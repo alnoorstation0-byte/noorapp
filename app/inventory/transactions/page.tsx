@@ -1,0 +1,349 @@
+﻿"use client";
+import React, { useState, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
+import { useInventoryTransactionsLogic } from './transactions_logic';
+import MasterPage from '@/components/MasterPage';
+import SecureAction from '@/components/SecureAction';
+import RawasiSidebarManager from '@/components/RawasiSidebarManager';
+import RawasiSmartTable from '@/components/rawasismarttable';
+import LoadingScreen from '@/components/LoadingScreen';
+
+import { useExpensesLogic } from '../../expenses/expenses_logic'; 
+import ExpenseFormModal from '../../expenses/ExpenseFormModal'; 
+
+import { THEME } from '@/lib/theme';
+
+export default function InventoryTransactionsPage() {
+  const router = useRouter();
+  const logic = useInventoryTransactionsLogic();
+  const expLogic = useExpensesLogic();
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => setMounted(true), []);
+
+  const columns = [
+    { key: 'transaction_number', label: 'رقم الحركة', type: 'text',
+      render: (row: any) => <span style={{ fontWeight: 900, color: THEME.coffeeDark }}>{row.transaction_number || '-'}</span>
+    },
+    { key: 'transaction_date', label: 'تاريخ الحركة', type: 'text' },
+    { key: 'type', label: 'نوع الحركة', type: 'badge',
+      render: (row: any) => (
+        <span style={{ 
+          background: ['in', 'transfer_in'].includes(row.type) ? '#dcfce7' : '#fee2e2', 
+          color: ['in', 'transfer_in'].includes(row.type) ? '#166534' : '#991b1b', 
+          padding: '4px 12px', borderRadius: '8px', fontSize: '12px', fontWeight: 900 
+        }}>
+          {['in', 'transfer_in'].includes(row.type) ? '🟢 استلام (In)' : '🔴 صرف (Out)'}
+        </span>
+      )
+    },
+    { key: 'item_name', label: 'الصنف', type: 'text',
+      render: (row: any) => <span style={{ fontWeight: 900, color: THEME.primary }}>📦 {row.item_name || '-'}</span>
+    },
+    { key: 'quantity', label: 'الكمية', type: 'number',
+      render: (row: any) => (
+        <span style={{ fontWeight: 900, color: ['in', 'transfer_in'].includes(row.type) ? '#16a34a' : '#dc2626' }}>
+          {['in', 'transfer_in'].includes(row.type) ? '+' : '-'}{row.quantity || 0} <span style={{ fontSize: '10px', color: '#475569' }}>{row.unit || ''}</span>
+        </span>
+      )
+    },
+    { key: 'unit_price', label: 'السعر الإفرادي', type: 'number',
+      render: (row: any) => row.unit_price ? <span style={{ fontWeight: 800 }}>{row.unit_price}</span> : '-'
+    },
+    { key: 'partner', label: 'العميل / المورد', type: 'text',
+      render: (row: any) => {
+        if (row.partner) {
+           let color = '#3b82f6';
+           let typeLabel = '';
+           if (row.partner_type === 'عميل') { color = '#ef4444'; typeLabel = ' (عميل)'; }
+           else if (row.partner_type === 'مورد') { color = '#10b981'; typeLabel = ' (مورد)'; }
+           else if (row.partner_type === 'عامل يومية' || row.partner_type === 'مندوب') { color = '#f59e0b'; typeLabel = ` (${row.partner_type})`; }
+           else { typeLabel = row.partner_type ? ` (${row.partner_type})` : ''; }
+           return <span style={{ color, fontWeight: 900 }}>{row.partner} <span style={{ fontSize: '10px', opacity: 0.8 }}>{typeLabel}</span></span>;
+        } else if (row.driver_name && row.driver_name !== 'بدون مندوب') {
+           return <span style={{ color: '#f59e0b', fontWeight: 900 }}>{row.driver_name} <span style={{ fontSize: '10px', opacity: 0.8 }}>(مندوب)</span></span>;
+        } else {
+           return <span style={{ color: '#475569', fontStyle: 'italic' }}>غير محدد</span>;
+        }
+      }
+    },
+    { key: 'notes', label: 'ملاحظات', type: 'text',
+      render: (row: any) => <span style={{ fontSize: '11px', color: '#64748b' }}>{row.notes || '-'}</span>
+    },
+    { key: 'fleet_operation', label: 'الرحلة / السيارة', type: 'text',
+      render: (row: any) => row.fleet_operation ? <span style={{ fontSize: '11px', fontWeight: 'bold', color: '#0ea5e9' }}>🚚 {row.fleet_operation}</span> : <span style={{ color: '#94a3b8' }}>-</span>
+    },
+    { key: 'status', label: 'الحالة', type: 'badge',
+      render: (row: any) => (
+        <span style={{ 
+          background: row.status === 'approved' ? '#dcfce7' : '#fef08a', 
+          color: row.status === 'approved' ? '#166534' : '#854d0e', 
+          padding: '4px 10px', borderRadius: '6px', fontSize: '11px', fontWeight: 900 
+        }}>
+          {row.status === 'approved' ? '✅ معتمد' : '⏳ معلق'}
+        </span>
+      )
+    },
+    { key: 'actions', label: 'إجراءات', type: 'actions',
+      render: (row: any) => (
+        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
+          {row.status === 'pending' && (
+            <>
+              <button 
+                onClick={() => logic.handleApproveTransaction(row)}
+                className="btn-main-glass blue"
+                style={{ width: 'auto', padding: '5px 12px', fontSize: '11px', margin: 0 }}
+              >
+                ✅ اعتماد
+              </button>
+              <button 
+                onClick={async () => {
+                  if(confirm('هل أنت متأكد من مسح هذه الحركة نهائياً؟')) {
+                    await supabase.from('inventory_transactions').delete().eq('id', row.id);
+                    logic.fetchTransactions();
+                  }
+                }}
+                className="btn-main-glass red"
+                style={{ width: 'auto', padding: '5px 12px', fontSize: '11px', margin: 0 }}
+              >
+                🗑️ مسح
+              </button>
+            </>
+          )}
+          {row.status === 'approved' && (
+            <button 
+              onClick={() => logic.handleUnapproveTransaction(row)}
+              className="btn-main-glass yellow"
+              style={{ width: 'auto', padding: '5px 12px', fontSize: '11px', margin: 0 }}
+            >
+              🔄 فك الاعتماد
+            </button>
+          )}
+
+          {row.status === 'approved' && ['in', 'transfer_in'].includes(row.type) && (
+             <button 
+                  disabled={expLogic.isEditModalOpen} 
+                  onClick={(e) => {
+                      e.stopPropagation(); 
+                      
+                      const preparedExpense = {
+                          exp_date: new Date().toISOString().split('T')[0],
+                          main_category: 'شراء بضاعة',
+                          payee_id: row.partner_id,
+                          payee_name: row.partner || row.driver_name || '',
+                          payment_account: row.partner_type === 'عميل' ? '113 - عملاء' : '211 - موردين',
+                          creditor_account: '219 - فواتير قيد الاستلام', // المدين
+                          description: `استحقاق شراء بضاعة (إذن استلام مستودع: ${row.transaction_number || ''})`,
+                          payment_method: 'آجل',
+                          quantity: 1,
+                          unit_price: 0,
+                          vat_amount: 0,
+                          discount_amount: 0,
+                          total_price: 0,
+                          lines_data: [{
+                              description: row.item_name || 'بضاعة',
+                              quantity: row.quantity || 1,
+                              unit_price: row.unit_price || 0,
+                              vat_amount: row.tax_amount || 0,
+                              total_price: (Number(row.quantity) || 0) * (Number(row.unit_price) || 0) + (Number(row.tax_amount) || 0)
+                          }]
+                      };
+
+                      expLogic.setCurrentExpense(preparedExpense);
+                      expLogic.setIsEditModalOpen(true);
+                  }} 
+                  className="btn-pay-action"
+                  style={{ 
+                      background: 'linear-gradient(135deg, #10b981 0%, #047857 100%)', 
+                      color: 'white', 
+                      border: 'none', 
+                      padding: '5px 12px', 
+                      borderRadius: '8px', 
+                      cursor: expLogic.isEditModalOpen ? 'not-allowed' : 'pointer', 
+                      fontWeight: 900, 
+                      fontSize: '11px', 
+                      margin: 0,
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      boxShadow: '0 4px 15px rgba(16, 185, 129, 0.3)',
+                      transition: 'all 0.2s ease',
+                      whiteSpace: 'nowrap',
+                      opacity: expLogic.isEditModalOpen ? 0.7 : 1 
+                  }}
+                  onMouseEnter={(e) => { if(!expLogic.isEditModalOpen) e.currentTarget.style.transform = 'translateY(-2px)'}}
+                  onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+                  title="إنشاء فاتورة مشتريات (استحقاق) لهذه الحركة"
+              >
+                  <span style={{ fontSize: '12px' }}>🧾</span>
+                  استحقاق فاتورة
+              </button>
+          )}
+
+          <button 
+            onClick={() => {
+               const printWindow = window.open('', '_blank');
+               if (printWindow) {
+                   printWindow.document.write(`
+                       <html dir="rtl">
+                       <head>
+                           <title>طباعة حركة مستودع</title>
+                           <style>
+                               body { font-family: 'Tajawal', sans-serif; padding: 40px; color: #0f172a; }
+                               .header { text-align: center; border-bottom: 2px solid #ca8a04; padding-bottom: 20px; margin-bottom: 30px; }
+                               table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                               th, td { border: 1px solid rgba(40, 145, 200, 0.2); padding: 12px; text-align: right; }
+                               th { background: rgba(255, 255, 255, 0.6); color: #451a03; }
+                           </style>
+                       </head>
+                       <body>
+                           <div class="header">
+                               <h1>سند ${['in', 'transfer_in'].includes(row.type) ? 'استلام (توريد)' : 'صرف'} بضاعة</h1>
+                               <h3>رقم الحركة: ${row.transaction_number || '-'}</h3>
+                           </div>
+                           <table>
+                               <tr><th>تاريخ الحركة</th><td>${row.transaction_date || '-'}</td></tr>
+                               <tr><th>العميل / المورد</th><td>${row.partner || 'غير محدد'}</td></tr>
+                               <tr><th>الصنف</th><td>${row.item_name || '-'}</td></tr>
+                               <tr><th>الكمية</th><td>${row.quantity || 0} ${row.unit || ''}</td></tr>
+                           </table>
+                           <div style="margin-top: 50px; display: flex; justify-content: space-between;">
+                               <div>توقيع المستلم: .....................</div>
+                               <div>توقيع أمين المستودع: .....................</div>
+                           </div>
+                           <script>window.print(); setTimeout(() => window.close(), 500);</script>
+                       </body>
+                       </html>
+                   `);
+                   printWindow.document.close();
+               }
+            }}
+            className="btn-main-glass white"
+            style={{ width: 'auto', padding: '5px 12px', fontSize: '11px', margin: 0 }}
+          >
+            🖨️ طباعة
+          </button>
+        </div>
+      )
+    }
+  ];
+
+  if (!mounted) return null;
+
+  return (
+    <>
+      <RawasiSidebarManager />
+
+      <MasterPage 
+        title="سجل حركة المستودع" 
+        subtitle="تتبع كافة عمليات الاستلام والصرف للأصناف"
+      >
+        {logic.isLoading ? (
+          <LoadingScreen message="جاري تحميل سجل الحركات..." fullScreen={false} />
+        ) : (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            
+            {/* لوحة الفلاتر */}
+            <div className="apple-glass-filter-bar">
+              <div style={{ flex: 1, minWidth: '200px' }}>
+                <label style={{ fontSize: '11px', color: '#475569', marginBottom: '6px', display: 'block', fontWeight: 900 }}>بحث عام</label>
+                <input 
+                  type="text"
+                  placeholder="بحث برقم الحركة، الصنف، المورد..." 
+                  className="glass-input-field" 
+                  value={logic.globalSearch} 
+                  onChange={e => logic.setGlobalSearch(e.target.value)} 
+                />
+              </div>
+              <div>
+                <label style={{ fontSize: '11px', color: '#475569', marginBottom: '6px', display: 'block', fontWeight: 900 }}>نوع الحركة</label>
+                <select 
+                  className="glass-input-field" 
+                  value={logic.filterType} 
+                  onChange={e => logic.setFilterType(e.target.value)}
+                >
+                  <option value="all">الكل</option>
+                  <option value="in">🟢 استلام (In)</option>
+                  <option value="out">🔴 صرف (Out)</option>
+                </select>
+              </div>
+              <div>
+                <label style={{ fontSize: '11px', color: '#475569', marginBottom: '6px', display: 'block', fontWeight: 900 }}>من تاريخ</label>
+                <input 
+                  type="date" 
+                  className="glass-input-field" 
+                  value={logic.dateFrom} 
+                  onChange={e => logic.setDateFrom(e.target.value)} 
+                />
+              </div>
+              <div>
+                <label style={{ fontSize: '11px', color: '#475569', marginBottom: '6px', display: 'block', fontWeight: 900 }}>إلى تاريخ</label>
+                <input 
+                  type="date" 
+                  className="glass-input-field" 
+                  value={logic.dateTo} 
+                  onChange={e => logic.setDateTo(e.target.value)} 
+                />
+              </div>
+            </div>
+
+            {/* الجدول */}
+            <RawasiSmartTable 
+              columns={columns}
+              data={logic.data}
+              pageSize={20}
+            />
+          </div>
+        )}
+
+        {mounted && expLogic.isEditModalOpen && (
+            <ExpenseFormModal 
+              isOpen={expLogic.isEditModalOpen}
+              onClose={() => expLogic.setIsEditModalOpen(false)}
+              record={expLogic.currentExpense}
+              setRecord={expLogic.setCurrentExpense}
+              onSave={expLogic.handleSaveExpense}
+              isSaving={expLogic.isLoading}
+              historicalData={expLogic.historicalData}
+            />
+        )}
+
+        <style>{`
+          .apple-glass-filter-bar {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            border-radius: 20px;
+            padding: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            align-items: flex-end;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.05);
+          }
+          .glass-input-field { 
+            width: 100%; 
+            padding: 10px 12px; 
+            border-radius: 12px; 
+            background: rgba(255, 255, 255, 0.65); 
+            border: 1px solid rgba(255, 255, 255, 0.8); 
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+            outline: none; 
+            font-weight: 700; 
+            color: #1e293b; 
+            transition: all 0.2s; 
+          }
+          .glass-input-field:focus { 
+            background: #ffffff; 
+            border-color: ${THEME.accent}; 
+            box-shadow: 0 0 0 4px rgba(202, 138, 4, 0.15); 
+          }
+        `}</style>
+      </MasterPage>
+    </>
+  );
+}
+
+

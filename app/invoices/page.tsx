@@ -1,0 +1,428 @@
+"use client";
+import React, { useState, useMemo, useEffect } from 'react';
+import { createPortal } from 'react-dom'; 
+import { useInvoicesLogic } from './invoices_logic';
+import { THEME } from '@/lib/theme';
+import { formatCurrency, getInvoiceSummaryAndAging } from '@/lib/helpers'; 
+import { usePermissions } from '@/lib/PermissionsContext'; 
+import SecureAction from '@/components/SecureAction';      
+import { useConfirm } from '@/components/ConfirmContext';
+import MasterPage from '@/components/MasterPage';
+
+  // 🧱 المكونات
+import RawasiSmartTable from '@/components/rawasismarttable';
+import RawasiSidebarManager from '@/components/RawasiSidebarManager'; 
+import InvoiceAgingDashboard from '@/components/InvoiceAgingDashboard';
+import SmartCombo from '@/components/SmartCombo'; 
+
+
+
+  // 🎬 المودالز
+import InvoiceFormModal from './InvoiceFormModal';
+import InvoicePrintModal from './InvoicePrintModal';
+import ReceiptVoucherModal from '@/app/ReceiptVouchers/ReceiptVoucherModal';
+import LoadingScreen from '@/components/LoadingScreen';
+
+import { useSearchParams } from 'next/navigation';
+
+export default function InvoicesPage() {
+  const logic = useInvoicesLogic(); 
+  const { showConfirm } = useConfirm();
+  const { can, loading: permsLoading } = usePermissions();
+  const [mounted, setMounted] = useState(false);
+  const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
+  const [printData, setPrintData] = useState<any>(null);
+  
+  useEffect(() => {
+      setMounted(true);
+  }, []);
+
+  // 🚀 استخراج العناصر الحالية لتحديد الكل بأمان
+  const currentVisibleIds = useMemo(() => {
+    return logic.allFiltered
+      .slice((logic.currentPage - 1) * logic.rowsPerPage, logic.currentPage * logic.rowsPerPage)
+      .map((v: any) => String(v.id));
+  }, [logic.allFiltered, logic.currentPage, logic.rowsPerPage]);
+
+  const isAllVisibleSelected = currentVisibleIds.length > 0 && currentVisibleIds.every((id: string) => logic.selectedIds.includes(id));
+
+  // =========================================================================
+  // ?? ????? ??????
+  // =========================================================================
+  const invoiceColumns = useMemo(() => [
+    {
+      key: 'select',
+      label: (
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <input 
+                  type="checkbox" 
+                  className="custom-checkbox"
+                  checked={isAllVisibleSelected}
+                  title="تحديد كل الصفحة"
+                  onChange={() => {
+                      if (isAllVisibleSelected) {
+                          logic.setSelectedIds(logic.selectedIds.filter((id: string) => !currentVisibleIds.includes(id)));
+                      } else {
+                          logic.setSelectedIds([...new Set([...logic.selectedIds, ...currentVisibleIds])]);
+                      }
+                  }}
+              />
+          </div>
+      ), 
+      render: (row: any) => {
+        if (!row) return null;
+        const isSelected = logic.selectedIds.includes(String(row.id));
+        return (
+          <div onClick={(e) => e.stopPropagation()} style={{ display: 'flex', justifyContent: 'center' }}>
+              <input 
+                  type="checkbox" 
+                  className="custom-checkbox" 
+                  checked={isSelected} 
+                  onChange={(e) => {
+                      e.stopPropagation();
+                      if (isSelected) logic.setSelectedIds(logic.selectedIds.filter((i:any) => i !== String(row.id))); 
+                      else logic.setSelectedIds([...logic.selectedIds, String(row.id)]); 
+                  }} 
+              />
+          </div>
+        );
+      }
+    },
+    { 
+      key: 'invoice_number',
+      label: 'رقم الفاتورة', 
+      render: (row: any) => {
+        if (!row) return null;
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+            <b style={{ color: THEME.accent, textShadow: '0 0 10px rgba(40, 145, 200, 0.3)', fontSize: '14px' }}>#{row.invoice_number}</b>
+            <span style={{ fontSize: '10px', color: '#64748b' }}>
+               {row.skip_zatca ? '📄 فاتورة داخلية' : '✅ ضريبية (ZATCA)'}
+            </span>
+          </div>
+        );
+      } 
+    },
+    { 
+      key: 'date',
+      label: 'التاريخ', 
+      render: (row: any) => {
+        if (!row) return null;
+        return (
+          <span style={{ fontSize: '12px', fontWeight: 900, color: '#0284c7', background: 'rgba(2, 132, 199, 0.1)', padding: '4px 10px', borderRadius: '8px', border: '1px solid rgba(2, 132, 199, 0.2)' }}>
+            {row.date ? new Date(row.date).toLocaleDateString('ar-EG') : '---'}
+          </span> 
+        );
+      }
+    },
+    {
+      key: 'client_name',
+      label: 'العميل / الفرع', 
+      render: (row: any) => {
+        if (!row) return null; 
+        const finalClientName = row.partners?.name || row.client_name || '---';
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', textAlign: 'right' }}>
+             <span style={{fontWeight: 900, color: '#1e293b'}}>{finalClientName}</span>
+             {row.description && (
+               <span style={{ fontSize: '11px', color: '#64748b', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', maxWidth: '180px' }} title={row.description}>
+                  {row.description}
+               </span>
+             )}
+          </div>
+        );
+      } 
+    },
+    {
+      key: 'delegate_name',
+      label: 'المندوب (التحصيل)',
+      render: (row: any) => {
+        if (!row) return null;
+        const delegate = logic.delegates?.find((d:any) => d.id === row.delegate_id);
+        return (
+          <span style={{ fontSize: '11px', fontWeight: 700, color: '#475569', background: 'rgba(241, 245, 249, 0.8)', padding: '4px 8px', borderRadius: '6px' }}>
+             {delegate ? `👤 ${delegate.name}` : '---'}
+          </span>
+        );
+      }
+    },
+    {
+      key: 'financial_details',
+      label: 'تفاصيل المبالغ (قبل الخصم)',
+      render: (row: any) => {
+        if (!row) return null;
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', fontSize: '11px', fontWeight: 700, textAlign: 'right' }}>
+             <span style={{ color: '#334155' }}>الخاضع: {formatCurrency(row.taxable_amount)}</span>
+             {Number(row.tax_amount) > 0 && <span style={{ color: '#0ea5e9' }}>الضريبة (15%): +{formatCurrency(row.tax_amount)}</span>}
+          </div>
+        );
+      }
+    },
+    { 
+      key: 'total_amount',
+      label: 'الإجمالي النهائي', 
+      render: (row: any) => {
+        if (!row) return null; 
+        return <span style={{ fontWeight: 900, color: THEME.accent, fontSize: '15px' }}>{formatCurrency(row.total_amount)}</span>;
+      } 
+    },
+    {
+      key: 'paid_amount',
+      label: 'السداد',
+      render: (row: any) => {
+        if (!row) return null; 
+        const total = Number(row.total_amount || 0);
+        const paid = Number(row.paid_amount || 0);
+        const remaining = total - paid;
+        
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '11px', fontWeight: 800 }}>
+             {paid > 0 && <span style={{ color: THEME.success }}>مسدد: {formatCurrency(paid)}</span>}
+             {remaining > 0 && <span style={{ color: THEME.danger }}>متبقي: {formatCurrency(remaining)}</span>}
+             {remaining < 0 && <span style={{ color: THEME.accent, background: 'rgba(40, 145, 200, 0.1)', padding: '2px 4px', borderRadius: '4px' }}>مقدم (بالزيادة): {formatCurrency(Math.abs(remaining))}</span>}
+             {paid === 0 && remaining === 0 && <span style={{ color: '#475569' }}>0.00</span>}
+          </div>
+        );
+      }
+    },
+    {
+      key: 'status',
+      label: 'الاعتماد',
+      render: (row: any) => {
+        if (!row) return null; 
+        const isApproved = row.status === 'posted' || row.status === 'معتمد';
+        return (
+          <div className={`approval-glass-badge ${isApproved ? 'approved' : 'pending'}`}>
+            <span className="dot"></span>
+            {isApproved ? 'معتمد' : 'معلق'}
+          </div>
+        );
+      }
+    },
+    {
+      key: 'due_date',
+      label: 'حالة الدفع',
+      render: (row: any) => {
+        if (!row) return null; 
+        const total = Number(row.total_amount || 0);
+        const paid = Number(row.paid_amount || 0);
+        
+        // 🚀 حالات الدفع (مكتمل أو بزيادة)
+        if (paid > total && total > 0) return <span className="deadline-badge paid" style={{background: 'rgba(40, 145, 200, 0.1)', color: THEME.accent, border: '1px solid rgba(40, 145, 200, 0.3)'}}>💸 سداد بزيادة</span>;
+        if (paid === total && total > 0) return <span className="deadline-badge paid" style={{background: 'rgba(16, 185, 129, 0.1)', color: THEME.success, border: '1px solid rgba(16, 185, 129, 0.3)'}}>✅ مكتمل</span>;
+        
+        if (!row.due_date) return <span style={{color:'#475569', fontWeight: 'bold'}}>---</span>;
+        
+        const today = new Date();
+        const due = new Date(row.due_date);
+        today.setHours(0, 0, 0, 0);
+        due.setHours(0, 0, 0, 0);
+        const diffTime = due.getTime() - today.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        if (diffDays < 0) return <div className="deadline-badge overdue">⚠️ متأخر ({Math.abs(diffDays)} يوم)</div>;
+        if (diffDays === 0) return <div className="deadline-badge today">🚨 السداد اليوم</div>;
+        return <div className="deadline-badge active">⏳ متبقي {diffDays} يوم</div>;
+      }
+    },
+    {
+      key: 'actions',
+      label: 'الإجراءات',
+      render: (row: any) => {
+        if (!row) return null; 
+        const total = Number(row.total_amount || 0);
+        const paid = Number(row.paid_amount || 0);
+        const balance = total - paid;
+        
+        // 🚀 الشرط اللي بيخفي الزرار لو الفاتورة مسددة أو بزيادة
+        const needsPayment = balance > 0; 
+        const isApproved = row.status === 'posted' || row.status === 'معتمد' || row.is_posted === true;
+        
+        return (
+          <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', alignItems: 'center' }}>
+            <button onClick={(e) => { e.stopPropagation(); setPrintData(row); setIsPrintModalOpen(true); }} className="btn-glass-print" title="طباعة الفاتورة" style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '18px', transition: '0.2s' }}>🖨️</button>
+            
+            {/* 🚀 السحر هنا: دمجنا needsPayment في الشرط عشان يخفي الزرار */}
+            {needsPayment && isApproved && logic.handleOpenPaymentModal && (
+              <button onClick={(e) => {
+                  e.stopPropagation(); 
+                  logic.handleOpenPaymentModal(row); 
+                }} className="btn-glass-pay" title="تسجيل سند قبض / دفعة إضافية" style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '18px', transition: '0.2s' }}>💰</button>
+            )}
+          </div>
+        );
+      }
+    }
+  ], [logic.selectedIds, isAllVisibleSelected, currentVisibleIds, logic]);
+
+  // =========================================================================
+  // 🕹️ أزرار السايد بار
+  // =========================================================================
+  const sidebarActions = useMemo(() => (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+      <SecureAction module="invoices" action="create">
+        <button className="btn-main-glass gold" onClick={logic.handleAddNew}>
+              ➕ إنشاء فاتورة جديدة
+        </button>
+      </SecureAction>
+
+      {logic.selectedIds.length > 0 && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', marginTop: '5px', paddingTop: '15px', borderTop: '1px dashed rgba(255,255,255,0.2)' }}>
+          <p style={{fontSize:'10px', textAlign:'center', color:'#475569', fontWeight:900, marginBottom:'-5px'}}>الإجراءات على ({logic.selectedIds.length})</p>
+          <SecureAction module="invoices" action="post">
+            <button className="btn-main-glass blue" onClick={logic.handlePostSelected} disabled={logic.isSaving}>
+              {logic.isSaving ? '⏳ جاري التنفيذ...' : '✅ اعتماد وترحيل'}
+            </button>
+          </SecureAction>
+          <SecureAction module="invoices" action="post">
+            <button className="btn-main-glass yellow" onClick={logic.handleUnpostSelected} disabled={logic.isSaving}>
+              ⏸️ فك الاعتماد
+            </button>
+          </SecureAction>
+          {logic.selectedIds.length === 1 && (
+            <SecureAction module="invoices" action="edit">
+              <button className="btn-main-glass white" onClick={() => logic.handleEdit(logic.allFiltered.find((i:any) => String(i.id) === logic.selectedIds[0]))}>
+                ✏️ تعديل البيانات
+              </button>
+            </SecureAction>
+          )}
+          <SecureAction module="invoices" action="delete">
+            <button className="btn-main-glass red" onClick={() => { showConfirm({ title: 'حذف نهائي', message: `تحذير: هل أنت متأكد من حذف الفواتير المحددة وعددها ${logic.selectedIds.length}؟`, type: 'danger', onConfirm: () => logic.handleDeleteSelected() }); }} disabled={logic.isSaving}>
+              🗑️ حذف نهائي
+            </button>
+          </SecureAction>
+        </div>
+      )}
+    </div>
+  ), [logic.selectedIds, logic]);
+
+  return (
+    <MasterPage 
+      title="فواتير المبيعات" 
+      subtitle="متابعة وإدارة التسويات والتحصيلات"
+    >
+      
+      <RawasiSidebarManager 
+        summary={
+          <div className="summary-glass-card">
+            <span style={{fontSize:'12px', fontWeight:800, color:'#64748b'}}>إجمالي المديونية 💼</span>
+            <div className="val" style={{fontSize:'24px', fontWeight:900, color: THEME.accent, marginTop:'5px'}}>{formatCurrency(logic.summary.totalRemaining)}</div>
+          </div>
+        }
+        actions={sidebarActions}
+        customFilters={
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                <SmartCombo 
+                    label="تصفية سريعة بالعميل"
+                    icon="👤"
+                    table="partners"
+                    displayCol="name"
+                    placeholder="ابحث عن عميل محدد..."
+                    enableClear={true}
+                    onSelect={(item:any) => logic.setGlobalSearch(item?.name || '')}
+                />
+                <div style={{ height: '1px', background: 'rgba(255,255,255,0.1)', margin: '10px 0' }} />
+                <InvoiceAgingDashboard summary={logic.summary} />
+            </div>
+        }
+        onSearch={logic.setGlobalSearch}
+        onDateFilter={(start, end) => { if(logic.setDateFrom) logic.setDateFrom(start); if(logic.setDateTo) logic.setDateTo(end); }}
+        watchDeps={[logic.selectedIds, logic.allFiltered.length, logic.summary.totalRemaining]}
+      />
+
+      <style>{`
+        .custom-checkbox { width: 20px; height: 20px; accent-color: ${THEME.accent}; cursor: pointer; transition: 0.1s; }
+        .btn-main-glass { width: 100%; padding: 14px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(15px); font-weight: 900; cursor: pointer; transition: 0.2s; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn-main-glass.gold { background: ${THEME.gradients.gold}; color: white; }
+        .btn-main-glass.blue { background: ${THEME.gradients.primary}; color: white; }
+        .btn-main-glass.green { background: linear-gradient(135deg, rgba(34, 197, 94, 0.8), rgba(22, 163, 74, 0.9)); color: white; }
+        .btn-main-glass.yellow { background: linear-gradient(135deg, rgba(245, 158, 11, 0.8), rgba(217, 119, 6, 0.9)); color: white; }
+        .btn-main-glass.white { background: rgba(255, 255, 255, 0.6); color: #1e293b; border: 1px solid rgba(255,255,255,0.8); }
+        .btn-main-glass.red { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); }
+        .btn-main-glass:hover { transform: translateY(-3px); filter: brightness(1.1); }
+      `}</style>
+
+      {( (logic.isLoading || permsLoading) && logic.allFiltered.length === 0 ) ? (
+        <LoadingScreen message="جاري التحميل..." fullScreen={false} />
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          
+          {/* أعمار الديون (مكانه الجديد فوق الجدول بدلاً من السايد بار عشان يكون أوضح) */}
+          {logic.summary && logic.summary.aging && (
+             <InvoiceAgingDashboard summary={logic.summary} />
+          )}
+
+          <div className="clickable-rows cinematic-scroll summary-glass-card">
+          <RawasiSmartTable 
+              data={logic.allFiltered} 
+              columns={invoiceColumns} 
+              enablePagination={true}
+              currentPage={logic.currentPage}
+              totalItems={logic.allFiltered.length}
+              rowsPerPage={logic.rowsPerPage}
+              onPageChange={logic.setCurrentPage}
+              onRowsChange={logic.setRowsPerPage}
+              onRowClick={(row:any) => { setPrintData(row); setIsPrintModalOpen(true); }}
+          />
+        </div>
+        </div>
+      )}
+      
+      {mounted && logic.isReceiptModalOpen && createPortal(
+        <div style={{ 
+            position: 'fixed', inset: 0, zIndex: 999999999, 
+            background: 'rgba(40, 24, 10, 0.85)', 
+            backdropFilter: 'blur(10px)',
+            display: 'flex', 
+            alignItems: 'flex-start',
+            justifyContent: 'center', 
+            overflowY: 'auto', 
+            padding: '50px 20px' 
+        }}>
+            <div style={{ width: '100%', maxWidth: '900px', position: 'relative' }}>
+                <ReceiptVoucherModal 
+                    isOpen={logic.isReceiptModalOpen} 
+                    onClose={() => logic.setIsReceiptModalOpen(false)} 
+                    record={logic.selectedInvoiceForPay || {}} 
+                    setRecord={logic.setSelectedInvoiceForPay}
+                    onSave={logic.handleSavePayment} 
+                    delegates={logic.delegates}
+                    fleetOperations={logic.fleetOperations}
+                />
+            </div>
+        </div>,
+        document.body
+      )}
+
+      {mounted && logic.isEditModalOpen && (
+          <InvoiceFormModal 
+            isOpen={logic.isEditModalOpen} 
+            onClose={() => logic.setIsEditModalOpen(false)} 
+            record={logic.currentRecord} 
+            setRecord={logic.setCurrentRecord} 
+            onSave={logic.handleSave} 
+            isSaving={logic.isSaving} 
+            projects={logic.projects} 
+            fleetOperations={logic.fleetOperations} 
+            warehouses={logic.warehouses} 
+            delegates={logic.delegates}
+            warehouseItems={logic.warehouseItems}
+          />
+      )}
+      
+      {mounted && isPrintModalOpen && (
+          <InvoicePrintModal 
+            isOpen={true} 
+            onClose={() => setIsPrintModalOpen(false)} 
+            record={printData} 
+            projects={logic.projects} 
+          />
+      )}
+      
+    </MasterPage>
+  );
+}
+
+
+

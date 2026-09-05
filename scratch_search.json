@@ -1,0 +1,234 @@
+[
+  {
+    "file": "D:\\waterapp\\app\\cashflows\\page.tsx",
+    "line": 1,
+    "words": [
+      "مشروع"
+    ]
+  },
+  {
+    "file": "D:\\waterapp\\app\\expenses\\ExpenseFormModal.tsx",
+    "line": 1,
+    "words": [
+      "بنود",
+      "أعمال"
+    ]
+  },
+  {
+    "file": "D:\\waterapp\\app\\expenses\\ExpensePrintModal.tsx",
+    "line": 4,
+    "words": [
+      "بنود"
+    ]
+  },
+  {
+    "file": "D:\\waterapp\\app\\expenses\\expenses_logic.ts",
+    "line": 1,
+    "words": [
+      "مقاولات",
+      "أعمال"
+    ]
+  },
+  {
+    "file": "D:\\waterapp\\app\\expenses\\page.tsx",
+    "line": 1,
+    "words": [
+      "بنود"
+    ]
+  },
+  {
+    "file": "D:\\waterapp\\app\\financialplan\\financial_plan_logic.ts",
+    "line": 1,
+    "words": [
+      "مشاريع",
+      "بند",
+      "بنود"
+    ]
+  },
+  {
+    "file": "D:\\waterapp\\app\\financialplan\\page.tsx",
+    "line": 1,
+    "words": [
+      "بند",
+      "بنود"
+    ]
+  },
+  {
+    "file": "D:\\waterapp\\app\\import\\page.tsx",
+    "line": 1,
+    "words": [
+      "مشاريع",
+      "بند",
+      "بنود"
+    ]
+  },
+  {
+    "file": "D:\\waterapp\\app\\invoices\\InvoiceFormModal.tsx",
+    "line": 1,
+    "words": [
+      "بنود",
+      "عقار"
+    ]
+  },
+  {
+    "file": "D:\\waterapp\\app\\invoices\\InvoicePrintModal.tsx",
+    "line": 1,
+    "words": [
+      "مشاريع"
+    ]
+  },
+  {
+    "file": "D:\\waterapp\\app\\invoices\\InvoicePrintModal.tsx",
+    "line": 4,
+    "words": [
+      "مشروع",
+      "بند",
+      "بنود",
+      "أعمال"
+    ]
+  },
+  {
+    "file": "D:\\waterapp\\app\\invoices\\invoices_logic.ts",
+    "line": 1,
+    "words": [
+      "مشاريع"
+    ]
+  },
+  {
+    "file": "D:\\waterapp\\app\\invoices\\page.tsx",
+    "line": 1,
+    "words": [
+      "مشروع"
+    ]
+  },
+  {
+    "file": "D:\\waterapp\\app\\journal\\journal_logic.ts",
+    "line": 1,
+    "words": [
+      "مشروع"
+    ]
+  },
+  {
+    "file": "D:\\waterapp\\app\\journal\\page.tsx",
+    "line": 1,
+    "words": [
+      "مشروع"
+    ]
+  },
+  {
+    "file": "D:\\waterapp\\app\\layout.tsx",
+    "line": 1,
+    "words": [
+      "مشاريع"
+    ]
+  },
+  {
+    "file": "D:\\waterapp\\app\\ledger\\page.tsx",
+    "line": 1,
+    "words": [
+      "مشروع"
+    ]
+  },
+  {
+    "file": "D:\\waterapp\\app\\ManualJournals\\page.tsx",
+    "line": 1,
+    "words": [
+      "مشروع",
+      "بند"
+    ]
+  },
+  {
+    "file": "D:\\waterapp\\app\\PartnerBalances\\page.tsx",
+    "line": 1,
+    "words": [
+      "مشروع"
+    ]
+  },
+  {
+    "file": "D:\\waterapp\\app\\PartnerBalances\\printstatement.tsx",
+    "line": 1,
+    "words": [
+      "مقاولات"
+    ]
+  },
+  {
+    "file": "D:\\waterapp\\app\\profile\\page.tsx",
+    "line": 1,
+    "words": [
+      "مشروع",
+      "بند",
+      "بنود"
+    ]
+  },
+  {
+    "file": "D:\\waterapp\\app\\profile\\profile_logic.ts",
+    "line": 1,
+    "words": [
+      "بند"
+    ]
+  },
+  {
+    "file": "D:\\waterapp\\app\\ReceiptVouchers\\ReceiptVoucherModal.tsx",
+    "line": 1,
+    "words": [
+      "مشاريع",
+      "عقار"
+    ]
+  },
+  {
+    "file": "D:\\waterapp\\app\\settings\\backup_logic.ts",
+    "line": 1,
+    "words": [
+      "مشروع",
+      "بند",
+      "عقار",
+      "أعمال"
+    ]
+  },
+  {
+    "file": "D:\\waterapp\\app\\settings\\page.tsx",
+    "line": 1,
+    "words": [
+      "مشاريع"
+    ]
+  },
+  {
+    "file": "D:\\waterapp\\app\\settings\\PermissionsMatrix.tsx",
+    "line": 1,
+    "words": [
+      "مشاريع"
+    ]
+  },
+  {
+    "file": "D:\\waterapp\\app\\settings\\restore_action.ts",
+    "line": 1,
+    "words": [
+      "مشروع",
+      "بند",
+      "عقار"
+    ]
+  },
+  {
+    "file": "D:\\waterapp\\app\\signup\\page.tsx",
+    "line": 1,
+    "words": [
+      "مشروع"
+    ]
+  },
+  {
+    "file": "D:\\waterapp\\app\\statement\\statement_logic.ts",
+    "line": 1,
+    "words": [
+      "بند",
+      "أعمال"
+    ]
+  },
+  {
+    "file": "D:\\waterapp\\app\\team\\profileeditormodal.tsx",
+    "line": 2,
+    "words": [
+      "مشاريع",
+      "بنود"
+    ]
+  }
+]
