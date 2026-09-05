@@ -167,16 +167,16 @@ export default function MasterPage({ title, subtitle, children, headerContent, i
               padding: 12px 15px !important; 
               margin-bottom: 0 !important; 
               border-radius: 0 0 20px 20px !important;
-              flex-wrap: nowrap !important;
+              flex-wrap: wrap !important;
           }
           .header-icon { width: 40px !important; height: 40px !important; min-width: 40px !important; border-radius: 10px !important; }
           .header-icon span { font-size: 20px !important; }
-          .title-area { gap: 8px !important; flex-shrink: 1 !important; min-width: 0 !important; }
+          .title-area { gap: 8px !important; flex-shrink: 1 !important; min-width: 0 !important; flex-basis: 100% !important; }
           .title-area h1 { font-size: 18px !important; max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
           .title-area p { display: none !important; }
           
-          .header-side { gap: 8px !important; flex-shrink: 0 !important; }
-          .header-actions { border: none !important; padding: 0 !important; flex-direction: row !important; gap: 8px !important; }
+          .header-side { gap: 8px !important; flex-shrink: 0 !important; flex-wrap: wrap !important; width: 100% !important; justify-content: space-between !important; }
+          .header-actions { border: none !important; padding: 0 !important; flex-direction: row !important; gap: 8px !important; flex-wrap: wrap !important; }
           .nav-btn, .msg-btn { width: 40px !important; height: 40px !important; font-size: 20px !important; border-radius: 10px !important; }
           .nav-group { display: none !important; }
           

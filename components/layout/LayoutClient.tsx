@@ -165,8 +165,8 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
         .overlay-screen {
           position: fixed; inset: 0; z-index: 9998;
           pointer-events: ${isOpen ? 'auto' : 'none'};
-          display: flex; align-items: center; justify-content: center;
-          padding: 20px; box-sizing: border-box;
+          display: flex; align-items: flex-start; justify-content: center;
+          padding: 40px 20px; box-sizing: border-box;
           overflow-y: auto; overflow-x: hidden;
         }
 
@@ -262,6 +262,22 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
           .group-section { padding: 15px; border-radius: 20px; }
           .items-grid { grid-template-columns: 1fr; gap: 10px; }
           .nav-card { padding: 12px 15px; }
+          .admin-header {
+            flex-direction: column;
+            gap: 10px !important;
+            padding: 15px !important;
+          }
+          .admin-header > div {
+            border-right: none !important;
+            padding-right: 0 !important;
+            border-top: 1px solid rgba(0,0,0,0.1);
+            padding-top: 10px;
+            width: 100%;
+            justify-content: center;
+          }
+          .main-content {
+            margin-right: 0 !important;
+          }
         }
       `}} />
 
@@ -289,7 +305,7 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
          if (e.target === e.currentTarget) setIsOpen(false); 
       }}>
           <div className="command-center" onClick={(e) => e.stopPropagation()}>
-            <div style={{ background: 'rgba(255, 255, 255, 0.65)', border: '1px solid rgba(255, 255, 255, 0.9)', padding: '15px 30px', borderRadius: '20px', fontSize: '18px', textAlign: 'center', color: '#122946', marginBottom: '10px', fontWeight: 900, backdropFilter: 'blur(15px)', alignSelf: 'center', boxShadow: '0 8px 30px rgba(0,0,0,0.04)', display: 'flex', alignItems: 'center', gap: '20px' }}>
+            <div className="admin-header" style={{ background: 'rgba(255, 255, 255, 0.65)', border: '1px solid rgba(255, 255, 255, 0.9)', padding: '15px 30px', borderRadius: '20px', fontSize: '18px', textAlign: 'center', color: '#122946', marginBottom: '10px', fontWeight: 900, backdropFilter: 'blur(15px)', alignSelf: 'center', boxShadow: '0 8px 30px rgba(0,0,0,0.04)', display: 'flex', alignItems: 'center', gap: '20px' }}>
                <span>بوابة الإدارة | {role === 'super_admin' ? 'مدير النظام' : 'صلاحيات مستخدم'}</span>
                <div style={{ display: 'flex', gap: '15px', borderRight: '2px solid rgba(0,0,0,0.1)', paddingRight: '15px', alignItems: 'center' }}>
                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px', background: '#dcfce7', color: '#166534', padding: '5px 12px', borderRadius: '20px', fontSize: '13px', fontWeight: 800 }}>
@@ -350,11 +366,12 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
           </div>
       </nav>
 
-      <main style={{ 
+      <main className="main-content" style={{ 
           flex: 1, 
           boxSizing: 'border-box',
           marginRight: currentMargin, 
           paddingRight: '15px', 
+          paddingLeft: '15px', /* Added left padding for symmetry on mobile */
           minHeight: '100vh', 
           position: 'relative', 
           zIndex: 1,
