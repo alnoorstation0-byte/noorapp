@@ -81,7 +81,7 @@ export function useInventoryLogic() {
 
   const enrichedItems = useMemo(() => {
     return items.map(item => {
-      const whItem = warehouseInventory.find(wi => wi.item_id === item.id);
+      const whItem = warehouseInventory.find(wi => wi.item_id === item.id && wi.warehouse_id === selectedWarehouseId);
       // If we are looking at the main warehouse, fallback to current_quantity if warehouse_inventory is empty
       // because we just migrated. Otherwise use 0.
       let qty = whItem ? Number(whItem.quantity) : 0;

@@ -255,7 +255,7 @@ export default function InvoiceFormModal({ isOpen, onClose, record, setRecord, o
                                 <option value="">-- اختر المستودع --</option>
                                   {warehouses?.map((wh: any) => (
                                       <option key={wh.id} value={wh.id}>
-                                          {wh.type === 'main' ? '🏢' : (wh.type === 'vehicle' ? '🚚' : (wh.type === 'pos' ? '🏪' : '🏭'))} {wh.name}
+                                          {wh.type === 'main' ? '🏢' : (wh.type === 'vehicle' ? '🚚' : '🏭')} {wh.name}
                                       </option>
                                   ))}
                             </select>

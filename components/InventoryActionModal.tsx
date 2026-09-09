@@ -13,9 +13,10 @@ interface InventoryActionModalProps {
   actionType: 'in' | 'out';
   onSuccess: () => void;
   items: any[];
+  initialData?: any;
 }
 
-export default function InventoryActionModal({ isOpen, onClose, actionType, onSuccess, items }: InventoryActionModalProps) {
+export default function InventoryActionModal({ isOpen, onClose, actionType, onSuccess, items, initialData }: InventoryActionModalProps) {
   const { showToast } = useToast();
   const queryClient = useQueryClient();
 
@@ -29,25 +30,43 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
     fleet_operation_id: '',
     partner_id: '', // supplier for IN, subcontractor/employee for OUT
     notes: '',
+    warehouse_id: '',
     include_tax: false
   });
 
   useEffect(() => {
     if (isOpen) {
-      setFormData(prev => ({
-        ...prev,
-        transaction_number: `${actionType.toUpperCase()}-${Date.now().toString().slice(-6)}`,
-        item_id: '',
-        quantity: 1,
-        unit_price: 0,
-        action_date: new Date().toISOString().split('T')[0],
-        partner_id: '',
-        fleet_operation_id: '',
-        notes: '',
-        include_tax: false
-      }));
+      if (initialData) {
+        setFormData({
+          transaction_number: initialData.transaction_number || '',
+          item_id: initialData.item_id || '',
+          quantity: initialData.quantity || 1,
+          unit_price: initialData.unit_price || 0,
+          action_date: initialData.transaction_date || new Date().toISOString().split('T')[0],
+          project_id: '',
+          fleet_operation_id: initialData.fleet_operation_id || '',
+          partner_id: initialData.partner_id || '',
+          notes: initialData.notes || '',
+          warehouse_id: initialData.warehouse_id || '11111111-1111-1111-1111-111111111111',
+          include_tax: initialData.include_tax || false
+        });
+      } else {
+        setFormData({
+          transaction_number: `${actionType.toUpperCase()}-${Date.now().toString().slice(-6)}`,
+          item_id: '',
+          quantity: 1,
+          unit_price: 0,
+          action_date: new Date().toISOString().split('T')[0],
+          project_id: '',
+          fleet_operation_id: '',
+          partner_id: '',
+          notes: '',
+          warehouse_id: '11111111-1111-1111-1111-111111111111', // Default main warehouse
+          include_tax: false
+        });
+      }
     }
-  }, [isOpen, actionType]);
+  }, [isOpen, actionType, initialData]);
 
   // Projects were removed as per user request
 
@@ -57,7 +76,15 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
     queryFn: async () => {
       const type = actionType === 'in' ? 'مورد' : 'مقاول';
       const { data } = await supabase.from('partners').select('id, name, partner_type');
-      // For out, we might dispense to employee or subcontractor, we just fetch all and filter client side if needed.
+      return data || [];
+    }
+  });
+
+  const { data: warehousesList = [] } = useQuery({
+    queryKey: ['warehouses_list'],
+    queryFn: async () => {
+      const { data, error } = await supabase.from('warehouses').select('id, name');
+      if (error) throw error;
       return data || [];
     }
   });
@@ -91,7 +118,7 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
           ? (formData.quantity * formData.unit_price * 0.15) 
           : 0;
 
-      const { error: txError } = await supabase.from('inventory_transactions').insert([{
+      const payload = {
         transaction_number: formData.transaction_number || `${actionType.toUpperCase()}-${Date.now().toString().slice(-6)}`,
         transaction_date: formData.action_date,
         type: actionType,
@@ -102,9 +129,18 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
         item_id: formData.item_id,
         partner_id: cleanId(formData.partner_id),
         fleet_operation_id: cleanId(formData.fleet_operation_id),
+        warehouse_id: cleanId(formData.warehouse_id),
         notes: formData.notes
-        // status defaults to 'pending' as per DB schema
-      }]);
+      };
+
+      let txError;
+      if (initialData?.id) {
+        const { error } = await supabase.from('inventory_transactions').update(payload).eq('id', initialData.id);
+        txError = error;
+      } else {
+        const { error } = await supabase.from('inventory_transactions').insert([payload]);
+        txError = error;
+      }
 
       if (txError) throw new Error(txError.message);
     },
@@ -161,15 +197,29 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
             </div>
 
             <div>
+              <label style={{ fontSize: '13px', fontWeight: 900, color: THEME.primary, marginBottom: '8px', display: 'block' }}>🏢 المستودع / منفذ البيع</label>
+              <select
+                className="glass-input-field"
+                value={formData.warehouse_id}
+                onChange={e => setFormData({ ...formData, warehouse_id: e.target.value })}
+                style={{ width: '100%', padding: '10px' }}
+              >
+                {warehousesList.map((wh: any) => (
+                  <option key={wh.id} value={wh.id}>{wh.name}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
               <label style={{ fontSize: '13px', fontWeight: 900, color: THEME.primary, marginBottom: '8px', display: 'block' }}>📦 الصنف *</label>
               <SearchableSelect
-                options={items.map(item => ({
+                options={(items || []).map(item => ({
                   label: `${item.name} (${item.available_qty} متاح)`,
                   value: item.id
                 }))}
                 value={formData.item_id}
                 onChange={val => {
-                   const selected = items.find(i => i.id === val);
+                   const selected = (items || []).find(i => i.id === val);
                    const cost = selected ? (selected.last_purchase_price || selected.default_price || 0) : 0;
                    setFormData(prev => ({ ...prev, item_id: val, unit_price: actionType === 'out' ? cost : prev.unit_price }));
                 }}

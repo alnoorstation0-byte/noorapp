@@ -1,7 +1,7 @@
 "use client";
 import React, { useState, useMemo, useEffect } from 'react';
 import { createPortal } from 'react-dom'; 
-import { useInvoicesLogic } from './invoices_logic';
+import { usePosInvoicesLogic } from './pos_invoices_logic';
 import { THEME } from '@/lib/theme';
 import { formatCurrency, getInvoiceSummaryAndAging } from '@/lib/helpers'; 
 import { usePermissions } from '@/lib/PermissionsContext'; 
@@ -26,7 +26,7 @@ import LoadingScreen from '@/components/LoadingScreen';
 import { useSearchParams } from 'next/navigation';
 
 export default function InvoicesPage() {
-  const logic = useInvoicesLogic(); 
+  const logic = usePosInvoicesLogic(); 
   const { showConfirm } = useConfirm();
   const { can, loading: permsLoading } = usePermissions();
   const [mounted, setMounted] = useState(false);
@@ -142,21 +142,6 @@ export default function InvoicesPage() {
         return (
           <span style={{ fontSize: '11px', fontWeight: 700, color: '#475569', background: 'rgba(241, 245, 249, 0.8)', padding: '4px 8px', borderRadius: '6px' }}>
              {delegate ? `👤 ${delegate.name}` : '---'}
-          </span>
-        );
-      }
-    },
-    {
-      key: 'invoice_source',
-      label: 'مصدر الفاتورة',
-      render: (row: any) => {
-        if (!row) return null;
-        const wh = logic.warehouses?.find((w:any) => w.id === row.warehouse_id);
-        if (!wh) return <span style={{ fontSize: '11px', color: '#94a3b8' }}>---</span>;
-        const typeIcon = wh.type === 'main' ? '🏢' : (wh.type === 'vehicle' ? '🚚' : (wh.type === 'pos' ? '🏪' : '🏭'));
-        return (
-          <span style={{ fontSize: '11px', fontWeight: 900, color: '#0f172a', background: 'rgba(255,255,255,0.7)', padding: '4px 8px', borderRadius: '6px', border: '1px solid rgba(0,0,0,0.05)' }}>
-             {typeIcon} {wh.name}
           </span>
         );
       }

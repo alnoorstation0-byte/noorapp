@@ -132,7 +132,7 @@ export default function InventoryPage() {
                     }}
                   >
                     <div style={{ fontSize: '24px', marginBottom: '5px' }}>
-                      {wh.type === 'main' ? '🏢' : (wh.type === 'vehicle' ? '🚚' : '🏭')}
+                      {wh.type === 'main' ? '🏢' : (wh.type === 'vehicle' ? '🚚' : (wh.type === 'pos' ? '🏪' : '🏭'))}
                     </div>
                     <div style={{ fontWeight: 'bold', fontSize: '15px', marginBottom: '10px' }}>{wh.name}</div>
                     
@@ -213,7 +213,7 @@ export default function InventoryPage() {
 
               <RawasiSmartTable 
                 columns={columns} 
-                data={logic.filteredItems} 
+                data={logic.items} 
                 keyExtractor={(r: any) => r.id}
                 pagination={true}
                 itemsPerPage={20}
@@ -222,16 +222,18 @@ export default function InventoryPage() {
               <InventoryItemModal 
                 isOpen={logic.isModalOpen}
                 onClose={() => { logic.setIsModalOpen(false); logic.setCurrentRecord(null); }}
-                record={logic.currentRecord}
-                onSave={logic.fetchItems}
+                currentRecord={logic.currentRecord || {}}
+                setCurrentRecord={logic.setCurrentRecord}
+                handleSave={logic.handleSave}
+                isSaving={logic.isSaving}
               />
 
               <InventoryActionModal 
                 isOpen={logic.isActionModalOpen}
                 onClose={() => logic.setIsActionModalOpen(false)}
-                type={actionType}
-                warehouseId={logic.selectedWarehouseId}
-                onSave={logic.fetchItems}
+                actionType={actionType}
+                onSuccess={logic.refreshData}
+                items={logic.items || []}
               />
             </>
           )}

@@ -91,6 +91,7 @@ export default function RawasiSmartTable({
 
     // 🚀 معالجة البيانات للفرز (يتم على جميع البيانات بالخلفية ليكون سريعاً ولا يعطل المتصفح)
     const sortedData = useMemo(() => {
+        if (!data || !Array.isArray(data)) return [];
         let sortableItems = [...data];
         if (sortConfig !== null) {
             sortableItems.sort((a, b) => {

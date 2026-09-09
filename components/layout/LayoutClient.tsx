@@ -104,6 +104,7 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
     switch(menuId) {
       case 'dashboard': return can('dashboard', 'view');
       case 'pos': return can('invoices', 'create');
+      case 'pos_invoices': return can('invoices', 'view');
       case 'pos_dashboard': return can('reports', 'view') || can('invoices', 'view');
       case 'invoices': return can('invoices', 'view');
       case 'inventory': return can('inventory', 'view');

@@ -16,13 +16,13 @@ const updateInventoryQty = async (itemId: string, warehouseId: string, qtyChange
     }
 };
 
-export function useInvoicesLogic() {
+export function usePosInvoicesLogic() {
     const router = useRouter();
     const { showToast } = useToast(); 
     const queryClient = useQueryClient();
     
     const updateRowsInCache = (targetIds: any[], updatedFields: any) => {
-        queryClient.setQueryData(['invoices'], (oldData: any[]) => {
+        queryClient.setQueryData(['pos_invoices'], (oldData: any[]) => {
             if (!oldData) return [];
             const stringIds = targetIds.map(String);
             return oldData.map(row => 
@@ -67,13 +67,12 @@ export function useInvoicesLogic() {
     }, []);
 
     const { data: invoices = [], isLoading: isInvLoading } = useQuery({
-        queryKey: ['invoices'],
+        queryKey: ['pos_invoices'],
         queryFn: async () => {
             const buildQuery = () => supabase
                 .from('invoices')
                 .select('*, partners:partners!invoices_partner_id_fkey(*), debit_acc:accounts!invoices_debit_acc_fkey(name)')
-                .not('invoice_number', 'ilike', 'INV-POS-%')
-                .order('date', { ascending: false });
+                .ilike('invoice_number', 'INV-POS-%').order('date', { ascending: false });
             return await fetchPaginatedData(buildQuery, 'id');
         }
     });
@@ -272,7 +271,7 @@ export function useInvoicesLogic() {
             }
 
             const invoiceHeader = {
-                invoice_number: record.invoice_number, 
+                invoice_number: (record.invoice_number || '').startsWith('INV-POS-') ? record.invoice_number : `INV-POS-${record.invoice_number || Date.now().toString().slice(-6)}`, 
                 date: record.date, 
                 partner_id: cleanId(record.partner_id),
                 client_name: record.client_name, 
@@ -316,7 +315,7 @@ export function useInvoicesLogic() {
         onSuccess: () => {
             setIsEditModalOpen(false);
             showToast("تم حفظ الفاتورة بنجاح 💾", "success");
-            queryClient.invalidateQueries({ queryKey: ['invoices'] });
+            queryClient.invalidateQueries({ queryKey: ['pos_invoices'] });
         },
         onError: (err: any) => {
             showToast(`حدث خطأ أثناء الحفظ! ❌ ${err.message}`, "error");
@@ -332,7 +331,7 @@ export function useInvoicesLogic() {
         onSuccess: () => {
             showToast("تم الاعتماد والترحيل بنجاح ✅", "success");
             setSelectedIds([]);
-            queryClient.invalidateQueries({ queryKey: ['invoices'] });
+            queryClient.invalidateQueries({ queryKey: ['pos_invoices'] });
             queryClient.invalidateQueries({ queryKey: ['accounts_report_with_lines'] }); 
             queryClient.invalidateQueries({ queryKey: ['journal_master_view'] }); 
         },
@@ -348,7 +347,7 @@ export function useInvoicesLogic() {
         onSuccess: () => {
             showToast("تم فك الترحيل بنجاح 🔄", "warning");
             setSelectedIds([]);
-            queryClient.invalidateQueries({ queryKey: ['invoices'] });
+            queryClient.invalidateQueries({ queryKey: ['pos_invoices'] });
         },
         onError: (err: any) => showToast(`${err.message}`, "error") 
     });
@@ -362,7 +361,7 @@ export function useInvoicesLogic() {
         onSuccess: () => {
             showToast("تم الحذف النهائي بنجاح 🗑️", "success");
             setSelectedIds([]);
-            queryClient.invalidateQueries({ queryKey: ['invoices'] });
+            queryClient.invalidateQueries({ queryKey: ['pos_invoices'] });
         },
         onError: (err: any) => showToast(`خطأ في الحذف: ${err.message}`, "error")
     });
@@ -398,7 +397,7 @@ export function useInvoicesLogic() {
             setIsReceiptModalOpen(false);
             setSelectedInvoiceForPay(null);
             showToast("تم إنشاء سند قبض كمسودة بنجاح 💰", "success");
-            queryClient.invalidateQueries({ queryKey: ['invoices'] });
+            queryClient.invalidateQueries({ queryKey: ['pos_invoices'] });
             queryClient.invalidateQueries({ queryKey: ['receipt_vouchers'] });
         }
     });

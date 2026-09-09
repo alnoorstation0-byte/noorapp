@@ -13,6 +13,8 @@ import { supabase } from '@/lib/supabase';
 import { THEME } from '@/lib/theme';
 import { useQuery } from '@tanstack/react-query';
 
+import PurchaseOrderPrintModal from './PurchaseOrderPrintModal';
+
 export default function PurchaseOrdersPage() {
   const logic = usePurchaseOrdersLogic();
   const { showConfirm } = useConfirm();
@@ -69,6 +71,15 @@ export default function PurchaseOrdersPage() {
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
           {row.status === 'pending' && (
             <>
+              <SecureAction module="purchase_orders" action="view">
+                <button 
+                  onClick={() => logic.setPrintingTransaction(row)}
+                  className="btn-main-glass"
+                  style={{ width: 'auto', padding: '5px 12px', fontSize: '11px', margin: 0, background: '#64748b', color: 'white' }}
+                >
+                  🖨️ طباعة
+                </button>
+              </SecureAction>
               <SecureAction module="purchase_orders" action="post">
                 <button 
                   onClick={() => logic.handleApproveTransaction(row)}
@@ -76,6 +87,18 @@ export default function PurchaseOrdersPage() {
                   style={{ width: 'auto', padding: '5px 12px', fontSize: '11px', margin: 0, background: '#16a34a', color: 'white' }}
                 >
                   📥 استلام بالأنظمة
+                </button>
+              </SecureAction>
+              <SecureAction module="purchase_orders" action="edit">
+                <button 
+                  onClick={() => {
+                    logic.setEditingTransaction(row);
+                    logic.setIsActionModalOpen(true);
+                  }}
+                  className="btn-main-glass"
+                  style={{ background: '#3b82f6', color: 'white', width: 'auto', padding: '5px 12px', fontSize: '11px', margin: 0 }}
+                >
+                  ✏️ تعديل
                 </button>
               </SecureAction>
               <SecureAction module="purchase_orders" action="delete">
@@ -100,15 +123,36 @@ export default function PurchaseOrdersPage() {
             </>
           )}
           {row.status === 'approved' && (
-            <SecureAction module="purchase_orders" action="post">
-              <button 
-                onClick={() => logic.handleUnapproveTransaction(row)}
-                className="btn-main-glass"
-                style={{ background: '#eab308', color: 'white', width: 'auto', padding: '5px 12px', fontSize: '11px', margin: 0 }}
-              >
-                ↩️ فك الاستلام
-              </button>
-            </SecureAction>
+            <>
+              <SecureAction module="purchase_orders" action="view">
+                <button 
+                  onClick={() => logic.setPrintingTransaction(row)}
+                  className="btn-main-glass"
+                  style={{ width: 'auto', padding: '5px 12px', fontSize: '11px', margin: 0, background: '#64748b', color: 'white' }}
+                >
+                  🖨️ طباعة
+                </button>
+              </SecureAction>
+              <SecureAction module="purchase_orders" action="post">
+                <button 
+                  onClick={() => logic.handleCreateEntitlement(row)}
+                  className="btn-main-glass"
+                  style={{ background: '#3b82f6', color: 'white', width: 'auto', padding: '5px 12px', fontSize: '11px', margin: 0 }}
+                  title="نقل المديونية من فواتير قيد الاستلام إلى حساب المورد"
+                >
+                  🧾 سند استحقاق الصرف
+                </button>
+              </SecureAction>
+              <SecureAction module="purchase_orders" action="post">
+                <button 
+                  onClick={() => logic.handleUnapproveTransaction(row)}
+                  className="btn-main-glass"
+                  style={{ background: '#eab308', color: 'white', width: 'auto', padding: '5px 12px', fontSize: '11px', margin: 0 }}
+                >
+                  ↩️ فك الاستلام
+                </button>
+              </SecureAction>
+            </>
           )}
         </div>
       )
@@ -152,10 +196,20 @@ export default function PurchaseOrdersPage() {
 
       <InventoryActionModal 
         isOpen={logic.isActionModalOpen}
-        onClose={() => logic.setIsActionModalOpen(false)}
+        onClose={() => {
+          logic.setIsActionModalOpen(false);
+          logic.setEditingTransaction(null);
+        }}
         actionType="in"
         items={inventoryItems}
+        initialData={logic.editingTransaction}
         onSuccess={() => logic.fetchTransactions()}
+      />
+
+      <PurchaseOrderPrintModal
+        isOpen={!!logic.printingTransaction}
+        onClose={() => logic.setPrintingTransaction(null)}
+        record={logic.printingTransaction}
       />
     </MasterPage>
   );
