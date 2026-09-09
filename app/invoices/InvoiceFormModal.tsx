@@ -6,6 +6,7 @@ import { formatCurrency } from '@/lib/helpers';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/lib/toast-context'; 
 import SmartCombo from '@/components/SmartCombo'; 
+import BarcodeScannerWidget from '@/components/BarcodeScannerWidget';
 import { z } from 'zod';
 
 // --- [نافذة إضافة/تعديل فاتورة] ---
@@ -128,6 +129,28 @@ export default function InvoiceFormModal({ isOpen, onClose, record, setRecord, o
             boq_id: null,
             item_id: null
         });
+    };
+
+    const handleBarcodeScan = async (barcode: string) => {
+        let foundItem = warehouseItems?.find((i: any) => String(i.code) === barcode || String(i.id) === barcode);
+        if (!foundItem) {
+            const { data } = await supabase.from('inventory_items').select('*').eq('code', barcode).single();
+            if (data) foundItem = data;
+        }
+
+        if (foundItem) {
+            setRecord({
+                ...record,
+                description: foundItem.name,
+                unit: foundItem.unit || 'حبة',
+                unit_price: foundItem.price || foundItem.default_price || 0,
+                item_id: foundItem.id,
+                quantity: 1
+            });
+            showToast(`تم العثور على: ${foundItem.name}`, 'success');
+        } else {
+            showToast(`لم يتم العثور على صنف بالباركود: ${barcode}`, 'error');
+        }
     };
 
     // 🚀 دالة حذف البيان من الجدول
@@ -302,9 +325,14 @@ export default function InvoiceFormModal({ isOpen, onClose, record, setRecord, o
 
                 {/* 2. Statement Line Section */}
                 <div style={{ background: 'rgba(255,255,255,0.4)', padding: '10px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.7)', marginBottom: '10px' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 0.5fr', gap: '10px', alignItems: 'end' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 0.5fr', gap: '10px', alignItems: 'end', marginBottom: '10px' }}>
                         <div>
                             <label style={{ fontSize: '12px', fontWeight: 900, color: THEME.primary, display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '6px' }}>البيان التفصيلي (الصنف)</label>
+                            <BarcodeScannerWidget onScan={handleBarcodeScan} placeholder="امسح الباركود للكتابة..." />
+                        </div>
+                    </div>
+                    <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 0.5fr', gap: '10px', alignItems: 'end' }}>
+                        <div>
                             <div style={{ zIndex: 10 }}>
                                 <SmartCombo 
                                     options={warehouseItems?.map((i: any) => ({

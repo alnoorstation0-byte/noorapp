@@ -25,6 +25,7 @@
     "file-saver": "^2.0.5",
     "framer-motion": "^12.38.0",
     "html2pdf.js": "^0.14.0",
+    "html5-qrcode": "^2.3.8",
     "idb-keyval": "^6.2.2",
     "jimp": "^0.16.13",
     "jspdf": "^4.2.1",

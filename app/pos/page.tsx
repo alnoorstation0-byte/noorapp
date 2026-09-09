@@ -4,6 +4,7 @@ import MasterPage from '@/components/MasterPage';
 import { usePosLogic } from './pos_logic';
 import { THEME } from '@/lib/theme';
 import LoadingScreen from '@/components/LoadingScreen';
+import BarcodeScannerWidget from '@/components/BarcodeScannerWidget';
 
 export default function PosPage() {
     const logic = usePosLogic();
@@ -135,11 +136,14 @@ export default function PosPage() {
                     
                     {/* Left: Items Selection */}
                     <div className="items-section">
-                        <div style={{ display: 'flex', gap: '15px' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                            {/* Barcode Scanner */}
+                            <BarcodeScannerWidget onScan={logic.handleBarcodeScan} />
+                            
                             <input 
                                 type="text" 
                                 className="glass-input-field" 
-                                placeholder="🔍 ابحث عن صنف بالاسم..." 
+                                placeholder="ابحث عن صنف بالاسم..." 
                                 value={logic.searchQuery}
                                 onChange={(e) => logic.setSearchQuery(e.target.value)}
                                 style={{ flex: 1 }}

@@ -35,7 +35,7 @@ export function usePosLogic() {
                 .from('warehouse_inventory')
                 .select(`
                     id, quantity, item_id,
-                    inventory_items (id, name, default_price, unit)
+                    inventory_items (id, name, default_price, unit, code)
                 `)
                 .eq('warehouse_id', selectedWarehouseId)
                 .gt('quantity', 0);
@@ -45,6 +45,7 @@ export function usePosLogic() {
                 name: row.inventory_items?.name,
                 price: row.inventory_items?.default_price || 0,
                 unit: row.inventory_items?.unit || 'حبة',
+                code: row.inventory_items?.code,
                 available_qty: row.quantity
             })) || [];
         },
@@ -77,6 +78,16 @@ export function usePosLogic() {
             }
             return [...prev, { ...item, qty: 1, discount: 0 }];
         });
+    };
+
+    const handleBarcodeScan = (barcode: string) => {
+        const item = inventoryItems.find((i: any) => String(i.code) === barcode || String(i.id) === barcode);
+        if (item) {
+            addToCart(item);
+            showToast(`تمت إضافة ${item.name}`, 'success');
+        } else {
+            showToast(`الصنف غير موجود أو نفدت كميته: ${barcode}`, 'error');
+        }
     };
 
     const updateCartItemQty = (id: string, qty: number) => {
@@ -175,7 +186,7 @@ export function usePosLogic() {
     return {
         warehouses, selectedWarehouseId, setSelectedWarehouseId,
         inventoryItems: filteredItems, searchQuery, setSearchQuery,
-        cart, addToCart, updateCartItemQty, removeFromCart, cartTotal,
+        cart, addToCart, updateCartItemQty, removeFromCart, cartTotal, handleBarcodeScan,
         paymentMethod, setPaymentMethod,
         customers, partnerId, setPartnerId,
         handleCheckout: () => checkoutMutation.mutate(),
