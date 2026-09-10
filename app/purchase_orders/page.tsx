@@ -84,15 +84,7 @@ export default function PurchaseOrdersPage() {
                   🖨️ طباعة
                 </button>
               </SecureAction>
-              <SecureAction module="inventory" action="post">
-                <button 
-                  onClick={() => logic.handleApproveTransaction(row)}
-                  className="btn-main-glass"
-                  style={{ width: 'auto', padding: '5px 12px', fontSize: '11px', margin: 0, background: '#16a34a', color: 'white' }}
-                >
-                  ☑ الاستلام والتوريد للمخزون
-                </button>
-              </SecureAction>
+
               <SecureAction module="inventory" action="edit">
                 <button 
                   onClick={() => {

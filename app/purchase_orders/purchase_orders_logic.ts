@@ -148,7 +148,9 @@ export function usePurchaseOrdersLogic() {
       setIsLoading(true);
 
       // Check if entitlement already exists in expenses
-      const expNo = `PO-${transaction.transaction_number}`;
+      // transaction_number may already start with "PO-", so avoid duplication
+      const rawNum = transaction.transaction_number?.replace(/^PO-/, '') || transaction.transaction_number;
+      const expNo = `PO-${rawNum}`;
       const { data: existing } = await supabase
         .from('expenses')
         .select('id')
@@ -160,7 +162,7 @@ export function usePurchaseOrdersLogic() {
 
       const subTotal = transaction.total_amount - (transaction.tax_amount || 0);
       const taxAmount = transaction.tax_amount || 0;
-      const desc = `فاتورة مشتريات مجمعة لأمر الشراء #${transaction.transaction_number}`;
+      const desc = `فاتورة مشتريات مجمعة لأمر الشراء #${rawNum}`;
 
       // Create Expense Record
       const expensePayload = {
@@ -175,15 +177,17 @@ export function usePurchaseOrdersLogic() {
         unit_price: subTotal,
         vat_amount: taxAmount,
         discount_amount: 0,
+        paid_amount: 0,
         notes: 'تم التوليد آلياً من أمر الشراء',
         is_posted: false,
-        expense_number: expNo
+        expense_number: expNo,
+        main_category: 'شراء بضاعة'
       };
 
       const { error: expErr } = await supabase.from('expenses').insert([expensePayload]);
       if (expErr) throw expErr;
 
-      showGlobalToast('تم إنشاء سند الاستحقاق بنجاح! راجع قسم المصروفات/فواتير المشتريات', 'success');
+      showGlobalToast('تم انشاء سند استحقاق صرف', 'success');
     } catch (error: any) {
       console.error('Error creating entitlement in expenses:', error);
       showGlobalToast('حدث خطأ أثناء إنشاء السند: ' + error.message, 'error');
