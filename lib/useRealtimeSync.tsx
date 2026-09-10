@@ -141,8 +141,8 @@ export function useRealtimeListener(
 }
 
 /**
- * Hook لإبطال كاش React Query عند تغيير جدول معين
- * مفيد للصفحات اللي بتستخدم useQuery
+ * Hook لإبطال كاش React Query أو تحديثه محلياً عند تغيير جدول معين
+ * تم التحديث: يدعم الآن التعديل الجزئي (Optimistic Updates) بدون سحب نت!
  * 
  * الاستخدام:
  *   useRealtimeInvalidate('expenses', ['expenses']);
@@ -152,15 +152,66 @@ export function useRealtimeInvalidate(
   tables: WatchedTable | WatchedTable[],
   queryKeys: string[]
 ) {
-  useRealtimeListener(tables, () => {
+  useRealtimeListener(tables, (detail) => {
     // Dynamic import to avoid circular dependencies
-    import('@tanstack/react-query').then(({ QueryClient }) => {
+    import('@tanstack/react-query').then(() => {
       // Access the global query client
-      if (typeof window !== 'undefined' && (window as any).__REACT_QUERY_CLIENT__) {
-        queryKeys.forEach(key => {
-          (window as any).__REACT_QUERY_CLIENT__.invalidateQueries({ queryKey: [key] });
-        });
-      }
+      const queryClient = typeof window !== 'undefined' ? (window as any).__REACT_QUERY_CLIENT__ : null;
+      if (!queryClient) return;
+
+      const eventType = detail?.eventType;
+      const newRecord = detail?.payload?.new;
+      const oldRecord = detail?.payload?.old;
+
+      queryKeys.forEach(key => {
+        // 1. تحديث جزئي (بدون سحب نت) في حالة التعديل UPDATE
+        if (eventType === 'UPDATE' && newRecord?.id) {
+          queryClient.setQueriesData({ queryKey: [key] }, (oldData: any) => {
+            if (!oldData) return oldData;
+            
+            if (Array.isArray(oldData)) {
+              return oldData.map(item => item.id === newRecord.id ? { ...item, ...newRecord } : item);
+            } else if (typeof oldData === 'object' && oldData !== null) {
+                // للبيانات المغلفة في كائنات مثل { invoices: [...] }
+                const newData = { ...oldData };
+                let updated = false;
+                for (const k in newData) {
+                    if (Array.isArray(newData[k])) {
+                        newData[k] = newData[k].map((item:any) => item.id === newRecord.id ? { ...item, ...newRecord } : item);
+                        updated = true;
+                    }
+                }
+                return updated ? newData : oldData;
+            }
+            return oldData;
+          });
+        } 
+        // 2. حذف جزئي (بدون سحب نت) في حالة الحذف DELETE
+        else if (eventType === 'DELETE' && oldRecord?.id) {
+          queryClient.setQueriesData({ queryKey: [key] }, (oldData: any) => {
+            if (!oldData) return oldData;
+            
+            if (Array.isArray(oldData)) {
+              return oldData.filter(item => item.id !== oldRecord.id);
+            } else if (typeof oldData === 'object' && oldData !== null) {
+                const newData = { ...oldData };
+                let updated = false;
+                for (const k in newData) {
+                    if (Array.isArray(newData[k])) {
+                        newData[k] = newData[k].filter((item:any) => item.id !== oldRecord.id);
+                        updated = true;
+                    }
+                }
+                return updated ? newData : oldData;
+            }
+            return oldData;
+          });
+        } 
+        // 3. إضافة جديدة (نجلب البيانات من السيرفر لأننا قد نحتاج للعلاقات Linked Data)
+        else {
+          queryClient.invalidateQueries({ queryKey: [key] });
+        }
+      });
     });
   });
 }
