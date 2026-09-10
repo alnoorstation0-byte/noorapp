@@ -23,8 +23,9 @@ export function useFleetLogic() {
                 .from('fleet_operations')
                 .select(`
                     *,
-                    vehicle:vehicles(plate_number),
-                    driver:users!fleet_operations_driver_id_fkey(name:full_name)
+                    description,
+                    vehicle:fleet_vehicles(plate_number),
+                    driver:partners!driver_id(name)
                 `)
                 .order('operation_date', { ascending: false });
             if (error) throw error;
@@ -35,15 +36,15 @@ export function useFleetLogic() {
     const { data: vehicles = [] } = useQuery({
         queryKey: ['vehicles'],
         queryFn: async () => {
-            const { data } = await supabase.from('vehicles').select('id, plate_number, status');
+            const { data } = await supabase.from('fleet_vehicles').select('id, plate_number, status, driver_id');
             return data || [];
         }
     });
 
     const { data: drivers = [] } = useQuery({
-        queryKey: ['drivers'],
+        queryKey: ['fleet_ops_drivers'],
         queryFn: async () => {
-            const { data } = await supabase.from('users').select('id, full_name').eq('role', 'driver');
+            const { data } = await supabase.from('partners').select('id, name').eq('partner_type', 'موظف');
             return data || [];
         }
     });

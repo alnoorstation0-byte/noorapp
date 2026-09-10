@@ -5,6 +5,7 @@ import { usePosLogic } from './pos_logic';
 import { THEME } from '@/lib/theme';
 import LoadingScreen from '@/components/LoadingScreen';
 import BarcodeScannerWidget from '@/components/BarcodeScannerWidget';
+import InvoicePrintModal from '../invoices/InvoicePrintModal';
 
 export default function PosPage() {
     const logic = usePosLogic();
@@ -157,9 +158,9 @@ export default function PosPage() {
                                 </div>
                             ) : (
                                 logic.inventoryItems.map((item: any) => (
-                                    <div key={item.id} className="pos-item-card" onClick={() => logic.addToCart(item)}>
+                                    <div key={item.id} className="pos-item-card" onClick={() => logic.handleItemClick(item)}>
                                         <div className="pos-item-name">{item.name}</div>
-                                        <div className="pos-item-price">{formatCurrency(item.price)}</div>
+                                        <div className="pos-item-price">{formatCurrency(item.suggested_price || item.price || 0)}</div>
                                         <div className="pos-item-qty">المتاح: {item.available_qty} {item.unit}</div>
                                     </div>
                                 ))
@@ -183,17 +184,30 @@ export default function PosPage() {
                                     <div key={item.id} className="cart-item">
                                         <div style={{ flex: 1 }}>
                                             <div style={{ fontWeight: 900, fontSize: '13px', color: '#1e293b' }}>{item.name}</div>
-                                            <div style={{ fontSize: '12px', color: '#16a34a', fontWeight: 'bold' }}>{formatCurrency(item.price)}</div>
+                                            <input 
+                                                type="number" 
+                                                value={item.unit_price !== undefined ? item.unit_price : (item.price || 0)}
+                                                onChange={(e) => logic.updateCartItemPrice(item.id, Number(e.target.value))}
+                                                style={{ width: '80px', fontSize: '12px', color: '#16a34a', fontWeight: 'bold', border: '1px solid #cbd5e1', borderRadius: '5px', padding: '2px 5px', marginTop: '2px' }}
+                                                min={0}
+                                                step="any"
+                                            />
                                         </div>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: '0 15px' }}>
                                             <button className="qty-btn" onClick={() => logic.updateCartItemQty(item.id, item.qty + 1)}>+</button>
-                                            <span style={{ fontWeight: 900, fontSize: '14px', width: '25px', textAlign: 'center' }}>{item.qty}</span>
+                                            <input 
+                                                type="number" 
+                                                value={item.qty}
+                                                onChange={(e) => logic.updateCartItemQty(item.id, Number(e.target.value))}
+                                                style={{ width: '40px', textAlign: 'center', fontWeight: 'bold', border: '1px solid #cbd5e1', borderRadius: '5px', padding: '2px' }}
+                                                min={1}
+                                            />
                                             <button className="qty-btn" onClick={() => logic.updateCartItemQty(item.id, item.qty - 1)}>-</button>
                                         </div>
                                         <div style={{ fontWeight: 900, fontSize: '14px', color: '#0f172a', width: '70px', textAlign: 'left' }}>
-                                            {formatCurrency(item.qty * item.price)}
+                                            {formatCurrency(item.qty * (item.unit_price || item.price || 0))}
                                         </div>
-                                        <button className="remove-btn" onClick={() => logic.removeFromCart(item.id)}>✕</button>
+                                        <button className="remove-btn" onClick={() => logic.removeFromCart(item.id)}>❌</button>
                                     </div>
                                 ))
                             )}
@@ -225,6 +239,19 @@ export default function PosPage() {
                                 </select>
                             </div>
 
+                                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '15px', background: 'rgba(255,255,255,0.5)', padding: '10px', borderRadius: '10px' }}>
+                                <span style={{ fontWeight: 'bold', color: '#1e293b', fontSize: '14px' }}>طريقة الحساب:</span>
+                                <div style={{ display: 'flex', background: '#e2e8f0', borderRadius: '8px', overflow: 'hidden' }}>
+                                    <button 
+                                        onClick={() => logic.setIsTaxInclusive(true)}
+                                        style={{ border: 'none', padding: '6px 12px', fontSize: '13px', fontWeight: 'bold', cursor: 'pointer', background: logic.isTaxInclusive ? '#16a34a' : 'transparent', color: logic.isTaxInclusive ? 'white' : '#475569', transition: '0.3s' }}
+                                    >شامل الضريبة</button>
+                                    <button 
+                                        onClick={() => logic.setIsTaxInclusive(false)}
+                                        style={{ border: 'none', padding: '6px 12px', fontSize: '13px', fontWeight: 'bold', cursor: 'pointer', background: !logic.isTaxInclusive ? '#3b82f6' : 'transparent', color: !logic.isTaxInclusive ? 'white' : '#475569', transition: '0.3s' }}
+                                    >غير شامل</button>
+                                </div>
+                            </div>
                             <div className="summary-row">
                                 <span>المجموع الفرعي:</span>
                                 <span>{formatCurrency(logic.cartTotal.subtotal)}</span>
@@ -255,6 +282,54 @@ export default function PosPage() {
 
                 </div>
             )}
+        
+            {logic.selectedItemForCart && (
+                <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(5px)' }}>
+                    <div style={{ background: 'rgba(255, 255, 255, 0.95)', padding: '25px', borderRadius: '20px', width: '90%', maxWidth: '400px', boxShadow: '0 10px 30px rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.4)' }}>
+                        <h3 style={{ margin: '0 0 20px 0', color: '#1C73AB', textAlign: 'center', fontSize: '20px', fontWeight: 900 }}>{logic.selectedItemForCart.name}</h3>
+                        
+                        <div style={{ marginBottom: '15px' }}>
+                            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', color: '#1C73AB' }}>الكمية المطلوبة</label>
+                            <input 
+                                type="number" 
+                                className="glass-input-field" 
+                                style={{ width: '100%', fontSize: '18px', textAlign: 'center', fontWeight: 'bold' }}
+                                value={logic.selectedItemForCart.selected_qty || ''}
+                                onChange={(e) => logic.setSelectedItemForCart({...logic.selectedItemForCart, selected_qty: Number(e.target.value)})}
+                                min={1}
+                            />
+                        </div>
+
+                        <div style={{ marginBottom: '25px' }}>
+                            <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', color: '#1C73AB' }}>{logic.isTaxInclusive ? "السعر (شامل الضريبة)" : "السعر (غير شامل الضريبة)"}</label>
+                            <input 
+                                type="number" 
+                                className="glass-input-field" 
+                                style={{ width: '100%', fontSize: '18px', textAlign: 'center', fontWeight: 'bold' }}
+                                value={logic.selectedItemForCart.selected_price || ''}
+                                onChange={(e) => logic.setSelectedItemForCart({...logic.selectedItemForCart, selected_price: Number(e.target.value)})}
+                            />
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '10px' }}>
+                            <button onClick={logic.confirmAddToCart} style={{ flex: 2, background: '#2891C8', color: 'white', border: 'none', padding: '12px', borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer' }}>
+                                إضافة للسلة 🛒
+                            </button>
+                            <button onClick={() => logic.setSelectedItemForCart(null)} style={{ flex: 1, background: '#fee2e2', color: '#dc2626', border: 'none', padding: '12px', borderRadius: '12px', fontWeight: 'bold', cursor: 'pointer' }}>
+                                إلغاء
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+        
+            <InvoicePrintModal 
+                isOpen={logic.isPrintModalOpen}
+                onClose={() => logic.setIsPrintModalOpen(false)}
+                record={logic.lastInvoice || {}}
+            />
         </MasterPage>
+
     );
 }

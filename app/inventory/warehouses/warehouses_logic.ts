@@ -32,19 +32,21 @@ export function useWarehousesLogic() {
 
   const saveMutation = useMutation({
     mutationFn: async (payload: any) => {
+      const dataToSave = {
+        name: payload.name,
+        type: payload.type || 'sub',
+        is_active: payload.is_active ?? true,
+        location: payload.location || null,
+        phone: payload.phone || null,
+        manager_name: payload.manager_name || null,
+        description: payload.description || null
+      };
+
       if (payload.id) {
-        const { error } = await supabase.from('warehouses').update({
-          name: payload.name,
-          type: payload.type,
-          is_active: payload.is_active
-        }).eq('id', payload.id);
+        const { error } = await supabase.from('warehouses').update(dataToSave).eq('id', payload.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from('warehouses').insert([{
-          name: payload.name,
-          type: payload.type || 'sub',
-          is_active: payload.is_active ?? true
-        }]);
+        const { error } = await supabase.from('warehouses').insert([dataToSave]);
         if (error) throw error;
       }
     },
@@ -55,6 +57,25 @@ export function useWarehousesLogic() {
     },
     onError: (err: any) => showToast(`خطأ أثناء الحفظ: ${err.message}`, "error")
   });
+
+  
+  const deleteMutation = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase.from('warehouses').delete().eq('id', id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      showToast('تم حذف المستودع بنجاح', 'success');
+      fetchWarehouses();
+    },
+    onError: (err: any) => showToast('لا يمكن الحذف، قد يكون مرتبطاً بحركات مخزنية: ' + err.message, 'error')
+  });
+
+  const handleDelete = (id: string) => {
+    if (window.confirm('هل أنت متأكد من حذف هذا المستودع/المنفذ؟')) {
+      deleteMutation.mutate(id);
+    }
+  };
 
   const handleAddNew = () => {
     setCurrentRecord({ name: '', type: 'sub', is_active: true });
@@ -71,7 +92,7 @@ export function useWarehousesLogic() {
     isLoading,
     isModalOpen, setIsModalOpen,
     currentRecord, setCurrentRecord,
-    handleAddNew, handleEdit,
+    handleAddNew, handleEdit, handleDelete,
     handleSave: () => saveMutation.mutate(currentRecord),
     isSaving: saveMutation.isPending
   };

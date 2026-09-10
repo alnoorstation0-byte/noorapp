@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import React from 'react';
 import MasterPage from '@/components/MasterPage';
 import SecureAction from '@/components/SecureAction';
@@ -10,16 +10,29 @@ import AquaModalWrapper from '@/components/AquaModalWrapper';
 
 export default function WarehousesPage() {
   const logic = useWarehousesLogic();
+  const [selectedIds, setSelectedIds] = React.useState<any[]>([]);
 
   const columns = [
-    { key: 'name', label: 'اسم المستودع', sortable: true },
+    { key: 'name', label: 'اسم المستودع / المنفذ', sortable: true },
     { key: 'type', label: 'النوع', sortable: true, render: (row: any) => {
         if (row.type === 'main') return <span style={{color: THEME.primary, fontWeight: 'bold'}}>رئيسي</span>;
-        if (row.type === 'vehicle') return <span style={{color: '#3b82f6', fontWeight: 'bold'}}>سيارة توزيع</span>;
+        if (row.type === 'vehicle') return <span style={{color: '#3b82f6', fontWeight: 'bold'}}>سيارة / متنقل</span>;
+        if (row.type === 'pos') return <span style={{color: '#eab308', fontWeight: 'bold'}}>منفذ بيع (POS)</span>;
         return <span style={{color: '#8b5cf6', fontWeight: 'bold'}}>مستودع فرعي</span>;
     } },
+    { key: 'location', label: 'العنوان', render: (row: any) => row.location || '---' },
+    { key: 'phone', label: 'الهاتف', render: (row: any) => row.phone || '---' },
+    { key: 'manager_name', label: 'المسؤول', render: (row: any) => row.manager_name || '---' },
     { key: 'is_active', label: 'الحالة', sortable: true, render: (row: any) => row.is_active ? 'نشط' : 'غير نشط' },
-    { key: 'created_at', label: 'تاريخ الإنشاء', sortable: true, render: (row: any) => new Date(row.created_at).toLocaleDateString('ar-EG') },
+  
+    { key: 'actions', label: 'إجراءات', render: (row: any) => (
+        <div style={{ display: 'flex', gap: '5px' }}>
+            <button onClick={(e) => { e.stopPropagation(); logic.handleEdit(row); }} className="btn-main-glass white" style={{ padding: '4px 8px', margin: 0, fontSize: '11px' }}>✏️ تعديل</button>
+            {row.type !== 'main' && row.type !== 'vehicle' && (
+                <button onClick={(e) => { e.stopPropagation(); logic.handleDelete(row.id); }} className="btn-main-glass red" style={{ padding: '4px 8px', margin: 0, fontSize: '11px' }}>🗑️ حذف</button>
+            )}
+        </div>
+    )},
   ];
 
   return (
@@ -28,18 +41,29 @@ export default function WarehousesPage() {
         title="إدارة المستودعات (Multi-Warehouse)" 
         subtitle="إدارة المستودعات الرئيسية، الفرعية، وسيارات التوزيع"
       >
-        <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'flex-end' }}>
+        <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
+            {selectedIds.length > 0 && (
+                <button className="btn-main-glass red" style={{ width: 'auto' }} onClick={() => {
+                    if (window.confirm('هل أنت متأكد من حذف المستودعات المحددة؟')) {
+                        selectedIds.forEach(id => {
+                            const row = logic.warehouses.find((w: any) => w.id === id);
+                            if (row && row.type !== 'main' && row.type !== 'vehicle') {
+                                logic.handleDelete(id);
+                            }
+                        });
+                        setSelectedIds([]);
+                    }
+                }}>
+                    🗑️ حذف المحدد
+                </button>
+            )}
             <button className="btn-main-glass blue" style={{ width: 'auto' }} onClick={logic.handleAddNew}>
-                ➕ إضافة مستودع فرعي جديد
+                ➕ إضافة مستودع / منفذ جديد
             </button>
         </div>
 
         <div className="clickable-rows cinematic-scroll">
-            <RawasiSmartTable
-                columns={columns}
-                data={logic.warehouses}
-                onRowClick={(row) => logic.handleEdit(row)}
-            />
+            <RawasiSmartTable columns={columns} data={logic.warehouses} selectable={true} selectedIds={selectedIds} onSelectionChange={setSelectedIds} />
         </div>
       </MasterPage>
 
@@ -49,7 +73,7 @@ export default function WarehousesPage() {
             onClose={() => logic.setIsModalOpen(false)}
             title={logic.currentRecord.id ? 'تعديل المستودع' : 'إضافة مستودع جديد'}
             icon="🏭"
-            width="400px"
+            width="500px"
         >
                   <div className="form-group" style={{ marginBottom: '15px' }}>
                       <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>اسم المستودع</label>
@@ -71,10 +95,53 @@ export default function WarehousesPage() {
                           onChange={e => logic.setCurrentRecord({...logic.currentRecord, type: e.target.value})}
                           disabled={logic.currentRecord.type === 'main' || logic.currentRecord.type === 'vehicle'}
                       >
-                          <option value="main">رئيسي</option>
+                          <option value="main">مستودع رئيسي</option>
                           <option value="sub">مستودع فرعي</option>
-                          <option value="vehicle">سيارة توزيع</option>
+                          <option value="pos">منفذ بيع (POS)</option>
+                          <option value="vehicle">سيارة / متنقل</option>
                       </select>
+                  </div>
+
+                  
+                  <div className="form-group" style={{ marginBottom: '15px' }}>
+                      <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>العنوان / الموقع</label>
+                      <input 
+                          type="text" 
+                          className="glass-input-field" 
+                          style={{ width: '100%' }}
+                          value={logic.currentRecord.location || ''}
+                          onChange={e => logic.setCurrentRecord({...logic.currentRecord, location: e.target.value})}
+                      />
+                  </div>
+                  <div className="form-group" style={{ marginBottom: '15px' }}>
+                      <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>رقم الهاتف</label>
+                      <input 
+                          type="text" 
+                          className="glass-input-field" 
+                          style={{ width: '100%' }}
+                          value={logic.currentRecord.phone || ''}
+                          onChange={e => logic.setCurrentRecord({...logic.currentRecord, phone: e.target.value})}
+                      />
+                  </div>
+                  <div className="form-group" style={{ marginBottom: '15px' }}>
+                      <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>المسؤول</label>
+                      <input 
+                          type="text" 
+                          className="glass-input-field" 
+                          style={{ width: '100%' }}
+                          value={logic.currentRecord.manager_name || ''}
+                          onChange={e => logic.setCurrentRecord({...logic.currentRecord, manager_name: e.target.value})}
+                      />
+                  </div>
+                  <div className="form-group" style={{ marginBottom: '15px' }}>
+                      <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>وصف / ملاحظات</label>
+                      <textarea 
+                          className="glass-input-field" 
+                          style={{ width: '100%' }}
+                          rows={2}
+                          value={logic.currentRecord.description || ''}
+                          onChange={e => logic.setCurrentRecord({...logic.currentRecord, description: e.target.value})}
+                      />
                   </div>
 
                   <div className="form-group" style={{ marginBottom: '20px' }}>

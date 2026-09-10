@@ -22,7 +22,39 @@ export function usePurchaseOrdersLogic() {
 
       const { data, error } = await query;
       if (error) throw error;
-      setTransactions(data || []);
+      
+      const grouped = (data || []).reduce((acc: any, curr: any) => {
+          let baseNumber = curr.transaction_number;
+          if (/-\d+$/.test(baseNumber)) {
+              baseNumber = baseNumber.replace(/-\d+$/, '');
+          }
+
+          if (!acc[baseNumber]) {
+              acc[baseNumber] = {
+                  id: curr.id, // Primary ID for rendering or passing to other functions if needed
+                  ids: [], // Array of all IDs in this transaction for mass approval/deletion
+                  transaction_number: baseNumber,
+                  transaction_date: curr.transaction_date,
+                  partner_id: curr.partner_id,
+                  partners: curr.partners,
+                  status: curr.status,
+                  items: [],
+                  notes: curr.notes,
+                  total_amount: 0,
+                  tax_amount: 0,
+                  quantity: 0
+              };
+          }
+          acc[baseNumber].ids.push(curr.id);
+          acc[baseNumber].items.push(curr);
+          acc[baseNumber].tax_amount += (curr.tax_amount || 0);
+          acc[baseNumber].total_amount += ((curr.quantity * curr.unit_price) + (curr.tax_amount || 0));
+          acc[baseNumber].quantity += curr.quantity; // Just for display fallback if needed
+          
+          return acc;
+      }, {});
+
+      setTransactions(Object.values(grouped).sort((a:any, b:any) => new Date(b.transaction_date).getTime() - new Date(a.transaction_date).getTime()));
     } catch (error: any) {
       console.error('Error fetching purchase orders:', error);
       showGlobalToast('حدث خطأ أثناء جلب أوامر الشراء', 'error');
@@ -38,8 +70,10 @@ export function usePurchaseOrdersLogic() {
   const handleApproveTransaction = async (transaction: any) => {
     try {
       setIsLoading(true);
-      const { error: rpcError } = await supabase.rpc('approve_inventory_transaction', { p_id: transaction.id });
-      if (rpcError) throw new Error(rpcError.message);
+      for (const id of transaction.ids) {
+          const { error: rpcError } = await supabase.rpc('approve_inventory_transaction', { p_id: id });
+          if (rpcError) throw new Error(rpcError.message);
+      }
 
       showGlobalToast('تم اعتماد أمر الشراء واستلامه بالمستودع بنجاح', 'success');
       fetchTransactions();
@@ -57,8 +91,44 @@ export function usePurchaseOrdersLogic() {
 
     try {
       setIsLoading(true);
-      const { error: rpcError } = await supabase.rpc('unapprove_inventory_transaction', { p_id: transaction.id });
-      if (rpcError) throw new Error(rpcError.message);
+        for (const id of transaction.ids) {
+            // Fetch transaction details
+            const { data: txn, error: txnError } = await supabase
+                .from('inventory_transactions')
+                .select('*')
+                .eq('id', id)
+                .single();
+            if (txnError || !txn) throw new Error('Transaction not found');
+
+            // 1. Subtract from main inventory
+            const { data: itemData } = await supabase.from('inventory_items').select('current_quantity').eq('id', txn.item_id).single();
+            if (itemData) {
+                await supabase.from('inventory_items').update({
+                    current_quantity: Number(itemData.current_quantity) - Number(txn.quantity)
+                }).eq('id', txn.item_id);
+            }
+
+            // 2. Subtract from warehouse inventory (if applicable)
+            const targetWarehouseId = txn.warehouse_id || '11111111-1111-1111-1111-111111111111';
+            const { data: whInv } = await supabase.from('warehouse_inventory').select('id, quantity').eq('warehouse_id', targetWarehouseId).eq('item_id', txn.item_id).maybeSingle();
+            
+            if (whInv) {
+                await supabase.from('warehouse_inventory').update({
+                    quantity: Number(whInv.quantity) - Number(txn.quantity)
+                }).eq('id', whInv.id);
+            }
+
+            // 3. Delete Journal Entry
+            if (txn.journal_id) {
+                await supabase.from('journal_headers').delete().eq('id', txn.journal_id);
+            }
+
+            // 4. Reset Transaction Status
+            await supabase.from('inventory_transactions').update({
+                status: 'pending',
+                journal_id: null
+            }).eq('id', id);
+        }
 
       // Clean up entitlement vouchers if any from expenses
       await supabase.from('expenses').delete().eq('expense_number', `PO-${transaction.transaction_number}`);
@@ -88,21 +158,21 @@ export function usePurchaseOrdersLogic() {
         return showGlobalToast('تم إنشاء سند استحقاق مسبقاً لهذا الأمر في المصروفات!', 'warning');
       }
 
-      const baseAmount = transaction.quantity * transaction.unit_price;
+      const subTotal = transaction.total_amount - (transaction.tax_amount || 0);
       const taxAmount = transaction.tax_amount || 0;
-      const desc = `استحقاق مشتريات لأمر الشراء #${transaction.transaction_number}`;
+      const desc = `فاتورة مشتريات مجمعة لأمر الشراء #${transaction.transaction_number}`;
 
       // Create Expense Record
       const expensePayload = {
         exp_date: new Date().toISOString().split('T')[0],
         description: desc,
-        creditor_account: '219 - فواتير قيد الاستلام', // (مدين)
+        creditor_account: '219 - فواتير قيد الاستلام', // (دائن)
         payment_method: 'آجل',
-        payment_account: '211 - موردين', // (دائن)
+        payment_account: '211 - الموردين', // (مدين)
         payee_id: transaction.partner_id || null,
         payee_name: transaction.partners?.name || null,
-        quantity: transaction.quantity || 1,
-        unit_price: transaction.unit_price || 0,
+        quantity: 1,
+        unit_price: subTotal,
         vat_amount: taxAmount,
         discount_amount: 0,
         notes: 'تم التوليد آلياً من أمر الشراء',

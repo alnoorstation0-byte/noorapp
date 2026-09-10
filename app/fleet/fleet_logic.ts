@@ -25,7 +25,7 @@ export function useFleetLogic() {
     }
   });
 
-  // 2. جلب المناديب والسائقين لاستخدامهم في القائمة المنسدلة
+  // 2. جلب الموظفين ليكونوا مندوبين/سائقين للسيارات
   const { data: drivers = [] } = useQuery({
     queryKey: ['drivers'],
     queryFn: async () => {

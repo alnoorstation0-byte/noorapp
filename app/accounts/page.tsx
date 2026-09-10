@@ -86,8 +86,8 @@ export default function HierarchicalLedgerPage() {
       )}
 
       <div style={{ display: 'flex', gap: '10px' }}>
-         <button className="btn-main-glass white" style={{flex: 1}} onClick={expandAll}>🔽 فتح الكل</button>
-         <button className="btn-main-glass white" style={{flex: 1}} onClick={collapseAll}>🔼 طي الكل</button>
+         <button type="button" className="btn-main-glass white" style={{flex: 1}} onClick={expandAll}>🔽 فتح الكل</button>
+         <button type="button" className="btn-main-glass white" style={{flex: 1}} onClick={collapseAll}>🔼 طي الكل</button>
       </div>
 
       {/* 📊 زر الإكسل الاحترافي */}

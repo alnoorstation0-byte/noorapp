@@ -40,9 +40,14 @@ export default function InventoryItemModal({ isOpen, onClose, currentRecord, set
               />
             </div>
             <div>
-              <label style={{ fontSize: '13px', fontWeight: 900, color: THEME.primary, marginBottom: '8px', display: 'block' }}>حد إعادة الطلب</label>
-              <input type="number" className="glass-input-field" placeholder="5" value={currentRecord.reorder_level || ''} onChange={e => setCurrentRecord({...currentRecord, reorder_level: Number(e.target.value)})} />
-            </div>
+              
+                <label style={{ fontSize: '13px', fontWeight: 900, color: THEME.primary, marginBottom: '8px', display: 'block' }}>سعر البيع المقترح</label>
+                <input type="number" className="glass-input-field" placeholder="0" value={currentRecord.suggested_price || ''} onChange={e => setCurrentRecord({...currentRecord, suggested_price: Number(e.target.value)})} />
+              </div>
+              <div>
+                <label style={{ fontSize: '13px', fontWeight: 900, color: THEME.primary, marginBottom: '8px', display: 'block' }}>حد إعادة الطلب</label>
+                <input type="number" className="glass-input-field" placeholder="5" value={currentRecord.reorder_level || ''} onChange={e => setCurrentRecord({...currentRecord, reorder_level: Number(e.target.value)})} />
+              </div>
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '15px' }}>

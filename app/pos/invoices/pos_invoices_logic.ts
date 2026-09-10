@@ -89,7 +89,7 @@ export function usePosInvoicesLogic() {
     const { data: fleetOperations = [] } = useQuery({
         queryKey: ['fleet_operations_open'],
         queryFn: async () => {
-            const { data, error } = await supabase.from('fleet_operations').select('id, operation_number, operation_date, status, vehicle_id, driver_id, vehicle:fleet_vehicles(plate_number), driver:partners(name)').eq('status', 'مفتوح');
+            const { data, error } = await supabase.from('fleet_operations').select('id, operation_number, operation_date, status, vehicle_id, driver_id, description, vehicle:fleet_vehicles(plate_number), driver:partners(name), description').eq('status', 'مفتوح');
             if (error) throw error;
             return data?.map((op:any) => ({
                 id: op.id,
@@ -97,7 +97,7 @@ export function usePosInvoicesLogic() {
                 status: op.status,
                 vehicle_id: op.vehicle_id,
                 driver_id: op.driver_id,
-                name: `رقم الرحلة: ${op.operation_number} | ${op.operation_date} | 🚚 ${op.vehicle?.plate_number || 'بدون سيارة'} | 👤 ${op.driver?.name || 'بدون مندوب'}`
+                name: ``
             })) || [];
         }
     });

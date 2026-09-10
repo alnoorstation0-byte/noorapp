@@ -85,12 +85,14 @@ export default function PurchaseOrderPrintModal({ isOpen, onClose, record }: any
                             </tr>
                         </thead>
                         <tbody>
-                            <tr>
-                                <td style={{ border: '1px solid #ccc', padding: '10px' }}>{record.inventory_items?.name || 'غير محدد'}</td>
-                                <td style={{ border: '1px solid #ccc', padding: '10px', textAlign: 'center' }}>{record.quantity}</td>
-                                <td style={{ border: '1px solid #ccc', padding: '10px', textAlign: 'center' }}>{formatCurrency(record.unit_price)}</td>
-                                <td style={{ border: '1px solid #ccc', padding: '10px', textAlign: 'center' }}>{formatCurrency(record.quantity * record.unit_price)}</td>
+                            {record.items?.map((item: any, idx: number) => (
+                            <tr key={idx}>
+                                <td style={{ border: '1px solid #ccc', padding: '10px' }}>{item.inventory_items?.name || 'غير محدد'}</td>
+                                <td style={{ border: '1px solid #ccc', padding: '10px', textAlign: 'center' }}>{item.quantity}</td>
+                                <td style={{ border: '1px solid #ccc', padding: '10px', textAlign: 'center' }}>{formatCurrency(item.unit_price)}</td>
+                                <td style={{ border: '1px solid #ccc', padding: '10px', textAlign: 'center' }}>{formatCurrency(item.quantity * item.unit_price)}</td>
                             </tr>
+                            ))}
                         </tbody>
                     </table>
 
@@ -99,15 +101,15 @@ export default function PurchaseOrderPrintModal({ isOpen, onClose, record }: any
                         <div style={{ width: '300px', border: '1px solid #ccc', borderRadius: '8px', padding: '15px' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
                                 <span>الإجمالي قبل الضريبة:</span>
-                                <span>{formatCurrency(record.quantity * record.unit_price)}</span>
+                                <span>{formatCurrency(record.items?.reduce((sum: number, item: any) => sum + (item.quantity * item.unit_price), 0) || 0)}</span>
                             </div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
-                                <span>ضريبة القيمة المضافة (15%):</span>
-                                <span>{formatCurrency(record.tax_amount || 0)}</span>
+                                <span>الضريبة (15%):</span>
+                                <span>{formatCurrency(record.items?.reduce((sum: number, item: any) => sum + (item.tax_amount || 0), 0) || 0)}</span>
                             </div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '2px solid #000', paddingTop: '10px', fontWeight: 'bold' }}>
                                 <span>الإجمالي المستحق:</span>
-                                <span>{formatCurrency((record.quantity * record.unit_price) + (record.tax_amount || 0))}</span>
+                                <span>{formatCurrency(record.total_amount)}</span>
                             </div>
                         </div>
                     </div>

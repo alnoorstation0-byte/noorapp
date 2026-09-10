@@ -67,7 +67,7 @@ export function useInventoryLogic() {
       if (pData) setPartners(pData);
 
       // Fetch active fleet operations
-      const { data: opData } = await supabase.from('fleet_operations').select('*, vehicle:fleet_vehicles(plate_number), driver:partners(name)').in('status', ['draft', 'pending', 'active']).order('created_at', { ascending: false });
+      const { data: opData } = await supabase.from('fleet_operations').select('*, vehicle:fleet_vehicles(plate_number), driver:partners(name), description').in('status', ['draft', 'pending', 'active']).order('created_at', { ascending: false });
       if (opData) setFleetOperations(opData);
 
     } catch (err) {

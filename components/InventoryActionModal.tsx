@@ -92,9 +92,9 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
   const { data: fleetOperations = [] } = useQuery({
     queryKey: ['fleet_operations_open_inv'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('fleet_operations').select('id, operation_number, operation_date, vehicle:fleet_vehicles(plate_number, vehicle_model), driver:partners(name)').eq('status', 'مفتوح');
+      const { data, error } = await supabase.from('fleet_operations').select('id, operation_number, operation_date, description, vehicle:fleet_vehicles(plate_number, vehicle_model), driver:partners(name), description').eq('status', 'مفتوح');
       if (error) throw error;
-      return data || [];
+      return data;
     }
   });
 
@@ -298,7 +298,7 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
                   <option value="">-- ربط برحلة توزيع (اختياري) --</option>
                   {fleetOperations?.map((op: any) => (
                       <option key={op.id} value={op.id}>
-                          {op.operation_number} | {op.operation_date} | سيارة: {op.vehicle?.plate_number} | المندوب: {op.driver?.name}
+                          {op.operation_number} | {op.operation_date} | سيارة: {op.vehicle?.plate_number} | المندوب: {op.driver?.name}{op.description ? ' | ' + op.description : ''}
                       </option>
                   ))}
               </select>

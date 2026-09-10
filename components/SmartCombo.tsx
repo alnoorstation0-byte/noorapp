@@ -301,7 +301,8 @@ export default function SmartCombo({
 
         return (
             <div key={`${isRecent ? 'recent' : 'res'}_${isPrimitive ? index : item.id}`} 
-                 onClick={(e) => handleItemSelect(item, e)} 
+                 onMouseDown={(e) => { e.preventDefault(); handleItemSelect(item, e); }} 
+                 onTouchStart={(e) => { handleItemSelect(item, e as any); }}
                  className={`smart-drop-item ${isSelected ? 'selected' : ''} ${isHighlighted ? 'highlighted' : ''}`}>
                 
                 {multi && <input type="checkbox" checked={isSelected} readOnly style={{ width: '18px', height: '18px', accentColor: THEME.success, cursor: 'pointer', flexShrink: 0 }} />}

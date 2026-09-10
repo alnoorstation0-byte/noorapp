@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
@@ -77,29 +77,29 @@ export default function InventoryTransactionsPage() {
     { key: 'status', label: 'الحالة', type: 'badge',
       render: (row: any) => (
         <span style={{ 
-          background: row.status === 'approved' ? '#dcfce7' : '#fef08a', 
-          color: row.status === 'approved' ? '#166534' : '#854d0e', 
+          background: ['approved', 'معتمد', 'مرحل'].includes(row.status) ? '#dcfce7' : '#fef08a', 
+          color: ['approved', 'معتمد', 'مرحل'].includes(row.status) ? '#166534' : '#854d0e', 
           padding: '4px 10px', borderRadius: '6px', fontSize: '11px', fontWeight: 900 
         }}>
-          {row.status === 'approved' ? '✅ معتمد' : '⏳ معلق'}
+          {['approved', 'معتمد', 'مرحل'].includes(row.status) ? '✅ معتمد' : '⏳ معلق'}
         </span>
       )
     },
     { key: 'actions', label: 'إجراءات', type: 'actions',
       render: (row: any) => (
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
-          {row.status === 'pending' && (
+          {['pending', 'مسودة', 'قيد الانتظار'].includes(row.status) && (
             <>
               <button 
                 onClick={() => logic.handleApproveTransaction(row)}
-                className="btn-main-glass blue"
-                style={{ width: 'auto', padding: '5px 12px', fontSize: '11px', margin: 0 }}
+                className="btn-main-glass"
+                style={{ width: 'auto', padding: '5px 12px', fontSize: '11px', margin: 0, background: '#16a34a', color: 'white' }}
               >
-                ✅ اعتماد
+                ☑ الاستلام والتوريد للمخزون
               </button>
               <button 
                 onClick={async () => {
-                  if(confirm('هل أنت متأكد من مسح هذه الحركة نهائياً؟')) {
+                  if(confirm('هل أنت متأكد من حذف هذه الحركة نهائياً؟')) {
                     await supabase.from('inventory_transactions').delete().eq('id', row.id);
                     logic.fetchTransactions();
                   }
@@ -107,79 +107,21 @@ export default function InventoryTransactionsPage() {
                 className="btn-main-glass red"
                 style={{ width: 'auto', padding: '5px 12px', fontSize: '11px', margin: 0 }}
               >
-                🗑️ مسح
+                🗑️ حذف
               </button>
             </>
           )}
-          {row.status === 'approved' && (
+          {['approved', 'معتمد', 'مرحل'].includes(row.status) && (
             <button 
               onClick={() => logic.handleUnapproveTransaction(row)}
-              className="btn-main-glass yellow"
-              style={{ width: 'auto', padding: '5px 12px', fontSize: '11px', margin: 0 }}
+              className="btn-main-glass"
+              style={{ background: '#eab308', color: 'white', width: 'auto', padding: '5px 12px', fontSize: '11px', margin: 0 }}
             >
-              🔄 فك الاعتماد
+              ↩ إلغاء الاستلام
             </button>
           )}
 
-          {row.status === 'approved' && ['in', 'transfer_in'].includes(row.type) && (
-             <button 
-                  disabled={expLogic.isEditModalOpen} 
-                  onClick={(e) => {
-                      e.stopPropagation(); 
-                      
-                      const preparedExpense = {
-                          exp_date: new Date().toISOString().split('T')[0],
-                          main_category: 'شراء بضاعة',
-                          payee_id: row.partner_id,
-                          payee_name: row.partner || row.driver_name || '',
-                          payment_account: row.partner_type === 'عميل' ? '113 - عملاء' : '211 - موردين',
-                          creditor_account: '219 - فواتير قيد الاستلام', // المدين
-                          description: `استحقاق شراء بضاعة (إذن استلام مستودع: ${row.transaction_number || ''})`,
-                          payment_method: 'آجل',
-                          quantity: 1,
-                          unit_price: 0,
-                          vat_amount: 0,
-                          discount_amount: 0,
-                          total_price: 0,
-                          lines_data: [{
-                              description: row.item_name || 'بضاعة',
-                              quantity: row.quantity || 1,
-                              unit_price: row.unit_price || 0,
-                              vat_amount: row.tax_amount || 0,
-                              total_price: (Number(row.quantity) || 0) * (Number(row.unit_price) || 0) + (Number(row.tax_amount) || 0)
-                          }]
-                      };
-
-                      expLogic.setCurrentExpense(preparedExpense);
-                      expLogic.setIsEditModalOpen(true);
-                  }} 
-                  className="btn-pay-action"
-                  style={{ 
-                      background: 'linear-gradient(135deg, #10b981 0%, #047857 100%)', 
-                      color: 'white', 
-                      border: 'none', 
-                      padding: '5px 12px', 
-                      borderRadius: '8px', 
-                      cursor: expLogic.isEditModalOpen ? 'not-allowed' : 'pointer', 
-                      fontWeight: 900, 
-                      fontSize: '11px', 
-                      margin: 0,
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      boxShadow: '0 4px 15px rgba(16, 185, 129, 0.3)',
-                      transition: 'all 0.2s ease',
-                      whiteSpace: 'nowrap',
-                      opacity: expLogic.isEditModalOpen ? 0.7 : 1 
-                  }}
-                  onMouseEnter={(e) => { if(!expLogic.isEditModalOpen) e.currentTarget.style.transform = 'translateY(-2px)'}}
-                  onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
-                  title="إنشاء فاتورة مشتريات (استحقاق) لهذه الحركة"
-              >
-                  <span style={{ fontSize: '12px' }}>🧾</span>
-                  استحقاق فاتورة
-              </button>
-          )}
+          
 
           <button 
             onClick={() => {

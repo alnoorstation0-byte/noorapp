@@ -285,7 +285,7 @@ export default function ReceiptVoucherModal({ isOpen, onClose, record, setRecord
                             >
                                 <option value="">-- ربط برحلة توزيع --</option>
                                   {fleetOperations?.map((op: any) => (
-                                      <option key={op.id} value={op.id}>{op.operation_number}</option>
+                                      <option key={op.id} value={op.id}>{op.name}</option>
                                   ))}
                             </select>
                         </div>

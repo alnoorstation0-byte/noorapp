@@ -1,24 +1,12 @@
-"use client";
 import { useState, useMemo, useDeferredValue, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/lib/toast-context';
-import { fetchPaginatedData } from '@/lib/supabase-pagination';
 import { useUniversalPosting } from '@/lib/accounting_engine'; 
 
 export function usePaymentVouchersLogic() {
     const queryClient = useQueryClient();
     const { showToast } = useToast();
-
-    const updateRowsInCache = (targetIds: any[], updatedFields: any) => {
-        queryClient.setQueryData(['payment_vouchers'], (oldData: any[]) => {
-            if (!oldData) return [];
-            const stringIds = targetIds.map(String);
-            return oldData.map(row => 
-                stringIds.includes(String(row.id)) ? { ...row, ...updatedFields } : row 
-            );
-        });
-    };
 
     const [globalSearch, setGlobalSearch] = useState('');
     const deferredSearch = useDeferredValue(globalSearch);
@@ -27,58 +15,18 @@ export function usePaymentVouchersLogic() {
     
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
-    const [rowsPerPage, setRowsPerPage] = useState(50);
+    const [rowsPerPage, setRowsPerPage] = useState(20);
+
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [currentVoucher, setCurrentVoucher] = useState<any>({});
-
     const [isBulkFixModalOpen, setIsBulkFixModalOpen] = useState(false);
-    const [bulkFixAccounts, setBulkFixAccounts] = useState({ credit_account_name: '', credit_account_id: null, debit_account_name: '', debit_account_id: null });
+    const [bulkFixAccounts, setBulkFixAccounts] = useState({ credit_account_id: '', debit_account_id: '' });
 
-    useEffect(() => {
-        const handleDateChange = (e: any) => {
-            setDateRange({ start: e.detail.start, end: e.detail.end });
-            setCurrentPage(1); 
-        };
-
-        const handleSearchChange = (e: any) => {
-            setGlobalSearch(e.detail || '');
-            setCurrentPage(1);
-        };
-        
-        window.addEventListener('globalDateFilter', handleDateChange as EventListener);
-        window.addEventListener('globalSearch', handleSearchChange as EventListener);
-
-        return () => {
-            window.removeEventListener('globalDateFilter', handleDateChange as EventListener);
-            window.removeEventListener('globalSearch', handleSearchChange as EventListener);
-        };
-    }, []);
-
-    const { data: vouchers = [], isLoading: isFetching } = useQuery({
-        queryKey: ['payment_vouchers'],
-        queryFn: async () => {
-            const buildQuery = () => supabase
-                .from('payment_vouchers')
-                .select(`
-                    *,
-                    payee:partners!partner_id(name),
-                    credit_account:accounts!credit_account_id(name),
-                    debit_account:accounts!debit_account_id(name)
-                `)
-                .order('date', { ascending: false })
-                .order('created_at', { ascending: false });
-
-            const allData = await fetchPaginatedData(buildQuery, 'id');
-            
-            return allData.map(v => ({ ...v, payee_id: v.partner_id }));
-        }
-    });
-
-    const { data: partnerBalance = 0, isLoading: isBalanceLoading } = useQuery({
+    const { data: partnerBalance, isLoading: isBalanceLoading } = useQuery({
         queryKey: ['partner_balance', currentVoucher.payee_id],
         queryFn: async () => {
             if (!currentVoucher.payee_id) return 0;
-            const { data, error } = await supabase.rpc('get_partner_balance', { p_id: currentVoucher.payee_id });
+            const { data, error } = await supabase.rpc('get_partner_balance', { p_partner_id: currentVoucher.payee_id });
             if (error) return 0;
             return data || 0;
         },
@@ -97,7 +45,7 @@ export function usePaymentVouchersLogic() {
     const { data: fleetOperations = [] } = useQuery({
         queryKey: ['fleet_operations_open'],
         queryFn: async () => {
-            const { data, error } = await supabase.from('fleet_operations').select('id, operation_number, operation_date, status, vehicle_id, vehicle:fleet_vehicles(plate_number), driver:partners(name)').eq('status', 'مفتوح');
+            const { data, error } = await supabase.from('fleet_operations').select('id, operation_number, operation_date, status, vehicle_id, description, vehicle:fleet_vehicles(plate_number), driver:partners(name)').eq('status', 'مفتوح');
             if (error) throw error;
             return data?.map((op:any) => ({
                 id: op.id,
@@ -106,6 +54,26 @@ export function usePaymentVouchersLogic() {
                 vehicle_id: op.vehicle_id,
                 name: `رقم الرحلة: ${op.operation_number} | ${op.operation_date} | 🚚 ${op.vehicle?.plate_number || 'بدون سيارة'} | 👤 ${op.driver?.name || 'بدون مندوب'}`
             })) || [];
+        }
+    });
+
+    const { data: vouchers = [], isLoading: isFetching } = useQuery({
+        queryKey: ['payment_vouchers'],
+        queryFn: async () => {
+            const { data, error } = await supabase
+                .from('payment_vouchers')
+                .select(`
+                    *,
+                    payee:partners!partner_id(name),
+                    credit_account:accounts!credit_account_id(name),
+                    debit_account:accounts!debit_account_id(name)
+                `)
+                .order('date', { ascending: false })
+                .order('created_at', { ascending: false })
+                .limit(2000);
+
+            if (error) throw new Error(error.message);
+            return data || [];
         }
     });
 
@@ -137,7 +105,6 @@ export function usePaymentVouchersLogic() {
 
     const totals = useMemo(() => {
         const totalAmount = displayedVouchers.reduce((sum, v) => sum + (parseFloat(v.amount) || 0), 0);
-        
         return { 
             totalAmount: parseFloat(totalAmount.toFixed(2)), 
             count: displayedVouchers.length,
@@ -152,70 +119,40 @@ export function usePaymentVouchersLogic() {
         'post_payment_vouchers_bulk'
     );
 
-    // 📝 8. عمليات الحفظ 
     const saveMutation = useMutation({
         mutationFn: async (voucherData: any) => {
-            if (voucherData.id) {
-                const { data: existing } = await supabase.from('payment_vouchers').select('is_posted, status').eq('id', voucherData.id).single();
-                if (existing && (existing.is_posted || existing.status === 'مرحل' || existing.status === 'معتمد')) {
-                    throw new Error("لا يمكن تعديل سند مرحل. يرجى فك الترحيل أولاً.");
-                }
-            }
-            // 🎯 تم إلغاء شروط التحقق من الحسابات (المدين والدائن) لتكون اختيارية
-            if (!voucherData.amount || Number(voucherData.amount) <= 0) {
-                throw new Error("⚠️ تنبيه: يرجى إدخال المبلغ المراد صرفه.");
-            }
-
-            let payload = { ...voucherData };
-            payload.partner_id = payload.partner_id || payload.payee_id;
-            payload.amount = parseFloat(Number(payload.amount).toFixed(2));
+            const payload = { ...voucherData };
             
-            // تنظيف الحقول المؤقتة
-            delete payload.payee_id; 
-            delete payload.payee_name; 
             delete payload.debit_account_name;
-            delete payload.credit_account_name; 
-            delete payload.payee; 
-            delete payload.credit_account; 
+            delete payload.credit_account_name;
+            delete payload.payee_name;
+            delete payload.partner;
+            delete payload.credit_account;
             delete payload.debit_account;
-            delete payload.manual_debit; 
-            delete payload.manual_credit;
-            delete payload.project_id; // 🔴 FORCE DELETE JUST IN CASE
+            delete payload.fleet_operations;
+            delete payload.payee;
 
-            console.log("SENDING PAYLOAD KEYS:", Object.keys(payload));
-
-            // Ensure fleet_operation_id is handled correctly
-            payload.fleet_operation_id = payload.fleet_operation_id || null;
-
-            if (!payload.voucher_number) {
-                const timePart = Date.now().toString().slice(-4);
-                const randomPart = Math.floor(Math.random() * 100).toString().padStart(2, '0');
-                payload.voucher_number = `PV-${timePart}${randomPart}`;
-            }
-            
-            if (!payload.id) {
-                payload.is_posted = false;
-                payload.status = 'مسودة';
+            if (payload.id) {
+                const { data: existing } = await supabase.from('payment_vouchers').select('is_posted, status').eq('id', payload.id).single();
+                if (existing && (existing.is_posted || existing.status === 'مرحل' || existing.status === 'معتمد')) {
+                    throw new Error("لا يمكن تعديل سند معتمد. قم بفك الاعتماد أولاً.");
+                }
             }
 
             if (payload.id) {
                 const { error } = await supabase.from('payment_vouchers').update(payload).eq('id', payload.id);
                 if (error) throw error;
             } else {
-                const { data: { session } } = await supabase.auth.getSession();
-                payload.created_by = session?.user?.id;
+                payload.voucher_number = `PV-${Date.now().toString().slice(-6)}`;
                 payload.is_posted = false;
                 payload.status = 'مسودة';
 
-                const { data: dbData, error } = await supabase.from('payment_vouchers').insert([payload]).select();
-                if (error) {
-                    console.error("Supabase Insert Error:", error, "Payload:", payload);
-                    throw new Error(`خطأ في الحفظ: ${error.message || JSON.stringify(error)}`);
-                }
+                const { error } = await supabase.from('payment_vouchers').insert([payload]);
+                if (error) throw new Error(error.message);
             }
         },
         onSuccess: () => {
-            showToast('تم حفظ السند وهو الآن (معلق) ⏳', 'success');
+            showToast('تم حفظ السند بنجاح 💾', 'success');
             setIsEditModalOpen(false);
             queryClient.invalidateQueries({ queryKey: ['payment_vouchers'] });
             queryClient.invalidateQueries({ queryKey: ['vouchers_server_totals'] }); 
@@ -226,7 +163,7 @@ export function usePaymentVouchersLogic() {
     const deleteMutation = useMutation({
         mutationFn: async () => {
             const postedVouchers = vouchers.filter(v => selectedIds.includes(v.id) && v.is_posted);
-            if (postedVouchers.length > 0) throw new Error('لا يمكن حذف سندات معتمدة. قم بفك الترحيل أولاً.');
+            if (postedVouchers.length > 0) throw new Error('لا يمكن حذف سندات معتمدة. قم بفك الاعتماد أولاً.');
 
             const CHUNK_SIZE = 20;
             for (let i = 0; i < selectedIds.length; i += CHUNK_SIZE) {
@@ -251,15 +188,6 @@ export function usePaymentVouchersLogic() {
         if (bulkFixAccounts.credit_account_id) updatePayload.credit_account_id = bulkFixAccounts.credit_account_id;
         if (bulkFixAccounts.debit_account_id) updatePayload.debit_account_id = bulkFixAccounts.debit_account_id;
 
-        const cacheUpdateFields: any = { ...updatePayload };
-        if (bulkFixAccounts.credit_account_id) cacheUpdateFields.credit_account = { name: bulkFixAccounts.credit_account_name };
-        if (bulkFixAccounts.debit_account_id) cacheUpdateFields.debit_account = { name: bulkFixAccounts.debit_account_name };
-
-        showToast(`⏳ جاري تصحيح وتوجيه ${selectedIds.length} سند...`, 'warning');
-        
-        const previousData = queryClient.getQueryData(['payment_vouchers']);
-        updateRowsInCache(selectedIds, cacheUpdateFields);
-
         try {
             const CHUNK_SIZE = 20;
             for (let i = 0; i < selectedIds.length; i += CHUNK_SIZE) {
@@ -268,12 +196,11 @@ export function usePaymentVouchersLogic() {
                 if (error) throw new Error(error.message);
             }
             setIsBulkFixModalOpen(false); 
-            setBulkFixAccounts({ credit_account_name: '', credit_account_id: null, debit_account_name: '', debit_account_id: null });
-            setSelectedIds([]); 
-            showToast(`✅ تم تصحيح الحسابات بنجاح!`, 'success');
-        } catch (error: any) {
-            queryClient.setQueryData(['payment_vouchers'], previousData); 
-            showToast("خطأ أثناء التحديث: " + error.message, 'error');
+            setSelectedIds([]);
+            queryClient.invalidateQueries({ queryKey: ['payment_vouchers'] });
+            showToast('تم تصحيح الحسابات المحددة بنجاح', 'success');
+        } catch(err: any) {
+            showToast(err.message, 'error');
         }
     };
 
@@ -293,15 +220,13 @@ export function usePaymentVouchersLogic() {
                 setCurrentVoucher({ 
                     date: new Date().toISOString().split('T')[0], 
                     payment_method: 'نقدي', 
-                    amount: '', // 🎯 اعتماد مبلغ واحد فقط
+                    amount: '', 
                     debit_account_id: null, debit_account_name: '', credit_account_id: null, credit_account_name: '',
                     payee_id: '', payee_name: '', is_posted: false, status: 'مسودة', fleet_operation_id: null
                 });
                 setIsEditModalOpen(true);
             },
             handleEditSelected: () => {
-                if (selectedIds.length !== 1) return showToast("برجاء تحديد سند واحد فقط للتعديل", "error");
-                
                 const selected = vouchers.find(v => v.id === selectedIds[0]);
                 if (selected) {
                     const voucherForEdit = {

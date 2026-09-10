@@ -1,18 +1,12 @@
-const fs = require('fs');
+require('dotenv').config({ path: '.env.local' });
+const { Pool } = require('pg');
 
-async function run() {
-    const sql = "SELECT pg_get_functiondef(oid) FROM pg_proc WHERE proname = 'post_expenses_bulk';";
-    const res = await fetch('http://localhost:3000/api/run-sql', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ sql })
-    });
-    
-    if (res.ok) {
-        const text = await res.text();
-        console.log(text);
-    } else {
-        console.error("Error:", res.status, await res.text());
-    }
+const pool = new Pool({
+  connectionString: process.env.NEXT_PUBLIC_SUPABASE_URL.replace('https://', 'postgresql://postgres:' + process.env.DB_PASSWORD + '@db.') + ':5432/postgres'
+});
+
+async function main() {
+    // Actually we can't easily get DB password from .env.local because Supabase doesn't put DB_PASSWORD there by default.
+    console.log(process.env);
 }
-run();
+main();

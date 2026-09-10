@@ -7,10 +7,11 @@ import RawasiSidebarManager from '@/components/RawasiSidebarManager';
 import RawasiSmartTable from '@/components/rawasismarttable';
 import LoadingScreen from '@/components/LoadingScreen';
 import { useConfirm } from '@/components/ConfirmContext';
-import InventoryActionModal from '@/components/InventoryActionModal';
+import PurchaseOrderModal from './PurchaseOrderModal';
 import { usePurchaseOrdersLogic } from './purchase_orders_logic';
 import { supabase } from '@/lib/supabase';
 import { THEME } from '@/lib/theme';
+import { showGlobalToast } from '@/lib/toast-context';
 import { useQuery } from '@tanstack/react-query';
 
 import PurchaseOrderPrintModal from './PurchaseOrderPrintModal';
@@ -41,37 +42,40 @@ export default function PurchaseOrdersPage() {
     { key: 'partner', header: 'المورد',
       render: (row: any) => <span style={{ fontWeight: 900, color: '#334155' }}>{row.partners?.name || '-'}</span>
     },
-    { key: 'item', header: 'الصنف المشتري',
+    { key: 'item', header: 'الأصناف المشتراة',
       render: (row: any) => (
         <div>
-          <div style={{ fontWeight: 'bold', color: '#122946' }}>{row.inventory_items?.name}</div>
-          <div style={{ fontSize: '11px', color: '#64748b' }}>{row.quantity} {row.inventory_items?.unit || 'حبة'}</div>
+           {row.items?.map((item: any, i: number) => (
+               <div key={i} style={{ marginBottom: '4px' }}>
+                  <span style={{ fontWeight: 'bold', color: '#122946' }}>{item.inventory_items?.name}</span>
+                  <span style={{ fontSize: '11px', color: '#64748b', marginRight: '5px' }}>({item.quantity} {item.inventory_items?.unit || 'حبة'})</span>
+               </div>
+           ))}
         </div>
       )
     },
     { key: 'amount', header: 'الإجمالي',
       render: (row: any) => {
-        const total = (row.quantity * row.unit_price) + (row.tax_amount || 0);
-        return <span style={{ fontWeight: 900, color: '#16a34a' }}>{formatCurrency(total)}</span>;
+        return <span style={{ fontWeight: 900, color: '#16a34a' }}>{formatCurrency(row.total_amount)}</span>;
       }
     },
     { key: 'status', header: 'الحالة',
       render: (row: any) => (
         <span style={{ 
-            background: row.status === 'approved' ? '#dcfce7' : '#fef9c3', 
-            color: row.status === 'approved' ? '#166534' : '#854d0e',
+            background: (['approved', 'معتمد', 'مرحل'].includes(row.status)) ? '#dcfce7' : '#fef9c3', 
+            color: (['approved', 'معتمد', 'مرحل'].includes(row.status)) ? '#166534' : '#854d0e',
             padding: '4px 10px', borderRadius: '12px', fontSize: '11px', fontWeight: 'bold' 
         }}>
-            {row.status === 'approved' ? 'مستلم 📥' : 'معتمد (قيد الانتظار) ⏳'}
+            {(['approved', 'معتمد', 'مرحل'].includes(row.status)) ? 'مستلم ✅' : 'قيد الانتظار ⏳'}
         </span>
       )
     },
     { key: 'actions', header: 'الإجراءات',
       render: (row: any) => (
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', alignItems: 'center' }}>
-          {row.status === 'pending' && (
+          {(['pending', 'مسودة', 'قيد الانتظار'].includes(row.status)) && (
             <>
-              <SecureAction module="purchase_orders" action="view">
+              <SecureAction module="inventory" action="view">
                 <button 
                   onClick={() => logic.setPrintingTransaction(row)}
                   className="btn-main-glass"
@@ -80,16 +84,16 @@ export default function PurchaseOrdersPage() {
                   🖨️ طباعة
                 </button>
               </SecureAction>
-              <SecureAction module="purchase_orders" action="post">
+              <SecureAction module="inventory" action="post">
                 <button 
                   onClick={() => logic.handleApproveTransaction(row)}
                   className="btn-main-glass"
                   style={{ width: 'auto', padding: '5px 12px', fontSize: '11px', margin: 0, background: '#16a34a', color: 'white' }}
                 >
-                  📥 استلام بالأنظمة
+                  ☑ الاستلام والتوريد للمخزون
                 </button>
               </SecureAction>
-              <SecureAction module="purchase_orders" action="edit">
+              <SecureAction module="inventory" action="edit">
                 <button 
                   onClick={() => {
                     logic.setEditingTransaction(row);
@@ -101,15 +105,15 @@ export default function PurchaseOrdersPage() {
                   ✏️ تعديل
                 </button>
               </SecureAction>
-              <SecureAction module="purchase_orders" action="delete">
+              <SecureAction module="inventory" action="delete">
                 <button 
                   onClick={() => {
                     showConfirm({
                       title: 'تأكيد الحذف',
-                      message: 'هل أنت متأكد من حذف مسودة أمر الشراء؟',
+                      message: 'هل أنت متأكد من حذف هذا الأمر؟ (سيتم الحذف نهائياً)',
                       type: 'danger',
                       onConfirm: async () => {
-                        await supabase.from('inventory_transactions').delete().eq('id', row.id);
+                        await supabase.from('inventory_transactions').delete().in('id', row.ids);
                         logic.fetchTransactions();
                       }
                     });
@@ -122,9 +126,9 @@ export default function PurchaseOrdersPage() {
               </SecureAction>
             </>
           )}
-          {row.status === 'approved' && (
+          {(['approved', 'معتمد', 'مرحل'].includes(row.status)) && (
             <>
-              <SecureAction module="purchase_orders" action="view">
+              <SecureAction module="inventory" action="view">
                 <button 
                   onClick={() => logic.setPrintingTransaction(row)}
                   className="btn-main-glass"
@@ -133,23 +137,42 @@ export default function PurchaseOrdersPage() {
                   🖨️ طباعة
                 </button>
               </SecureAction>
-              <SecureAction module="purchase_orders" action="post">
+              <SecureAction module="inventory" action="post">
                 <button 
                   onClick={() => logic.handleCreateEntitlement(row)}
                   className="btn-main-glass"
                   style={{ background: '#3b82f6', color: 'white', width: 'auto', padding: '5px 12px', fontSize: '11px', margin: 0 }}
-                  title="نقل المديونية من فواتير قيد الاستلام إلى حساب المورد"
+                  title="ينقلك لإنشاء فاتورة من مورد لتسجيل استحقاق مالي لهذا الأمر المورد"
                 >
-                  🧾 سند استحقاق الصرف
+                  🧾 إنشاء استحقاق مصروف
                 </button>
               </SecureAction>
-              <SecureAction module="purchase_orders" action="post">
+              <SecureAction module="inventory" action="post">
                 <button 
                   onClick={() => logic.handleUnapproveTransaction(row)}
                   className="btn-main-glass"
                   style={{ background: '#eab308', color: 'white', width: 'auto', padding: '5px 12px', fontSize: '11px', margin: 0 }}
                 >
-                  ↩️ فك الاستلام
+                  ↩ إلغاء الاستلام
+                </button>
+              </SecureAction>
+              <SecureAction module="inventory" action="edit">
+                <button 
+                  onClick={() => showGlobalToast('يجب فك الاعتماد أولاً لتتمكن من التعديل', 'warning')}
+                  className="btn-main-glass"
+                  style={{ background: '#94a3b8', color: 'white', width: 'auto', padding: '5px 12px', fontSize: '11px', margin: 0 }}
+                  title="لا يمكن تعديل أمر شراء معتمد، قم بفك الاعتماد أولاً"
+                >
+                  ✏️ تعديل
+                </button>
+              </SecureAction>
+              <SecureAction module="inventory" action="create">
+                <button 
+                  onClick={() => window.location.href = '/PaymentVouchers'}
+                  className="btn-main-glass"
+                  style={{ background: '#8b5cf6', color: 'white', width: 'auto', padding: '5px 12px', fontSize: '11px', margin: 0 }}
+                >
+                  💸 سند صرف
                 </button>
               </SecureAction>
             </>
@@ -161,7 +184,7 @@ export default function PurchaseOrdersPage() {
 
   const sidebarActions = (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-      <SecureAction module="purchase_orders" action="create">
+      <SecureAction module="inventory" action="create">
         <button 
           onClick={() => logic.setIsActionModalOpen(true)}
           className="btn-main-glass gold"
@@ -194,13 +217,12 @@ export default function PurchaseOrdersPage() {
         </div>
       )}
 
-      <InventoryActionModal 
+      <PurchaseOrderModal 
         isOpen={logic.isActionModalOpen}
         onClose={() => {
           logic.setIsActionModalOpen(false);
           logic.setEditingTransaction(null);
         }}
-        actionType="in"
         items={inventoryItems}
         initialData={logic.editingTransaction}
         onSuccess={() => logic.fetchTransactions()}

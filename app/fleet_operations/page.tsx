@@ -19,6 +19,7 @@ export default function FleetOperationsPage() {
         { header: 'التاريخ', accessor: 'operation_date' },
         { header: 'السيارة', accessor: 'vehicle.plate_number', render: (row: any) => <span style={{fontWeight: 800, color: '#334155'}}>{row.vehicle?.plate_number}</span> },
         { header: 'المندوب', accessor: 'driver.name', render: (row: any) => <span>{row.driver?.name}</span> },
+        { header: 'وصف الرحلة', accessor: 'description' },
         { header: 'المبيعات 💰', accessor: 'total_sales', render: (row: any) => <span style={{color: '#059669', fontWeight: 900}}>{formatCurrency(row.total_sales)}</span> },
         { header: 'تكلفة البضاعة 📦', accessor: 'total_cost', render: (row: any) => <span style={{color: '#d97706', fontWeight: 900}}>{formatCurrency(row.total_cost)}</span> },
         { header: 'المصروفات 📉', accessor: 'total_expenses', render: (row: any) => <span style={{color: '#dc2626', fontWeight: 900}}>{formatCurrency(row.total_expenses)}</span> },
@@ -34,8 +35,13 @@ export default function FleetOperationsPage() {
         )},
         { header: 'إجراءات', accessor: 'actions', render: (row: any) => (
             <div style={{display:'flex', gap:'10px'}}>
+                <SecureAction module="fleet_operations" action="view">
+                    <button className="btn-main-glass" style={{ width: 'auto', margin: 0, padding: '5px 12px', fontSize: '11px', background: '#3b82f6', color: 'white' }} onClick={() => { window.location.href = `/fleet_operations/${row.id}`; }}>
+                        التفاصيل
+                    </button>
+                </SecureAction>
                 <SecureAction module="fleet_operations" action="edit">
-                    <button className="btn-main-glass blue" style={{ width: 'auto', margin: 0, padding: '5px 12px', fontSize: '11px' }} onClick={() => { setEditData(row); setModalOpen(true); }}>
+                    <button className="btn-main-glass gold" style={{ width: 'auto', margin: 0, padding: '5px 12px', fontSize: '11px' }} onClick={() => { setEditData(row); setModalOpen(true); }}>
                         تعديل
                     </button>
                 </SecureAction>

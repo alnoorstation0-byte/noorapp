@@ -66,28 +66,52 @@ export function usePosLogic() {
         return inventoryItems.filter((i: any) => i.name?.toLowerCase().includes(searchQuery.toLowerCase()));
     }, [inventoryItems, searchQuery]);
 
-    const addToCart = (item: any) => {
+    const [selectedItemForCart, setSelectedItemForCart] = useState<any>(null);
+
+    const addToCart = (item: any, qty: number = 1, price?: number) => {
         setCart(prev => {
             const existing = prev.find(i => i.id === item.id);
+            const unitPrice = price !== undefined ? price : (existing ? existing.unit_price : (item.suggested_price || 0));
+            
             if (existing) {
-                if (existing.qty + 1 > item.available_qty) {
-                    showToast(`الكمية المتاحة لا تكفي! المتاح: ${item.available_qty}`, 'warning');
+                if (existing.qty + qty > item.available_qty) {
+                    setTimeout(() => showToast(`الكمية المتاحة غير كافية! المتاح: ${item.available_qty}`, 'warning'), 0);
                     return prev;
                 }
-                return prev.map(i => i.id === item.id ? { ...i, qty: i.qty + 1 } : i);
+                return prev.map(i => i.id === item.id ? { ...i, qty: i.qty + qty, unit_price: unitPrice } : i);
             }
-            return [...prev, { ...item, qty: 1, discount: 0 }];
+            if (qty > item.available_qty) {
+                setTimeout(() => showToast(`الكمية المتاحة غير كافية! المتاح: ${item.available_qty}`, 'warning'), 0);
+                return prev;
+            }
+            return [...prev, { ...item, qty, unit_price: unitPrice }];
         });
     };
+
+    const handleItemClick = (item: any) => {
+        setSelectedItemForCart({ ...item, selected_qty: 1, selected_price: item.suggested_price || 0 });
+    };
+
+    const confirmAddToCart = () => {
+        if (selectedItemForCart) {
+            addToCart(selectedItemForCart, selectedItemForCart.selected_qty, selectedItemForCart.selected_price);
+            setSelectedItemForCart(null);
+        }
+    };
+
 
     const handleBarcodeScan = (barcode: string) => {
         const item = inventoryItems.find((i: any) => String(i.code) === barcode || String(i.id) === barcode);
         if (item) {
-            addToCart(item);
+            addToCart(item, 1, item.suggested_price || 0);
             showToast(`تمت إضافة ${item.name}`, 'success');
         } else {
             showToast(`الصنف غير موجود أو نفدت كميته: ${barcode}`, 'error');
         }
+    };
+
+    const updateCartItemPrice = (id: string, price: number) => {
+        setCart(prev => prev.map(i => i.id === id ? { ...i, unit_price: price } : i));
     };
 
     const updateCartItemQty = (id: string, qty: number) => {
@@ -107,14 +131,26 @@ export function usePosLogic() {
         setCart(prev => prev.filter(i => i.id !== id));
     };
 
+    const [isTaxInclusive, setIsTaxInclusive] = useState<boolean>(true);
+    const [lastInvoice, setLastInvoice] = useState<any>(null);
+    const [isPrintModalOpen, setIsPrintModalOpen] = useState<boolean>(false);
+
     const cartTotal = useMemo(() => {
-        let subtotal = 0;
+        let sum = 0;
         cart.forEach(item => {
-            subtotal += (item.price * item.qty) - (item.discount || 0);
+            sum += ((item.unit_price || item.price || 0) * item.qty) - (item.discount || 0);
         });
-        const tax = subtotal * 0.15; // Assuming 15% VAT for simplicity in POS
-        return { subtotal, tax, total: subtotal + tax };
-    }, [cart]);
+        
+        if (isTaxInclusive) {
+            const subtotal = sum / 1.15;
+            const tax = sum - subtotal;
+            return { subtotal, tax, total: sum };
+        } else {
+            const subtotal = sum;
+            const tax = subtotal * 0.15;
+            return { subtotal, tax, total: subtotal + tax };
+        }
+    }, [cart, isTaxInclusive]);
 
     const checkoutMutation = useMutation({
         mutationFn: async () => {
@@ -142,13 +178,13 @@ export function usePosLogic() {
                     item_id: item.id,
                     name: item.name,
                     quantity: item.qty,
-                    unit_price: item.price,
+                    unit_price: item.unit_price || item.price || 0,
                     discount: item.discount || 0,
-                    total: (item.qty * item.price) - (item.discount || 0)
+                    total: (item.qty * (item.unit_price || item.price || 0)) - (item.discount || 0)
                 }))
             };
 
-            const { data: insertedInv, error: invErr } = await supabase.from('invoices').insert([invoiceHeader]).select().single();
+            const { data: insertedInv, error: invErr } = await supabase.from('invoices').insert([invoiceHeader]).select('*, partners:partners!invoices_partner_id_fkey(*)').single();
             if (invErr) throw invErr;
 
             // 2. Auto-Post (deduct inventory & create journal entries)
@@ -157,24 +193,18 @@ export function usePosLogic() {
 
             // 3. Create Receipt Voucher if paid
             if (paymentMethod !== 'آجل') {
-                const receiptData = {
-                    receipt_number: `RV-POS-${Date.now().toString().slice(-6)}`,
-                    date: new Date().toISOString().split('T')[0],
-                    amount: cartTotal.total,
-                    payment_method: paymentMethod,
-                    notes: `سداد فاتورة نقاط البيع #${autoNumber}`,
-                    invoice_id: insertedInv.id,
-                    partner_id: partnerId || null,
-                    safe_bank_acc_id: '21b8a1db-bc9f-4cf8-b741-1efeded0963c', // main safe
-                    partner_acc_id: '4f828d0d-a1f4-4762-83e3-c17dafae802d'
-                };
-                const { error: rectErr } = await supabase.from('receipt_vouchers').insert([receiptData]);
+                const { error: rectErr } = await supabase.rpc('auto_create_pos_receipt', { p_invoice_id: insertedInv.id });
                 if (rectErr) throw rectErr;
             }
+            return insertedInv;
         },
-        onSuccess: () => {
+        onSuccess: (data) => {
+            setLastInvoice(data);
+            setIsPrintModalOpen(true);
             showToast("تمت عملية البيع بنجاح! ✅", "success");
             setCart([]);
+            // Set last invoice for printing
+            // Need to pass the actual returned data from the mutation fn to onSuccess, but for now we'll fetch it or we can just return it from mutationFn.
             queryClient.invalidateQueries({ queryKey: ['pos_inventory'] });
             queryClient.invalidateQueries({ queryKey: ['invoices'] });
         },
@@ -184,9 +214,11 @@ export function usePosLogic() {
     });
 
     return {
+        selectedItemForCart, setSelectedItemForCart, confirmAddToCart, handleItemClick,
         warehouses, selectedWarehouseId, setSelectedWarehouseId,
         inventoryItems: filteredItems, searchQuery, setSearchQuery,
-        cart, addToCart, updateCartItemQty, removeFromCart, cartTotal, handleBarcodeScan,
+        cart, addToCart, lastInvoice, setLastInvoice, isPrintModalOpen, setIsPrintModalOpen, updateCartItemQty, updateCartItemPrice, removeFromCart, cartTotal, handleBarcodeScan,
+        isTaxInclusive, setIsTaxInclusive,
         paymentMethod, setPaymentMethod,
         customers, partnerId, setPartnerId,
         handleCheckout: () => checkoutMutation.mutate(),
