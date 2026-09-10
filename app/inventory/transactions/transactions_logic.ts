@@ -1,6 +1,7 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { showGlobalToast } from '@/lib/toast-context';
+import { useRealtimeListener } from '@/lib/useRealtimeSync';
 
 export function useInventoryTransactionsLogic() {
   const [rawRecords, setRawRecords] = useState<any[]>([]);
@@ -144,6 +145,9 @@ export function useInventoryTransactionsLogic() {
   useEffect(() => {
     fetchTransactions();
   }, [filterType, dateFrom, dateTo]);
+
+  // 🔄 مزامنة فورية - تحديث تلقائي عند أي تغيير في قاعدة البيانات
+  useRealtimeListener('inventory_transactions', () => fetchTransactions());
 
   const data = useMemo(() => {
     if (!globalSearch) return rawRecords;

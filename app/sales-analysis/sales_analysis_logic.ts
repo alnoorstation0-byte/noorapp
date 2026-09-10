@@ -19,6 +19,7 @@ export function useSalesAnalysisLogic() {
                     total_amount, 
                     taxable_amount, 
                     tax_amount, 
+                    paid_amount,
                     lines_data, 
                     client_name,
                     partner_id,
@@ -26,18 +27,28 @@ export function useSalesAnalysisLogic() {
                     partner:partners!invoices_partner_id_fkey(name),
                     delegate:partners!invoices_delegate_id_fkey(name)
                 `)
-                .neq('status', 'مسودة');
+                // ✅ فقط الفواتير المعتمدة/المرحلة - لا تشمل المعلقة أو الملغاة
+                .in('status', ['مرحل', 'معتمد', 'مغلق', 'مدفوع']);
 
             if (dateFrom) q = q.gte('date', dateFrom);
             if (dateTo) q = q.lte('date', dateTo);
 
             const { data, error } = await q;
             if (error) throw error;
-            return data || [];
+
+            // ✅ جلب تكلفة الأصناف من inventory_items لحساب هامش الربح
+            const { data: itemsCost } = await supabase
+                .from('inventory_items')
+                .select('id, name, cost_price');
+            const costMap: Record<string, number> = {};
+            itemsCost?.forEach(i => { costMap[i.id] = Number(i.cost_price || 0); });
+
+            return { invoices: data || [], costMap };
         }
     });
 
-    const rawInvoices = invoicesQuery.data || [];
+    const rawInvoices = invoicesQuery.data?.invoices || [];
+    const costMap = invoicesQuery.data?.costMap || {};
 
     const {
         topClients,
@@ -45,38 +56,40 @@ export function useSalesAnalysisLogic() {
         topItems,
         totalRevenue,
         totalInvoices,
-        averageInvoiceValue
+        averageInvoiceValue,
+        totalCOGS,
+        grossProfit,
+        grossMargin,
+        totalOutstanding
     } = useMemo(() => {
         let totalRevenue = 0;
+        let totalCOGS = 0;
+        let totalOutstanding = 0;
         const clientsMap = new Map<string, { name: string, total: number, count: number }>();
         const delegatesMap = new Map<string, { name: string, total: number, count: number }>();
-        const itemsMap = new Map<string, { name: string, qty: number, revenue: number }>();
+        const itemsMap = new Map<string, { name: string, qty: number, revenue: number, cogs: number, profit: number }>();
 
-        rawInvoices.forEach(inv => {
+        rawInvoices.forEach((inv: any) => {
             const amount = Number(inv.total_amount || 0);
+            const paid = Number(inv.paid_amount || 0);
             totalRevenue += amount;
+            totalOutstanding += Math.max(0, amount - paid);
 
             // Clients
-            const clientName = inv.partner?.name || inv.client_name || 'عميل نقدي / غير محدد';
-            if (!clientsMap.has(clientName)) {
-                clientsMap.set(clientName, { name: clientName, total: 0, count: 0 });
-            }
+            const clientName = (inv.partner as any)?.name || inv.client_name || 'عميل نقدي';
+            if (!clientsMap.has(clientName)) clientsMap.set(clientName, { name: clientName, total: 0, count: 0 });
             const c = clientsMap.get(clientName)!;
-            c.total += amount;
-            c.count += 1;
+            c.total += amount; c.count += 1;
 
             // Delegates
-            const delegateName = inv.delegate?.name || 'غير محدد';
-            if (!delegatesMap.has(delegateName)) {
-                delegatesMap.set(delegateName, { name: delegateName, total: 0, count: 0 });
-            }
+            const delegateName = (inv.delegate as any)?.name || 'بدون مندوب';
+            if (!delegatesMap.has(delegateName)) delegatesMap.set(delegateName, { name: delegateName, total: 0, count: 0 });
             const d = delegatesMap.get(delegateName)!;
-            d.total += amount;
-            d.count += 1;
+            d.total += amount; d.count += 1;
 
-            // Items
+            // Items + COGS
             if (inv.lines_data) {
-                let lines = [];
+                let lines: any[] = [];
                 if (typeof inv.lines_data === 'string') {
                     try { lines = JSON.parse(inv.lines_data); } catch(e){}
                 } else if (Array.isArray(inv.lines_data)) {
@@ -85,58 +98,76 @@ export function useSalesAnalysisLogic() {
 
                 lines.forEach((line: any) => {
                     const itemName = line.item_name || line.name || 'صنف غير معروف';
+                    const itemId = line.item_id || '';
                     const qty = Number(line.quantity || 0);
                     const unitPrice = Number(line.unit_price || line.price || 0);
-                    const lineTotal = qty * unitPrice;
+                    const lineRevenue = qty * unitPrice;
+                    // ✅ حساب التكلفة (COGS) من cost_price
+                    const lineCOGS = qty * (costMap[itemId] || 0);
+                    const lineProfit = lineRevenue - lineCOGS;
+
+                    totalCOGS += lineCOGS;
 
                     if (!itemsMap.has(itemName)) {
-                        itemsMap.set(itemName, { name: itemName, qty: 0, revenue: 0 });
+                        itemsMap.set(itemName, { name: itemName, qty: 0, revenue: 0, cogs: 0, profit: 0 });
                     }
                     const i = itemsMap.get(itemName)!;
                     i.qty += qty;
-                    i.revenue += lineTotal;
+                    i.revenue += lineRevenue;
+                    i.cogs += lineCOGS;
+                    i.profit += lineProfit;
                 });
             }
         });
 
+        const grossProfit = totalRevenue - totalCOGS;
+        const grossMargin = totalRevenue > 0 ? (grossProfit / totalRevenue) * 100 : 0;
+
         const topClients = Array.from(clientsMap.values()).sort((a, b) => b.total - a.total).slice(0, 10);
         const topDelegates = Array.from(delegatesMap.values()).sort((a, b) => b.total - a.total).slice(0, 10);
-        const topItems = Array.from(itemsMap.values()).sort((a, b) => b.qty - a.qty).slice(0, 10); // Sort by quantity for items
-
+        const topItems = Array.from(itemsMap.values()).sort((a, b) => b.revenue - a.revenue).slice(0, 15);
         const averageInvoiceValue = rawInvoices.length > 0 ? totalRevenue / rawInvoices.length : 0;
 
         return {
-            topClients,
-            topDelegates,
-            topItems,
-            totalRevenue,
-            totalInvoices: rawInvoices.length,
-            averageInvoiceValue
+            topClients, topDelegates, topItems,
+            totalRevenue, totalInvoices: rawInvoices.length,
+            averageInvoiceValue, totalCOGS, grossProfit, grossMargin, totalOutstanding
         };
-    }, [rawInvoices]);
+    }, [rawInvoices, costMap]);
 
 
     const exportToExcel = () => {
         const wb = XLSX.utils.book_new();
 
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(topClients.map(c => ({ 'اسم العميل': c.name, 'عدد الفواتير': c.count, 'إجمالي المبيعات': c.total }))), "أفضل العملاء");
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(topDelegates.map(d => ({ 'المندوب': d.name, 'عدد الفواتير': d.count, 'إجمالي المبيعات': d.total }))), "أفضل المناديب");
-        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(topItems.map(i => ({ 'الصنف': i.name, 'الكمية المباعة': i.qty, 'إجمالي الإيراد': i.revenue }))), "أفضل الأصناف");
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(
+            topClients.map(c => ({ 'اسم العميل': c.name, 'عدد الفواتير': c.count, 'إجمالي المبيعات': c.total.toFixed(2) }))
+        ), "أفضل العملاء");
 
-        XLSX.writeFile(wb, `Sales_Analysis_${new Date().toISOString().split('T')[0]}.xlsx`);
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(
+            topDelegates.map(d => ({ 'المندوب': d.name, 'عدد الفواتير': d.count, 'إجمالي المبيعات': d.total.toFixed(2) }))
+        ), "أفضل المناديب");
+
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(
+            topItems.map((i: any) => ({
+                'الصنف': i.name,
+                'الكمية المباعة': i.qty,
+                'إجمالي الإيراد': i.revenue.toFixed(2),
+                'تكلفة البضاعة (COGS)': i.cogs.toFixed(2),
+                'إجمالي الربح': i.profit.toFixed(2),
+                'هامش الربح %': i.revenue > 0 ? ((i.profit / i.revenue) * 100).toFixed(1) + '%' : '0%'
+            }))
+        ), "ربحية الأصناف");
+
+        XLSX.writeFile(wb, `Sales_Profitability_${new Date().toISOString().split('T')[0]}.xlsx`);
     };
 
     return {
-        dateFrom,
-        setDateFrom,
-        dateTo,
-        setDateTo,
-        topClients,
-        topDelegates,
-        topItems,
-        totalRevenue,
-        totalInvoices,
-        averageInvoiceValue,
+        dateFrom, setDateFrom,
+        dateTo, setDateTo,
+        topClients, topDelegates, topItems,
+        totalRevenue, totalInvoices, averageInvoiceValue,
+        // ✅ قيم الربحية الجديدة
+        totalCOGS, grossProfit, grossMargin, totalOutstanding,
         isLoading: invoicesQuery.isLoading,
         exportToExcel
     };

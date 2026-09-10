@@ -3,10 +3,16 @@ import { supabase } from '@/lib/supabase';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/lib/toast-context';
 import { useUniversalPosting } from '@/lib/accounting_engine'; 
+import { useRealtimeListener } from '@/lib/useRealtimeSync';
 
 export function usePaymentVouchersLogic() {
     const queryClient = useQueryClient();
     const { showToast } = useToast();
+
+    // 🔄 مزامنة فورية
+    useRealtimeListener(['payment_vouchers', 'expenses'], () => {
+        queryClient.invalidateQueries({ queryKey: ['payment_vouchers'] });
+    });
 
     const [globalSearch, setGlobalSearch] = useState('');
     const deferredSearch = useDeferredValue(globalSearch);

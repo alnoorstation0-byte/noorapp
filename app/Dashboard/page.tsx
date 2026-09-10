@@ -112,14 +112,14 @@ export default function DashboardPage() {
               <h4 className="chart-title">📈 تحليل التدفقات (الإيرادات vs المصروفات)</h4>
               <div style={{ width: '100%', height: '300px' }}>
                 <ResponsiveContainer>
-                  <BarChart data={logic.chartData.revenueVsExpenses} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                  <BarChart data={logic.stats?.cashFlowData || []} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.4)" />
                     <XAxis dataKey="name" axisLine={false} tickLine={false} tick={{ fill: '#475569', fontWeight: 'bold' }} />
                     <YAxis axisLine={false} tickLine={false} tickFormatter={(val) => `${val / 1000}k`} tick={{ fill: '#475569' }} />
                     <Tooltip cursor={{ fill: 'rgba(255,255,255,0.2)' }} contentStyle={{ borderRadius: '15px', border: 'none', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }} />
                     <Legend wrapperStyle={{ paddingTop: '10px' }} />
-                    <Bar dataKey="الإيرادات" fill="#10b981" radius={[8, 8, 0, 0]} maxBarSize={50} />
-                    <Bar dataKey="المصروفات" fill="#ef4444" radius={[8, 8, 0, 0]} maxBarSize={50} />
+                    <Bar dataKey="income" name="الإيرادات" fill="#10b981" radius={[8, 8, 0, 0]} maxBarSize={50} />
+                    <Bar dataKey="expense" name="المصروفات" fill="#ef4444" radius={[8, 8, 0, 0]} maxBarSize={50} />
                   </BarChart>
                 </ResponsiveContainer>
               </div>
@@ -129,17 +129,17 @@ export default function DashboardPage() {
             <div className="glass-chart-container">
               <h4 className="chart-title">🎯 توزيع المصروفات التشغيلية</h4>
               <div style={{ width: '100%', height: '300px' }}>
-                {logic.chartData.expensesBreakdown.length > 0 ? (
+                {(logic.stats?.expensesByCategory || []).length > 0 ? (
                   <ResponsiveContainer>
                     <PieChart>
                       <Pie
-                        data={logic.chartData.expensesBreakdown}
+                        data={logic.stats?.expensesByCategory || []}
                         innerRadius={60}
                         outerRadius={100}
                         paddingAngle={5}
                         dataKey="value"
                       >
-                        {logic.chartData.expensesBreakdown.map((entry: any, index: number) => (
+                        {(logic.stats?.expensesByCategory || []).map((entry: any, index: number) => (
                           <Cell key={`cell-${index}`} fill={AQUA_COLORS[index % AQUA_COLORS.length]} />
                         ))}
                       </Pie>

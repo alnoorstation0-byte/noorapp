@@ -15,19 +15,43 @@ export default function PosPage() {
     };
 
     const headerContent = (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
             <span style={{ fontWeight: 900, color: THEME.primary }}>🏪 منفذ البيع:</span>
             <select 
                 className="glass-input-field" 
                 value={logic.selectedWarehouseId}
                 onChange={(e) => logic.setSelectedWarehouseId(e.target.value)}
-                style={{ width: '250px', fontWeight: 'bold' }}
+                style={{ width: '200px', fontWeight: 'bold' }}
+                disabled={logic.isDelegateLocked}
             >
                 <option value="" disabled>-- اختر منفذ البيع --</option>
                 {logic.warehouses.map((w: any) => (
                     <option key={w.id} value={w.id}>{w.name}</option>
                 ))}
             </select>
+
+            <span style={{ fontWeight: 900, color: '#16a34a' }}>👤 المندوب:</span>
+            <select 
+                className="glass-input-field" 
+                value={logic.delegateId}
+                onChange={(e) => logic.setDelegateId(e.target.value)}
+                style={{ 
+                    width: '180px', fontWeight: 'bold',
+                    borderColor: logic.delegateId ? '#16a34a' : undefined,
+                    boxShadow: logic.delegateId ? '0 0 0 2px rgba(22,163,74,0.2)' : undefined
+                }}
+                disabled={logic.isDelegateLocked}
+            >
+                <option value="">-- اختر المندوب --</option>
+                {logic.delegates.map((d: any) => (
+                    <option key={d.id} value={d.id}>{d.name}</option>
+                ))}
+            </select>
+            {logic.delegateId && (
+                <span style={{ fontSize: '12px', fontWeight: 800, color: '#16a34a', background: 'rgba(22,163,74,0.1)', padding: '4px 10px', borderRadius: '20px' }}>
+                    ✅ {logic.isDelegateLocked ? 'حسابك' : 'تم اختيار المندوب'}
+                </span>
+            )}
         </div>
     );
 

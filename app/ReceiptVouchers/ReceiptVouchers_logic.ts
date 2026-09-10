@@ -4,10 +4,16 @@ import { supabase } from '@/lib/supabase';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/lib/toast-context';
 import { fetchPaginatedData } from '@/lib/supabase-pagination';
+import { useRealtimeListener } from '@/lib/useRealtimeSync';
 
 export function useReceiptVouchersLogic() {
     const queryClient = useQueryClient();
     const { showToast } = useToast();
+
+    // 🔄 مزامنة فورية
+    useRealtimeListener(['receipt_vouchers', 'invoices'], () => {
+        queryClient.invalidateQueries({ queryKey: ['receipt_vouchers'] });
+    });
 
     // 🎯 دالة سحرية لتحديث الكاش لحظياً (Optimistic UI)
     const updateRowsInCache = (targetIds: any[], updatedFields: any) => {

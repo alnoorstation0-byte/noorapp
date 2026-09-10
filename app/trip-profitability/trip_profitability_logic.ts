@@ -52,10 +52,6 @@ export function useTripProfitabilityLogic() {
   const fetchData = useCallback(async () => {
     setIsLoading(true);
     try {
-      // For drivers, it seems the foreign key might not be set up explicitly, or we don't have driver_name easily accessible without a join. 
-      // If we don't have vehicles/delegates linked via FK, we'll try to fetch partners/vehicles separately if needed, but for now we'll fetch just operations.
-      // Wait, let's just fetch all and map if we need to.
-      
       const { data: operations, error } = await supabase
         .from('fleet_operations')
         .select('*')
@@ -65,12 +61,16 @@ export function useTripProfitabilityLogic() {
 
       if (error) throw error;
 
-      // We'll also try to fetch vehicles to map names manually since FK is missing
-      const { data: vehicles } = await supabase.from('fleet_vehicles').select('id, name');
+      // ✅ جلب السيارات بالحقول الصحيحة (plate_number + vehicle_model)
+      const { data: vehicles } = await supabase
+        .from('fleet_vehicles')
+        .select('id, plate_number, vehicle_model');
       const { data: partners } = await supabase.from('partners').select('id, name');
 
       const vMap: Record<string, string> = {};
-      vehicles?.forEach(v => { vMap[v.id] = v.name; });
+      vehicles?.forEach(v => {
+        vMap[v.id] = `${v.plate_number}${v.vehicle_model ? ' - ' + v.vehicle_model : ''}`;
+      });
 
       const pMap: Record<string, string> = {};
       partners?.forEach(p => { pMap[p.id] = p.name; });
@@ -81,7 +81,7 @@ export function useTripProfitabilityLogic() {
         const sales = op.total_sales || 0;
         const expenses = op.total_expenses || 0;
         const invCost = op.inventory_cost || 0;
-        const netProfit = op.net_profit || 0;
+        const netProfit = op.net_profit || (sales - expenses - invCost);
         
         sumSales += sales;
         sumExpenses += expenses;
@@ -93,8 +93,8 @@ export function useTripProfitabilityLogic() {
           operation_number: op.operation_number,
           operation_date: op.operation_date,
           status: op.status,
-          vehicle_name: vMap[op.vehicle_id] || 'غير محدد',
-          driver_name: pMap[op.driver_id] || 'غير محدد',
+          vehicle_name: vMap[op.vehicle_id] || 'سيارة غير محددة',
+          driver_name: pMap[op.driver_id] || 'سائق غير محدد',
           total_sales: sales,
           total_expenses: expenses,
           inventory_cost: invCost,

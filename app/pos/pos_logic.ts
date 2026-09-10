@@ -1,5 +1,5 @@
 "use client";
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/lib/toast-context';
@@ -13,18 +13,76 @@ export function usePosLogic() {
     const [searchQuery, setSearchQuery] = useState('');
     const [paymentMethod, setPaymentMethod] = useState<'نقدي (كاش)' | 'شبكة (مدى)' | 'آجل'>('نقدي (كاش)');
     const [partnerId, setPartnerId] = useState<string>('');
+    const [delegateId, setDelegateId] = useState<string>(''); // المندوب المسؤول
+    const [isDelegateLocked, setIsDelegateLocked] = useState(false); // القفل إذا كان المستخدم مندوب
+
+    // Fetch current user and profile
+    const { data: userProfile, isLoading: loadingProfile } = useQuery({
+        queryKey: ['pos_user_profile'],
+        queryFn: async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session?.user?.id) return null;
+            const { data: profile } = await supabase
+                .from('profiles')
+                .select('linked_partner_id, role')
+                .eq('id', session.user.id)
+                .single();
+            return profile || null;
+        }
+    });
 
     // Fetch Warehouses (Points of Sale)
     const { data: warehouses = [], isLoading: loadingWarehouses } = useQuery({
         queryKey: ['pos_warehouses'],
         queryFn: async () => {
             const { data } = await supabase.from('warehouses').select('*').eq('is_active', true).order('name');
-            if (data && data.length > 0 && !selectedWarehouseId) {
-                setSelectedWarehouseId(data[0].id);
-            }
             return data || [];
         }
     });
+
+    // Fetch delegates (المناديب)
+    const { data: delegates = [] } = useQuery({
+        queryKey: ['pos_delegates'],
+        queryFn: async () => {
+            const { data } = await supabase
+                .from('partners')
+                .select('id, name')
+                .in('partner_type', ['مندوب', 'موظف', 'delegate', 'employee'])
+                .eq('is_active', true)
+                .order('name');
+            return data || [];
+        }
+    });
+
+    // Auto-select delegate and warehouse based on logged-in user
+    useEffect(() => {
+        if (!loadingProfile && !loadingWarehouses) {
+            // إذا كان المستخدم مربوط بمندوب
+            if (userProfile?.linked_partner_id) {
+                setDelegateId(userProfile.linked_partner_id);
+                // فقط اقفل التعديل إذا لم يكن مدير أو أدمن (حسب دورك)
+                if (userProfile.role !== 'admin' && userProfile.role !== 'super_admin') {
+                    setIsDelegateLocked(true);
+                }
+                
+                // البحث عن مستودع المندوب
+                if (warehouses.length > 0) {
+                    const assignedWh = warehouses.find(w => w.delegate_id === userProfile.linked_partner_id);
+                    if (assignedWh) {
+                        setSelectedWarehouseId(assignedWh.id);
+                    } else if (!selectedWarehouseId) {
+                        setSelectedWarehouseId(warehouses[0].id); // fallback
+                    }
+                }
+            } else {
+                // ليس مندوب (مستخدم عادي/أدمن)
+                setIsDelegateLocked(false);
+                if (!selectedWarehouseId && warehouses.length > 0) {
+                    setSelectedWarehouseId(warehouses[0].id);
+                }
+            }
+        }
+    }, [userProfile, warehouses, loadingProfile, loadingWarehouses]);
 
     // Fetch available items in the selected POS
     const { data: inventoryItems = [], isLoading: loadingItems } = useQuery({
@@ -35,7 +93,7 @@ export function usePosLogic() {
                 .from('warehouse_inventory')
                 .select(`
                     id, quantity, item_id,
-                    inventory_items (id, name, default_price, unit, code)
+                    inventory_items (id, name, default_price, suggested_price, unit, code)
                 `)
                 .eq('warehouse_id', selectedWarehouseId)
                 .gt('quantity', 0);
@@ -44,6 +102,7 @@ export function usePosLogic() {
                 id: row.inventory_items?.id,
                 name: row.inventory_items?.name,
                 price: row.inventory_items?.default_price || 0,
+                suggested_price: row.inventory_items?.suggested_price || row.inventory_items?.default_price || 0,
                 unit: row.inventory_items?.unit || 'حبة',
                 code: row.inventory_items?.code,
                 available_qty: row.quantity
@@ -159,7 +218,7 @@ export function usePosLogic() {
 
             const autoNumber = `INV-POS-${Date.now().toString().slice(-6)}`;
             
-            // 1. Create Invoice
+            // 1. إنشاء الفاتورة بحالة معلق (غير مرحلة) لكي يعتمدها المحاسب لاحقاً
             const invoiceHeader = {
                 invoice_number: autoNumber,
                 date: new Date().toISOString().split('T')[0],
@@ -168,12 +227,13 @@ export function usePosLogic() {
                 total_amount: cartTotal.total,
                 taxable_amount: cartTotal.subtotal,
                 tax_amount: cartTotal.tax,
-                status: 'مغلق', // automatically close POS invoices
+                status: 'معلق',  // تبقى غير مرحلة - يعتمدها المحاسب
                 warehouse_id: selectedWarehouseId,
+                delegate_id: delegateId || null,  // المندوب المسؤول عن البيع
                 payment_method: paymentMethod,
                 paid_amount: paymentMethod !== 'آجل' ? cartTotal.total : 0,
-                debit_account_id: '4f828d0d-a1f4-4762-83e3-c17dafae802d', // default customers
-                credit_account_id: '6667f91a-9478-49ab-9721-521ee09381fa', // sales revenue
+                debit_account_id: '4f828d0d-a1f4-4762-83e3-c17dafae802d',
+                credit_account_id: '6667f91a-9478-49ab-9721-521ee09381fa',
                 lines_data: cart.map(item => ({
                     item_id: item.id,
                     name: item.name,
@@ -184,29 +244,42 @@ export function usePosLogic() {
                 }))
             };
 
-            const { data: insertedInv, error: invErr } = await supabase.from('invoices').insert([invoiceHeader]).select('*, partners:partners!invoices_partner_id_fkey(*)').single();
+            const { data: insertedInv, error: invErr } = await supabase
+                .from('invoices')
+                .insert([invoiceHeader])
+                .select('*, partners:partners!invoices_partner_id_fkey(*)')
+                .single();
             if (invErr) throw invErr;
 
-            // 2. Auto-Post (deduct inventory & create journal entries)
-            const { error: postErr } = await supabase.rpc('post_invoices_bulk', { p_ids: [insertedInv.id] });
-            if (postErr) throw postErr;
-
-            // 3. Create Receipt Voucher if paid
+            // 2. إنشاء سند قبض إذا الدفع نقدي/شبكة (لكن بدون ترحيل تلقائي)
             if (paymentMethod !== 'آجل') {
-                const { error: rectErr } = await supabase.rpc('auto_create_pos_receipt', { p_invoice_id: insertedInv.id });
-                if (rectErr) throw rectErr;
+                const receiptPayload = {
+                    receipt_number: `RCV-POS-${Date.now().toString().slice(-6)}`,
+                    date: new Date().toISOString().split('T')[0],
+                    amount: cartTotal.total,
+                    payment_method: paymentMethod === 'نقدي (كاش)' ? 'نقدي' : 'بطاقة',
+                    partner_id: partnerId || null,
+                    invoice_id: insertedInv.id,
+                    delegate_id: delegateId || null,
+                    status: 'مسودة',  // غير مرحل - يعتمده المحاسب
+                    notes: `POS - ${invoiceHeader.client_name || 'عميل نقدي'}`,
+                    safe_bank_acc_id: '21b8a1db-bc9f-4cf8-b741-1efeded0963c', // الخزينة الرئيسية
+                    partner_acc_id: '4f828d0d-a1f4-4762-83e3-c17dafae802d',
+                };
+                const { error: rectErr } = await supabase.from('receipt_vouchers').insert([receiptPayload]);
+                if (rectErr) console.warn('Receipt voucher warning:', rectErr.message);
             }
+
             return insertedInv;
         },
         onSuccess: (data) => {
             setLastInvoice(data);
             setIsPrintModalOpen(true);
-            showToast("تمت عملية البيع بنجاح! ✅", "success");
+            showToast("تمت عملية البيع بنجاح! ✅ الفاتورة بانتظار الاعتماد المحاسبي", "success");
             setCart([]);
-            // Set last invoice for printing
-            // Need to pass the actual returned data from the mutation fn to onSuccess, but for now we'll fetch it or we can just return it from mutationFn.
             queryClient.invalidateQueries({ queryKey: ['pos_inventory'] });
             queryClient.invalidateQueries({ queryKey: ['invoices'] });
+            queryClient.invalidateQueries({ queryKey: ['receipt_vouchers'] });
         },
         onError: (err: any) => {
             showToast(`فشلت العملية: ${err.message}`, "error");
@@ -217,10 +290,12 @@ export function usePosLogic() {
         selectedItemForCart, setSelectedItemForCart, confirmAddToCart, handleItemClick,
         warehouses, selectedWarehouseId, setSelectedWarehouseId,
         inventoryItems: filteredItems, searchQuery, setSearchQuery,
-        cart, addToCart, lastInvoice, setLastInvoice, isPrintModalOpen, setIsPrintModalOpen, updateCartItemQty, updateCartItemPrice, removeFromCart, cartTotal, handleBarcodeScan,
+        cart, addToCart, lastInvoice, setLastInvoice, isPrintModalOpen, setIsPrintModalOpen,
+        updateCartItemQty, updateCartItemPrice, removeFromCart, cartTotal, handleBarcodeScan,
         isTaxInclusive, setIsTaxInclusive,
         paymentMethod, setPaymentMethod,
         customers, partnerId, setPartnerId,
+        delegates, delegateId, setDelegateId, isDelegateLocked,
         handleCheckout: () => checkoutMutation.mutate(),
         isCheckingOut: checkoutMutation.isPending,
         isLoading: loadingWarehouses || loadingItems

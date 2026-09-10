@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { showGlobalToast } from '@/lib/toast-context';
+import { useRealtimeListener } from '@/lib/useRealtimeSync';
 
 export function usePurchaseOrdersLogic() {
   const [transactions, setTransactions] = useState<any[]>([]);
@@ -66,6 +67,9 @@ export function usePurchaseOrdersLogic() {
   useEffect(() => {
     fetchTransactions();
   }, []);
+
+  // 🔄 مزامنة فورية - تحديث تلقائي عند تغيير الحركات (من أي شاشة)
+  useRealtimeListener('inventory_transactions', () => fetchTransactions());
 
   const handleApproveTransaction = async (transaction: any) => {
     try {

@@ -28,9 +28,10 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
     action_date: new Date().toISOString().split('T')[0],
     project_id: '',
     fleet_operation_id: '',
-    partner_id: '', // supplier for IN, subcontractor/employee for OUT
+    partner_id: '',
     notes: '',
-    warehouse_id: '',
+    warehouse_id: '',        // المستودع المصدر
+    destination_warehouse_id: '', // المستودع الوجهة (للصرف فقط)
     include_tax: false
   });
 
@@ -48,6 +49,7 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
           partner_id: initialData.partner_id || '',
           notes: initialData.notes || '',
           warehouse_id: initialData.warehouse_id || '11111111-1111-1111-1111-111111111111',
+          destination_warehouse_id: initialData.destination_warehouse_id || '',
           include_tax: initialData.include_tax || false
         });
       } else {
@@ -61,7 +63,8 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
           fleet_operation_id: '',
           partner_id: '',
           notes: '',
-          warehouse_id: '11111111-1111-1111-1111-111111111111', // Default main warehouse
+          warehouse_id: '11111111-1111-1111-1111-111111111111',
+          destination_warehouse_id: '',
           include_tax: false
         });
       }
@@ -130,6 +133,7 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
         partner_id: cleanId(formData.partner_id),
         fleet_operation_id: cleanId(formData.fleet_operation_id),
         warehouse_id: cleanId(formData.warehouse_id),
+        destination_warehouse_id: actionType === 'out' ? cleanId(formData.destination_warehouse_id) : null,
         notes: formData.notes
       };
 
@@ -197,18 +201,43 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
             </div>
 
             <div>
-              <label style={{ fontSize: '13px', fontWeight: 900, color: THEME.primary, marginBottom: '8px', display: 'block' }}>🏢 المستودع / منفذ البيع</label>
+              <label style={{ fontSize: '13px', fontWeight: 900, color: THEME.primary, marginBottom: '8px', display: 'block' }}>
+                🏢 {actionType === 'out' ? 'المستودع المصدر (من)' : 'المستودع / منفذ البيع'}
+              </label>
               <select
                 className="glass-input-field"
                 value={formData.warehouse_id}
                 onChange={e => setFormData({ ...formData, warehouse_id: e.target.value })}
                 style={{ width: '100%', padding: '10px' }}
               >
+                <option value="">-- اختر المستودع --</option>
                 {warehousesList.map((wh: any) => (
                   <option key={wh.id} value={wh.id}>{wh.name}</option>
                 ))}
               </select>
             </div>
+
+            {/* حقل مستودع الوجهة - يظهر فقط عند الصرف */}
+            {actionType === 'out' && (
+              <div>
+                <label style={{ fontSize: '13px', fontWeight: 900, color: '#ef4444', marginBottom: '8px', display: 'block' }}>
+                  🚛 مستودع الوجهة (إلى) <span style={{ fontSize: '11px', fontWeight: 600, color: '#94a3b8' }}>- اختياري للنقل الداخلي</span>
+                </label>
+                <select
+                  className="glass-input-field"
+                  value={formData.destination_warehouse_id}
+                  onChange={e => setFormData({ ...formData, destination_warehouse_id: e.target.value })}
+                  style={{ width: '100%', padding: '10px', borderColor: formData.destination_warehouse_id ? '#ef4444' : undefined }}
+                >
+                  <option value="">-- بدون نقل (صرف نهائي) --</option>
+                  {warehousesList
+                    .filter((wh: any) => wh.id !== formData.warehouse_id)
+                    .map((wh: any) => (
+                      <option key={wh.id} value={wh.id}>{wh.name}</option>
+                    ))}
+                </select>
+              </div>
+            )}
 
             <div>
               <label style={{ fontSize: '13px', fontWeight: 900, color: THEME.primary, marginBottom: '8px', display: 'block' }}>📦 الصنف *</label>

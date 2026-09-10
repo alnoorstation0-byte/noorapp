@@ -247,16 +247,10 @@ export function useHierarchicalAccountsLogic() {
     expandedIds, 
     toggleExpand: (id: string) => setExpandedIds(prev => prev.includes(id) ? prev.filter(i => i !== id) : [...prev, id]),
     expandAll: () => {
-      const ids: string[] = [];
-      const getIds = (nodes: any[]) => {
-        if (!nodes || !Array.isArray(nodes)) return;
-        nodes.forEach(n => { 
-            if(n.id) ids.push(n.id); 
-            if(n.children && Array.isArray(n.children)) getIds(n.children); 
-        });
-      };
-      getIds(treeData);
-      setExpandedIds([...new Set(ids)]);
+      if (accountsReport && Array.isArray(accountsReport)) {
+        const allIds = accountsReport.map((a: any) => String(a.id));
+        setExpandedIds([...new Set(allIds)]);
+      }
     }, 
     collapseAll: () => setExpandedIds([]),
     selectedIds, setSelectedIds,

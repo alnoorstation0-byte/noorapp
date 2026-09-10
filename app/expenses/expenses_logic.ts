@@ -8,10 +8,17 @@ import { fetchPaginatedData } from '@/lib/supabase-pagination';
 import { useUniversalPosting } from '@/lib/accounting_engine'; 
 import { useToast , showGlobalToast} from '@/lib/toast-context'; 
 import { checkAdminApprovalPrivilege } from '@/lib/helpers';
+import { useRealtimeListener } from '@/lib/useRealtimeSync';
 
 export function useExpensesLogic() {
     const queryClient = useQueryClient();
     const { showToast } = useToast(); 
+
+    // 🔄 مزامنة فورية - تحديث تلقائي عند تغيير المصروفات أو سندات الصرف
+    useRealtimeListener(['expenses', 'payment_vouchers'], () => {
+        queryClient.invalidateQueries({ queryKey: ['expenses'] });
+        queryClient.invalidateQueries({ queryKey: ['payment_vouchers'] });
+    });
 
     // 🎯 دالة مساعدة لتحديث سطر في الكاش بدقة شديدة
     const updateRowsInCache = (targetIds: any[], updatedFields: any) => {

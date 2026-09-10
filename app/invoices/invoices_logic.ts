@@ -6,6 +6,7 @@ import { useToast } from '@/lib/toast-context';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'; 
 import { fetchPaginatedData } from '@/lib/supabase-pagination';
 import { getInvoiceSummaryAndAging } from '@/lib/helpers';
+import { useRealtimeListener } from '@/lib/useRealtimeSync';
 
 const updateInventoryQty = async (itemId: string, warehouseId: string, qtyChange: number) => {
     const { data } = await supabase.from('warehouse_inventory').select('*').eq('item_id', itemId).eq('warehouse_id', warehouseId).single();
@@ -21,6 +22,11 @@ export function useInvoicesLogic() {
     const { showToast } = useToast(); 
     const queryClient = useQueryClient();
     
+    // 🔄 مزامنة فورية
+    useRealtimeListener(['invoices', 'receipt_vouchers'], () => {
+        queryClient.invalidateQueries({ queryKey: ['invoices'] });
+    });
+
     const updateRowsInCache = (targetIds: any[], updatedFields: any) => {
         queryClient.setQueryData(['invoices'], (oldData: any[]) => {
             if (!oldData) return [];

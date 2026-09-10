@@ -15,6 +15,7 @@ import LayoutClient from './layout/LayoutClient';
 import PwaManager from './PwaManager';
 import GlobalNavigationShortcuts from './GlobalNavigationShortcuts';
 import { THEME } from '@/lib/theme'; 
+import { RealtimeSyncProvider } from '@/lib/useRealtimeSync';
 
 export default function AppClientProviders({ children }: { children: React.ReactNode }) {
     return (
@@ -36,11 +37,13 @@ export default function AppClientProviders({ children }: { children: React.React
                                         <PermissionsProvider>
                                             <SidebarProvider> 
                                                 <LayoutClient>
+                                                    <RealtimeSyncProvider>
                                                     <PwaManager />
                                                     <GlobalNavigationShortcuts />
                                                     <div style={{ position: 'relative', zIndex: 1 }}>
                                                         {children}
                                                     </div>
+                                                    </RealtimeSyncProvider>
                                                 </LayoutClient>
                                             </SidebarProvider> 
                                         </PermissionsProvider>
