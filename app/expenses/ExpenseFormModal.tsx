@@ -8,6 +8,7 @@ import { useToast , showGlobalToast} from '@/lib/toast-context';
 import { supabase } from '@/lib/supabase'; 
 
 const EXPENSE_CATEGORIES = [
+    "مشتريات بضائع",
     "شراء بضاعة",
     "إعاشة وتغذية",
     "محروقات وانتقالات",
@@ -244,7 +245,7 @@ export default function ExpenseFormModal({
                             let newCreditor = record.creditor_account;
                             let newPayment = record.payment_account;
                             if (!record?.id) {
-                                if (selectedCategory === 'شراء بضاعة') {
+                                if (selectedCategory === 'شراء بضاعة' || selectedCategory === 'مشتريات بضائع') {
                                     newCreditor = 'فواتير قيد الاستلام';
                                     newPayment = 'الموردين';
                                 } else if (selectedCategory === 'مصاريف إدارية') {

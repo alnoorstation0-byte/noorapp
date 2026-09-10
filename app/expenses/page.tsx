@@ -101,7 +101,8 @@ export default function ExpensesPage() {
 
   const displayedTotal = useMemo(() => {
     return displayedExpenses.reduce((sum: number, row: any) => {
-      const total = row.total_price || ((Number(row.quantity || 1) * Number(row.unit_price || 0)) + Number(row.vat_amount || 0) - Number(row.discount_amount || 0));
+      const basePrice2 = row.total_price ? Number(row.total_price) : (Number(row.quantity || 1) * Number(row.unit_price || 0));
+          const total = Math.round((basePrice2 + Number(row.vat_amount || 0) - Number(row.discount_amount || 0)) * 100) / 100;
       return sum + total;
     }, 0);
   }, [displayedExpenses]);
@@ -301,19 +302,16 @@ export default function ExpensesPage() {
       accessor: 'total', 
       render: (row: any) => {
         if (!row) return null;
-        const total = row.total_price || ((Number(row.quantity || 1) * Number(row.unit_price || 0)) + Number(row.vat_amount || 0) - Number(row.discount_amount || 0));
+        const basePrice = row.total_price ? Number(row.total_price) : (Number(row.quantity || 1) * Number(row.unit_price || 0));
+        const total = Math.round((basePrice + Number(row.vat_amount || 0) - Number(row.discount_amount || 0)) * 100) / 100;
         return <span style={{ color: THEME.success, fontWeight: 900, fontSize: '14px' }}>{total.toLocaleString()}</span>;
       },
       exportValue: (row: any) => {
-        if (row.total_price) return Number(row.total_price);
+        let basePrice = row.total_price ? Number(row.total_price) : (Number(row.quantity || 1) * Number(row.unit_price || 0));
         if (row.lines_data && Array.isArray(row.lines_data) && row.lines_data.length > 0) {
-            const linesTotal = row.lines_data.reduce((sum: number, line: any) => {
-                const lineTotal = line.total_price || (Number(line.quantity || 1) * Number(line.unit_price || 0));
-                return sum + lineTotal;
-            }, 0);
-            return linesTotal + Number(row.vat_amount || 0) - Number(row.discount_amount || 0);
+            basePrice = row.lines_data.reduce((sum: number, line: any) => sum + (line.total_price ? Number(line.total_price) : (Number(line.quantity || 1) * Number(line.unit_price || 0))), 0);
         }
-        return (Number(row.quantity || 1) * Number(row.unit_price || 0)) + Number(row.vat_amount || 0) - Number(row.discount_amount || 0);
+        return basePrice + Number(row.vat_amount || 0) - Number(row.discount_amount || 0);
       }
     },
     {
@@ -321,14 +319,15 @@ export default function ExpensesPage() {
       accessor: 'payment_status',
       render: (row: any) => {
         if (!row) return null;
-        const total = row.total_price || (Number(row.quantity || 1) * Number(row.unit_price || 0)) + Number(row.vat_amount || 0) - Number(row.discount_amount || 0);
-        const paid = Number(row.paid_amount || 0);
+        const basePrice = row.total_price ? Number(row.total_price) : (Number(row.quantity || 1) * Number(row.unit_price || 0));
+        const total = Math.round((basePrice + Number(row.vat_amount || 0) - Number(row.discount_amount || 0)) * 100) / 100;
+        const paid = Math.round(Number(row.paid_amount || 0) * 100) / 100;
         
         let statusText = ''; let bgColor = ''; let textColor = '';
 
         if (paid <= 0) {
             statusText = 'غير مسدد ❌'; bgColor = '#fef2f2'; textColor = '#ef4444';
-        } else if (paid > 0 && paid < total) {
+        } else if (paid > 0 && paid < total - 0.01) {
             statusText = 'مسدد جزئي ⏳'; bgColor = '#fffbeb'; textColor = '#f59e0b';
         } else if (paid >= total) {
             statusText = 'مسدد ✅'; bgColor = '#ecfdf5'; textColor = '#10b981';
@@ -341,10 +340,11 @@ export default function ExpensesPage() {
         );
       },
       exportValue: (row: any) => {
-        const total = row.total_price || (Number(row.quantity || 1) * Number(row.unit_price || 0)) + Number(row.vat_amount || 0) - Number(row.discount_amount || 0);
-        const paid = Number(row.paid_amount || 0);
+        const basePrice = row.total_price ? Number(row.total_price) : (Number(row.quantity || 1) * Number(row.unit_price || 0));
+        const total = Math.round((basePrice + Number(row.vat_amount || 0) - Number(row.discount_amount || 0)) * 100) / 100;
+        const paid = Math.round(Number(row.paid_amount || 0) * 100) / 100;
         if (paid <= 0) return 'غير مسدد ❌';
-        if (paid > 0 && paid < total) return 'مسدد جزئي ⏳';
+        if (paid > 0 && paid < total - 0.01) return 'مسدد جزئي ⏳';
         return 'مسدد ✅';
       }
     },
@@ -365,8 +365,9 @@ export default function ExpensesPage() {
       excludeFromExport: true, 
       render: (row: any) => {
         if (!row) return null;
-        const total = row.total_price || ((Number(row.quantity || 1) * Number(row.unit_price || 0)) + Number(row.vat_amount || 0) - Number(row.discount_amount || 0));
-        const paid = Number(row.paid_amount || 0);
+        const basePrice2 = row.total_price ? Number(row.total_price) : (Number(row.quantity || 1) * Number(row.unit_price || 0));
+          const total = Math.round((basePrice2 + Number(row.vat_amount || 0) - Number(row.discount_amount || 0)) * 100) / 100;
+        const paid = Math.round(Number(row.paid_amount || 0) * 100) / 100;
         const balance = total - paid;
         
         const needsPayment = balance > 0 && row.is_posted === true; 
@@ -415,21 +416,21 @@ export default function ExpensesPage() {
                       }
 
                       const preparedVoucher = {
-                          date: new Date().toISOString().split('T')[0],
-                          amount: balance, 
-                          debit_account_id: resolvedDebitId, 
-                          debit_account_name: resolvedDebitName, 
-                          credit_account_id: MAIN_TREASURY_ID,
-                          credit_account_name: MAIN_TREASURY_NAME,
-                          partner_id: row.payee_id,
-                          
-                          payee_name: row.payee_name || row.sub_contractor || row.creditor_account,
-                          
-                          description: `سداد مصروف: ${row.description || ''} (فاتورة: ${row.expense_number || 'غير محدد'})`,
-                          payment_method: 'نقدي',
-                          reference_no: row.expense_number, 
-                          related_expense_id: row.id 
-                      };
+                        voucher_number: `PV-${Date.now()}-${Math.floor(Math.random() * 1000)}`, 
+                        
+                        date: new Date().toISOString().split('T')[0],
+                        amount: balance, 
+                        debit_account_id: resolvedDebitId, 
+                        debit_account_name: resolvedDebitName, 
+                        credit_account_id: MAIN_TREASURY_ID,
+                        credit_account_name: MAIN_TREASURY_NAME,
+                        partner_id: row.payee_id,
+                        payee_name: row.payee_name || row.sub_contractor || row.creditor_account,
+                        description: `سداد مصروف: ${row.description || ''} (فاتورة: ${row.expense_number || 'غير محدد'})`,
+                        payment_method: 'نقدي',
+                        reference_no: row.expense_number, 
+                        related_expense_id: row.id 
+                    };
 
                       pvLogic.actions.setCurrentVoucher(preparedVoucher);
                       pvLogic.actions.setIsEditModalOpen(true);

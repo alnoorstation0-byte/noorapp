@@ -121,14 +121,14 @@ export function useExpensesLogic() {
             const [part, acc, fleet, vehicles] = await Promise.all([
                 supabase.from('partners').select('id, name, partner_type'),
                 supabase.from('accounts').select('id, code, name'),
-                supabase.from('fleet_operations').select('id, operation_number, operation_date, vehicle:fleet_vehicles(plate_number), driver:partners(name)').eq('status', 'مفتوح'),
+                supabase.from('fleet_operations').select('id, operation_number, operation_date, description, vehicle:fleet_vehicles(plate_number), driver:partners(name), description').eq('status', 'مفتوح'),
                 supabase.from('fleet_vehicles').select('id, plate_number, vehicle_model')
             ]);
             
             const partnersData = part.data || [];
             const formattedFleet = fleet.data?.map(op => ({
                 id: op.id,
-                name: `رقم الرحلة: ${op.operation_number} | ${op.operation_date} | 🚚 ${op.vehicle?.plate_number || 'بدون سيارة'} | 👤 ${op.driver?.name || 'بدون مندوب'}`
+                name: ``
             })) || [];
 
             return {
@@ -136,7 +136,7 @@ export function useExpensesLogic() {
                 contractors: partnersData.filter(p => p.partner_type === 'مورد'),
                 payees: partnersData.filter(p => p.partner_type === 'مورد' || p.partner_type === 'مندوب'),
                 accounts_raw: acc.data || [], 
-                accounts: (acc.data || []).map(a => ({ id: a.id, code: a.code, name: `${a.code} - ${a.name}` })),
+                accounts: (acc.data || []).map(a => ({ id: a.id, code: a.code, name: `` })),
                 boqItems: [],
                 fleetOperations: formattedFleet,
                 fleetVehicles: vehicles.data || []
@@ -175,12 +175,12 @@ export function useExpensesLogic() {
             } else {
                 baseAmount = Number(exp.total_price) || (Number(exp.quantity || 1) * Number(exp.unit_price || 0));
             }
-            const total = baseAmount + Number(exp.vat_amount || 0) - Number(exp.discount_amount || 0);
-            const paid = Number(exp.paid_amount || 0);
+            const total = Math.round((baseAmount + Number(exp.vat_amount || 0) - Number(exp.discount_amount || 0)) * 100) / 100;
+            const paid = Math.round(Number(exp.paid_amount || 0) * 100) / 100;
             
             if (paymentFilter === 'غير مسدد') return paid <= 0;
-            if (paymentFilter === 'مسدد جزئي') return paid > 0 && paid < total;
-            if (paymentFilter === 'مسدد') return paid >= total && total > 0;
+            if (paymentFilter === 'مسدد جزئي') return paid > 0 && paid < total - 0.01;
+            if (paymentFilter === 'مسدد') return paid >= total - 0.01 && total > 0;
             return true;
         });
     }, [allFiltered, paymentFilter]);
