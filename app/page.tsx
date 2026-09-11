@@ -62,10 +62,15 @@ export default function WelcomeHomePage() {
         setFavorites(tempFavorites);
         setIsFavModalOpen(false);
         if (profile?.id) {
-            await supabase
+            const { error } = await supabase
                 .from('profiles')
                 .update({ quick_links: tempFavorites })
                 .eq('id', profile.id);
+            
+            if (error) {
+                console.error("Error saving quick links:", error);
+                alert("لم يتم حفظ المفضلة في قاعدة البيانات: " + error.message);
+            }
         }
     };
 

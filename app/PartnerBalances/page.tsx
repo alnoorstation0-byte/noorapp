@@ -357,6 +357,10 @@ export default function PartnerBalancesPage() {
         link.click();
     };
 
+    if (isPrintMode) {
+        return <PrintStatement />;
+    }
+
     return (
         <div className="clean-page print-container">
             <MasterPage icon="⚖️" title="أرصدة الشركاء وكشف الحساب" subtitle="اضغط على أي حساب لعرض تفاصيل حركاته (Ledger)">

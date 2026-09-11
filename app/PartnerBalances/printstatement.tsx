@@ -11,6 +11,7 @@ export default function PrintStatement() {
     const [partner, setPartner] = useState<any>(null);
     const [ledger, setLedger] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [printFormat, setPrintFormat] = useState<'a4' | 'thermal'>('a4');
 
     useEffect(() => {
         if (!partnerId) return;
@@ -96,127 +97,218 @@ import LoadingScreen from '@/components/LoadingScreen';
                 .sig-name { font-weight: 900; margin-bottom: 40px; }
                 .sig-line { border-bottom: 1px dashed #000; }
 
-                .print-controls { position: fixed; bottom: 30px; left: 30px; display: flex; gap: 10px; }
+                .print-controls { position: fixed; bottom: 30px; left: 30px; display: flex; gap: 10px; z-index: 9999; }
                 .btn { padding: 12px 25px; border-radius: 8px; font-weight: 900; cursor: pointer; border: none; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
                 .btn-p { background: #10b981; color: white; }
                 .btn-c { background: #64748b; color: white; }
+                
+                /* 🚀 Thermal Styles */
+                .thermal-preview-box {
+                    width: 80mm; background: white; padding: 10px; margin: 0 auto; color: black;
+                    font-family: 'Courier New', Courier, monospace; font-size: 13px; font-weight: bold;
+                    text-align: center; direction: rtl; box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+                    min-height: auto;
+                }
+                .thermal-preview-box table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+                .thermal-preview-box th, .thermal-preview-box td { border-bottom: 1px dashed #000; padding: 4px 0; font-size: 12px; }
 
                 @media print {
                     .print-controls { display: none !important; }
                     body { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-                    @page { margin: 15mm; size: A4; }
                 }
             `}</style>
 
-            <div className="print-controls">
+            {printFormat === 'a4' && (
+                <style>{`
+                    @media print {
+                        @page { margin: 15mm; size: A4; }
+                        .a4-wrapper { width: 100%; }
+                    }
+                `}</style>
+            )}
+
+            {printFormat === 'thermal' && (
+                <style>{`
+                    @media print {
+                        @page { size: 80mm auto; margin: 0 !important; }
+                        html, body, .print-container { width: 80mm !important; margin: 0 !important; padding: 0 !important; background: white !important; }
+                        .thermal-preview-box {
+                            position: absolute !important; top: 0 !important; left: 0 !important; 
+                            width: 80mm !important; margin: 0 !important; padding: 5px !important; 
+                            border: none !important; box-shadow: none !important;
+                        }
+                    }
+                `}</style>
+            )}
+
+            <div className="print-controls no-print">
                 <button className="btn btn-p" onClick={() => window.print()}>🖨️ طباعة الآن</button>
+                <button className="btn" style={{ background: '#f59e0b', color: 'white' }} onClick={() => setPrintFormat(f => f === 'a4' ? 'thermal' : 'a4')}>
+                    تغيير للطباعة {printFormat === 'a4' ? 'الحرارية 🧾' : 'A4 📄'}
+                </button>
                 <button className="btn btn-c" onClick={() => window.close()}>❌ إغلاق</button>
             </div>
 
-            <div className="header">
-                <div className="company-info">
-                    <h1>إدارة الحسابات العامة</h1>
-                    <p>نظام إدارة التجارة والمبيعات الذكي</p>
-                    <p>تاريخ الكشف: {new Date().toLocaleDateString('ar-EG')}</p>
+            {printFormat === 'a4' ? (
+            <div className="a4-wrapper">
+                <div className="header">
+                    <div className="company-info">
+                        <h1>إدارة الحسابات العامة</h1>
+                        <p>نظام إدارة التجارة والمبيعات الذكي</p>
+                        <p>تاريخ الكشف: {new Date().toLocaleDateString('ar-EG')}</p>
+                    </div>
+                    <div className="doc-badge">كشف حساب تفصيلي</div>
                 </div>
-                <div className="doc-badge">كشف حساب تفصيلي</div>
-            </div>
 
-            <div className="meta-grid">
-                <div className="meta-item">
-                    <span className="label">اسم الحساب (الشريك):</span>
-                    <span className="value" style={{ color: '#2563eb' }}>{partner.name}</span>
+                <div className="meta-grid">
+                    <div className="meta-item">
+                        <span className="label">اسم الحساب (الشريك):</span>
+                        <span className="value" style={{ color: '#2563eb' }}>{partner.name}</span>
+                    </div>
+                    <div className="meta-item">
+                        <span className="label">كود الحساب:</span>
+                        <span className="value">#{partner.code || '---'}</span>
+                    </div>
+                    <div className="meta-item">
+                        <span className="label">تصنيف الجهة:</span>
+                        <span className="value">{partner.partner_type}</span>
+                    </div>
+                    <div className="meta-item">
+                        <span className="label">حالة الحساب:</span>
+                        <span className="value">{partner.is_active !== false ? 'نشط' : 'موقوف'}</span>
+                    </div>
                 </div>
-                <div className="meta-item">
-                    <span className="label">كود الحساب:</span>
-                    <span className="value">#{partner.code || '---'}</span>
+
+                <table className="statement-table">
+                    <thead>
+                        <tr>
+                            <th style={{ width: '50px' }}>م</th>
+                            <th style={{ width: '120px' }}>التاريخ</th>
+                            <th>البيان وتفاصيل الحركة</th>
+                            <th style={{ width: '130px' }}>دائن (له)</th>
+                            <th style={{ width: '130px' }}>مدين (عليه)</th>
+                            <th style={{ width: '150px' }}>الرصيد التراكمي</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {ledger.length === 0 ? (
+                            <tr><td colSpan={6}>لا توجد حركات مسجلة</td></tr>
+                        ) : (
+                            (() => {
+                                let runningBal = 0;
+                                return ledger.map((item, idx) => {
+                                    const c = Math.abs(Number(item.credit || 0));
+                                    const d = Math.abs(Number(item.debit || 0));
+                                    runningBal += (c - d);
+                                    const rbInfo = getBalanceInfo(runningBal);
+
+                                    return (
+                                        <tr key={idx}>
+                                            <td>{idx + 1}</td>
+                                            <td>{item.transaction_date}</td>
+                                            <td className="text-right">
+                                                <div style={{ fontWeight: 900 }}>{item.main_description}</div>
+                                                {item.line_details && <div style={{ fontSize: '11px', color: '#475569', marginTop: '2px' }}>{item.line_details}</div>}
+                                            </td>
+                                            <td style={{ color: c > 0 ? '#059669' : '#000' }}>{c > 0 ? formatCurrency(c) : '-'}</td>
+                                            <td style={{ color: d > 0 ? '#dc2626' : '#000' }}>{d > 0 ? formatCurrency(d) : '-'}</td>
+                                            <td style={{ background: Math.abs(runningBal) < 0.01 ? '#fef9c3' : 'transparent', WebkitPrintColorAdjust: 'exact' }}>
+                                                {formatCurrency(Math.abs(runningBal))} 
+                                                <span style={{ fontSize: '10px', marginRight: '5px' }}>({rbInfo.label})</span>
+                                            </td>
+                                        </tr>
+                                    );
+                                })
+                            })()
+                        )}
+                    </tbody>
+                </table>
+
+                <div className="summary-section">
+                    <div className="summary-card">
+                        <div className="summary-line">
+                            <span>إجمالي المستحقات (دائن):</span>
+                            <span style={{ color: '#059669' }}>{formatCurrency(totalCredit)}</span>
+                        </div>
+                        <div className="summary-line">
+                            <span>إجمالي المسحوبات (مدين):</span>
+                            <span style={{ color: '#dc2626' }}>{formatCurrency(totalDebit)}</span>
+                        </div>
+                        <div className="summary-line total" style={{ color: finalBalInfo.color }}>
+                            <span>الرصيد النهائي الصافي:</span>
+                            <span>{formatCurrency(Math.abs(finalBalance))} ({finalBalInfo.label})</span>
+                        </div>
+                    </div>
                 </div>
-                <div className="meta-item">
-                    <span className="label">تصنيف الجهة:</span>
-                    <span className="value">{partner.partner_type}</span>
-                </div>
-                <div className="meta-item">
-                    <span className="label">حالة الحساب:</span>
-                    <span className="value">{partner.is_active !== false ? 'نشط' : 'موقوف'}</span>
+
+                <div className="footer-sig">
+                    <div className="sig-box">
+                        <div className="sig-name">توقيع المحاسب</div>
+                        <div className="sig-line"></div>
+                    </div>
+                    <div className="sig-box">
+                        <div className="sig-name">توقيع المدير المالي</div>
+                        <div className="sig-line"></div>
+                    </div>
+                    <div className="sig-box">
+                        <div className="sig-name">اعتماد الشريك</div>
+                        <div className="sig-line"></div>
+                    </div>
                 </div>
             </div>
+            ) : (
+            <div className="thermal-preview-box">
+                <div style={{ fontSize: '18px', fontWeight: 900, marginBottom: '5px' }}>شركة مياه غيام</div>
+                <div>كشف حساب | Account Statement</div>
+                <div style={{ borderBottom: '1px dashed #000', margin: '10px 0' }}></div>
+                
+                <div style={{ textAlign: 'right', marginBottom: '10px' }}>
+                    <div>الجهة: {partner.name}</div>
+                    <div>كود: {partner.code || '---'}</div>
+                    <div>تاريخ الإصدار: {new Date().toLocaleDateString('ar-SA')}</div>
+                </div>
 
-            <table className="statement-table">
-                <thead>
-                    <tr>
-                        <th style={{ width: '50px' }}>م</th>
-                        <th style={{ width: '120px' }}>التاريخ</th>
-                        <th>البيان وتفاصيل الحركة</th>
-                        <th style={{ width: '130px' }}>دائن (له)</th>
-                        <th style={{ width: '130px' }}>مدين (عليه)</th>
-                        <th style={{ width: '150px' }}>الرصيد التراكمي</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {ledger.length === 0 ? (
-                        <tr><td colSpan={6}>لا توجد حركات مسجلة</td></tr>
-                    ) : (
-                        (() => {
-                            let runningBal = 0;
+                <table>
+                    <thead>
+                        <tr>
+                            <th>التاريخ</th>
+                            <th>البيان</th>
+                            <th>دائن/مدين</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {(() => {
                             return ledger.map((item, idx) => {
                                 const c = Math.abs(Number(item.credit || 0));
                                 const d = Math.abs(Number(item.debit || 0));
-                                runningBal += (c - d);
-                                const rbInfo = getBalanceInfo(runningBal);
-
+                                const isCredit = c > 0;
+                                const amt = isCredit ? c : d;
                                 return (
                                     <tr key={idx}>
-                                        <td>{idx + 1}</td>
-                                        <td>{item.transaction_date}</td>
-                                        <td className="text-right">
-                                            <div style={{ fontWeight: 900 }}>{item.main_description}</div>
-                                            {item.line_details && <div style={{ fontSize: '11px', color: '#475569', marginTop: '2px' }}>{item.line_details}</div>}
-                                        </td>
-                                        <td style={{ color: c > 0 ? '#059669' : '#000' }}>{c > 0 ? formatCurrency(c) : '-'}</td>
-                                        <td style={{ color: d > 0 ? '#dc2626' : '#000' }}>{d > 0 ? formatCurrency(d) : '-'}</td>
-                                        <td style={{ background: Math.abs(runningBal) < 0.01 ? '#fef9c3' : 'transparent', WebkitPrintColorAdjust: 'exact' }}>
-                                            {formatCurrency(Math.abs(runningBal))} 
-                                            <span style={{ fontSize: '10px', marginRight: '5px' }}>({rbInfo.label})</span>
-                                        </td>
+                                        <td>{item.transaction_date?.slice(5) || ''}</td>
+                                        <td style={{ textAlign: 'right' }}>{item.main_description?.slice(0, 20)}</td>
+                                        <td>{amt.toFixed(2)} {isCredit ? 'له' : 'عليه'}</td>
                                     </tr>
                                 );
-                            })
-                        })()
-                    )}
-                </tbody>
-            </table>
+                            });
+                        })()}
+                    </tbody>
+                </table>
 
-            <div className="summary-section">
-                <div className="summary-card">
-                    <div className="summary-line">
-                        <span>إجمالي المستحقات (دائن):</span>
-                        <span style={{ color: '#059669' }}>{formatCurrency(totalCredit)}</span>
-                    </div>
-                    <div className="summary-line">
-                        <span>إجمالي المسحوبات (مدين):</span>
-                        <span style={{ color: '#dc2626' }}>{formatCurrency(totalDebit)}</span>
-                    </div>
-                    <div className="summary-line total" style={{ color: finalBalInfo.color }}>
-                        <span>الرصيد النهائي الصافي:</span>
-                        <span>{formatCurrency(Math.abs(finalBalance))} ({finalBalInfo.label})</span>
-                    </div>
+                <div style={{ borderBottom: '1px dashed #000', margin: '10px 0' }}></div>
+
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', marginTop: '10px', fontWeight: 'bold' }}>
+                    <span>الرصيد النهائي:</span>
+                    <span>{formatCurrency(Math.abs(finalBalance))} ({finalBalInfo.label})</span>
+                </div>
+
+                <div style={{ borderBottom: '1px dashed #000', margin: '10px 0' }}></div>
+
+                <div style={{ fontSize: '11px', marginTop: '10px', textAlign: 'center' }}>
+                    تم الإصدار عبر نظام غيام
                 </div>
             </div>
-
-            <div className="footer-sig">
-                <div className="sig-box">
-                    <div className="sig-name">توقيع المحاسب</div>
-                    <div className="sig-line"></div>
-                </div>
-                <div className="sig-box">
-                    <div className="sig-name">توقيع المدير المالي</div>
-                    <div className="sig-line"></div>
-                </div>
-                <div className="sig-box">
-                    <div className="sig-name">اعتماد الشريك</div>
-                    <div className="sig-line"></div>
-                </div>
-            </div>
+            )}
         </div>
     );
 }

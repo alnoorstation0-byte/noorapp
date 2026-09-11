@@ -13,6 +13,7 @@ export default function InvoicePrintModal({ isOpen, onClose, record, setRecord =
     const { showToast } = useToast(); 
     const [mounted, setMounted] = useState(false); 
     const [creatorInfo, setCreatorInfo] = useState<{username: string, fullName: string} | null>(null); 
+    const [printFormat, setPrintFormat] = useState<'a4' | 'thermal'>('a4');
 
     useEffect(() => {
         setMounted(true);
@@ -341,78 +342,67 @@ export default function InvoicePrintModal({ isOpen, onClose, record, setRecord =
                     font-weight: 700; 
                 }
 
+                /* 🚀 Thermal Styles */
+                .thermal-preview-box {
+                    width: 80mm; background: white; padding: 10px; margin: 0 auto; color: black;
+                    font-family: 'Courier New', Courier, monospace; font-size: 13px; font-weight: bold;
+                    text-align: center; direction: rtl; box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+                    min-height: auto;
+                }
+                .thermal-preview-box table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+                .thermal-preview-box th, .thermal-preview-box td { border-bottom: 1px dashed #000; padding: 4px 0; font-size: 12px; }
+
                 @media print {
-                    @page { 
-                        size: A4 portrait; 
-                        margin: 0 !important; 
-                    }
-                    
-                    html, body { 
-                        width: 210mm !important;
-                        height: 297mm !important; 
-                        margin: 0 !important; 
-                        padding: 0 !important; 
-                        background: white !important; 
-                        overflow: visible !important;
-                    }
-
-                    body > *:not(.print-modal-overlay) {
-                        display: none !important;
-                    }
-                    
-                    .no-print, .print-actions-bar { 
-                        display: none !important; 
-                    }
-
-                    .print-modal-overlay, .print-modal-overlay * { 
-                        visibility: visible !important; 
-                    }
-                    
+                    html, body { margin: 0 !important; padding: 0 !important; background: white !important; overflow: visible !important; }
+                    body > *:not(.print-modal-overlay) { display: none !important; }
+                    .no-print, .print-actions-bar { display: none !important; }
                     .print-modal-overlay { 
-                        position: absolute !important; 
-                        left: 0 !important; 
-                        top: 0 !important; 
-                        right: 0 !important;
-                        bottom: 0 !important;
-                        width: 210mm !important; 
-                        height: 297mm !important; 
+                        position: absolute !important; left: 0 !important; top: 0 !important; 
+                        background: white !important; padding: 0 !important; margin: 0 !important; 
                         display: block !important; 
-                        background: white !important; 
-                        padding: 0 !important; 
-                        margin: 0 !important; 
-                    }
-                    
-                    .a4-preview-box { 
-                        position: absolute !important; 
-                        top: 0 !important; 
-                        left: 0 !important; 
-                        width: 100% !important; 
-                        height: 100% !important; 
-                        margin: 0 !important; 
-                        box-shadow: none !important; 
-                        border: none !important;
-                        padding: 15mm !important; 
-                        box-sizing: border-box !important;
-                        direction: rtl !important; 
-                        display: flex !important;
-                        flex-direction: column !important;
-                        border-radius: 0 !important; 
-                        page-break-after: avoid !important;
-                        page-break-inside: avoid !important;
                     }
                 }
             `}</style>
 
+            {printFormat === 'a4' && (
+                <style>{`
+                    @media print {
+                        @page { size: A4 portrait; margin: 0 !important; }
+                        html, body, .print-modal-overlay { width: 210mm !important; height: 297mm !important; }
+                        .a4-preview-box {
+                            position: absolute !important; top: 0 !important; left: 0 !important; 
+                            width: 210mm !important; height: 297mm !important; 
+                            padding: 15mm !important; margin: 0 !important; border: none !important; box-shadow: none !important;
+                            page-break-inside: avoid !important;
+                        }
+                    }
+                `}</style>
+            )}
+
+            {printFormat === 'thermal' && (
+                <style>{`
+                    @media print {
+                        @page { size: 80mm auto; margin: 0 !important; }
+                        html, body, .print-modal-overlay { width: 80mm !important; }
+                        .thermal-preview-box {
+                            position: absolute !important; top: 0 !important; left: 0 !important; 
+                            width: 80mm !important; margin: 0 !important; padding: 5px !important; 
+                            border: none !important; box-shadow: none !important;
+                        }
+                    }
+                `}</style>
+            )}
+
             <div className="print-actions-bar no-print">
-                <button onClick={handlePrintOrPDF} className="action-btn print">
-                    🖨️ طباعة / تنزيل PDF
+                <button onClick={handlePrintOrPDF} className="action-btn print">🖨️ طباعة الفاتورة</button>
+                <button onClick={() => setPrintFormat(f => f === 'a4' ? 'thermal' : 'a4')} className="action-btn print" style={{ background: '#f59e0b', color: 'white' }}>
+                    تغيير للطباعة {printFormat === 'a4' ? 'الحرارية 🧾' : 'A4 📄'}
                 </button>
-                <button onClick={onClose} className="action-btn close">
-                    ❌ إغلاق المعاينة
-                </button>
+                <button onClick={onClose} className="action-btn close">❌ إغلاق المعاينة</button>
             </div>
 
-            <div className="a4-preview-box">
+            {printFormat === 'a4' ? (
+                <div className="a4-preview-box">
                 
                 {/* 1️⃣ رأس الفاتورة */}
                 <div className="inv-header">
@@ -602,6 +592,99 @@ export default function InvoicePrintModal({ isOpen, onClose, record, setRecord =
                 </div>
 
             </div>
+            ) : (
+                <div className="thermal-preview-box">
+                    <div style={{ fontSize: '18px', fontWeight: 900, marginBottom: '5px' }}>شركة مياه غيام</div>
+                    <div>فاتورة ضريبية مبسطة</div>
+                    <div>Simplified Tax Invoice</div>
+                    <div style={{ borderBottom: '1px dashed #000', margin: '10px 0' }}></div>
+                    
+                    <div style={{ textAlign: 'center', marginBottom: '10px' }}>
+                        <div>الرقم الضريبي: 312487477800003</div>
+                        <div>الفاتورة: {record.invoice_number || record.id?.slice(0,8)}</div>
+                        <div>التاريخ: {creationDate} - {creationTime}</div>
+                        <div>العميل: {record.client_name || 'عميل نقدي'}</div>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>الصنف</th>
+                                <th>الكمية</th>
+                                <th>الإجمالي</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {(hasMainItem && record.description) && (
+                                <tr>
+                                    <td style={{ textAlign: 'right' }}>{record.description}</td>
+                                    <td>{Number(record.quantity || 1).toFixed(2)}</td>
+                                    <td>{(Number(record.quantity || 1) * Number(record.unit_price || 0)).toFixed(2)}</td>
+                                </tr>
+                            )}
+                            {record.lines?.map((line: any, idx: number) => (
+                                <tr key={`l-${idx}`}>
+                                    <td style={{ textAlign: 'right' }}>{line.description}</td>
+                                    <td>{Number(line.quantity || 1).toFixed(2)}</td>
+                                    <td>{(Number(line.quantity || 1) * Number(line.unit_price || 0)).toFixed(2)}</td>
+                                </tr>
+                            ))}
+                            {record.lines_data?.map((line: any, idx: number) => (
+                                <tr key={`ld-${idx}`}>
+                                    <td style={{ textAlign: 'right' }}>{line.description}</td>
+                                    <td>{Number(line.quantity || 1).toFixed(2)}</td>
+                                    <td>{Number(line.total_price || 0).toFixed(2)}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+
+                    <div style={{ borderBottom: '1px dashed #000', margin: '10px 0' }}></div>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
+                        <span>الإجمالي الفرعي:</span>
+                        <span>{formatNumberEn(displayLineTotal)}</span>
+                    </div>
+                    {Number(record.materials_discount) > 0 && (
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
+                            <span>خصم:</span>
+                            <span>{formatNumberEn(record.materials_discount)} -</span>
+                        </div>
+                    )}
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
+                        <span>الخاضع للضريبة:</span>
+                        <span>{formatNumberEn(record.taxable_amount)}</span>
+                    </div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
+                        <span>الضريبة (15%):</span>
+                        <span>{formatNumberEn(record.tax_amount)}</span>
+                    </div>
+                    
+                    <div style={{ borderBottom: '1px dashed #000', margin: '10px 0' }}></div>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '16px', fontWeight: 'bold' }}>
+                        <span>الإجمالي المستحق:</span>
+                        <span>{formatNumberEn(record.total_amount)} ر.س</span>
+                    </div>
+
+                    <div style={{ borderBottom: '1px dashed #000', margin: '10px 0' }}></div>
+
+                    <div style={{ display: 'flex', justifyContent: 'center', margin: '15px 0' }}>
+                        <ZatcaQRCode 
+                            sellerName="مياه غيام"
+                            vatRegistrationNumber="312487477800003"
+                            timestamp={record.date || new Date().toISOString()}
+                            invoiceTotal={record.total_amount?.toString() || "0"}
+                            vatTotal={record.tax_amount?.toString() || "0"}
+                        />
+                    </div>
+
+                    <div style={{ fontSize: '11px', marginTop: '10px', textAlign: 'center' }}>
+                        البائع: {finalFullName}<br/>
+                        تم الإصدار عبر نظام غيام
+                    </div>
+                </div>
+            )}
         </div>
     );
 

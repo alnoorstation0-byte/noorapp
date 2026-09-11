@@ -6,6 +6,7 @@ import { formatCurrency } from '@/lib/helpers';
 
 export default function PurchaseOrderPrintModal({ isOpen, onClose, record }: any) {
     const [mounted, setMounted] = useState(false);
+    const [printFormat, setPrintFormat] = useState<'a4' | 'thermal'>('a4');
 
     useEffect(() => {
         setMounted(true);
@@ -20,29 +21,94 @@ export default function PurchaseOrderPrintModal({ isOpen, onClose, record }: any
         setTimeout(() => { document.title = originalTitle; }, 1000);
     };
 
-    return createPortal(
-        <div className="print-modal-wrapper" style={{
-            position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-            backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(10px)',
-            zIndex: 999999, display: 'flex', justifyContent: 'center', alignItems: 'flex-start',
-            padding: '20px', overflowY: 'auto'
-        }}>
-            <div className="print-modal-content" style={{
-                background: 'white', borderRadius: '15px', width: '100%', maxWidth: '800px',
-                boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)'
-            }}>
-                {/* Header Actions */}
-                <div className="no-print" style={{ padding: '20px', display: 'flex', justifyContent: 'space-between', borderBottom: '1px solid #e5e7eb', background: '#f8fafc' }}>
-                    <h2 style={{ margin: 0, color: THEME.primary, fontWeight: 800 }}>طباعة أمر الشراء</h2>
-                    <div style={{ display: 'flex', gap: '10px' }}>
-                        <button onClick={printInvoice} className="btn-main-glass" style={{ background: THEME.goldAccent, color: THEME.primary, margin: 0, padding: '8px 15px' }}>🖨️ طباعة المستند</button>
-                        <button onClick={onClose} className="btn-main-glass" style={{ background: '#ef4444', color: 'white', margin: 0, padding: '8px 15px' }}>❌ إغلاق</button>
-                    </div>
-                </div>
+    const linesToPrint = record.items || [];
+    const subtotal = linesToPrint.reduce((sum: number, item: any) => sum + ((item.quantity||0) * (item.unit_price||0)), 0);
+    const taxTotal = linesToPrint.reduce((sum: number, item: any) => sum + (item.tax_amount || 0), 0);
 
-                {/* Printable Area */}
-                <div id="printable-po" className="print-container" style={{ padding: '40px', background: 'white', color: 'black' }} dir="rtl">
-                    
+    return createPortal(
+        <div className="print-modal-overlay">
+            <style>{`
+                .print-modal-overlay { 
+                    position: fixed !important; inset: 0 !important; 
+                    background: rgba(18, 41, 70, 0.90) !important; 
+                    backdrop-filter: blur(10px) !important; 
+                    z-index: 999999999 !important; 
+                    display: flex !important; flex-direction: column !important; 
+                    align-items: center !important; justify-content: flex-start !important; 
+                    padding: 30px 20px !important; overflow-y: auto !important; 
+                    font-family: 'Arial', sans-serif; 
+                }
+
+                .print-actions-bar {
+                    display: flex !important; gap: 15px !important; margin-bottom: 25px !important;
+                    background: white !important; padding: 15px 30px !important; border-radius: 50px !important;
+                    box-shadow: 0 10px 30px rgba(0,0,0,0.3) !important; position: sticky !important; 
+                    top: 20px !important; z-index: 1000000000 !important; 
+                }
+                .action-btn { padding: 12px 25px; border-radius: 10px; border: none; font-weight: 900; font-size: 16px; cursor: pointer; transition: 0.2s; }
+                .action-btn.print { background: linear-gradient(135deg, #2891C8, #7FD4E3); color: #122946; }
+                .action-btn.close { background: #fee2e2; color: #dc2626; }
+
+                /* 🚀 Thermal Styles */
+                .thermal-preview-box {
+                    width: 80mm; background: white; padding: 10px; margin: 0 auto; color: black;
+                    font-family: 'Courier New', Courier, monospace; font-size: 13px; font-weight: bold;
+                    text-align: center; direction: rtl; box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+                }
+                .thermal-preview-box table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+                .thermal-preview-box th, .thermal-preview-box td { border-bottom: 1px dashed #000; padding: 4px 0; font-size: 12px; }
+
+                @media print {
+                    html, body { margin: 0 !important; padding: 0 !important; background: white !important; overflow: visible !important; }
+                    body > *:not(.print-modal-overlay) { display: none !important; }
+                    .no-print, .print-actions-bar { display: none !important; }
+                    .print-modal-overlay { 
+                        position: absolute !important; left: 0 !important; top: 0 !important; 
+                        background: white !important; padding: 0 !important; margin: 0 !important; 
+                        display: block !important; 
+                    }
+                }
+            `}</style>
+
+            {printFormat === 'a4' && (
+                <style>{`
+                    @media print {
+                        @page { size: A4 portrait; margin: 0 !important; }
+                        html, body, .print-modal-overlay { width: 210mm !important; height: 297mm !important; }
+                        .a4-preview-box {
+                            position: absolute !important; top: 0 !important; left: 0 !important; 
+                            width: 210mm !important; height: 297mm !important; 
+                            padding: 15mm !important; margin: 0 !important; border: none !important; box-shadow: none !important;
+                            page-break-inside: avoid !important;
+                        }
+                    }
+                `}</style>
+            )}
+
+            {printFormat === 'thermal' && (
+                <style>{`
+                    @media print {
+                        @page { size: 80mm auto; margin: 0 !important; }
+                        html, body, .print-modal-overlay { width: 80mm !important; }
+                        .thermal-preview-box {
+                            position: absolute !important; top: 0 !important; left: 0 !important; 
+                            width: 80mm !important; margin: 0 !important; padding: 5px !important; 
+                            border: none !important; box-shadow: none !important;
+                        }
+                    }
+                `}</style>
+            )}
+
+            <div className="print-actions-bar no-print">
+                <button onClick={printInvoice} className="action-btn print">🖨️ طباعة</button>
+                <button onClick={() => setPrintFormat(f => f === 'a4' ? 'thermal' : 'a4')} className="action-btn print" style={{ background: '#f59e0b', color: 'white' }}>
+                    تغيير للطباعة {printFormat === 'a4' ? 'الحرارية 🧾' : 'A4 📄'}
+                </button>
+                <button onClick={onClose} className="action-btn close">❌ إغلاق</button>
+            </div>
+
+            {printFormat === 'a4' ? (
+                <div className="a4-preview-box" style={{ background: 'white', padding: '40px', borderRadius: '15px', color: 'black', direction: 'rtl', minHeight: '297mm' }}>
                     {/* Header */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', borderBottom: '2px solid #000', paddingBottom: '20px', marginBottom: '20px' }}>
                         <div>
@@ -51,7 +117,7 @@ export default function PurchaseOrderPrintModal({ isOpen, onClose, record }: any
                             <p style={{ margin: '5px 0 0 0', fontSize: '14px' }}>التاريخ: {record.transaction_date}</p>
                         </div>
                         <div style={{ textAlign: 'left' }}>
-                            <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 'bold' }}>مؤسسة غيدام التجارية</h2>
+                            <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 'bold' }}>شركة مياه غيام</h2>
                         </div>
                     </div>
 
@@ -85,7 +151,7 @@ export default function PurchaseOrderPrintModal({ isOpen, onClose, record }: any
                             </tr>
                         </thead>
                         <tbody>
-                            {record.items?.map((item: any, idx: number) => (
+                            {linesToPrint.map((item: any, idx: number) => (
                             <tr key={idx}>
                                 <td style={{ border: '1px solid #ccc', padding: '10px' }}>{item.inventory_items?.name || 'غير محدد'}</td>
                                 <td style={{ border: '1px solid #ccc', padding: '10px', textAlign: 'center' }}>{item.quantity}</td>
@@ -101,11 +167,11 @@ export default function PurchaseOrderPrintModal({ isOpen, onClose, record }: any
                         <div style={{ width: '300px', border: '1px solid #ccc', borderRadius: '8px', padding: '15px' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
                                 <span>الإجمالي قبل الضريبة:</span>
-                                <span>{formatCurrency(record.items?.reduce((sum: number, item: any) => sum + (item.quantity * item.unit_price), 0) || 0)}</span>
+                                <span>{formatCurrency(subtotal)}</span>
                             </div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px' }}>
                                 <span>الضريبة (15%):</span>
-                                <span>{formatCurrency(record.items?.reduce((sum: number, item: any) => sum + (item.tax_amount || 0), 0) || 0)}</span>
+                                <span>{formatCurrency(taxTotal)}</span>
                             </div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', borderTop: '2px solid #000', paddingTop: '10px', fontWeight: 'bold' }}>
                                 <span>الإجمالي المستحق:</span>
@@ -123,9 +189,67 @@ export default function PurchaseOrderPrintModal({ isOpen, onClose, record }: any
                             <p style={{ borderTop: '1px solid #000', paddingTop: '10px' }}>توقيع المورد / المندوب</p>
                         </div>
                     </div>
-
                 </div>
-            </div>
+            ) : (
+                <div className="thermal-preview-box">
+                    <div style={{ fontSize: '18px', fontWeight: 900, marginBottom: '5px' }}>شركة مياه غيام</div>
+                    <div>أمر شراء | Purchase Order</div>
+                    <div style={{ borderBottom: '1px dashed #000', margin: '10px 0' }}></div>
+                    
+                    <div style={{ textAlign: 'right', marginBottom: '10px' }}>
+                        <div>المرجع: {record.transaction_number}</div>
+                        <div>التاريخ: {record.transaction_date}</div>
+                        <div>المورد: {record.partners?.name || '---'}</div>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>الصنف</th>
+                                <th>الكمية</th>
+                                <th>الإجمالي</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {linesToPrint.map((line: any, idx: number) => {
+                                const lineTotal = Number(line.quantity || 0) * Number(line.unit_price || 0);
+                                return (
+                                    <tr key={idx}>
+                                        <td style={{ textAlign: 'right' }}>{line.inventory_items?.name || '---'}</td>
+                                        <td style={{ textAlign: 'center' }}>{line.quantity}</td>
+                                        <td>{lineTotal.toFixed(2)}</td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+
+                    <div style={{ borderBottom: '1px dashed #000', margin: '10px 0' }}></div>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginTop: '5px' }}>
+                        <span>الإجمالي (بدون ضريبة):</span>
+                        <span>{subtotal.toFixed(2)} ر.س</span>
+                    </div>
+                    {taxTotal > 0 && (
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginTop: '5px' }}>
+                            <span>الضريبة:</span>
+                            <span>{taxTotal.toFixed(2)} ر.س</span>
+                        </div>
+                    )}
+                    
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', marginTop: '10px', fontWeight: 'bold' }}>
+                        <span>الإجمالي المستحق:</span>
+                        <span>{Number(record.total_amount || 0).toFixed(2)} ر.س</span>
+                    </div>
+
+                    <div style={{ borderBottom: '1px dashed #000', margin: '10px 0' }}></div>
+
+                    <div style={{ fontSize: '11px', marginTop: '10px', textAlign: 'center' }}>
+                        المعتمد: أمين المستودع<br/>
+                        تم الإصدار عبر نظام غيام
+                    </div>
+                </div>
+            )}
         </div>,
         document.body
     );

@@ -9,6 +9,7 @@ import { supabase } from '@/lib/supabase';
 export default function ExpensePrintModal({ isOpen, onClose, record, projects }: any) {
     const [mounted, setMounted] = useState(false); 
     const [creatorInfo, setCreatorInfo] = useState<{username: string, fullName: string} | null>(null); 
+    const [printFormat, setPrintFormat] = useState<'a4' | 'thermal'>('a4');
 
     useEffect(() => {
         setMounted(true);
@@ -162,22 +163,66 @@ export default function ExpensePrintModal({ isOpen, onClose, record, projects }:
 
                 .inv-footer-contact { margin-top: auto !important; border-top: 2px solid rgba(40, 145, 200, 0.15); padding-top: 15px; text-align: center; font-size: 13px; color: #64748b; font-weight: 700; }
 
+                /* 🚀 Thermal Styles */
+                .thermal-preview-box {
+                    width: 80mm; background: white; padding: 10px; margin: 0 auto; color: black;
+                    font-family: 'Courier New', Courier, monospace; font-size: 13px; font-weight: bold;
+                    text-align: center; direction: rtl; box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+                }
+                .thermal-preview-box table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+                .thermal-preview-box th, .thermal-preview-box td { border-bottom: 1px dashed #000; padding: 4px 0; font-size: 12px; }
+
                 @media print {
-                    @page { size: A4 portrait; margin: 0 !important; }
-                    html, body { width: 210mm !important; height: 297mm !important; margin: 0 !important; padding: 0 !important; background: white !important; overflow: visible !important; }
+                    html, body { margin: 0 !important; padding: 0 !important; background: white !important; overflow: visible !important; }
                     body > *:not(.print-modal-overlay) { display: none !important; }
                     .no-print, .print-actions-bar { display: none !important; }
-                    .print-modal-overlay { position: absolute !important; left: 0 !important; top: 0 !important; right: 0 !important; bottom: 0 !important; width: 210mm !important; height: 297mm !important; display: block !important; background: white !important; padding: 0 !important; margin: 0 !important; }
-                    .a4-preview-box { position: absolute !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; margin: 0 !important; box-shadow: none !important; border: none !important; padding: 15mm !important; box-sizing: border-box !important; direction: rtl !important; display: flex !important; flex-direction: column !important; border-radius: 0 !important; page-break-after: avoid !important; page-break-inside: avoid !important; }
+                    .print-modal-overlay { 
+                        position: absolute !important; left: 0 !important; top: 0 !important; 
+                        background: white !important; padding: 0 !important; margin: 0 !important; 
+                        display: block !important; 
+                    }
                 }
             `}</style>
 
+            {printFormat === 'a4' && (
+                <style>{`
+                    @media print {
+                        @page { size: A4 portrait; margin: 0 !important; }
+                        html, body, .print-modal-overlay { width: 210mm !important; height: 297mm !important; }
+                        .a4-preview-box {
+                            position: absolute !important; top: 0 !important; left: 0 !important; 
+                            width: 210mm !important; height: 297mm !important; 
+                            padding: 15mm !important; margin: 0 !important; border: none !important; box-shadow: none !important;
+                            page-break-inside: avoid !important;
+                        }
+                    }
+                `}</style>
+            )}
+
+            {printFormat === 'thermal' && (
+                <style>{`
+                    @media print {
+                        @page { size: 80mm auto; margin: 0 !important; }
+                        html, body, .print-modal-overlay { width: 80mm !important; }
+                        .thermal-preview-box {
+                            position: absolute !important; top: 0 !important; left: 0 !important; 
+                            width: 80mm !important; margin: 0 !important; padding: 5px !important; 
+                            border: none !important; box-shadow: none !important;
+                        }
+                    }
+                `}</style>
+            )}
+
             <div className="print-actions-bar no-print">
-                <button onClick={handlePrintOrPDF} className="action-btn print">🖨️ طباعة السند</button>
-                <button onClick={onClose} className="action-btn close">❌ إغلاق المعاينة</button>
+                <button onClick={handlePrintOrPDF} className="action-btn print">🖨️ طباعة</button>
+                <button onClick={() => setPrintFormat(f => f === 'a4' ? 'thermal' : 'a4')} className="action-btn print" style={{ background: '#f59e0b', color: 'white' }}>
+                    تغيير للطباعة {printFormat === 'a4' ? 'الحرارية 🧾' : 'A4 📄'}
+                </button>
+                <button onClick={onClose} className="action-btn close">❌ إغلاق</button>
             </div>
 
-            <div className="a4-preview-box">
+            {printFormat === 'a4' ? (
+                <div className="a4-preview-box">
                 
                 {/* 1️⃣ رأس الفاتورة */}
                 <div className="inv-header">
@@ -303,6 +348,66 @@ export default function ExpensePrintModal({ isOpen, onClose, record, projects }:
                 </div>
 
             </div>
+            ) : (
+                <div className="thermal-preview-box">
+                    <div style={{ fontSize: '18px', fontWeight: 900, marginBottom: '5px' }}>شركة مياه غيام</div>
+                    <div>سند مصروف | Expense Voucher</div>
+                    <div style={{ borderBottom: '1px dashed #000', margin: '10px 0' }}></div>
+                    
+                    <div style={{ textAlign: 'right', marginBottom: '10px' }}>
+                        <div>المرجع: {record.expense_number || record.id?.slice(0,8)}</div>
+                        <div>التاريخ: {creationDate}</div>
+                        <div>حساب السداد: {record.payment_account || '---'}</div>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>البيان</th>
+                                <th>الإجمالي</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {linesToPrint.map((line: any, idx: number) => {
+                                const lineTotal = Number(line.quantity || 1) * Number(line.unit_price || 0);
+                                return (
+                                    <tr key={idx}>
+                                        <td style={{ textAlign: 'right' }}>{line.description}</td>
+                                        <td>{lineTotal.toFixed(2)}</td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+
+                    <div style={{ borderBottom: '1px dashed #000', margin: '10px 0' }}></div>
+
+                    {vat > 0 && (
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginTop: '5px' }}>
+                            <span>الضريبة:</span>
+                            <span>{vat.toFixed(2)} ر.س</span>
+                        </div>
+                    )}
+                    {discount > 0 && (
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginTop: '5px' }}>
+                            <span>الخصم:</span>
+                            <span>{discount.toFixed(2)} -</span>
+                        </div>
+                    )}
+                    
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', marginTop: '10px', fontWeight: 'bold' }}>
+                        <span>الصافي المدفوع:</span>
+                        <span>{grandTotal.toFixed(2)} ر.س</span>
+                    </div>
+
+                    <div style={{ borderBottom: '1px dashed #000', margin: '10px 0' }}></div>
+
+                    <div style={{ fontSize: '11px', marginTop: '10px', textAlign: 'center' }}>
+                        المعتمد: {finalFullName}<br/>
+                        تم الإصدار عبر نظام غيام
+                    </div>
+                </div>
+            )}
         </div>
     );
 

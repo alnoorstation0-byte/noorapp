@@ -29,6 +29,7 @@ export default function StatementPrintModal({
 }: StatementPrintModalProps) {
     const printRef = useRef<HTMLDivElement>(null);
     const [mounted, setMounted] = useState(false);
+    const [printFormat, setPrintFormat] = useState<'a4' | 'thermal'>('a4');
 
     // 🛡️ تفعيل المودال بشكل آمن لمنع أخطاء الـ SSR في Next.js
     useEffect(() => {
@@ -57,10 +58,14 @@ export default function StatementPrintModal({
             <div className="print-modal-content">
                 
                 <div className="no-print controls-bar">
-                    <button type="button" onClick={handlePrint} className="btn-print">🖨️ بدء الطباعة</button>
+                    <button type="button" onClick={handlePrint} className="btn-print">🖨️ طباعة المستند</button>
+                    <button type="button" onClick={() => setPrintFormat(f => f === 'a4' ? 'thermal' : 'a4')} className="btn-print" style={{ background: '#f59e0b', color: 'white' }}>
+                        تغيير للطباعة {printFormat === 'a4' ? 'الحرارية 🧾' : 'A4 📄'}
+                    </button>
                     <button type="button" onClick={onClose} className="btn-close">إغلاق ✕</button>
                 </div>
 
+                {printFormat === 'a4' ? (
                 <div className="a4-paper" ref={printRef} id="printable-area">
                     
                     <div className="print-header">
@@ -186,6 +191,61 @@ export default function StatementPrintModal({
                         <div className="sig-box"><p>توقيع المورد / الشريك</p><div className="sig-line"></div></div>
                     </div>
                 </div>
+                ) : (
+                <div className="thermal-preview-box">
+                    <div style={{ fontSize: '18px', fontWeight: 900, marginBottom: '5px' }}>شركة مياه غيام</div>
+                    <div>كشف حساب | Account Statement</div>
+                    <div style={{ borderBottom: '1px dashed #000', margin: '10px 0' }}></div>
+                    
+                    <div style={{ textAlign: 'right', marginBottom: '10px' }}>
+                        <div>الجهة: {partnerName || '---'}</div>
+                        <div>الفترة: {dateFrom ? formatDate(dateFrom) : 'البداية'} - {dateTo ? formatDate(dateTo) : 'تاريخه'}</div>
+                        <div>تاريخ الإصدار: {new Date().toLocaleDateString('ar-SA')}</div>
+                    </div>
+
+                    <div style={{ borderBottom: '1px dashed #000', margin: '10px 0' }}></div>
+
+                    <div style={{ textAlign: 'right', marginBottom: '10px' }}>
+                        <div>رصيد افتتاحي: {formatCurrency(Math.abs(openingBalance))} {openingBalance >= 0 ? '(له)' : '(عليه)'}</div>
+                    </div>
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>التاريخ</th>
+                                <th>البيان</th>
+                                <th>له/عليه</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {printLines.map((line: any, idx: number) => {
+                                const isCredit = line.credit > 0;
+                                const amt = isCredit ? line.credit : line.debit;
+                                return (
+                                    <tr key={idx}>
+                                        <td>{formatDate(line.date)}</td>
+                                        <td style={{ textAlign: 'right' }}>{line.description}</td>
+                                        <td>{amt.toFixed(2)} {isCredit ? 'له' : 'عليه'}</td>
+                                    </tr>
+                                );
+                            })}
+                        </tbody>
+                    </table>
+
+                    <div style={{ borderBottom: '1px dashed #000', margin: '10px 0' }}></div>
+
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', marginTop: '10px', fontWeight: 'bold' }}>
+                        <span>الرصيد النهائي:</span>
+                        <span>{formatCurrency(Math.abs(currentBalance))} {currentBalance >= 0 ? '(له)' : '(عليه)'}</span>
+                    </div>
+
+                    <div style={{ borderBottom: '1px dashed #000', margin: '10px 0' }}></div>
+
+                    <div style={{ fontSize: '11px', marginTop: '10px', textAlign: 'center' }}>
+                        تم الإصدار عبر نظام غيام
+                    </div>
+                </div>
+                )}
             </div>
 
             <style>{`
@@ -199,6 +259,16 @@ export default function StatementPrintModal({
                 .btn-print:hover { transform: translateY(-2px); filter: brightness(1.1); }
                 .btn-close { background: #fdfaf6; color: #4a3b32; border: 1px solid #2891C8; padding: 12px 24px; border-radius: 12px; font-weight: 900; font-size: 16px; cursor: pointer; transition: 0.2s; }
                 .btn-close:hover { background: #eaddcf; }
+
+                /* 🚀 Thermal Styles */
+                .thermal-preview-box {
+                    width: 80mm; background: white; padding: 10px; margin: 0 auto; color: black;
+                    font-family: 'Courier New', Courier, monospace; font-size: 13px; font-weight: bold;
+                    text-align: center; direction: rtl; box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+                    min-height: auto;
+                }
+                .thermal-preview-box table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+                .thermal-preview-box th, .thermal-preview-box td { border-bottom: 1px dashed #000; padding: 4px 0; font-size: 12px; }
 
                 /* 🚀 جعل الورقة تتمدد كـ Flex Column لدفع التواقيع للأسفل */
                 .a4-paper { 
@@ -253,58 +323,46 @@ export default function StatementPrintModal({
                 .sig-box { text-align: center; width: 22%; }
                 .sig-box p { font-size: 14px; font-weight: 900; color: #8a7a6b; margin-bottom: 60px; }
                 .sig-line { border-bottom: 1px dashed #2891C8; width: 100%; }
-
-                @media print {
-                    html, body { 
-                        visibility: hidden !important; 
-                        overflow: visible !important; 
-                        height: auto !important; 
-                        background: white !important;
-                    }
-                    .print-modal-overlay { 
-                        visibility: visible !important;
-                        position: absolute !important; 
-                        left: 0 !important; 
-                        top: 0 !important; 
-                        width: 100% !important; 
-                        height: auto !important;
-                        overflow: visible !important; 
-                        background: transparent !important; 
-                        padding: 0 !important; 
-                    }
-                    .print-modal-content {
-                        width: 100% !important;
-                        max-width: 100% !important;
-                        margin: 0 !important;
-                        animation: none !important;
-                    }
-                    #printable-area, #printable-area * { 
-                        visibility: visible !important; 
-                    }
-                    #printable-area { 
-                        position: relative !important; 
-                        width: 100% !important; 
-                        margin: 0 !important; 
-                        padding: 0 !important; 
-                        box-shadow: none !important;
-                        display: flex !important;
-                        flex-direction: column !important;
-                        min-height: 100vh !important;
-                    }
-                    .no-print { display: none !important; }
-
-                    .print-table th { border: none !important; border-bottom: 2px solid #000 !important; border-top: 1px solid #000 !important; }
-                    .print-table td { border: none !important; }
-                    .print-table tbody tr:nth-child(even) td { 
-                        background-color: #f7f3ed !important; 
-                        -webkit-print-color-adjust: exact !important; 
-                        print-color-adjust: exact !important; 
-                    }
-
-                    tr { page-break-inside: avoid; }
-                    @page { size: A4 portrait; margin: 10mm; }
-                }
             `}</style>
+            
+            {printFormat === 'a4' && (
+                <style>{`
+                    @media print {
+                        html, body { width: 210mm !important; margin: 0 !important; padding: 0 !important; background: white !important; }
+                        .print-modal-overlay { 
+                            position: absolute !important; left: 0 !important; top: 0 !important; right: 0 !important; 
+                            background: white !important; padding: 0 !important; margin: 0 !important; 
+                        }
+                        #printable-area, #printable-area * { visibility: visible !important; }
+                        #printable-area { 
+                            position: relative !important; width: 100% !important; margin: 0 !important; 
+                            padding: 0 !important; box-shadow: none !important; display: flex !important;
+                            flex-direction: column !important; min-height: 100vh !important;
+                        }
+                        .no-print { display: none !important; }
+                        .print-table th { border: none !important; border-bottom: 2px solid #000 !important; border-top: 1px solid #000 !important; }
+                        .print-table td { border: none !important; }
+                        .print-table tbody tr:nth-child(even) td { background-color: #f7f3ed !important; -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+                        tr { page-break-inside: avoid; }
+                        @page { size: A4 portrait; margin: 10mm; }
+                    }
+                `}</style>
+            )}
+
+            {printFormat === 'thermal' && (
+                <style>{`
+                    @media print {
+                        @page { size: 80mm auto; margin: 0 !important; }
+                        html, body, .print-modal-overlay { width: 80mm !important; margin: 0 !important; padding: 0 !important; background: white !important; }
+                        .thermal-preview-box {
+                            position: absolute !important; top: 0 !important; left: 0 !important; 
+                            width: 80mm !important; margin: 0 !important; padding: 5px !important; 
+                            border: none !important; box-shadow: none !important;
+                        }
+                        .no-print { display: none !important; }
+                    }
+                `}</style>
+            )}
         </div>
     );
 
