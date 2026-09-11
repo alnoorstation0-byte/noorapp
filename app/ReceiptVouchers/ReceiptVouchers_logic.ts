@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/lib/toast-context';
 import { fetchPaginatedData } from '@/lib/supabase-pagination';
 import { useRealtimeInvalidate } from '@/lib/useRealtimeSync';
+import { useAuth } from '@/components/authGuard';
 
 export function useReceiptVouchersLogic() {
     const queryClient = useQueryClient();
@@ -45,19 +46,33 @@ export function useReceiptVouchersLogic() {
     // =========================================================================
     // 📥 جلب البيانات (Data Fetching)
     // =========================================================================
+    const { profile, can } = useAuth();
+    
     const { data: allData = [], isLoading } = useQuery({
-        queryKey: ['receipt_vouchers'],
+        queryKey: ['receipt_vouchers', profile?.id],
         queryFn: async () => {
-            const buildQuery = () => supabase
-                .from('receipt_vouchers')
-                .select(`*, partners!receipt_vouchers_partner_id_fkey(name), invoices(invoice_number)`)
-                .order('date', { ascending: false })
-                .order('created_at', { ascending: false });
+            const buildQuery = () => {
+                let q = supabase
+                    .from('receipt_vouchers')
+                    .select(`*, partners!receipt_vouchers_partner_id_fkey(name), invoices(invoice_number)`)
+                    .order('date', { ascending: false })
+                    .order('created_at', { ascending: false });
+                
+                if (profile) {
+                    const role = String(profile.role || '').toLowerCase();
+                    const isGlobalAdmin = role === 'admin' || role === 'super_admin' || role === 'manager' || profile.is_admin === true;
+                    if (!isGlobalAdmin && profile.linked_partner_id) {
+                        q = q.or(`delegate_id.eq.${profile.linked_partner_id},partner_id.eq.${profile.linked_partner_id}`);
+                    }
+                }
+                return q;
+            };
 
             const rec = await fetchPaginatedData(buildQuery, 'id');
 
             return rec || [];
-        }
+        },
+        enabled: !!profile
     });
 
     const { data: delegates = [] } = useQuery({

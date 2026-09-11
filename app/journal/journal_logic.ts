@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/lib/toast-context';
 import { fetchPaginatedData } from '@/lib/supabase-pagination';
+import { useAuth } from '@/components/authGuard';
 
 /**
  * العقل المدبر لدفتر اليومية الشامل - رواسي V12
@@ -24,9 +25,11 @@ export function useJournalLogic() {
     const [filterStatus, setFilterStatus] = useState('الكل'); 
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
+    const { profile, can } = useAuth();
+
     // 📥 2. محرك جلب البيانات - سحب على مراحل (React Query)
     const { data: journalMaster = [], isLoading, isError } = useQuery({
-        queryKey: ['journal_master_view', dateFrom, dateTo, filterAccountId, filterPartnerId, filterStatus], 
+        queryKey: ['journal_master_view', dateFrom, dateTo, filterAccountId, filterPartnerId, filterStatus, profile?.id], 
         queryFn: async () => {
             const buildQuery = () => {
                 let query = supabase
@@ -39,7 +42,19 @@ export function useJournalLogic() {
                 if (dateFrom) query = query.gte('entry_date', dateFrom);
                 if (dateTo) query = query.lte('entry_date', dateTo);
                 if (filterAccountId) query = query.eq('account_id', filterAccountId);
-                if (filterPartnerId) query = query.eq('partner_id', filterPartnerId);
+                
+                // 🛡️ Data Scoping
+                if (profile) {
+                    const role = String(profile.role || '').toLowerCase();
+                    const isGlobalAdmin = role === 'admin' || role === 'super_admin' || role === 'manager' || profile.is_admin === true;
+                    if (!isGlobalAdmin && profile.linked_partner_id) {
+                        query = query.eq('partner_id', profile.linked_partner_id);
+                    } else if (filterPartnerId) {
+                        query = query.eq('partner_id', filterPartnerId);
+                    }
+                } else if (filterPartnerId) {
+                    query = query.eq('partner_id', filterPartnerId);
+                }
                 
                 if (filterStatus === 'معتمد') query = query.eq('header_status', 'معتمد');
                 if (filterStatus === 'مسودة') query = query.eq('header_status', 'draft');
@@ -49,6 +64,7 @@ export function useJournalLogic() {
 
             return await fetchPaginatedData(buildQuery, 'line_id');
         },
+        enabled: !!profile,
         staleTime: 60 * 1000 
     });
 

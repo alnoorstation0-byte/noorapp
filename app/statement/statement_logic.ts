@@ -5,6 +5,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useSearchParams } from 'next/navigation';
 import { useToast } from '@/lib/toast-context'; 
 import { fetchPaginatedData } from '@/lib/supabase-pagination';
+import { useAuth } from '@/components/authGuard';
 
 // 🚀 المترجم المالي - تم تحديث المسمى لـ "قيد غرامة / استقطاع" ليطابق الهوية المحاسبية الجديدة
 const translateVType = (type: string) => {
@@ -43,22 +44,35 @@ export function useStatementLogic() {
     const [isExportingAll, setIsExportingAll] = useState(false);
     const [exportProgress, setExportProgress] = useState('');
 
+    const { profile, can } = useAuth();
+    
+    // 🛡️ Data Scoping: Force partnerId to user's linked_partner_id if they aren't admin
+    const effectivePartnerId = useMemo(() => {
+        if (!profile) return partnerId;
+        const role = String(profile.role || '').toLowerCase();
+        const isGlobalAdmin = role === 'admin' || role === 'super_admin' || role === 'manager' || profile.is_admin === true;
+        if (!isGlobalAdmin && profile.linked_partner_id) {
+            return profile.linked_partner_id;
+        }
+        return partnerId;
+    }, [partnerId, profile]);
+
     const { data: partnerInfo } = useQuery({
-        queryKey: ['partner_info', partnerId],
+        queryKey: ['partner_info', effectivePartnerId],
         queryFn: async () => {
-            if (!partnerId) return null;
-            const { data, error } = await supabase.from('partners').select('name').eq('id', partnerId).single();
+            if (!effectivePartnerId) return null;
+            const { data, error } = await supabase.from('partners').select('name').eq('id', effectivePartnerId).single();
             if (error) return null; return data;
         },
-        enabled: !!partnerId,
+        enabled: !!effectivePartnerId,
     });
 
     const { data: rawLines = [], isLoading } = useQuery({
-        queryKey: ['partner_statement_raw', partnerId],
+        queryKey: ['partner_statement_raw', effectivePartnerId],
         queryFn: async () => {
-            if (!partnerId) return [];
+            if (!effectivePartnerId) return [];
             const buildQuery = () => supabase.from('partner_statement_ledger') 
-                .select('*').eq('partner_id', partnerId)
+                .select('*').eq('partner_id', effectivePartnerId)
                 .order('transaction_date', { ascending: true })
                 .order('debit', { ascending: true })
                 .order('credit', { ascending: true })
@@ -329,7 +343,7 @@ export function useStatementLogic() {
     };
 
     return {
-        partnerId, partnerName: partnerInfo?.name || '', isLoading, dateFrom, dateTo, globalSearch,
+        partnerId: effectivePartnerId, partnerName: partnerInfo?.name || '', isLoading, dateFrom, dateTo, globalSearch,
         setPartnerId, setDateFrom, setDateTo, setGlobalSearch, exportToExcel,
         
         downloadIndividualWorkerPDFs, // 🚀 ممررة للزر وتعمل بكفاءة ومربوطة بالـ ZIP والـ Backend

@@ -55,7 +55,15 @@ export default function TeamPage() {
     const fetchProfiles = async () => {
         setIsLoading(true);
         try {
-            // المحاولة الأولى: جلب البيانات مع اسم الشريك
+            // 1. محاولة الجلب والمزامنة التلقائية مع Auth عبر API الإدارة
+            const apiRes = await fetch('/api/admin/users').then(r => r.json()).catch(() => null);
+            if (apiRes?.success && Array.isArray(apiRes.profiles)) {
+                setProfiles(apiRes.profiles);
+                setIsLoading(false);
+                return;
+            }
+
+            // 2. المحاولة الاحتياطية: جلب البيانات مباشرة مع اسم الشريك
             const { data, error } = await supabase
                 .from('profiles')
                 .select('*, partners(name)')
@@ -67,7 +75,7 @@ export default function TeamPage() {
         } catch (err: any) {
             console.warn("⚠️ فشل جلب العلاقات، جاري المحاولة بدون الشركاء...", err);
             
-            // المحاولة الثانية (Fallback): جلب الملفات فقط
+            // المحاولة الثالثة (Fallback): جلب الملفات فقط
             try {
                 const { data: fallbackData, error: fallbackError } = await supabase
                     .from('profiles')
@@ -325,7 +333,12 @@ export default function TeamPage() {
                         </thead>
                         <tbody>
                             {filteredProfiles.map((user, index) => (
-                                <tr key={user.id}>
+                                <tr 
+                                    key={user.id} 
+                                    onClick={() => { setSelectedProfile(user); setIsModalOpen(true); }} 
+                                    style={{ cursor: 'pointer' }} 
+                                    title="انقر لتعديل بيانات وصلاحيات هذا المستخدم"
+                                >
                                     <td>{index + 1}</td>
                                     <td>{user.full_name || user.nickname || 'مستخدم غير مسمى'}</td>
                                     <td>{user.email || user.username}</td>

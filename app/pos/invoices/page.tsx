@@ -18,8 +18,10 @@ import SmartCombo from '@/components/SmartCombo';
 
 
   // 🎬 المودالز
+import { FaMoneyBillWave } from 'react-icons/fa';
 import InvoiceFormModal from './InvoiceFormModal';
 import InvoicePrintModal from './InvoicePrintModal';
+import ThermalReceiptModal from '../../invoices/ThermalReceiptModal';
 import ReceiptVoucherModal from '@/app/ReceiptVouchers/ReceiptVoucherModal';
 import LoadingScreen from '@/components/LoadingScreen';
 
@@ -31,6 +33,7 @@ export default function InvoicesPage() {
   const { can, loading: permsLoading } = usePermissions();
   const [mounted, setMounted] = useState(false);
   const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
+  const [isThermalPrintModalOpen, setIsThermalPrintModalOpen] = useState(false);
   const [printData, setPrintData] = useState<any>(null);
   
   useEffect(() => {
@@ -241,7 +244,7 @@ export default function InvoicesPage() {
         
         return (
           <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', alignItems: 'center' }}>
-            <button onClick={(e) => { e.stopPropagation(); setPrintData(row); setIsPrintModalOpen(true); }} className="btn-glass-print" title="طباعة الفاتورة" style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '18px', transition: '0.2s' }}>🖨️</button>
+            <button onClick={(e) => { e.stopPropagation(); setPrintData(row); setIsThermalPrintModalOpen(true); }} className="btn-glass-print" title="طباعة الفاتورة" style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '18px', transition: '0.2s' }}>🖨️</button>
             
             {/* 🚀 السحر هنا: دمجنا needsPayment في الشرط عشان يخفي الزرار */}
             {needsPayment && isApproved && logic.handleOpenPaymentModal && (
@@ -411,6 +414,18 @@ export default function InvoicesPage() {
           />
       )}
       
+      {mounted && isThermalPrintModalOpen && (
+          <ThermalReceiptModal 
+            isOpen={true} 
+            onClose={() => setIsThermalPrintModalOpen(false)} 
+            record={printData} 
+            onOpenA4={() => {
+                setIsThermalPrintModalOpen(false);
+                setIsPrintModalOpen(true);
+            }}
+          />
+      )}
+
       {mounted && isPrintModalOpen && (
           <InvoicePrintModal 
             isOpen={true} 

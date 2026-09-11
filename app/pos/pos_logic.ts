@@ -54,6 +54,21 @@ export function usePosLogic() {
         }
     });
 
+    // Fetch Active Shift
+    const { data: activeShift, isLoading: loadingShift } = useQuery({
+        queryKey: ['active_pos_shift', userProfile?.id],
+        enabled: !!userProfile?.id,
+        queryFn: async () => {
+            const { data } = await supabase
+                .from('pos_shifts')
+                .select('*')
+                .eq('user_id', userProfile.id)
+                .eq('status', 'open')
+                .single();
+            return data || null;
+        }
+    });
+
     // Auto-select delegate and warehouse based on logged-in user
     useEffect(() => {
         if (!loadingProfile && !loadingWarehouses) {
@@ -193,6 +208,9 @@ export function usePosLogic() {
     const [isTaxInclusive, setIsTaxInclusive] = useState<boolean>(true);
     const [lastInvoice, setLastInvoice] = useState<any>(null);
     const [isPrintModalOpen, setIsPrintModalOpen] = useState<boolean>(false);
+    const [isThermalPrintModalOpen, setIsThermalPrintModalOpen] = useState<boolean>(false);
+    const [isShiftCloseModalOpen, setIsShiftCloseModalOpen] = useState<boolean>(false);
+    const [isShiftOpenModalOpen, setIsShiftOpenModalOpen] = useState<boolean>(false);
 
     const cartTotal = useMemo(() => {
         let sum = 0;
@@ -215,10 +233,23 @@ export function usePosLogic() {
         mutationFn: async () => {
             if (cart.length === 0) throw new Error("السلة فارغة!");
             if (!selectedWarehouseId) throw new Error("يرجى تحديد منفذ البيع!");
+            if (!activeShift && userProfile?.role !== 'super_admin') {
+                throw new Error("يجب فتح وردية أولاً!");
+            }
 
             const autoNumber = `INV-POS-${Date.now().toString().slice(-6)}`;
             
-            // 1. إنشاء الفاتورة بحالة معلق (غير مرحلة) لكي يعتمدها المحاسب لاحقاً
+            const linesData = cart.map(item => ({
+                item_id: item.inventory_items?.id || item.id,
+                name: item.inventory_items?.name || item.name,
+                quantity: item.quantity || item.qty,
+                unit_price: item.selected_price || item.unit_price || item.price || 0,
+                discount: item.discount || 0,
+                total: ((item.quantity || item.qty) * (item.selected_price || item.unit_price || item.price || 0)) - (item.discount || 0),
+                warehouse_id: selectedWarehouseId
+            }));
+
+            // 1. إنشاء الفاتورة بحالة معلق
             const invoiceHeader = {
                 invoice_number: autoNumber,
                 date: new Date().toISOString().split('T')[0],
@@ -227,43 +258,42 @@ export function usePosLogic() {
                 total_amount: cartTotal.total,
                 taxable_amount: cartTotal.subtotal,
                 tax_amount: cartTotal.tax,
-                status: 'معلق',  // تبقى غير مرحلة - يعتمدها المحاسب
+                status: 'معلق',  
                 warehouse_id: selectedWarehouseId,
-                delegate_id: delegateId || null,  // المندوب المسؤول عن البيع
+                delegate_id: delegateId || null,
                 payment_method: paymentMethod,
                 paid_amount: paymentMethod !== 'آجل' ? cartTotal.total : 0,
                 debit_account_id: '4f828d0d-a1f4-4762-83e3-c17dafae802d',
                 credit_account_id: '6667f91a-9478-49ab-9721-521ee09381fa',
-                lines_data: cart.map(item => ({
-                    item_id: item.id,
-                    name: item.name,
-                    quantity: item.qty,
-                    unit_price: item.unit_price || item.price || 0,
-                    discount: item.discount || 0,
-                    total: (item.qty * (item.unit_price || item.price || 0)) - (item.discount || 0)
-                }))
+                lines_data: linesData,
+                shift_id: activeShift?.id
             };
 
-            const { data: insertedInv, error: invErr } = await supabase
-                .from('invoices')
-                .insert([invoiceHeader])
-                .select('*, partners:partners!invoices_partner_id_fkey(*)')
-                .single();
-            if (invErr) throw invErr;
+            const { data: insertedInv, error: invErr } = await supabase.from('invoices').insert([invoiceHeader]).select().single();
+            if (invErr) throw new Error(invErr.message);
 
-            // 2. إنشاء سند قبض إذا الدفع نقدي/شبكة (لكن بدون ترحيل تلقائي)
-            if (paymentMethod !== 'آجل') {
+            // Deduct from warehouse
+            for (let line of linesData) {
+                const { data: invItem } = await supabase.from('warehouse_inventory')
+                    .select('quantity, id').eq('item_id', line.item_id).eq('warehouse_id', line.warehouse_id).single();
+                if (invItem) {
+                    await supabase.from('warehouse_inventory')
+                        .update({ quantity: invItem.quantity - line.quantity })
+                        .eq('id', invItem.id);
+                }
+            }
+
+            // Optional: Insert receipt voucher
+            if (paymentMethod === 'نقدي' || paymentMethod === 'كاش' || paymentMethod === 'شبكة') {
                 const receiptPayload = {
-                    receipt_number: `RCV-POS-${Date.now().toString().slice(-6)}`,
-                    date: new Date().toISOString().split('T')[0],
+                    receipt_date: new Date().toISOString().split('T')[0],
                     amount: cartTotal.total,
-                    payment_method: paymentMethod === 'نقدي (كاش)' ? 'نقدي' : 'بطاقة',
-                    partner_id: partnerId || null,
-                    invoice_id: insertedInv.id,
-                    delegate_id: delegateId || null,
-                    status: 'مسودة',  // غير مرحل - يعتمده المحاسب
+                    payment_method: paymentMethod,
+                    description: `متحصلات فاتورة مبيعات POS - ${insertedInv.id.substring(0,8)}`,
+                    status: 'مرحل',
+                    project_id: null,
                     notes: `POS - ${invoiceHeader.client_name || 'عميل نقدي'}`,
-                    safe_bank_acc_id: '21b8a1db-bc9f-4cf8-b741-1efeded0963c', // الخزينة الرئيسية
+                    safe_bank_acc_id: '21b8a1db-bc9f-4cf8-b741-1efeded0963c', 
                     partner_acc_id: '4f828d0d-a1f4-4762-83e3-c17dafae802d',
                 };
                 const { error: rectErr } = await supabase.from('receipt_vouchers').insert([receiptPayload]);
@@ -274,8 +304,8 @@ export function usePosLogic() {
         },
         onSuccess: (data) => {
             setLastInvoice(data);
-            setIsPrintModalOpen(true);
-            showToast("تمت عملية البيع بنجاح! ✅ الفاتورة بانتظار الاعتماد المحاسبي", "success");
+            setIsThermalPrintModalOpen(true);
+            showToast("تمت عملية البيع بنجاح! ✅", "success");
             setCart([]);
             queryClient.invalidateQueries({ queryKey: ['pos_inventory'] });
             queryClient.invalidateQueries({ queryKey: ['invoices'] });
@@ -287,17 +317,22 @@ export function usePosLogic() {
     });
 
     return {
+        selectedWarehouseId, setSelectedWarehouseId, warehouses,
+        searchQuery, setSearchQuery, inventoryItems: filteredItems, filteredItems,
         selectedItemForCart, setSelectedItemForCart, confirmAddToCart, handleItemClick,
-        warehouses, selectedWarehouseId, setSelectedWarehouseId,
-        inventoryItems: filteredItems, searchQuery, setSearchQuery,
-        cart, addToCart, lastInvoice, setLastInvoice, isPrintModalOpen, setIsPrintModalOpen,
-        updateCartItemQty, updateCartItemPrice, removeFromCart, cartTotal, handleBarcodeScan,
-        isTaxInclusive, setIsTaxInclusive,
+        cart, addToCart, removeFromCart, updateCartItemQty, updateCartItemPrice,
+        lastInvoice, setLastInvoice, handleBarcodeScan,
+        isPrintModalOpen, setIsPrintModalOpen,
+        isThermalPrintModalOpen, setIsThermalPrintModalOpen,
+        isShiftCloseModalOpen, setIsShiftCloseModalOpen,
+        isShiftOpenModalOpen, setIsShiftOpenModalOpen,
+        activeShift, loadingShift, userProfile,
+        cartTotal, isTaxInclusive, setIsTaxInclusive,
         paymentMethod, setPaymentMethod,
         customers, partnerId, setPartnerId,
         delegates, delegateId, setDelegateId, isDelegateLocked,
         handleCheckout: () => checkoutMutation.mutate(),
         isCheckingOut: checkoutMutation.isPending,
-        isLoading: loadingWarehouses || loadingItems
+        isLoading: loadingWarehouses || loadingItems || loadingShift
     };
 }

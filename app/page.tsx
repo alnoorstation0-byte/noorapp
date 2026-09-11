@@ -6,6 +6,7 @@ import { usePermissions } from '@/lib/PermissionsContext';
 import LoadingScreen from '@/components/LoadingScreen';
 import MasterPage from '@/components/MasterPage';
 import { menuGroups } from '@/lib/menuData';
+import { supabase } from '@/lib/supabase';
 
 const MOTIVATIONAL_MESSAGES = [
     "يوم جديد لنجاحات مبهرة، توكل على الله وانطلق! 🚀",
@@ -37,14 +38,35 @@ export default function WelcomeHomePage() {
     }, []);
 
     useEffect(() => {
-        const saved = localStorage.getItem('rawasi_fav_pages');
-        setFavorites(saved ? JSON.parse(saved) : DEFAULT_FAVORITES);
+        const fetchUserFavs = async () => {
+            if (profile?.id) {
+                const { data, error } = await supabase
+                    .from('profiles')
+                    .select('quick_links')
+                    .eq('id', profile.id)
+                    .single();
+                
+                if (!error && data?.quick_links && Array.isArray(data.quick_links) && data.quick_links.length > 0) {
+                    setFavorites(data.quick_links);
+                } else {
+                    setFavorites(DEFAULT_FAVORITES);
+                }
+            } else {
+                setFavorites(DEFAULT_FAVORITES);
+            }
+        };
+        fetchUserFavs();
     }, [profile?.id]);
 
-    const saveFavorites = () => {
+    const saveFavorites = async () => {
         setFavorites(tempFavorites);
-        localStorage.setItem('rawasi_fav_pages', JSON.stringify(tempFavorites));
         setIsFavModalOpen(false);
+        if (profile?.id) {
+            await supabase
+                .from('profiles')
+                .update({ quick_links: tempFavorites })
+                .eq('id', profile.id);
+        }
     };
 
     const openFavModal = () => { setTempFavorites(favorites); setIsFavModalOpen(true); };

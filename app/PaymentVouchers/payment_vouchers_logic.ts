@@ -4,6 +4,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/lib/toast-context';
 import { useUniversalPosting } from '@/lib/accounting_engine'; 
 import { useRealtimeInvalidate } from '@/lib/useRealtimeSync';
+import { useAuth } from '@/components/authGuard';
 
 export function usePaymentVouchersLogic() {
     const queryClient = useQueryClient();
@@ -61,10 +62,12 @@ export function usePaymentVouchersLogic() {
         }
     });
 
+    const { profile, can } = useAuth();
+
     const { data: vouchers = [], isLoading: isFetching } = useQuery({
-        queryKey: ['payment_vouchers'],
+        queryKey: ['payment_vouchers', profile?.id],
         queryFn: async () => {
-            const { data, error } = await supabase
+            let q = supabase
                 .from('payment_vouchers')
                 .select(`
                     *,
@@ -76,9 +79,20 @@ export function usePaymentVouchersLogic() {
                 .order('created_at', { ascending: false })
                 .limit(2000);
 
+            if (profile) {
+                const role = String(profile.role || '').toLowerCase();
+                const isGlobalAdmin = role === 'admin' || role === 'super_admin' || role === 'manager' || profile.is_admin === true;
+                if (!isGlobalAdmin && profile.linked_partner_id) {
+                    q = q.eq('partner_id', profile.linked_partner_id);
+                }
+            }
+
+            const { data, error } = await q;
+
             if (error) throw new Error(error.message);
             return data || [];
-        }
+        },
+        enabled: !!profile
     });
 
     const displayedVouchers = useMemo(() => {

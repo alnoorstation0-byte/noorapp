@@ -3,6 +3,8 @@ import { supabase } from '@/lib/supabase';
 import { showGlobalToast } from '@/lib/toast-context';
 import { useRealtimeListener } from '@/lib/useRealtimeSync';
 
+import { useAuth } from '@/components/authGuard';
+
 export function usePurchaseOrdersLogic() {
   const [transactions, setTransactions] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -12,6 +14,8 @@ export function usePurchaseOrdersLogic() {
   const [editingTransaction, setEditingTransaction] = useState<any>(null);
   const [printingTransaction, setPrintingTransaction] = useState<any>(null);
 
+  const { profile, can } = useAuth();
+
   const fetchTransactions = async () => {
     try {
       setIsLoading(true);
@@ -20,6 +24,14 @@ export function usePurchaseOrdersLogic() {
         .select('id, transaction_number, transaction_date, type, quantity, unit_price, tax_amount, include_tax, notes, status, item_id, partner_id, inventory_items ( name, unit ), partners!inventory_transactions_partner_id_fkey ( name )')
         .eq('type', 'in')
         .order('transaction_date', { ascending: false });
+
+      if (profile) {
+          const role = String(profile.role || '').toLowerCase();
+          const isGlobalAdmin = role === 'admin' || role === 'super_admin' || role === 'manager' || profile.is_admin === true;
+          if (!isGlobalAdmin && profile.linked_partner_id) {
+              query = query.eq('partner_id', profile.linked_partner_id);
+          }
+      }
 
       const { data, error } = await query;
       if (error) throw error;
@@ -66,7 +78,7 @@ export function usePurchaseOrdersLogic() {
 
   useEffect(() => {
     fetchTransactions();
-  }, []);
+  }, [profile?.id]);
 
   // 🔄 مزامنة فورية - تحديث تلقائي عند تغيير الحركات (من أي شاشة)
   useRealtimeListener('inventory_transactions', () => fetchTransactions());

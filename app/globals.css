@@ -912,15 +912,49 @@ td {
   .imperial-trigger:hover { transform: none !important; box-shadow: none !important; border: none !important; }
   .avatar-frame { width: 45px !important; height: 45px !important; }
 
-  /* ─── 8. Modals ─── */
-  .modal-content, .supreme-modal,
+  /* 📱 8. Modals & Dialogs (Fixed Sizing) */
+  .modal-content, .supreme-modal, .profile-modal-box,
   div[style*="width: 500px"], div[style*="width: 600px"], 
   div[style*="width: 700px"], div[style*="width: 800px"], 
-  div[style*="width: 900px"], div[style*="max-width: 550px"],
-  div[style*="max-width: 600px"], div[style*="max-width: 900px"],
-  .profile-modal-box {
-        grid-template-columns: 1fr !important;
-    }
+  div[style*="width: 900px"], div[style*="width: 1000px"], 
+  div[style*="width: 1200px"], div[style*="width: 65%"], div[style*="width: 70%"],
+  div[style*="width: 80%"], div[style*="width: 90%"] {
+      width: 95vw !important;
+      max-width: 95vw !important;
+      min-width: 95vw !important;
+      margin: 10px auto !important;
+      padding: 15px !important;
+      max-height: 90vh !important;
+      overflow-y: auto !important;
+      border-radius: 20px !important;
+      box-sizing: border-box !important;
+  }
+
+  /* 📱 9. Grids and Forms */
+  div[style*="gridTemplateColumns"],
+  div[style*="grid-template-columns"],
+  .grid-container {
+      grid-template-columns: 1fr !important;
+      display: flex !important;
+      flex-direction: column !important;
+      gap: 15px !important;
+  }
+
+  /* 📱 10. Inputs and Selects (Touch Friendly) */
+  input, select, textarea {
+      min-height: 48px !important;
+      font-size: 16px !important; /* Prevents iOS auto-zoom */
+      width: 100% !important;
+      box-sizing: border-box !important;
+  }
+
+  /* 📱 11. Overlays and Dropdowns */
+  .combo-list, .dropdown-menu {
+      width: 95vw !important;
+      max-width: 95vw !important;
+      left: 2.5vw !important;
+      right: auto !important;
+  }
 }
 
 img[src="/ghayam_logo.jpg"] {

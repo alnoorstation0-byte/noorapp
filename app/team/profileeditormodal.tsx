@@ -289,22 +289,20 @@ export default function ProfileEditorModal({ isOpen, onClose, record, onSave }: 
                             </div>
                         </div>
 
-                        {form.role === 'delegate' && (
-                            <div style={{ gridColumn: '1 / -1' }}>
-                                <label style={{ display: 'block', fontSize: '13px', fontWeight: 900, color: '#475569', marginBottom: '8px' }}>
-                                    ربط المندوب بـ (Partner / Customer)
-                                </label>
-                                <SmartCombo 
-                                    table="partners"
-                                    value={form.linked_partner_id}
-                                    onChange={(val) => setForm({...form, linked_partner_id: val})}
-                                    placeholder="ابحث عن اسم المندوب في دليل العملاء..."
-                                />
-                                <span style={{ fontSize: '11px', color: '#94a3b8', marginTop: '4px', display: 'block' }}>
-                                    * مهم جداً: لكي تظهر مبيعات المندوب في (ذمم المناديب) ويمكنه إصدار فواتير، يجب ربط حسابه هنا بالاسم الموجود في دليل العملاء.
-                                </span>
-                            </div>
-                        )}
+                        <div style={{ gridColumn: '1 / -1', background: '#f8fafc', padding: '16px', borderRadius: '14px', border: '1px solid #e2e8f0' }}>
+                            <label style={{ display: 'block', fontSize: '14px', fontWeight: 900, color: THEME.primary, marginBottom: '8px' }}>
+                                🔗 ربط المستخدم بـ (شريك / عميل / مورد / مندوب)
+                            </label>
+                            <SmartCombo 
+                                table="partners"
+                                initialDisplay={form.linked_partner_id ? 'شريك محفوظ مسبقاً' : ''}
+                                onSelect={(val: any) => setForm({...form, linked_partner_id: val?.id || null})}
+                                placeholder="ابحث عن اسم الشريك في دليل العملاء والموردين والمناديب..."
+                            />
+                            <span style={{ fontSize: '12px', color: '#64748b', marginTop: '6px', display: 'block', fontWeight: 600 }}>
+                                * يتيح ربط الحساب ربط العمليات المحاسبية، الفواتير، والذمم مباشرة بسجل هذا الشريك في النظام.
+                            </span>
+                        </div>
                     </div>
 
                     <div>

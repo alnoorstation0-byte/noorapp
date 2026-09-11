@@ -6,6 +6,10 @@ import { THEME } from '@/lib/theme';
 import LoadingScreen from '@/components/LoadingScreen';
 import BarcodeScannerWidget from '@/components/BarcodeScannerWidget';
 import InvoicePrintModal from '../invoices/InvoicePrintModal';
+import ThermalReceiptModal from '../invoices/ThermalReceiptModal';
+import ShiftOpenModal from './ShiftOpenModal';
+import ShiftCloseModal from './ShiftCloseModal';
+import { FaPlus, FaMinus, FaTrash, FaCheckCircle, FaBarcode } from 'react-icons/fa';
 
 export default function PosPage() {
     const logic = usePosLogic();
@@ -51,6 +55,22 @@ export default function PosPage() {
                 <span style={{ fontSize: '12px', fontWeight: 800, color: '#16a34a', background: 'rgba(22,163,74,0.1)', padding: '4px 10px', borderRadius: '20px' }}>
                     ✅ {logic.isDelegateLocked ? 'حسابك' : 'تم اختيار المندوب'}
                 </span>
+            )}
+            
+            {logic.activeShift ? (
+                <button 
+                    onClick={() => logic.setIsShiftCloseModalOpen(true)}
+                    style={{ marginLeft: 'auto', background: '#ef4444', color: 'white', padding: '6px 15px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 'bold' }}
+                >
+                    🔒 إغلاق الوردية
+                </button>
+            ) : (
+                <button 
+                    onClick={() => logic.setIsShiftOpenModalOpen(true)}
+                    style={{ marginLeft: 'auto', background: 'linear-gradient(135deg, #16a34a 0%, #10b981 100%)', color: 'white', padding: '6px 15px', borderRadius: '8px', border: 'none', cursor: 'pointer', fontWeight: 'bold', boxShadow: '0 4px 10px rgba(22,163,74,0.3)' }}
+                >
+                    ✨ فتح وردية
+                </button>
             )}
         </div>
     );
@@ -348,10 +368,30 @@ export default function PosPage() {
             )}
 
         
+            <ThermalReceiptModal 
+                isOpen={logic.isThermalPrintModalOpen}
+                onClose={() => logic.setIsThermalPrintModalOpen(false)}
+                record={logic.lastInvoice || {}}
+                onOpenA4={() => logic.setIsPrintModalOpen(true)}
+            />
+
             <InvoicePrintModal 
                 isOpen={logic.isPrintModalOpen}
                 onClose={() => logic.setIsPrintModalOpen(false)}
                 record={logic.lastInvoice || {}}
+            />
+
+            <ShiftOpenModal 
+                isOpen={!logic.activeShift && !logic.isLoading && logic.userProfile?.role !== 'super_admin'} 
+                userProfile={logic.userProfile} 
+                delegateId={logic.delegateId} 
+                warehouseId={logic.selectedWarehouseId} 
+            />
+
+            <ShiftCloseModal 
+                isOpen={logic.isShiftCloseModalOpen} 
+                onClose={() => logic.setIsShiftCloseModalOpen(false)} 
+                activeShift={logic.activeShift} 
             />
         </MasterPage>
 

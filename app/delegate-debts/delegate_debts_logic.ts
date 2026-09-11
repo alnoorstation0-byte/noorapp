@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 
+import { useAuth } from '@/components/authGuard';
+
 export interface DelegateInvoice {
   id: string;
   invoice_number: string;
@@ -26,17 +28,26 @@ export function useDelegateDebtsLogic() {
   const [delegatesData, setDelegatesData] = useState<DelegateDebtSummary[]>([]);
   const [grandTotalDebt, setGrandTotalDebt] = useState(0);
 
+  const { profile, can } = useAuth();
+
   const fetchData = useCallback(async () => {
     setIsLoading(true);
     try {
-      // 1. Fetch all unpaid or partially paid invoices that have a delegate assigned
-      // 'مدفوعة' means fully paid. We want to exclude those. 
-      // Also, we ensure delegate_id is not null.
-      const { data: invoices, error: invError } = await supabase
+      let q = supabase
         .from('invoices')
         .select('id, invoice_number, date, client_name, total_amount, paid_amount, due_date, status, delegate_id')
         .not('status', 'eq', 'مدفوعة')
         .not('delegate_id', 'is', null);
+
+      if (profile) {
+          const role = String(profile.role || '').toLowerCase();
+          const isGlobalAdmin = role === 'admin' || role === 'super_admin' || role === 'manager' || profile.is_admin === true;
+          if (!isGlobalAdmin && profile.linked_partner_id) {
+              q = q.eq('delegate_id', profile.linked_partner_id);
+          }
+      }
+
+      const { data: invoices, error: invError } = await q;
 
       if (invError) throw invError;
 
@@ -106,7 +117,7 @@ export function useDelegateDebtsLogic() {
     } finally {
       setIsLoading(false);
     }
-  }, []);
+  }, [profile?.id]);
 
   useEffect(() => {
     fetchData();

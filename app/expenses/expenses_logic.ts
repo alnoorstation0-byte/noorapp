@@ -9,6 +9,7 @@ import { useUniversalPosting } from '@/lib/accounting_engine';
 import { useToast , showGlobalToast} from '@/lib/toast-context'; 
 import { checkAdminApprovalPrivilege } from '@/lib/helpers';
 import { useRealtimeInvalidate } from '@/lib/useRealtimeSync';
+import { useAuth } from '@/components/authGuard';
 
 export function useExpensesLogic() {
     const queryClient = useQueryClient();
@@ -58,11 +59,25 @@ export function useExpensesLogic() {
     };
     const [currentExpense, setCurrentExpense] = useState<any>(defaultExp);
 
+    const { profile, can } = useAuth();
+
     // 📥 2. جلب البيانات الأساسية
     const expensesQuery = useQuery({
-        queryKey: ['expenses'],
+        queryKey: ['expenses', profile?.id],
         queryFn: async () => {
-            const buildQuery = () => supabase.from('expenses').select('*').order('exp_date', { ascending: false });
+            const buildQuery = () => {
+                let q = supabase.from('expenses').select('*').order('exp_date', { ascending: false });
+                
+                // 🛡️ Data Scoping
+                if (profile) {
+                    const role = String(profile.role || '').toLowerCase();
+                    const isGlobalAdmin = role === 'admin' || role === 'super_admin' || role === 'manager' || profile.is_admin === true;
+                    if (!isGlobalAdmin && profile.linked_partner_id) {
+                        q = q.eq('payee_id', profile.linked_partner_id);
+                    }
+                }
+                return q;
+            };
             const allData = await fetchPaginatedData(buildQuery, 'id');
 
             const groupedExpenses = new Map();
@@ -113,6 +128,7 @@ export function useExpensesLogic() {
 
             return Array.from(groupedExpenses.values());
         },
+        enabled: !!profile,
         staleTime: 1000 * 60 * 5,
         retry: 1
     });

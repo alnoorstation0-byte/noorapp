@@ -3,6 +3,7 @@ import { useState, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/lib/toast-context';
+import { useAuth } from '@/components/authGuard';
 
 export function usePartnerBalancesLogic() {
   const { showToast } = useToast();
@@ -10,21 +11,34 @@ export function usePartnerBalancesLogic() {
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
+  const { profile, can } = useAuth();
+  
   // 🚀 سحب البيانات من الـ View الجاهز والمحسوب في السيرفر
   const { data: balances = [], isLoading, error } = useQuery({
-    queryKey: ['partner_balances_summary'],
+    queryKey: ['partner_balances_summary', profile?.id],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let q = supabase
         .from('partner_balances_summary')
         .select('*')
         .order('current_balance', { ascending: false }); // ترتيب بالأعلى رصيداً
+      
+      if (profile) {
+          const role = String(profile.role || '').toLowerCase();
+          const isGlobalAdmin = role === 'admin' || role === 'super_admin' || role === 'manager' || profile.is_admin === true;
+          if (!isGlobalAdmin && profile.linked_partner_id) {
+              q = q.eq('partner_id', profile.linked_partner_id);
+          }
+      }
+
+      const { data, error } = await q;
       
       if (error) {
         showToast("فشل جلب الأرصدة", 'error');
         throw error;
       }
       return data;
-    }
+    },
+    enabled: !!profile
   });
 
   // 🛡️ التصفية اللحظية

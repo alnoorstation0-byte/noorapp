@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { useToast } from '@/lib/toast-context';
+import { useAuth } from '@/components/authGuard';
 
 export function useFleetLogic() {
     const queryClient = useQueryClient();
@@ -16,10 +17,12 @@ export function useFleetLogic() {
     const [currentPage, setCurrentPage] = useState(1);
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
+    const { profile, can } = useAuth();
+
     const { data: rawOperations = [], isLoading } = useQuery({
-        queryKey: ['fleet_operations'],
+        queryKey: ['fleet_operations', profile?.id],
         queryFn: async () => {
-            const { data, error } = await supabase
+            let q = supabase
                 .from('fleet_operations')
                 .select(`
                     *,
@@ -28,9 +31,20 @@ export function useFleetLogic() {
                     driver:partners!driver_id(name)
                 `)
                 .order('operation_date', { ascending: false });
+            
+            if (profile) {
+                const role = String(profile.role || '').toLowerCase();
+                const isGlobalAdmin = role === 'admin' || role === 'super_admin' || role === 'manager' || profile.is_admin === true;
+                if (!isGlobalAdmin && profile.linked_partner_id) {
+                    q = q.eq('driver_id', profile.linked_partner_id);
+                }
+            }
+
+            const { data, error } = await q;
             if (error) throw error;
             return data;
-        }
+        },
+        enabled: !!profile
     });
 
     const { data: vehicles = [] } = useQuery({

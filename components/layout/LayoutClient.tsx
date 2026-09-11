@@ -15,7 +15,7 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
   const router = useRouter();
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
-  const [position, setPosition] = useState({ x: 40, y: 40 });
+  const [customPosition, setCustomPosition] = useState<{ x: number, y: number } | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false); 
   const dragStartPos = useRef({ x: 0, y: 0 });
@@ -31,35 +31,28 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
   const unreadCounts = useUnreadCounts();
   const { onlineUsers, onlineCount } = usePresence();
 
-  // Load saved position ONLY in browser after mount
+  // تحميل الموقع المخصص فقط إذا قام المستخدم بسحبه مسبقاً
   useEffect(() => {
-    const savedPos = localStorage.getItem('fabPosition');
+    const savedPos = localStorage.getItem('fabPosition_v2');
     if (savedPos) {
       try {
         const parsed = JSON.parse(savedPos);
-        if (parsed.x && parsed.y) {
-          setPosition(parsed);
+        if (typeof parsed?.x === 'number' && typeof parsed?.y === 'number') {
+          setCustomPosition(parsed);
         }
       } catch(e) {}
     }
     setMounted(true);
-    // Add small delay before showing UI to avoid layout jump
     setTimeout(() => setIsInitialized(true), 100); 
   }, []);
 
-  // Save position on change
-  useEffect(() => {
-    if (mounted) {
-      localStorage.setItem('fabPosition', JSON.stringify(position));
-    }
-  }, [position, mounted]);
-
   const onMouseDown = (e: React.MouseEvent) => {
-    if (window.innerWidth <= 768) return; // Disable drag on mobile
+    if (window.innerWidth <= 768) return; // تعطيل السحب على الجوال
     setIsDragging(false);
+    const rect = e.currentTarget.getBoundingClientRect();
     dragStartPos.current = {
-      x: e.clientX - position.x,
-      y: e.clientY - position.y
+      x: e.clientX - rect.left,
+      y: e.clientY - rect.top
     };
     
     const onMouseMove = (moveEvent: MouseEvent) => {
@@ -67,13 +60,15 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
       const newX = moveEvent.clientX - dragStartPos.current.x;
       const newY = moveEvent.clientY - dragStartPos.current.y;
       
-      const maxX = window.innerWidth - 80;
-      const maxY = window.innerHeight - 80;
+      const maxX = window.innerWidth - 85;
+      const maxY = window.innerHeight - 85;
       
-      setPosition({
-        x: Math.max(0, Math.min(newX, maxX)),
-        y: Math.max(0, Math.min(newY, maxY))
-      });
+      const pos = {
+        x: Math.max(10, Math.min(newX, maxX)),
+        y: Math.max(10, Math.min(newY, maxY))
+      };
+      setCustomPosition(pos);
+      localStorage.setItem('fabPosition_v2', JSON.stringify(pos));
     };
     
     const onMouseUp = () => {
@@ -145,7 +140,7 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
       <style dangerouslySetInnerHTML={{__html: `
         .fab-main {
           position: fixed;
-          bottom: 40px; right: 40px;
+          bottom: 35px; left: 35px; right: auto !important;
           width: 75px; height: 75px;
           border-radius: 50%;
           background: rgba(255, 255, 255, 0.4);
@@ -256,7 +251,7 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
 
         @media (max-width: 768px) {
           .fab-main {
-            bottom: 20px !important; right: 20px !important; left: auto !important; top: auto !important;
+            bottom: 20px !important; left: 20px !important; right: auto !important; top: auto !important;
             width: 65px; height: 65px;
           }
           .command-center { margin-top: 10px; gap: 15px; }
@@ -294,10 +289,10 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
       />
 
       <div className="fab-main no-print" 
-           style={window.innerWidth > 768 ? { left: position.x, top: position.y, bottom: 'auto', right: 'auto' } : undefined}
-           onMouseDown={(e) => { if(window.innerWidth > 768) onMouseDown(e); }} 
-           onTouchStart={(e) => { if(window.innerWidth <= 768) setIsOpen(!isOpen); }}
-           onClick={() => { if(window.innerWidth > 768 && !isDragging) setIsOpen(!isOpen); }}>
+           style={customPosition && (typeof window !== 'undefined' && window.innerWidth > 768) ? { left: customPosition.x, top: customPosition.y, bottom: 'auto', right: 'auto' } : { bottom: '35px', left: '35px', right: 'auto' }}
+           onMouseDown={(e) => { if(typeof window !== 'undefined' && window.innerWidth > 768) onMouseDown(e); }} 
+           onTouchStart={(e) => { if(typeof window !== 'undefined' && window.innerWidth <= 768) setIsOpen(!isOpen); }}
+           onClick={() => { if(typeof window !== 'undefined' && window.innerWidth > 768 && !isDragging) setIsOpen(!isOpen); }}>
         <img src="/ghayam_logo.png" alt="لوجو" className="fab-logo" />
       </div>
 

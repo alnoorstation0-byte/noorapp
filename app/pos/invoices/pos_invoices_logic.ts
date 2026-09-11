@@ -6,6 +6,7 @@ import { useToast } from '@/lib/toast-context';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'; 
 import { fetchPaginatedData } from '@/lib/supabase-pagination';
 import { getInvoiceSummaryAndAging } from '@/lib/helpers';
+import { useAuth } from '@/components/authGuard';
 
 const updateInventoryQty = async (itemId: string, warehouseId: string, qtyChange: number) => {
     const { data } = await supabase.from('warehouse_inventory').select('*').eq('item_id', itemId).eq('warehouse_id', warehouseId).single();
@@ -21,6 +22,8 @@ export function usePosInvoicesLogic() {
     const { showToast } = useToast(); 
     const queryClient = useQueryClient();
     
+    const { profile, can } = useAuth();
+    
     const updateRowsInCache = (targetIds: any[], updatedFields: any) => {
         queryClient.setQueryData(['pos_invoices'], (oldData: any[]) => {
             if (!oldData) return [];
@@ -31,8 +34,6 @@ export function usePosInvoicesLogic() {
         });
     };
 
-    const [permissions, setPermissions] = useState<any>({ isAdmin: false });
-    
     const [globalSearch, setGlobalSearch] = useState('');
     const deferredSearch = useDeferredValue(globalSearch); 
     const [dateFrom, setDateFrom] = useState('');
@@ -46,35 +47,28 @@ export function usePosInvoicesLogic() {
     const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
     const [selectedInvoiceForPay, setSelectedInvoiceForPay] = useState<any>(null);
 
-    useEffect(() => {
-        const fetchAuth = async () => {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session) {
-                const { data: profile } = await supabase
-                    .from('profiles')
-                    .select('role, permissions, is_admin')
-                    .eq('id', session.user.id)
-                    .single();
-                
-                const userRole = String(profile?.role || '').toLowerCase();
-                setPermissions({ 
-                    isAdmin: (userRole === 'admin' || userRole === 'super_admin') || profile?.is_admin === true, 
-                    ...profile?.permissions 
-                });
-            }
-        };
-        fetchAuth();
-    }, []);
-
     const { data: invoices = [], isLoading: isInvLoading } = useQuery({
-        queryKey: ['pos_invoices'],
+        queryKey: ['pos_invoices', profile?.id],
         queryFn: async () => {
-            const buildQuery = () => supabase
-                .from('invoices')
-                .select('*, partners:partners!invoices_partner_id_fkey(*), debit_acc:accounts!invoices_debit_acc_fkey(name)')
-                .ilike('invoice_number', 'INV-POS-%').order('date', { ascending: false });
+            const buildQuery = () => {
+                let q = supabase
+                    .from('invoices')
+                    .select('*, partners:partners!invoices_partner_id_fkey(*), debit_acc:accounts!invoices_debit_acc_fkey(name)')
+                    .ilike('invoice_number', 'INV-POS-%')
+                    .order('date', { ascending: false });
+                    
+                if (profile) {
+                    const role = String(profile.role || '').toLowerCase();
+                    const isGlobalAdmin = role === 'admin' || role === 'super_admin' || role === 'manager' || profile.is_admin === true;
+                    if (!isGlobalAdmin && profile.linked_partner_id) {
+                        q = q.or(`delegate_id.eq.${profile.linked_partner_id},partner_id.eq.${profile.linked_partner_id}`);
+                    }
+                }
+                return q;
+            };
             return await fetchPaginatedData(buildQuery, 'id');
-        }
+        },
+        enabled: !!profile
     });
 
     const { data: projects = [], isLoading: isProjLoading } = useQuery({
@@ -415,7 +409,7 @@ export function usePosInvoicesLogic() {
         summary,
         isLoading,
         isSaving,
-        permissions,
+        permissions: { isAdmin: can('pos_invoices', 'edit') },
         handlePayInvoice,
         isReceiptModalOpen, setIsReceiptModalOpen,
         selectedInvoiceForPay, setSelectedInvoiceForPay, 

@@ -3,27 +3,39 @@ import { useState, useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useQuery } from '@tanstack/react-query';
 import * as XLSX from 'xlsx';
+import { useAuth } from '@/components/authGuard';
 
 export function useDelegateSettlementsLogic() {
     const [globalSearch, setGlobalSearch] = useState('');
     const [dateFrom, setDateFrom] = useState('');
     const [dateTo, setDateTo] = useState('');
 
+    const { profile, can } = useAuth();
+
     const tripsQuery = useQuery({
-        queryKey: ['delegate_settlements_trips', dateFrom, dateTo],
+        queryKey: ['delegate_settlements_trips', dateFrom, dateTo, profile?.id],
         queryFn: async () => {
             let q = supabase
                 .from('fleet_operations')
-                .select('id, operation_number, operation_date, status, driver:partners(name)')
+                .select('id, operation_number, operation_date, status, driver:partners!driver_id(name), driver_id')
                 .order('operation_date', { ascending: false });
 
             if (dateFrom) q = q.gte('operation_date', dateFrom);
             if (dateTo) q = q.lte('operation_date', dateTo);
 
+            if (profile) {
+                const role = String(profile.role || '').toLowerCase();
+                const isGlobalAdmin = role === 'admin' || role === 'super_admin' || role === 'manager' || profile.is_admin === true;
+                if (!isGlobalAdmin && profile.linked_partner_id) {
+                    q = q.eq('driver_id', profile.linked_partner_id);
+                }
+            }
+
             const { data, error } = await q;
             if (error) throw error;
             return data || [];
-        }
+        },
+        enabled: !!profile
     });
 
     const invoicesQuery = useQuery({

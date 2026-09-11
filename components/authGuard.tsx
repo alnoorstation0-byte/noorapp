@@ -14,13 +14,26 @@ const AuthContext = createContext<{
 const ROUTE_MODULE_MAP: Record<string, string> = {
   '/Dashboard': 'dashboard',
   '/GlobalSummary': 'global_summary',
+  '/kpis': 'global_summary',
+  
+  '/pos': 'pos',
+  '/pos/invoices': 'pos_invoices',
+  '/pos/dashboard': 'pos_dashboard',
+  
   '/fleet': 'fleet',
   '/fleet_operations': 'fleet_operations',
   '/invoices': 'invoices',
   
+  '/inventory': 'inventory',
+  '/item-card': 'inventory',
+  '/dead-stock': 'inventory',
+  '/reorder-alerts': 'inventory',
+  '/inventory-valuation': 'inventory',
+  
   '/purchase_orders': 'purchase_orders',
   '/inventory/warehouses': 'warehouses',
   '/inventory/transactions': 'inventory_transactions',
+  
   '/ReceiptVouchers': 'receipts',
   '/PaymentVouchers': 'payments',
   '/expenses': 'expenses',
@@ -29,31 +42,32 @@ const ROUTE_MODULE_MAP: Record<string, string> = {
   '/accounts': 'accounts',
   '/ledger': 'ledger',
   '/trialbalance': 'trialbalance',
+  
   '/financial-center': 'financial_center',
+  '/financialplan': 'financial_center',
   '/financial-statements': 'financial_statements',
   '/cashflows': 'cashflows',
+  
   '/partners': 'partners',
   '/PartnerBalances': 'partner_balances',
   '/delegate-debts': 'delegate_debts',
   '/delegate-settlements': 'delegate_settlements',
   '/statement': 'statement',
+  
   '/reports': 'reports',
-  '/import': 'import',
-  '/audit': 'audit',
-  '/payroll': 'payroll',
-  '/settings': 'settings',
-  '/team': 'team',
-  '/profile': 'profile',
-  '/item-card': 'inventory',
-  '/dead-stock': 'inventory',
-  '/reorder-alerts': 'inventory',
   '/sales-analysis': 'reports',
   '/trip-profitability': 'reports',
   '/ar-aging': 'reports',
   '/vehicle-expenses': 'reports',
   '/vat-return': 'reports',
-  '/kpis': 'global_summary',
-  '/financialplan': 'financial_center',
+  '/profit-dashboard': 'reports',
+  
+  '/import': 'import',
+  '/audit': 'audit',
+  '/payroll': 'payroll',
+  '/settings': 'settings',
+  '/team': 'team',
+  '/messages': 'messages',
 };
 
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
@@ -128,11 +142,24 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     if (loading || !user || !profile) return true; // Don't block while loading
     if (pathname === '/' || pathname === '/login' || pathname === '/signup' || pathname.startsWith('/api')) return true;
     
-    // 🛡️ السماح دائماً للملف الشخصي لأي مستخدم مسجل
-    if (pathname === '/profile') return true;
+    // 🛡️ السماح دائماً للملف الشخصي والتنبيهات
+    if (pathname === '/profile' || pathname === '/notifications') return true;
 
-    const requiredModule = ROUTE_MODULE_MAP[pathname];
-    if (!requiredModule) return true; // If route not mapped, let it pass
+    // Check for exact match first
+    let requiredModule = ROUTE_MODULE_MAP[pathname];
+    
+    // If no exact match, check for matching prefixes for sub-routes
+    if (!requiredModule) {
+      const matchingPrefix = Object.keys(ROUTE_MODULE_MAP)
+        .sort((a, b) => b.length - a.length)
+        .find(prefix => pathname.startsWith(prefix + '/'));
+      
+      if (matchingPrefix) {
+        requiredModule = ROUTE_MODULE_MAP[matchingPrefix];
+      }
+    }
+
+    if (!requiredModule) return true; // If route not mapped, let it pass (safe fallback)
 
     return can(requiredModule, 'view');
   }, [pathname, profile, loading, user]);
