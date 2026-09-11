@@ -207,7 +207,30 @@ export function useRealtimeInvalidate(
             return oldData;
           });
         } 
-        // 3. إضافة جديدة (نجلب البيانات من السيرفر لأننا قد نحتاج للعلاقات Linked Data)
+        // 3. إضافة جديدة (نجلب البيانات من السيرفر لأننا قد نحتاج للعلاقات Linked Data، لكن كحل سريع نضيفه للكاش مؤقتاً)
+        else if (eventType === 'INSERT' && newRecord?.id) {
+          queryClient.setQueriesData({ queryKey: [key] }, (oldData: any) => {
+            if (!oldData) return oldData;
+            
+            if (Array.isArray(oldData)) {
+              // Add to the top of the array
+              return [newRecord, ...oldData];
+            } else if (typeof oldData === 'object' && oldData !== null) {
+                const newData = { ...oldData };
+                let updated = false;
+                for (const k in newData) {
+                    if (Array.isArray(newData[k])) {
+                        newData[k] = [newRecord, ...newData[k]];
+                        updated = true;
+                    }
+                }
+                return updated ? newData : oldData;
+            }
+            return oldData;
+          });
+          // Also invalidate to ensure relations are fetched correctly in the background
+          queryClient.invalidateQueries({ queryKey: [key] });
+        }
         else {
           queryClient.invalidateQueries({ queryKey: [key] });
         }

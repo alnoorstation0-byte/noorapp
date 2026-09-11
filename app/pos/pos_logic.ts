@@ -24,10 +24,10 @@ export function usePosLogic() {
             if (!session?.user?.id) return null;
             const { data: profile } = await supabase
                 .from('profiles')
-                .select('linked_partner_id, role')
+                .select('id, linked_partner_id, role')
                 .eq('id', session.user.id)
                 .single();
-            return profile || null;
+            return profile || { id: session.user.id };
         }
     });
 

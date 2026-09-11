@@ -837,13 +837,20 @@ td {
     padding: 15px !important;
   }
 
-  /* ─── 3. Buttons ─── */
-  .btn { width: 100% !important; padding: 14px !important; }
+  /* 📱 3. Buttons */
+  .btn { 
+      width: 100% !important; 
+      padding: 14px !important; 
+      box-sizing: border-box !important;
+  }
   
   button {
-    white-space: nowrap !important;
-    flex-shrink: 0 !important;
-    min-height: 44px !important; /* Apple HIG touch target */
+      white-space: normal !important; /* Allow text to wrap if it's too long */
+      word-wrap: break-word !important;
+      flex-shrink: 1 !important; /* Allow it to shrink to fit container */
+      min-height: 48px !important; /* Apple HIG touch target */
+      max-width: 100% !important; /* Prevent overflowing */
+      box-sizing: border-box !important;
   }
 
   /* ─── 4. Tables ─── */

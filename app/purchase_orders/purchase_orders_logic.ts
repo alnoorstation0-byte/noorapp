@@ -203,7 +203,15 @@ export function usePurchaseOrdersLogic() {
       const { error: expErr } = await supabase.from('expenses').insert([expensePayload]);
       if (expErr) throw expErr;
 
-      showGlobalToast('تم انشاء سند استحقاق صرف', 'success');
+      // 🚀 Invalidate the expenses cache immediately so it's fresh when navigating
+      import('@tanstack/react-query').then(({ QueryClient }) => {
+          const client = typeof window !== 'undefined' ? (window as any).__REACT_QUERY_CLIENT__ : null;
+          if (client) {
+              client.invalidateQueries({ queryKey: ['expenses'] });
+          }
+      });
+
+      showGlobalToast('تم إنشاء سند الاستحقاق بنجاح', 'success');
     } catch (error: any) {
       console.error('Error creating entitlement in expenses:', error);
       showGlobalToast('حدث خطأ أثناء إنشاء السند: ' + error.message, 'error');
