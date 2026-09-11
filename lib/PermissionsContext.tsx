@@ -27,7 +27,7 @@ export const PermissionsProvider = ({ children }: { children: React.ReactNode })
                 if (currentUser && isMounted) {
                     const { data, error } = await supabase
                         .from('profiles')
-                        .select('role, permissions, is_admin, full_name, avatar_url')
+                        .select('id, role, permissions, is_admin, full_name, avatar_url')
                         .eq('id', currentUser.id)
                         .single();
                         
