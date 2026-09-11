@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 
 /**
@@ -23,6 +24,7 @@ const WATCHED_TABLES = [
   'payment_vouchers',
   'receipt_vouchers',
   'invoices',
+  'purchase_orders',
   'journal_headers',
   'journal_lines',
   'manual_journals',
@@ -142,7 +144,8 @@ export function useRealtimeListener(
 
 /**
  * Hook لإبطال كاش React Query أو تحديثه محلياً عند تغيير جدول معين
- * تم التحديث: يدعم الآن التعديل الجزئي (Optimistic Updates) بدون سحب نت!
+ * تم الإصلاح: يستخدم useQueryClient() بدلاً من window.__REACT_QUERY_CLIENT__ الهش
+ * يدعم الآن التعديل الجزئي (Optimistic Updates) بدون سحب نت!
  * 
  * الاستخدام:
  *   useRealtimeInvalidate('expenses', ['expenses']);
@@ -152,89 +155,68 @@ export function useRealtimeInvalidate(
   tables: WatchedTable | WatchedTable[],
   queryKeys: string[]
 ) {
+  // ✅ استخدام useQueryClient hook مباشرة - تم استيراده في أعلى الملف
+  const queryClient = useQueryClient();
+
   useRealtimeListener(tables, (detail) => {
-    // Dynamic import to avoid circular dependencies
-    import('@tanstack/react-query').then(() => {
-      // Access the global query client
-      const queryClient = typeof window !== 'undefined' ? (window as any).__REACT_QUERY_CLIENT__ : null;
-      if (!queryClient) return;
+    if (!queryClient) return;
 
-      const eventType = detail?.eventType;
-      const newRecord = detail?.payload?.new;
-      const oldRecord = detail?.payload?.old;
+    const eventType = detail?.eventType;
+    const newRecord = detail?.payload?.new;
+    const oldRecord = detail?.payload?.old;
 
-      queryKeys.forEach(key => {
-        // 1. تحديث جزئي (بدون سحب نت) في حالة التعديل UPDATE
-        if (eventType === 'UPDATE' && newRecord?.id) {
-          queryClient.setQueriesData({ queryKey: [key] }, (oldData: any) => {
-            if (!oldData) return oldData;
-            
-            if (Array.isArray(oldData)) {
-              return oldData.map(item => item.id === newRecord.id ? { ...item, ...newRecord } : item);
-            } else if (typeof oldData === 'object' && oldData !== null) {
-                // للبيانات المغلفة في كائنات مثل { invoices: [...] }
-                const newData = { ...oldData };
-                let updated = false;
-                for (const k in newData) {
-                    if (Array.isArray(newData[k])) {
-                        newData[k] = newData[k].map((item:any) => item.id === newRecord.id ? { ...item, ...newRecord } : item);
-                        updated = true;
-                    }
-                }
-                return updated ? newData : oldData;
-            }
-            return oldData;
-          });
-        } 
-        // 2. حذف جزئي (بدون سحب نت) في حالة الحذف DELETE
-        else if (eventType === 'DELETE' && oldRecord?.id) {
-          queryClient.setQueriesData({ queryKey: [key] }, (oldData: any) => {
-            if (!oldData) return oldData;
-            
-            if (Array.isArray(oldData)) {
-              return oldData.filter(item => item.id !== oldRecord.id);
-            } else if (typeof oldData === 'object' && oldData !== null) {
-                const newData = { ...oldData };
-                let updated = false;
-                for (const k in newData) {
-                    if (Array.isArray(newData[k])) {
-                        newData[k] = newData[k].filter((item:any) => item.id !== oldRecord.id);
-                        updated = true;
-                    }
-                }
-                return updated ? newData : oldData;
-            }
-            return oldData;
-          });
-        } 
-        // 3. إضافة جديدة (نجلب البيانات من السيرفر لأننا قد نحتاج للعلاقات Linked Data، لكن كحل سريع نضيفه للكاش مؤقتاً)
-        else if (eventType === 'INSERT' && newRecord?.id) {
-          queryClient.setQueriesData({ queryKey: [key] }, (oldData: any) => {
-            if (!oldData) return oldData;
-            
-            if (Array.isArray(oldData)) {
-              // Add to the top of the array
-              return [newRecord, ...oldData];
-            } else if (typeof oldData === 'object' && oldData !== null) {
-                const newData = { ...oldData };
-                let updated = false;
-                for (const k in newData) {
-                    if (Array.isArray(newData[k])) {
-                        newData[k] = [newRecord, ...newData[k]];
-                        updated = true;
-                    }
-                }
-                return updated ? newData : oldData;
-            }
-            return oldData;
-          });
-          // Also invalidate to ensure relations are fetched correctly in the background
-          queryClient.invalidateQueries({ queryKey: [key] });
-        }
-        else {
-          queryClient.invalidateQueries({ queryKey: [key] });
-        }
-      });
+    queryKeys.forEach(key => {
+      // 1. تحديث جزئي (بدون سحب نت) في حالة التعديل UPDATE
+      if (eventType === 'UPDATE' && newRecord?.id) {
+        queryClient.setQueriesData({ queryKey: [key], exact: false }, (oldData: any) => {
+          if (!oldData) return oldData;
+          
+          if (Array.isArray(oldData)) {
+            return oldData.map(item => item.id === newRecord.id ? { ...item, ...newRecord } : item);
+          } else if (typeof oldData === 'object' && oldData !== null) {
+              const newData = { ...oldData };
+              let updated = false;
+              for (const k in newData) {
+                  if (Array.isArray(newData[k])) {
+                      newData[k] = newData[k].map((item:any) => item.id === newRecord.id ? { ...item, ...newRecord } : item);
+                      updated = true;
+                  }
+              }
+              return updated ? newData : oldData;
+          }
+          return oldData;
+        });
+      } 
+      // 2. حذف جزئي (بدون سحب نت) في حالة الحذف DELETE
+      else if (eventType === 'DELETE' && oldRecord?.id) {
+        queryClient.setQueriesData({ queryKey: [key], exact: false }, (oldData: any) => {
+          if (!oldData) return oldData;
+          
+          if (Array.isArray(oldData)) {
+            return oldData.filter(item => item.id !== oldRecord.id);
+          } else if (typeof oldData === 'object' && oldData !== null) {
+              const newData = { ...oldData };
+              let updated = false;
+              for (const k in newData) {
+                  if (Array.isArray(newData[k])) {
+                      newData[k] = newData[k].filter((item:any) => item.id !== oldRecord.id);
+                      updated = true;
+                  }
+              }
+              return updated ? newData : oldData;
+          }
+          return oldData;
+        });
+      } 
+      // 3. إضافة جديدة — نُبطل الكاش بالكامل لضمان جلب البيانات المرتبطة (JOIN) بشكل صحيح
+      else if (eventType === 'INSERT') {
+        // invalidate with exact:false يشمل أي queryKey يبدأ بـ [key] بصرف النظر عن باقي الـ params
+        queryClient.invalidateQueries({ queryKey: [key], exact: false });
+      }
+      else {
+        queryClient.invalidateQueries({ queryKey: [key], exact: false });
+      }
     });
   });
 }
+

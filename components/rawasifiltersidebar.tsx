@@ -151,25 +151,35 @@ export default function RawasiFilterSidebar({
 
         @media (max-width: 768px) {
           .filter-sidebar-v3 {
-            width: 280px !important;
-            right: ${isOpen ? '0' : '-100%'} !important;
-            border-left: none !important;
-            top: 0 !important;
-            height: 100vh !important;
-          }
-          .filter-content {
+            top: auto !important;
+            bottom: ${isOpen ? '0px' : '-90vh'} !important;
+            right: 0 !important;
+            left: 0 !important;
             width: 100% !important;
+            max-height: 80vh !important;
+            border-radius: 24px 24px 0 0 !important;
+            transition: bottom 0.4s cubic-bezier(0.165, 0.84, 0.44, 1) !important;
           }
+          
           .filter-toggle-tab-v3 {
-            width: 24px !important;
-            padding: 0 4px !important;
-            top: 0 !important;
-            height: 100vh !important;
-            border-radius: 0 !important;
+            top: auto !important;
+            bottom: 0 !important;
+            right: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            height: 32px !important;
+            border-radius: 16px 16px 0 0 !important;
+            opacity: ${isOpen ? 0 : 1} !important;
+            pointer-events: ${isOpen ? 'none' : 'auto'} !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            gap: 8px !important;
+            font-size: 12px !important;
+            font-weight: 700 !important;
           }
-          .tab-text { display: none !important; }
-          .tab-icon { display: block !important; font-size: 16px; transform: none !important; writing-mode: horizontal-tb !important; }
         }
+
       `}</style>
 
       {isMobile && isOpen && (

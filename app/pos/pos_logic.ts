@@ -113,15 +113,18 @@ export function usePosLogic() {
                 .eq('warehouse_id', selectedWarehouseId)
                 .gt('quantity', 0);
             
-            return data?.map((row: any) => ({
-                id: row.inventory_items?.id,
-                name: row.inventory_items?.name,
-                price: row.inventory_items?.default_price || 0,
-                suggested_price: row.inventory_items?.suggested_price || row.inventory_items?.default_price || 0,
-                unit: row.inventory_items?.unit || 'حبة',
-                code: row.inventory_items?.code,
-                available_qty: row.quantity
-            })) || [];
+            return data?.map((row: any) => {
+                const itemInfo = Array.isArray(row.inventory_items) ? row.inventory_items[0] : row.inventory_items;
+                return {
+                    id: row.item_id,
+                    name: itemInfo?.name || 'صنف غير معروف',
+                    price: itemInfo?.default_price || 0,
+                    suggested_price: itemInfo?.suggested_price || itemInfo?.default_price || 0,
+                    unit: itemInfo?.unit || 'حبة',
+                    code: itemInfo?.code,
+                    available_qty: row.quantity
+                };
+            }) || [];
         },
         enabled: !!selectedWarehouseId
     });
@@ -249,6 +252,22 @@ export function usePosLogic() {
                 warehouse_id: selectedWarehouseId
             }));
 
+            // Resolve fleet_operation_id if warehouse is a vehicle
+            let fleetOpId = null;
+            if (selectedWarehouseId) {
+                const { data: wh } = await supabase.from('warehouses').select('type, vehicle_id').eq('id', selectedWarehouseId).single();
+                if (wh?.type === 'vehicle' && wh.vehicle_id) {
+                    const { data: op } = await supabase.from('fleet_operations')
+                        .select('id')
+                        .eq('vehicle_id', wh.vehicle_id)
+                        .eq('status', 'مفتوح')
+                        .single();
+                    if (op) {
+                        fleetOpId = op.id;
+                    }
+                }
+            }
+
             // 1. إنشاء الفاتورة بحالة معلق
             const invoiceHeader = {
                 invoice_number: autoNumber,
@@ -266,7 +285,8 @@ export function usePosLogic() {
                 debit_account_id: '4f828d0d-a1f4-4762-83e3-c17dafae802d',
                 credit_account_id: '6667f91a-9478-49ab-9721-521ee09381fa',
                 lines_data: linesData,
-                shift_id: activeShift?.id
+                shift_id: activeShift?.id,
+                fleet_operation_id: fleetOpId
             };
 
             const { data: insertedInv, error: invErr } = await supabase.from('invoices').insert([invoiceHeader]).select().single();
@@ -283,21 +303,9 @@ export function usePosLogic() {
                 }
             }
 
-            // Optional: Insert receipt voucher
-            if (paymentMethod === 'نقدي' || paymentMethod === 'كاش' || paymentMethod === 'شبكة') {
-                const receiptPayload = {
-                    receipt_date: new Date().toISOString().split('T')[0],
-                    amount: cartTotal.total,
-                    payment_method: paymentMethod,
-                    description: `متحصلات فاتورة مبيعات POS - ${insertedInv.id.substring(0,8)}`,
-                    status: 'مرحل',
-                    project_id: null,
-                    notes: `POS - ${invoiceHeader.client_name || 'عميل نقدي'}`,
-                    safe_bank_acc_id: '21b8a1db-bc9f-4cf8-b741-1efeded0963c', 
-                    partner_acc_id: '4f828d0d-a1f4-4762-83e3-c17dafae802d',
-                };
-                const { error: rectErr } = await supabase.from('receipt_vouchers').insert([receiptPayload]);
-                if (rectErr) console.warn('Receipt voucher warning:', rectErr.message);
+            // AUTO POST INVOICE (Creates Journal Lines & sets status to مرحل)
+            if (insertedInv) {
+                await supabase.rpc('post_invoices_bulk', { p_ids: [insertedInv.id] });
             }
 
             return insertedInv;

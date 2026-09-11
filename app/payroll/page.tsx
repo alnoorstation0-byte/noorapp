@@ -162,8 +162,20 @@ export default function PayrollPage() {
       render: (row: any) => {
         if (!row) return null;
         return (
-          <div style={{ fontWeight: 'bold', color: row.previous_balance > 0 ? THEME.primary : THEME.textMuted, textAlign: 'center' }}>
+          <div style={{ fontWeight: '800', textAlign: 'center' }}>
             {formatCurrency(row.previous_balance)}
+          </div>
+        );
+      }
+    },
+    {
+      header: 'رصيد العهدة (مطلوب تسويته)',
+      accessor: 'custody_balance',
+      render: (row: any) => {
+        if (!row) return null;
+        return (
+          <div style={{ fontWeight: '800', textAlign: 'center', color: row.custody_balance > 0 ? THEME.warning : 'inherit' }}>
+            {formatCurrency(row.custody_balance)}
           </div>
         );
       }
@@ -350,6 +362,7 @@ export default function PayrollPage() {
                   <th>غرامات</th>
                   <th>مسحوبات</th>
                   <th>رصيد سابق</th>
+                  <th>رصيد عهدة</th>
                   <th>الصافي النهائي</th>
                   <th style={{color: THEME.accent}}>المبلغ للصرف</th>
                   <th style={{color: THEME.ruby}}>المتبقي</th>
@@ -366,6 +379,7 @@ export default function PayrollPage() {
                      <td style={{fontWeight: 700}}>{formatCurrency(r.deductions)}</td>
                      <td style={{fontWeight: 700, color: r.extended_advances > 0 ? THEME.ruby : 'inherit'}}>{formatCurrency(r.extended_advances)}</td>
                      <td style={{fontWeight: 700}}>{formatCurrency(r.previous_balance)}</td>
+                     <td style={{fontWeight: 800, color: '#555'}}>{formatCurrency(r.custody_balance)}</td>
                      <td style={{fontWeight: 900}}>{formatCurrency(r.net_salary)}</td>
                      <td style={{fontWeight: 900, fontSize: '12px', color: THEME.success}}>{formatCurrency(r.amount_to_pay || 0)}</td>
                      <td style={{fontWeight: 900, fontSize: '12px', color: THEME.ruby}}>{formatCurrency(Number(r.net_salary || 0) - Number(r.amount_to_pay || 0))}</td>

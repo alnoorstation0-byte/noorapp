@@ -63,7 +63,7 @@ export function useExpensesLogic() {
 
     // 📥 2. جلب البيانات الأساسية
     const expensesQuery = useQuery({
-        queryKey: ['expenses', profile?.id],
+        queryKey: ['expenses'],
         queryFn: async () => {
             const buildQuery = () => {
                 let q = supabase.from('expenses').select('*').order('exp_date', { ascending: false });
@@ -129,7 +129,8 @@ export function useExpensesLogic() {
             return Array.from(groupedExpenses.values());
         },
         enabled: !!profile,
-        staleTime: 1000 * 60 * 5,
+        staleTime: 0,       // ← مهم: دائماً اعتبر البيانات قديمة لضمان التحديث الفوري
+        gcTime: 1000 * 60 * 10,
         retry: 1
     });
     const expenses = expensesQuery.data || [];

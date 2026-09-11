@@ -213,7 +213,7 @@ export default function HierarchicalLedgerPage() {
                   </div>
               </div>
             }
-            watchDeps={[selectedIds, summary.balance, searchTerm, startDate, endDate]}
+            watchDeps={[selectedIds, summary.balance, searchTerm, startDate, endDate, allAccounts, expandedIds]}
           />
 
           <div className="glass-master-card no-print">

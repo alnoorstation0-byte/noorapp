@@ -66,12 +66,54 @@ export function usePayrollLogic() {
                 .eq('month', targetMonthStr);
             if (slipsError) throw slipsError;
 
+            // --- Fetch Custody (عهدة) ---
+            const { data: invData } = await supabase
+                .from('invoices')
+                .select('fleet_operation_id, total_amount, payment_method, fleet_operations(driver_id)')
+                .not('fleet_operation_id', 'is', null)
+                .neq('status', 'مسودة');
+
+            const { data: recData } = await supabase
+                .from('journal_headers')
+                .select('fleet_operation_id, total_amount')
+                .not('fleet_operation_id', 'is', null)
+                .in('reference_type', ['سند قبض', 'receipt', 'قبض']);
+
+            const custodyMap = new Map<string, number>();
+            const opCashMap = new Map<string, number>();
+            const opDriverMap = new Map<string, string>();
+
+            (invData || []).forEach((inv: any) => {
+                const opId = inv.fleet_operation_id;
+                const driverId = inv.fleet_operations?.driver_id;
+                if (opId && driverId) {
+                    opDriverMap.set(opId, driverId);
+                    if (inv.payment_method !== 'اجل') {
+                         opCashMap.set(opId, (opCashMap.get(opId) || 0) + Number(inv.total_amount || 0));
+                    }
+                }
+            });
+            (recData || []).forEach((rec: any) => {
+                const opId = rec.fleet_operation_id;
+                if (opId) {
+                    opCashMap.set(opId, (opCashMap.get(opId) || 0) - Number(rec.total_amount || 0));
+                }
+            });
+            opCashMap.forEach((netCash, opId) => {
+                const driverId = opDriverMap.get(opId);
+                if (driverId) {
+                    custodyMap.set(driverId, (custodyMap.get(driverId) || 0) + netCash);
+                }
+            });
+            // ----------------------------
+
             setEmployees(empData || []);
 
             const initialPayroll = (empData || []).map(emp => {
                 const balanceObj = (balData || []).find((b: any) => b.partner_id === emp.id);
-                // الرصيد الحي من قاعدة البيانات
+                // الرصيد السابق من قاعدة البيانات
                 const livePrevUnpaid = balanceObj ? Number(balanceObj.previous_unpaid_balance) : 0;
+                const custodyBalance = custodyMap.get(emp.id) || 0;
 
                 const moduleData = (syncData || []).find((d: any) => d.partner_id === emp.id);
                 const savedSlipObj = (savedSlips || []).find((s: any) => s.emp_id === emp.id);
@@ -130,7 +172,8 @@ export function usePayrollLogic() {
                     net_salary: finalNet, 
                     amount_to_pay: amountToPay, 
                     status: status,             
-                    notes: ''
+                    notes: '',
+                    custody_balance: custodyBalance
                 };
             });
             setPayrollRecords(initialPayroll);
