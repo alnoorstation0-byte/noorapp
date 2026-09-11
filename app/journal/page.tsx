@@ -172,6 +172,19 @@ function useJournalLogic() {
         onError: (err: any) => showToast(`فشل في الحذف: ${err.message}`, 'error')
     });
 
+    const { data: pendingJournalsCount = 0 } = useQuery({
+        queryKey: ['pending_journals_count'],
+        queryFn: async () => {
+            const { count, error } = await supabase
+                .from('journal_headers')
+                .select('*', { count: 'exact', head: true })
+                .in('status', ['draft', 'pending', 'مسودة', 'غير مرحل']);
+            if (error) return 0;
+            return count || 0;
+        },
+        staleTime: 30000
+    });
+
     // كاشف الفلترة النشطة
     const isFiltered = !!(filterAccountId || filterPartnerId || dateFrom || dateTo || (filterStatus !== 'الكل') || (filterVType !== 'الكل'));
 
@@ -187,6 +200,7 @@ function useJournalLogic() {
         currentPage, setCurrentPage, totalPages,
         paginatedLines, 
         totals,
+        pendingJournalsCount,
         selectedIds, setSelectedIds,
         isFiltered,
         handleDeleteHeaders: () => {
@@ -449,6 +463,51 @@ export default function JournalPage() {
             </div>
           ) : (
             <>
+              {logic.pendingJournalsCount > 0 && (
+                <div style={{
+                  background: 'linear-gradient(135deg, rgba(254, 243, 199, 0.95) 0%, rgba(255, 237, 213, 0.95) 100%)',
+                  border: '1px solid rgba(245, 158, 11, 0.4)',
+                  borderRadius: '16px',
+                  padding: '12px 20px',
+                  marginBottom: '15px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  boxShadow: '0 4px 15px rgba(245, 158, 11, 0.1)',
+                  flexWrap: 'wrap',
+                  gap: '10px'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span style={{ fontSize: '24px' }}>⚠️</span>
+                    <div>
+                      <div style={{ fontWeight: 900, color: '#92400e', fontSize: '14px' }}>
+                        تنبيه القيود: يوجد ({logic.pendingJournalsCount}) قيد يومية مسودة / قيد الانتظار لم يتم ترحيلها بعد!
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#b45309', fontWeight: 700 }}>
+                        القيود المسودة لا تؤثر على الأرصدة الختامية حتى يتم ترحيلها.
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => logic.setFilterStatus(logic.filterStatus === 'مسودة' ? 'الكل' : 'مسودة')}
+                    style={{
+                      background: logic.filterStatus === 'مسودة' ? '#d97706' : '#ea580c',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '10px',
+                      padding: '8px 16px',
+                      fontWeight: 800,
+                      fontSize: '12px',
+                      cursor: 'pointer',
+                      boxShadow: '0 2px 8px rgba(234, 88, 12, 0.3)',
+                      transition: '0.2s'
+                    }}
+                  >
+                    {logic.filterStatus === 'مسودة' ? 'عرض كافة القيود' : '🔍 استعراض القيود المعلقة فقط'}
+                  </button>
+                </div>
+              )}
               <PrintHeader title="دفتر اليومية الشامل" subtitle={logic.isFiltered ? "تقرير مفلتر" : "تقرير عام"} />
               <RawasiSmartTable 
                   data={logic.paginatedLines} 

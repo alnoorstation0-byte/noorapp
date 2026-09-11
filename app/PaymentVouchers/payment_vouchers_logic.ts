@@ -65,7 +65,8 @@ export function usePaymentVouchersLogic() {
     const { profile, can } = useAuth();
 
     const { data: vouchers = [], isLoading: isFetching } = useQuery({
-        queryKey: ['payment_vouchers', profile?.id],
+        queryKey: ['payment_vouchers'],
+        staleTime: 0,
         queryFn: async () => {
             let q = supabase
                 .from('payment_vouchers')

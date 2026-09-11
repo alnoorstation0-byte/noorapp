@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import React, { useState, useEffect, useMemo } from 'react'; 
 import { createPortal } from 'react-dom';
 import { useManualJournalsLogic } from './manual_journals_logic';
@@ -183,6 +183,52 @@ export default function ManualJournalsPage() {
                     actions={sidebarActions}
                     watchDeps={[logic.state.selectedIds]}
                 />
+
+                {logic.state.unpostedCount > 0 && (
+                    <div style={{
+                        background: 'linear-gradient(135deg, rgba(254, 243, 199, 0.95) 0%, rgba(255, 237, 213, 0.95) 100%)',
+                        border: '1px solid rgba(245, 158, 11, 0.4)',
+                        borderRadius: '16px',
+                        padding: '12px 20px',
+                        marginBottom: '18px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        boxShadow: '0 4px 15px rgba(245, 158, 11, 0.1)',
+                        flexWrap: 'wrap',
+                        gap: '10px'
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <span style={{ fontSize: '24px' }}>⚠️</span>
+                            <div>
+                                <div style={{ fontWeight: 900, color: '#92400e', fontSize: '14px' }}>
+                                    تنبيه القيود: يوجد ({logic.state.unpostedCount}) قيد تسوية يدوي غير مرحل!
+                                </div>
+                                <div style={{ fontSize: '12px', color: '#b45309', fontWeight: 700 }}>
+                                    القيود غير المرحلة لا تؤثر في الحسابات والأرصدة حتى يتم ترحيلها.
+                                </div>
+                            </div>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={() => logic.state.setFilterStatus(logic.state.filterStatus === 'مسودة' ? 'الكل' : 'مسودة')}
+                            style={{
+                                background: logic.state.filterStatus === 'مسودة' ? '#d97706' : '#ea580c',
+                                color: 'white',
+                                border: 'none',
+                                borderRadius: '10px',
+                                padding: '8px 16px',
+                                fontWeight: 800,
+                                fontSize: '12px',
+                                cursor: 'pointer',
+                                boxShadow: '0 2px 8px rgba(234, 88, 12, 0.3)',
+                                transition: '0.2s'
+                            }}
+                        >
+                            {logic.state.filterStatus === 'مسودة' ? 'عرض كافة القيود' : '🔍 استعراض القيود غير المرحلة فقط'}
+                        </button>
+                    </div>
+                )}
 
                 <RawasiSmartTable 
                     columns={columns}

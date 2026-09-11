@@ -3,10 +3,15 @@ import { useState, useMemo, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/lib/toast-context';
+import { useRealtimeInvalidate } from '@/lib/useRealtimeSync';
+import { SALES_ACCOUNTS } from '@/lib/account-ids';
 
 export function usePosLogic() {
     const { showToast } = useToast();
     const queryClient = useQueryClient();
+
+    // 🔄 مزامنة فورية - تحديث المخزون والفواتير تلقائياً
+    useRealtimeInvalidate(['warehouse_inventory', 'invoices'], ['pos_inventory', 'invoices']);
 
     const [selectedWarehouseId, setSelectedWarehouseId] = useState<string>('');
     const [cart, setCart] = useState<any[]>([]);
@@ -99,6 +104,8 @@ export function usePosLogic() {
         }
     }, [userProfile, warehouses, loadingProfile, loadingWarehouses]);
 
+    const [onlyLowStock, setOnlyLowStock] = useState(false);
+
     // Fetch available items in the selected POS
     const { data: inventoryItems = [], isLoading: loadingItems } = useQuery({
         queryKey: ['pos_inventory', selectedWarehouseId],
@@ -108,13 +115,15 @@ export function usePosLogic() {
                 .from('warehouse_inventory')
                 .select(`
                     id, quantity, item_id,
-                    inventory_items (id, name, default_price, suggested_price, unit, code)
+                    inventory_items (id, name, default_price, suggested_price, unit, code, reorder_level)
                 `)
                 .eq('warehouse_id', selectedWarehouseId)
                 .gt('quantity', 0);
             
             return data?.map((row: any) => {
                 const itemInfo = Array.isArray(row.inventory_items) ? row.inventory_items[0] : row.inventory_items;
+                const reorderLvl = Number(itemInfo?.reorder_level) || 5;
+                const availableQty = Number(row.quantity) || 0;
                 return {
                     id: row.item_id,
                     name: itemInfo?.name || 'صنف غير معروف',
@@ -122,12 +131,19 @@ export function usePosLogic() {
                     suggested_price: itemInfo?.suggested_price || itemInfo?.default_price || 0,
                     unit: itemInfo?.unit || 'حبة',
                     code: itemInfo?.code,
-                    available_qty: row.quantity
+                    available_qty: availableQty,
+                    reorder_level: reorderLvl,
+                    isCriticalLow: availableQty <= reorderLvl,
+                    isNearLow: availableQty > reorderLvl && availableQty <= reorderLvl * 1.5
                 };
             }) || [];
         },
         enabled: !!selectedWarehouseId
     });
+
+    const lowStockCount = useMemo(() => {
+        return inventoryItems.filter((i: any) => i.isCriticalLow).length;
+    }, [inventoryItems]);
 
     // Fetch customers
     const { data: customers = [] } = useQuery({
@@ -139,9 +155,15 @@ export function usePosLogic() {
     });
 
     const filteredItems = useMemo(() => {
-        if (!searchQuery) return inventoryItems;
-        return inventoryItems.filter((i: any) => i.name?.toLowerCase().includes(searchQuery.toLowerCase()));
-    }, [inventoryItems, searchQuery]);
+        let items = inventoryItems;
+        if (onlyLowStock) {
+            items = items.filter((i: any) => i.isCriticalLow || i.isNearLow);
+        }
+        if (searchQuery) {
+            items = items.filter((i: any) => i.name?.toLowerCase().includes(searchQuery.toLowerCase()));
+        }
+        return items;
+    }, [inventoryItems, searchQuery, onlyLowStock]);
 
     const [selectedItemForCart, setSelectedItemForCart] = useState<any>(null);
 
@@ -268,6 +290,9 @@ export function usePosLogic() {
                 }
             }
 
+            // 🔑 الحسابات من الملف المركزي — بدون استعلامات DB إضافية
+            // 123 العملاء (ذمم مدينون) — 41 إيرادات المبيعات
+
             // 1. إنشاء الفاتورة بحالة معلق
             const invoiceHeader = {
                 invoice_number: autoNumber,
@@ -277,13 +302,13 @@ export function usePosLogic() {
                 total_amount: cartTotal.total,
                 taxable_amount: cartTotal.subtotal,
                 tax_amount: cartTotal.tax,
-                status: 'معلق',  
+                status: 'معلق',
                 warehouse_id: selectedWarehouseId,
                 delegate_id: delegateId || null,
                 payment_method: paymentMethod,
                 paid_amount: paymentMethod !== 'آجل' ? cartTotal.total : 0,
-                debit_account_id: '4f828d0d-a1f4-4762-83e3-c17dafae802d',
-                credit_account_id: '6667f91a-9478-49ab-9721-521ee09381fa',
+                debit_account_id: SALES_ACCOUNTS.AR,        // 123 العملاء
+                credit_account_id: SALES_ACCOUNTS.REVENUE,  // 41 إيرادات المبيعات
                 lines_data: linesData,
                 shift_id: activeShift?.id,
                 fleet_operation_id: fleetOpId
@@ -291,6 +316,7 @@ export function usePosLogic() {
 
             const { data: insertedInv, error: invErr } = await supabase.from('invoices').insert([invoiceHeader]).select().single();
             if (invErr) throw new Error(invErr.message);
+
 
             // Deduct from warehouse
             for (let line of linesData) {
@@ -339,6 +365,7 @@ export function usePosLogic() {
         paymentMethod, setPaymentMethod,
         customers, partnerId, setPartnerId,
         delegates, delegateId, setDelegateId, isDelegateLocked,
+        onlyLowStock, setOnlyLowStock, lowStockCount,
         handleCheckout: () => checkoutMutation.mutate(),
         isCheckingOut: checkoutMutation.isPending,
         isLoading: loadingWarehouses || loadingItems || loadingShift

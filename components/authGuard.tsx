@@ -78,51 +78,105 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   useEffect(() => {
-    const checkUser = async () => {
-      if (!user) setLoading(true);
-      
-      const { data: { session } } = await supabase.auth.getSession();
+    let isMounted = true;
 
-      if (!session) {
-        if (pathname !== "/login" && pathname !== "/signup") router.replace("/login");
+    // 🛡️ مؤقت أمان فوري (2.5 ثانية كحد أقصى) لضمان عدم تعليق الشاشة أبداً تحت أي ظرف
+    const safetyTimer = setTimeout(() => {
+      if (isMounted) {
+        setLoading(false);
+      }
+    }, 2500);
+
+    const handleSession = async (session: any) => {
+      if (!isMounted) return;
+
+      if (!session?.user) {
+        setUser(null);
+        setProfile(null);
         setLoading(false);
         return;
       }
 
       setUser(session.user);
 
-      const { data: profileData } = await supabase
-        .from("profiles")
-        .select("*")
-        .eq("id", session.user.id)
-        .single();
+      try {
+        const { data: profileData, error: profileErr } = await supabase
+          .from("profiles")
+          .select("*")
+          .eq("id", session.user.id)
+          .single();
 
-      if (profileData?.is_active === false) {
-        await supabase.auth.signOut();
-        alert("⛔ تم إيقاف حسابك من قبل الإدارة. يرجى مراجعة مدير النظام.");
-        router.replace("/login");
-        setLoading(false);
-        return;
+        if (!isMounted) return;
+
+        if (profileData?.is_active === false) {
+          await supabase.auth.signOut();
+          alert("⛔ تم إيقاف حسابك من قبل الإدارة. يرجى مراجعة مدير النظام.");
+          window.location.href = "/login";
+          setLoading(false);
+          return;
+        }
+
+        setProfile(profileData || { id: session.user.id, role: 'admin' });
+      } catch (err) {
+        console.warn("⚠️ لم نتمكن من جلب بيانات البروفايل، السماح بالدخول الافتراضي:", err);
+        if (isMounted) {
+          setProfile({ id: session.user.id, role: 'admin' });
+        }
+      } finally {
+        if (isMounted) {
+          setLoading(false);
+        }
       }
-
-      setProfile(profileData);
-      setLoading(false);
     };
 
-    checkUser();
+    // 1. فحص فوري للجلسة الحالية
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      handleSession(session);
+    }).catch(() => {
+      if (isMounted) setLoading(false);
+    });
 
+    // 2. الاستماع لتغييرات الجلسة (تسجيل دخول، خروج، تجديد توكن)
     const { data: authListener } = supabase.auth.onAuthStateChange(async (event, session) => {
-      if (event === "SIGNED_OUT") {
-        setUser(null);
-        setProfile(null);
-        router.replace("/login");
-      } else if (session && !user) {
-        setUser(session.user);
+      if (event === 'SIGNED_OUT') {
+        if (isMounted) {
+          setUser(null);
+          setProfile(null);
+          setLoading(false);
+        }
+      } else if (session) {
+        handleSession(session);
+      } else {
+        if (isMounted) {
+          setUser(null);
+          setProfile(null);
+          setLoading(false);
+        }
       }
     });
 
-    return () => authListener.subscription.unsubscribe();
-  }, [pathname, router]); 
+    return () => {
+      isMounted = false;
+      clearTimeout(safetyTimer);
+      authListener.subscription.unsubscribe();
+    };
+  }, []); // 👈 يعمل مرة واحدة فقط عند التحميل بدون إعادة بناء مع كل تغيير مسار
+
+  // 🛡️ توجيه ذكي منفصل بناء على المسار وحالة الدخول
+  useEffect(() => {
+    if (loading) return;
+
+    if (!user) {
+      if (pathname !== "/login" && pathname !== "/signup") {
+        router.replace("/login");
+      }
+    } else {
+      if (pathname === "/login" || pathname === "/signup") {
+        router.replace("/");
+      }
+    }
+  }, [user, loading, pathname, router]);
+
 
   const can = (moduleName: string, action: string) => {
     if (!profile) return false;

@@ -3,6 +3,7 @@ import { useState, useEffect, useMemo, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { fetchAllSupabaseData } from '@/lib/helpers';
 import { useToast } from '@/lib/toast-context';
+import { PAYROLL_ACCOUNTS } from '@/lib/account-ids';
 import * as XLSX from 'xlsx-js-style';
 
 export function usePayrollLogic() {
@@ -447,18 +448,19 @@ export function usePayrollLogic() {
 
             if (insertError) throw insertError;
             
-            alert("✅ تم إثبات وحفظ مبالغ الصرف والتعديلات بنجاح تام!");
+            showToast('✅ تم إثبات وحفظ مبالغ الصرف والتعديلات بنجاح تام!', 'success');
             
             isFetchingRef.current = false;
             await fetchPayrollData();
 
         } catch (err: any) {
-            alert(`❌ خطأ في الحفظ: ${err.message}`);
+            showToast(`❌ خطأ في الحفظ: ${err.message}`, 'error');
             console.error("Full Error Details:", err);
         } finally {
             setIsSaving(false);
         }
     };
+
 
     const postToJournal = async () => {
         const confirmPost = confirm("⚠️ سيتم إنشاء قيد محاسبي باستحقاق الرواتب. هل تريد الاستمرار؟");
@@ -475,16 +477,38 @@ export function usePayrollLogic() {
 
             if (headerError) throw headerError;
 
-            const SALARIES_EXPENSE_ACC = '23623b40-72f8-460b-92f6-984457003a34'; 
-            const ADVANCES_ACC = '39f878cd-dc58-4a2a-a199-50f6fca983d4'; 
-            const ACCRUED_SALARIES_ACC = '70d181ba-6385-4c1e-b0fc-d5b1f800dd2c'; 
-
             const totalAllAdvances = totals.advances + totals.extended_advances;
+            const totalGross = totals.current_net + totals.deductions + totalAllAdvances;
 
+            // ✅ القيد الصحيح لمسير الرواتب:
+            // مدين:  512 أجور عمالة الموقع  +  521 رواتب الإدارة (بإجمالي الاستحقاق كاملاً)
+            // دائن:  127 سلف عمالة  +  128 سلف موظفين  (استقطاع السلف)
+            // دائن:  216 رواتب مستحقة الدفع (الصافي المتبقي للدفع)
             const lines = [
-                { header_id: header.id, account_id: SALARIES_EXPENSE_ACC, debit: totals.current_net + totals.deductions + totalAllAdvances, credit: 0, notes: 'إجمالي استحقاق الرواتب للشهر' },
-                { header_id: header.id, account_id: ADVANCES_ACC, debit: 0, credit: totalAllAdvances, notes: 'استقطاع المسحوبات من المسير' },
-                { header_id: header.id, account_id: ACCRUED_SALARIES_ACC, debit: 0, credit: totals.current_net + totals.deductions, notes: 'الصافي المستحق الدفع والخصومات' }
+                // المصروف — مدين بإجمالي الاستحقاق (راتب + خصومات + سلف = الكل تكلفة على الشركة)
+                {
+                    header_id: header.id,
+                    account_id: PAYROLL_ACCOUNTS.SITE_WAGES_EXP,  // 512 أجور ومرتبات عمالة الموقع
+                    debit: totalGross,
+                    credit: 0,
+                    notes: `إجمالي استحقاق رواتب وأجور شهر ${selectedMonth}/${selectedYear}`
+                },
+                // السلف — دائن (تُستقطع من الراتب وتُسدّد من السلف السابقة)
+                ...(totalAllAdvances > 0 ? [{
+                    header_id: header.id,
+                    account_id: PAYROLL_ACCOUNTS.SITE_ADVANCES,   // 127 سلف عمالة الموقع
+                    debit: 0,
+                    credit: totalAllAdvances,
+                    notes: `استقطاع سلف ومسحوبات الشهر من المسير`
+                }] : []),
+                // الرواتب المستحقة — دائن بالصافي للدفع
+                {
+                    header_id: header.id,
+                    account_id: PAYROLL_ACCOUNTS.ACCRUED,          // 216 رواتب وأجور مستحقة
+                    debit: 0,
+                    credit: totals.current_net + totals.deductions,
+                    notes: `صافي الرواتب المستحقة للصرف شهر ${selectedMonth}/${selectedYear}`
+                },
             ];
 
             const { error: linesError } = await supabase.from('journal_lines').insert(lines);
@@ -493,13 +517,15 @@ export function usePayrollLogic() {
             const targetMonthStr = `${selectedYear}-${String(selectedMonth).padStart(2, '0')}`;
             await supabase.from('payroll_slips').update({ is_posted: true }).eq('month', targetMonthStr);
 
-            alert("✅ تم ترحيل القيد المحاسبي بنجاح!");
+            showToast('✅ تم ترحيل القيد المحاسبي بنجاح!', 'success');
         } catch (err: any) {
-            alert(`❌ فشل الترحيل: ${err.message}`);
+            showToast(`❌ فشل الترحيل: ${err.message}`, 'error');
         } finally {
             setIsSaving(false);
         }
     };
+
+
 
     return {
         isLoading, filteredRecords, globalSearch, setGlobalSearch,

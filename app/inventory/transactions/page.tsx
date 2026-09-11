@@ -28,15 +28,39 @@ export default function InventoryTransactionsPage() {
     },
     { key: 'transaction_date', label: 'تاريخ الحركة', type: 'text' },
     { key: 'type', label: 'نوع الحركة', type: 'badge',
-      render: (row: any) => (
-        <span style={{ 
-          background: ['in', 'transfer_in'].includes(row.type) ? '#dcfce7' : '#fee2e2', 
-          color: ['in', 'transfer_in'].includes(row.type) ? '#166534' : '#991b1b', 
-          padding: '4px 12px', borderRadius: '8px', fontSize: '12px', fontWeight: 900 
-        }}>
-          {['in', 'transfer_in'].includes(row.type) ? '🟢 استلام (In)' : '🔴 صرف (Out)'}
-        </span>
-      )
+      render: (row: any) => {
+        if (row.type === 'waste' || row.type === 'damage') {
+          return (
+            <span style={{ 
+              background: '#fee2e2', color: '#991b1b', 
+              border: '1px solid rgba(239, 68, 68, 0.4)',
+              padding: '4px 12px', borderRadius: '8px', fontSize: '12px', fontWeight: 900 
+            }}>
+              🗑️ تالف / هدر
+            </span>
+          );
+        }
+        if (row.type === 'empty_return') {
+          return (
+            <span style={{ 
+              background: '#e0f2fe', color: '#0369a1', 
+              border: '1px solid rgba(2, 132, 199, 0.4)',
+              padding: '4px 12px', borderRadius: '8px', fontSize: '12px', fontWeight: 900 
+            }}>
+              🔄 إرجاع فوارغ
+            </span>
+          );
+        }
+        return (
+          <span style={{ 
+            background: ['in', 'transfer_in'].includes(row.type) ? '#dcfce7' : '#fee2e2', 
+            color: ['in', 'transfer_in'].includes(row.type) ? '#166534' : '#991b1b', 
+            padding: '4px 12px', borderRadius: '8px', fontSize: '12px', fontWeight: 900 
+          }}>
+            {['in', 'transfer_in'].includes(row.type) ? '🟢 استلام (In)' : '🔴 صرف (Out)'}
+          </span>
+        );
+      }
     },
     { key: 'item_name', label: 'الصنف', type: 'text',
       render: (row: any) => <span style={{ fontWeight: 900, color: THEME.primary }}>📦 {row.item_name || '-'}</span>
@@ -186,6 +210,110 @@ export default function InventoryTransactionsPage() {
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             
+            {/* ⏳ Pending Alert Banner */}
+            {logic.stats?.pendingCount > 0 && (
+              <div style={{
+                background: 'linear-gradient(135deg, rgba(254, 243, 199, 0.95) 0%, rgba(255, 237, 213, 0.95) 100%)',
+                border: '1px solid rgba(245, 158, 11, 0.4)',
+                borderRadius: '16px',
+                padding: '12px 20px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                boxShadow: '0 4px 15px rgba(245, 158, 11, 0.1)',
+                flexWrap: 'wrap',
+                gap: '10px'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                  <span style={{ fontSize: '22px' }}>⏳</span>
+                  <div>
+                    <div style={{ fontWeight: 900, color: '#92400e', fontSize: '14px' }}>
+                      تنبيه العمليات: يوجد ({logic.stats.pendingCount}) حركة مخزنية بانتظار الاعتماد وتوليد القيود المالية!
+                    </div>
+                    <div style={{ fontSize: '12px', color: '#b45309', fontWeight: 700 }}>
+                      يُرجى مراجعة الحركات وتأكيد الاعتماد لتحديث أرصدة المستودعات وترحيل اليومية تلقائياً.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* 📊 Summary Stats Cards */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+              gap: '15px'
+            }}>
+              {/* بطاقة التوالف */}
+              <div style={{
+                background: 'rgba(255, 255, 255, 0.8)',
+                border: '1px solid rgba(239, 68, 68, 0.25)',
+                borderRadius: '16px',
+                padding: '16px',
+                backdropFilter: 'blur(10px)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '6px'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '13px', fontWeight: 800, color: '#991b1b' }}>خسائر التوالف والهدر</span>
+                  <span style={{ fontSize: '20px' }}>🗑️</span>
+                </div>
+                <div style={{ fontSize: '20px', fontWeight: 900, color: '#dc2626' }}>
+                  {(logic.stats?.wasteCost || 0).toLocaleString()} ر.س
+                </div>
+                <div style={{ fontSize: '11px', color: '#64748b', fontWeight: 700 }}>
+                  إجمالي الكميات التالفة: {logic.stats?.wasteQty || 0} وحدة
+                </div>
+              </div>
+
+              {/* بطاقة الفوارغ المسترجعة */}
+              <div style={{
+                background: 'rgba(255, 255, 255, 0.8)',
+                border: '1px solid rgba(2, 132, 199, 0.25)',
+                borderRadius: '16px',
+                padding: '16px',
+                backdropFilter: 'blur(10px)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '6px'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '13px', fontWeight: 800, color: '#0369a1' }}>فوارغ الجالونات المسترجعة</span>
+                  <span style={{ fontSize: '20px' }}>🔄</span>
+                </div>
+                <div style={{ fontSize: '20px', fontWeight: 900, color: '#0284c7' }}>
+                  {(logic.stats?.emptyReturnQty || 0).toLocaleString()} جالون / عبوة
+                </div>
+                <div style={{ fontSize: '11px', color: '#64748b', fontWeight: 700 }}>
+                  تم استلامها وإعادتها لدورة التعبئة
+                </div>
+              </div>
+
+              {/* بطاقة الحركات المعلقة */}
+              <div style={{
+                background: 'rgba(255, 255, 255, 0.8)',
+                border: '1px solid rgba(245, 158, 11, 0.25)',
+                borderRadius: '16px',
+                padding: '16px',
+                backdropFilter: 'blur(10px)',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '6px'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                  <span style={{ fontSize: '13px', fontWeight: 800, color: '#92400e' }}>حركات قيد الانتظار</span>
+                  <span style={{ fontSize: '20px' }}>⏳</span>
+                </div>
+                <div style={{ fontSize: '20px', fontWeight: 900, color: '#d97706' }}>
+                  {logic.stats?.pendingCount || 0} حركة
+                </div>
+                <div style={{ fontSize: '11px', color: '#64748b', fontWeight: 700 }}>
+                  تحتاج اعتماد لتوليد القيود المحاسبية
+                </div>
+              </div>
+            </div>
+
             {/* لوحة الفلاتر */}
             <div className="apple-glass-filter-bar">
               <div style={{ flex: 1, minWidth: '200px' }}>
@@ -208,6 +336,8 @@ export default function InventoryTransactionsPage() {
                   <option value="all">الكل</option>
                   <option value="in">🟢 استلام (In)</option>
                   <option value="out">🔴 صرف (Out)</option>
+                  <option value="waste">🗑️ توالف وهدر (Waste)</option>
+                  <option value="empty_return">🔄 استرجاع فوارغ (Empty Return)</option>
                 </select>
               </div>
               <div>

@@ -160,8 +160,38 @@ export function useInventoryTransactionsLogic() {
     );
   }, [rawRecords, globalSearch]);
 
+  const stats = useMemo(() => {
+    let wasteCost = 0;
+    let wasteQty = 0;
+    let emptyReturnQty = 0;
+    let pendingCount = 0;
+
+    rawRecords.forEach(r => {
+      const isPending = r.status === 'pending' || r.status === 'مسودة' || !r.status;
+      if (isPending) pendingCount++;
+
+      if (r.type === 'waste' || r.type === 'damage') {
+        const qty = Number(r.quantity) || 0;
+        const price = Number(r.unit_price) || 0;
+        wasteQty += qty;
+        wasteCost += (qty * price);
+      } else if (r.type === 'empty_return') {
+        emptyReturnQty += (Number(r.quantity) || 0);
+      }
+    });
+
+    return {
+      wasteCost,
+      wasteQty,
+      emptyReturnQty,
+      pendingCount
+    };
+  }, [rawRecords]);
+
   return {
     data,
+    rawRecords,
+    stats,
     isLoading,
     globalSearch, setGlobalSearch,
     filterType, setFilterType,

@@ -13,6 +13,7 @@ export default function MasterPage({ title, subtitle, children, headerContent, i
   const pathname = usePathname();
   const [userProfile, setUserProfile] = useState<any>(null);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
+  const [pendingTotalCount, setPendingTotalCount] = useState(0);
   const { unread_messages, unread_notifications } = useUnreadCounts();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [coords, setCoords] = useState({ top: 0, left: 0 });
@@ -28,15 +29,43 @@ export default function MasterPage({ title, subtitle, children, headerContent, i
   }, [pathname]);
 
   useEffect(() => {
+    const fetchPendingCount = async () => {
+      try {
+        const [jhRes, txRes] = await Promise.all([
+          supabase.from('journal_headers').select('id', { count: 'exact', head: true }).in('status', ['draft', 'pending', 'مسودة', 'غير مرحل']),
+          supabase.from('inventory_transactions').select('id', { count: 'exact', head: true }).in('status', ['pending', 'draft', 'مسودة'])
+        ]);
+        const total = (jhRes.count || 0) + (txRes.count || 0);
+        setPendingTotalCount(total);
+      } catch (e) {
+        // silent fail
+      }
+    };
+    fetchPendingCount();
+    const interval = setInterval(fetchPendingCount, 60000);
+    return () => clearInterval(interval);
+  }, []);
+
+  useEffect(() => {
     const getUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session?.user) {
-        const { data } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
-        setUserProfile(data || { full_name: session.user.email });
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          const { data } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
+          const emailName = session.user.email ? session.user.email.split('@')[0] : 'المدير';
+          setUserProfile({
+            ...(data || {}),
+            email: session.user.email,
+            displayName: data?.full_name?.trim() || emailName
+          });
+        }
+      } catch (err) {
+        console.warn("Could not fetch profile in MasterPage:", err);
       }
     };
     getUser();
   }, []);
+
 
   const toggleMenu = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -287,32 +316,59 @@ html, body {
                 </button>
              </div>
 
-             {/* Notifications & Messages */}
-             <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                 <button className="msg-btn" onClick={() => setIsNotificationsOpen(true)} style={{ background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.9)', color: '#1C73AB', cursor: 'pointer', position: 'relative', fontSize: '22px', transition: '0.3s', width: '45px', height: '45px', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 10px rgba(28, 115, 171, 0.1)' }}>
-                     🔔
-                     {unread_notifications > 0 && <span style={{ position: 'absolute', top: '-6px', right: '-6px', background: '#ef4444', color: 'white', fontSize: '12px', minWidth: '22px', height: '22px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 8px rgba(239, 68, 68, 0.5)', fontWeight: 900, border: '2px solid rgba(255,255,255,0.8)' }}>{unread_notifications}</span>}
-                 </button>
-                 <Link className="msg-btn" href="/messages" style={{ background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.9)', color: '#1C73AB', cursor: 'pointer', position: 'relative', textDecoration: 'none', fontSize: '22px', transition: '0.3s', width: '45px', height: '45px', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 10px rgba(28, 115, 171, 0.1)' }}>
-                     ✉️
-                     {unread_messages > 0 && <span style={{ position: 'absolute', top: '-6px', right: '-6px', background: '#3b82f6', color: 'white', fontSize: '12px', minWidth: '22px', height: '22px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 8px rgba(59, 130, 246, 0.5)', fontWeight: 900, border: '2px solid rgba(255,255,255,0.8)' }}>{unread_messages}</span>}
-                 </Link>
-             </div>
+              {/* Notifications & Messages & Pending Alert */}
+              <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                  {pendingTotalCount > 0 && (
+                      <Link 
+                          href="/journal" 
+                          title={`يوجد ${pendingTotalCount} عمليات وقيود معلقة بانتظار الاعتماد`}
+                          style={{
+                              background: 'rgba(254, 243, 199, 0.95)',
+                              backdropFilter: 'blur(10px)',
+                              border: '1px solid rgba(245, 158, 11, 0.6)',
+                              color: '#b45309',
+                              textDecoration: 'none',
+                              fontSize: '12px',
+                              fontWeight: 900,
+                              padding: '6px 12px',
+                              borderRadius: '12px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '6px',
+                              boxShadow: '0 2px 8px rgba(245, 158, 11, 0.2)',
+                              transition: '0.2s',
+                              whiteSpace: 'nowrap'
+                          }}
+                      >
+                          <span>⚠️</span>
+                          <span>{pendingTotalCount} معلق</span>
+                      </Link>
+                  )}
+                  <button className="msg-btn" onClick={() => setIsNotificationsOpen(true)} style={{ background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.9)', color: '#1C73AB', cursor: 'pointer', position: 'relative', fontSize: '22px', transition: '0.3s', width: '45px', height: '45px', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 10px rgba(28, 115, 171, 0.1)' }}>
+                      🔔
+                      {unread_notifications > 0 && <span style={{ position: 'absolute', top: '-6px', right: '-6px', background: '#ef4444', color: 'white', fontSize: '12px', minWidth: '22px', height: '22px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 8px rgba(239, 68, 68, 0.5)', fontWeight: 900, border: '2px solid rgba(255,255,255,0.8)' }}>{unread_notifications}</span>}
+                  </button>
+                  <Link className="msg-btn" href="/messages" style={{ background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.9)', color: '#1C73AB', cursor: 'pointer', position: 'relative', textDecoration: 'none', fontSize: '22px', transition: '0.3s', width: '45px', height: '45px', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 10px rgba(28, 115, 171, 0.1)' }}>
+                      ✉️
+                      {unread_messages > 0 && <span style={{ position: 'absolute', top: '-6px', right: '-6px', background: '#3b82f6', color: 'white', fontSize: '12px', minWidth: '22px', height: '22px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 8px rgba(59, 130, 246, 0.5)', fontWeight: 900, border: '2px solid rgba(255,255,255,0.8)' }}>{unread_messages}</span>}
+                  </Link>
+              </div>
           </div>
           
           {/* Avatar Card Restored */}
           <div className="imperial-trigger" ref={triggerRef} onClick={toggleMenu} style={{ flexShrink: 0 }}>
             <div className="u-info-text">
-              <span className="u-name">{userProfile?.full_name || 'جاري التحميل...'}</span>
+              <span className="u-name">{userProfile?.displayName || 'المدير'}</span>
               <span className="u-role">
                 {userProfile?.role === 'super_admin' ? 'مدير عام 👑' : 'مسؤول نظام 🛡️'}
               </span>
             </div>
             <div className="avatar-frame">
-              <img src={userProfile?.avatar_url || `https://ui-avatars.com/api/?name=${userProfile?.full_name || 'U'}&background=A1D6E2&color=122946&bold=true`} alt="Avatar" />
+              <img src={userProfile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(userProfile?.displayName || 'U')}&background=A1D6E2&color=122946&bold=true`} alt="Avatar" />
               <div className="active-dot"></div>
             </div>
           </div>
+
 
         </div>
       </header>

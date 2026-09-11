@@ -16,7 +16,7 @@ export default function InventoryPage() {
   const { showConfirm } = useConfirm();
   
   const [mounted, setMounted] = useState(false);
-  const [actionType, setActionType] = useState<'in' | 'out'>('in');
+  const [actionType, setActionType] = useState<'in' | 'out' | 'waste' | 'empty_return'>('in');
 
   useEffect(() => setMounted(true), []);
 
@@ -39,23 +39,35 @@ export default function InventoryPage() {
     { key: 'reorder_level', label: 'حد إعادة الطلب', type: 'number' },
     { key: 'available_qty', label: 'الكمية المتاحة', type: 'number',
       render: (row: any) => {
-        const isLowStock = row.available_qty <= row.reorder_level;
+        const reorderLvl = Number(row.reorder_level) || 5;
+        const isOutOfStock = row.available_qty <= 0;
+        const isLowStock = row.available_qty <= reorderLvl;
+        const isNearLow = !isLowStock && row.available_qty <= reorderLvl * 1.5;
+
         return (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '4px', justifyContent: 'center' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span style={{ 
                 fontSize: '15px', fontWeight: 900, 
-                color: isLowStock ? '#dc2626' : (row.available_qty > 0 ? '#16a34a' : '#475569') 
+                color: isOutOfStock ? '#dc2626' : (isLowStock ? '#ea580c' : (isNearLow ? '#d97706' : '#16a34a')) 
               }}>
                 {row.available_qty}
               </span>
               <span style={{ fontSize: '11px', color: '#64748b' }}>{row.unit || 'حبة'}</span>
             </div>
-            {isLowStock && (
-              <span style={{ fontSize: '10px', background: '#fee2e2', color: '#dc2626', padding: '2px 6px', borderRadius: '4px', fontWeight: 700 }}>
-                يجب إعادة الطلب
+            {isOutOfStock ? (
+              <span style={{ fontSize: '10px', background: '#fee2e2', color: '#b91c1c', padding: '2px 8px', borderRadius: '6px', fontWeight: 900, border: '1px solid #f87171' }}>
+                ⛔ نفد من المخزون
               </span>
-            )}
+            ) : isLowStock ? (
+              <span style={{ fontSize: '10px', background: '#ffedd5', color: '#c2410c', padding: '2px 8px', borderRadius: '6px', fontWeight: 900, border: '1px solid #fb923c' }}>
+                ⚠️ وصل حد الطلب ({reorderLvl})
+              </span>
+            ) : isNearLow ? (
+              <span style={{ fontSize: '10px', background: '#fef3c7', color: '#b45309', padding: '2px 8px', borderRadius: '6px', fontWeight: 800 }}>
+                ⚡ قارب على النفاد
+              </span>
+            ) : null}
           </div>
         );
       }
@@ -163,9 +175,56 @@ export default function InventoryPage() {
                 ))}
               </div>
 
+              {/* 🚨 Low Stock Warning Banner */}
+              {logic.lowStockCount > 0 && (
+                <div style={{
+                  background: 'linear-gradient(135deg, rgba(254, 242, 242, 0.95) 0%, rgba(255, 237, 213, 0.95) 100%)',
+                  border: '1px solid rgba(239, 68, 68, 0.3)',
+                  borderRadius: '16px',
+                  padding: '12px 20px',
+                  marginBottom: '15px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  boxShadow: '0 4px 15px rgba(239, 68, 68, 0.08)',
+                  flexWrap: 'wrap',
+                  gap: '10px'
+                }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <span style={{ fontSize: '22px' }}>🚨</span>
+                    <div>
+                      <div style={{ fontWeight: 900, color: '#991b1b', fontSize: '14px' }}>
+                        تنبيه المخزون: يوجد {logic.lowStockCount} أصناف وصلت إلى حد إعادة الطلب أو نفدت!
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#b45309', fontWeight: 700 }}>
+                        يُنصح بإصدار أوامر شراء أو تعبئة للمستودع المختار لتفادي نفاد الكميات.
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => logic.setFilterLowStockOnly(!logic.filterLowStockOnly)}
+                    style={{
+                      background: logic.filterLowStockOnly ? '#dc2626' : '#ea580c',
+                      color: 'white',
+                      border: 'none',
+                      borderRadius: '10px',
+                      padding: '8px 16px',
+                      fontWeight: 800,
+                      fontSize: '12px',
+                      cursor: 'pointer',
+                      boxShadow: '0 2px 8px rgba(234, 88, 12, 0.3)',
+                      transition: '0.2s'
+                    }}
+                  >
+                    {logic.filterLowStockOnly ? 'إلغاء التصفية' : '🔍 استعراض الأصناف الناقصة فقط'}
+                  </button>
+                </div>
+              )}
+
               {/* Quick Actions Filter Bar */}
               <div className="apple-glass-filter-bar">
-                <div style={{ display: 'flex', gap: '10px', flex: 1 }}>
+                <div style={{ display: 'flex', gap: '10px', flex: 1, flexWrap: 'wrap' }}>
                   
                   <SecureAction module="inventory" action="create">
                     <button 
@@ -186,6 +245,41 @@ export default function InventoryPage() {
                       ➕ تعريف صنف جديد
                     </button>
                   </SecureAction>
+
+                  <SecureAction module="inventory" action="create">
+                    <button 
+                      onClick={() => { setActionType('waste'); logic.setIsActionModalOpen(true); }}
+                      className="btn-main-glass" 
+                      style={{ background: 'linear-gradient(135deg, #f97316 0%, #dc2626 100%)', color: 'white', fontSize: '13px', fontWeight: 800 }}
+                    >
+                      🗑️ تسجيل توالف وهدر
+                    </button>
+                  </SecureAction>
+
+                  <SecureAction module="inventory" action="create">
+                    <button 
+                      onClick={() => { setActionType('empty_return'); logic.setIsActionModalOpen(true); }}
+                      className="btn-main-glass" 
+                      style={{ background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)', color: 'white', fontSize: '13px', fontWeight: 800 }}
+                    >
+                      🔄 استرجاع فوارغ
+                    </button>
+                  </SecureAction>
+
+                  <button 
+                    type="button"
+                    onClick={() => logic.setFilterLowStockOnly(!logic.filterLowStockOnly)}
+                    className="btn-main-glass" 
+                    style={{ 
+                      background: logic.filterLowStockOnly ? '#dc2626' : 'rgba(254, 226, 226, 0.8)', 
+                      color: logic.filterLowStockOnly ? 'white' : '#b91c1c', 
+                      border: '1px solid rgba(220, 38, 38, 0.4)',
+                      fontSize: '13px',
+                      fontWeight: 800
+                    }}
+                  >
+                    ⚠️ النواقص ({logic.lowStockCount})
+                  </button>
                 </div>
 
                 <div style={{ display: 'flex', gap: '10px', flex: 1, justifyContent: 'flex-end' }}>

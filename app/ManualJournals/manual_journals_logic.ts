@@ -120,6 +120,10 @@ export function useManualJournalsLogic() {
         'post_manual_journals_bulk'
     );
 
+    const unpostedCount = useMemo(() => {
+        return rawJournals.filter((j: any) => !j.is_posted && j.status !== 'مرحل' && j.status !== 'معتمد').length;
+    }, [rawJournals]);
+
     // 📝 5. عمليات الحفظ 
     const saveMutation = useMutation({
         mutationFn: async (journalData: any) => {
@@ -201,7 +205,7 @@ export function useManualJournalsLogic() {
             filterCreditAccount, setFilterCreditAccount,
             filterStatus, setFilterStatus,
             paginatedJournals, totalPages,
-            totals, isProcessing,
+            totals, isProcessing, unpostedCount,
             accounts, partners, projects
         },
         actions: {

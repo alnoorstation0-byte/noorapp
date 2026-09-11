@@ -30,9 +30,12 @@ const WATCHED_TABLES = [
   'manual_journals',
   'inventory_items',
   'warehouse_inventory',
+  'warehouses',
   'partners',
   'accounts',
   'fleet_operations',
+  'pos_shifts',
+  'payroll_slips',
 ] as const;
 
 type WatchedTable = typeof WATCHED_TABLES[number];

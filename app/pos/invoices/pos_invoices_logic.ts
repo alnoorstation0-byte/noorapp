@@ -48,7 +48,8 @@ export function usePosInvoicesLogic() {
     const [selectedInvoiceForPay, setSelectedInvoiceForPay] = useState<any>(null);
 
     const { data: invoices = [], isLoading: isInvLoading } = useQuery({
-        queryKey: ['pos_invoices', profile?.id],
+        queryKey: ['pos_invoices'],
+        staleTime: 0,
         queryFn: async () => {
             const buildQuery = () => {
                 let q = supabase

@@ -10,7 +10,7 @@ import SearchableSelect from './SearchableSelect';
 interface InventoryActionModalProps {
   isOpen: boolean;
   onClose: () => void;
-  actionType: 'in' | 'out';
+  actionType: 'in' | 'out' | 'waste' | 'empty_return';
   onSuccess: () => void;
   items: any[];
   initialData?: any;
@@ -30,6 +30,7 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
     fleet_operation_id: '',
     partner_id: '',
     notes: '',
+    waste_reason: 'كسر عبوة / جالون',
     warehouse_id: '',        // المستودع المصدر
     destination_warehouse_id: '', // المستودع الوجهة (للصرف فقط)
     include_tax: false
@@ -48,13 +49,15 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
           fleet_operation_id: initialData.fleet_operation_id || '',
           partner_id: initialData.partner_id || '',
           notes: initialData.notes || '',
+          waste_reason: 'كسر عبوة / جالون',
           warehouse_id: initialData.warehouse_id || '11111111-1111-1111-1111-111111111111',
           destination_warehouse_id: initialData.destination_warehouse_id || '',
           include_tax: initialData.include_tax || false
         });
       } else {
+        const prefix = actionType === 'waste' ? 'WASTE' : (actionType === 'empty_return' ? 'RETURN' : actionType.toUpperCase());
         setFormData({
-          transaction_number: `${actionType.toUpperCase()}-${Date.now().toString().slice(-6)}`,
+          transaction_number: `${prefix}-${Date.now().toString().slice(-6)}`,
           item_id: '',
           quantity: 1,
           unit_price: 0,
@@ -63,6 +66,7 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
           fleet_operation_id: '',
           partner_id: '',
           notes: '',
+          waste_reason: 'كسر عبوة / جالون',
           warehouse_id: '11111111-1111-1111-1111-111111111111',
           destination_warehouse_id: '',
           include_tax: false
@@ -109,7 +113,7 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
 
       const selectedItem = items.find(i => i.id === formData.item_id);
 
-      if (actionType === 'out') {
+      if (actionType === 'out' || actionType === 'waste') {
         if (selectedItem && formData.quantity > selectedItem.available_qty) {
             throw new Error(`الكمية المطلوبة (${formData.quantity}) تتجاوز الرصيد المتاح (${selectedItem.available_qty}).`);
         }
@@ -121,8 +125,14 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
           ? (formData.quantity * formData.unit_price * 0.15) 
           : 0;
 
+      const prefix = actionType === 'waste' ? 'WASTE' : (actionType === 'empty_return' ? 'RETURN' : actionType.toUpperCase());
+
+      const fullNotes = actionType === 'waste'
+        ? `[سبب التلف: ${formData.waste_reason}] ${formData.notes || ''}`.trim()
+        : formData.notes;
+
       const payload = {
-        transaction_number: formData.transaction_number || `${actionType.toUpperCase()}-${Date.now().toString().slice(-6)}`,
+        transaction_number: formData.transaction_number || `${prefix}-${Date.now().toString().slice(-6)}`,
         transaction_date: formData.action_date,
         type: actionType,
         quantity: formData.quantity,
@@ -134,7 +144,7 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
         fleet_operation_id: cleanId(formData.fleet_operation_id),
         warehouse_id: cleanId(formData.warehouse_id),
         destination_warehouse_id: actionType === 'out' ? cleanId(formData.destination_warehouse_id) : null,
-        notes: formData.notes
+        notes: fullNotes
       };
 
       let txError;
@@ -167,12 +177,28 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
   const taxAmount = (actionType === 'in' && formData.include_tax) ? subtotal * 0.15 : 0;
   const totalAmount = subtotal + taxAmount;
 
+  const modalTitle = actionType === 'in' 
+    ? 'استلام بضاعة (In)' 
+    : actionType === 'out' 
+    ? 'صرف من المستودع (Out)' 
+    : actionType === 'waste' 
+    ? 'تسجيل توالف وهدر (Waste / Damage)' 
+    : 'استرجاع فوارغ جالونات (Empty Return)';
+
+  const modalIcon = actionType === 'in' 
+    ? '➕' 
+    : actionType === 'out' 
+    ? '📤' 
+    : actionType === 'waste' 
+    ? '🗑️' 
+    : '🔄';
+
   return (
     <AquaModalWrapper
         isOpen={isOpen}
         onClose={onClose}
-        title={actionType === 'in' ? 'استلام بضاعة (In)' : 'صرف من المستودع (Out)'}
-        icon={actionType === 'in' ? '➕' : '➖'}
+        title={modalTitle}
+        icon={modalIcon}
         width="900px"
     >
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))', gap: '30px', alignItems: 'start' }}>
@@ -239,6 +265,29 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
               </div>
             )}
 
+            {/* حقل سبب التلف - يظهر فقط عند تسجيل التوالف */}
+            {actionType === 'waste' && (
+              <div>
+                <label style={{ fontSize: '13px', fontWeight: 900, color: '#ef4444', marginBottom: '8px', display: 'block' }}>
+                  ⚠️ سبب التلف / الهدر *
+                </label>
+                <select
+                  className="glass-input-field"
+                  value={formData.waste_reason}
+                  onChange={e => setFormData({ ...formData, waste_reason: e.target.value })}
+                  style={{ width: '100%', padding: '10px', border: '1.5px solid #f87171' }}
+                >
+                  <option value="كسر عبوة / جالون">كسر عبوة مياه أو جالون فارغ</option>
+                  <option value="تسريب كرتون مياه">تسريب كرتون مياه / تلف تغليف</option>
+                  <option value="عيب تصنيع أو غطاء غير محكم">عيب تصنيع أو غطاء غير محكم</option>
+                  <option value="تلف أثناء النقل والتوزيع">تلف أثناء نقل وتوزيع البضاعة</option>
+                  <option value="انتهاء صلاحية / سوء تخزين">انتهاء صلاحية أو سوء تخزين</option>
+                  <option value="تلف مواد تعبئة (أغطية/ستيكرات)">تلف مواد تعبئة (أغطية / كراتين / ستيكرات)</option>
+                  <option value="أخرى">سبب آخر (يُذكر في الملاحظات)</option>
+                </select>
+              </div>
+            )}
+
             <div>
               <label style={{ fontSize: '13px', fontWeight: 900, color: THEME.primary, marginBottom: '8px', display: 'block' }}>📦 الصنف *</label>
               <SearchableSelect
@@ -250,7 +299,7 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
                 onChange={val => {
                    const selected = (items || []).find(i => i.id === val);
                    const cost = selected ? (selected.last_purchase_price || selected.default_price || 0) : 0;
-                   setFormData(prev => ({ ...prev, item_id: val, unit_price: actionType === 'out' ? cost : prev.unit_price }));
+                   setFormData(prev => ({ ...prev, item_id: val, unit_price: (actionType === 'out' || actionType === 'waste') ? cost : prev.unit_price }));
                 }}
                 placeholder="-- ابحث عن الصنف --"
               />
@@ -269,7 +318,7 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
               </div>
               <div>
                 <label style={{ fontSize: '13px', fontWeight: 900, color: THEME.primary, marginBottom: '8px', display: 'block' }}>
-                    💰 {actionType === 'out' ? 'التكلفة المعتمدة' : 'السعر الإفرادي'}
+                    💰 {actionType === 'out' ? 'التكلفة المعتمدة' : (actionType === 'waste' ? 'تكلفة الوحدة (تقديري)' : (actionType === 'empty_return' ? 'قيمة التأمين/الوحدة' : 'السعر الإفرادي'))}
                 </label>
                 <input 
                   type="number" 
@@ -304,7 +353,13 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <div>
               <label style={{ fontSize: '13px', fontWeight: 900, color: THEME.primary, marginBottom: '8px', display: 'block' }}>
-                {actionType === 'in' ? '👤 العميل / المورد (اختياري)' : '👤 العميل / المستلم / المقاول (اختياري)'}
+                {actionType === 'in' 
+                  ? '👤 العميل / المورد (اختياري)' 
+                  : actionType === 'waste'
+                  ? '👤 المسؤول عن التلف / السائق (اختياري)'
+                  : actionType === 'empty_return'
+                  ? '👤 العميل أو المندوب المسلم للفوارغ (اختياري)'
+                  : '👤 العميل / المستلم / المقاول (اختياري)'}
               </label>
               <SearchableSelect
                 options={partners.map((p: any) => ({
@@ -313,7 +368,7 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
                 }))}
                 value={formData.partner_id}
                 onChange={val => setFormData({...formData, partner_id: val})}
-                placeholder="-- ابحث عن المستفيد --"
+                placeholder="-- ابحث عن الطرف المرتبط --"
               />
             </div>
 
@@ -364,6 +419,35 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
                   </div>
                </div>
             )}
+
+            {actionType === 'waste' && (
+               <div style={{ background: '#fef2f2', padding: '15px', borderRadius: '12px', border: '1px solid #fca5a5', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', color: '#991b1b', fontSize: '13px', fontWeight: 800 }}>
+                      <span>الكمية التالفة:</span>
+                      <span style={{ fontWeight: 900 }}>{formData.quantity}</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', color: '#991b1b', fontSize: '13px', fontWeight: 800 }}>
+                      <span>تكلفة الوحدة:</span>
+                      <span>{(formData.unit_price || 0).toFixed(2)} ر.س</span>
+                  </div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', color: '#7f1d1d', fontSize: '15px', fontWeight: 900, borderTop: '1px solid #f87171', paddingTop: '8px', marginTop: '4px' }}>
+                      <span>إجمالي خسارة الهدر / التالف:</span>
+                      <span style={{ color: '#dc2626' }}>{subtotal.toFixed(2)} ر.س</span>
+                  </div>
+               </div>
+            )}
+
+            {actionType === 'empty_return' && (
+               <div style={{ background: '#f0f9ff', padding: '15px', borderRadius: '12px', border: '1px solid #bae6fd', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', color: '#0369a1', fontSize: '13px', fontWeight: 800 }}>
+                      <span>عدد الفوارغ المسترجعة:</span>
+                      <span style={{ fontWeight: 900, fontSize: '16px' }}>{formData.quantity} عبوة/جالون</span>
+                  </div>
+                  <div style={{ fontSize: '11px', color: '#0284c7', fontWeight: 700 }}>
+                      💡 سيتم إضافة هذه الفوارغ لرصيد المستودع المختار بعد اعتماد الحركة.
+                  </div>
+               </div>
+            )}
           </div>
         </div>
 
@@ -372,9 +456,20 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
             onClick={() => mutation.mutate()}
             disabled={mutation.isPending}
             className="btn-glass-save"
-            style={{ flex: 2 }}
+            style={{ 
+              flex: 2, 
+              background: actionType === 'waste' ? 'linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)' : (actionType === 'empty_return' ? 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)' : undefined) 
+            }}
           >
-            {mutation.isPending ? '⏳ جاري الحفظ...' : (actionType === 'in' ? '✅ تأكيد الاستلام' : '✅ تأكيد الصرف')}
+            {mutation.isPending 
+              ? '⏳ جاري الحفظ...' 
+              : (actionType === 'in' 
+                  ? '✅ تأكيد الاستلام' 
+                  : (actionType === 'out' 
+                      ? '✅ تأكيد الصرف' 
+                      : (actionType === 'waste' 
+                          ? '🗑️ تأكيد تسجيل التالف / الهدر' 
+                          : '🔄 تأكيد استلام الفوارغ')))}
           </button>
           <button 
             onClick={onClose}

@@ -38,18 +38,20 @@ export const useDashboardLogic = () => {
       const [
         expenses, invoices, payments, receipts,
         journalLines, accounts, fleetOps,
-        warehouses, warehouseInventory, inventoryItems
+        warehouses, warehouseInventory, inventoryItems,
+        fleetVehicles
       ] = await Promise.all([
-        fetchAllForDashboard('expenses', 'amount, is_posted, main_category'),
+        fetchAllForDashboard('expenses', 'id, total_price, unit_price, quantity, vat_amount, discount_amount, paid_amount, is_posted, main_category'),
         fetchAllForDashboard('invoices', 'total_amount, status'),
         fetchAllForDashboard('payment_vouchers', 'amount, is_posted, status'),
         fetchAllForDashboard('receipt_vouchers', 'amount, status'),
         fetchAllForDashboard('journal_lines', 'debit, credit, account_id'),
-        fetchAllForDashboard('accounts', 'id, account_type'),
+        fetchAllForDashboard('accounts', 'id, account_type, code, name'),
         fetchAllForDashboard('fleet_operations', 'status, id'),
         fetchAllForDashboard('warehouses', 'id, name'),
         fetchAllForDashboard('warehouse_inventory', 'warehouse_id, item_id, quantity'),
-        fetchAllForDashboard('inventory_items', 'id, default_price')
+        fetchAllForDashboard('inventory_items', 'id, default_price'),
+        fetchAllForDashboard('fleet_vehicles', 'id, status')
       ]);
 
       // --- 🏗️ تحليل حالات رحلات التوزيع ---
@@ -60,11 +62,21 @@ export const useDashboardLogic = () => {
         { name: 'رحلات ملغاة', value: fleetOps.filter(f => f.status === 'ملغى').length }
       ].filter(p => p.value > 0);
 
-      // --- 🏛️ حساب المركز المالي من القيود ---
+      // --- 🏛️ حساب المركز المالي ورصيد النقدية والبنوك من القيود ---
       let totalAssets = 0;
       let totalLiabilities = 0;
+      let cashAndBankBalance = 0;
       const accountTypesMap: Record<string, string> = {};
-      accounts.forEach(acc => { accountTypesMap[acc.id] = acc.account_type; });
+      const cashAccountIds = new Set(
+        accounts
+          .filter(a => 
+            (a.code && (a.code.startsWith('122') || a.code.startsWith('129') || a.code.startsWith('121'))) ||
+            (a.name && (a.name.includes('نقد') || a.name.includes('خزين') || a.name.includes('بنك') || a.name.includes('الراجحي') || a.name.includes('الرياض')))
+          )
+          .map(a => a.id)
+      );
+
+      accounts.forEach(acc => { accountTypesMap[acc.id] = acc.account_type || ''; });
 
       journalLines.forEach(line => {
         const type = accountTypesMap[line.account_id] || '';
@@ -75,13 +87,22 @@ export const useDashboardLogic = () => {
         } else if (type.includes('خصوم') || type.includes('التزام') || type.includes('Liability') || type.includes('دائن')) {
           totalLiabilities += (credit - debit);
         }
+        if (cashAccountIds.has(line.account_id)) {
+          cashAndBankBalance += (debit - credit);
+        }
       });
 
-      // --- 💰 المبيعات والمصروفات والأرباح ---
+      // --- 💰 حساب المبالغ بدقة وحساب المصروفات بدون عمود amount غير الموجود ---
+      const getExpenseAmount = (item: any) => {
+        return Number(item.total_price) || 
+          ((Number(item.quantity || 1) * Number(item.unit_price || 0)) + Number(item.vat_amount || 0) - Number(item.discount_amount || 0)) || 
+          Number(item.paid_amount || 0);
+      };
+
       const validStatuses = ['معتمد', 'posted', 'مدفوع'];
-      const totalExpenses = expenses.reduce((sum, item) => sum + Number(item.amount || 0), 0);
+      const totalExpenses = expenses.reduce((sum, item) => sum + getExpenseAmount(item), 0);
       const totalInvoices = invoices.reduce((sum, item) => sum + Number(item.total_amount || 0), 0);
-      const approvedExpenses = expenses.filter(e => e.is_posted === true).reduce((sum, item) => sum + Number(item.amount || 0), 0);
+      const approvedExpenses = expenses.filter(e => e.is_posted === true).reduce((sum, item) => sum + getExpenseAmount(item), 0);
       const approvedInvoices = invoices.filter(i => validStatuses.includes(i.status)).reduce((sum, item) => sum + Number(item.total_amount || 0), 0);
       const netProfit = approvedInvoices - approvedExpenses;
 
@@ -124,32 +145,33 @@ export const useDashboardLogic = () => {
         receipts: getPostingStats(receipts, 'status', validStatuses)
       };
 
-      // --- 🚨 الرادار الأمني ---
-      const alerts: any[] = [];
-      const checkPending = (data: any[], label: string, route: string, postedKey: string = 'is_posted', postedVal: any = true) => {
-        const count = data.filter(item => {
-          if (Array.isArray(postedVal)) return !postedVal.includes(item[postedKey]);
-          return item[postedKey] !== postedVal && item[postedKey] !== true;
-        }).length;
-        if (count > 0) {
-          alerts.push({
-            title: `يوجد (${count}) ${label} غير معتمد يحتاج مراجعة`,
-            type: count > 10 ? 'danger' : 'warning',
-            route: route
-          });
-        }
-      };
+      // --- 🚨 المهام المعلقة (pendingActions) المطلوبة في واجهة لوحة القيادة ---
+      const unpostedExpenses = expenses.filter(e => e.is_posted !== true).length;
+      const unpostedInvoices = invoices.filter(i => !validStatuses.includes(i.status)).length;
+      const unpostedPayments = payments.filter(p => p.is_posted !== true).length;
+      const unpostedReceipts = receipts.filter(r => !validStatuses.includes(r.status)).length;
 
-      checkPending(expenses, 'مصروفات عامة', '/expenses', 'is_posted', true);
-      checkPending(invoices, 'فواتير عملاء', '/invoices', 'status', validStatuses);
-      checkPending(payments, 'سندات صرف', '/PaymentVouchers', 'is_posted', true);
-      checkPending(receipts, 'سندات قبض', '/ReceiptVouchers', 'status', validStatuses);
+      const pendingActions = [
+        { type: 'expenses', count: unpostedExpenses },
+        { type: 'invoices', count: unpostedInvoices },
+        { type: 'payments', count: unpostedPayments },
+        { type: 'receipts', count: unpostedReceipts }
+      ].filter(a => a.count > 0);
+
+      const alerts: any[] = [];
+      pendingActions.forEach(p => {
+        alerts.push({
+          title: `يوجد (${p.count}) ${p.type} غير معتمد يحتاج مراجعة`,
+          type: p.count > 10 ? 'danger' : 'warning',
+          route: `/${p.type}`
+        });
+      });
 
       // --- 🍩 تجميع المصروفات للرسم البياني ---
       const categoryMap: Record<string, number> = {};
       expenses.forEach(exp => {
         const cat = exp.main_category || 'مصروفات تشغيلية';
-        categoryMap[cat] = (categoryMap[cat] || 0) + Number(exp.amount || 0);
+        categoryMap[cat] = (categoryMap[cat] || 0) + getExpenseAmount(exp);
       });
 
       const expensesByCategory = Object.entries(categoryMap)
@@ -159,9 +181,27 @@ export const useDashboardLogic = () => {
         .slice(0, 5);
 
       return {
+        // 📊 الخصائص المباشرة التي تطلبها صفحة DashboardPage
+        totalRevenues: approvedInvoices,
+        totalExpenses: approvedExpenses,
+        cashAndBankBalance,
+        totalWarehouses: warehouses.length,
+        totalInventoryValue,
+        totalVehicles: fleetVehicles.length,
+        totalFleetTrips: fleetOps.length,
+        cashFlowData: [
+          { name: 'المبيعات', income: approvedInvoices, expense: 0 },
+          { name: 'المصروفات', income: 0, expense: approvedExpenses }
+        ],
+        expensesByCategory,
+        pendingActions,
+
+        // 🏛️ كائن totals والبيانات المتقدمة
         totals: {
           totalExpenses,
           totalInvoices,
+          approvedExpenses,
+          approvedInvoices,
           netProfit,
           totalInventoryValue,
           activeProjects: activeProjectsCount,
@@ -171,15 +211,12 @@ export const useDashboardLogic = () => {
         projectsStatusData,
         warehouseChartData,
         postingCharts,
-        expensesByCategory,
-        alerts,
-        cashFlowData: [
-          { name: 'إجمالي المبيعات', income: totalInvoices, expense: totalExpenses }
-        ]
+        alerts
       };
     },
     staleTime: 1000 * 60 * 5,
   });
+
 
   return {
     stats: query.data,

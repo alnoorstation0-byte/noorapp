@@ -20,7 +20,8 @@ export function useFleetLogic() {
     const { profile, can } = useAuth();
 
     const { data: rawOperations = [], isLoading } = useQuery({
-        queryKey: ['fleet_operations', profile?.id],
+        queryKey: ['fleet_operations'],
+        staleTime: 0,
         queryFn: async () => {
             let q = supabase
                 .from('fleet_operations')

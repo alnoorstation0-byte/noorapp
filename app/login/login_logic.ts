@@ -84,26 +84,29 @@ export function useLoginLogic() {
         const { error, data } = await supabase.auth.signInWithPassword({ email, password });
         if (error) throw new Error('بيانات الدخول غير صحيحة، يرجى المحاولة مرة أخرى.');
         
-        // تسجيل حركة الدخول في سجل المراقبة
+        // تسجيل حركة الدخول في سجل المراقبة (في الخلفية — لا يعيق الدخول)
         if (data.session) {
-          import('@/lib/audit').then(({ logCustomAuditEvent }) => {
-            logCustomAuditEvent('profiles', 'LOGIN', data.session.user.id, null, { login_time: new Date().toISOString() }, data.session.user.id);
-          });
+          try {
+            import('@/lib/audit').then(({ logCustomAuditEvent }) => {
+              logCustomAuditEvent('profiles', 'LOGIN', data.session.user.id, null, { login_time: new Date().toISOString() }, data.session.user.id);
+            });
+          } catch (_) { /* silent */ }
         }
         
         showToast('تم تسجيل الدخول بنجاح! 🚀', 'success');
-        router.refresh(); 
         
-        // 👈 توجيه ذكي بعد الدخول بنجاح
-        setTimeout(() => {
-          const redirectParam = searchParams?.get('redirect');
-          router.replace(redirectParam || '/'); 
-        }, 500);
+        // ✅ إعادة تعيين التحميل + التوجيه الكامل لضمان تحميل الجلسة
+        setIsLoading(false);
+        
+        const redirectParam = searchParams?.get('redirect');
+        window.location.href = redirectParam || '/';
       }
     } catch (error: any) {
       showToast(error.message, 'error'); 
       setIsLoading(false); 
     } 
+
+
   };
 
   return {

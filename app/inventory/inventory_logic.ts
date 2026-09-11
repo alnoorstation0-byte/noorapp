@@ -79,6 +79,8 @@ export function useInventoryLogic() {
 
   useEffect(() => { fetchData(); }, [selectedWarehouseId]); // Re-fetch if warehouse changes
 
+  const [filterLowStockOnly, setFilterLowStockOnly] = useState(false);
+
   const enrichedItems = useMemo(() => {
     return items.map(item => {
       const whItem = warehouseInventory.find(wi => wi.item_id === item.id && wi.warehouse_id === selectedWarehouseId);
@@ -89,18 +91,28 @@ export function useInventoryLogic() {
           qty = Number(item.current_quantity || 0);
       }
 
+      const reorderLvl = Number(item.reorder_level) || 5;
+      const isLow = qty <= reorderLvl;
+
       return {
         ...item,
         available_qty: qty,
+        reorder_level: reorderLvl,
+        isLowStock: isLow,
         last_purchase_price: lastPrices[item.id] || 0,
         avg_cost: 0
       };
     }).filter(i => {
       const matchSearch = (i.name || '').toLowerCase().includes(searchQuery.toLowerCase()) || (i.code || '').toLowerCase().includes(searchQuery.toLowerCase());
       const matchCat = filterCategory === 'الكل' || i.unit === filterCategory;
-      return matchSearch && matchCat;
+      const matchLowStock = !filterLowStockOnly || i.isLowStock;
+      return matchSearch && matchCat && matchLowStock;
     });
-  }, [items, warehouseInventory, searchQuery, filterCategory, selectedWarehouseId, lastPrices]);
+  }, [items, warehouseInventory, searchQuery, filterCategory, filterLowStockOnly, selectedWarehouseId, lastPrices]);
+
+  const lowStockCount = useMemo(() => {
+    return enrichedItems.filter(i => i.isLowStock).length;
+  }, [enrichedItems]);
 
   const enrichedWarehouses = useMemo(() => {
     return warehouses.map(wh => {
@@ -180,6 +192,8 @@ export function useInventoryLogic() {
     isLoading,
     searchQuery, setSearchQuery,
     filterCategory, setFilterCategory,
+    filterLowStockOnly, setFilterLowStockOnly,
+    lowStockCount,
     isModalOpen, setIsModalOpen,
     isActionModalOpen, setIsActionModalOpen,
     currentRecord, setCurrentRecord,

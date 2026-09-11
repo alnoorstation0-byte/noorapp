@@ -47,7 +47,14 @@ export const PermissionsProvider = ({ children }: { children: React.ReactNode })
             }
         };
 
-        // 🚀 السحر هنا: نعتمد فقط على الـ Listener لمنع تكرار الطلبات (No Double Fetch)
+        // فحص فوري عند التركيب لضمان عدم الانتظار للـ listener لو كان فات
+        fetchPerms();
+
+        const safetyTimer = setTimeout(() => {
+            if (isMounted) setLoading(false);
+        }, 2500);
+
+        // 🚀 الاستماع لأحداث الجلسة
         const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
             if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
                 fetchPerms(session?.user);
@@ -62,9 +69,11 @@ export const PermissionsProvider = ({ children }: { children: React.ReactNode })
 
         return () => {
             isMounted = false;
+            clearTimeout(safetyTimer);
             authListener.subscription.unsubscribe();
         };
     }, []); // 👈 مصفوفة فارغة لضمان عدم إعادة التشغيل نهائياً
+
 
     const can = (moduleName: string, actionName: string) => {
         if (role === 'super_admin' || role === 'admin') return true;

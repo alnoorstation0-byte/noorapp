@@ -31,7 +31,7 @@ export default function DashboardPage() {
   return (
     <MasterPage title="لوحة القيادة المركزية" subtitle="مراقبة العمليات والمؤشرات المالية - ريال سعودي">
       
-      {logic.isLoading ? (
+      {logic.isLoading || !logic.stats ? (
         <LoadingScreen message="جاري تحميل لوحة القيادة..." subMessage="نقوم الآن بتجميع البيانات وتحديث المؤشرات..." fullScreen={false} />
       ) : (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '35px', animation: 'fadeUp 0.6s ease-out', paddingBottom: '50px' }}>
@@ -48,7 +48,7 @@ export default function DashboardPage() {
                   <div className="icon-wrapper" style={{ background: 'linear-gradient(135deg, #10b98120, #05966920)', color: '#10b981' }}>💰</div>
                   <span className="trend-badge positive">إجمالي الإيرادات</span>
                 </div>
-                <div className="card-value">{logic.formatCurrency(logic.stats.totalRevenues)}</div>
+                <div className="card-value">{logic.formatCurrency(logic.stats?.totalRevenues || 0)}</div>
                 <div className="card-subtitle">إجمالي المبالغ من الفواتير المعتمدة</div>
               </div>
 
@@ -57,7 +57,7 @@ export default function DashboardPage() {
                   <div className="icon-wrapper" style={{ background: 'linear-gradient(135deg, #ef444420, #dc262620)', color: '#ef4444' }}>📉</div>
                   <span className="trend-badge negative">إجمالي المصروفات</span>
                 </div>
-                <div className="card-value">{logic.formatCurrency(logic.stats.totalExpenses)}</div>
+                <div className="card-value">{logic.formatCurrency(logic.stats?.totalExpenses || 0)}</div>
                 <div className="card-subtitle">المصروفات التشغيلية المعتمدة</div>
               </div>
 
@@ -66,7 +66,7 @@ export default function DashboardPage() {
                   <div className="icon-wrapper" style={{ background: 'linear-gradient(135deg, #2891C820, #1C73AB20)', color: THEME.primary }}>🏦</div>
                   <span className="trend-badge neutral">الرصيد النقدي والبنكي</span>
                 </div>
-                <div className="card-value">{logic.formatCurrency(logic.stats.cashAndBankBalance)}</div>
+                <div className="card-value">{logic.formatCurrency(logic.stats?.cashAndBankBalance || 0)}</div>
                 <div className="card-subtitle">رصيد الصناديق والبنوك الحالي</div>
               </div>
             </div>
@@ -80,25 +80,25 @@ export default function DashboardPage() {
             <div className="premium-grid-4">
               <div className="premium-card center-content" onClick={() => router.push('/inventory')} style={{ cursor: 'pointer' }}>
                 <div className="icon-wrapper lg" style={{ background: '#f8fafc', color: THEME.primary }}>🏭</div>
-                <div className="card-value sm">{logic.stats.totalWarehouses}</div>
+                <div className="card-value sm">{logic.stats?.totalWarehouses || 0}</div>
                 <div className="card-title">مستودع نشط</div>
               </div>
 
               <div className="premium-card center-content" onClick={() => router.push('/inventory')} style={{ cursor: 'pointer' }}>
                 <div className="icon-wrapper lg" style={{ background: '#f8fafc', color: '#f59e0b' }}>📦</div>
-                <div className="card-value sm">{logic.stats.totalInventoryValue > 0 ? logic.formatCurrency(logic.stats.totalInventoryValue) : '0'}</div>
+                <div className="card-value sm">{(logic.stats?.totalInventoryValue || 0) > 0 ? logic.formatCurrency(logic.stats?.totalInventoryValue || 0) : '0'}</div>
                 <div className="card-title">قيمة المخزون الإجمالية</div>
               </div>
 
               <div className="premium-card center-content" onClick={() => router.push('/fleet')} style={{ cursor: 'pointer' }}>
                 <div className="icon-wrapper lg" style={{ background: '#f8fafc', color: '#8b5cf6' }}>🚚</div>
-                <div className="card-value sm">{logic.stats.totalVehicles}</div>
+                <div className="card-value sm">{logic.stats?.totalVehicles || 0}</div>
                 <div className="card-title">مركبة مسجلة</div>
               </div>
 
               <div className="premium-card center-content" onClick={() => router.push('/fleet_operations')} style={{ cursor: 'pointer' }}>
                 <div className="icon-wrapper lg" style={{ background: '#f8fafc', color: '#10b981' }}>🔄</div>
-                <div className="card-value sm">{logic.stats.totalFleetTrips}</div>
+                <div className="card-value sm">{logic.stats?.totalFleetTrips || 0}</div>
                 <div className="card-title">أمر شغل (رحلة)</div>
               </div>
             </div>
@@ -157,13 +157,13 @@ export default function DashboardPage() {
           </div>
 
           {/* ========== 4. مهام معلقة تحتاج مراجعة ========== */}
-          {logic.stats.pendingActions.length > 0 && (
+          {(logic.stats?.pendingActions || []).length > 0 && (
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '20px' }}>
                 <h3 className="section-title">⚠️ مستندات قيد الانتظار (تحتاج مراجعة/ترحيل)</h3>
               </div>
               <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
-                {logic.stats.pendingActions.map((action: any, idx: number) => (
+                {(logic.stats?.pendingActions || []).map((action: any, idx: number) => (
                   <div key={idx} className="warning-card" onClick={() => router.push(`/${action.type}`)} style={{ cursor: 'pointer' }}>
                     <div style={{ fontSize: '24px', marginBottom: '10px' }}>📝</div>
                     <div style={{ fontSize: '20px', fontWeight: 900, color: '#b45309' }}>{action.count}</div>
@@ -178,6 +178,7 @@ export default function DashboardPage() {
 
         </div>
       )}
+
     </MasterPage>
   );
 }

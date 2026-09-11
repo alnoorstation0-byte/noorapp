@@ -49,7 +49,8 @@ export function useReceiptVouchersLogic() {
     const { profile, can } = useAuth();
     
     const { data: allData = [], isLoading } = useQuery({
-        queryKey: ['receipt_vouchers', profile?.id],
+        queryKey: ['receipt_vouchers'],
+        staleTime: 0,
         queryFn: async () => {
             const buildQuery = () => {
                 let q = supabase

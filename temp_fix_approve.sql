@@ -56,6 +56,7 @@ BEGIN
     -- Use the transaction's warehouse_id or default to main warehouse
     v_target_warehouse_id := COALESCE(v_txn.warehouse_id, '11111111-1111-1111-1111-111111111111'::uuid);
 
+    -- 1. حركة أسطول / عهدة سيارة
     IF v_txn.fleet_operation_id IS NOT NULL AND v_txn.vehicle_id IS NOT NULL THEN
         PERFORM public.update_inventory_quantity(v_txn.item_id, -v_qty, v_target_warehouse_id);
         PERFORM public.update_inventory_quantity(v_txn.item_id, v_qty, v_txn.vehicle_id);
@@ -69,38 +70,71 @@ BEGIN
         
         INSERT INTO public.journal_lines (header_id, account_id, partner_id, debit, credit, notes)
         VALUES (v_journal_id, v_inv_acc_id, NULL, 0, v_total_amount, 'صرف من المستودع (دائن)');
-    ELSE
-        IF v_txn.type IN ('in', 'transfer_in') THEN
-            PERFORM public.update_inventory_quantity(v_txn.item_id, v_qty, v_target_warehouse_id);
 
+    -- 2. إتلاف مخزني وتوالف (Waste Accounting)
+    ELSIF v_txn.type = 'waste' THEN
+        PERFORM public.update_inventory_quantity(v_txn.item_id, -v_qty, v_target_warehouse_id);
+
+        IF v_total_amount > 0 THEN
             INSERT INTO public.journal_headers (entry_date, description, status, v_type, reference_id)
-            VALUES (v_txn.transaction_date, 'توريد مخزني - ' || COALESCE(v_txn.transaction_number,'') || ' - ' || v_full_desc, 'posted', 'inventory', v_txn.id)
+            VALUES (v_txn.transaction_date, 'إتلاف مخزني - خسائر توالف وهدر - ' || COALESCE(v_txn.transaction_number, '') || ' - ' || v_full_desc, 'posted', 'inventory', v_txn.id)
             RETURNING id INTO v_journal_id;
 
             INSERT INTO public.journal_lines (header_id, account_id, partner_id, debit, credit, notes)
-            VALUES (v_journal_id, v_inv_acc_id, NULL, v_total_amount, 0, 'استلام للمستودع (مدين)');
-            
-            INSERT INTO public.journal_lines (header_id, account_id, partner_id, debit, credit, notes)
-            VALUES (v_journal_id, v_partner_acc_id, v_txn.partner_id, 0, v_total_amount, 'فواتير قيد الاستلام (دائن)');
-            
-        ELSE
-            PERFORM public.update_inventory_quantity(v_txn.item_id, -v_qty, v_target_warehouse_id);
-
-            INSERT INTO public.journal_headers (entry_date, description, status, v_type, reference_id)
-            VALUES (v_txn.transaction_date, 'صرف مخزني - ' || COALESCE(v_txn.transaction_number,'') || ' - ' || v_full_desc, 'posted', 'inventory', v_txn.id)
-            RETURNING id INTO v_journal_id;
+            VALUES (v_journal_id, 'a5280000-0000-4000-a000-000000000528'::uuid, v_txn.partner_id, v_total_amount, 0, 'خسائر توالف وهدر مخزني (مدين)');
 
             INSERT INTO public.journal_lines (header_id, account_id, partner_id, debit, credit, notes)
-            VALUES (v_journal_id, v_partner_acc_id, v_txn.partner_id, v_total_amount + v_tax_amount, 0, 'استحقاق مدين (ذمة)');
-            
-            IF v_tax_amount > 0 THEN
-                INSERT INTO public.journal_lines (header_id, account_id, partner_id, debit, credit, notes)
-                VALUES (v_journal_id, v_vat_acc_id, NULL, 0, v_tax_amount, 'ضريبة مخرجات (دائن)');
-            END IF;
-
-            INSERT INTO public.journal_lines (header_id, account_id, partner_id, debit, credit, notes)
-            VALUES (v_journal_id, v_inv_acc_id, NULL, 0, v_total_amount, 'صرف من المستودع (دائن)');
+            VALUES (v_journal_id, v_inv_acc_id, NULL, 0, v_total_amount, 'تخفيض المخزون بالتالف (دائن)');
         END IF;
+
+    -- 3. استرجاع فوارغ (Empty Bottles Return)
+    ELSIF v_txn.type = 'empty_return' THEN
+        PERFORM public.update_inventory_quantity(v_txn.item_id, v_qty, v_target_warehouse_id);
+
+        IF v_total_amount > 0 THEN
+            INSERT INTO public.journal_headers (entry_date, description, status, v_type, reference_id)
+            VALUES (v_txn.transaction_date, 'استرجاع فوارغ للمستودع - ' || COALESCE(v_txn.transaction_number, '') || ' - ' || v_full_desc, 'posted', 'inventory', v_txn.id)
+            RETURNING id INTO v_journal_id;
+
+            INSERT INTO public.journal_lines (header_id, account_id, partner_id, debit, credit, notes)
+            VALUES (v_journal_id, v_inv_acc_id, NULL, v_total_amount, 0, 'استلام فوارغ للمستودع (مدين)');
+
+            INSERT INTO public.journal_lines (header_id, account_id, partner_id, debit, credit, notes)
+            VALUES (v_journal_id, v_partner_acc_id, v_txn.partner_id, 0, v_total_amount, 'تسوية عهدة/تأمينات فوارغ (دائن)');
+        END IF;
+
+    -- 4. توريد مخزني (Inflow)
+    ELSIF v_txn.type IN ('in', 'transfer_in') THEN
+        PERFORM public.update_inventory_quantity(v_txn.item_id, v_qty, v_target_warehouse_id);
+
+        INSERT INTO public.journal_headers (entry_date, description, status, v_type, reference_id)
+        VALUES (v_txn.transaction_date, 'توريد مخزني - ' || COALESCE(v_txn.transaction_number,'') || ' - ' || v_full_desc, 'posted', 'inventory', v_txn.id)
+        RETURNING id INTO v_journal_id;
+
+        INSERT INTO public.journal_lines (header_id, account_id, partner_id, debit, credit, notes)
+        VALUES (v_journal_id, v_inv_acc_id, NULL, v_total_amount, 0, 'استلام للمستودع (مدين)');
+        
+        INSERT INTO public.journal_lines (header_id, account_id, partner_id, debit, credit, notes)
+        VALUES (v_journal_id, v_partner_acc_id, v_txn.partner_id, 0, v_total_amount, 'فواتير قيد الاستلام (دائن)');
+        
+    -- 5. صرف مخزني عادي (Outflow)
+    ELSE
+        PERFORM public.update_inventory_quantity(v_txn.item_id, -v_qty, v_target_warehouse_id);
+
+        INSERT INTO public.journal_headers (entry_date, description, status, v_type, reference_id)
+        VALUES (v_txn.transaction_date, 'صرف مخزني - ' || COALESCE(v_txn.transaction_number,'') || ' - ' || v_full_desc, 'posted', 'inventory', v_txn.id)
+        RETURNING id INTO v_journal_id;
+
+        INSERT INTO public.journal_lines (header_id, account_id, partner_id, debit, credit, notes)
+        VALUES (v_journal_id, v_partner_acc_id, v_txn.partner_id, v_total_amount + v_tax_amount, 0, 'استحقاق مدين (ذمة)');
+        
+        IF v_tax_amount > 0 THEN
+            INSERT INTO public.journal_lines (header_id, account_id, partner_id, debit, credit, notes)
+            VALUES (v_journal_id, v_vat_acc_id, NULL, 0, v_tax_amount, 'ضريبة مخرجات (دائن)');
+        END IF;
+
+        INSERT INTO public.journal_lines (header_id, account_id, partner_id, debit, credit, notes)
+        VALUES (v_journal_id, v_inv_acc_id, NULL, 0, v_total_amount, 'صرف من المستودع (دائن)');
     END IF;
 
     UPDATE public.inventory_transactions SET status = 'approved' WHERE id = p_id;
@@ -132,7 +166,7 @@ BEGIN
         PERFORM public.update_inventory_quantity(v_txn.item_id, v_qty, v_target_warehouse_id);
         PERFORM public.update_inventory_quantity(v_txn.item_id, -v_qty, v_txn.vehicle_id);
     ELSE
-        IF v_txn.type IN ('in', 'transfer_in') THEN
+        IF v_txn.type IN ('in', 'transfer_in', 'empty_return') THEN
             PERFORM public.update_inventory_quantity(v_txn.item_id, -v_qty, v_target_warehouse_id);
         ELSE
             PERFORM public.update_inventory_quantity(v_txn.item_id, v_qty, v_target_warehouse_id);
