@@ -664,13 +664,27 @@ export default function PosPage() {
                                     {/* Qty Field */}
                                     <div
                                         onClick={() => switchField('qty')}
-                                        style={{ background: activeField === 'qty' ? 'linear-gradient(135deg,#1C73AB,#2891C8)' : '#f1f5f9', borderRadius: '16px', padding: '14px', cursor: 'pointer', border: activeField === 'qty' ? '2px solid #2891C8' : '2px solid transparent', transition: '0.2s', textAlign: 'center' }}
+                                        style={{ 
+                                            background: (item.selected_qty > item.available_qty)
+                                                ? '#fee2e2'
+                                                : (activeField === 'qty' ? 'linear-gradient(135deg,#1C73AB,#2891C8)' : '#f1f5f9'), 
+                                            borderRadius: '16px', 
+                                            padding: '14px', 
+                                            cursor: 'pointer', 
+                                            border: (item.selected_qty > item.available_qty)
+                                                ? '2px solid #ef4444'
+                                                : (activeField === 'qty' ? '2px solid #2891C8' : '2px solid transparent'), 
+                                            transition: '0.2s', 
+                                            textAlign: 'center' 
+                                        }}
                                     >
-                                        <div style={{ fontSize: '11px', fontWeight: 700, color: activeField === 'qty' ? 'rgba(255,255,255,0.8)' : '#64748b', marginBottom: '6px' }}>الكمية</div>
-                                        <div style={{ fontSize: '32px', fontWeight: 900, color: activeField === 'qty' ? 'white' : '#0f172a', letterSpacing: '-1px' }}>
+                                        <div style={{ fontSize: '11px', fontWeight: 700, color: (item.selected_qty > item.available_qty) ? '#dc2626' : (activeField === 'qty' ? 'rgba(255,255,255,0.8)' : '#64748b'), marginBottom: '6px' }}>
+                                            {(item.selected_qty > item.available_qty) ? '⚠️ الكمية (تجاوزت المخزون)' : 'الكمية'}
+                                        </div>
+                                        <div style={{ fontSize: '32px', fontWeight: 900, color: (item.selected_qty > item.available_qty) ? '#dc2626' : (activeField === 'qty' ? 'white' : '#0f172a'), letterSpacing: '-1px' }}>
                                             {item.selected_qty || 0}
                                         </div>
-                                        <div style={{ fontSize: '11px', color: activeField === 'qty' ? 'rgba(255,255,255,0.65)' : '#94a3b8', marginTop: '4px' }}>{item.unit}</div>
+                                        <div style={{ fontSize: '11px', color: (item.selected_qty > item.available_qty) ? '#dc2626' : (activeField === 'qty' ? 'rgba(255,255,255,0.65)' : '#94a3b8'), marginTop: '4px' }}>{item.unit}</div>
                                     </div>
 
                                     {/* Price Field */}
@@ -687,6 +701,13 @@ export default function PosPage() {
                                         <div style={{ fontSize: '11px', color: activeField === 'price' ? 'rgba(255,255,255,0.65)' : '#94a3b8', marginTop: '4px' }}>ريال</div>
                                     </div>
                                 </div>
+
+                                {/* Stock Warning Message */}
+                                {item.selected_qty > item.available_qty && (
+                                    <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '12px', padding: '8px 12px', color: '#b91c1c', fontSize: '12px', fontWeight: 800, textAlign: 'center' }}>
+                                        ⛔ الكمية المطلوبة ({item.selected_qty}) تتجاوز الرصيد المتاح بالمستودع ({item.available_qty})!
+                                    </div>
+                                )}
 
                                 {/* Quick +/- for Qty */}
                                 <div style={{ display: 'flex', gap: '10px', alignItems: 'center', justifyContent: 'center' }}>
@@ -744,10 +765,25 @@ export default function PosPage() {
                                 <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '10px' }}>
                                     <button
                                         onClick={logic.confirmAddToCart}
-                                        disabled={!item.selected_qty || item.selected_qty <= 0}
-                                        style={{ height: '54px', background: 'linear-gradient(135deg,#2891C8,#1C73AB)', color: 'white', border: 'none', borderRadius: '14px', fontWeight: 900, fontSize: '16px', cursor: 'pointer', boxShadow: '0 4px 15px rgba(40,145,200,0.4)' }}
+                                        disabled={!item.selected_qty || item.selected_qty <= 0 || item.selected_qty > item.available_qty}
+                                        style={{ 
+                                            height: '54px', 
+                                            background: (item.selected_qty > item.available_qty)
+                                                ? 'linear-gradient(135deg, #ef4444, #991b1b)'
+                                                : 'linear-gradient(135deg,#2891C8,#1C73AB)', 
+                                            color: 'white', 
+                                            border: 'none', 
+                                            borderRadius: '14px', 
+                                            fontWeight: 900, 
+                                            fontSize: '15px', 
+                                            cursor: (item.selected_qty > item.available_qty) ? 'not-allowed' : 'pointer', 
+                                            boxShadow: '0 4px 15px rgba(40,145,200,0.4)',
+                                            transition: '0.2s'
+                                        }}
                                     >
-                                        🛒 إضافة للسلة
+                                        {item.selected_qty > item.available_qty 
+                                            ? `⛔ تجاوز المخزون (المتاح ${item.available_qty})`
+                                            : '🛒 إضافة للسلة'}
                                     </button>
                                     <button
                                         onClick={() => logic.setSelectedItemForCart(null)}

@@ -111,32 +111,54 @@ export function usePosLogic() {
         queryKey: ['pos_inventory', selectedWarehouseId],
         queryFn: async () => {
             if (!selectedWarehouseId) return [];
-            const { data } = await supabase
+
+            // 1. Fetch all catalog items
+            const { data: catalog, error: catErr } = await supabase
+                .from('inventory_items')
+                .select('id, name, default_price, suggested_price, unit, code, reorder_level, current_quantity')
+                .order('name');
+
+            if (catErr) throw catErr;
+
+            // 2. Fetch inventory for selected warehouse
+            const { data: whInv, error: whErr } = await supabase
                 .from('warehouse_inventory')
-                .select(`
-                    id, quantity, item_id,
-                    inventory_items (id, name, default_price, suggested_price, unit, code, reorder_level)
-                `)
-                .eq('warehouse_id', selectedWarehouseId)
-                .gt('quantity', 0);
-            
-            return data?.map((row: any) => {
-                const itemInfo = Array.isArray(row.inventory_items) ? row.inventory_items[0] : row.inventory_items;
-                const reorderLvl = Number(itemInfo?.reorder_level) || 5;
-                const availableQty = Number(row.quantity) || 0;
+                .select('id, quantity, item_id')
+                .eq('warehouse_id', selectedWarehouseId);
+
+            if (whErr) throw whErr;
+
+            const whMap = new Map();
+            (whInv || []).forEach((row: any) => {
+                whMap.set(row.item_id, row);
+            });
+
+            return (catalog || []).map((item: any) => {
+                const whRow = whMap.get(item.id);
+                let availableQty = whRow ? Number(whRow.quantity || 0) : 0;
+                
+                // Fallback for main warehouse if not yet recorded in warehouse_inventory
+                if (!whRow && selectedWarehouseId === '11111111-1111-1111-1111-111111111111') {
+                    availableQty = Number(item.current_quantity || 0);
+                }
+
+                const reorderLvl = Number(item.reorder_level) || 5;
+                const isCritical = availableQty <= reorderLvl;
+                const isNear = availableQty > reorderLvl && availableQty <= reorderLvl * 1.5;
+
                 return {
-                    id: row.item_id,
-                    name: itemInfo?.name || 'صنف غير معروف',
-                    price: itemInfo?.default_price || 0,
-                    suggested_price: itemInfo?.suggested_price || itemInfo?.default_price || 0,
-                    unit: itemInfo?.unit || 'حبة',
-                    code: itemInfo?.code,
+                    id: item.id,
+                    name: item.name || 'صنف غير معروف',
+                    price: Number(item.default_price) || 0,
+                    suggested_price: Number(item.suggested_price) || Number(item.default_price) || 0,
+                    unit: item.unit || 'حبة',
+                    code: item.code,
                     available_qty: availableQty,
                     reorder_level: reorderLvl,
-                    isCriticalLow: availableQty <= reorderLvl,
-                    isNearLow: availableQty > reorderLvl && availableQty <= reorderLvl * 1.5
+                    isCriticalLow: isCritical,
+                    isNearLow: isNear
                 };
-            }) || [];
+            });
         },
         enabled: !!selectedWarehouseId
     });
@@ -174,13 +196,13 @@ export function usePosLogic() {
             
             if (existing) {
                 if (existing.qty + qty > item.available_qty) {
-                    setTimeout(() => showToast(`الكمية المتاحة غير كافية! المتاح: ${item.available_qty}`, 'warning'), 0);
+                    setTimeout(() => showToast(`⛔ تجاوز المخزون ممنوع! الكمية المطلوبة (${existing.qty + qty}) تتجاوز الرصيد المتوفر (${item.available_qty})`, 'error'), 0);
                     return prev;
                 }
                 return prev.map(i => i.id === item.id ? { ...i, qty: i.qty + qty, unit_price: unitPrice } : i);
             }
             if (qty > item.available_qty) {
-                setTimeout(() => showToast(`الكمية المتاحة غير كافية! المتاح: ${item.available_qty}`, 'warning'), 0);
+                setTimeout(() => showToast(`⛔ تجاوز المخزون ممنوع! الكمية المطلوبة (${qty}) تتجاوز الرصيد المتوفر (${item.available_qty})`, 'error'), 0);
                 return prev;
             }
             return [...prev, { ...item, qty, unit_price: unitPrice }];
@@ -193,6 +215,10 @@ export function usePosLogic() {
 
     const confirmAddToCart = () => {
         if (selectedItemForCart) {
+            if (selectedItemForCart.selected_qty > selectedItemForCart.available_qty) {
+                showToast(`⛔ منع البيع: الكمية المطلوبة (${selectedItemForCart.selected_qty}) تتجاوز الرصيد المتوفر في المستودع (${selectedItemForCart.available_qty})!`, 'error');
+                return;
+            }
             addToCart(selectedItemForCart, selectedItemForCart.selected_qty, selectedItemForCart.selected_price);
             setSelectedItemForCart(null);
         }
@@ -202,6 +228,10 @@ export function usePosLogic() {
     const handleBarcodeScan = (barcode: string) => {
         const item = inventoryItems.find((i: any) => String(i.code) === barcode || String(i.id) === barcode);
         if (item) {
+            if (1 > item.available_qty) {
+                showToast(`⛔ نفد رصيد هذا الصنف بالمستودع (${item.name})!`, 'error');
+                return;
+            }
             addToCart(item, 1, item.suggested_price || 0);
             showToast(`تمت إضافة ${item.name}`, 'success');
         } else {
@@ -216,7 +246,7 @@ export function usePosLogic() {
     const updateCartItemQty = (id: string, qty: number) => {
         const item = inventoryItems.find((i: any) => i.id === id);
         if (item && qty > item.available_qty) {
-            showToast(`الكمية المتاحة لا تكفي! المتاح: ${item.available_qty}`, 'warning');
+            showToast(`⛔ تجاوز المخزون ممنوع! الرصيد المتاح لهذا الصنف هو ${item.available_qty} فقط`, 'error');
             return;
         }
         if (qty <= 0) {
@@ -321,11 +351,29 @@ export function usePosLogic() {
             // Deduct from warehouse
             for (let line of linesData) {
                 const { data: invItem } = await supabase.from('warehouse_inventory')
-                    .select('quantity, id').eq('item_id', line.item_id).eq('warehouse_id', line.warehouse_id).single();
+                    .select('quantity, id').eq('item_id', line.item_id).eq('warehouse_id', line.warehouse_id).maybeSingle();
                 if (invItem) {
                     await supabase.from('warehouse_inventory')
-                        .update({ quantity: invItem.quantity - line.quantity })
+                        .update({ quantity: (Number(invItem.quantity) || 0) - line.quantity })
                         .eq('id', invItem.id);
+                } else {
+                    await supabase.from('warehouse_inventory')
+                        .insert([{
+                            warehouse_id: line.warehouse_id,
+                            item_id: line.item_id,
+                            quantity: -line.quantity
+                        }]);
+                }
+
+                // If deducting from main warehouse, also update inventory_items.current_quantity
+                if (line.warehouse_id === '11111111-1111-1111-1111-111111111111') {
+                    const { data: catItem } = await supabase.from('inventory_items')
+                        .select('current_quantity').eq('id', line.item_id).single();
+                    if (catItem) {
+                        await supabase.from('inventory_items')
+                            .update({ current_quantity: (Number(catItem.current_quantity) || 0) - line.quantity })
+                            .eq('id', line.item_id);
+                    }
                 }
             }
 

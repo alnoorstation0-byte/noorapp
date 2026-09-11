@@ -203,6 +203,21 @@ function useJournalLogic() {
         pendingJournalsCount,
         selectedIds, setSelectedIds,
         isFiltered,
+        handleBulkPostDrafts: async () => {
+            if (!confirm(`هل أنت متأكد من اعتماد وترحيل كافة القيود اليومية المسودة (${pendingJournalsCount}) دفعة واحدة؟`)) return;
+            try {
+                const { error } = await supabase
+                    .from('journal_headers')
+                    .update({ status: 'posted' })
+                    .in('status', ['draft', 'pending', 'مسودة', 'غير مرحل']);
+                if (error) throw error;
+                showToast('✅ تم اعتماد وترحيل كافة القيود المسودة بنجاح!', 'success');
+                queryClient.invalidateQueries({ queryKey: ['journal_master_view'] });
+                queryClient.invalidateQueries({ queryKey: ['pending_journals_count'] });
+            } catch (err: any) {
+                showToast(`❌ فشل الترحيل الجماعي: ${err.message}`, 'error');
+            }
+        },
         handleDeleteHeaders: () => {
             if (confirm('تنبيه: سيتم حذف القيود المحددة بالكامل (مدين ودائن). هل أنت متأكد؟')) {
                 deleteHeadersMutation.mutate();
@@ -488,24 +503,48 @@ export default function JournalPage() {
                       </div>
                     </div>
                   </div>
-                  <button
-                    type="button"
-                    onClick={() => logic.setFilterStatus(logic.filterStatus === 'مسودة' ? 'الكل' : 'مسودة')}
-                    style={{
-                      background: logic.filterStatus === 'مسودة' ? '#d97706' : '#ea580c',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: '10px',
-                      padding: '8px 16px',
-                      fontWeight: 800,
-                      fontSize: '12px',
-                      cursor: 'pointer',
-                      boxShadow: '0 2px 8px rgba(234, 88, 12, 0.3)',
-                      transition: '0.2s'
-                    }}
-                  >
-                    {logic.filterStatus === 'مسودة' ? 'عرض كافة القيود' : '🔍 استعراض القيود المعلقة فقط'}
-                  </button>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                    <button
+                      type="button"
+                      onClick={logic.handleBulkPostDrafts}
+                      style={{
+                        background: 'linear-gradient(135deg, #16a34a, #059669)',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '10px',
+                        padding: '8px 16px',
+                        fontWeight: 900,
+                        fontSize: '12px',
+                        cursor: 'pointer',
+                        boxShadow: '0 2px 8px rgba(22, 163, 74, 0.3)',
+                        transition: '0.2s',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '6px'
+                      }}
+                    >
+                      <span>⚡</span>
+                      <span>ترحيل جميع المسودات ({logic.pendingJournalsCount})</span>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => logic.setFilterStatus(logic.filterStatus === 'مسودة' ? 'الكل' : 'مسودة')}
+                      style={{
+                        background: logic.filterStatus === 'مسودة' ? '#d97706' : '#ea580c',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '10px',
+                        padding: '8px 16px',
+                        fontWeight: 800,
+                        fontSize: '12px',
+                        cursor: 'pointer',
+                        boxShadow: '0 2px 8px rgba(234, 88, 12, 0.3)',
+                        transition: '0.2s'
+                      }}
+                    >
+                      {logic.filterStatus === 'مسودة' ? 'عرض كافة القيود' : '🔍 استعراض المعلقة فقط'}
+                    </button>
+                  </div>
                 </div>
               )}
               <PrintHeader title="دفتر اليومية الشامل" subtitle={logic.isFiltered ? "تقرير مفلتر" : "تقرير عام"} />

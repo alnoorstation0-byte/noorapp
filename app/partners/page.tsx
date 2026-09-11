@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import React, { useState, useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
@@ -24,13 +24,14 @@ function usePartnersLogic() {
     const [editingPartner, setEditingPartner] = useState<any>(null);
 
     const [formData, setFormData] = useState({
+        code: '',
         name: '',
         partner_type: 'عميل',
         phone: '',
-        email: '',
-        tax_number: '',
+        vat_number: '',
         address: '',
-        notes: ''
+        job_role: '',
+        identity_number: ''
     });
 
     const { data: partners = [], isLoading, isError } = useQuery({
@@ -49,14 +50,25 @@ function usePartnersLogic() {
         }
         if (globalSearch) {
             const lower = globalSearch.toLowerCase();
-            res = res.filter(p => p.name.toLowerCase().includes(lower) || p.phone?.includes(lower));
+            res = res.filter(p => p.name?.toLowerCase().includes(lower) || p.phone?.includes(lower) || p.code?.toLowerCase().includes(lower));
         }
         return res;
     }, [partners, filterType, globalSearch]);
 
     const addPartnerMutation = useMutation({
         mutationFn: async (newP: any) => {
-            const { data, error } = await supabase.from('partners').insert([newP]).select();
+            const partnerCode = newP.code?.trim() || `P-${Date.now().toString().slice(-6)}`;
+            const payload = {
+                code: partnerCode,
+                name: newP.name.trim(),
+                partner_type: newP.partner_type || 'عميل',
+                phone: newP.phone?.trim() || null,
+                vat_number: newP.vat_number?.trim() || null,
+                address: newP.address?.trim() || null,
+                job_role: newP.job_role?.trim() || null,
+                identity_number: newP.identity_number?.trim() || null
+            };
+            const { data, error } = await supabase.from('partners').insert([payload]).select();
             if (error) throw error;
             return data;
         },
@@ -70,8 +82,20 @@ function usePartnersLogic() {
 
     const updatePartnerMutation = useMutation({
         mutationFn: async (updatedP: any) => {
-            const { id, ...updates } = updatedP;
-            const { data, error } = await supabase.from('partners').update(updates).eq('id', id).select();
+            const { id, ...rest } = updatedP;
+            const payload: any = {
+                name: rest.name?.trim(),
+                partner_type: rest.partner_type,
+                phone: rest.phone?.trim() || null,
+                vat_number: rest.vat_number?.trim() || null,
+                address: rest.address?.trim() || null,
+                job_role: rest.job_role?.trim() || null,
+                identity_number: rest.identity_number?.trim() || null
+            };
+            if (rest.code?.trim()) {
+                payload.code = rest.code.trim();
+            }
+            const { data, error } = await supabase.from('partners').update(payload).eq('id', id).select();
             if (error) throw error;
             return data;
         },
@@ -104,7 +128,7 @@ function usePartnersLogic() {
         formData, setFormData,
         displayedPartners,
         addPartnerMutation, updatePartnerMutation, deletePartnerMutation,
-        can
+        can, showToast
     };
 }
 
@@ -112,6 +136,15 @@ export default function PartnersPage() {
     const logic = usePartnersLogic();
 
     const columns = useMemo(() => [
+        { 
+          header: 'الكود', 
+          accessor: 'code', 
+          render: (row: any) => (
+            <span style={{ fontFamily: 'monospace', fontWeight: 800, color: '#475569', background: 'rgba(28, 115, 171, 0.08)', padding: '3px 8px', borderRadius: '6px', fontSize: '12px' }}>
+              {row.code || '---'}
+            </span>
+          ) 
+        },
         { header: 'اسم الشريك', accessor: 'name', render: (row: any) => <b style={{ color: THEME.primary }}>{row.name}</b> },
         { 
           header: 'النوع', 
@@ -126,25 +159,30 @@ export default function PartnersPage() {
           }
         },
         { header: 'رقم الهاتف', accessor: 'phone', render: (row: any) => row.phone || '-' },
-        { header: 'الرقم الضريبي', accessor: 'tax_number', render: (row: any) => row.tax_number || '-' },
+        { header: 'الرقم الضريبي', accessor: 'vat_number', render: (row: any) => row.vat_number || '-' },
         {
           header: 'إجراءات',
           accessor: 'actions',
           render: (row: any) => (
             <div style={{ display: 'flex', gap: '8px' }}>
               <SecureAction module="partners" action="edit">
-                  <button className="btn-icon edit" onClick={() => {
+                  <button className="btn-icon edit" title="تعديل" onClick={() => {
                       logic.setEditingPartner(row);
                       logic.setFormData({
-                          name: row.name, partner_type: row.partner_type,
-                          phone: row.phone || '', email: row.email || '',
-                          tax_number: row.tax_number || '', address: row.address || '', notes: row.notes || ''
+                          code: row.code || '',
+                          name: row.name || '',
+                          partner_type: row.partner_type || 'عميل',
+                          phone: row.phone || '',
+                          vat_number: row.vat_number || '',
+                          address: row.address || '',
+                          job_role: row.job_role || '',
+                          identity_number: row.identity_number || ''
                       });
                       logic.setIsModalOpen(true);
                   }}>✏️</button>
               </SecureAction>
               <SecureAction module="partners" action="delete">
-                  <button className="btn-icon delete" onClick={() => {
+                  <button className="btn-icon delete" title="حذف" onClick={() => {
                       if (confirm('تأكيد الحذف؟')) logic.deletePartnerMutation.mutate(row.id);
                   }}>🗑️</button>
               </SecureAction>
@@ -157,7 +195,7 @@ export default function PartnersPage() {
       <SecureAction module="partners" action="create">
         <button className="btn-main-glass" onClick={() => {
             logic.setEditingPartner(null);
-            logic.setFormData({ name: '', partner_type: 'عميل', phone: '', email: '', tax_number: '', address: '', notes: '' });
+            logic.setFormData({ code: '', name: '', partner_type: 'عميل', phone: '', vat_number: '', address: '', job_role: '', identity_number: '' });
             logic.setIsModalOpen(true);
         }}>➕ شريك جديد</button>
       </SecureAction>
@@ -208,7 +246,7 @@ export default function PartnersPage() {
 
                     /* Modal Styles */
                     .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; }
-                    .modal-content { background: white; border-radius: 24px; width: 100%; max-width: 500px; padding: 30px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); animation: zoomIn 0.3s cubic-bezier(0.165, 0.84, 0.44, 1); }
+                    .modal-content { background: white; border-radius: 24px; width: 100%; max-width: 520px; padding: 30px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); animation: zoomIn 0.3s cubic-bezier(0.165, 0.84, 0.44, 1); }
                     @keyframes zoomIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
                     .form-group { margin-bottom: 15px; }
                     .form-label { display: block; font-size: 12px; font-weight: 800; color: #475569; margin-bottom: 5px; }
@@ -238,49 +276,82 @@ export default function PartnersPage() {
                             {logic.editingPartner ? 'تعديل بيانات الشريك' : 'إضافة شريك جديد'}
                         </h2>
                         
+                        <div style={{ display: 'flex', gap: '15px' }}>
+                            <div className="form-group" style={{ flex: 1 }}>
+                                <label className="form-label">كود الشريك (اختياري)</label>
+                                <input 
+                                    type="text" 
+                                    className="form-input" 
+                                    value={logic.formData.code} 
+                                    onChange={e => logic.setFormData({...logic.formData, code: e.target.value})} 
+                                    placeholder="يُولّد تلقائياً إن تُرك فارغاً"
+                                />
+                            </div>
+                            <div className="form-group" style={{ flex: 1 }}>
+                                <label className="form-label">النوع</label>
+                                <select 
+                                    className="form-select" 
+                                    value={logic.formData.partner_type} 
+                                    onChange={e => logic.setFormData({...logic.formData, partner_type: e.target.value})}
+                                >
+                                    {partnerTypes.map(t => <option key={t} value={t}>{t}</option>)}
+                                </select>
+                            </div>
+                        </div>
+
                         <div className="form-group">
-                            <label className="form-label">الاسم</label>
+                            <label className="form-label">اسم الشريك *</label>
                             <input 
                                 type="text" 
                                 className="form-input" 
                                 value={logic.formData.name} 
                                 onChange={e => logic.setFormData({...logic.formData, name: e.target.value})} 
-                                placeholder="اسم الشريك..."
+                                placeholder="اسم الشريك بالكامل..."
                             />
-                        </div>
-
-                        <div className="form-group">
-                            <label className="form-label">النوع</label>
-                            <select 
-                                className="form-select"
-                                value={logic.formData.partner_type}
-                                onChange={e => logic.setFormData({...logic.formData, partner_type: e.target.value})}
-                            >
-                                {partnerTypes.map(t => <option key={t} value={t}>{t}</option>)}
-                            </select>
                         </div>
 
                         <div style={{ display: 'flex', gap: '15px' }}>
                             <div className="form-group" style={{ flex: 1 }}>
                                 <label className="form-label">رقم الهاتف</label>
-                                <input type="text" className="form-input" value={logic.formData.phone} onChange={e => logic.setFormData({...logic.formData, phone: e.target.value})} />
+                                <input 
+                                    type="text" 
+                                    className="form-input" 
+                                    value={logic.formData.phone} 
+                                    onChange={e => logic.setFormData({...logic.formData, phone: e.target.value})} 
+                                    placeholder="05xxxxxxxx"
+                                />
                             </div>
                             <div className="form-group" style={{ flex: 1 }}>
                                 <label className="form-label">الرقم الضريبي</label>
-                                <input type="text" className="form-input" value={logic.formData.tax_number} onChange={e => logic.setFormData({...logic.formData, tax_number: e.target.value})} />
+                                <input 
+                                    type="text" 
+                                    className="form-input" 
+                                    value={logic.formData.vat_number} 
+                                    onChange={e => logic.setFormData({...logic.formData, vat_number: e.target.value})} 
+                                    placeholder="300xxxxxxxxxxxx"
+                                />
                             </div>
                         </div>
 
                         <div className="form-group">
-                            <label className="form-label">ملاحظات</label>
-                            <input type="text" className="form-input" value={logic.formData.notes} onChange={e => logic.setFormData({...logic.formData, notes: e.target.value})} />
+                            <label className="form-label">العنوان</label>
+                            <input 
+                                type="text" 
+                                className="form-input" 
+                                value={logic.formData.address} 
+                                onChange={e => logic.setFormData({...logic.formData, address: e.target.value})} 
+                                placeholder="المدينة، الحي، الشارع..."
+                            />
                         </div>
 
                         <div className="modal-actions">
                             <button className="btn-save" onClick={() => {
-                                if(!logic.formData.name) return logic.showToast('الاسم مطلوب', 'error');
-                                if (logic.editingPartner) logic.updatePartnerMutation.mutate({ id: logic.editingPartner.id, ...logic.formData });
-                                else logic.addPartnerMutation.mutate(logic.formData);
+                                if (!logic.formData.name?.trim()) return logic.showToast('اسم الشريك مطلوب!', 'error');
+                                if (logic.editingPartner) {
+                                    logic.updatePartnerMutation.mutate({ id: logic.editingPartner.id, ...logic.formData });
+                                } else {
+                                    logic.addPartnerMutation.mutate(logic.formData);
+                                }
                             }}>
                                 {logic.editingPartner ? 'حفظ التعديلات' : 'إضافة الشريك'}
                             </button>

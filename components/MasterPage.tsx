@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase';
 import NotificationsModal from './NotificationsModal';
 import Link from 'next/link';
 import { useUnreadCounts } from '@/hooks/useUnreadCounts';
+import { useRealtimeListener } from '@/lib/useRealtimeSync';
 import { useRouter, usePathname } from 'next/navigation';
 
 export default function MasterPage({ title, subtitle, children, headerContent, icon }: any) {
@@ -14,6 +15,10 @@ export default function MasterPage({ title, subtitle, children, headerContent, i
   const [userProfile, setUserProfile] = useState<any>(null);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
   const [pendingTotalCount, setPendingTotalCount] = useState(0);
+  const [pendingDetails, setPendingDetails] = useState({ journals: 0, inventory: 0, manual: 0, total: 0 });
+  const [isPendingMenuOpen, setIsPendingMenuOpen] = useState(false);
+  const [pendingCoords, setPendingCoords] = useState({ top: 0, left: 0 });
+  const bellRef = useRef<HTMLButtonElement>(null);
   const { unread_messages, unread_notifications } = useUnreadCounts();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [coords, setCoords] = useState({ top: 0, left: 0 });
@@ -28,23 +33,32 @@ export default function MasterPage({ title, subtitle, children, headerContent, i
     }
   }, [pathname]);
 
+  const fetchPendingCount = async () => {
+    try {
+      const [jhRes, txRes, mjRes] = await Promise.all([
+        supabase.from('journal_headers').select('id', { count: 'exact', head: true }).in('status', ['draft', 'pending', 'مسودة', 'غير مرحل']),
+        supabase.from('inventory_transactions').select('id', { count: 'exact', head: true }).in('status', ['pending', 'draft', 'مسودة']),
+        supabase.from('manual_journals').select('id', { count: 'exact', head: true }).or('is_posted.is.null,is_posted.eq.false')
+      ]);
+      const jCount = jhRes.count || 0;
+      const iCount = txRes.count || 0;
+      const mCount = mjRes.count || 0;
+      const total = jCount + iCount + mCount;
+      setPendingDetails({ journals: jCount, inventory: iCount, manual: mCount, total });
+      setPendingTotalCount(total);
+    } catch (e) {
+      // silent fail
+    }
+  };
+
   useEffect(() => {
-    const fetchPendingCount = async () => {
-      try {
-        const [jhRes, txRes] = await Promise.all([
-          supabase.from('journal_headers').select('id', { count: 'exact', head: true }).in('status', ['draft', 'pending', 'مسودة', 'غير مرحل']),
-          supabase.from('inventory_transactions').select('id', { count: 'exact', head: true }).in('status', ['pending', 'draft', 'مسودة'])
-        ]);
-        const total = (jhRes.count || 0) + (txRes.count || 0);
-        setPendingTotalCount(total);
-      } catch (e) {
-        // silent fail
-      }
-    };
     fetchPendingCount();
     const interval = setInterval(fetchPendingCount, 60000);
     return () => clearInterval(interval);
   }, []);
+
+  // 🔄 مزامنة لحظية مع جداول القيود والمخزون
+  useRealtimeListener(['journal_headers', 'inventory_transactions', 'manual_journals'], fetchPendingCount);
 
   useEffect(() => {
     const getUser = async () => {
@@ -69,18 +83,42 @@ export default function MasterPage({ title, subtitle, children, headerContent, i
 
   const toggleMenu = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (triggerRef.current) {
+    if (!isMenuOpen && triggerRef.current) {
       const rect = triggerRef.current.getBoundingClientRect();
-      setCoords({ top: rect.bottom + window.scrollY + 8, left: rect.left });
+      setCoords({
+        top: rect.bottom + window.scrollY + 10,
+        left: rect.left + window.scrollX
+      });
+      setIsMenuOpen(true);
+      setIsPendingMenuOpen(false);
+    } else {
+      setIsMenuOpen(false);
     }
-    setIsMenuOpen(!isMenuOpen);
+  };
+
+  const togglePendingMenu = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!isPendingMenuOpen && bellRef.current) {
+      const rect = bellRef.current.getBoundingClientRect();
+      setPendingCoords({
+        top: rect.bottom + window.scrollY + 10,
+        left: Math.max(10, rect.right + window.scrollX - 280)
+      });
+      setIsPendingMenuOpen(true);
+      setIsMenuOpen(false);
+    } else {
+      setIsPendingMenuOpen(false);
+    }
   };
 
   useEffect(() => {
-    const close = () => setIsMenuOpen(false);
-    if (isMenuOpen) window.addEventListener('click', close);
-    return () => window.removeEventListener('click', close);
-  }, [isMenuOpen]);
+    const handleOutsideClick = () => {
+      setIsMenuOpen(false);
+      setIsPendingMenuOpen(false);
+    };
+    window.addEventListener('click', handleOutsideClick);
+    return () => window.removeEventListener('click', handleOutsideClick);
+  }, []);
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -344,9 +382,19 @@ html, body {
                           <span>{pendingTotalCount} معلق</span>
                       </Link>
                   )}
-                  <button className="msg-btn" onClick={() => setIsNotificationsOpen(true)} style={{ background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.9)', color: '#1C73AB', cursor: 'pointer', position: 'relative', fontSize: '22px', transition: '0.3s', width: '45px', height: '45px', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 10px rgba(28, 115, 171, 0.1)' }}>
+                  <button 
+                    ref={bellRef}
+                    className="msg-btn" 
+                    onClick={togglePendingMenu} 
+                    title="التنبيهات والمعلقات"
+                    style={{ background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.9)', color: '#1C73AB', cursor: 'pointer', position: 'relative', fontSize: '22px', transition: '0.3s', width: '45px', height: '45px', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 10px rgba(28, 115, 171, 0.1)' }}
+                  >
                       🔔
-                      {unread_notifications > 0 && <span style={{ position: 'absolute', top: '-6px', right: '-6px', background: '#ef4444', color: 'white', fontSize: '12px', minWidth: '22px', height: '22px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 8px rgba(239, 68, 68, 0.5)', fontWeight: 900, border: '2px solid rgba(255,255,255,0.8)' }}>{unread_notifications}</span>}
+                      {(unread_notifications > 0 || pendingTotalCount > 0) && (
+                        <span style={{ position: 'absolute', top: '-6px', right: '-6px', background: '#ef4444', color: 'white', fontSize: '11px', minWidth: '20px', height: '20px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 8px rgba(239, 68, 68, 0.5)', fontWeight: 900, border: '2px solid rgba(255,255,255,0.8)' }}>
+                          {unread_notifications > 0 ? unread_notifications : pendingTotalCount}
+                        </span>
+                      )}
                   </button>
                   <Link className="msg-btn" href="/messages" style={{ background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.9)', color: '#1C73AB', cursor: 'pointer', position: 'relative', textDecoration: 'none', fontSize: '22px', transition: '0.3s', width: '45px', height: '45px', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 10px rgba(28, 115, 171, 0.1)' }}>
                       ✉️
@@ -379,6 +427,76 @@ html, body {
             <div className="drop-item" onClick={() => router.push('/profile')}><span>👤</span> بروفيلي</div>
             <div className="drop-item" onClick={() => router.push('/settings')}><span>⚙️</span> الإعدادات</div>
             <div className="drop-item logout" onClick={handleLogout}><span>🚪</span> خروج</div>
+        </div>,
+        document.body
+      )}
+
+      {mounted && isPendingMenuOpen && typeof document !== 'undefined' && createPortal(
+        <div 
+          className="supreme-dropdown" 
+          style={{ 
+            top: pendingCoords.top, 
+            left: pendingCoords.left, 
+            width: '280px',
+            padding: '12px',
+            background: 'rgba(255, 255, 255, 0.96)',
+            backdropFilter: 'blur(25px) saturate(200%)',
+            boxShadow: '0 20px 50px rgba(28, 115, 171, 0.2)',
+            border: '1px solid rgba(255, 255, 255, 0.9)',
+            borderRadius: '20px'
+          }} 
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px 10px', borderBottom: '1px solid rgba(28, 115, 171, 0.1)', marginBottom: '8px' }}>
+            <span style={{ fontSize: '13px', fontWeight: 900, color: '#1C73AB' }}>🔔 مركز الإشعارات والمعلقات</span>
+            <span style={{ fontSize: '11px', fontWeight: 800, background: '#fee2e2', color: '#dc2626', padding: '2px 8px', borderRadius: '10px' }}>
+              {pendingDetails.total} معلق
+            </span>
+          </div>
+
+          <div 
+            className="drop-item" 
+            onClick={() => { setIsPendingMenuOpen(false); router.push('/journal'); }}
+            style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+          >
+            <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><span>📝</span> قيود اليومية المسودة</span>
+            {pendingDetails.journals > 0 ? (
+              <span style={{ background: '#fef3c7', color: '#b45309', padding: '2px 8px', borderRadius: '8px', fontSize: '11px', fontWeight: 800 }}>{pendingDetails.journals}</span>
+            ) : <span style={{ color: '#10b981', fontSize: '11px' }}>0</span>}
+          </div>
+
+          <div 
+            className="drop-item" 
+            onClick={() => { setIsPendingMenuOpen(false); router.push('/inventory/transactions'); }}
+            style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+          >
+            <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><span>📦</span> حركات المستودع المعلقة</span>
+            {pendingDetails.inventory > 0 ? (
+              <span style={{ background: '#ffedd5', color: '#ea580c', padding: '2px 8px', borderRadius: '8px', fontSize: '11px', fontWeight: 800 }}>{pendingDetails.inventory}</span>
+            ) : <span style={{ color: '#10b981', fontSize: '11px' }}>0</span>}
+          </div>
+
+          <div 
+            className="drop-item" 
+            onClick={() => { setIsPendingMenuOpen(false); router.push('/ManualJournals'); }}
+            style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
+          >
+            <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><span>⚖️</span> قيود تسوية غير مرحلة</span>
+            {pendingDetails.manual > 0 ? (
+              <span style={{ background: '#fef3c7', color: '#b45309', padding: '2px 8px', borderRadius: '8px', fontSize: '11px', fontWeight: 800 }}>{pendingDetails.manual}</span>
+            ) : <span style={{ color: '#10b981', fontSize: '11px' }}>0</span>}
+          </div>
+
+          <div 
+            className="drop-item" 
+            onClick={() => { setIsPendingMenuOpen(false); setIsNotificationsOpen(true); }}
+            style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px dashed rgba(28, 115, 171, 0.15)', marginTop: '6px', paddingTop: '8px' }}
+          >
+            <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><span>🔔</span> إشعارات النظام</span>
+            {unread_notifications > 0 && (
+              <span style={{ background: '#ef4444', color: 'white', padding: '2px 8px', borderRadius: '8px', fontSize: '11px', fontWeight: 800 }}>{unread_notifications}</span>
+            )}
+          </div>
         </div>,
         document.body
       )}

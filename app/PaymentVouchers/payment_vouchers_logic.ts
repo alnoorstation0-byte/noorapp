@@ -27,15 +27,16 @@ export function usePaymentVouchersLogic() {
     const [isBulkFixModalOpen, setIsBulkFixModalOpen] = useState(false);
     const [bulkFixAccounts, setBulkFixAccounts] = useState({ credit_account_id: '', debit_account_id: '' });
 
+    const currentPartnerId = currentVoucher.partner_id || currentVoucher.payee_id;
     const { data: partnerBalance, isLoading: isBalanceLoading } = useQuery({
-        queryKey: ['partner_balance', currentVoucher.payee_id],
+        queryKey: ['partner_balance', currentPartnerId],
         queryFn: async () => {
-            if (!currentVoucher.payee_id) return 0;
-            const { data, error } = await supabase.rpc('get_partner_balance', { p_partner_id: currentVoucher.payee_id });
+            if (!currentPartnerId) return 0;
+            const { data, error } = await supabase.rpc('get_partner_balance', { p_partner_id: currentPartnerId });
             if (error) return 0;
             return data || 0;
         },
-        enabled: !!currentVoucher.payee_id 
+        enabled: !!currentPartnerId 
     });
 
     const { data: serverTotals } = useQuery({
@@ -142,9 +143,13 @@ export function usePaymentVouchersLogic() {
         mutationFn: async (voucherData: any) => {
             const payload = { ...voucherData };
             
+            if (payload.payee_id && !payload.partner_id) {
+                payload.partner_id = payload.payee_id;
+            }
+            delete payload.payee_id;
+            delete payload.payee_name;
             delete payload.debit_account_name;
             delete payload.credit_account_name;
-            delete payload.payee_name;
             delete payload.partner;
             delete payload.credit_account;
             delete payload.debit_account;
@@ -241,7 +246,7 @@ export function usePaymentVouchersLogic() {
                     payment_method: 'نقدي', 
                     amount: '', 
                     debit_account_id: null, debit_account_name: '', credit_account_id: null, credit_account_name: '',
-                    payee_id: '', payee_name: '', is_posted: false, status: 'مسودة', fleet_operation_id: null
+                    partner_id: null, payee_id: '', payee_name: '', is_posted: false, status: 'مسودة', fleet_operation_id: null
                 });
                 setIsEditModalOpen(true);
             },
@@ -250,6 +255,8 @@ export function usePaymentVouchersLogic() {
                 if (selected) {
                     const voucherForEdit = {
                         ...selected,
+                        partner_id: selected.partner_id || null,
+                        payee_id: selected.partner_id || '',
                         payee_name: selected.payee?.name || '',
                         debit_account_name: selected.debit_account?.name || '',
                         credit_account_name: selected.credit_account?.name || ''

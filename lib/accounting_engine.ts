@@ -1,5 +1,5 @@
 // @ts-nocheck
-"use client"; // 🟢 تم التغيير لـ Client لأننا سنستخدم Hooks (React Query) والعمليات الثقيلة أصبحت في الداتابيز (RPC)
+"use client";
 
 import { supabase } from './supabase';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -33,15 +33,24 @@ export function useUniversalPosting(queryKey: string, tableName: string, postRpc
         mutationFn: async (selectedIds: string[]) => {
             if (!selectedIds || selectedIds.length === 0) throw new Error("لم يتم تحديد أي سجلات لفك الترحيل.");
             
-            // استدعاء الدالة المركزية في الداتابيز بخطوة واحدة
-            const { error } = await supabase.rpc('unpost_universal_bulk', { 
-                p_ids: selectedIds,
-                p_table_name: tableName 
-            });
-            if (error) throw new Error(error.message);
+            let rpcError = null;
+            if (tableName === 'payment_vouchers') {
+                const res = await supabase.rpc('unpost_payment_vouchers_bulk', { p_ids: selectedIds });
+                rpcError = res.error;
+            } else if (tableName === 'invoices') {
+                const res = await supabase.rpc('unpost_invoices_bulk', { p_ids: selectedIds });
+                rpcError = res.error;
+            } else {
+                const res = await supabase.rpc('unpost_universal_bulk', { 
+                    p_ids: selectedIds,
+                    p_table_name: tableName 
+                });
+                rpcError = res.error;
+            }
+            if (rpcError) throw new Error(rpcError.message);
 
-            // 🚀 تصحيح: الدالة المركزية قد لا تحدث حالة السند النصية إلى مسودة، مما يجعله "معلقاً" عند التعديل
-            await supabase.from(tableName).update({ status: 'مسودة' }).in('id', selectedIds);
+            // 🚀 تحديث حالة السجل إلى مسودة وفك الترحيل
+            await supabase.from(tableName).update({ status: 'مسودة', is_posted: false }).in('id', selectedIds);
         },
         onSuccess: () => {
             showToast('تم فك الترحيل ومسح القيود بنجاح ⏪', 'success');

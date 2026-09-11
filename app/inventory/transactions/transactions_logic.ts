@@ -96,7 +96,7 @@ export function useInventoryTransactionsLogic() {
     const isSupply = transaction.type === 'in' || transaction.type === 'transfer_in'; 
     const totalAmount = transaction.quantity * transaction.unit_price;
 
-    if (!transaction.unit_price || totalAmount <= 0) {
+    if ((!transaction.unit_price || totalAmount <= 0) && transaction.type !== 'empty_return') {
       showGlobalToast("⚠️ يرجى التأكد من إدخال سعر الوحدة قبل اعتماد الحركة لتوليد القيد المالي.", 'warning');
       return;
     }
@@ -115,6 +115,32 @@ export function useInventoryTransactionsLogic() {
     } catch (error: any) {
       console.error("خطأ في الاعتماد:", error);
       showGlobalToast(`❌ حدث خطأ أثناء الاعتماد: ${error.message || ''}`, 'warning');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleBulkApprove = async () => {
+    const pendingList = rawRecords.filter(r => r.status === 'pending' || r.status === 'مسودة' || !r.status);
+    if (pendingList.length === 0) {
+      showGlobalToast("لا توجد حركات معلقة للاعتماد.", 'warning');
+      return;
+    }
+    const confirmApprove = confirm(`هل أنت متأكد من اعتماد جميع الحركات المخزنية المعلقة (${pendingList.length}) دفعة واحدة وتحديث أرصدة المستودعات وترحيل القيود؟`);
+    if (!confirmApprove) return;
+
+    try {
+      setIsLoading(true);
+      let success = 0;
+      for (const t of pendingList) {
+        const { error } = await supabase.rpc('approve_inventory_transaction', { p_id: t.id });
+        if (!error) success++;
+      }
+      showGlobalToast(`✅ تم اعتماد ${success} حركة مخزنية وتحديث القيود بنجاح!`, 'warning');
+      fetchTransactions();
+    } catch (err: any) {
+      console.error(err);
+      showGlobalToast(`❌ حدث خطأ أثناء الاعتماد الجماعي: ${err.message}`, 'warning');
     } finally {
       setIsLoading(false);
     }
@@ -199,6 +225,7 @@ export function useInventoryTransactionsLogic() {
     dateTo, setDateTo,
     fetchTransactions,
     handleApproveTransaction,
-    handleUnapproveTransaction
+    handleUnapproveTransaction,
+    handleBulkApprove
   };
 }

@@ -235,6 +235,30 @@ export default function InventoryTransactionsPage() {
                     </div>
                   </div>
                 </div>
+
+                <button
+                  type="button"
+                  onClick={logic.handleBulkApprove}
+                  style={{
+                    background: 'linear-gradient(135deg, #16a34a, #059669)',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '10px',
+                    padding: '8px 16px',
+                    fontWeight: 900,
+                    fontSize: '12px',
+                    cursor: 'pointer',
+                    boxShadow: '0 2px 8px rgba(22, 163, 74, 0.3)',
+                    transition: '0.2s',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  <span>⚡</span>
+                  <span>اعتماد جميع الحركات المعلقة ({logic.stats?.pendingCount})</span>
+                </button>
               </div>
             )}
 

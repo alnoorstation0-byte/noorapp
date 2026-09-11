@@ -7,6 +7,8 @@ import { useToast } from '@/lib/toast-context';
 
 export default function ShiftCloseModal({ isOpen, onClose, activeShift }: any) {
     const [actualCash, setActualCash] = useState<number | ''>('');
+    const [actualBottlesReturned, setActualBottlesReturned] = useState<number | ''>('');
+    const [bottlesSold, setBottlesSold] = useState(0);
     const [totals, setTotals] = useState({ cash: 0, card: 0, credit: 0, total: 0 });
     const [isLoadingStats, setIsLoadingStats] = useState(true);
     const { showToast } = useToast();
@@ -24,18 +26,28 @@ export default function ShiftCloseModal({ isOpen, onClose, activeShift }: any) {
             // Fetch invoices created during this shift
             const { data: invoices } = await supabase
                 .from('invoices')
-                .select('total_amount, payment_method')
+                .select('total_amount, payment_method, lines_data')
                 .eq('shift_id', activeShift.id);
 
             let cash = 0, card = 0, credit = 0;
+            let soldUnits = 0;
+
             (invoices || []).forEach(inv => {
                 const amt = Number(inv.total_amount || 0);
                 if (inv.payment_method === 'نقدي' || inv.payment_method === 'كاش') cash += amt;
                 else if (inv.payment_method === 'آجل') credit += amt;
                 else card += amt; // شبكة، تحويل بنكي الخ
+
+                if (Array.isArray(inv.lines_data)) {
+                    inv.lines_data.forEach((line: any) => {
+                        soldUnits += Number(line.quantity || line.qty || 0);
+                    });
+                }
             });
 
             setTotals({ cash, card, credit, total: cash + card + credit });
+            setBottlesSold(soldUnits);
+            setActualBottlesReturned(soldUnits); // الافتراضي مطابقة كاملة
         } catch (error) {
             console.error(error);
         } finally {
@@ -45,6 +57,8 @@ export default function ShiftCloseModal({ isOpen, onClose, activeShift }: any) {
 
     const expectedCash = Number(activeShift?.starting_cash || 0) + totals.cash;
     const difference = actualCash === '' ? 0 : Number(actualCash) - expectedCash;
+    const returnedCount = actualBottlesReturned === '' ? 0 : Number(actualBottlesReturned);
+    const bottlesShortage = bottlesSold - returnedCount;
 
     const closeShiftMutation = useMutation({
         mutationFn: async () => {
@@ -59,13 +73,16 @@ export default function ShiftCloseModal({ isOpen, onClose, activeShift }: any) {
                 total_card_sales: totals.card,
                 total_credit_sales: totals.credit,
                 shortage_overage: difference,
+                bottles_sold: bottlesSold,
+                bottles_returned: returnedCount,
+                bottles_shortage: bottlesShortage,
                 status: 'closed'
             }).eq('id', activeShift.id);
 
             if (error) throw new Error(error.message);
         },
         onSuccess: () => {
-            showToast('تم إغلاق الوردية وتقفيل الصندوق بنجاح 🔒', 'success');
+            showToast('تم إغلاق الوردية وتقفيل الصندوق وعهدة الفوارغ بنجاح 🔒', 'success');
             queryClient.invalidateQueries({ queryKey: ['active_pos_shift'] });
             onClose();
         },
@@ -127,6 +144,35 @@ export default function ShiftCloseModal({ isOpen, onClose, activeShift }: any) {
                                 {difference === 0 ? '✅ الصندوق مطابق تماماً' : difference > 0 ? `💰 يوجد زيادة بقيمة: ${difference.toFixed(2)}` : `⚠️ يوجد عجز بقيمة: ${Math.abs(difference).toFixed(2)}`}
                             </div>
                         )}
+
+                        {/* 🔄 مطابقة عهدة فوارغ الجالونات والعبوات */}
+                        <div style={{ background: 'rgba(240, 249, 255, 0.8)', border: '1px solid rgba(40, 145, 200, 0.3)', padding: '15px', borderRadius: '12px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                                <span style={{ fontSize: '13px', fontWeight: 900, color: '#1C73AB' }}>🔄 عهدة فوارغ المياه المباعة:</span>
+                                <span style={{ fontSize: '15px', fontWeight: 900, color: '#122946' }}>{bottlesSold} عبوة / جالون</span>
+                            </div>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '10px', alignItems: 'center', marginTop: '10px' }}>
+                                <label style={{ fontSize: '12px', fontWeight: 800, color: '#334155' }}>عدد الفوارغ المستلمة فعلياً:</label>
+                                <input 
+                                    type="number"
+                                    min="0"
+                                    className="glass-input-field"
+                                    value={actualBottlesReturned}
+                                    onChange={(e) => setActualBottlesReturned(e.target.value === '' ? '' : Number(e.target.value))}
+                                    style={{ fontSize: '18px', fontWeight: 'bold', textAlign: 'center', borderColor: '#2891C8', padding: '6px' }}
+                                    placeholder="الفوارغ"
+                                />
+                            </div>
+
+                            <div style={{ marginTop: '10px', fontSize: '13px', fontWeight: 800, textAlign: 'center', padding: '6px', borderRadius: '8px', background: bottlesShortage === 0 ? '#dcfce7' : bottlesShortage > 0 ? '#fee2e2' : '#f0f9ff', color: bottlesShortage === 0 ? '#16a34a' : bottlesShortage > 0 ? '#b91c1c' : '#0369a1' }}>
+                                {bottlesShortage === 0 
+                                    ? '✅ الفوارغ مطابقة تماماً' 
+                                    : bottlesShortage > 0 
+                                        ? `⚠️ عجز فوارغ: ${bottlesShortage} عبوة (تُقيد كذمة على المندوب)` 
+                                        : `ℹ️ فوارغ إضافية مستلمة: +${Math.abs(bottlesShortage)} عبوة`}
+                            </div>
+                        </div>
 
                         <button 
                             onClick={() => closeShiftMutation.mutate()} 
