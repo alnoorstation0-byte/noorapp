@@ -422,6 +422,7 @@ export const RESTORE_DEPENDENCY_ORDER = [
 
 // ترتيب الحذف عند مسح الحركات والقيود (الأبناء أولاً لمنع أخطاء Foreign Keys)
 export const CLEAR_TRANSACTIONS_ORDER = [
+    'vehicle_inventory',
     'inventory_transactions',
     'journal_lines',
     'journal_headers',
@@ -953,9 +954,28 @@ export async function clearTransactionsOnly(
     onProgress?: (msg: string) => void
 ): Promise<{ success: boolean; error?: string }> {
     try {
-        onProgress?.('🛡️ بدء عملية مسح القيود والعمليات المحاسبية...');
+        onProgress?.('🛡️ بدء عملية مسح القيود والعمليات وسجل الورديات والرحلات...');
 
-        // مسح الجداول التشغيلية بترتيب عكسي آمن
+        // 1. محاولة المسح الشامل الموثوق عبر Server Admin API (بصلاحيات Service Role لتجاوز قيود RLS والـ Foreign Keys)
+        try {
+            const apiRes = await fetch('/api/admin/clear-transactions', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'clear_transactions' })
+            });
+
+            if (apiRes.ok) {
+                const apiData = await apiRes.json();
+                if (apiData.success) {
+                    onProgress?.('✅ تم مسح جميع القيود وسجل الورديات وأوامر تشغيل الرحلات وتصفير الحركات بنجاح!');
+                    return { success: true };
+                }
+            }
+        } catch (apiErr) {
+            console.warn('Admin API wipe error, falling back to direct client deletion:', apiErr);
+        }
+
+        // مسح الجداول التشغيلية بترتيب عكسي آمن كخيار احتياطي
         for (const table of CLEAR_TRANSACTIONS_ORDER) {
             onProgress?.(`🧹 جاري إفراغ جدول: ${table}...`);
             const { error } = await supabase.from(table).delete().neq('id', '00000000-0000-0000-0000-000000000000');
@@ -1003,6 +1023,25 @@ export async function fullFactoryReset(
 ): Promise<{ success: boolean; error?: string }> {
     try {
         onProgress?.('⚠️ بدء إعادة ضبط المصنع الشاملة للنظام...');
+
+        // 1. محاولة المسح الشامل الموثوق عبر Server Admin API
+        try {
+            const apiRes = await fetch('/api/admin/clear-transactions', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'factory_reset' })
+            });
+
+            if (apiRes.ok) {
+                const apiData = await apiRes.json();
+                if (apiData.success) {
+                    onProgress?.('✅ تمت إعادة ضبط المصنع بالكامل! النظام الآن مهيأ كبداية جديدة نظيفة.');
+                    return { success: true };
+                }
+            }
+        } catch (apiErr) {
+            console.warn('Admin API factory reset error, falling back to direct client deletion:', apiErr);
+        }
 
         // 1. أولاً: مسح كافة العمليات والحركات
         await clearTransactionsOnly(onProgress);

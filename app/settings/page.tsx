@@ -30,6 +30,7 @@ import {
   clearTransactionsOnly,
   fullFactoryReset
 } from '@/lib/backupRestoreEngine';
+import { emitTableChange } from '@/lib/useRealtimeSync';
 
 // تجميع الجداول حسب الموديول للعرض
 const TABLE_GROUPS = [
@@ -199,8 +200,21 @@ export default function SettingsPage() {
     try {
       const res = await clearTransactionsOnly((msg) => setStatusMsg({ text: msg, type: 'loading' }));
       if (res.success) {
-        showToast('✅ تم مسح جميع العمليات والقيود وتصفير الأرصدة بنجاح مع الاحتفاظ بالأساسيات!', 'success');
-        setStatusMsg({ text: '✅ تم مسح القيود وتصفير الحركات بنجاح.', type: 'success' });
+        showToast('✅ تم مسح جميع القيود وسجل الورديات وأوامر تشغيل الرحلات وتصفير الأرصدة بنجاح!', 'success');
+        setStatusMsg({ text: '✅ تم مسح القيود وسجل الورديات وأوامر تشغيل الرحلات وتصفير الحركات بنجاح.', type: 'success' });
+        
+        // ⚡ بث التحديثات اللحظية وإبطال الكاش لكافة الشاشات
+        emitTableChange('pos_shifts');
+        emitTableChange('fleet_operations');
+        emitTableChange('invoices');
+        emitTableChange('receipt_vouchers');
+        emitTableChange('payment_vouchers');
+        emitTableChange('expenses');
+        emitTableChange('inventory_transactions');
+        emitTableChange('warehouse_inventory');
+        emitTableChange('vehicle_inventory');
+        emitTableChange('journal_headers');
+
         queryClient.invalidateQueries();
       } else {
         showToast('❌ خطأ: ' + (res.error || 'حدث خطأ'), 'error');
@@ -497,7 +511,7 @@ export default function SettingsPage() {
                     <span className="badge-safe">يحافظ على الأساسيات</span>
                   </div>
                   <p style={{ fontSize: '11.5px', color: '#78350f', lineHeight: 1.5, margin: '0 0 15px 0', fontWeight: 700 }}>
-                    يحذف الفواتير، سندات القبض والصرف، القيود المحاسبية، المصروفات، الورديات، والتدفقات، ويصفر أرصدة المخزون وعهد الفوارغ. <strong>ويحافظ تماماً</strong> على شجرة الحسابات، العملاء، الموردين، المستودعات، والأصناف.
+                    يحذف الفواتير، سندات القبض والصرف، القيود المحاسبية، المصروفات، <strong>سجل الورديات (نقاط البيع)</strong>، <strong>أوامر تشغيل الرحلات (الأسطول)</strong>، والتدفقات، ويصفر أرصدة المخزون وعهد الفوارغ. <strong>ويحافظ تماماً</strong> على شجرة الحسابات، العملاء، الموردين، المستودعات، والأصناف.
                   </p>
                   <button 
                     onClick={() => { setConfirmModalType('clear'); setConfirmInputText(''); }}
