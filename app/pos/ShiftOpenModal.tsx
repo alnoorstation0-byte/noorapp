@@ -120,6 +120,28 @@ export default function ShiftOpenModal({
         onError: (err: any) => showToast(`فشل فتح الوردية: ${err.message}`, 'error')
     });
 
+    // ⌨️ استجابة لوحة المفاتيح: Esc للإغلاق و Enter / Ctrl+Enter للبدء
+    useEffect(() => {
+        if (!isOpen) return;
+
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                e.stopPropagation();
+                if (onClose) onClose();
+            } else if (e.key === 'Enter' || ((e.ctrlKey || e.metaKey) && e.key === 'Enter')) {
+                if (!openShiftMutation.isPending && targetWarehouseId && !existingWarehouseShift && !isConflictWithOtherWarehouse) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openShiftMutation.mutate();
+                }
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isOpen, onClose, targetWarehouseId, existingWarehouseShift, isConflictWithOtherWarehouse, openShiftMutation]);
+
     if (!isOpen) return null;
 
     return (

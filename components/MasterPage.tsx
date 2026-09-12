@@ -344,8 +344,16 @@ html, body {
           
           <div className="header-actions" style={{ display: 'flex', flexDirection: 'row', gap: '15px', alignItems: 'center', borderRight: '2px solid rgba(28, 115, 171, 0.1)', paddingRight: '20px' }}>
              
-             {/* Nav Arrows */}
+             {/* Nav Arrows & Shortcuts Button */}
              <div className="nav-group" style={{ display: 'flex', gap: '5px', margin: 0, border: 'none', background: 'rgba(255, 255, 255, 0.5)', borderRadius: '12px', padding: '4px', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)' }}>
+                <button 
+                  onClick={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'F1', bubbles: true }))} 
+                  className="nav-btn-glass" 
+                  title="خريطة اختصارات الكيبورد (F1)" 
+                  style={{ width: '40px', height: '40px', borderRadius: '10px', fontSize: '18px', background: 'rgba(255,255,255,0.7)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#1C73AB', transition: '0.2s', boxShadow: '0 2px 5px rgba(28,115,171,0.1)' }}
+                >
+                  ⌨️
+                </button>
                 <button onClick={() => router.forward()} className="nav-btn-glass" title="تقدم للأمام" style={{ width: '40px', height: '40px', borderRadius: '10px', fontSize: '20px', background: 'rgba(255,255,255,0.7)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#1C73AB', transition: '0.2s', boxShadow: '0 2px 5px rgba(28,115,171,0.1)' }}>
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
                 </button>

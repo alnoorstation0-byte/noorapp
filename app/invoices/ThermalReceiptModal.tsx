@@ -26,9 +26,29 @@ export default function ThermalReceiptModal({ isOpen, onClose, record, onOpenA4 
         lines = typeof record.lines_data === 'string' ? JSON.parse(record.lines_data) : record.lines_data;
     } catch(e){}
 
-    const handlePrint = () => {
+    const handlePrint = React.useCallback(() => {
         window.print();
-    };
+    }, []);
+
+    // ⌨️ استجابة لوحة المفاتيح: Esc للإغلاق و Enter أو Ctrl+P للطباعة
+    React.useEffect(() => {
+        if (!isOpen) return;
+
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                e.stopPropagation();
+                onClose();
+            } else if (e.key === 'Enter' || ((e.ctrlKey || e.metaKey) && (e.key === 'p' || e.key === 'P'))) {
+                e.preventDefault();
+                e.stopPropagation();
+                handlePrint();
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isOpen, onClose, handlePrint]);
 
     return (
         <div className="thermal-modal-overlay">

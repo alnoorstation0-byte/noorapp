@@ -1,11 +1,12 @@
 "use client";
 import { createPortal } from 'react-dom';
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import { THEME } from '@/lib/theme';
 
 interface AquaModalWrapperProps {
     isOpen: boolean;
     onClose: () => void;
+    onConfirm?: () => void;
     title: string;
     icon?: string;
     width?: string;
@@ -13,9 +14,65 @@ interface AquaModalWrapperProps {
     headerExtra?: React.ReactNode;
 }
 
-export default function AquaModalWrapper({ isOpen, onClose, title, icon, width = '950px', children, headerExtra }: AquaModalWrapperProps) {
+export default function AquaModalWrapper({ isOpen, onClose, onConfirm, title, icon, width = '950px', children, headerExtra }: AquaModalWrapperProps) {
     const [mounted, setMounted] = useState(false);
+    const containerRef = useRef<HTMLDivElement>(null);
+
     useEffect(() => setMounted(true), []);
+
+    // ⌨️ الاختصارات العامة داخل المودال (Escape للإغلاق و Ctrl+Enter للحفظ)
+    useEffect(() => {
+        if (!isOpen) return;
+
+        // Auto-focus first visible input on desktop
+        const timer = setTimeout(() => {
+            if (containerRef.current) {
+                const firstInput = containerRef.current.querySelector<HTMLElement>(
+                    'input:not([type="hidden"]):not([disabled]), select:not([disabled]), textarea:not([disabled])'
+                );
+                if (firstInput) {
+                    firstInput.focus();
+                }
+            }
+        }, 80);
+
+        const handleKeyDown = (e: KeyboardEvent) => {
+            // 1. Esc -> إغلاق المودال
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                e.stopPropagation();
+                onClose();
+                return;
+            }
+
+            // 2. Ctrl + Enter (أو Cmd + Enter على الماك) -> حفظ وموافقة
+            if ((e.ctrlKey || e.metaKey) && (e.key === 'Enter' || e.code === 'NumpadEnter')) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                if (onConfirm) {
+                    onConfirm();
+                    return;
+                }
+
+                // البحث التلقائي عن زر الحفظ والاعتماد داخل المودال
+                if (containerRef.current) {
+                    const saveBtn = containerRef.current.querySelector<HTMLButtonElement>(
+                        '.btn-glass-save, button[type="submit"], [data-shortcut="save"]'
+                    );
+                    if (saveBtn && !saveBtn.disabled) {
+                        saveBtn.click();
+                    }
+                }
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => {
+            clearTimeout(timer);
+            window.removeEventListener('keydown', handleKeyDown);
+        };
+    }, [isOpen, onClose, onConfirm]);
 
     if (!isOpen || !mounted) return null;
 
@@ -70,7 +127,22 @@ export default function AquaModalWrapper({ isOpen, onClose, title, icon, width =
 
                 @keyframes modalScaleUp { 0% { transform: scale(0.95); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 
+                .modal-kbd-badge {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 6px;
+                    padding: 4px 10px;
+                    background: rgba(40, 145, 200, 0.1);
+                    border: 1px solid rgba(40, 145, 200, 0.25);
+                    border-radius: 8px;
+                    font-size: 11px;
+                    font-weight: 800;
+                    color: #1C73AB;
+                    white-space: nowrap;
+                }
+
                 @media (max-width: 768px) {
+                    .modal-kbd-badge { display: none !important; }
                     .glass-modal-container {
                         width: 95% !important;
                         padding: 20px !important;
@@ -88,7 +160,7 @@ export default function AquaModalWrapper({ isOpen, onClose, title, icon, width =
                 }
             `}</style>
 
-            <div className="cinematic-scroll glass-modal-container" onClick={(e) => e.stopPropagation()} style={{ 
+            <div ref={containerRef} className="cinematic-scroll glass-modal-container" onClick={(e) => e.stopPropagation()} style={{ 
                 width: width, maxHeight: '95vh', background: 'rgba(248, 250, 252, 0.85)', 
                 backdropFilter: 'blur(12px)', borderRadius: '25px', padding: '15px 25px', 
                 boxShadow: '0 30px 60px rgba(0,0,0,0.25)', overflowY: 'auto', direction: 'rtl',
@@ -97,10 +169,15 @@ export default function AquaModalWrapper({ isOpen, onClose, title, icon, width =
             }}>
                 
                 <div className="modal-header-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px', borderBottom: `2px solid ${THEME.accent}50`, paddingBottom: '15px' }}>
-                    <h2 style={{ color: THEME.primary, fontWeight: 900, margin: 0, fontSize: '24px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        {icon && <span>{icon}</span>}
-                        <span>{title}</span>
-                    </h2>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                        <h2 style={{ color: THEME.primary, fontWeight: 900, margin: 0, fontSize: '24px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            {icon && <span>{icon}</span>}
+                            <span>{title}</span>
+                        </h2>
+                        <span className="modal-kbd-badge" title="اختصارات لوحة المفاتيح">
+                            💾 Ctrl+Enter للحفظ | Esc للإلغاء
+                        </span>
+                    </div>
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                         {headerExtra}

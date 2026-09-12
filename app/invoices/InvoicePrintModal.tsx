@@ -148,17 +148,34 @@ export default function InvoicePrintModal({ isOpen, onClose, record, setRecord =
     const handleRemoveLine = (indexToRemove: number) => { /* محفوظة للمنطق */ };
     const handleValidateAndSave = () => { /* محفوظة للمنطق */ };
 
-    if (!isOpen || !mounted || !record) return null;
-
-    // =========================================================================
-    // 🚀 دالة الطباعة السحرية
-    // =========================================================================
-    const handlePrintOrPDF = () => {
+    const handlePrintOrPDF = React.useCallback(() => {
         const originalTitle = document.title;
         document.title = record?.invoice_number ? `فاتورة_${record.invoice_number}` : 'فاتورة_ضريبية';
         window.print();
         setTimeout(() => { document.title = originalTitle; }, 1000);
-    };
+    }, [record?.invoice_number]);
+
+    // ⌨️ استجابة لوحة المفاتيح: Esc للإغلاق و Ctrl+P أو Enter للطباعة
+    React.useEffect(() => {
+        if (!isOpen) return;
+
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                e.stopPropagation();
+                onClose();
+            } else if ((e.ctrlKey || e.metaKey) && (e.key === 'p' || e.key === 'P')) {
+                e.preventDefault();
+                e.stopPropagation();
+                handlePrintOrPDF();
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isOpen, onClose, handlePrintOrPDF]);
+
+    if (!isOpen || !mounted || !record) return null;
 
     // 🚀 تهيئة بيانات التوقيع والباركود
     const finalFullName = creatorInfo?.fullName || 'المحاسب المعتمد';

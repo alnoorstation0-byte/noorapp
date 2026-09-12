@@ -31,16 +31,36 @@ export const ConfirmProvider = ({ children }: { children: ReactNode }) => {
         setConfirmState({ isOpen: true, options });
     };
 
-    const closeConfirm = () => {
+    const closeConfirm = React.useCallback(() => {
         setConfirmState({ isOpen: false, options: null });
-    };
+    }, []);
 
-    const handleConfirm = () => {
+    const handleConfirm = React.useCallback(() => {
         if (confirmState.options?.onConfirm) {
             confirmState.options.onConfirm();
         }
         closeConfirm();
-    };
+    }, [confirmState.options, closeConfirm]);
+
+    // ⌨️ الاستجابة لمفاتيح Enter للتأكيد و Escape للإلغاء
+    React.useEffect(() => {
+        if (!confirmState.isOpen) return;
+
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Enter' || e.code === 'NumpadEnter') {
+                e.preventDefault();
+                e.stopPropagation();
+                handleConfirm();
+            } else if (e.key === 'Escape') {
+                e.preventDefault();
+                e.stopPropagation();
+                closeConfirm();
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [confirmState.isOpen, handleConfirm, closeConfirm]);
 
     return (
         <ConfirmContext.Provider value={{ showConfirm }}>
@@ -66,15 +86,17 @@ export const ConfirmProvider = ({ children }: { children: ReactNode }) => {
                         <div style={{ display: 'flex', gap: '15px' }}>
                             <button 
                                 onClick={handleConfirm} 
-                                style={{ flex: 1, background: confirmState.options.type === 'warning' ? '#f59e0b' : THEME.danger, color: 'white', padding: '14px', borderRadius: '14px', border: 'none', fontWeight: 900, fontSize: '15px', cursor: 'pointer', transition: '0.2s', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }}
+                                style={{ flex: 1, background: confirmState.options.type === 'warning' ? '#f59e0b' : THEME.danger, color: 'white', padding: '14px', borderRadius: '14px', border: 'none', fontWeight: 900, fontSize: '15px', cursor: 'pointer', transition: '0.2s', boxShadow: '0 4px 10px rgba(0,0,0,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
                             >
-                                {confirmState.options.confirmText || 'نعم، تأكيد'}
+                                <span>{confirmState.options.confirmText || 'نعم، تأكيد'}</span>
+                                <span style={{ opacity: 0.8, fontSize: '12px' }}>↵</span>
                             </button>
                             <button 
                                 onClick={closeConfirm} 
-                                style={{ flex: 1, background: 'rgba(255, 255, 255, 0.4)', color: '#64748b', padding: '14px', borderRadius: '14px', border: 'none', fontWeight: 900, fontSize: '15px', cursor: 'pointer', transition: '0.2s' }}
+                                style={{ flex: 1, background: 'rgba(255, 255, 255, 0.4)', color: '#64748b', padding: '14px', borderRadius: '14px', border: 'none', fontWeight: 900, fontSize: '15px', cursor: 'pointer', transition: '0.2s', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px' }}
                             >
-                                {confirmState.options.cancelText || 'إلغاء والتراجع'}
+                                <span>{confirmState.options.cancelText || 'إلغاء والتراجع'}</span>
+                                <span style={{ opacity: 0.7, fontSize: '11px' }}>(Esc)</span>
                             </button>
                         </div>
                     </div>

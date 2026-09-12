@@ -146,6 +146,28 @@ export default function ShiftCloseModal({
         onError: (err: any) => showToast(`فشل إغلاق الوردية: ${err.message}`, 'error')
     });
 
+    // ⌨️ استجابة لوحة المفاتيح: Esc للإغلاق و Ctrl+Enter للتقفيل النهائي
+    useEffect(() => {
+        if (!isOpen) return;
+
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                e.stopPropagation();
+                onClose();
+            } else if ((e.ctrlKey || e.metaKey) && (e.key === 'Enter' || e.code === 'NumpadEnter')) {
+                if (!closeShiftMutation.isPending && actualCash !== '') {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    closeShiftMutation.mutate();
+                }
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isOpen, onClose, actualCash, closeShiftMutation]);
+
     if (!isOpen) return null;
 
     if (!activeShift) {
