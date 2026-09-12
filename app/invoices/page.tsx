@@ -206,7 +206,7 @@ export default function InvoicesPage() {
       label: 'الاعتماد',
       render: (row: any) => {
         if (!row) return null; 
-        const isApproved = row.status === 'posted' || row.status === 'معتمد';
+        const isApproved = ['posted', 'معتمد', 'مرحل', 'approved'].includes(String(row.status || '').trim().toLowerCase()) || row.is_posted === true;
         const isToggling = String(logic.togglingId) === String(row.id);
         
         return (
@@ -267,7 +267,7 @@ export default function InvoicesPage() {
         const paid = Number(row.paid_amount || 0);
         const balance = total - paid;
         const needsPayment = balance > 0; 
-        const isApproved = row.status === 'posted' || row.status === 'معتمد' || row.is_posted === true;
+        const isApproved = ['posted', 'معتمد', 'مرحل', 'approved'].includes(String(row.status || '').trim().toLowerCase()) || row.is_posted === true;
         
         return (
           <div onClick={(e) => e.stopPropagation()} style={{ display: 'inline-flex', gap: '6px', alignItems: 'center' }}>

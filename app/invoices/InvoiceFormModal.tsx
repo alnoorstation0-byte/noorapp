@@ -264,7 +264,7 @@ export default function InvoiceFormModal({ isOpen, onClose, record, setRecord, o
                             <label style={{ fontSize: '12px', fontWeight: 900, color: THEME.primary, display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '6px' }}>حالة الفاتورة</label>
                             <select 
                                 className="glass-input-field" 
-                                value={record.status === 'posted' || record.status === 'معتمد' ? 'معتمد' : 'معلق'} 
+                                value={['posted', 'معتمد', 'مرحل', 'approved'].includes(String(record.status || '').trim().toLowerCase()) || record.is_posted === true ? 'معتمد' : 'معلق'} 
                                 onChange={e => setRecord({...record, status: e.target.value})}
                             >
                                 <option value="معلق">⏳ معلق (مسودة قابلة للتعديل)</option>

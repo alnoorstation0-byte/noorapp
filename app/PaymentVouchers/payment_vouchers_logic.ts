@@ -112,7 +112,10 @@ export function usePaymentVouchersLogic() {
 
         if (filterStatus !== 'الكل') {
             const isPostedTarget = filterStatus === 'معتمد';
-            result = result.filter(v => v.is_posted === isPostedTarget);
+            result = result.filter(v => {
+                const isVoucherPosted = ['posted', 'معتمد', 'مرحل', 'approved'].includes(String(v.status || '').trim().toLowerCase()) || v.is_posted === true;
+                return isPostedTarget ? isVoucherPosted : !isVoucherPosted;
+            });
         }
 
         if (deferredSearch) {

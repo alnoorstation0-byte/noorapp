@@ -57,8 +57,8 @@ export function useJournalLogic() {
                     query = query.eq('partner_id', filterPartnerId);
                 }
                 
-                if (filterStatus === 'معتمد') query = query.eq('header_status', 'معتمد');
-                if (filterStatus === 'مسودة') query = query.eq('header_status', 'draft');
+                if (filterStatus === 'معتمد') query = query.in('header_status', ['posted', 'معتمد', 'مرحل', 'approved']);
+                if (filterStatus === 'مسودة') query = query.in('header_status', ['draft', 'pending', 'مسودة', 'غير مرحل']);
 
                 return query;
             };
@@ -75,8 +75,11 @@ export function useJournalLogic() {
         let result = journalMaster;
 
         if (filterStatus !== 'الكل') {
-            const targetStatus = filterStatus === 'معتمد' ? 'معتمد' : 'draft';
-            result = result.filter(r => r.header_status === targetStatus);
+            if (filterStatus === 'معتمد') {
+                result = result.filter(r => ['posted', 'معتمد', 'مرحل', 'approved'].includes(String(r.header_status || '').trim().toLowerCase()));
+            } else if (filterStatus === 'مسودة') {
+                result = result.filter(r => ['draft', 'pending', 'مسودة', 'غير مرحل'].includes(String(r.header_status || '').trim().toLowerCase()));
+            }
         }
 
         if (deferredSearch) {

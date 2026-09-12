@@ -138,7 +138,7 @@ export default function ReceiptVouchersPage() {
             accessor: 'status',
             render: (row: any) => {
                 if (!row) return null;
-                const isPosted = row.status === 'معتمد' || row.status === 'مرحل';
+                const isPosted = ['posted', 'معتمد', 'مرحل', 'approved'].includes(String(row.status || '').trim().toLowerCase()) || row.is_posted === true;
                 const isRefunded = row.status === 'مسترجع';
                 return (
                     <div style={{

@@ -177,7 +177,7 @@ export function useInvoicesLogic() {
 
             const total = Number(inv.total_amount || 0);
             const paid = Number(inv.paid_amount || 0);
-            const isApproved = inv.status === 'posted' || inv.status === 'معتمد';
+            const isApproved = ['posted', 'معتمد', 'مرحل', 'approved'].includes(String(inv.status || '').trim().toLowerCase()) || inv.is_posted === true;
 
             let matchesStatus = true;
             if (statusFilter === 'posted') matchesStatus = isApproved;
@@ -218,8 +218,8 @@ export function useInvoicesLogic() {
         today.setHours(0, 0, 0, 0);
         return {
             all: invoices.length,
-            posted: invoices.filter((i: any) => i.status === 'posted' || i.status === 'معتمد').length,
-            pending: invoices.filter((i: any) => i.status !== 'posted' && i.status !== 'معتمد').length,
+            posted: invoices.filter((i: any) => ['posted', 'معتمد', 'مرحل', 'approved'].includes(String(i.status || '').trim().toLowerCase()) || i.is_posted === true).length,
+            pending: invoices.filter((i: any) => !['posted', 'معتمد', 'مرحل', 'approved'].includes(String(i.status || '').trim().toLowerCase()) && !i.is_posted).length,
             unpaid: invoices.filter((i: any) => (Number(i.total_amount || 0) - Number(i.paid_amount || 0)) > 0).length,
             overdue: invoices.filter((i: any) => (Number(i.total_amount || 0) - Number(i.paid_amount || 0)) > 0 && !!i.due_date && new Date(i.due_date) < today).length,
             totalSales: invoices.reduce((sum: number, i: any) => sum + Number(i.total_amount || 0), 0),
@@ -230,8 +230,8 @@ export function useInvoicesLogic() {
 
     const kpis = useMemo(() => ({
         total: allFiltered.length,
-        posted: allFiltered.filter((i: any) => (i.status === 'posted' || i.status === 'معتمد')).length,
-        pending: allFiltered.filter((i: any) => (i.status !== 'posted' && i.status !== 'معتمد')).length
+        posted: allFiltered.filter((i: any) => ['posted', 'معتمد', 'مرحل', 'approved'].includes(String(i.status || '').trim().toLowerCase()) || i.is_posted === true).length,
+        pending: allFiltered.filter((i: any) => !['posted', 'معتمد', 'مرحل', 'approved'].includes(String(i.status || '').trim().toLowerCase()) && !i.is_posted).length
     }), [allFiltered]);
 
     const summary = useMemo(() => getInvoiceSummaryAndAging(allFiltered), [allFiltered]);
@@ -288,7 +288,7 @@ export function useInvoicesLogic() {
     };
 
     const handleEdit = (inv: any) => {
-        if (inv.is_posted || inv.status === 'posted' || inv.status === 'معتمد') {
+        if (inv.is_posted || ['posted', 'معتمد', 'مرحل', 'approved'].includes(String(inv.status || '').trim().toLowerCase())) {
             showToast("⚠️ لا يمكن تعديل فاتورة معتمدة! لتسجيل الدفعات استخدم زر (💰) الموجود بالجدول. ولتعديل بيانات الأصناف يجب فك الترحيل أولاً.", "error");
             return;
         }
@@ -303,7 +303,7 @@ export function useInvoicesLogic() {
             
             if (record.id) {
                 const { data: currentInv } = await supabase.from('invoices').select('status').eq('id', record.id).single();
-                if (currentInv && (currentInv.status === 'posted' || currentInv.status === 'معتمد')) {
+                if (currentInv && ['posted', 'معتمد', 'مرحل', 'approved'].includes(String(currentInv.status || '').trim().toLowerCase())) {
                     throw new Error("لا يمكن حفظ التعديلات! الفاتورة معتمدة بالفعل في النظام. يرجى فك الترحيل أولاً.");
                 }
             }
@@ -482,7 +482,7 @@ export function useInvoicesLogic() {
         handleUnpostSelected: () => unpostMutation.mutate(), 
         warehouseItems,
         handleDeleteSelected: () => {
-            const posted = invoices.filter((inv:any) => selectedIds.includes(String(inv.id)) && (inv.status === 'معتمد' || inv.status === 'posted'));
+            const posted = invoices.filter((inv:any) => selectedIds.includes(String(inv.id)) && (inv.is_posted || ['posted', 'معتمد', 'مرحل', 'approved'].includes(String(inv.status || '').trim().toLowerCase())));
             if (posted.length > 0) {
                 return showToast("⚠️ لا يمكن حذف فواتير معتمدة ومرحلة. يرجى فك الترحيل أولاً.", "error");
             }
@@ -490,7 +490,7 @@ export function useInvoicesLogic() {
             deleteMutation.mutate();
         },
         handleDeleteSingle: async (inv: any) => {
-            if (inv.status === 'posted' || inv.status === 'معتمد') {
+            if (inv.is_posted || ['posted', 'معتمد', 'مرحل', 'approved'].includes(String(inv.status || '').trim().toLowerCase())) {
                 return showToast("⚠️ لا يمكن حذف فاتورة معتمدة ومرحلة، يرجى فك الترحيل أولاً.", "error");
             }
             if (!confirm(`تحذير: هل أنت متأكد من حذف الفاتورة #${inv.invoice_number} نهائياً؟`)) return;
@@ -504,7 +504,7 @@ export function useInvoicesLogic() {
             }
         },
         handleToggleStatus: async (inv: any) => {
-            const isApproved = inv.status === 'posted' || inv.status === 'معتمد';
+            const isApproved = inv.is_posted === true || ['posted', 'معتمد', 'مرحل', 'approved'].includes(String(inv.status || '').trim().toLowerCase());
             setTogglingId(String(inv.id));
             try {
                 if (isApproved) {

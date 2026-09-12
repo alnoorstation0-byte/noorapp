@@ -14,6 +14,7 @@ import RawasiSmartTable from '@/components/rawasismarttable';
 import LoadingScreen from '@/components/LoadingScreen';
 import PrintHeader from '@/components/PrintHeader';
 import { reconcileShiftOnJournalDeletion, reconcileShiftOnJournalUnpost } from '@/lib/shift_sync_engine';
+import JournalVoucherModal from './JournalVoucherModal';
 
 // ==========================================
 // 🧠 العقل المدبر (Logic) - متوافق مع قوانين Supabase
@@ -38,6 +39,9 @@ function useJournalLogic() {
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [rowActionLoadingId, setRowActionLoadingId] = useState<string | null>(null);
+    const [isBulkProcessing, setIsBulkProcessing] = useState(false);
+    const [voucherModalHeaderId, setVoucherModalHeaderId] = useState<string | null>(null);
+    const [isVoucherModalOpen, setIsVoucherModalOpen] = useState(false);
 
     useEffect(() => {
         setCurrentPage(1);
@@ -70,8 +74,8 @@ function useJournalLogic() {
                 if (filterAccountId) query = query.eq('account_id', filterAccountId);
                 if (filterPartnerId) query = query.eq('partner_id', filterPartnerId);
                 
-                if (filterStatus === 'معتمد') query = query.eq('header_status', 'معتمد');
-                if (filterStatus === 'مسودة') query = query.eq('header_status', 'draft');
+                if (filterStatus === 'معتمد') query = query.in('header_status', ['posted', 'معتمد', 'مرحل', 'approved']);
+                if (filterStatus === 'مسودة') query = query.in('header_status', ['draft', 'pending', 'مسودة', 'غير مرحل']);
                 if (filterVType && filterVType !== 'الكل') query = query.eq('v_type', filterVType);
 
                 if (filterStatus === 'غير متزن') {
@@ -198,6 +202,30 @@ function useJournalLogic() {
     // كاشف الفلترة النشطة
     const isFiltered = !!(filterAccountId || filterPartnerId || dateFrom || dateTo || (filterStatus !== 'الكل') || (filterVType !== 'الكل'));
 
+    const selectedLines = useMemo(() => {
+        if (!selectedIds.length) return [];
+        return journalMaster.filter(l => selectedIds.includes(String(l.line_id)));
+    }, [journalMaster, selectedIds]);
+
+    const selectedHeaderIds = useMemo(() => {
+        return [...new Set(selectedLines.map(l => l.header_id).filter(Boolean))];
+    }, [selectedLines]);
+
+    const selectedHeaderCount = selectedHeaderIds.length;
+    const selectedSingleHeaderDescription = selectedHeaderCount === 1 
+        ? (selectedLines[0]?.header_description || selectedLines[0]?.account_name || '') 
+        : null;
+
+    const voucherModalLines = useMemo(() => {
+        if (voucherModalHeaderId) {
+            return journalMaster.filter(l => l.header_id === voucherModalHeaderId);
+        }
+        if (selectedIds.length > 0) {
+            return journalMaster.filter(l => selectedIds.includes(String(l.line_id)));
+        }
+        return [];
+    }, [journalMaster, voucherModalHeaderId, selectedIds]);
+
     return {
         isLoading, isError,
         globalSearch, setGlobalSearch, 
@@ -212,7 +240,67 @@ function useJournalLogic() {
         totals,
         pendingJournalsCount,
         selectedIds, setSelectedIds,
+        selectedHeaderCount,
+        selectedSingleHeaderDescription,
+        isBulkProcessing,
+        voucherModalHeaderId,
+        isVoucherModalOpen,
+        setIsVoucherModalOpen,
+        voucherModalLines,
         isFiltered,
+        handlePrintSingleHeader: (headerId: string) => {
+            setVoucherModalHeaderId(headerId);
+            setIsVoucherModalOpen(true);
+        },
+        handlePrintSelected: () => {
+            if (selectedHeaderIds.length === 0) return;
+            if (selectedHeaderIds.length === 1) {
+                setVoucherModalHeaderId(selectedHeaderIds[0]);
+            } else {
+                setVoucherModalHeaderId(null);
+            }
+            setIsVoucherModalOpen(true);
+        },
+        handlePostSelectedHeaders: async () => {
+            if (selectedHeaderIds.length === 0) return showToast('لم يتم تحديد أي قيود صالحة.', 'error');
+            setIsBulkProcessing(true);
+            try {
+                const { error } = await supabase
+                    .from('journal_headers')
+                    .update({ status: 'posted' })
+                    .in('id', selectedHeaderIds);
+                if (error) throw error;
+                showToast(`✅ تم اعتماد وترحيل (${selectedHeaderIds.length}) قيد بنجاح!`, 'success');
+                setSelectedIds([]);
+                queryClient.invalidateQueries({ queryKey: ['journal_master_view'] });
+                queryClient.invalidateQueries({ queryKey: ['pending_journals_count'] });
+            } catch (err: any) {
+                showToast(`❌ فشل ترحيل القيود المحددة: ${err.message}`, 'error');
+            } finally {
+                setIsBulkProcessing(false);
+            }
+        },
+        handleUnpostSelectedHeaders: async () => {
+            if (selectedHeaderIds.length === 0) return showToast('لم يتم تحديد أي قيود صالحة.', 'error');
+            if (!confirm(`هل أنت متأكد من فك ترحيل (${selectedHeaderIds.length}) قيد محدد وإعادتها لمسودة؟\nسيتم تحديث الورديات والفواتير المرتبطة تلقائياً.`)) return;
+            setIsBulkProcessing(true);
+            try {
+                for (const hId of selectedHeaderIds) {
+                    await reconcileShiftOnJournalUnpost(hId);
+                }
+                showToast(`↩️ تم فك ترحيل (${selectedHeaderIds.length}) قيد وتحديث الورديات بنجاح!`, 'success');
+                setSelectedIds([]);
+                queryClient.invalidateQueries({ queryKey: ['journal_master_view'] });
+                queryClient.invalidateQueries({ queryKey: ['pending_journals_count'] });
+                queryClient.invalidateQueries({ queryKey: ['active_pos_shift'] });
+                queryClient.invalidateQueries({ queryKey: ['pos_dashboard_sales_all'] });
+                queryClient.invalidateQueries({ queryKey: ['pos_dashboard_shifts_all'] });
+            } catch (err: any) {
+                showToast(`❌ فشل فك الترحيل: ${err.message}`, 'error');
+            } finally {
+                setIsBulkProcessing(false);
+            }
+        },
         handleBulkPostDrafts: async () => {
             if (!confirm(`هل أنت متأكد من اعتماد وترحيل كافة القيود اليومية المسودة (${pendingJournalsCount}) دفعة واحدة؟`)) return;
             try {
@@ -368,7 +456,8 @@ export default function JournalPage() {
       accessor: 'header_status',
       render: (row: any) => {
         if (!row) return null;
-        return row.header_status === 'معتمد' ? 
+        const isPosted = ['posted', 'معتمد', 'مرحل', 'approved'].includes(String(row.header_status || '').trim().toLowerCase());
+        return isPosted ? 
           <span className="badge-glass green">معتمد ✅</span> : 
           <span className="badge-glass yellow">مسودة ⏳</span>;
       }
@@ -378,10 +467,10 @@ export default function JournalPage() {
       accessor: 'actions',
       render: (row: any) => {
         if (!row || !row.header_id) return null;
-        const isPosted = row.header_status === 'معتمد';
+        const isPosted = ['posted', 'معتمد', 'مرحل', 'approved'].includes(String(row.header_status || '').trim().toLowerCase());
         const isLoading = logic.rowActionLoadingId === row.header_id;
         return (
-          <div style={{ display: 'flex', gap: '6px', justifyContent: 'center', alignItems: 'center' }}>
+          <div style={{ display: 'flex', gap: '5px', justifyContent: 'center', alignItems: 'center', flexWrap: 'nowrap' }}>
             <SecureAction module="journal" action="post">
               {isPosted ? (
                 <button
@@ -391,37 +480,11 @@ export default function JournalPage() {
                     e.stopPropagation();
                     logic.handleUnpostSingleHeader(row.header_id);
                   }}
-                  style={{
-                    background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.2) 100%)',
-                    color: '#b45309',
-                    border: '1px solid rgba(245, 158, 11, 0.4)',
-                    padding: '6px 12px',
-                    borderRadius: '10px',
-                    cursor: isLoading ? 'wait' : 'pointer',
-                    fontWeight: 900,
-                    fontSize: '11px',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    boxShadow: '0 2px 6px rgba(245, 158, 11, 0.15)',
-                    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                    whiteSpace: 'nowrap',
-                    opacity: isLoading ? 0.6 : 1
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isLoading) {
-                      e.currentTarget.style.transform = 'translateY(-2px)';
-                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(245, 158, 11, 0.25)';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = '0 2px 6px rgba(245, 158, 11, 0.15)';
-                  }}
+                  className="btn-row-action unpost"
                   title="فك ترحيل هذا القيد وإعادته لمسودة"
                 >
                   <span>{isLoading ? '⏳' : '↩️'}</span>
-                  <span>{isLoading ? 'جاري الفك...' : 'فك الترحيل'}</span>
+                  <span>{isLoading ? 'جاري...' : 'فك'}</span>
                 </button>
               ) : (
                 <button
@@ -431,40 +494,28 @@ export default function JournalPage() {
                     e.stopPropagation();
                     logic.handlePostSingleHeader(row.header_id);
                   }}
-                  style={{
-                    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                    color: 'white',
-                    border: 'none',
-                    padding: '6px 14px',
-                    borderRadius: '10px',
-                    cursor: isLoading ? 'wait' : 'pointer',
-                    fontWeight: 900,
-                    fontSize: '11px',
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    gap: '4px',
-                    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
-                    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                    whiteSpace: 'nowrap',
-                    opacity: isLoading ? 0.6 : 1
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isLoading) {
-                      e.currentTarget.style.transform = 'translateY(-2px)';
-                      e.currentTarget.style.boxShadow = '0 6px 16px rgba(16, 185, 129, 0.45)';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.3)';
-                  }}
+                  className="btn-row-action post"
                   title="اعتماد وترحيل هذا القيد"
                 >
                   <span>{isLoading ? '⏳' : '🚀'}</span>
-                  <span>{isLoading ? 'جاري الترحيل...' : 'ترحيل'}</span>
+                  <span>{isLoading ? 'جاري...' : 'ترحيل'}</span>
                 </button>
               )}
             </SecureAction>
+
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                logic.handlePrintSingleHeader(row.header_id);
+              }}
+              className="btn-row-action print"
+              title="طباعة سند قيد اليومية"
+            >
+              <span>🖨️</span>
+              <span>طباعة</span>
+            </button>
+
             <SecureAction module="journal" action="delete">
               <button
                 type="button"
@@ -473,33 +524,7 @@ export default function JournalPage() {
                   e.stopPropagation();
                   logic.handleDeleteSingleHeader(row.header_id);
                 }}
-                style={{
-                  background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.12) 0%, rgba(220, 38, 38, 0.2) 100%)',
-                  color: '#dc2626',
-                  border: '1px solid rgba(239, 68, 68, 0.3)',
-                  padding: '6px 10px',
-                  borderRadius: '10px',
-                  cursor: isLoading ? 'wait' : 'pointer',
-                  fontWeight: 900,
-                  fontSize: '11px',
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '4px',
-                  boxShadow: '0 2px 6px rgba(239, 68, 68, 0.1)',
-                  transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                  whiteSpace: 'nowrap',
-                  opacity: isLoading ? 0.6 : 1
-                }}
-                onMouseEnter={(e) => {
-                  if (!isLoading) {
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(239, 68, 68, 0.25)';
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 2px 6px rgba(239, 68, 68, 0.1)';
-                }}
+                className="btn-row-action delete"
                 title="حذف هذا القيد وتعديل الوردية المرتبطة تلقائياً"
               >
                 <span>🗑️</span>
@@ -510,7 +535,7 @@ export default function JournalPage() {
         );
       }
     }
-  ], [logic.rowActionLoadingId, logic.handlePostSingleHeader, logic.handleUnpostSingleHeader, logic.handleDeleteSingleHeader]);
+  ], [logic.rowActionLoadingId, logic.handlePostSingleHeader, logic.handleUnpostSingleHeader, logic.handleDeleteSingleHeader, logic.handlePrintSingleHeader]);
 
   const sidebarActions = useMemo(() => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
@@ -673,6 +698,220 @@ export default function JournalPage() {
             .btn-pagination { background: white; color: #1C73AB; border: 1px solid rgba(28, 115, 171, 0.2); padding: 10px 20px; border-radius: 12px; font-weight: 900; cursor: pointer; transition: 0.3s; }
             .btn-pagination:hover:not(:disabled) { background: #1C73AB; color: white; border-color: #1C73AB; }
             .btn-pagination:disabled { opacity: 0.5; cursor: not-allowed; background: #f1f5f9; color: #94a3b8; border-color: #e2e8f0; }
+
+            /* 🎯 Journal Selection Bar (Aqua Glassmorphism) */
+            .journal-selection-bar {
+              display: flex;
+              align-items: center;
+              justify-content: space-between;
+              background: linear-gradient(135deg, rgba(40, 145, 200, 0.12), rgba(28, 115, 171, 0.18));
+              border: 1.5px solid rgba(40, 145, 200, 0.35);
+              border-radius: 14px;
+              padding: 10px 16px;
+              margin-top: 14px;
+              backdrop-filter: blur(10px);
+              -webkit-backdrop-filter: blur(10px);
+              box-shadow: 0 4px 15px rgba(28, 115, 171, 0.08);
+              animation: journalSelectionSlideDown 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+              width: 100%;
+              box-sizing: border-box;
+              gap: 12px;
+            }
+
+            @keyframes journalSelectionSlideDown {
+              from { opacity: 0; transform: translateY(-8px); }
+              to { opacity: 1; transform: translateY(0); }
+            }
+
+            .selection-bar-info {
+              display: flex;
+              align-items: center;
+              gap: 10px;
+              min-width: 0;
+              flex-shrink: 1;
+            }
+
+            .selection-badge {
+              font-size: 12px;
+              font-weight: 900;
+              color: #1C73AB;
+              background: rgba(255, 255, 255, 0.85);
+              padding: 5px 12px;
+              border-radius: 8px;
+              border: 1px solid rgba(28, 115, 171, 0.2);
+              white-space: nowrap;
+            }
+
+            .selection-header-name {
+              font-size: 12px;
+              font-weight: 800;
+              color: #122946;
+              white-space: nowrap;
+              overflow: hidden;
+              text-overflow: ellipsis;
+              max-width: 250px;
+            }
+
+            .selection-bar-actions {
+              display: flex;
+              align-items: center;
+              gap: 8px;
+              flex-shrink: 0;
+            }
+
+            .selection-action-btn {
+              display: inline-flex;
+              align-items: center;
+              justify-content: center;
+              gap: 6px;
+              padding: 7px 14px;
+              border-radius: 10px;
+              font-size: 12px;
+              font-weight: 900;
+              white-space: nowrap;
+              cursor: pointer;
+              min-height: 38px;
+              touch-action: manipulation;
+              transition: all 0.2s ease;
+              border: none;
+              box-sizing: border-box;
+            }
+
+            .selection-action-btn.post {
+              background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+              color: white;
+              box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            }
+            .selection-action-btn.post:hover:not(:disabled) {
+              transform: translateY(-1px);
+              box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+            }
+
+            .selection-action-btn.unpost {
+              background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.25) 100%);
+              color: #b45309;
+              border: 1px solid rgba(245, 158, 11, 0.4);
+            }
+            .selection-action-btn.unpost:hover:not(:disabled) {
+              background: #d97706;
+              color: white;
+              transform: translateY(-1px);
+            }
+
+            .selection-action-btn.print {
+              background: linear-gradient(135deg, #1C73AB, #2891C8);
+              color: white;
+              box-shadow: 0 4px 12px rgba(28, 115, 171, 0.25);
+            }
+            .selection-action-btn.print:hover:not(:disabled) {
+              filter: brightness(1.1);
+              transform: translateY(-1px);
+            }
+
+            .selection-action-btn.delete {
+              background: rgba(239, 68, 68, 0.12);
+              color: #ef4444;
+              border: 1px solid rgba(239, 68, 68, 0.3);
+            }
+            .selection-action-btn.delete:hover:not(:disabled) {
+              background: #ef4444;
+              color: white;
+              transform: translateY(-1px);
+              box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+            }
+
+            .selection-action-btn.clear {
+              background: #f1f5f9;
+              color: #64748b;
+              border: 1px solid #cbd5e1;
+              padding: 7px 10px;
+            }
+            .selection-action-btn.clear:hover {
+              background: #e2e8f0;
+              color: #1e293b;
+            }
+            .selection-action-btn:disabled {
+              opacity: 0.5;
+              cursor: not-allowed;
+            }
+
+            /* Row Action Buttons in Table */
+            .btn-row-action {
+              padding: 5px 10px;
+              border-radius: 8px;
+              font-size: 11px;
+              font-weight: 900;
+              display: inline-flex;
+              align-items: center;
+              gap: 4px;
+              cursor: pointer;
+              transition: all 0.2s ease;
+              white-space: nowrap;
+              border: none;
+            }
+            .btn-row-action:hover:not(:disabled) {
+              transform: translateY(-1px);
+            }
+            .btn-row-action:disabled {
+              opacity: 0.5;
+              cursor: not-allowed;
+            }
+            .btn-row-action.post {
+              background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+              color: white;
+              box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
+            }
+            .btn-row-action.unpost {
+              background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.2) 100%);
+              color: #b45309;
+              border: 1px solid rgba(245, 158, 11, 0.4);
+            }
+            .btn-row-action.print {
+              background: linear-gradient(135deg, rgba(28, 115, 171, 0.12) 0%, rgba(40, 145, 200, 0.18) 100%);
+              color: #1C73AB;
+              border: 1px solid rgba(28, 115, 171, 0.3);
+            }
+            .btn-row-action.print:hover:not(:disabled) {
+              background: #1C73AB;
+              color: white;
+            }
+            .btn-row-action.delete {
+              background: linear-gradient(135deg, rgba(239, 68, 68, 0.12) 0%, rgba(220, 38, 38, 0.2) 100%);
+              color: #dc2626;
+              border: 1px solid rgba(239, 68, 68, 0.3);
+            }
+            .btn-row-action.delete:hover:not(:disabled) {
+              background: #dc2626;
+              color: white;
+            }
+
+            @media (max-width: 768px) {
+              .journal-selection-bar {
+                flex-direction: column !important;
+                align-items: stretch !important;
+                padding: 10px !important;
+                gap: 8px !important;
+              }
+              .selection-bar-info {
+                width: 100% !important;
+                justify-content: space-between !important;
+              }
+              .selection-bar-actions {
+                width: 100% !important;
+                display: grid !important;
+                grid-template-columns: repeat(2, 1fr) 42px !important;
+                gap: 6px !important;
+              }
+              .selection-action-btn {
+                width: 100% !important;
+                min-height: 42px !important;
+                padding: 8px 6px !important;
+              }
+              .selection-action-btn.clear {
+                grid-column: span 1;
+                width: 42px !important;
+              }
+            }
           `}</style>
 
           {(logic.isLoading || permsLoading) ? (
@@ -762,6 +1001,82 @@ export default function JournalPage() {
                   enablePagination={false} 
                   rowKey="line_id" 
               />
+
+              {/* 🎯 شريط الإجراءات الموحد عند التحديد (داخل الإطار ومناسب 100% للجوال والكمبيوتر) */}
+              {logic.selectedIds.length > 0 && (
+                <div className="journal-selection-bar">
+                  <div className="selection-bar-info">
+                    <span className="selection-badge">
+                      🎯 تم تحديد {logic.selectedIds.length} سطر ({logic.selectedHeaderCount} قيد)
+                    </span>
+                    {logic.selectedSingleHeaderDescription && (
+                      <span className="selection-header-name">
+                        {logic.selectedSingleHeaderDescription}
+                      </span>
+                    )}
+                  </div>
+                  <div className="selection-bar-actions">
+                    <SecureAction module="journal" action="post">
+                      <button 
+                        type="button"
+                        className="selection-action-btn post" 
+                        onClick={logic.handlePostSelectedHeaders} 
+                        disabled={logic.isBulkProcessing}
+                        title="اعتماد وترحيل جميع القيود المحددة"
+                      >
+                        <span>🚀</span>
+                        <span>{logic.isBulkProcessing ? 'جاري...' : 'ترحيل المحددة'}</span>
+                      </button>
+                    </SecureAction>
+
+                    <SecureAction module="journal" action="post">
+                      <button 
+                        type="button"
+                        className="selection-action-btn unpost" 
+                        onClick={logic.handleUnpostSelectedHeaders} 
+                        disabled={logic.isBulkProcessing}
+                        title="فك ترحيل القيود المحددة وإعادتها لمسودة"
+                      >
+                        <span>↩️</span>
+                        <span>{logic.isBulkProcessing ? 'جاري...' : 'فك الترحيل'}</span>
+                      </button>
+                    </SecureAction>
+
+                    <button 
+                      type="button"
+                      className="selection-action-btn print" 
+                      onClick={logic.handlePrintSelected} 
+                      disabled={logic.isBulkProcessing}
+                      title="طباعة سند أو كشف القيود المحددة"
+                    >
+                      <span>🖨️</span>
+                      <span>طباعة</span>
+                    </button>
+
+                    <SecureAction module="journal" action="delete">
+                      <button 
+                        type="button"
+                        className="selection-action-btn delete" 
+                        onClick={logic.handleDeleteHeaders} 
+                        disabled={logic.isBulkProcessing}
+                        title="حذف القيود المحددة نهائياً"
+                      >
+                        <span>🗑️</span>
+                        <span>حذف ({logic.selectedHeaderCount})</span>
+                      </button>
+                    </SecureAction>
+
+                    <button 
+                      type="button"
+                      className="selection-action-btn clear" 
+                      onClick={() => logic.setSelectedIds([])}
+                      title="إلغاء التحديد"
+                    >
+                      ✖️
+                    </button>
+                  </div>
+                </div>
+              )}
               
               {logic.totals.count > 0 && (
                 <div className="pagination-container">
@@ -769,7 +1084,7 @@ export default function JournalPage() {
                         className="btn-pagination" 
                         onClick={() => logic.setCurrentPage(p => Math.max(1, p - 1))} 
                         disabled={logic.currentPage === 1}
-                    >\
+                    >
                         ◀️ السابق
                     </button>
                     
@@ -790,6 +1105,13 @@ export default function JournalPage() {
               )}
             </>
           )}
+
+          <JournalVoucherModal
+            isOpen={logic.isVoucherModalOpen}
+            onClose={() => logic.setIsVoucherModalOpen(false)}
+            lines={logic.voucherModalLines}
+            headerId={logic.voucherModalHeaderId}
+          />
       </MasterPage>
     </div>
   );

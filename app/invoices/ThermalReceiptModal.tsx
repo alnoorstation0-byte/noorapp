@@ -570,7 +570,7 @@ export default function ThermalReceiptModal({ isOpen, onClose, record, onOpenA4 
                         </tr>
                         <tr>
                             <td className="meta-label">حالة الفاتورة:</td>
-                            <td className="meta-val">{record.status === 'posted' || record.status === 'معتمد' || paidAmount >= totalAmount ? 'مسددة بالكامل ✅' : 'آجل / معلق ⏳'}</td>
+                            <td className="meta-val">{['posted', 'معتمد', 'مرحل', 'approved'].includes(String(record.status || '').trim().toLowerCase()) || record.is_posted || paidAmount >= totalAmount ? 'مسددة بالكامل ✅' : 'آجل / معلق ⏳'}</td>
                         </tr>
                     </tbody>
                 </table>

@@ -41,7 +41,7 @@ export function useReceiptVouchersLogic() {
     const [permissions] = useState({ canAdd: true, canEdit: true, canDelete: true, canPost: true, canUnpost: true });
 
     const canUserEdit = (record: any) => {
-        if (!record || record.status === 'معتمد') return false; 
+        if (!record || ['posted', 'معتمد', 'مرحل', 'approved'].includes(String(record.status || '').trim().toLowerCase()) || record.is_posted) return false; 
         return permissions.canEdit;
     };
 
@@ -132,8 +132,8 @@ export function useReceiptVouchersLogic() {
     const kpis = useMemo(() => {
         return {
             total: allFiltered.length,
-            posted: allFiltered.filter(i => i.status === 'معتمد').length,
-            pending: allFiltered.filter(i => i.status !== 'معتمد').length,
+            posted: allFiltered.filter(i => ['posted', 'معتمد', 'مرحل', 'approved'].includes(String(i.status || '').trim().toLowerCase()) || i.is_posted).length,
+            pending: allFiltered.filter(i => !['posted', 'معتمد', 'مرحل', 'approved'].includes(String(i.status || '').trim().toLowerCase()) && !i.is_posted).length,
             totalAmount: allFiltered.reduce((sum, r) => sum + Number(r.amount || 0), 0)
         };
     }, [allFiltered]);

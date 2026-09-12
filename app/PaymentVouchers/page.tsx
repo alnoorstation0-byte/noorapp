@@ -138,7 +138,8 @@ export default function PaymentVouchersPage() {
       accessor: 'is_posted',
       render: (row: any) => {
         if (!row) return null;
-        return row.is_posted ? 
+        const isPosted = row.is_posted === true || ['posted', 'معتمد', 'مرحل', 'approved'].includes(String(row.status || '').trim().toLowerCase());
+        return isPosted ? 
           <span style={{ display: 'inline-block', background: '#ecfdf5', color: '#059669', padding: '4px 10px', borderRadius: '8px', fontSize: '11px', fontWeight: 900 }}>معتمد ✅</span> : 
           <span style={{ display: 'inline-block', background: '#fff7ed', color: '#d97706', padding: '4px 10px', borderRadius: '8px', fontSize: '11px', fontWeight: 900 }}>معلق ⏳</span>;
       }
@@ -149,6 +150,7 @@ export default function PaymentVouchersPage() {
       minWidth: '220px',
       render: (row: any) => {
         if (!row) return null;
+        const isPosted = row.is_posted === true || ['posted', 'معتمد', 'مرحل', 'approved'].includes(String(row.status || '').trim().toLowerCase());
         return (
           <div 
             className="table-actions-container" 
@@ -164,7 +166,7 @@ export default function PaymentVouchersPage() {
           >
             {/* 🚀 زر الترحيل وفك الترحيل الفوري بجانب السند */}
             <SecureAction module="payments" action="post">
-              {row.is_posted ? (
+              {isPosted ? (
                 <button
                   type="button"
                   disabled={logic.actions.isProcessing}
