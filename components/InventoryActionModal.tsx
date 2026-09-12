@@ -6,6 +6,7 @@ import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { useToast } from '@/lib/toast-context';
 import { THEME } from '@/lib/theme';
 import SearchableSelect from './SearchableSelect';
+import { executeApproveTransaction, syncAllWarehouseBalances } from '@/lib/inventory_engine';
 
 interface InventoryActionModalProps {
   isOpen: boolean;
@@ -177,20 +178,35 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
       };
 
       let txError;
+      let newId = initialData?.id;
       if (initialData?.id) {
         const { error } = await supabase.from('inventory_transactions').update(payload).eq('id', initialData.id);
         txError = error;
       } else {
-        const { error } = await supabase.from('inventory_transactions').insert([payload]);
+        payload.status = 'approved';
+        const { data: inserted, error } = await supabase.from('inventory_transactions').insert([payload]).select('id').single();
         txError = error;
+        if (inserted) newId = inserted.id;
       }
 
       if (txError) throw new Error(txError.message);
+
+      // 🚀 اعتماد فوري وتحديث لأرصدة المستودع والسيارة فوراً
+      if (newId) {
+        try {
+          await executeApproveTransaction(newId);
+        } catch (apprErr) {
+          console.warn("Auto approve note:", apprErr);
+          await syncAllWarehouseBalances();
+        }
+      }
     },
     onSuccess: () => {
-      showToast("تم الحفظ بنجاح ⏳ بانتظار الاعتماد", "success");
+      showToast("تم الحفظ واعتماد الصرف وتحديث رصيد السيارة والمستودع بنجاح ✅", "success");
       queryClient.invalidateQueries({ queryKey: ['inventory_transactions'] });
       queryClient.invalidateQueries({ queryKey: ['warehouse_inventory'] });
+      queryClient.invalidateQueries({ queryKey: ['inventory_items'] });
+      queryClient.invalidateQueries({ queryKey: ['pos_inventory'] });
       queryClient.invalidateQueries({ queryKey: ['fleet_operations'] });
       onSuccess();
       onClose();

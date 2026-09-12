@@ -170,18 +170,19 @@ export function usePosLogic() {
 
     // Auto-select delegate and warehouse based on logged-in user
     useEffect(() => {
+        const profile: any = userProfile;
         if (!loadingProfile && !loadingWarehouses) {
             // إذا كان المستخدم مربوط بمندوب
-            if (userProfile?.linked_partner_id) {
-                setDelegateId(userProfile.linked_partner_id);
+            if (profile?.linked_partner_id) {
+                setDelegateId(profile.linked_partner_id);
                 // فقط اقفل التعديل إذا لم يكن مدير أو أدمن (حسب دورك)
-                if (userProfile.role !== 'admin' && userProfile.role !== 'super_admin') {
+                if (profile.role !== 'admin' && profile.role !== 'super_admin') {
                     setIsDelegateLocked(true);
                 }
                 
                 // البحث عن مستودع المندوب
                 if (warehouses.length > 0) {
-                    const assignedWh = warehouses.find(w => w.delegate_id === userProfile.linked_partner_id);
+                    const assignedWh = warehouses.find(w => w.delegate_id === profile.linked_partner_id);
                     if (assignedWh) {
                         setSelectedWarehouseId(assignedWh.id);
                     } else if (!selectedWarehouseId) {
@@ -523,7 +524,7 @@ export function usePosLogic() {
                     item_id: line.item_id,
                     partner_id: partnerId || null,
                     unit_price: line.unit_price,
-                    total_price: line.total_price,
+                    total_price: (line as any).total_price || (line as any).total || (line.quantity * line.unit_price),
                     status: 'approved',
                     invoice_id: insertedInv?.id || null,
                     warehouse_id: line.warehouse_id,

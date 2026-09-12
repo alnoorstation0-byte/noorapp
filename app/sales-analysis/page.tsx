@@ -108,7 +108,7 @@ export default function SalesAnalysisPage() {
                                         <Tooltip 
                                             cursor={{fill: 'rgba(255,255,255,0.05)'}} 
                                             contentStyle={{ background: 'rgba(15, 23, 42, 0.9)', border: '1px solid #38bdf8', borderRadius: '12px', color: 'white', textAlign: 'right' }} 
-                                            formatter={(val: number) => formatCurrency(val)} 
+                                            formatter={(val: any) => formatCurrency(Number(val) || 0)} 
                                         />
                                         <Bar dataKey="total" radius={[0, 8, 8, 0]}>
                                             {topClients.map((entry, index) => (
@@ -134,7 +134,7 @@ export default function SalesAnalysisPage() {
                                         <Tooltip 
                                             cursor={{fill: 'rgba(255,255,255,0.05)'}} 
                                             contentStyle={{ background: 'rgba(15, 23, 42, 0.9)', border: '1px solid #10b981', borderRadius: '12px', color: 'white', textAlign: 'right' }} 
-                                            formatter={(val: number) => formatCurrency(val)} 
+                                            formatter={(val: any) => formatCurrency(Number(val) || 0)} 
                                         />
                                         <Bar dataKey="total" radius={[8, 8, 0, 0]}>
                                             {topDelegates.map((entry, index) => (
@@ -161,7 +161,7 @@ export default function SalesAnalysisPage() {
                                             <Tooltip 
                                                 cursor={{fill: 'rgba(255,255,255,0.05)'}} 
                                                 contentStyle={{ background: 'rgba(15, 23, 42, 0.9)', border: '1px solid #f59e0b', borderRadius: '12px', color: 'white', textAlign: 'right' }} 
-                                                formatter={(val: number) => [`${val} وحدة`, 'الكمية']} 
+                                                formatter={(val: any) => [`${val} وحدة`, 'الكمية']} 
                                             />
                                             <Bar dataKey="qty" radius={[8, 8, 0, 0]}>
                                                 {topItems.map((entry, index) => (

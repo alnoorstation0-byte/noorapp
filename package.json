@@ -46,6 +46,7 @@
     "react-dom": "19.2.3",
     "react-error-boundary": "^6.1.1",
     "react-hot-toast": "^2.6.0",
+    "react-icons": "^5.7.0",
     "react-native-safe-area-context": "^5.8.0",
     "react-native-screens": "^4.25.2",
     "react-signature-canvas": "^1.1.0-alpha.2",

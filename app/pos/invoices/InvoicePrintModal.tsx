@@ -670,13 +670,7 @@ export default function InvoicePrintModal({ isOpen, onClose, record, setRecord =
                     <div style={{ borderBottom: '1px dashed #000', margin: '10px 0' }}></div>
 
                     <div style={{ display: 'flex', justifyContent: 'center', margin: '15px 0' }}>
-                        <ZatcaQRCode 
-                            sellerName="مياه غيام"
-                            vatRegistrationNumber="312487477800003"
-                            timestamp={record.date || new Date().toISOString()}
-                            invoiceTotal={record.total_amount?.toString() || "0"}
-                            vatTotal={record.tax_amount?.toString() || "0"}
-                        />
+                        <ZatcaQRCode record={record} />
                     </div>
 
                     <div style={{ fontSize: '11px', marginTop: '10px', textAlign: 'center' }}>

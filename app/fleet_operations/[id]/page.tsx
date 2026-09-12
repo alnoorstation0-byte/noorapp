@@ -1,7 +1,7 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import MasterPage from '@/components/MasterPage';
 import RawasiSmartTable from '@/components/rawasismarttable';
 import { formatCurrency } from '@/lib/helpers';
@@ -10,6 +10,7 @@ import { useParams, useRouter } from 'next/navigation';
 export default function FleetOperationDetails() {
     const params = useParams();
     const router = useRouter();
+    const queryClient = useQueryClient();
     const id = params?.id as string;
     const [activeTab, setActiveTab] = useState('invoices');
 
@@ -109,12 +110,51 @@ export default function FleetOperationDetails() {
             title={`تفاصيل الرحلة: ${operation.operation_number}`} 
             subtitle={`السيارة: ${operation.vehicle?.plate_number} | المندوب: ${operation.driver?.name}`}
         >
-            <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <button className="btn-main-glass" style={{ width: 'auto', background: '#e2e8f0', color: '#334155' }} onClick={() => router.push('/fleet_operations')}>
+            <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+                <button className="btn-main-glass" style={{ width: 'auto', background: '#e2e8f0', color: '#334155', margin: 0 }} onClick={() => router.push('/fleet_operations')}>
                     ⬅️ {LBL.back}
                 </button>
-                <div style={{ background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(10px)', padding: '10px 20px', borderRadius: '15px', fontWeight: 900, color: operation.status === 'مفتوح' ? '#d97706' : '#166534' }}>
-                    {operation.status}
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div style={{ 
+                        background: operation?.status === 'مفتوح' ? '#fef08a' : '#dcfce7', 
+                        border: operation?.status === 'مفتوح' ? '1px solid #fde047' : '1px solid #86efac',
+                        padding: '8px 18px', 
+                        borderRadius: '12px', 
+                        fontWeight: 900, 
+                        color: operation?.status === 'مفتوح' ? '#854d0e' : '#166534',
+                        fontSize: '14px'
+                    }}>
+                        الحالة: {operation?.status === 'مفتوح' ? 'مفتوح 🔓' : 'مغلق 🔒'}
+                    </div>
+                    {operation?.status === 'مفتوح' ? (
+                        <button
+                            className="btn-main-glass"
+                            style={{ width: 'auto', margin: 0, background: '#f59e0b', color: 'white', fontWeight: 800, padding: '8px 16px', borderRadius: '12px', fontSize: '13px' }}
+                            onClick={async () => {
+                                if (confirm(`تأكيد إغلاق أمر التشغيل رقم ${operation?.operation_number}؟`)) {
+                                    await supabase.from('fleet_operations').update({ status: 'مغلق' }).eq('id', id);
+                                    queryClient.invalidateQueries({ queryKey: ['fleet_operation_details', id] });
+                                    queryClient.invalidateQueries({ queryKey: ['fleet_operations'] });
+                                }
+                            }}
+                        >
+                            🔒 إغلاق أمر التشغيل
+                        </button>
+                    ) : (
+                        <button
+                            className="btn-main-glass"
+                            style={{ width: 'auto', margin: 0, background: '#10b981', color: 'white', fontWeight: 800, padding: '8px 16px', borderRadius: '12px', fontSize: '13px' }}
+                            onClick={async () => {
+                                if (confirm(`تأكيد إعادة فتح أمر التشغيل رقم ${operation?.operation_number}؟`)) {
+                                    await supabase.from('fleet_operations').update({ status: 'مفتوح' }).eq('id', id);
+                                    queryClient.invalidateQueries({ queryKey: ['fleet_operation_details', id] });
+                                    queryClient.invalidateQueries({ queryKey: ['fleet_operations'] });
+                                }
+                            }}
+                        >
+                            🔓 إعادة فتح أمر التشغيل
+                        </button>
+                    )}
                 </div>
             </div>
 

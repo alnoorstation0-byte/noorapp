@@ -253,7 +253,7 @@ export function usePayrollLogic() {
         const monthNameArabic = arabicMonths[selectedMonth - 1] || `شهر ${selectedMonth}`;
 
         // 2. تجهيز سطور البيانات
-        const dataToExport = liveData.map((r, i) => {
+        const dataToExport: any[] = liveData.map((r, i) => {
             return {
                 "م": i + 1,
                 "الاسم": r.name || "غير محدد",
@@ -282,7 +282,7 @@ export function usePayrollLogic() {
         });
 
         // 4. تحويل البيانات لشيت (البيانات تبدأ من الصف الثالث A3)
-        const ws = XLSX.utils.json_to_sheet(dataToExport, { origin: 'A3' });
+        const ws = (XLSX.utils.json_to_sheet as any)(dataToExport, { origin: 'A3' });
 
         // 5. دمج خلايا العنوان الرئيسي (من أول عمود لآخر عمود)
         if (!ws['!merges']) ws['!merges'] = [];

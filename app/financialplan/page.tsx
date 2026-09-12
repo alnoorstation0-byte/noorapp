@@ -439,9 +439,9 @@ export default function FinancialPlanPage() {
                  );
                })}
                <tr style={{ background: 'rgba(40, 145, 200, 0.15)', fontWeight: 900 }}>
-                  <td style={{ textMain: THEME.primary, paddingRight: '12px' }}>إجمالي قسم الإيرادات الكلي:</td>
-                  <td style={{ textMain: THEME.primary, textAlign: 'center' }}>{formatCurrency(logic.totals.totalRevPlanned)}</td>
-                  <td style={{ textMain: THEME.primary, textAlign: 'center' }}>{formatCurrency(logic.totals.totalRevActual)}</td>
+                  <td style={{ color: THEME.primary, paddingRight: '12px' }}>إجمالي قسم الإيرادات الكلي:</td>
+                  <td style={{ color: THEME.primary, textAlign: 'center' }}>{formatCurrency(logic.totals.totalRevPlanned)}</td>
+                  <td style={{ color: THEME.primary, textAlign: 'center' }}>{formatCurrency(logic.totals.totalRevActual)}</td>
                   <td style={{ direction: 'ltr', textAlign: 'center', color: (logic.totals.totalRevActual - logic.totals.totalRevPlanned) >= 0 ? THEME.success : THEME.ruby }}>
                     {formatCurrency(logic.totals.totalRevActual - logic.totals.totalRevPlanned)}
                   </td>
@@ -477,9 +477,9 @@ export default function FinancialPlanPage() {
                  );
                })}
                <tr style={{ background: 'rgba(40, 145, 200, 0.15)', fontWeight: 900 }}>
-                  <td style={{ textMain: THEME.primary, paddingRight: '12px' }}>إجمالي قسم المصروفات الكلي:</td>
-                  <td style={{ textMain: THEME.primary, textAlign: 'center' }}>{formatCurrency(logic.totals.totalExpPlanned)}</td>
-                  <td style={{ textMain: THEME.primary, textAlign: 'center' }}>{formatCurrency(logic.totals.totalExpActual)}</td>
+                  <td style={{ color: THEME.primary, paddingRight: '12px' }}>إجمالي قسم المصروفات الكلي:</td>
+                  <td style={{ color: THEME.primary, textAlign: 'center' }}>{formatCurrency(logic.totals.totalExpPlanned)}</td>
+                  <td style={{ color: THEME.primary, textAlign: 'center' }}>{formatCurrency(logic.totals.totalExpActual)}</td>
                   <td style={{ direction: 'ltr', textAlign: 'center', color: (logic.totals.totalExpActual - logic.totals.totalExpPlanned) <= 0 ? THEME.success : THEME.ruby }}>
                     {formatCurrency(logic.totals.totalExpActual - logic.totals.totalExpPlanned)}
                   </td>

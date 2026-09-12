@@ -34,16 +34,45 @@ export default function FleetOperationsPage() {
             </span>
         )},
         { header: 'إجراءات', accessor: 'actions', render: (row: any) => (
-            <div style={{display:'flex', gap:'10px'}}>
+            <div style={{display:'flex', gap:'8px', alignItems:'center', flexWrap:'wrap'}}>
                 <SecureAction module="fleet_operations" action="view">
-                    <button className="btn-main-glass" style={{ width: 'auto', margin: 0, padding: '5px 12px', fontSize: '11px', background: '#3b82f6', color: 'white' }} onClick={() => { window.location.href = `/fleet_operations/${row.id}`; }}>
+                    <button className="btn-main-glass" style={{ width: 'auto', margin: 0, padding: '5px 10px', fontSize: '11px', background: '#3b82f6', color: 'white' }} onClick={() => { window.location.href = `/fleet_operations/${row.id}`; }}>
                         التفاصيل
                     </button>
                 </SecureAction>
                 <SecureAction module="fleet_operations" action="edit">
-                    <button className="btn-main-glass gold" style={{ width: 'auto', margin: 0, padding: '5px 12px', fontSize: '11px' }} onClick={() => { setEditData(row); setModalOpen(true); }}>
+                    <button className="btn-main-glass gold" style={{ width: 'auto', margin: 0, padding: '5px 10px', fontSize: '11px' }} onClick={() => { setEditData(row); setModalOpen(true); }}>
                         تعديل
                     </button>
+                </SecureAction>
+                <SecureAction module="fleet_operations" action="edit">
+                    {row.status === 'مفتوح' ? (
+                        <button 
+                            className="btn-main-glass" 
+                            style={{ width: 'auto', margin: 0, padding: '5px 10px', fontSize: '11px', background: '#f59e0b', color: 'white', fontWeight: 800 }} 
+                            onClick={() => {
+                                if (confirm(`تأكيد إغلاق أمر التشغيل رقم ${row.operation_number}؟`)) {
+                                    logic.mutations.toggleStatusMutation.mutate({ id: row.id, newStatus: 'مغلق' });
+                                }
+                            }}
+                            title="إغلاق أمر التشغيل"
+                        >
+                            🔒 إغلاق
+                        </button>
+                    ) : (
+                        <button 
+                            className="btn-main-glass" 
+                            style={{ width: 'auto', margin: 0, padding: '5px 10px', fontSize: '11px', background: '#10b981', color: 'white', fontWeight: 800 }} 
+                            onClick={() => {
+                                if (confirm(`تأكيد إعادة فتح أمر التشغيل رقم ${row.operation_number}؟`)) {
+                                    logic.mutations.toggleStatusMutation.mutate({ id: row.id, newStatus: 'مفتوح' });
+                                }
+                            }}
+                            title="إعادة فتح أمر التشغيل"
+                        >
+                            🔓 فتح
+                        </button>
+                    )}
                 </SecureAction>
             </div>
         )}

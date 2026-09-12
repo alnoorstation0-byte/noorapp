@@ -419,14 +419,20 @@ export default function HierarchicalLedgerPage() {
           background: rgba(0,0,0,0.04); padding: 2px 6px; border-radius: 6px;
         }
 
+        .mobile-only { display: none !important; }
+        .desktop-only { display: inline-flex !important; }
+        .acc-code-row { display: contents; }
+
         .acc-type-pill {
           display: flex; align-items: center; gap: 6px;
         }
         .acc-type-tag {
-          font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 8px;
+          font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 6px;
+          display: inline-flex; align-items: center; justify-content: center;
+          white-space: nowrap; line-height: 1.2; box-sizing: border-box;
         }
-        .acc-type-tag.trans { color: #64748b; background: rgba(100, 116, 139, 0.08); }
-        .acc-type-tag.summary { color: ${THEME.goldAccent}; background: rgba(40, 145, 200, 0.1); }
+        .acc-type-tag.trans { color: #64748b; background: rgba(100, 116, 139, 0.08); border: 1px solid rgba(100, 116, 139, 0.2); }
+        .acc-type-tag.summary { color: ${THEME.goldAccent}; background: rgba(40, 145, 200, 0.1); border: 1px solid rgba(40, 145, 200, 0.25); }
 
         .acc-stat-box { text-align: center; }
         .acc-stat-box.debit .acc-stat-val { color: ${THEME.success}; font-weight: 700; font-family: monospace; font-size: 14px; }
@@ -628,11 +634,16 @@ export default function HierarchicalLedgerPage() {
             border-color: rgba(239, 68, 68, 0.3) !important;
           }
 
+          .mobile-only { display: inline-flex !important; }
+          .desktop-only { display: none !important; }
+
           /* 4. Adaptive Indentation on Mobile */
           .account-node-wrapper {
-            margin-right: calc(var(--node-depth, 0) * 8px) !important;
+            margin-right: calc(var(--node-depth, 0) * 6px) !important;
             border-right: calc(var(--node-depth, 0) > 0 ? 1.5px : 0px) dashed rgba(40, 145, 200, 0.25) !important;
             padding-right: calc(var(--node-depth, 0) > 0 ? 4px : 0px) !important;
+            max-width: 100% !important;
+            box-sizing: border-box !important;
           }
 
           /* 5. Transform account row into a mobile card */
@@ -646,6 +657,9 @@ export default function HierarchicalLedgerPage() {
             margin-bottom: 8px !important;
             background: rgba(255, 255, 255, 0.95) !important;
             box-shadow: 0 3px 10px rgba(0, 0, 0, 0.03) !important;
+            max-width: 100% !important;
+            box-sizing: border-box !important;
+            overflow: hidden !important;
           }
           .acc-row.root-node {
             background: rgba(248, 250, 252, 0.95) !important;
@@ -656,6 +670,8 @@ export default function HierarchicalLedgerPage() {
             align-items: center !important;
             gap: 8px !important;
             width: 100% !important;
+            max-width: 100% !important;
+            box-sizing: border-box !important;
           }
 
           .acc-name-info {
@@ -672,11 +688,22 @@ export default function HierarchicalLedgerPage() {
             line-height: 1.3 !important;
             display: block !important;
             max-width: 100% !important;
+            white-space: nowrap !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+          }
+
+          .acc-code-row {
+            display: flex !important;
+            align-items: center !important;
+            gap: 6px !important;
+            margin-top: 2px !important;
           }
 
           .acc-code-badge {
             font-size: 10px !important;
             padding: 1px 5px !important;
+            white-space: nowrap !important;
           }
 
           .acc-type-pill {
@@ -688,19 +715,28 @@ export default function HierarchicalLedgerPage() {
 
           .acc-type-tag {
             font-size: 10px !important;
-            padding: 2px 6px !important;
+            padding: 2px 7px !important;
+            border-radius: 6px !important;
+            white-space: nowrap !important;
+            display: inline-flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            line-height: 1.2 !important;
+            box-sizing: border-box !important;
           }
 
           .acc-expand-arrow {
             display: inline-flex !important;
             align-items: center !important;
             justify-content: center !important;
-            width: 22px !important;
-            height: 22px !important;
+            width: 26px !important;
+            height: 26px !important;
             border-radius: 50% !important;
             background: rgba(28, 115, 171, 0.08) !important;
             color: #1C73AB !important;
-            font-size: 9px !important;
+            font-size: 10px !important;
+            flex-shrink: 0 !important;
+            cursor: pointer !important;
           }
 
           /* 6. Stats Bar (3 mini columns on mobile) */
@@ -714,6 +750,7 @@ export default function HierarchicalLedgerPage() {
             border: 1px solid rgba(226, 232, 240, 0.8) !important;
             width: 100% !important;
             box-sizing: border-box !important;
+            overflow: hidden !important;
           }
 
           .acc-stat-box {
@@ -721,6 +758,8 @@ export default function HierarchicalLedgerPage() {
             flex-direction: column !important;
             align-items: center !important;
             justify-content: center !important;
+            min-width: 0 !important;
+            overflow: hidden !important;
           }
 
           .acc-stat-label {
@@ -734,11 +773,19 @@ export default function HierarchicalLedgerPage() {
           .acc-stat-box.debit .acc-stat-val {
             font-size: 11px !important;
             font-weight: 800 !important;
+            max-width: 100% !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            white-space: nowrap !important;
           }
 
           .acc-stat-box.credit .acc-stat-val {
             font-size: 11px !important;
             font-weight: 800 !important;
+            max-width: 100% !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            white-space: nowrap !important;
           }
 
           .acc-stat-box.balance .acc-stat-val {
@@ -746,6 +793,10 @@ export default function HierarchicalLedgerPage() {
             font-weight: 900 !important;
             padding: 1px 4px !important;
             border-radius: 4px !important;
+            max-width: 100% !important;
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            white-space: nowrap !important;
           }
 
           /* 7. Transactions (entry-line) on Mobile */
@@ -826,14 +877,19 @@ function AccountNode({ node, expandedIds, toggleExpand, selectedIds, toggleSelec
               {hasSub ? (isExpanded ? '📂 ' : '📁 ') : '📄 '}
               {node.name}
             </span>
-            <span className="acc-code-badge">#{node.code}</span>
+            <div className="acc-code-row">
+              <span className="acc-code-badge">#{node.code}</span>
+              <span className={`acc-type-tag mobile-only ${node.is_transactional ? 'trans' : 'summary'}`}>
+                {node.is_transactional ? 'فرعي' : 'تجميعي'}
+              </span>
+            </div>
           </div>
           <div className="acc-type-pill">
-            <span className={`acc-type-tag ${node.is_transactional ? 'trans' : 'summary'}`}>
+            <span className={`acc-type-tag desktop-only ${node.is_transactional ? 'trans' : 'summary'}`}>
               {node.is_transactional ? 'فرعي' : 'تجميعي'}
             </span>
             {hasSub && (
-              <span className="acc-expand-arrow">
+              <span className="acc-expand-arrow" title={isExpanded ? 'طي الحساب' : 'فتح الحساب'}>
                 {isExpanded ? '▲' : '▼'}
               </span>
             )}

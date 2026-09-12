@@ -51,7 +51,7 @@ export function useInventoryTransactionsLogic() {
       const { data, error } = await query;
       if (error) throw error;
 
-      const formattedData = (data || []).map(row => ({
+      const formattedData = (data || []).map((row: any) => ({
         id: row.id,
         transaction_number: row.transaction_number || '-',
         transaction_date: row.transaction_date,

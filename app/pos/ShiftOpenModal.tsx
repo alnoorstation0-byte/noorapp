@@ -303,7 +303,7 @@ export default function ShiftOpenModal({
                         <p style={{ color: '#991b1b', fontSize: '12.5px', margin: '0 0 8px 0', lineHeight: 1.6, fontWeight: 700 }}>
                             توجد حالياً وردية مفتوحة في <strong>{selectedWarehouse?.name}</strong> برقم <strong>#{String(existingWarehouseShift.id).slice(-6)}</strong>.
                             <br />
-                            المسؤول الحالي: <strong style={{ color: '#111827' }}>{existingWarehouseShift.delegate?.name || 'مبيعات مباشرة'}</strong>.
+                            المسؤول الحالي: <strong style={{ color: '#111827' }}>{(Array.isArray(existingWarehouseShift.delegate) ? existingWarehouseShift.delegate[0]?.name : (existingWarehouseShift.delegate as any)?.name) || 'مبيعات مباشرة'}</strong>.
                         </p>
                         <div style={{
                             background: 'rgba(255, 255, 255, 0.9)',
@@ -334,7 +334,7 @@ export default function ShiftOpenModal({
                             <span>المندوب مسؤول عن وردية نشطة في منفذ آخر!</span>
                         </div>
                         <p style={{ color: '#92400e', fontSize: '12.5px', margin: 0, lineHeight: 1.6, fontWeight: 700 }}>
-                            المندوب <strong>{selectedDelegate?.name}</strong> يدير حالياً وردية نشطة في <strong>{existingDelegateShift?.warehouse?.name || 'منفذ آخر'}</strong>.
+                            المندوب <strong>{selectedDelegate?.name}</strong> يدير حالياً وردية نشطة في <strong>{(Array.isArray(existingDelegateShift?.warehouse) ? existingDelegateShift?.warehouse[0]?.name : (existingDelegateShift?.warehouse as any)?.name) || 'منفذ آخر'}</strong>.
                             <br />
                             المسؤول شخص واحد ولا يمكن الجمع بين ورديتين لنفس الشخص في نفس الوقت.
                         </p>

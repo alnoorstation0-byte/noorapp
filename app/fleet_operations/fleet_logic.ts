@@ -126,6 +126,25 @@ export function useFleetLogic() {
         }
     });
 
+    const toggleStatusMutation = useMutation({
+        mutationFn: async ({ id, newStatus }: { id: string, newStatus: string }) => {
+            const { data, error } = await supabase
+                .from('fleet_operations')
+                .update({ status: newStatus })
+                .eq('id', id)
+                .select();
+            if (error) throw error;
+            return data;
+        },
+        onSuccess: (_, variables) => {
+            queryClient.invalidateQueries({ queryKey: ['fleet_operations'] });
+            showToast(variables.newStatus === 'مغلق' ? 'تم إغلاق أمر التشغيل بنجاح 🔒' : 'تم إعادة فتح أمر التشغيل 🔓', 'success');
+        },
+        onError: (err: any) => {
+            showToast(err.message || 'حدث خطأ أثناء تعديل حالة أمر التشغيل', 'error');
+        }
+    });
+
     return {
         state: {
             globalSearch, setGlobalSearch,
@@ -146,7 +165,8 @@ export function useFleetLogic() {
         },
         mutations: {
             saveMutation,
-            deleteMutation
+            deleteMutation,
+            toggleStatusMutation
         }
     };
 }

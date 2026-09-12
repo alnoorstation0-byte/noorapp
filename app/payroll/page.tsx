@@ -13,6 +13,7 @@ const THEME = {
   accent: '#ca8a04',     
   success: '#059669',    
   ruby: '#e11d48',       
+  warning: '#d97706',
   slate: 'rgba(255, 255, 255, 0.6)',
   border: 'rgba(40, 145, 200, 0.15)',
   textMain: '#334155',

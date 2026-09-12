@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { formatCurrency } from '@/lib/helpers';
+import LoadingScreen from '@/components/LoadingScreen';
 
 export default function PrintStatement() {
     const searchParams = useSearchParams();
@@ -67,7 +68,6 @@ export default function PrintStatement() {
         <div className="print-wrapper">
             <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;700;900&display=swap');
-import LoadingScreen from '@/components/LoadingScreen';
                 
                 body { background: white !important; margin: 0; padding: 0; font-family: 'Tajawal', sans-serif; direction: rtl; }
                 .print-wrapper { max-width: 900px; margin: 0 auto; padding: 40px; color: #000; background: white; }

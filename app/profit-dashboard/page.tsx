@@ -49,7 +49,7 @@ export default function ProfitDashboardPage() {
                                 <Tooltip cursor={{ fill: 'rgba(0,0,0,0.05)' }} contentStyle={{ borderRadius: '15px', border: 'none', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }} />
                                 <Bar dataKey="profit" fill={THEME.accent} radius={[0, 10, 10, 0]}>
                                     {logic.topItems.map((entry, index) => (
-                                        <Cell key={cell-+index} fill={COLORS[index % COLORS.length]} />
+                                        <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                     ))}
                                 </Bar>
                             </BarChart>
@@ -63,7 +63,7 @@ export default function ProfitDashboardPage() {
                     <div style={{ height: '300px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         <ResponsiveContainer width="100%" height="100%">
                             <PieChart>
-                                <Pie data={logic.topDelegates} dataKey="profit" nameKey="name" cx="50%" cy="50%" innerRadius={60} outerRadius={100} label={({name, percent}) => `${name} (${(percent * 100).toFixed(0)}%)`}>
+                                <Pie data={logic.topDelegates} dataKey="profit" nameKey="name" cx="50%" cy="50%" innerRadius={60} outerRadius={100} label={({name, percent}) => `${name} (${((percent || 0) * 100).toFixed(0)}%)`}>
                                     {logic.topDelegates.map((entry, index) => (
                                         <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                                     ))}

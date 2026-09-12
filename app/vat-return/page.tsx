@@ -143,7 +143,7 @@ export default function VATReturnPage() {
                     <XAxis dataKey="name" tick={{ fill: '#475569', fontWeight: 900, fontSize: 13 }} axisLine={false} tickLine={false} />
                     <YAxis tick={{ fill: '#475569', fontWeight: 900, fontSize: 12 }} axisLine={false} tickLine={false} tickFormatter={(val) => val.toLocaleString()} />
                     <Tooltip 
-                      formatter={(value: number) => [`${formatCurrency(value)}`, 'قيمة الضريبة']} 
+                      formatter={(value: any) => [`${formatCurrency(Number(value) || 0)}`, 'قيمة الضريبة']} 
                       cursor={{ fill: 'rgba(0,0,0,0.02)' }}
                       contentStyle={{ borderRadius: '16px', fontWeight: 900, textAlign: 'right', direction: 'rtl', border: 'none', boxShadow: '0 10px 30px rgba(0,0,0,0.1)', padding: '15px' }}
                     />

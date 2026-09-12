@@ -67,66 +67,291 @@ function PosItemNumpadModal({
 
     const numpadKeys = ['7', '8', '9', '4', '5', '6', '1', '2', '3', '.', '0', '⌫'];
 
-    return (
-        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(8px)' }}>
-            <div style={{ background: 'rgba(255,255,255,0.97)', borderRadius: '28px', width: '95vw', maxWidth: '460px', boxShadow: '0 25px 60px rgba(0,0,0,0.35)', border: '1px solid rgba(255,255,255,0.6)', overflow: 'hidden' }}>
+    const isExceeded = (item.selected_qty || 0) > (item.available_qty || 0);
 
+    return (
+        <div className="pos-numpad-overlay">
+            <style>{`
+                .pos-numpad-overlay {
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    right: 0;
+                    bottom: 0;
+                    background: rgba(15, 23, 42, 0.65);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    z-index: 9999;
+                    backdrop-filter: blur(10px);
+                    -webkit-backdrop-filter: blur(10px);
+                    padding: 16px;
+                    box-sizing: border-box;
+                    direction: rtl;
+                }
+                .pos-numpad-card {
+                    background: rgba(255, 255, 255, 0.98);
+                    border-radius: 28px;
+                    width: 100%;
+                    max-width: 440px;
+                    max-height: 92vh;
+                    overflow-y: auto;
+                    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
+                    border: 1px solid rgba(255, 255, 255, 0.8);
+                    animation: posCardFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+                    display: flex;
+                    flex-direction: column;
+                    box-sizing: border-box;
+                }
+                .pos-numpad-card::-webkit-scrollbar {
+                    width: 5px;
+                }
+                .pos-numpad-card::-webkit-scrollbar-thumb {
+                    background: rgba(28, 115, 171, 0.25);
+                    border-radius: 4px;
+                }
+                .pos-mobile-drag-bar {
+                    display: none;
+                }
+                .pos-numpad-header {
+                    background: linear-gradient(135deg, #1C73AB 0%, #2891C8 100%);
+                    padding: 16px 20px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    flex-shrink: 0;
+                    position: relative;
+                }
+                .pos-numpad-body {
+                    padding: 18px 20px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 12px;
+                    box-sizing: border-box;
+                }
+                .pos-key-btn {
+                    height: 52px;
+                    border-radius: 13px;
+                    border: none;
+                    font-weight: 900;
+                    cursor: pointer;
+                    box-shadow: 0 2px 5px rgba(0,0,0,0.06);
+                    transition: transform 0.1s, background 0.15s;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    user-select: none;
+                    -webkit-tap-highlight-color: transparent;
+                }
+                .pos-key-btn:active {
+                    transform: scale(0.93) !important;
+                }
+                .pos-quick-btn {
+                    width: 50px;
+                    height: 50px;
+                    border-radius: 50%;
+                    border: none;
+                    font-size: 22px;
+                    font-weight: 900;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    transition: transform 0.1s;
+                    -webkit-tap-highlight-color: transparent;
+                }
+                .pos-quick-btn:active {
+                    transform: scale(0.92) !important;
+                }
+
+                @keyframes posCardFadeIn {
+                    from { opacity: 0; transform: scale(0.96); }
+                    to { opacity: 1; transform: scale(1); }
+                }
+                @keyframes posSheetSlideUp {
+                    from { opacity: 0.8; transform: translateY(100%); }
+                    to { opacity: 1; transform: translateY(0); }
+                }
+
+                /* 📱 MOBILE RESPONSIVENESS (<= 768px) */
+                @media (max-width: 768px) {
+                    .pos-numpad-overlay {
+                        align-items: flex-end !important;
+                        padding: 0 !important;
+                    }
+                    .pos-numpad-card {
+                        max-width: 100vw !important;
+                        width: 100vw !important;
+                        border-radius: 26px 26px 0 0 !important;
+                        max-height: 92vh !important;
+                        animation: posSheetSlideUp 0.3s cubic-bezier(0.16, 1, 0.3, 1) !important;
+                        border-bottom: none !important;
+                        border-left: none !important;
+                        border-right: none !important;
+                    }
+                    .pos-mobile-drag-bar {
+                        display: block;
+                        width: 42px;
+                        height: 4px;
+                        background: rgba(255, 255, 255, 0.7);
+                        border-radius: 999px;
+                        margin: 0 auto 10px auto;
+                    }
+                    .pos-numpad-header {
+                        padding: 12px 16px !important;
+                        flex-direction: column !important;
+                        align-items: stretch !important;
+                        border-radius: 26px 26px 0 0 !important;
+                    }
+                    .pos-numpad-header-row {
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        width: 100%;
+                    }
+                    .pos-numpad-title {
+                        font-size: 16px !important;
+                        line-height: 1.2 !important;
+                    }
+                    .pos-numpad-sub {
+                        font-size: 12px !important;
+                    }
+                    .pos-numpad-body {
+                        padding: 12px 14px !important;
+                        gap: 10px !important;
+                        padding-bottom: max(18px, env(safe-area-inset-bottom, 18px)) !important;
+                    }
+                    .pos-field-box {
+                        padding: 10px 8px !important;
+                        border-radius: 14px !important;
+                    }
+                    .pos-qty-display {
+                        font-size: 26px !important;
+                    }
+                    .pos-price-display {
+                        font-size: 22px !important;
+                    }
+                    .pos-quick-btn {
+                        width: 44px !important;
+                        height: 44px !important;
+                        font-size: 20px !important;
+                    }
+                    .pos-quick-label {
+                        font-size: 12px !important;
+                        min-width: 70px !important;
+                    }
+                    .pos-key-btn {
+                        height: 46px !important;
+                        font-size: 19px !important;
+                        border-radius: 11px !important;
+                    }
+                    .pos-total-row {
+                        padding: 10px 14px !important;
+                        border-radius: 12px !important;
+                    }
+                    .pos-total-val {
+                        font-size: 18px !important;
+                    }
+                    .pos-action-btn-main {
+                        height: 48px !important;
+                        font-size: 14px !important;
+                        border-radius: 12px !important;
+                    }
+                    .pos-action-btn-sub {
+                        height: 48px !important;
+                        font-size: 14px !important;
+                        border-radius: 12px !important;
+                    }
+                }
+            `}</style>
+
+            <div className="pos-numpad-card">
                 {/* Header */}
-                <div style={{ background: 'linear-gradient(135deg, #1C73AB 0%, #2891C8 100%)', padding: '18px 22px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <div>
-                        <div style={{ color: 'white', fontWeight: 900, fontSize: '18px' }}>{item.name}</div>
-                        <div style={{ color: 'rgba(255,255,255,0.75)', fontSize: '13px', marginTop: '3px' }}>المتاح: {item.available_qty} {item.unit}</div>
+                <div className="pos-numpad-header">
+                    <div className="pos-mobile-drag-bar" />
+                    <div className="pos-numpad-header-row" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                        <div style={{ flex: 1, minWidth: 0, paddingLeft: '8px' }}>
+                            <div className="pos-numpad-title" style={{ color: 'white', fontWeight: 900, fontSize: '18px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                {item.name}
+                            </div>
+                            <div className="pos-numpad-sub" style={{ color: 'rgba(255,255,255,0.8)', fontSize: '13px', marginTop: '2px' }}>
+                                الرصيد المتاح: <span style={{ fontWeight: 800, color: '#fff' }}>{item.available_qty}</span> {item.unit}
+                            </div>
+                        </div>
+                        <button 
+                            onClick={onClose} 
+                            style={{ background: 'rgba(255,255,255,0.22)', border: 'none', color: 'white', width: '36px', height: '36px', borderRadius: '50%', cursor: 'pointer', fontSize: '18px', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
+                            aria-label="إغلاق"
+                        >
+                            ×
+                        </button>
                     </div>
-                    <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.2)', border: 'none', color: 'white', width: '36px', height: '36px', borderRadius: '50%', cursor: 'pointer', fontSize: '18px', fontWeight: 'bold' }}>×</button>
                 </div>
 
-                <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                {/* Body */}
+                <div className="pos-numpad-body">
 
                     {/* Active Field Displays */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
                         {/* Qty Field */}
                         <div
                             onClick={() => switchField('qty')}
+                            className="pos-field-box"
                             style={{ 
-                                background: (item.selected_qty > item.available_qty)
+                                background: isExceeded
                                     ? '#fee2e2'
                                     : (activeField === 'qty' ? 'linear-gradient(135deg,#1C73AB,#2891C8)' : '#f1f5f9'), 
                                 borderRadius: '16px', 
-                                padding: '14px', 
+                                padding: '12px 10px', 
                                 cursor: 'pointer', 
-                                border: (item.selected_qty > item.available_qty)
+                                border: isExceeded
                                     ? '2px solid #ef4444'
                                     : (activeField === 'qty' ? '2px solid #2891C8' : '2px solid transparent'), 
                                 transition: '0.2s', 
-                                textAlign: 'center' 
+                                textAlign: 'center',
+                                boxShadow: activeField === 'qty' ? '0 4px 15px rgba(28, 115, 171, 0.25)' : 'none'
                             }}
                         >
-                            <div style={{ fontSize: '11px', fontWeight: 700, color: (item.selected_qty > item.available_qty) ? '#dc2626' : (activeField === 'qty' ? 'rgba(255,255,255,0.8)' : '#64748b'), marginBottom: '6px' }}>
-                                {(item.selected_qty > item.available_qty) ? '⚠️ الكمية (تجاوزت المخزون)' : 'الكمية'}
+                            <div style={{ fontSize: '11px', fontWeight: 800, color: isExceeded ? '#dc2626' : (activeField === 'qty' ? 'rgba(255,255,255,0.85)' : '#64748b'), marginBottom: '4px' }}>
+                                {isExceeded ? '⚠️ تجاوز المخزون' : 'الكمية المطلوبة'}
                             </div>
-                            <div style={{ fontSize: '32px', fontWeight: 900, color: (item.selected_qty > item.available_qty) ? '#dc2626' : (activeField === 'qty' ? 'white' : '#0f172a'), letterSpacing: '-1px' }}>
+                            <div className="pos-qty-display" style={{ fontSize: '30px', fontWeight: 900, color: isExceeded ? '#dc2626' : (activeField === 'qty' ? 'white' : '#0f172a'), letterSpacing: '-1px', lineHeight: 1.1 }}>
                                 {item.selected_qty || 0}
                             </div>
-                            <div style={{ fontSize: '11px', color: (item.selected_qty > item.available_qty) ? '#dc2626' : (activeField === 'qty' ? 'rgba(255,255,255,0.65)' : '#94a3b8'), marginTop: '4px' }}>{item.unit}</div>
+                            <div style={{ fontSize: '11px', fontWeight: 700, color: isExceeded ? '#dc2626' : (activeField === 'qty' ? 'rgba(255,255,255,0.7)' : '#94a3b8'), marginTop: '3px' }}>
+                                {item.unit}
+                            </div>
                         </div>
 
                         {/* Price Field */}
                         <div
                             onClick={() => switchField('price')}
-                            style={{ background: activeField === 'price' ? 'linear-gradient(135deg,#16a34a,#10b981)' : '#f1f5f9', borderRadius: '16px', padding: '14px', cursor: 'pointer', border: activeField === 'price' ? '2px solid #16a34a' : '2px solid transparent', transition: '0.2s', textAlign: 'center' }}
+                            className="pos-field-box"
+                            style={{ 
+                                background: activeField === 'price' ? 'linear-gradient(135deg,#16a34a,#10b981)' : '#f1f5f9', 
+                                borderRadius: '16px', 
+                                padding: '12px 10px', 
+                                cursor: 'pointer', 
+                                border: activeField === 'price' ? '2px solid #16a34a' : '2px solid transparent', 
+                                transition: '0.2s', 
+                                textAlign: 'center',
+                                boxShadow: activeField === 'price' ? '0 4px 15px rgba(22, 163, 74, 0.25)' : 'none'
+                            }}
                         >
-                            <div style={{ fontSize: '11px', fontWeight: 700, color: activeField === 'price' ? 'rgba(255,255,255,0.8)' : '#64748b', marginBottom: '6px' }}>
-                                {isTaxInclusive ? 'السعر شامل ض.ق.م' : 'السعر قبل ض.ق.م'}
+                            <div style={{ fontSize: '11px', fontWeight: 800, color: activeField === 'price' ? 'rgba(255,255,255,0.85)' : '#64748b', marginBottom: '4px' }}>
+                                {isTaxInclusive ? 'السعر (شامل الضريبة)' : 'السعر (قبل الضريبة)'}
                             </div>
-                            <div style={{ fontSize: '28px', fontWeight: 900, color: activeField === 'price' ? 'white' : '#16a34a', letterSpacing: '-1px' }}>
+                            <div className="pos-price-display" style={{ fontSize: '26px', fontWeight: 900, color: activeField === 'price' ? 'white' : '#16a34a', letterSpacing: '-1px', lineHeight: 1.1 }}>
                                 {Number(item.selected_price || 0).toFixed(2)}
                             </div>
-                            <div style={{ fontSize: '11px', color: activeField === 'price' ? 'rgba(255,255,255,0.65)' : '#94a3b8', marginTop: '4px' }}>ريال</div>
+                            <div style={{ fontSize: '11px', fontWeight: 700, color: activeField === 'price' ? 'rgba(255,255,255,0.7)' : '#94a3b8', marginTop: '3px' }}>
+                                ريال
+                            </div>
                         </div>
                     </div>
 
                     {/* Stock Warning Message */}
-                    {item.selected_qty > item.available_qty && (
+                    {isExceeded && (
                         <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '12px', padding: '8px 12px', color: '#b91c1c', fontSize: '12px', fontWeight: 800, textAlign: 'center' }}>
                             ⛔ الكمية المطلوبة ({item.selected_qty}) تتجاوز الرصيد المتاح بالمستودع ({item.available_qty})!
                         </div>
@@ -135,40 +360,42 @@ function PosItemNumpadModal({
                     {/* Quick +/- for Qty */}
                     <div style={{ display: 'flex', gap: '10px', alignItems: 'center', justifyContent: 'center' }}>
                         <button
+                            type="button"
                             onClick={() => { onUpdateItem({ ...item, selected_qty: Math.max(1, (item.selected_qty || 1) - 1) }); setIsFirstPress(false); }}
-                            style={{ width: '52px', height: '52px', borderRadius: '50%', border: 'none', background: '#fee2e2', color: '#dc2626', fontSize: '24px', fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                        >−</button>
-                        <span style={{ fontSize: '13px', color: '#64748b', fontWeight: 700, minWidth: '80px', textAlign: 'center' }}>الكمية السريعة</span>
+                            className="pos-quick-btn"
+                            style={{ background: '#fee2e2', color: '#dc2626' }}
+                        >
+                            −
+                        </button>
+                        <span className="pos-quick-label" style={{ fontSize: '13px', color: '#64748b', fontWeight: 800, minWidth: '80px', textAlign: 'center' }}>
+                            تعديل سريع
+                        </span>
                         <button
+                            type="button"
                             onClick={() => { const next = (item.selected_qty || 1) + 1; if(next <= item.available_qty) { onUpdateItem({ ...item, selected_qty: next }); setIsFirstPress(false); } }}
-                            style={{ width: '52px', height: '52px', borderRadius: '50%', border: 'none', background: '#dcfce7', color: '#16a34a', fontSize: '24px', fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                        >+</button>
+                            className="pos-quick-btn"
+                            style={{ background: '#dcfce7', color: '#16a34a' }}
+                        >
+                            +
+                        </button>
                     </div>
 
                     {/* Numpad */}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px' }}>
                         {numpadKeys.map(key => (
                             <button
                                 key={key}
+                                type="button"
                                 onClick={() => handleNumpad(key)}
+                                className="pos-key-btn"
                                 style={{
-                                    height: '58px',
-                                    borderRadius: '14px',
-                                    border: 'none',
                                     background: key === '⌫' ? '#fee2e2' : key === '.' ? '#f0f9ff' : 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
-                                    color: key === '⌫' ? '#dc2626' : key === '.' ? '#0ea5e9' : '#0f172a',
-                                    fontSize: key === '⌫' ? '20px' : '22px',
-                                    fontWeight: 900,
-                                    cursor: 'pointer',
-                                    boxShadow: '0 2px 6px rgba(0,0,0,0.08)',
-                                    transition: 'all 0.1s',
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    justifyContent: 'center',
+                                    color: key === '⌫' ? '#dc2626' : key === '.' ? '#0284c7' : '#0f172a',
+                                    fontSize: key === '⌫' ? '20px' : '21px',
                                 }}
-                                onMouseDown={e => (e.currentTarget.style.transform = 'scale(0.94)')}
+                                onMouseDown={e => (e.currentTarget.style.transform = 'scale(0.93)')}
                                 onMouseUp={e => (e.currentTarget.style.transform = 'scale(1)')}
-                                onTouchStart={e => (e.currentTarget.style.transform = 'scale(0.94)')}
+                                onTouchStart={e => (e.currentTarget.style.transform = 'scale(0.93)')}
                                 onTouchEnd={e => (e.currentTarget.style.transform = 'scale(1)')}
                             >
                                 {key}
@@ -177,9 +404,9 @@ function PosItemNumpadModal({
                     </div>
 
                     {/* Total Preview */}
-                    <div style={{ background: 'linear-gradient(135deg,#0f172a,#1e293b)', borderRadius: '14px', padding: '14px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ color: '#94a3b8', fontWeight: 700, fontSize: '14px' }}>الإجمالي المتوقع:</span>
-                        <span style={{ color: '#10b981', fontWeight: 900, fontSize: '22px' }}>
+                    <div className="pos-total-row" style={{ background: 'linear-gradient(135deg,#0f172a,#1e293b)', borderRadius: '14px', padding: '12px 16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ color: '#94a3b8', fontWeight: 700, fontSize: '13px' }}>الإجمالي المتوقع:</span>
+                        <span className="pos-total-val" style={{ color: '#10b981', fontWeight: 900, fontSize: '20px' }}>
                             {formatCurrency((item.selected_qty || 0) * (item.selected_price || 0))}
                         </span>
                     </div>
@@ -187,11 +414,13 @@ function PosItemNumpadModal({
                     {/* Action Buttons */}
                     <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '10px' }}>
                         <button
+                            type="button"
                             onClick={onConfirm}
-                            disabled={!item.selected_qty || item.selected_qty <= 0 || item.selected_qty > item.available_qty}
+                            disabled={!item.selected_qty || item.selected_qty <= 0 || isExceeded}
+                            className="pos-action-btn-main"
                             style={{ 
-                                height: '54px', 
-                                background: (item.selected_qty > item.available_qty)
+                                height: '52px', 
+                                background: isExceeded
                                     ? 'linear-gradient(135deg, #ef4444, #991b1b)'
                                     : 'linear-gradient(135deg,#2891C8,#1C73AB)', 
                                 color: 'white', 
@@ -199,18 +428,20 @@ function PosItemNumpadModal({
                                 borderRadius: '14px', 
                                 fontWeight: 900, 
                                 fontSize: '15px', 
-                                cursor: (item.selected_qty > item.available_qty) ? 'not-allowed' : 'pointer', 
-                                boxShadow: '0 4px 15px rgba(40,145,200,0.4)',
+                                cursor: isExceeded ? 'not-allowed' : 'pointer', 
+                                boxShadow: isExceeded ? 'none' : '0 4px 15px rgba(40,145,200,0.35)',
                                 transition: '0.2s'
                             }}
                         >
-                            {item.selected_qty > item.available_qty 
-                                ? `⛔ تجاوز المخزون (المتاح ${item.available_qty})`
+                            {isExceeded 
+                                ? `⛔ تجاوز المخزون (${item.available_qty})`
                                 : '🛒 إضافة للسلة'}
                         </button>
                         <button
+                            type="button"
                             onClick={onClose}
-                            style={{ height: '54px', background: '#f1f5f9', color: '#64748b', border: 'none', borderRadius: '14px', fontWeight: 700, fontSize: '15px', cursor: 'pointer' }}
+                            className="pos-action-btn-sub"
+                            style={{ height: '52px', background: '#f1f5f9', color: '#64748b', border: '1px solid #e2e8f0', borderRadius: '14px', fontWeight: 800, fontSize: '15px', cursor: 'pointer' }}
                         >
                             إلغاء
                         </button>
@@ -566,9 +797,9 @@ export default function PosPage() {
                             <span style={{ fontSize: '13px', fontWeight: 900, color: '#0f172a' }}>
                                 {logic.activeFleetOperation.operation_number}
                             </span>
-                            {logic.activeFleetOperation.vehicle?.plate_number && (
+                            {((Array.isArray(logic.activeFleetOperation.vehicle) ? logic.activeFleetOperation.vehicle[0]?.plate_number : (logic.activeFleetOperation.vehicle as any)?.plate_number)) && (
                                 <span style={{ fontSize: '11px', color: '#64748b', fontWeight: 800 }}>
-                                    ({logic.activeFleetOperation.vehicle.plate_number})
+                                    ({Array.isArray(logic.activeFleetOperation.vehicle) ? logic.activeFleetOperation.vehicle[0]?.plate_number : (logic.activeFleetOperation.vehicle as any)?.plate_number})
                                 </span>
                             )}
                             <span style={{ 

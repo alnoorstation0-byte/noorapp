@@ -208,8 +208,8 @@ export default function PosDashboardPage() {
                             <RawasiSmartTable 
                                 columns={shiftColumns} 
                                 data={logic.shiftsHistory} 
-                                pagination={true}
-                                itemsPerPage={10}
+                                enablePagination={true}
+                                rowsPerPage={10}
                             />
                         </div>
 
@@ -218,8 +218,8 @@ export default function PosDashboardPage() {
                             <RawasiSmartTable 
                                 columns={invColumns} 
                                 data={logic.inventoryBalances} 
-                                pagination={true}
-                                itemsPerPage={10}
+                                enablePagination={true}
+                                rowsPerPage={10}
                             />
                         </div>
 
@@ -228,8 +228,8 @@ export default function PosDashboardPage() {
                             <RawasiSmartTable 
                                 columns={salesColumns} 
                                 data={logic.sales} 
-                                pagination={true}
-                                itemsPerPage={10}
+                                enablePagination={true}
+                                rowsPerPage={10}
                             />
                         </div>
                     </div>

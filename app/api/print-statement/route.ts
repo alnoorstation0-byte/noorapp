@@ -14,7 +14,7 @@ export async function POST(request: Request) {
         const page = await browser.newPage();
         
         // 🚀 حقن كود الـ HTML
-        await page.setContent(htmlContent, { waitUntil: 'networkidle0' });
+        await page.setContent(htmlContent, { waitUntil: 'networkidle0' as any });
         
         // 🚀 إصدار ملف الـ PDF
         const pdfBuffer = await page.pdf({
@@ -26,7 +26,7 @@ export async function POST(request: Request) {
         await browser.close();
 
         // 🚀 إرسال الملف
-        return new NextResponse(pdfBuffer, {
+        return new NextResponse(Buffer.from(pdfBuffer) as any, {
             status: 200,
             headers: {
                 'Content-Type': 'application/pdf',

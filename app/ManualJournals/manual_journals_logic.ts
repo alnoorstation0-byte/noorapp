@@ -30,8 +30,7 @@ export function useManualJournalsLogic() {
                     *,
                     debit_account:accounts!manual_journals_debit_account_id_fkey(name),
                     credit_account:accounts!manual_journals_credit_account_id_fkey(name),
-                    partner:partners(name),
-                    project:projects(Property)
+                    partner:partners(name)
                 `)
                 .order('entry_date', { ascending: false })
                 .order('created_at', { ascending: false });
@@ -53,14 +52,6 @@ export function useManualJournalsLogic() {
         queryKey: ['partners_list'],
         queryFn: async () => {
             const { data } = await supabase.from('partners').select('id, name').order('name');
-            return data || [];
-        }
-    });
-
-    const { data: projects = [] } = useQuery({
-        queryKey: ['projects_list'],
-        queryFn: async () => {
-            const { data } = await supabase.from('projects').select('id, name:Property').order('Property');
             return data || [];
         }
     });
@@ -109,7 +100,7 @@ export function useManualJournalsLogic() {
             };
         }
         return {
-            amount: serverTotals?.totalAmount || 0
+            amount: serverTotals?.total || (serverTotals as any)?.totalAmount || 0
         };
     }, [displayedJournals, serverTotals, globalSearch, dateFrom, dateTo, filterStatus, filterDebitAccount, filterCreditAccount]);
 
@@ -206,7 +197,7 @@ export function useManualJournalsLogic() {
             filterStatus, setFilterStatus,
             paginatedJournals, totalPages,
             totals, isProcessing, unpostedCount,
-            accounts, partners, projects
+            accounts, partners
         },
         actions: {
             handlePostSelected: () => postRecords(selectedIds),

@@ -138,8 +138,8 @@ export async function GET(
                 returned: Number(shift.bottles_returned || 0),
                 shortage: Number(shift.bottles_shortage || 0)
             },
-            invoices_count: invoices.length,
-            invoices: invoices.map((inv: any) => ({
+            invoices_count: (invoices || []).length,
+            invoices: (invoices || []).map((inv: any) => ({
                 id: inv.id,
                 invoice_number: inv.invoice_number,
                 date: inv.date,

@@ -11,7 +11,7 @@ export async function syncAllWarehouseBalances() {
     // 1. جلب كافة الحركات المعتمدة
     const { data: transactions, error: txErr } = await supabase
       .from('inventory_transactions')
-      .select('id, type, quantity, item_id, warehouse_id, destination_warehouse_id, status')
+      .select('id, type, quantity, item_id, warehouse_id, destination_warehouse_id, status, fleet_operation_id, fleet_operations(vehicle_id)')
       .eq('status', 'approved');
 
     if (txErr) throw txErr;
@@ -24,7 +24,7 @@ export async function syncAllWarehouseBalances() {
 
     const { data: warehouses, error: whErr } = await supabase
       .from('warehouses')
-      .select('id, name, type')
+      .select('id, name, type, vehicle_id')
       .eq('is_active', true);
     if (whErr) throw whErr;
 
@@ -49,7 +49,13 @@ export async function syncAllWarehouseBalances() {
       if (!tx.item_id || qty <= 0) return;
 
       const srcWh = tx.warehouse_id || MAIN_WAREHOUSE_ID;
-      const destWh = tx.destination_warehouse_id;
+      let destWh = tx.destination_warehouse_id;
+
+      // ربط ذكي لمستودع السيارة إن وجد أمر تشغيل رحلة
+      if (!destWh && (tx as any).fleet_operations?.vehicle_id) {
+        const vWh = warehouses?.find(w => w.vehicle_id === (tx as any).fleet_operations.vehicle_id);
+        if (vWh) destWh = vWh.id;
+      }
 
       if (!whBalances[srcWh]) whBalances[srcWh] = {};
       if (whBalances[srcWh][tx.item_id] === undefined) whBalances[srcWh][tx.item_id] = 0;
@@ -134,7 +140,6 @@ export async function executeApproveTransaction(transactionId: string) {
     .single();
 
   if (getErr || !txn) throw new Error(getErr?.message || 'الحركة غير موجودة');
-  if (txn.status === 'approved') return { alreadyApproved: true };
 
   const qty = Number(txn.quantity) || 0;
   const srcWh = txn.warehouse_id || MAIN_WAREHOUSE_ID;
@@ -151,18 +156,7 @@ export async function executeApproveTransaction(transactionId: string) {
     if (vWh) destWh = vWh.id;
   }
 
-  // 2. استدعاء دالة قاعدة البيانات لتوليد القيود المحاسبية
-  try {
-    await supabase.rpc('approve_inventory_transaction', { p_id: transactionId });
-  } catch (rpcErr) {
-    console.warn('RPC approve warning (handled):', rpcErr);
-  }
-
-  // The SQL RPC 'approve_inventory_transaction' handles updating warehouse_inventory, 
-  // inventory_items, AND generates the necessary accounting journal entries automatically.
-  // We rely entirely on the DB to maintain ACID compliance and prevent double-counting.
-
-  // 4. التأكد من حفظ الحالة معتمدة ومستودع الوجهة
+  // 2. تحديث الحالة ومستودع الوجهة
   await supabase
     .from('inventory_transactions')
     .update({
@@ -171,6 +165,16 @@ export async function executeApproveTransaction(transactionId: string) {
       destination_warehouse_id: destWh || null
     })
     .eq('id', transactionId);
+
+  // 3. استدعاء دالة قاعدة البيانات لتوليد القيود المحاسبية
+  try {
+    await supabase.rpc('approve_inventory_transaction', { p_id: transactionId });
+  } catch (rpcErr) {
+    console.warn('RPC approve warning (handled):', rpcErr);
+  }
+
+  // 4. 🚀 إعادة مزامنة وتحديث أرصدة كافة المستودعات وسيارات التوزيع فوراً
+  await syncAllWarehouseBalances();
 
   return { success: true };
 }
@@ -186,11 +190,6 @@ export async function executeUnapproveTransaction(transactionId: string) {
     .single();
 
   if (getErr || !txn) throw new Error(getErr?.message || 'الحركة غير موجودة');
-  if (txn.status !== 'approved') return { alreadyUnapproved: true };
-
-  const qty = Number(txn.quantity) || 0;
-  const srcWh = txn.warehouse_id || MAIN_WAREHOUSE_ID;
-  const destWh = txn.destination_warehouse_id;
 
   // 1. استدعاء دالة فك الاعتماد في قاعدة البيانات لإلغاء القيد المحاسبي
   try {
@@ -199,15 +198,14 @@ export async function executeUnapproveTransaction(transactionId: string) {
     console.warn('RPC unapprove warning (handled):', rpcErr);
   }
 
-  // The SQL RPC 'unapprove_inventory_transaction' handles reverting warehouse_inventory,
-  // inventory_items, AND deletes the generated accounting journal entries automatically.
-  // We rely entirely on the DB to maintain ACID compliance and prevent double-counting.
-
-  // 3. تحديث حالة الحركة إلى مسودة مع حذف مرجع القيد
+  // 2. تحديث حالة الحركة إلى مسودة مع حذف مرجع القيد
   await supabase
     .from('inventory_transactions')
     .update({ status: 'pending', journal_id: null })
     .eq('id', transactionId);
+
+  // 3. 🚀 إعادة مزامنة وتحديث أرصدة كافة المستودعات وسيارات التوزيع فوراً
+  await syncAllWarehouseBalances();
 
   return { success: true };
 }

@@ -48,6 +48,14 @@ interface RawasiSmartTableProps {
     onRefresh?: (options?: any) => Promise<any> | void;
     onSearch?: (term: string) => void;
     searchPlaceholder?: string;
+
+    // 🔄 خصائص التوافق السابقة (Backward Compatibility)
+    pageSize?: number;
+    pagination?: boolean;
+    itemsPerPage?: number;
+    keyExtractor?: (row: any) => any;
+    rowKey?: string;
+    watchDeps?: any[];
 }
 
 export default function RawasiSmartTable({ 
@@ -59,8 +67,15 @@ export default function RawasiSmartTable({
     totalItems: externalTotal,
     rowsPerPage: externalRowsPerPage,
     onPageChange,
-    onRowsChange
+    onRowsChange,
+    pageSize,
+    pagination,
+    itemsPerPage,
+    keyExtractor,
+    rowKey
 }: RawasiSmartTableProps) {
+    const effectivePagination = pagination !== undefined ? pagination : enablePagination;
+    const effectiveRowsPerPage = externalRowsPerPage || itemsPerPage || pageSize;
     
     // 🧮 Internal state for pagination if not provided by parent
     const [internalPage, setInternalPage] = useState(1);
@@ -120,16 +135,16 @@ export default function RawasiSmartTable({
 
     // 🧮 حساب عدد الصفحات الديناميكي
     const activePage = externalPage !== undefined ? externalPage : internalPage;
-    const activeRows = externalRowsPerPage !== undefined ? externalRowsPerPage : internalRowsPerPage;
+    const activeRows = effectiveRowsPerPage !== undefined ? effectiveRowsPerPage : internalRowsPerPage;
     const activeTotal = externalTotal || sortedData.length;
     const totalPages = Math.ceil(activeTotal / activeRows) || 1;
 
     // 🚀 محرك القص (Pagination Engine): لضمان عدم تهنيج المتصفح عند إرسال آلاف السجلات
     const paginatedData = useMemo(() => {
-        if (!enablePagination) return sortedData;
+        if (!effectivePagination) return sortedData;
         const startIndex = (activePage - 1) * activeRows;
         return sortedData.slice(startIndex, startIndex + activeRows);
-    }, [sortedData, enablePagination, activePage, activeRows]);
+    }, [sortedData, effectivePagination, activePage, activeRows]);
 
     const exportToExcel = () => {
         if (!data || data.length === 0) return toast.error('عفواً، لا توجد بيانات للتصدير ❌');

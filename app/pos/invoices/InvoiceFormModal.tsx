@@ -138,9 +138,9 @@ export default function InvoiceFormModal({ isOpen, onClose, record, setRecord, o
 
     // 🚀 3. دالة التحقق قبل الحفظ (باستخدام Zod)
     const invoiceSchema = z.object({
-        date: z.string({ required_error: "يرجى إدخال تاريخ الفاتورة" }).min(1, "يرجى إدخال تاريخ الفاتورة"),
-        partner_id: z.string({ required_error: "يرجى اختيار العميل (البارتنر) أولاً" }).min(1, "يرجى اختيار العميل (البارتنر) أولاً"),
-        total_amount: z.number({ required_error: "إجمالي الفاتورة غير صحيح" }).min(0.01, "إجمالي الفاتورة لا يمكن أن يكون 0، يرجى التأكد من السعر والكمية")
+        date: z.string().min(1, "يرجى إدخال تاريخ الفاتورة"),
+        partner_id: z.string().min(1, "يرجى اختيار العميل (البارتنر) أولاً"),
+        total_amount: z.number().min(0.01, "إجمالي الفاتورة لا يمكن أن يكون 0، يرجى التأكد من السعر والكمية")
     });
 
     const handleValidateAndSave = () => {
@@ -152,7 +152,8 @@ export default function InvoiceFormModal({ isOpen, onClose, record, setRecord, o
 
         if (!validationResult.success) {
             // إظهار أول خطأ تم التقاطه بواسطة Zod
-            const firstError = validationResult.error.errors[0].message;
+            const errObj: any = validationResult.error;
+            const firstError = errObj.issues?.[0]?.message || errObj.errors?.[0]?.message || "بيانات الفاتورة غير مكتملة";
             showToast(`${firstError} ⚠️`, "warning");
             return;
         }

@@ -4,6 +4,8 @@ export const THEME = {
   // 🌊 [متغيرات هوية المياه والنقاء - Ghayam Aqua Branding]
   primary: '#122946',      // أزرق كحلي داكن (Deep Ocean)
   accent: '#1C73AB',       // أزرق مائي (Aqua Blue)
+  info: '#1C73AB',         // أزرق معلوماتي
+  text: '#122946',         // لون النص الأساسي
   background: '#D4F0F7',   // خلفية جليدية (Ice Blue)
   logo: '/ghayam_logo.png',// لوجو النظام
   success: '#2ECC71',      // الأخضر المرجاني (Coral Green)
@@ -15,6 +17,7 @@ export const THEME = {
   navyDark: '#122946',     // Deep Ocean
   aquaAccent: '#1C73AB',   // Aqua Blue
   cyanLight: '#A1D6E2',    // Pure Cyan
+  accentLight: '#7FD4E3',  // Light Aqua Accent
 
   coffeeMain: '#1C73AB',   // معاد توجيهه لـ Aqua Blue
   coffeeDark: '#122946',   // معاد توجيهه لـ Deep Ocean

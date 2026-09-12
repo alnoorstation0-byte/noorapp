@@ -200,10 +200,10 @@ export function useHierarchicalAccountsLogic() {
     });
 
     // حساب الإجماليات السفلية مع التقريب لمنع الخلل العائم
-    const totalDebit = Math.round(excelData.reduce((sum, row) => sum + row["إجمالي مدين"], 0) * 100) / 100;
-    const totalCredit = Math.round(excelData.reduce((sum, row) => sum + row["إجمالي دائن"], 0) * 100) / 100;
-    const totalBalDebit = Math.round(excelData.reduce((sum, row) => sum + row["رصيد مدين"], 0) * 100) / 100;
-    const totalBalCredit = Math.round(excelData.reduce((sum, row) => sum + row["رصيد دائن"], 0) * 100) / 100;
+    const totalDebit = Math.round(excelData.reduce((sum: number, row: any) => sum + Number(row["إجمالي مدين"] || 0), 0) * 100) / 100;
+    const totalCredit = Math.round(excelData.reduce((sum: number, row: any) => sum + Number(row["إجمالي دائن"] || 0), 0) * 100) / 100;
+    const totalBalDebit = Math.round(excelData.reduce((sum: number, row: any) => sum + Number(row["رصيد مدين"] || 0), 0) * 100) / 100;
+    const totalBalCredit = Math.round(excelData.reduce((sum: number, row: any) => sum + Number(row["رصيد دائن"] || 0), 0) * 100) / 100;
 
     // إضافة سطر المجاميع
     excelData.push({

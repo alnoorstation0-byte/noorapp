@@ -70,7 +70,7 @@ export function useKpisLogic() {
             totalOutstandingDebts,
             collectionRate: Math.min(collectionRate, 100).toFixed(2) // Cap at 100% just in case for display, though it can theoretically exceed if paying old debts
         };
-    }, [rawInvoices, rawReceipts, rawClients]);
+    }, [rawInvoices, rawReceipts, rawClientsLines]);
 
     return {
         dateFrom,

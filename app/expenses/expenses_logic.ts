@@ -44,7 +44,7 @@ export function useExpensesLogic() {
     const [isEditModalOpen, setIsEditModalOpen] = useState(false);
     const [editingId, setEditingId] = useState<string | null>(null);
     const [isBulkFixModalOpen, setIsBulkFixModalOpen] = useState(false);
-    const [bulkFixAccounts, setBulkFixAccounts] = useState({ creditor_account: '', payment_account: '' });
+    const [bulkFixAccounts, setBulkFixAccounts] = useState<{ creditor_account: string; payment_account: string; creditor_account_id?: string | null; payment_account_id?: string | null }>({ creditor_account: '', payment_account: '' });
 
     const [disburseProgress, setDisburseProgress] = useState({ current: 0, total: 0, isActive: false });
     const [rowActionLoadingId, setRowActionLoadingId] = useState<string | null>(null);

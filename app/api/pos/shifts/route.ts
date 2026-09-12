@@ -132,8 +132,10 @@ export async function POST(request: Request) {
         const existingWarehouseShift = existingWarehouseShifts?.[0];
 
         if (existingWarehouseShift) {
-            const whName = existingWarehouseShift.warehouse?.name || 'هذا المستودع';
-            const delegateName = existingWarehouseShift.delegate?.name || 'مبيعات مباشرة';
+            const wh: any = existingWarehouseShift.warehouse;
+            const del: any = existingWarehouseShift.delegate;
+            const whName = (Array.isArray(wh) ? wh[0]?.name : wh?.name) || 'هذا المستودع';
+            const delegateName = (Array.isArray(del) ? del[0]?.name : del?.name) || 'مبيعات مباشرة';
             return NextResponse.json(
                 {
                     success: false,
@@ -166,7 +168,8 @@ export async function POST(request: Request) {
             const existingDelegateShift = existingDelegateShifts?.[0];
 
             if (existingDelegateShift) {
-                const whName = existingDelegateShift.warehouse?.name || 'منفذ آخر';
+                const delWh: any = existingDelegateShift.warehouse;
+                const whName = (Array.isArray(delWh) ? delWh[0]?.name : delWh?.name) || 'منفذ آخر';
                 return NextResponse.json(
                     {
                         success: false,

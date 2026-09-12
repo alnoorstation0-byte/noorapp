@@ -13,6 +13,7 @@ import { useExpensesLogic } from '../../expenses/expenses_logic';
 import ExpenseFormModal from '../../expenses/ExpenseFormModal'; 
 
 import { THEME } from '@/lib/theme';
+import { syncAllWarehouseBalances } from '@/lib/inventory_engine';
 
 export default function InventoryTransactionsPage() {
   const router = useRouter();
@@ -125,6 +126,7 @@ export default function InventoryTransactionsPage() {
                 onClick={async () => {
                   if(confirm('هل أنت متأكد من حذف هذه الحركة نهائياً؟')) {
                     await supabase.from('inventory_transactions').delete().eq('id', row.id);
+                    await syncAllWarehouseBalances();
                     logic.fetchTransactions();
                   }
                 }}
