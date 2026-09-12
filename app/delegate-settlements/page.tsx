@@ -115,6 +115,8 @@ export default function DelegateSettlementsPage() {
                     cursor: pointer !important;
                     border: 1px solid transparent !important;
                     transition: all 0.25s ease !important;
+                    white-space: nowrap !important;
+                    word-break: keep-all !important;
                 }
                 .aqua-filter-tab.active {
                     background: #1C73AB !important;
@@ -130,14 +132,55 @@ export default function DelegateSettlementsPage() {
                     background: rgba(255, 255, 255, 0.9) !important;
                 }
 
+                /* Spacious Status Badges */
+                .status-badge-pill {
+                    display: inline-flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    gap: 6px !important;
+                    padding: 7px 16px !important;
+                    border-radius: 50px !important;
+                    font-weight: 900 !important;
+                    font-size: 12px !important;
+                    line-height: 1.2 !important;
+                    white-space: nowrap !important;
+                    word-break: keep-all !important;
+                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04) !important;
+                }
+
+                .settle-table-wrapper {
+                    overflow-x: auto !important;
+                    -webkit-overflow-scrolling: touch !important;
+                    width: 100% !important;
+                    border-radius: 20px !important;
+                }
+
+                .settle-table {
+                    width: 100% !important;
+                    min-width: 1550px !important;
+                    border-collapse: collapse !important;
+                }
+
+                .settle-table th {
+                    white-space: nowrap !important;
+                    word-break: keep-all !important;
+                    letter-spacing: -0.2px !important;
+                }
+
+                .settle-table td {
+                    white-space: nowrap !important;
+                    word-break: keep-all !important;
+                }
+
                 @media (max-width: 768px) {
                     .settle-page-header { padding: 20px 15px !important; border-radius: 20px !important; }
                     .settle-kpi-grid { grid-template-columns: 1fr !important; gap: 12px !important; }
                     .settle-filters-row { flex-direction: column !important; gap: 12px !important; }
                     .settle-filters-row > div { width: 100% !important; }
-                    .settle-filter-tabs { width: 100% !important; overflow-x: auto !important; padding-bottom: 4px !important; }
+                    .settle-filter-tabs { width: 100% !important; overflow-x: auto !important; padding-bottom: 4px !important; flex-wrap: nowrap !important; }
                     .aqua-btn-primary, .aqua-btn-outline { min-height: 44px !important; width: 100% !important; }
-                    .settle-table th, .settle-table td { padding: 10px 8px !important; font-size: 11px !important; }
+                    .settle-table { min-width: 1550px !important; }
+                    .settle-table th, .settle-table td { padding: 14px 16px !important; font-size: 13px !important; white-space: nowrap !important; }
                 }
             `}</style>
 
@@ -416,21 +459,21 @@ export default function DelegateSettlementsPage() {
                         جاري تحميل ومطابقة عهد المناديب والأسطول...
                     </div>
                 ) : (
-                    <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-                        <table className="settle-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right', fontSize: '13px', color: '#122946' }}>
+                    <div className="settle-table-wrapper">
+                        <table className="settle-table" style={{ width: '100%', minWidth: '1550px', borderCollapse: 'collapse', textAlign: 'right', fontSize: '13px', color: '#122946' }}>
                             <thead style={{ background: 'rgba(28, 115, 171, 0.08)', borderBottom: '1.5px solid rgba(28, 115, 171, 0.15)' }}>
                                 <tr>
-                                    <th style={{ padding: '18px 20px', color: '#1C73AB', fontWeight: 900 }}>الرحلة والسيارة 🚚</th>
-                                    <th style={{ padding: '18px 20px', color: '#1C73AB', fontWeight: 900 }}>التاريخ 📅</th>
-                                    <th style={{ padding: '18px 20px', color: '#1C73AB', fontWeight: 900 }}>المندوب / السائق 👤</th>
-                                    <th style={{ padding: '18px 20px', color: '#122946', fontWeight: 900, textAlign: 'center' }}>المبيعات 📦</th>
-                                    <th style={{ padding: '18px 20px', color: '#ef4444', fontWeight: 900, textAlign: 'center' }}>المصروفات (-)</th>
-                                    <th style={{ padding: '18px 20px', color: '#b45309', fontWeight: 900, textAlign: 'center' }}>المطالبة النقدية 💰</th>
-                                    <th style={{ padding: '18px 20px', color: '#16a34a', fontWeight: 900, textAlign: 'center' }}>المورد للخزينة 💵</th>
-                                    <th style={{ padding: '18px 20px', color: '#122946', fontWeight: 900, textAlign: 'center' }}>متبقي العهدة ⚠️</th>
-                                    <th style={{ padding: '18px 20px', color: '#1C73AB', fontWeight: 900, textAlign: 'center' }}>بضاعة السيارة 🔄</th>
-                                    <th style={{ padding: '18px 20px', color: '#122946', fontWeight: 900, textAlign: 'center' }}>حالة التسوية</th>
-                                    <th style={{ padding: '18px 20px', color: '#1C73AB', fontWeight: 900, textAlign: 'center' }}>الإجراءات</th>
+                                    <th style={{ padding: '18px 20px', color: '#1C73AB', fontWeight: 900, minWidth: '170px', whiteSpace: 'nowrap' }}>الرحلة والسيارة 🚚</th>
+                                    <th style={{ padding: '18px 20px', color: '#1C73AB', fontWeight: 900, minWidth: '130px', whiteSpace: 'nowrap' }}>التاريخ 📅</th>
+                                    <th style={{ padding: '18px 20px', color: '#1C73AB', fontWeight: 900, minWidth: '220px', whiteSpace: 'nowrap' }}>المندوب / السائق 👤</th>
+                                    <th style={{ padding: '18px 20px', color: '#122946', fontWeight: 900, textAlign: 'center', minWidth: '190px', whiteSpace: 'nowrap' }}>المبيعات 📦</th>
+                                    <th style={{ padding: '18px 20px', color: '#ef4444', fontWeight: 900, textAlign: 'center', minWidth: '140px', whiteSpace: 'nowrap' }}>المصروفات (-)</th>
+                                    <th style={{ padding: '18px 20px', color: '#b45309', fontWeight: 900, textAlign: 'center', minWidth: '160px', whiteSpace: 'nowrap' }}>المطالبة النقدية 💰</th>
+                                    <th style={{ padding: '18px 20px', color: '#16a34a', fontWeight: 900, textAlign: 'center', minWidth: '160px', whiteSpace: 'nowrap' }}>المورد للخزينة 💵</th>
+                                    <th style={{ padding: '18px 20px', color: '#122946', fontWeight: 900, textAlign: 'center', minWidth: '160px', whiteSpace: 'nowrap' }}>متبقي العهدة ⚠️</th>
+                                    <th style={{ padding: '18px 20px', color: '#1C73AB', fontWeight: 900, textAlign: 'center', minWidth: '180px', whiteSpace: 'nowrap' }}>بضاعة السيارة 🔄</th>
+                                    <th style={{ padding: '18px 20px', color: '#122946', fontWeight: 900, textAlign: 'center', minWidth: '160px', whiteSpace: 'nowrap' }}>حالة التسوية</th>
+                                    <th style={{ padding: '18px 20px', color: '#1C73AB', fontWeight: 900, textAlign: 'center', minWidth: '210px', whiteSpace: 'nowrap' }}>الإجراءات</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -441,19 +484,21 @@ export default function DelegateSettlementsPage() {
                                     return (
                                         <tr key={item.id || idx} className="aqua-table-row">
                                             {/* Trip & Vehicle */}
-                                            <td style={{ padding: '18px 20px' }}>
+                                            <td style={{ padding: '18px 20px', whiteSpace: 'nowrap' }}>
                                                 <div style={{
                                                     background: 'rgba(28, 115, 171, 0.1)',
                                                     color: '#1C73AB',
-                                                    padding: '4px 10px',
-                                                    borderRadius: '8px',
-                                                    display: 'inline-block',
+                                                    padding: '5px 12px',
+                                                    borderRadius: '10px',
+                                                    display: 'inline-flex',
+                                                    alignItems: 'center',
                                                     fontWeight: 900,
-                                                    fontSize: '13px'
+                                                    fontSize: '13px',
+                                                    whiteSpace: 'nowrap'
                                                 }}>
                                                     #{item.operationNumber}
                                                 </div>
-                                                <div style={{ fontSize: '11px', color: '#64748b', marginTop: '4px', fontWeight: 700 }}>
+                                                <div style={{ fontSize: '11px', color: '#64748b', marginTop: '5px', fontWeight: 700, whiteSpace: 'nowrap' }}>
                                                     🚗 {item.vehiclePlate}
                                                 </div>
                                             </td>
@@ -464,14 +509,14 @@ export default function DelegateSettlementsPage() {
                                             </td>
 
                                             {/* Delegate Name & Partner ID */}
-                                            <td style={{ padding: '18px 20px' }}>
-                                                <div style={{ fontWeight: 900, color: '#122946', fontSize: '14px' }}>
+                                            <td style={{ padding: '18px 20px', whiteSpace: 'nowrap' }}>
+                                                <div style={{ fontWeight: 900, color: '#122946', fontSize: '14px', whiteSpace: 'nowrap' }}>
                                                     {item.driverName}
                                                 </div>
-                                                <div style={{ fontSize: '11px', color: '#1C73AB', marginTop: '3px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                <div style={{ fontSize: '11px', color: '#1C73AB', marginTop: '4px', display: 'flex', alignItems: 'center', gap: '8px', whiteSpace: 'nowrap' }}>
                                                     {item.driverPhone && <span>📞 {item.driverPhone}</span>}
                                                     {item.driverId && (
-                                                        <span title={item.driverId} style={{ background: 'rgba(28, 115, 171, 0.08)', padding: '1px 6px', borderRadius: '4px' }}>
+                                                        <span title={item.driverId} style={{ background: 'rgba(28, 115, 171, 0.08)', padding: '2px 8px', borderRadius: '4px', fontWeight: 700 }}>
                                                             ID: {item.driverId.slice(0, 6)}..
                                                         </span>
                                                     )}
@@ -479,93 +524,88 @@ export default function DelegateSettlementsPage() {
                                             </td>
 
                                             {/* Sales */}
-                                            <td style={{ padding: '18px 20px', textAlign: 'center' }}>
+                                            <td style={{ padding: '18px 20px', textAlign: 'center', whiteSpace: 'nowrap' }}>
                                                 <div style={{ fontWeight: 900, color: '#1C73AB', fontSize: '15px' }}>
                                                     {formatCurrency(item.totalSales)}
                                                 </div>
-                                                <div style={{ fontSize: '11px', color: '#64748b', marginTop: '3px' }}>
+                                                <div style={{ fontSize: '11px', color: '#64748b', marginTop: '4px', whiteSpace: 'nowrap' }}>
                                                     كاش: {formatCurrency(item.cashSales)} | آجل: {formatCurrency(item.creditSales)}
                                                 </div>
                                             </td>
 
                                             {/* Expenses */}
-                                            <td style={{ padding: '18px 20px', textAlign: 'center', fontWeight: 800, color: '#ef4444' }}>
+                                            <td style={{ padding: '18px 20px', textAlign: 'center', fontWeight: 800, color: '#ef4444', whiteSpace: 'nowrap' }}>
                                                 {item.totalExpenses > 0 ? formatCurrency(item.totalExpenses) : '---'}
                                             </td>
 
                                             {/* Net Cash Due */}
-                                            <td style={{ padding: '18px 20px', textAlign: 'center', fontWeight: 900, color: '#b45309', fontSize: '15px' }}>
+                                            <td style={{ padding: '18px 20px', textAlign: 'center', fontWeight: 900, color: '#b45309', fontSize: '15px', whiteSpace: 'nowrap' }}>
                                                 {formatCurrency(item.netCashDue)}
                                             </td>
 
                                             {/* Handed Over Cash */}
-                                            <td style={{ padding: '18px 20px', textAlign: 'center', fontWeight: 900, color: '#16a34a', fontSize: '15px' }}>
+                                            <td style={{ padding: '18px 20px', textAlign: 'center', fontWeight: 900, color: '#16a34a', fontSize: '15px', whiteSpace: 'nowrap' }}>
                                                 {formatCurrency(item.handedOverCash)}
                                             </td>
 
                                             {/* Remaining Cash */}
-                                            <td style={{ padding: '18px 20px', textAlign: 'center' }}>
+                                            <td style={{ padding: '18px 20px', textAlign: 'center', whiteSpace: 'nowrap' }}>
                                                 <div style={{
                                                     fontWeight: 900,
                                                     fontSize: '15px',
-                                                    color: item.remainingCashCustody <= 0 ? '#16a34a' : '#ef4444'
+                                                    color: item.remainingCashCustody <= 0 ? '#16a34a' : '#ef4444',
+                                                    whiteSpace: 'nowrap'
                                                 }}>
                                                     {item.remainingCashCustody <= 0 ? '0.00 ر.س' : formatCurrency(item.remainingCashCustody)}
                                                 </div>
                                             </td>
 
                                             {/* Remaining Items */}
-                                            <td style={{ padding: '18px 20px', textAlign: 'center' }}>
+                                            <td style={{ padding: '18px 20px', textAlign: 'center', whiteSpace: 'nowrap' }}>
                                                 {item.totalRemainingQty > 0 ? (
                                                     <span style={{
                                                         background: 'rgba(245, 158, 11, 0.15)',
                                                         color: '#b45309',
-                                                        padding: '4px 10px',
+                                                        padding: '6px 14px',
                                                         borderRadius: '20px',
                                                         fontWeight: 900,
-                                                        fontSize: '12px'
+                                                        fontSize: '12px',
+                                                        display: 'inline-flex',
+                                                        alignItems: 'center',
+                                                        gap: '5px',
+                                                        whiteSpace: 'nowrap'
                                                     }}>
                                                         {item.totalRemainingQty} حبة بالسيارة
                                                     </span>
                                                 ) : (
-                                                    <span style={{ color: '#16a34a', fontWeight: 800 }}>تم الإرجاع بالكامل ✔️</span>
+                                                    <span style={{ color: '#16a34a', fontWeight: 800, display: 'inline-flex', alignItems: 'center', gap: '4px', whiteSpace: 'nowrap' }}>
+                                                        تم الإرجاع بالكامل ✔️
+                                                    </span>
                                                 )}
                                             </td>
 
                                             {/* Status Badge */}
-                                            <td style={{ padding: '18px 20px', textAlign: 'center' }}>
+                                            <td style={{ padding: '18px 20px', textAlign: 'center', whiteSpace: 'nowrap' }}>
                                                 {isSettled ? (
-                                                    <span style={{
+                                                    <span className="status-badge-pill" style={{
                                                         background: 'rgba(22, 163, 74, 0.15)',
                                                         color: '#16a34a',
-                                                        padding: '6px 14px',
-                                                        borderRadius: '50px',
-                                                        fontWeight: 900,
-                                                        fontSize: '12px',
                                                         border: '1px solid rgba(22, 163, 74, 0.3)'
                                                     }}>
                                                         تمت التسوية ✅
                                                     </span>
                                                 ) : isPartial ? (
-                                                    <span style={{
+                                                    <span className="status-badge-pill" style={{
                                                         background: 'rgba(40, 145, 200, 0.15)',
                                                         color: '#1C73AB',
-                                                        padding: '6px 14px',
-                                                        borderRadius: '50px',
-                                                        fontWeight: 900,
-                                                        fontSize: '12px',
                                                         border: '1px solid rgba(40, 145, 200, 0.3)'
                                                     }}>
                                                         تسوية جزئية 🔄
                                                     </span>
                                                 ) : (
-                                                    <span style={{
+                                                    <span className="status-badge-pill" style={{
                                                         background: 'rgba(245, 158, 11, 0.15)',
                                                         color: '#b45309',
-                                                        padding: '6px 14px',
-                                                        borderRadius: '50px',
-                                                        fontWeight: 900,
-                                                        fontSize: '12px',
                                                         border: '1px solid rgba(245, 158, 11, 0.3)'
                                                     }}>
                                                         بانتظار التسوية ⏳
@@ -574,8 +614,8 @@ export default function DelegateSettlementsPage() {
                                             </td>
 
                                             {/* Actions */}
-                                            <td style={{ padding: '18px 20px', textAlign: 'center' }}>
-                                                <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                                            <td style={{ padding: '18px 20px', textAlign: 'center', whiteSpace: 'nowrap' }}>
+                                                <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', alignItems: 'center', whiteSpace: 'nowrap' }}>
                                                     {/* Settle button */}
                                                     <button
                                                         type="button"
@@ -584,7 +624,7 @@ export default function DelegateSettlementsPage() {
                                                             setIsSettlementModalOpen(true);
                                                         }}
                                                         style={{
-                                                            padding: '7px 14px',
+                                                            padding: '8px 16px',
                                                             borderRadius: '12px',
                                                             border: 'none',
                                                             background: isSettled ? 'rgba(28, 115, 171, 0.12)' : 'linear-gradient(135deg, #1C73AB 0%, #2891C8 100%)',
@@ -593,9 +633,10 @@ export default function DelegateSettlementsPage() {
                                                             fontSize: '12px',
                                                             cursor: 'pointer',
                                                             boxShadow: isSettled ? 'none' : '0 4px 12px rgba(28, 115, 171, 0.25)',
-                                                            display: 'flex',
+                                                            display: 'inline-flex',
                                                             alignItems: 'center',
                                                             gap: '6px',
+                                                            whiteSpace: 'nowrap',
                                                             transition: 'all 0.2s'
                                                         }}
                                                         title="تسوية العهدة النقدية وإرجاع البضاعة"
@@ -611,22 +652,23 @@ export default function DelegateSettlementsPage() {
                                                             setIsPrintModalOpen(true);
                                                         }}
                                                         style={{
-                                                            padding: '7px 12px',
+                                                            padding: '8px 14px',
                                                             borderRadius: '12px',
-                                                            border: '1px solid rgba(28, 115, 171, 0.25)',
+                                                            border: '1.5px solid rgba(28, 115, 171, 0.25)',
                                                             background: 'rgba(255, 255, 255, 0.8)',
                                                             color: '#1C73AB',
                                                             fontWeight: 800,
                                                             fontSize: '12px',
                                                             cursor: 'pointer',
-                                                            display: 'flex',
+                                                            display: 'inline-flex',
                                                             alignItems: 'center',
-                                                            gap: '4px'
+                                                            gap: '6px',
+                                                            whiteSpace: 'nowrap',
+                                                            transition: 'all 0.2s'
                                                         }}
                                                         title="طباعة سند تسوية ومخالصة عهدة رسمية"
                                                     >
-                                                        <span>🖨️</span>
-                                                        <span>سند</span>
+                                                        <span>🖨️ طباعة</span>
                                                     </button>
                                                 </div>
                                             </td>
