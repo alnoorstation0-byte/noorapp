@@ -1,8 +1,21 @@
 "use client";
 import React, { useState, useMemo } from 'react';
-import PermissionsMatrix from './PermissionsMatrix';
-import SystemHealthRadar from './SystemHealthRadar';
-import AuditLogs from './AuditLogs';
+import dynamic from 'next/dynamic';
+
+const PermissionsMatrix = dynamic(() => import('./PermissionsMatrix'), { 
+  loading: () => <div style={{ textAlign: 'center', padding: '40px', fontWeight: 800, color: '#1C73AB' }}>⏳ جاري تحميل مصفوفة الصلاحيات...</div>,
+  ssr: false 
+});
+
+const SystemHealthRadar = dynamic(() => import('./SystemHealthRadar'), { 
+  loading: () => <div style={{ textAlign: 'center', padding: '40px', fontWeight: 800, color: '#1C73AB' }}>⏳ جاري فحص سلامة النظام...</div>,
+  ssr: false 
+});
+
+const AuditLogs = dynamic(() => import('./AuditLogs'), { 
+  loading: () => <div style={{ textAlign: 'center', padding: '40px', fontWeight: 800, color: '#1C73AB' }}>⏳ جاري تحميل سجل المراقبة...</div>,
+  ssr: false 
+});
 import RawasiSidebarManager from '@/components/RawasiSidebarManager'; 
 import MasterPage from '@/components/MasterPage';
 import GlassContainer from '@/components/GlassContainer';

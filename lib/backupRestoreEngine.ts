@@ -1,5 +1,4 @@
 "use client";
-import * as XLSX from 'xlsx';
 import { supabase } from '@/lib/supabase';
 import { fetchAllSupabaseData } from '@/lib/helpers';
 
@@ -449,6 +448,7 @@ export async function exportToProfessionalExcel(
         }
 
         onProgress?.('⏳ جاري جلب البيانات من النظام...');
+        const XLSX = await import('xlsx');
         const workbook = XLSX.utils.book_new();
         const exportTimestamp = new Date().toLocaleString('ar-SA');
 
@@ -809,6 +809,7 @@ export async function restoreFromExcel(
 ): Promise<{ success: boolean; totalRestored: number; error?: string }> {
     try {
         onProgress?.('⏳ جاري قراءة ملف الإكسل...');
+        const XLSX = await import('xlsx');
         const buffer = await file.arrayBuffer();
         const workbook = XLSX.read(buffer, { type: 'array' });
         let grandTotal = 0;
