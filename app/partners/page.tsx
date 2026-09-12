@@ -9,6 +9,7 @@ import SecureAction from '@/components/SecureAction';
 import MasterPage from '@/components/MasterPage';
 import RawasiSidebarManager from '@/components/RawasiSidebarManager';
 import RawasiSmartTable from '@/components/rawasismarttable';
+import TranslatableInput from '@/components/TranslatableInput';
 
 const partnerTypes = ['مورد', 'عميل', 'موظف', 'أخرى', 'مندوب 🚚'];
 
@@ -299,16 +300,14 @@ export default function PartnersPage() {
                             </div>
                         </div>
 
-                        <div className="form-group">
-                            <label className="form-label">اسم الشريك *</label>
-                            <input 
-                                type="text" 
-                                className="form-input" 
-                                value={logic.formData.name} 
-                                onChange={e => logic.setFormData({...logic.formData, name: e.target.value})} 
-                                placeholder="اسم الشريك بالكامل..."
-                            />
-                        </div>
+                        <TranslatableInput
+                            label="اسم الشريك"
+                            required
+                            value={logic.formData.name}
+                            onChange={val => logic.setFormData(prev => ({ ...prev, name: val }))}
+                            placeholder="اسم الشريك بالكامل..."
+                            inputClassName="form-input"
+                        />
 
                         <div style={{ display: 'flex', gap: '15px' }}>
                             <div className="form-group" style={{ flex: 1 }}>
@@ -333,16 +332,13 @@ export default function PartnersPage() {
                             </div>
                         </div>
 
-                        <div className="form-group">
-                            <label className="form-label">العنوان</label>
-                            <input 
-                                type="text" 
-                                className="form-input" 
-                                value={logic.formData.address} 
-                                onChange={e => logic.setFormData({...logic.formData, address: e.target.value})} 
-                                placeholder="المدينة، الحي، الشارع..."
-                            />
-                        </div>
+                        <TranslatableInput
+                            label="العنوان"
+                            value={logic.formData.address}
+                            onChange={val => logic.setFormData(prev => ({ ...prev, address: val }))}
+                            placeholder="المدينة، الحي، الشارع..."
+                            inputClassName="form-input"
+                        />
 
                         <div className="modal-actions">
                             <button className="btn-save" onClick={() => {

@@ -8,8 +8,10 @@ import Link from 'next/link';
 import { useUnreadCounts } from '@/hooks/useUnreadCounts';
 import { useRealtimeListener } from '@/lib/useRealtimeSync';
 import { useRouter, usePathname } from 'next/navigation';
+import { useLanguage } from '@/lib/LanguageContext';
 
 export default function MasterPage({ title, subtitle, children, headerContent, icon, className }: any) {
+  const { language, toggleLanguage, isRtl } = useLanguage();
   const router = useRouter();
   const pathname = usePathname();
   const [userProfile, setUserProfile] = useState<any>(null);
@@ -212,7 +214,7 @@ html, body {
 .clean-page { 
     padding: 25px 15px 25px 15px !important; 
     margin: 0 !important;
-    direction: rtl; 
+    direction: inherit; 
     min-height: 100vh; 
     width: 100% !important;
     max-width: 100%;
@@ -433,6 +435,34 @@ html, body {
                   <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
                 </button>
              </div>
+
+             {/* 🌐 زر تبديل اللغة (Language Switcher) */}
+             <button
+                type="button"
+                onClick={toggleLanguage}
+                className="nav-btn-glass"
+                title={language === 'ar' ? 'Switch to English' : 'التحويل إلى العربية'}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px',
+                  padding: '0 12px',
+                  width: 'auto',
+                  height: '40px',
+                  borderRadius: '12px',
+                  fontSize: '12px',
+                  fontWeight: 900,
+                  background: 'rgba(255, 255, 255, 0.75)',
+                  border: '1px solid rgba(28, 115, 171, 0.25)',
+                  color: '#1C73AB',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s',
+                  boxShadow: '0 2px 8px rgba(28, 115, 171, 0.1)'
+                }}
+             >
+                <span style={{ fontSize: '15px' }}>🌐</span>
+                <span>{language === 'ar' ? 'English' : 'عربي'}</span>
+             </button>
 
               {/* Notifications & Messages & Pending Alert */}
               <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>

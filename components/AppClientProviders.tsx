@@ -17,6 +17,7 @@ import GlobalNavigationShortcuts from './GlobalNavigationShortcuts';
 import GlobalAutoSelectNumber from './GlobalAutoSelectNumber';
 import { THEME } from '@/lib/theme'; 
 import { RealtimeSyncProvider } from '@/lib/useRealtimeSync';
+import { LanguageProvider } from '@/lib/LanguageContext';
 
 export default function AppClientProviders({ children }: { children: React.ReactNode }) {
     return (
@@ -29,6 +30,7 @@ export default function AppClientProviders({ children }: { children: React.React
                 zIndex={99999} 
             />
             <GlobalErrorBoundary>
+                <LanguageProvider>
                 <QueryProvider>
                     <Providers>
                         <ToastProvider>
@@ -55,6 +57,7 @@ export default function AppClientProviders({ children }: { children: React.React
                         </ToastProvider>
                     </Providers>
                 </QueryProvider>
+                </LanguageProvider>
             </GlobalErrorBoundary>
         </>
     );

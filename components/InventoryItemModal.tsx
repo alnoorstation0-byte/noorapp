@@ -2,6 +2,7 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import AquaModalWrapper from '@/components/AquaModalWrapper';
 import SearchableSelect from './SearchableSelect';
+import TranslatableInput from './TranslatableInput';
 import { THEME } from '@/lib/theme';
 
 function BarcodeScannerModal({ onDetected, onClose }: { onDetected: (code: string) => void; onClose: () => void }) {
@@ -272,19 +273,15 @@ export default function InventoryItemModal({ isOpen, onClose, currentRecord, set
               <span>البيانات الأساسية للصنف</span>
             </div>
 
-            <div style={{ marginBottom: '12px' }}>
-              <label className="item-modal-label">
-                اسم الصنف / المنتج *
-              </label>
-              <input 
-                type="text" 
-                className="glass-input-field item-modal-input" 
-                placeholder="مثال: مياه غيام كرتون 330 مل (40 عبوة)..."
-                value={formData.name || ''} 
-                onChange={e => updateField('name', e.target.value)} 
-                autoFocus
-              />
-            </div>
+            <TranslatableInput
+              label="اسم الصنف / المنتج"
+              required
+              placeholder="مثال: مياه غيام كرتون 330 مل (40 عبوة)..."
+              value={formData.name || ''} 
+              onChange={val => updateField('name', val)} 
+              inputClassName="item-modal-input"
+              autoFocus
+            />
 
             <div className="item-modal-grid-2">
               <div>
@@ -460,17 +457,14 @@ export default function InventoryItemModal({ isOpen, onClose, currentRecord, set
               </div>
             </div>
 
-            <div>
-              <label className="item-modal-label">📝 ملاحظات فنية ومواصفات</label>
-              <textarea 
-                className="glass-input-field" 
-                rows={2} 
-                placeholder="أي مواصفات فنية أو تفاصيل خاصة بالخامة..."
-                value={formData.notes || ''} 
-                onChange={e => updateField('notes', e.target.value)} 
-                style={{ resize: 'vertical', fontSize: '12px', padding: '8px 12px' }} 
-              />
-            </div>
+            <TranslatableInput
+              label="ملاحظات فنية ومواصفات"
+              isTextArea
+              rows={2}
+              placeholder="أي مواصفات فنية أو تفاصيل خاصة بالخامة..."
+              value={formData.notes || ''} 
+              onChange={val => updateField('notes', val)} 
+            />
           </div>
 
         </div>

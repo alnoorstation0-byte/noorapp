@@ -10,6 +10,7 @@ import { usePermissions } from '@/lib/PermissionsContext';
 import { useUnreadCounts } from '@/hooks/useUnreadCounts';
 import { usePresence } from '@/hooks/usePresence';
 import LoadingScreen from '@/components/LoadingScreen';
+import { useLanguage } from '@/lib/LanguageContext';
 
 export default function LayoutClient({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -32,6 +33,7 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
   const { role, can, loading } = usePermissions();
   const unreadCounts = useUnreadCounts();
   const { onlineUsers, onlineCount } = usePresence();
+  const { t, language, dir, isRtl } = useLanguage();
 
   // تحديث ref الموقع عند تغييره لتفادي مشاكل الـ closure
   useEffect(() => {
@@ -245,13 +247,22 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
 
   const currentMargin = isSidebarOpen ? '320px' : '0px';
 
+  const groupKeyMap: Record<string, string> = {
+    "الرئيسية والملخصات": "menu_group_home",
+    "التشغيل والمبيعات": "menu_group_sales",
+    "المستودع": "menu_group_inventory",
+    "الحسابات والمالية": "menu_group_finance",
+    "العملاء والمندوبين": "menu_group_partners",
+    "النظام والتقارير": "menu_group_system",
+  };
+
   // Helper function to find currentPage title dynamically based on path
   const findCurrentPageTitle = () => {
     for (let group of menuGroups) {
       const match = group.items.find(i => i.path === pathname);
-      if (match) return match.title;
+      if (match) return t('menu_' + match.id) || match.title;
     }
-    return 'الرئيسية';
+    return t('menu_dashboard') || 'الرئيسية';
   };
 
   const currentPageTitle = findCurrentPageTitle();
@@ -459,14 +470,14 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
       }}>
           <div className="command-center" onClick={(e) => e.stopPropagation()}>
             <div className="admin-header" style={{ background: 'rgba(255, 255, 255, 0.65)', border: '1px solid rgba(255, 255, 255, 0.9)', padding: '15px 30px', borderRadius: '20px', fontSize: '18px', textAlign: 'center', color: '#122946', marginBottom: '10px', fontWeight: 900, backdropFilter: 'blur(15px)', alignSelf: 'center', boxShadow: '0 8px 30px rgba(0,0,0,0.04)', display: 'flex', alignItems: 'center', gap: '20px' }}>
-               <span>بوابة الإدارة | {role === 'super_admin' ? 'مدير النظام' : 'صلاحيات مستخدم'}</span>
-               <div style={{ display: 'flex', gap: '15px', borderRight: '2px solid rgba(0,0,0,0.1)', paddingRight: '15px', alignItems: 'center' }}>
+               <span>{language === 'en' ? `Admin Portal | ${role === 'super_admin' ? 'Super Admin' : 'User Access'}` : `بوابة الإدارة | ${role === 'super_admin' ? 'مدير النظام' : 'صلاحيات مستخدم'}`}</span>
+               <div style={{ display: 'flex', gap: '15px', borderRight: isRtl ? '2px solid rgba(0,0,0,0.1)' : 'none', borderLeft: !isRtl ? '2px solid rgba(0,0,0,0.1)' : 'none', paddingRight: isRtl ? '15px' : '0', paddingLeft: !isRtl ? '15px' : '0', alignItems: 'center' }}>
                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px', background: '#dcfce7', color: '#166534', padding: '5px 12px', borderRadius: '20px', fontSize: '13px', fontWeight: 800 }}>
                        <span style={{ width: '8px', height: '8px', background: '#16a34a', borderRadius: '50%', boxShadow: '0 0 8px #16a34a' }}></span>
-                       {onlineCount} متصل
+                       {language === 'en' ? `${onlineCount} Online` : `${onlineCount} متصل`}
                    </div>
                    <button onClick={handleLogout} style={{ background: '#fee2e2', color: '#dc2626', border: 'none', padding: '6px 15px', borderRadius: '20px', fontWeight: 'bold', cursor: 'pointer', fontSize: '13px', display: 'flex', alignItems: 'center', gap: '5px' }}>
-                     تسجيل الخروج
+                     {language === 'en' ? 'Logout' : 'تسجيل الخروج'}
                    </button>
                </div>
             </div>
@@ -475,19 +486,22 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
               const filteredItems = group.items.filter(item => canView(item.id));
               if (filteredItems.length === 0) return null;
 
+              const groupTitle = groupKeyMap[group.group] ? t(groupKeyMap[group.group]) : group.group;
+
               return (
                 <div key={gIdx} className="group-section">
-                  <span className="group-header">{group.group}</span>
+                  <span className="group-header">{groupTitle}</span>
                   <div className="items-grid">
                     {filteredItems.map((item, iIdx) => {
                       const delay = (animationDelayCounter++) * 0.05;
                       const isActive = pathname === item.path;
+                      const itemTitle = t('menu_' + item.id) || item.title;
                       return (
                         <Link key={iIdx} href={item.path} onClick={() => setIsOpen(false)}>
                               <div className={`nav-card ${isActive ? 'active' : ''}`} style={{ animationDelay: isOpen ? `${delay}s` : '0s' }}>
                                 <div className="icon-wrapper">{item.icon}</div>
-                                <span className="nav-title" style={{ fontWeight: 800, fontSize: '15px', color: '#1e293b', lineHeight: '1.4' }}>{item.title}</span>
-                                {isActive && <div style={{ position: 'absolute', top: '15px', right: '15px', width: '10px', height: '10px', background: '#10b981', borderRadius: '50%', boxShadow: '0 0 15px rgba(16, 185, 129, 0.4)' }}></div>}
+                                <span className="nav-title" style={{ fontWeight: 800, fontSize: '15px', color: '#1e293b', lineHeight: '1.4' }}>{itemTitle}</span>
+                                {isActive && <div style={{ position: 'absolute', top: '15px', right: isRtl ? '15px' : 'auto', left: !isRtl ? '15px' : 'auto', width: '10px', height: '10px', background: '#10b981', borderRadius: '50%', boxShadow: '0 0 15px rgba(16, 185, 129, 0.4)' }}></div>}
                             </div>
                         </Link>
                       );
@@ -500,7 +514,9 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
             {/* المتصلين حاليا */}
             {onlineUsers.length > 0 && (
               <div className="group-section" style={{ marginTop: '20px' }}>
-                <span className="group-header" style={{ borderColor: 'rgba(22, 163, 74, 0.2)', color: '#166534' }}>المتصلين الآن ({onlineCount})</span>
+                <span className="group-header" style={{ borderColor: 'rgba(22, 163, 74, 0.2)', color: '#166534' }}>
+                  {language === 'en' ? `Online Now (${onlineCount})` : `المتصلين الآن (${onlineCount})`}
+                </span>
                 <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap', marginTop: '20px' }}>
                   {onlineUsers.map((user, idx) => (
                     <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(255,255,255,0.8)', padding: '10px 15px', borderRadius: '15px', border: '1px solid rgba(22, 163, 74, 0.2)', boxShadow: '0 4px 10px rgba(0,0,0,0.02)' }}>
@@ -509,7 +525,9 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column' }}>
                             <span style={{ fontSize: '13px', fontWeight: 900, color: '#0f172a' }}>{user.full_name}</span>
-                            <span style={{ fontSize: '11px', color: '#64748b' }}>{user.role === 'super_admin' ? 'مدير' : 'موظف'}</span>
+                            <span style={{ fontSize: '11px', color: '#64748b' }}>
+                              {language === 'en' ? (user.role === 'super_admin' ? 'Super Admin' : 'Employee') : (user.role === 'super_admin' ? 'مدير' : 'موظف')}
+                            </span>
                         </div>
                     </div>
                   ))}
@@ -522,14 +540,15 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
       <main className="main-content" style={{ 
           flex: 1, 
           boxSizing: 'border-box',
-          marginRight: currentMargin, 
+          marginRight: isRtl ? currentMargin : '0px', 
+          marginLeft: !isRtl ? currentMargin : '0px',
           paddingRight: '15px', 
           paddingLeft: '15px', /* Added left padding for symmetry on mobile */
           minHeight: '100vh', 
           position: 'relative', 
           zIndex: 1,
           overflowX: 'hidden',
-          transition: 'margin-right 0.5s cubic-bezier(0.165, 0.84, 0.44, 1)' 
+          transition: isRtl ? 'margin-right 0.5s cubic-bezier(0.165, 0.84, 0.44, 1)' : 'margin-left 0.5s cubic-bezier(0.165, 0.84, 0.44, 1)' 
       }}>
         {children}
       </main>
