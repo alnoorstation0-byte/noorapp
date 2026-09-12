@@ -146,10 +146,22 @@ export default function PaymentVouchersPage() {
     {
       header: 'الإجراءات',
       accessor: 'actions',
+      minWidth: '220px',
       render: (row: any) => {
         if (!row) return null;
         return (
-          <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', alignItems: 'center' }}>
+          <div 
+            className="table-actions-container" 
+            style={{ 
+              display: 'flex', 
+              flexDirection: 'row', 
+              flexWrap: 'nowrap', 
+              gap: '5px', 
+              justifyContent: 'center', 
+              alignItems: 'center', 
+              minWidth: '205px' 
+            }}
+          >
             {/* 🚀 زر الترحيل وفك الترحيل الفوري بجانب السند */}
             <SecureAction module="payments" action="post">
               {row.is_posted ? (
@@ -160,40 +172,27 @@ export default function PaymentVouchersPage() {
                     e.stopPropagation();
                     logic.actions.handleUnpostSingle(row.id);
                   }}
+                  className="table-action-btn"
                   style={{
-                    background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.2) 100%)',
+                    background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.25) 100%)',
                     color: '#b45309',
                     border: '1px solid rgba(245, 158, 11, 0.4)',
-                    padding: '6px 12px',
-                    borderRadius: '10px',
-                    cursor: logic.actions.isProcessing ? 'wait' : 'pointer',
-                    fontWeight: 900,
+                    padding: '5px 8px',
+                    borderRadius: '8px',
+                    fontWeight: 800,
                     fontSize: '11px',
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: '5px',
-                    backdropFilter: 'blur(10px)',
-                    boxShadow: '0 2px 6px rgba(245, 158, 11, 0.15)',
-                    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                    gap: '4px',
+                    cursor: logic.actions.isProcessing ? 'wait' : 'pointer',
                     whiteSpace: 'nowrap',
+                    flexShrink: 0,
                     opacity: logic.actions.isProcessing ? 0.6 : 1
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!logic.actions.isProcessing) {
-                      e.currentTarget.style.transform = 'translateY(-2px)';
-                      e.currentTarget.style.background = 'linear-gradient(135deg, rgba(245, 158, 11, 0.25) 0%, rgba(217, 119, 6, 0.3) 100%)';
-                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(245, 158, 11, 0.25)';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.background = 'linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.2) 100%)';
-                    e.currentTarget.style.boxShadow = '0 2px 6px rgba(245, 158, 11, 0.15)';
                   }}
                   title="فك ترحيل هذا السند وإعادته لمسودة"
                 >
                   <span>↩️</span>
-                  <span>فك الترحيل</span>
+                  <span>فك</span>
                 </button>
               ) : (
                 <button
@@ -203,32 +202,23 @@ export default function PaymentVouchersPage() {
                     e.stopPropagation();
                     logic.actions.handlePostSingle(row.id);
                   }}
+                  className="table-action-btn"
                   style={{
                     background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
                     color: 'white',
-                    border: '1px solid rgba(255, 255, 255, 0.3)',
-                    padding: '6px 14px',
-                    borderRadius: '10px',
-                    cursor: logic.actions.isProcessing ? 'wait' : 'pointer',
-                    fontWeight: 900,
+                    border: 'none',
+                    padding: '5px 9px',
+                    borderRadius: '8px',
+                    fontWeight: 800,
                     fontSize: '11px',
                     display: 'inline-flex',
                     alignItems: 'center',
-                    gap: '5px',
-                    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
-                    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                    gap: '4px',
+                    cursor: logic.actions.isProcessing ? 'wait' : 'pointer',
                     whiteSpace: 'nowrap',
+                    flexShrink: 0,
+                    boxShadow: '0 2px 6px rgba(16, 185, 129, 0.3)',
                     opacity: logic.actions.isProcessing ? 0.6 : 1
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!logic.actions.isProcessing) {
-                      e.currentTarget.style.transform = 'translateY(-2px)';
-                      e.currentTarget.style.boxShadow = '0 6px 16px rgba(16, 185, 129, 0.45)';
-                    }
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.3)';
                   }}
                   title="اعتماد وترحيل سند الصرف محاسبياً"
                 >
@@ -238,12 +228,100 @@ export default function PaymentVouchersPage() {
               )}
             </SecureAction>
 
+            {/* ✏️ زر تعديل السند المباشر (للسندات المعلقة) */}
+            {!row.is_posted && (
+              <SecureAction module="payments" action="edit">
+                <button 
+                  type="button"
+                  className="table-action-btn edit-btn" 
+                  style={{
+                    background: 'linear-gradient(135deg, #1C73AB 0%, #2891C8 100%)',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    padding: '5px 8px',
+                    fontSize: '11px',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    logic.actions.handleEditRow(row);
+                  }}
+                  title="تعديل السند"
+                >
+                  <span>✏️</span>
+                  <span>تعديل</span>
+                </button>
+              </SecureAction>
+            )}
+
+            {/* 🗑️ زر حذف السند المباشر (للسندات المعلقة) */}
+            {!row.is_posted && (
+              <SecureAction module="payments" action="delete">
+                <button 
+                  type="button"
+                  className="table-action-btn delete-btn" 
+                  style={{
+                    background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    padding: '5px 8px',
+                    fontSize: '11px',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0
+                  }}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    showConfirm({
+                      title: 'حذف سند الصرف',
+                      message: `هل أنت متأكد من حذف سند الصرف رقم (#${row.voucher_number}) بمبلغ (${formatCurrency(row.amount)}) نهائياً؟`,
+                      type: 'danger',
+                      onConfirm: () => logic.actions.handleDeleteSingle(row.id)
+                    });
+                  }}
+                  title="حذف السند"
+                >
+                  <span>🗑️</span>
+                  <span>حذف</span>
+                </button>
+              </SecureAction>
+            )}
+
+            {/* 🖨️ زر طباعة السند */}
             <button 
+              type="button"
               onClick={(e) => { e.stopPropagation(); setPrintData(row); setIsPrintModalOpen(true); }} 
-              style={{ background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(0,0,0,0.1)', padding: '6px 10px', borderRadius: '8px', cursor: 'pointer', transition: '0.2s', fontSize: '14px' }}
+              className="table-action-btn"
+              style={{ 
+                background: 'rgba(255, 255, 255, 0.7)', 
+                border: '1px solid rgba(28, 115, 171, 0.2)', 
+                color: '#1C73AB',
+                padding: '5px 8px', 
+                borderRadius: '8px', 
+                cursor: 'pointer', 
+                fontSize: '12px',
+                fontWeight: 800,
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                whiteSpace: 'nowrap',
+                flexShrink: 0
+              }}
               title="طباعة السند"
             >
-              🖨️
+              <span>🖨️</span>
             </button>
           </div>
         );
@@ -361,7 +439,7 @@ export default function PaymentVouchersPage() {
               .btn-main-glass.red { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); }
               .btn-main-glass:hover { transform: translateY(-3px); filter: brightness(1.1); }
               .summary-glass-card { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); padding: 20px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.2); margin-bottom: 25px; }
-              .filter-btn { flex: 1; padding: 8px; border-radius: 8px; background: rgba(255,255,255,0.1); color: white; border: none; font-weight: 900; cursor: pointer; font-size: 11px; transition: 0.3s; }
+              .filter-btn { flex: 1; padding: 8px; border-radius: 8px; background: rgba(255,255,255,0.1); color: white; border: none; font-weight: 900; cursor: pointer; font-size: 11px; transition: 0.3s; white-space: nowrap !important; word-break: keep-all !important; min-height: 34px !important; }
               .filter-btn.active { background: ${THEME.goldAccent}; color: #1e293b; }
             `}</style>
 

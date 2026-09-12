@@ -710,21 +710,42 @@ td {
       box-sizing: border-box !important;
   }
   
-  /* Fix buttons that overflow */
-  button, a[role="button"] {
+  /* Fix buttons that overflow (excluding table action buttons, filter buttons, and compact buttons) */
+  button:not(.table-action-btn):not([class*="table-action"]):not(.filter-btn):not(.custom-checkbox):not([class*="compact"]):not([class*="icon"]):not(table button),
+  a[role="button"]:not(.table-action-btn) {
       max-width: 100% !important;
       box-sizing: border-box !important;
       white-space: normal !important; 
       word-wrap: break-word !important;
       word-break: break-word !important;
       flex-shrink: 1 !important; 
-      min-height: 48px !important; 
+      min-height: 44px !important; 
+  }
+
+  /* 📱 Table Action Buttons Protection: Never wrap or break vertically inside tables */
+  table button,
+  .table-actions-container button,
+  .table-action-btn {
+      white-space: nowrap !important;
+      word-break: keep-all !important;
+      word-wrap: normal !important;
+      min-height: 32px !important;
+      max-height: 38px !important;
+      width: auto !important;
+      max-width: none !important;
+      flex-shrink: 0 !important;
+      display: inline-flex !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      justify-content: center !important;
   }
   
   .btn-main-glass {
     font-size: 12px !important;
     padding: 10px 8px !important;
     margin-bottom: 6px !important;
+    white-space: nowrap !important;
+    word-break: keep-all !important;
   }
 
   .btn-glass-pay, .btn-glass-print {
@@ -960,16 +981,21 @@ td {
   }
 
   .table-action-btn {
-      min-height: 34px !important;
+      min-height: 32px !important;
       max-height: 38px !important;
       padding: 4px 8px !important;
       font-size: 11px !important;
       white-space: nowrap !important;
       word-break: keep-all !important;
+      word-wrap: normal !important;
       flex-shrink: 0 !important;
       width: auto !important;
       max-width: none !important;
       border-radius: 8px !important;
+      display: inline-flex !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      justify-content: center !important;
   }
 }
 

@@ -201,13 +201,16 @@ export function usePaymentVouchersLogic() {
     });
 
     const deleteMutation = useMutation({
-        mutationFn: async () => {
-            const postedVouchers = vouchers.filter(v => selectedIds.includes(v.id) && v.is_posted);
+        mutationFn: async (targetIds?: string[]) => {
+            const idsToDelete = (targetIds && Array.isArray(targetIds) && targetIds.length > 0) ? targetIds : selectedIds;
+            if (idsToDelete.length === 0) return;
+
+            const postedVouchers = vouchers.filter(v => idsToDelete.includes(v.id) && v.is_posted);
             if (postedVouchers.length > 0) throw new Error('لا يمكن حذف سندات معتمدة. قم بفك الاعتماد أولاً.');
 
             const CHUNK_SIZE = 20;
-            for (let i = 0; i < selectedIds.length; i += CHUNK_SIZE) {
-                const chunk = selectedIds.slice(i, i + CHUNK_SIZE);
+            for (let i = 0; i < idsToDelete.length; i += CHUNK_SIZE) {
+                const chunk = idsToDelete.slice(i, i + CHUNK_SIZE);
                 const { error } = await supabase.from('payment_vouchers').delete().in('id', chunk);
                 if (error) throw error;
             }
@@ -281,8 +284,25 @@ export function usePaymentVouchersLogic() {
                     setIsEditModalOpen(true);
                 }
             },
+            handleEditRow: (row: any) => {
+                if (!row) return;
+                const voucherForEdit = {
+                    ...row,
+                    partner_id: row.partner_id || null,
+                    payee_id: row.partner_id || '',
+                    payee_name: row.payee?.name || row.payee_name || '',
+                    debit_account_name: row.debit_account?.name || '',
+                    credit_account_name: row.credit_account?.name || ''
+                };
+                setCurrentVoucher(voucherForEdit);
+                setIsEditModalOpen(true);
+            },
             handleDeleteSelected: () => {
                 if (confirm('تأكيد الحذف النهائي للسندات المحددة؟')) deleteMutation.mutate();
+            },
+            handleDeleteSingle: (id: string) => {
+                if (!id) return;
+                deleteMutation.mutate([id]);
             },
             handleSaveVoucher: async (dataFromOutside?: any) => {
                 const dataToSave = (dataFromOutside && Object.keys(dataFromOutside).length > 0) ? dataFromOutside : currentVoucher;

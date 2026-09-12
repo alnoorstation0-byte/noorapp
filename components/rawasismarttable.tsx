@@ -239,7 +239,7 @@ export default function RawasiSmartTable({
                                         key={idx} 
                                         onClick={() => handleSort(sortKey)}
                                         style={{ 
-                                            padding: '15px', 
+                                            padding: isActions ? '15px 8px' : '15px', 
                                             textAlign: 'right', 
                                             color: THEME.coffeeDark, 
                                             fontWeight: 900, 
@@ -248,8 +248,8 @@ export default function RawasiSmartTable({
                                             cursor: sortKey ? 'pointer' : 'default',
                                             userSelect: 'none',
                                             whiteSpace: 'nowrap',
-                                            width: isActions ? '135px' : undefined,
-                                            minWidth: isActions ? '130px' : undefined
+                                            width: col.width || (isActions ? (col.minWidth || '140px') : undefined),
+                                            minWidth: col.minWidth || (isActions ? '130px' : undefined)
                                         }}
                                         title={sortKey ? `فرز حسب ${typeof col.label === 'string' ? col.label : (typeof col.header === 'string' ? col.header : '')}` : ''}
                                     >
@@ -308,12 +308,12 @@ export default function RawasiSmartTable({
                                             <td 
                                                 key={colIndex} 
                                                 style={{ 
-                                                    padding: '12px 15px', 
+                                                    padding: isActions ? '10px 8px' : '12px 15px', 
                                                     color: '#334155', 
                                                     fontSize: '13px',
                                                     whiteSpace: isActions ? 'nowrap' : undefined,
-                                                    width: isActions ? '135px' : undefined,
-                                                    minWidth: isActions ? '130px' : undefined
+                                                    width: col.width || (isActions ? (col.minWidth || '140px') : undefined),
+                                                    minWidth: col.minWidth || (isActions ? '130px' : undefined)
                                                 }}
                                             >
                                                 {col.render ? col.render(row) : (row[col.key || col.accessor || ''] || '---')}
