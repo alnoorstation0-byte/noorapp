@@ -749,7 +749,14 @@ export default function InvoicePrintModal({
                                     lines.map((item, index) => (
                                         <tr key={index}>
                                             <td>{item.index}</td>
-                                            <td className="desc">{item.name}</td>
+                                            <td className="desc">
+                                                <div>{item.name}</div>
+                                                {Boolean(item.discount && item.discount > 0) && (
+                                                    <span style={{ display: 'block', fontSize: '10px', color: '#dc2626', fontWeight: 700 }}>
+                                                        خصم: {formatCurrencyEn(item.discount)} -
+                                                    </span>
+                                                )}
+                                            </td>
                                             <td>{item.unit}</td>
                                             <td>{formatNumberEn(item.quantity)}</td>
                                             <td>{formatCurrencyEn(item.unit_price)}</td>

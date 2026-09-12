@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { QRCodeSVG } from 'qrcode.react';
 import { generateZatcaQR } from '@/lib/zatca_qr';
@@ -590,7 +590,14 @@ export default function ThermalReceiptModal({ isOpen, onClose, record, onOpenA4 
                     <tbody>
                         {lines.map((line, idx) => (
                             <tr key={idx}>
-                                <td style={{ textAlign: 'right', fontWeight: 'bold' }}>{line.name}</td>
+                                <td style={{ textAlign: 'right', fontWeight: 'bold' }}>
+                                    <div>{line.name}</div>
+                                    {Boolean(line.discount && line.discount > 0) && (
+                                        <div style={{ fontSize: '9px', color: '#333', fontWeight: 'normal' }}>
+                                            خصم: {Number(line.discount).toFixed(2)}-
+                                        </div>
+                                    )}
+                                </td>
                                 <td style={{ textAlign: 'center' }}>{line.quantity}</td>
                                 <td style={{ textAlign: 'center' }}>{line.unit_price.toFixed(2)}</td>
                                 <td style={{ textAlign: 'left', fontWeight: '900' }}>{line.total.toFixed(2)}</td>

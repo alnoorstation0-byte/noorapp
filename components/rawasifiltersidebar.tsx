@@ -34,6 +34,8 @@ export default function RawasiFilterSidebar({
   const [isPinned, setIsPinned] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const [dates, setDates] = useState({ start: '', end: '' });
+  const [activePreset, setActivePreset] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
   const [isMobile, setIsMobile] = useState(false);
   const [mounted, setMounted] = useState(false);
 
@@ -69,6 +71,44 @@ export default function RawasiFilterSidebar({
     window.dispatchEvent(new CustomEvent('globalDateFilter', { detail: { start, end } }));
   };
 
+  const applyPreset = (preset: 'today' | 'week' | 'month' | 'year') => {
+    setActivePreset(preset);
+    const now = new Date();
+    const pad = (n: number) => String(n).padStart(2, '0');
+    const toDateStr = (d: Date) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+
+    let start = '';
+    const end = toDateStr(now);
+
+    if (preset === 'today') {
+      start = end;
+    } else if (preset === 'week') {
+      const weekAgo = new Date(now);
+      weekAgo.setDate(now.getDate() - 7);
+      start = toDateStr(weekAgo);
+    } else if (preset === 'month') {
+      const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+      start = toDateStr(firstDay);
+    } else if (preset === 'year') {
+      const firstDay = new Date(now.getFullYear(), 0, 1);
+      start = toDateStr(firstDay);
+    }
+
+    setDates({ start, end });
+    handleDateChange(start, end);
+  };
+
+  const handleClearDates = () => {
+    setActivePreset(null);
+    setDates({ start: '', end: '' });
+    handleDateChange('', '');
+  };
+
+  const handleClearSearch = () => {
+    setSearchTerm('');
+    handleSearch('');
+  };
+
   if (!mounted) return null;
 
   return (
@@ -81,16 +121,16 @@ export default function RawasiFilterSidebar({
         .filter-sidebar-v3 {
           position: fixed;
           top: 20px;
-          right: ${isOpen ? '20px' : '-340px'};
+          right: ${isOpen ? '20px' : '-360px'};
           bottom: 20px;
-          width: 310px;
+          width: 320px;
           background: rgba(255, 255, 255, 0.88);
-          backdrop-filter: blur(30px) saturate(180%);
-          -webkit-backdrop-filter: blur(30px);
+          backdrop-filter: blur(35px) saturate(200%);
+          -webkit-backdrop-filter: blur(35px);
           border-radius: 24px;
           box-shadow: 0 15px 45px rgba(28, 115, 171, 0.12), -10px 15px 40px rgba(0,0,0,0.08);
           z-index: 1000;
-          transition: right 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+          transition: right 0.38s cubic-bezier(0.165, 0.84, 0.44, 1);
           border: 1.5px solid rgba(255, 255, 255, 0.95);
           overflow: hidden;
           color: ${textColor};
@@ -132,79 +172,114 @@ export default function RawasiFilterSidebar({
           background: #1C73AB;
         }
 
-        /* 👑 Header Bar */
+        /* 👑 Header Bar - Sleek, Uncluttered, No Overlapping */
         .sidebar-header-bar {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 14px 18px;
-          border-bottom: 1.5px solid rgba(28, 115, 171, 0.12);
-          background: rgba(255, 255, 255, 0.6);
-          flex-shrink: 0;
-          gap: 10px;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: space-between !important;
+          padding: 12px 16px !important;
+          border-bottom: 1.5px solid rgba(28, 115, 171, 0.12) !important;
+          background: rgba(255, 255, 255, 0.75) !important;
+          flex-shrink: 0 !important;
+          gap: 10px !important;
+          width: 100% !important;
         }
         .sidebar-header-info {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-          min-width: 0;
-          flex: 1;
+          display: flex !important;
+          align-items: center !important;
+          gap: 10px !important;
+          min-width: 0 !important;
+          flex: 1 !important;
         }
         .sidebar-header-logo {
-          width: 36px;
-          height: 36px;
-          border-radius: 10px;
-          object-fit: contain;
-          border: 1px solid rgba(28, 115, 171, 0.2);
-          padding: 2px;
-          background: white;
+          width: 36px !important;
+          height: 36px !important;
+          border-radius: 10px !important;
+          object-fit: contain !important;
+          border: 1px solid rgba(28, 115, 171, 0.2) !important;
+          padding: 2px !important;
+          background: white !important;
           box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-          flex-shrink: 0;
+          flex-shrink: 0 !important;
         }
         .sidebar-header-titles {
-          display: flex;
-          flex-direction: column;
-          min-width: 0;
+          display: flex !important;
+          flex-direction: column !important;
+          min-width: 0 !important;
+          flex: 1 !important;
         }
         .sidebar-main-title {
-          font-size: 15px;
-          font-weight: 900;
-          color: #122946;
-          margin: 0;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
+          font-size: 14.5px !important;
+          font-weight: 900 !important;
+          color: #122946 !important;
+          margin: 0 !important;
+          white-space: nowrap !important;
+          overflow: hidden !important;
+          text-overflow: ellipsis !important;
+          line-height: 1.2 !important;
         }
         .sidebar-sub-badge {
-          font-size: 10.5px;
-          font-weight: 700;
-          color: #1C73AB;
+          font-size: 10.5px !important;
+          font-weight: 700 !important;
+          color: #1C73AB !important;
+          margin-top: 2px !important;
+          white-space: nowrap !important;
         }
-        .sidebar-close-or-pin-btn {
-          width: 34px;
-          height: 34px;
-          border-radius: 10px;
-          background: rgba(28, 115, 171, 0.08);
-          border: 1px solid rgba(28, 115, 171, 0.18);
-          color: #1C73AB;
-          cursor: pointer;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: 14px;
-          font-weight: 900;
-          transition: all 0.2s;
-          flex-shrink: 0;
+        
+        .sidebar-header-actions {
+          display: flex !important;
+          align-items: center !important;
+          gap: 6px !important;
+          flex-shrink: 0 !important;
         }
-        .sidebar-close-or-pin-btn:hover {
-          background: rgba(28, 115, 171, 0.18);
-          transform: scale(1.05);
+        .sidebar-header-action-btn {
+          width: 32px !important;
+          min-width: 32px !important;
+          max-width: 32px !important;
+          height: 32px !important;
+          min-height: 32px !important;
+          max-height: 32px !important;
+          border-radius: 10px !important;
+          border: 1px solid rgba(28, 115, 171, 0.18) !important;
+          background: rgba(255, 255, 255, 0.85) !important;
+          color: #1C73AB !important;
+          cursor: pointer !important;
+          display: inline-flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          font-size: 13px !important;
+          font-weight: 900 !important;
+          padding: 0 !important;
+          margin: 0 !important;
+          transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+          box-shadow: 0 2px 5px rgba(0,0,0,0.03) !important;
+        }
+        .sidebar-header-action-btn:hover {
+          background: #ffffff !important;
+          transform: translateY(-1px) !important;
+          box-shadow: 0 4px 10px rgba(28, 115, 171, 0.15) !important;
+          border-color: #1C73AB !important;
+        }
+        .sidebar-header-action-btn.pin.is-pinned {
+          background: rgba(28, 115, 171, 0.15) !important;
+          border-color: #1C73AB !important;
+          color: #1C73AB !important;
+        }
+        .sidebar-header-action-btn.close {
+          color: #ef4444 !important;
+          border-color: rgba(239, 68, 68, 0.25) !important;
+          background: rgba(239, 68, 68, 0.08) !important;
+        }
+        .sidebar-header-action-btn.close:hover {
+          background: #fee2e2 !important;
+          color: #dc2626 !important;
+          border-color: #fca5a5 !important;
         }
 
         /* 📜 Scrollable Content */
         .filter-content {
           width: 100%;
-          padding: 16px 18px 24px 18px;
+          padding: 16px 16px 24px 16px;
           display: flex;
           flex-direction: column;
           gap: 16px;
@@ -288,87 +363,199 @@ export default function RawasiFilterSidebar({
           display: block !important;
         }
 
-        /* ⚡ Action Buttons */
+        /* ⚡ Action Buttons (Strictly Scoped so it doesn't affect header buttons) */
         .sidebar-actions-grid {
           display: flex;
           flex-direction: column;
           gap: 8px;
           width: 100%;
         }
-        .filter-sidebar-v3 .btn-main-glass,
-        .filter-sidebar-v3 button[class*="btn"] {
+        .sidebar-actions-grid button,
+        .sidebar-actions-grid .btn-main-glass {
           width: 100% !important;
-          background: linear-gradient(135deg, #1C73AB 0%, #2891C8 100%) !important;
-          color: white !important;
-          border: none !important;
           border-radius: 12px !important;
-          padding: 10px 14px !important;
-          font-size: 13px !important;
+          padding: 11px 14px !important;
+          font-size: 12.5px !important;
           font-weight: 800 !important;
-          box-shadow: 0 4px 14px rgba(28, 115, 171, 0.25) !important;
           min-height: 42px !important;
           display: flex !important;
           align-items: center !important;
           justify-content: center !important;
           gap: 8px !important;
           cursor: pointer !important;
-          transition: all 0.2s ease !important;
+          transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+          border: 1px solid rgba(255, 255, 255, 0.5) !important;
+          box-shadow: 0 4px 14px rgba(28, 115, 171, 0.15) !important;
         }
-        .filter-sidebar-v3 .btn-main-glass:hover,
-        .filter-sidebar-v3 button[class*="btn"]:hover {
+        .sidebar-actions-grid button:hover,
+        .sidebar-actions-grid .btn-main-glass:hover {
           transform: translateY(-2px) !important;
-          box-shadow: 0 6px 18px rgba(28, 115, 171, 0.35) !important;
+          box-shadow: 0 6px 18px rgba(28, 115, 171, 0.25) !important;
+          filter: brightness(1.08) !important;
         }
 
-        /* 🔍 Inputs & Dates */
-        .filter-input,
-        .filter-sidebar-v3 input[type="text"],
-        .filter-sidebar-v3 input[type="search"],
-        .filter-sidebar-v3 input[type="date"],
-        .filter-sidebar-v3 select {
+        /* 🔍 Search Box */
+        .sidebar-search-box {
+          position: relative;
+          display: flex;
+          align-items: center;
+          width: 100%;
+        }
+        .sidebar-search-input {
           width: 100% !important;
-          background: rgba(255, 255, 255, 0.96) !important;
+          height: 40px !important;
+          min-height: 40px !important;
+          background: rgba(255, 255, 255, 0.95) !important;
           border: 1.5px solid rgba(28, 115, 171, 0.22) !important;
           border-radius: 12px !important;
-          padding: 10px 14px !important;
+          padding: 0 12px 0 34px !important;
           color: #122946 !important;
           font-weight: 700 !important;
-          font-size: 13.5px !important;
+          font-size: 13px !important;
           direction: rtl !important;
           text-align: right !important;
           outline: none !important;
           transition: all 0.2s ease !important;
           box-shadow: 0 2px 6px rgba(28, 115, 171, 0.04) !important;
         }
-        .filter-input:focus,
-        .filter-sidebar-v3 input:focus,
-        .filter-sidebar-v3 select:focus {
+        .sidebar-search-input:focus {
           border-color: #1C73AB !important;
-          background: #ffffff !important;
           box-shadow: 0 0 0 3px rgba(28, 115, 171, 0.15) !important;
+          background: #ffffff !important;
         }
-        .filter-input::placeholder {
-          color: #94a3b8 !important;
-          font-weight: 600 !important;
+        .search-icon-box {
+          position: absolute;
+          left: 10px;
+          pointer-events: none;
+          font-size: 13px;
+          color: #94a3b8;
+        }
+        .search-clear-btn {
+          position: absolute;
+          right: 8px;
+          background: rgba(239, 68, 68, 0.08) !important;
+          border: none !important;
+          color: #ef4444 !important;
+          font-size: 11px !important;
+          font-weight: 900 !important;
+          cursor: pointer !important;
+          width: 22px !important;
+          height: 22px !important;
+          border-radius: 50% !important;
+          display: flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          transition: all 0.2s !important;
+        }
+        .search-clear-btn:hover {
+          background: #fee2e2 !important;
+          color: #dc2626 !important;
         }
 
-        .sidebar-date-grid {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: 10px;
-          margin-top: 8px;
-          width: 100%;
+        /* 📅 Date Filter - Stacked & Comfortable Layout */
+        .sidebar-date-presets {
+          display: flex;
+          align-items: center;
+          gap: 5px;
+          flex-wrap: wrap;
+          margin-bottom: 6px;
         }
-        .sidebar-date-col {
+        .date-preset-pill {
+          background: rgba(255, 255, 255, 0.75) !important;
+          border: 1px solid rgba(28, 115, 171, 0.2) !important;
+          border-radius: 8px !important;
+          padding: 3px 9px !important;
+          font-size: 11px !important;
+          font-weight: 800 !important;
+          color: #475569 !important;
+          cursor: pointer !important;
+          transition: all 0.2s ease !important;
+          display: inline-flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          height: 26px !important;
+          min-height: 26px !important;
+          box-shadow: 0 1px 3px rgba(0,0,0,0.02) !important;
+        }
+        .date-preset-pill:hover {
+          background: rgba(28, 115, 171, 0.1) !important;
+          color: #1C73AB !important;
+          border-color: #1C73AB !important;
+          transform: translateY(-1px) !important;
+        }
+        .date-preset-pill.active {
+          background: #1C73AB !important;
+          color: white !important;
+          border-color: #1C73AB !important;
+          box-shadow: 0 2px 8px rgba(28, 115, 171, 0.25) !important;
+        }
+        .date-clear-pill {
+          margin-inline-start: auto;
+          background: rgba(239, 68, 68, 0.08) !important;
+          color: #ef4444 !important;
+          border: 1px solid rgba(239, 68, 68, 0.25) !important;
+          border-radius: 6px !important;
+          padding: 2px 7px !important;
+          font-size: 10px !important;
+          font-weight: 800 !important;
+          cursor: pointer !important;
+          transition: all 0.2s !important;
+        }
+        .date-clear-pill:hover {
+          background: #fee2e2 !important;
+          color: #dc2626 !important;
+        }
+
+        .sidebar-date-stack {
           display: flex;
           flex-direction: column;
-          gap: 4px;
+          gap: 8px;
+          width: 100%;
         }
-        .sidebar-date-label {
-          font-size: 11px;
+        .sidebar-date-row {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          width: 100%;
+        }
+        .sidebar-date-tag {
+          width: 36px;
+          min-width: 36px;
+          height: 38px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 11.5px;
           font-weight: 800;
           color: #1C73AB;
+          background: rgba(28, 115, 171, 0.08);
+          border: 1px solid rgba(28, 115, 171, 0.18);
+          border-radius: 10px;
+          flex-shrink: 0;
         }
+        .sidebar-date-input {
+          flex: 1;
+          min-width: 0;
+          height: 38px !important;
+          min-height: 38px !important;
+          background: rgba(255, 255, 255, 0.95) !important;
+          border: 1.5px solid rgba(28, 115, 171, 0.2) !important;
+          border-radius: 10px !important;
+          padding: 0 10px !important;
+          color: #122946 !important;
+          font-weight: 700 !important;
+          font-size: 12px !important;
+          direction: rtl !important;
+          outline: none !important;
+          transition: all 0.2s !important;
+          box-shadow: 0 2px 5px rgba(28, 115, 171, 0.03) !important;
+        }
+        .sidebar-date-input:focus {
+          border-color: #1C73AB !important;
+          background: white !important;
+          box-shadow: 0 0 0 3px rgba(28, 115, 171, 0.15) !important;
+        }
+
         .sidebar-custom-filters-wrap {
           margin-top: 10px;
           padding-top: 10px;
@@ -401,7 +588,7 @@ export default function RawasiFilterSidebar({
             bottom: 0;
             height: 100vh;
             width: 24px;
-            background: rgba(255, 255, 255, 0.6);
+            background: rgba(255, 255, 255, 0.65);
             backdrop-filter: blur(10px);
             color: #1C73AB;
             padding: 0 4px;
@@ -431,7 +618,7 @@ export default function RawasiFilterSidebar({
             left: 0 !important;
             width: 100% !important;
             max-width: 100% !important;
-            max-height: 85vh !important;
+            max-height: 82vh !important;
             border-radius: 24px 24px 0 0 !important;
             border: 1.5px solid rgba(255, 255, 255, 0.95) !important;
             border-bottom: none !important;
@@ -444,7 +631,7 @@ export default function RawasiFilterSidebar({
             width: 100% !important;
             max-width: 100% !important;
             padding: 12px 16px 35px 16px !important;
-            max-height: calc(85vh - 65px) !important;
+            max-height: calc(82vh - 65px) !important;
           }
 
           .filter-toggle-tab-v3 {
@@ -509,21 +696,38 @@ export default function RawasiFilterSidebar({
             <img src={logoPath} alt="Logo" className="sidebar-header-logo" />
             <div className="sidebar-header-titles">
               <h2 className="sidebar-main-title">{title}</h2>
-              <span className="sidebar-sub-badge">لوحة الفلاتر والملخص</span>
+              <span className="sidebar-sub-badge">لوحة التحكم والملخص</span>
             </div>
           </div>
 
-          <button 
-            type="button"
-            className="sidebar-close-or-pin-btn" 
-            onClick={(e) => { 
-              e.stopPropagation(); 
-              setIsPinned(!isPinned); 
-            }}
-            title={isMobile ? 'إغلاق' : (isPinned ? 'إلغاء التثبيت' : 'تثبيت اللوحة')}
-          >
-            <span>{isMobile ? '✕' : (isPinned ? '📌' : '📍')}</span>
-          </button>
+          <div className="sidebar-header-actions">
+            {!isMobile && (
+              <button 
+                type="button"
+                className={`sidebar-header-action-btn pin ${isPinned ? 'is-pinned' : ''}`} 
+                onClick={(e) => { 
+                  e.stopPropagation(); 
+                  setIsPinned(!isPinned); 
+                }}
+                title={isPinned ? 'إلغاء التثبيت' : 'تثبيت اللوحة دائماً'}
+              >
+                <span>{isPinned ? '📌' : '📍'}</span>
+              </button>
+            )}
+
+            <button 
+              type="button"
+              className="sidebar-header-action-btn close" 
+              onClick={(e) => { 
+                e.stopPropagation(); 
+                setIsPinned(false); 
+                setIsHovered(false);
+              }}
+              title="إغلاق السايد بار"
+            >
+              <span>✕</span>
+            </button>
+          </div>
         </div>
 
         <div className="filter-content cinematic-scroll">
@@ -560,29 +764,97 @@ export default function RawasiFilterSidebar({
             </div>
           )}
 
-          {/* 🔍 Search & Filters */}
+          {/* 🔍 Search Section */}
           <div className="sidebar-section">
             <div className="sidebar-section-header">
               <span className="sidebar-section-icon">🔍</span>
-              <span className="sidebar-section-title">البحث وتصفية التاريخ</span>
+              <span className="sidebar-section-title">البحث السريع</span>
             </div>
             
             <div className="sidebar-search-box">
+              <span className="search-icon-box">🔍</span>
               <input 
                 type="text" 
-                className="filter-input search" 
+                className="sidebar-search-input" 
                 placeholder="ابحث هنا عن أي بيان..." 
-                onChange={(e) => handleSearch(e.target.value)} 
+                value={searchTerm}
+                onChange={(e) => {
+                  setSearchTerm(e.target.value);
+                  handleSearch(e.target.value);
+                }} 
               />
+              {searchTerm && (
+                <button
+                  type="button"
+                  className="search-clear-btn"
+                  onClick={handleClearSearch}
+                  title="مسح البحث"
+                >
+                  ✕
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* 📅 Date Filter Section */}
+          <div className="sidebar-section">
+            <div className="sidebar-section-header">
+              <span className="sidebar-section-icon">📅</span>
+              <span className="sidebar-section-title">الفترة الزمنية</span>
+              {(dates.start || dates.end) && (
+                <button
+                  type="button"
+                  className="date-clear-pill"
+                  onClick={handleClearDates}
+                  title="مسح تصفية التاريخ"
+                >
+                  مسح ✕
+                </button>
+              )}
             </div>
 
-            <div className="sidebar-date-grid">
-              <div className="sidebar-date-col">
-                <label className="sidebar-date-label">من تاريخ 📅</label>
+            {/* Quick Presets */}
+            <div className="sidebar-date-presets">
+              <button
+                type="button"
+                className={`date-preset-pill ${activePreset === 'today' ? 'active' : ''}`}
+                onClick={() => applyPreset('today')}
+              >
+                اليوم
+              </button>
+              <button
+                type="button"
+                className={`date-preset-pill ${activePreset === 'week' ? 'active' : ''}`}
+                onClick={() => applyPreset('week')}
+              >
+                أسبوع
+              </button>
+              <button
+                type="button"
+                className={`date-preset-pill ${activePreset === 'month' ? 'active' : ''}`}
+                onClick={() => applyPreset('month')}
+              >
+                هذا الشهر
+              </button>
+              <button
+                type="button"
+                className={`date-preset-pill ${activePreset === 'year' ? 'active' : ''}`}
+                onClick={() => applyPreset('year')}
+              >
+                هذا العام
+              </button>
+            </div>
+
+            {/* Stacked Clean Date Inputs (Full Width) */}
+            <div className="sidebar-date-stack">
+              <div className="sidebar-date-row">
+                <span className="sidebar-date-tag">من</span>
                 <input 
                   type="date" 
-                  className="filter-input date" 
+                  className="sidebar-date-input" 
+                  value={dates.start}
                   onChange={(e) => {
+                    setActivePreset(null);
                     const d = { ...dates, start: e.target.value };
                     setDates(d);
                     handleDateChange(d.start, d.end);
@@ -590,12 +862,14 @@ export default function RawasiFilterSidebar({
                 />
               </div>
 
-              <div className="sidebar-date-col">
-                <label className="sidebar-date-label">إلى تاريخ 📅</label>
+              <div className="sidebar-date-row">
+                <span className="sidebar-date-tag">إلى</span>
                 <input 
                   type="date" 
-                  className="filter-input date" 
+                  className="sidebar-date-input" 
+                  value={dates.end}
                   onChange={(e) => {
+                    setActivePreset(null);
                     const d = { ...dates, end: e.target.value };
                     setDates(d);
                     handleDateChange(d.start, d.end);

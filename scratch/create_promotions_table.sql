@@ -1,5 +1,5 @@
--- 1. Create Promotions Table
-CREATE TABLE public.promotions (
+-- 1. Create Promotions Table (Idempotent)
+CREATE TABLE IF NOT EXISTS public.promotions (
     id uuid DEFAULT gen_random_uuid() NOT NULL PRIMARY KEY,
     name character varying(255) NOT NULL,
     description text,
@@ -17,11 +17,26 @@ CREATE TABLE public.promotions (
 -- 2. Add RLS Policies
 ALTER TABLE public.promotions ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Enable read access for all users" ON public.promotions;
 CREATE POLICY "Enable read access for all users" ON public.promotions
     FOR SELECT USING (true);
 
+DROP POLICY IF EXISTS "Enable all access for authenticated users" ON public.promotions;
 CREATE POLICY "Enable all access for authenticated users" ON public.promotions
     FOR ALL USING (auth.role() = 'authenticated');
 
--- 3. Add to realtime if needed
--- alter publication supabase_realtime add table public.promotions;
+-- Fallback policy allowing application operations if running without Supabase JWT
+DROP POLICY IF EXISTS "Enable all operations for all users" ON public.promotions;
+CREATE POLICY "Enable all operations for all users" ON public.promotions
+    FOR ALL USING (true) WITH CHECK (true);
+
+-- 3. Add to Realtime (optional if publication exists)
+DO $$
+BEGIN
+    IF EXISTS (SELECT 1 FROM pg_publication WHERE pubname = 'supabase_realtime') THEN
+        ALTER PUBLICATION supabase_realtime ADD TABLE public.promotions;
+    END IF;
+EXCEPTION
+    WHEN duplicate_object THEN NULL;
+    WHEN others THEN NULL;
+END $$;

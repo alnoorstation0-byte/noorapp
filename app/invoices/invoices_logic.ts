@@ -43,6 +43,8 @@ export function useInvoicesLogic() {
     const deferredSearch = useDeferredValue(globalSearch); 
     const [dateFrom, setDateFrom] = useState('');
     const [dateTo, setDateTo] = useState('');
+    const [statusFilter, setStatusFilter] = useState<'all' | 'posted' | 'pending' | 'unpaid' | 'overdue'>('all');
+    const [togglingId, setTogglingId] = useState<string | null>(null);
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [rowsPerPage, setRowsPerPage] = useState(50);
@@ -163,7 +165,8 @@ export function useInvoicesLogic() {
             const searchLower = (deferredSearch || '').toLowerCase();
             const matchesSearch = 
                 inv.invoice_number?.toLowerCase().includes(searchLower) || 
-                inv.client_name?.toLowerCase().includes(searchLower);
+                inv.client_name?.toLowerCase().includes(searchLower) ||
+                inv.partners?.name?.toLowerCase().includes(searchLower);
             
             let matchesDate = true;
             const invDate = inv.date ? new Date(inv.date) : null;
@@ -171,7 +174,22 @@ export function useInvoicesLogic() {
                 if (dateFrom) matchesDate = matchesDate && invDate >= new Date(dateFrom);
                 if (dateTo) matchesDate = matchesDate && invDate <= new Date(dateTo);
             }
-            return matchesSearch && matchesDate;
+
+            const total = Number(inv.total_amount || 0);
+            const paid = Number(inv.paid_amount || 0);
+            const isApproved = inv.status === 'posted' || inv.status === 'معتمد';
+
+            let matchesStatus = true;
+            if (statusFilter === 'posted') matchesStatus = isApproved;
+            else if (statusFilter === 'pending') matchesStatus = !isApproved;
+            else if (statusFilter === 'unpaid') matchesStatus = (total - paid) > 0;
+            else if (statusFilter === 'overdue') {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                matchesStatus = (total - paid) > 0 && !!inv.due_date && new Date(inv.due_date) < today;
+            }
+
+            return matchesSearch && matchesDate && matchesStatus;
         }).map((inv: any) => {
             const total = Number(inv.total_amount || 0);
             const paid = Number(inv.paid_amount || 0);
@@ -188,12 +206,27 @@ export function useInvoicesLogic() {
                 payment_display_status: paymentStatus
             };
         });
-    }, [invoices, deferredSearch, dateFrom, dateTo]);
+    }, [invoices, deferredSearch, dateFrom, dateTo, statusFilter]);
 
     const paginatedInvoices = useMemo(() => {
         const start = (currentPage - 1) * rowsPerPage;
         return allFiltered.slice(start, start + rowsPerPage);
     }, [allFiltered, currentPage, rowsPerPage]);
+
+    const filterStats = useMemo(() => {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        return {
+            all: invoices.length,
+            posted: invoices.filter((i: any) => i.status === 'posted' || i.status === 'معتمد').length,
+            pending: invoices.filter((i: any) => i.status !== 'posted' && i.status !== 'معتمد').length,
+            unpaid: invoices.filter((i: any) => (Number(i.total_amount || 0) - Number(i.paid_amount || 0)) > 0).length,
+            overdue: invoices.filter((i: any) => (Number(i.total_amount || 0) - Number(i.paid_amount || 0)) > 0 && !!i.due_date && new Date(i.due_date) < today).length,
+            totalSales: invoices.reduce((sum: number, i: any) => sum + Number(i.total_amount || 0), 0),
+            totalCollected: invoices.reduce((sum: number, i: any) => sum + Number(i.paid_amount || 0), 0),
+            totalRemaining: invoices.reduce((sum: number, i: any) => sum + Math.max(0, Number(i.total_amount || 0) - Number(i.paid_amount || 0)), 0),
+        };
+    }, [invoices]);
 
     const kpis = useMemo(() => ({
         total: allFiltered.length,
@@ -449,13 +482,53 @@ export function useInvoicesLogic() {
         handleUnpostSelected: () => unpostMutation.mutate(), 
         warehouseItems,
         handleDeleteSelected: () => {
-            const posted = invoices.filter((inv:any) => selectedIds.includes(String(inv.id)) && inv.status === 'معتمد');
+            const posted = invoices.filter((inv:any) => selectedIds.includes(String(inv.id)) && (inv.status === 'معتمد' || inv.status === 'posted'));
             if (posted.length > 0) {
-                return showToast("⚠️ لا يمكن حذف فواتير معتمدة. يرجى فك الترحيل أولاً.", "error");
+                return showToast("⚠️ لا يمكن حذف فواتير معتمدة ومرحلة. يرجى فك الترحيل أولاً.", "error");
             }
             if (!selectedIds.length || !confirm("هل أنت متأكد من الحذف النهائي للفواتير والقيود المرتبطة بها؟")) return;
             deleteMutation.mutate();
         },
+        handleDeleteSingle: async (inv: any) => {
+            if (inv.status === 'posted' || inv.status === 'معتمد') {
+                return showToast("⚠️ لا يمكن حذف فاتورة معتمدة ومرحلة، يرجى فك الترحيل أولاً.", "error");
+            }
+            if (!confirm(`تحذير: هل أنت متأكد من حذف الفاتورة #${inv.invoice_number} نهائياً؟`)) return;
+            try {
+                const { error } = await supabase.rpc('delete_invoices_bulk', { p_ids: [inv.id] });
+                if (error) throw error;
+                showToast(`تم حذف الفاتورة #${inv.invoice_number} بنجاح 🗑️`, "success");
+                queryClient.invalidateQueries({ queryKey: ['invoices'] });
+            } catch (err: any) {
+                showToast(`فشل الحذف: ${err.message}`, "error");
+            }
+        },
+        handleToggleStatus: async (inv: any) => {
+            const isApproved = inv.status === 'posted' || inv.status === 'معتمد';
+            setTogglingId(String(inv.id));
+            try {
+                if (isApproved) {
+                    if (!confirm(`هل أنت متأكد من فك ترحيل واعتماد الفاتورة #${inv.invoice_number}؟`)) return;
+                    const { error } = await supabase.rpc('unpost_invoices_bulk', { p_ids: [inv.id] });
+                    if (error) throw error;
+                    showToast(`تم فك اعتماد الفاتورة #${inv.invoice_number} 🔄`, "warning");
+                } else {
+                    const { error } = await supabase.rpc('post_invoices_bulk', { p_ids: [inv.id] });
+                    if (error) throw error;
+                    showToast(`تم اعتماد وترحيل الفاتورة #${inv.invoice_number} بنجاح ✅`, "success");
+                }
+                queryClient.invalidateQueries({ queryKey: ['invoices'] });
+                queryClient.invalidateQueries({ queryKey: ['accounts_report_with_lines'] }); 
+                queryClient.invalidateQueries({ queryKey: ['journal_master_view'] }); 
+            } catch (err: any) {
+                showToast(`خطأ في تغيير حالة الفاتورة: ${err.message}`, "error");
+            } finally {
+                setTogglingId(null);
+            }
+        },
+        statusFilter, setStatusFilter: (v: 'all' | 'posted' | 'pending' | 'unpaid' | 'overdue') => { setStatusFilter(v); setCurrentPage(1); },
+        togglingId,
+        filterStats,
         handleSavePayment: (record: any) => payMutation.mutate(record), 
     };
 }

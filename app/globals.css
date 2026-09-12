@@ -710,9 +710,9 @@ td {
       box-sizing: border-box !important;
   }
   
-  /* Fix buttons that overflow (excluding table action buttons, filter buttons, and compact buttons) */
-  button:not(.table-action-btn):not([class*="table-action"]):not(.filter-btn):not(.custom-checkbox):not([class*="compact"]):not([class*="icon"]):not(table button),
-  a[role="button"]:not(.table-action-btn) {
+  /* Fix buttons that overflow (excluding table action buttons, filter buttons, compact buttons, tabs and pills) */
+  button:not(.table-action-btn):not([class*="table-action"]):not(.filter-btn):not(.custom-checkbox):not([class*="compact"]):not([class*="icon"]):not(table button):not([class*="tab"]):not([class*="pill"]):not([class*="chip"]):not([class*="badge"]):not(.notif-tab-btn):not(.tab-btn),
+  a[role="button"]:not(.table-action-btn):not([class*="tab"]):not(.tab-btn) {
       max-width: 100% !important;
       box-sizing: border-box !important;
       white-space: normal !important; 
@@ -720,6 +720,26 @@ td {
       word-break: break-word !important;
       flex-shrink: 1 !important; 
       min-height: 44px !important; 
+  }
+
+  /* 📱 Tab and Category Buttons Protection: Never wrap or break vertically */
+  .tab-btn,
+  [class*="tab-btn"],
+  [class*="nav-tab"],
+  .notif-tab,
+  .notif-tab-btn,
+  [role="tab"] {
+      white-space: nowrap !important;
+      word-break: keep-all !important;
+      word-wrap: normal !important;
+      flex-shrink: 0 !important;
+      width: auto !important;
+      max-width: none !important;
+      min-height: 36px !important;
+      display: inline-flex !important;
+      flex-direction: row !important;
+      align-items: center !important;
+      justify-content: center !important;
   }
 
   /* 📱 Table Action Buttons Protection: Never wrap or break vertically inside tables */
@@ -781,7 +801,7 @@ td {
   /* ─── 5. Layouts & Sidebars ─── */
   .dashboard-layout, .main-layout, .sidebar-container { flex-direction: column !important; }
   
-  aside, .sidebar {
+  aside:not(.filter-sidebar-v3), .sidebar:not(.filter-sidebar-v3) {
     width: 100% !important; min-width: 100% !important;
     margin-bottom: 15px !important; border-radius: 12px !important;
     height: auto !important; min-height: unset !important;

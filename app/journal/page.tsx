@@ -275,7 +275,7 @@ function useJournalLogic() {
             setRowActionLoadingId(headerId);
             try {
                 const res = await reconcileShiftOnJournalDeletion([headerId]);
-                if (res?.affectedShiftsCount > 0) {
+                if ((res?.affectedShiftsCount ?? 0) > 0) {
                     showToast(`تم حذف القيد وتعديل أرقام الوردية المرتبطة بنجاح 🔄`, 'success');
                 } else {
                     showToast('تم حذف القيد بنجاح 🗑️', 'success');

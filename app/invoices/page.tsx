@@ -207,10 +207,24 @@ export default function InvoicesPage() {
       render: (row: any) => {
         if (!row) return null; 
         const isApproved = row.status === 'posted' || row.status === 'معتمد';
+        const isToggling = String(logic.togglingId) === String(row.id);
+        
         return (
-          <div className={`approval-glass-badge ${isApproved ? 'approved' : 'pending'}`}>
-            <span className="dot"></span>
-            {isApproved ? 'معتمد' : 'معلق'}
+          <div onClick={(e) => e.stopPropagation()} style={{ display: 'inline-flex', alignItems: 'center' }}>
+            <button
+              type="button"
+              onClick={() => logic.handleToggleStatus(row)}
+              disabled={isToggling}
+              className={`invoice-status-pill ${isApproved ? 'approved' : 'pending'}`}
+              title={isApproved ? "فاتورة معتمدة ومرحلة — انقر لفك الاعتماد 🔄" : "فاتورة معلقة — انقر للاعتماد والترحيل ✅"}
+            >
+              {isToggling ? (
+                <span style={{ display: 'inline-block', animation: 'spin 1s linear infinite' }}>⏳</span>
+              ) : (
+                <span className={`status-dot ${isApproved ? 'green' : 'amber'}`} />
+              )}
+              <span>{isApproved ? 'معتمد' : 'معلق'}</span>
+            </button>
           </div>
         );
       }
@@ -222,12 +236,15 @@ export default function InvoicesPage() {
         if (!row) return null; 
         const total = Number(row.total_amount || 0);
         const paid = Number(row.paid_amount || 0);
+        const balance = total - paid;
         
-        // 🚀 حالات الدفع (مكتمل أو بزيادة)
-        if (paid > total && total > 0) return <span className="deadline-badge paid" style={{background: 'rgba(40, 145, 200, 0.1)', color: THEME.accent, border: '1px solid rgba(40, 145, 200, 0.3)'}}>💸 سداد بزيادة</span>;
-        if (paid === total && total > 0) return <span className="deadline-badge paid" style={{background: 'rgba(16, 185, 129, 0.1)', color: THEME.success, border: '1px solid rgba(16, 185, 129, 0.3)'}}>✅ مكتمل</span>;
+        if (paid > total && total > 0) return <span className="invoice-pay-badge overpaid">💸 سداد بزيادة</span>;
+        if (paid === total && total > 0) return <span className="invoice-pay-badge paid">✅ مكتمل</span>;
         
-        if (!row.due_date) return <span style={{color:'#475569', fontWeight: 'bold'}}>---</span>;
+        if (!row.due_date) {
+          if (paid > 0) return <span className="invoice-pay-badge partial">⏳ متبقي {formatCurrency(balance)}</span>;
+          return <span style={{ color: '#94a3b8', fontSize: '11px', fontWeight: 700 }}>آجل</span>;
+        }
         
         const today = new Date();
         const due = new Date(row.due_date);
@@ -236,9 +253,9 @@ export default function InvoicesPage() {
         const diffTime = due.getTime() - today.getTime();
         const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
         
-        if (diffDays < 0) return <div className="deadline-badge overdue">⚠️ متأخر ({Math.abs(diffDays)} يوم)</div>;
-        if (diffDays === 0) return <div className="deadline-badge today">🚨 السداد اليوم</div>;
-        return <div className="deadline-badge active">⏳ متبقي {diffDays} يوم</div>;
+        if (diffDays < 0) return <span className="invoice-pay-badge overdue">⚠️ متأخر ({Math.abs(diffDays)} يوم)</span>;
+        if (diffDays === 0) return <span className="invoice-pay-badge today">🚨 السداد اليوم</span>;
+        return <span className="invoice-pay-badge active">⏳ متبقي {diffDays} يوم</span>;
       }
     },
     {
@@ -249,21 +266,47 @@ export default function InvoicesPage() {
         const total = Number(row.total_amount || 0);
         const paid = Number(row.paid_amount || 0);
         const balance = total - paid;
-        
-        // 🚀 الشرط اللي بيخفي الزرار لو الفاتورة مسددة أو بزيادة
         const needsPayment = balance > 0; 
         const isApproved = row.status === 'posted' || row.status === 'معتمد' || row.is_posted === true;
         
         return (
-          <div style={{ display: 'flex', gap: '10px', justifyContent: 'center', alignItems: 'center' }}>
-            <button onClick={(e) => { e.stopPropagation(); setPrintData(row); setIsPrintModalOpen(true); }} className="btn-glass-print" title="طباعة الفاتورة" style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '18px', transition: '0.2s' }}>🖨️</button>
+          <div onClick={(e) => e.stopPropagation()} style={{ display: 'inline-flex', gap: '6px', alignItems: 'center' }}>
+            <button 
+              onClick={() => { setPrintData(row); setIsPrintModalOpen(true); }} 
+              className="inv-row-btn print" 
+              title="طباعة الفاتورة"
+            >
+              🖨️
+            </button>
             
-            {/* 🚀 السحر هنا: دمجنا needsPayment في الشرط عشان يخفي الزرار */}
             {needsPayment && isApproved && logic.handleOpenPaymentModal && (
-              <button onClick={(e) => {
-                  e.stopPropagation(); 
-                  logic.handleOpenPaymentModal(row); 
-                }} className="btn-glass-pay" title="تسجيل سند قبض / دفعة إضافية" style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '18px', transition: '0.2s' }}>💰</button>
+              <button 
+                onClick={() => logic.handleOpenPaymentModal(row)} 
+                className="inv-row-btn pay" 
+                title="تسجيل سند قبض / دفعة سداد"
+              >
+                💰
+              </button>
+            )}
+
+            {!isApproved && (
+              <button 
+                onClick={() => logic.handleEdit(row)} 
+                className="inv-row-btn edit" 
+                title="تعديل بيانات الفاتورة"
+              >
+                ✏️
+              </button>
+            )}
+
+            {!isApproved && (
+              <button 
+                onClick={() => logic.handleDeleteSingle(row)} 
+                className="inv-row-btn delete" 
+                title="حذف الفاتورة"
+              >
+                🗑️
+              </button>
             )}
           </div>
         );
@@ -356,31 +399,591 @@ export default function InvoicesPage() {
         .btn-main-glass.white { background: rgba(255, 255, 255, 0.6); color: #1e293b; border: 1px solid rgba(255,255,255,0.8); }
         .btn-main-glass.red { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); }
         .btn-main-glass:hover { transform: translateY(-3px); filter: brightness(1.1); }
+
+        /* 🔘 باج حالة الفاتورة التفاعلي والمضغوط */
+        .invoice-status-pill {
+          display: inline-flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          gap: 6px !important;
+          padding: 4px 12px !important;
+          border-radius: 9999px !important;
+          font-size: 11.5px !important;
+          font-weight: 800 !important;
+          cursor: pointer !important;
+          border: 1px solid transparent !important;
+          transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+          white-space: nowrap !important;
+          height: 28px !important;
+          min-height: 28px !important;
+          max-height: 28px !important;
+          line-height: 1 !important;
+          box-shadow: 0 2px 5px rgba(0,0,0,0.04);
+        }
+        .invoice-status-pill.approved {
+          background: rgba(34, 197, 94, 0.12) !important;
+          color: #15803d !important;
+          border-color: rgba(34, 197, 94, 0.3) !important;
+        }
+        .invoice-status-pill.approved:hover {
+          background: rgba(34, 197, 94, 0.22) !important;
+          transform: translateY(-2px) !important;
+          box-shadow: 0 4px 12px rgba(34, 197, 94, 0.25) !important;
+        }
+        .invoice-status-pill.pending {
+          background: rgba(245, 158, 11, 0.12) !important;
+          color: #b45309 !important;
+          border-color: rgba(245, 158, 11, 0.3) !important;
+        }
+        .invoice-status-pill.pending:hover {
+          background: rgba(245, 158, 11, 0.22) !important;
+          transform: translateY(-2px) !important;
+          box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25) !important;
+        }
+        .status-dot { width: 7px; height: 7px; border-radius: 50%; display: inline-block; }
+        .status-dot.green { background: #22c55e; box-shadow: 0 0 8px #22c55e; }
+        .status-dot.amber { background: #f59e0b; box-shadow: 0 0 8px #f59e0b; }
+
+        /* 💳 شارات حالة السداد */
+        .invoice-pay-badge {
+          display: inline-flex !important;
+          align-items: center !important;
+          gap: 4px !important;
+          padding: 3px 8px !important;
+          border-radius: 8px !important;
+          font-size: 11px !important;
+          font-weight: 800 !important;
+          white-space: nowrap !important;
+        }
+        .invoice-pay-badge.paid { background: rgba(16, 185, 129, 0.12); color: #059669; border: 1px solid rgba(16, 185, 129, 0.25); }
+        .invoice-pay-badge.partial { background: rgba(245, 158, 11, 0.12); color: #d97706; border: 1px solid rgba(245, 158, 11, 0.25); }
+        .invoice-pay-badge.overdue { background: rgba(239, 68, 68, 0.12); color: #dc2626; border: 1px solid rgba(239, 68, 68, 0.25); }
+        .invoice-pay-badge.today { background: rgba(239, 68, 68, 0.2); color: #b91c1c; border: 1px solid rgba(239, 68, 68, 0.4); animation: pulse 2s infinite; }
+        .invoice-pay-badge.active { background: rgba(2, 132, 199, 0.1); color: #0284c7; border: 1px solid rgba(2, 132, 199, 0.25); }
+        .invoice-pay-badge.overpaid { background: rgba(147, 51, 234, 0.1); color: #9333ea; border: 1px solid rgba(147, 51, 234, 0.25); }
+
+        /* 🛠️ أزرار الإجراءات داخل الصف */
+        .inv-row-btn {
+          width: 32px !important;
+          height: 32px !important;
+          border-radius: 8px !important;
+          border: 1px solid rgba(255, 255, 255, 0.6) !important;
+          background: rgba(255, 255, 255, 0.75) !important;
+          cursor: pointer !important;
+          display: inline-flex !important;
+          align-items: center !important;
+          justify-content: center !important;
+          font-size: 14px !important;
+          transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
+          box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+        }
+        .inv-row-btn:hover {
+          transform: translateY(-2px);
+          background: #ffffff !important;
+          box-shadow: 0 4px 12px rgba(28, 115, 171, 0.15);
+        }
+        .inv-row-btn.delete { color: #ef4444; }
+        .inv-row-btn.delete:hover { background: #fee2e2 !important; border-color: #fca5a5 !important; }
+        .inv-row-btn.pay { color: #059669; }
+        .inv-row-btn.pay:hover { background: #ecfdf5 !important; border-color: #6ee7b7 !important; }
+        .inv-row-btn.print { color: #1e293b; }
+        .inv-row-btn.print:hover { background: #f1f5f9 !important; border-color: #cbd5e1 !important; }
+        .inv-row-btn.edit { color: #0284c7; }
+        .inv-row-btn.edit:hover { background: #f0f9ff !important; border-color: #7dd3fc !important; }
+
+        /* 📊 كروت KPI المودرن */
+        .invoice-kpi-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+          gap: 14px;
+          margin-bottom: 5px;
+        }
+        .invoice-kpi-card {
+          background: rgba(255, 255, 255, 0.65);
+          backdrop-filter: blur(25px) saturate(190%);
+          border: 1px solid rgba(255, 255, 255, 0.6);
+          border-radius: 18px;
+          padding: 14px 18px;
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          cursor: pointer;
+          transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+          box-shadow: 0 6px 20px rgba(28, 115, 171, 0.05);
+          position: relative;
+          overflow: hidden;
+        }
+        .invoice-kpi-card:hover {
+          transform: translateY(-3px);
+          background: rgba(255, 255, 255, 0.88);
+          box-shadow: 0 10px 25px rgba(28, 115, 171, 0.12);
+          border-color: rgba(40, 145, 200, 0.45);
+        }
+        .invoice-kpi-card.active-filter {
+          border-color: #1C73AB;
+          background: rgba(255, 255, 255, 0.95);
+          box-shadow: 0 8px 24px rgba(28, 115, 171, 0.18);
+        }
+        .kpi-icon-bubble {
+          width: 46px;
+          height: 46px;
+          border-radius: 14px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 20px;
+          flex-shrink: 0;
+        }
+        .kpi-icon-bubble.blue { background: rgba(28, 115, 171, 0.12); color: #1C73AB; }
+        .kpi-icon-bubble.green { background: rgba(34, 197, 94, 0.12); color: #16a34a; }
+        .kpi-icon-bubble.amber { background: rgba(245, 158, 11, 0.12); color: #d97706; }
+        .kpi-icon-bubble.red { background: rgba(239, 68, 68, 0.12); color: #dc2626; }
+        .kpi-content { display: flex; flex-direction: column; min-width: 0; }
+        .kpi-label { font-size: 11.5px; font-weight: 700; color: #64748b; margin-bottom: 2px; }
+        .kpi-value { font-size: 19px; font-weight: 900; line-height: 1.2; letter-spacing: -0.3px; }
+        .kpi-value.text-blue { color: #1C73AB; }
+        .kpi-value.text-green { color: #16a34a; }
+        .kpi-value.text-amber { color: #d97706; }
+        .kpi-value.text-red { color: #ef4444; }
+        .kpi-sub { font-size: 11px; font-weight: 700; color: #94a3b8; margin-top: 3px; }
+
+        /* 🎛️ شريط التبويبات والبحث السريع */
+        .invoices-toolbar-card {
+          background: rgba(255, 255, 255, 0.65);
+          backdrop-filter: blur(20px);
+          border: 1px solid rgba(255, 255, 255, 0.6);
+          border-radius: 18px;
+          padding: 10px 14px;
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 12px;
+          flex-wrap: wrap;
+          box-shadow: 0 4px 15px rgba(28, 115, 171, 0.04);
+        }
+        .filter-tabs-wrapper {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          overflow-x: auto;
+          padding-bottom: 2px;
+          max-width: 100%;
+        }
+        .filter-tab-pill {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          padding: 7px 14px;
+          border-radius: 12px;
+          border: 1px solid rgba(255, 255, 255, 0.7);
+          background: rgba(255, 255, 255, 0.6);
+          font-size: 12px;
+          font-weight: 800;
+          color: #475569;
+          cursor: pointer;
+          transition: all 0.2s;
+          white-space: nowrap;
+        }
+        .filter-tab-pill:hover {
+          background: rgba(255, 255, 255, 0.9);
+          color: #0f172a;
+          transform: translateY(-1px);
+        }
+        .filter-tab-pill.active {
+          background: #1C73AB;
+          color: white;
+          border-color: #1C73AB;
+          box-shadow: 0 4px 14px rgba(28, 115, 171, 0.3);
+        }
+        .filter-tab-pill.active .tab-count {
+          background: rgba(255, 255, 255, 0.25);
+          color: white;
+        }
+        .tab-count {
+          padding: 2px 7px;
+          border-radius: 8px;
+          font-size: 10.5px;
+          font-weight: 900;
+          background: rgba(0, 0, 0, 0.06);
+          color: #475569;
+        }
+        .filter-tab-pill .dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
+        .filter-tab-pill .dot.green { background: #22c55e; }
+        .filter-tab-pill .dot.amber { background: #f59e0b; }
+        .filter-tab-pill .dot.blue { background: #0284c7; }
+        .filter-tab-pill .dot.red { background: #ef4444; }
+
+        .toolbar-actions-group {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-wrap: wrap;
+          margin-inline-start: auto;
+        }
+        .quick-search-box {
+          position: relative;
+          display: flex;
+          align-items: center;
+        }
+        .quick-search-input {
+          height: 38px;
+          width: 220px;
+          border-radius: 12px;
+          border: 1px solid rgba(28, 115, 171, 0.2);
+          background: rgba(255, 255, 255, 0.85);
+          padding: 0 12px 0 32px;
+          font-size: 12px;
+          font-weight: 700;
+          color: #1e293b;
+          outline: none;
+          transition: all 0.2s;
+        }
+        .quick-search-input:focus {
+          border-color: #1C73AB;
+          width: 250px;
+          box-shadow: 0 0 0 3px rgba(28, 115, 171, 0.15);
+          background: white;
+        }
+        .search-icon {
+          position: absolute;
+          left: 10px;
+          pointer-events: none;
+          font-size: 13px;
+          color: #94a3b8;
+        }
+        .clear-search-btn {
+          position: absolute;
+          right: 8px;
+          background: none;
+          border: none;
+          font-size: 12px;
+          color: #94a3b8;
+          cursor: pointer;
+          padding: 2px;
+        }
+        .btn-create-invoice {
+          display: inline-flex;
+          align-items: center;
+          gap: 6px;
+          height: 38px;
+          padding: 0 16px;
+          border-radius: 12px;
+          background: linear-gradient(135deg, #1C73AB 0%, #2891C8 100%);
+          color: white;
+          font-size: 12.5px;
+          font-weight: 800;
+          border: 1px solid rgba(255, 255, 255, 0.3);
+          cursor: pointer;
+          transition: all 0.2s;
+          box-shadow: 0 4px 14px rgba(28, 115, 171, 0.25);
+          white-space: nowrap;
+        }
+        .btn-create-invoice:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 6px 18px rgba(28, 115, 171, 0.35);
+          filter: brightness(1.08);
+        }
+
+        /* 🚀 شريط الإجراءات الجماعية العائم (Floating Batch Bar) */
+        .floating-batch-bar {
+          position: fixed;
+          bottom: 24px;
+          left: 50%;
+          transform: translateX(-50%);
+          z-index: 99999;
+          background: rgba(18, 41, 70, 0.94);
+          backdrop-filter: blur(25px) saturate(180%);
+          border: 1px solid rgba(255, 255, 255, 0.25);
+          border-radius: 20px;
+          padding: 8px 16px;
+          display: flex;
+          align-items: center;
+          gap: 14px;
+          box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+          animation: floatUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+          max-width: 95vw;
+          flex-wrap: wrap;
+        }
+        @keyframes floatUp {
+          from { opacity: 0; transform: translate(-50%, 20px); }
+          to { opacity: 1; transform: translate(-50%, 0); }
+        }
+        .batch-info {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          color: white;
+        }
+        .batch-badge {
+          background: #2891C8;
+          color: white;
+          padding: 3px 9px;
+          border-radius: 12px;
+          font-size: 12px;
+          font-weight: 900;
+        }
+        .batch-text { font-size: 12px; font-weight: 800; }
+        .batch-buttons { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+        .batch-btn {
+          height: 34px;
+          padding: 0 14px;
+          border-radius: 10px;
+          font-size: 12px;
+          font-weight: 800;
+          cursor: pointer;
+          border: none;
+          transition: all 0.2s;
+          display: inline-flex;
+          align-items: center;
+          gap: 5px;
+          white-space: nowrap;
+        }
+        .batch-btn:hover { transform: translateY(-2px); }
+        .batch-btn.approve { background: #22c55e; color: white; }
+        .batch-btn.approve:hover { background: #16a34a; }
+        .batch-btn.unpost { background: #f59e0b; color: white; }
+        .batch-btn.unpost:hover { background: #d97706; }
+        .batch-btn.delete { background: rgba(239, 68, 68, 0.2); color: #fca5a5; border: 1px solid rgba(239, 68, 68, 0.4); }
+        .batch-btn.delete:hover { background: #ef4444; color: white; }
+        .batch-btn.cancel { background: rgba(255, 255, 255, 0.15); color: #cbd5e1; }
+        .batch-btn.cancel:hover { background: rgba(255, 255, 255, 0.25); color: white; }
+
+        @media (max-width: 768px) {
+          .invoice-kpi-grid { grid-template-columns: repeat(2, 1fr) !important; gap: 10px !important; }
+          .quick-search-input { width: 100% !important; }
+          .toolbar-actions-group { width: 100% !important; justify-content: space-between !important; }
+          .invoices-toolbar-card { padding: 8px 10px !important; }
+          .floating-batch-bar { bottom: 12px !important; padding: 8px 12px !important; gap: 8px !important; width: 96vw !important; justify-content: space-between !important; }
+        }
       `}</style>
 
       {( (logic.isLoading || permsLoading) && logic.allFiltered.length === 0 ) ? (
         <LoadingScreen message="جاري التحميل..." fullScreen={false} />
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
           
-          {/* أعمار الديون (مكانه الجديد فوق الجدول بدلاً من السايد بار عشان يكون أوضح) */}
+          {/* 🌟 1. كروت مؤشرات الأداء السريعة (KPI Dashboard) */}
+          <div className="invoice-kpi-grid">
+            <div 
+              className={`invoice-kpi-card ${logic.statusFilter === 'all' ? 'active-filter' : ''}`} 
+              onClick={() => logic.setStatusFilter('all')}
+              title="عرض كل الفواتير"
+            >
+              <div className="kpi-icon-bubble blue">📊</div>
+              <div className="kpi-content">
+                <span className="kpi-label">إجمالي المبيعات</span>
+                <span className="kpi-value text-blue">{formatCurrency(logic.filterStats?.totalSales || 0)}</span>
+                <span className="kpi-sub">{logic.filterStats?.all || 0} فاتورة مسجلة</span>
+              </div>
+            </div>
+
+            <div 
+              className={`invoice-kpi-card ${logic.statusFilter === 'posted' ? 'active-filter' : ''}`} 
+              onClick={() => logic.setStatusFilter('posted')}
+              title="عرض الفواتير المعتمدة والمرحلة فقط"
+            >
+              <div className="kpi-icon-bubble green">✅</div>
+              <div className="kpi-content">
+                <span className="kpi-label">فواتير معتمدة ومرحلة</span>
+                <span className="kpi-value text-green">{logic.filterStats?.posted || 0}</span>
+                <span className="kpi-sub">المحصل: {formatCurrency(logic.filterStats?.totalCollected || 0)}</span>
+              </div>
+            </div>
+
+            <div 
+              className={`invoice-kpi-card ${logic.statusFilter === 'pending' ? 'active-filter' : ''}`} 
+              onClick={() => logic.setStatusFilter('pending')}
+              title="عرض الفواتير المعلقة بانتظار الاعتماد"
+            >
+              <div className="kpi-icon-bubble amber">⏳</div>
+              <div className="kpi-content">
+                <span className="kpi-label">فواتير معلقة (مسودات)</span>
+                <span className="kpi-value text-amber">{logic.filterStats?.pending || 0}</span>
+                <span className="kpi-sub">تتطلب المراجعة والاعتماد</span>
+              </div>
+            </div>
+
+            <div 
+              className={`invoice-kpi-card ${logic.statusFilter === 'unpaid' ? 'active-filter' : ''}`} 
+              onClick={() => logic.setStatusFilter('unpaid')}
+              title="عرض الفواتير غير المسددة أو المتأخرة"
+            >
+              <div className="kpi-icon-bubble red">💼</div>
+              <div className="kpi-content">
+                <span className="kpi-label">المتبقي للتحصيل (ديون)</span>
+                <span className="kpi-value text-red">{formatCurrency(logic.filterStats?.totalRemaining || 0)}</span>
+                <span className="kpi-sub">{logic.filterStats?.unpaid || 0} مستحقة ({logic.filterStats?.overdue || 0} متأخرة)</span>
+              </div>
+            </div>
+          </div>
+
+          {/* 🎛️ 2. شريط التصفية والبحث السريع وأزرار الإجراء */}
+          <div className="invoices-toolbar-card">
+            <div className="filter-tabs-wrapper">
+              <button
+                type="button"
+                className={`filter-tab-pill ${logic.statusFilter === 'all' ? 'active' : ''}`}
+                onClick={() => logic.setStatusFilter('all')}
+              >
+                <span>الكل</span>
+                <span className="tab-count">{logic.filterStats?.all || 0}</span>
+              </button>
+
+              <button
+                type="button"
+                className={`filter-tab-pill ${logic.statusFilter === 'posted' ? 'active' : ''}`}
+                onClick={() => logic.setStatusFilter('posted')}
+              >
+                <span className="dot green" />
+                <span>معتمدة</span>
+                <span className="tab-count">{logic.filterStats?.posted || 0}</span>
+              </button>
+
+              <button
+                type="button"
+                className={`filter-tab-pill ${logic.statusFilter === 'pending' ? 'active' : ''}`}
+                onClick={() => logic.setStatusFilter('pending')}
+              >
+                <span className="dot amber" />
+                <span>معلقة</span>
+                <span className="tab-count">{logic.filterStats?.pending || 0}</span>
+              </button>
+
+              <button
+                type="button"
+                className={`filter-tab-pill ${logic.statusFilter === 'unpaid' ? 'active' : ''}`}
+                onClick={() => logic.setStatusFilter('unpaid')}
+              >
+                <span className="dot blue" />
+                <span>غير مسددة</span>
+                <span className="tab-count">{logic.filterStats?.unpaid || 0}</span>
+              </button>
+
+              <button
+                type="button"
+                className={`filter-tab-pill ${logic.statusFilter === 'overdue' ? 'active' : ''}`}
+                onClick={() => logic.setStatusFilter('overdue')}
+              >
+                <span className="dot red" />
+                <span>متأخرة</span>
+                <span className="tab-count">{logic.filterStats?.overdue || 0}</span>
+              </button>
+            </div>
+
+            <div className="toolbar-actions-group">
+              <div className="quick-search-box">
+                <span className="search-icon">🔍</span>
+                <input
+                  type="text"
+                  placeholder="ابحث برقم الفاتورة أو العميل..."
+                  value={logic.globalSearch || ''}
+                  onChange={(e) => logic.setGlobalSearch(e.target.value)}
+                  className="quick-search-input"
+                />
+                {logic.globalSearch && (
+                  <button
+                    type="button"
+                    onClick={() => logic.setGlobalSearch('')}
+                    className="clear-search-btn"
+                  >
+                    ✕
+                  </button>
+                )}
+              </div>
+
+              <SecureAction module="invoices" action="create">
+                <button
+                  type="button"
+                  className="btn-create-invoice"
+                  onClick={logic.handleAddNew}
+                >
+                  <span>➕</span>
+                  <span>فاتورة جديدة</span>
+                </button>
+              </SecureAction>
+            </div>
+          </div>
+
+          {/* 3. أعمار الديون (إذا كان هناك أرصدة مفتوحة) */}
           {logic.summary && logic.summary.aging && (
              <InvoiceAgingDashboard summary={logic.summary} />
           )}
 
+          {/* 4. جدول الفواتير الذكي */}
           <div className="clickable-rows cinematic-scroll summary-glass-card">
-          <RawasiSmartTable 
-              data={logic.allFiltered} 
-              columns={invoiceColumns} 
-              enablePagination={true}
-              currentPage={logic.currentPage}
-              totalItems={logic.allFiltered.length}
-              rowsPerPage={logic.rowsPerPage}
-              onPageChange={logic.setCurrentPage}
-              onRowsChange={logic.setRowsPerPage}
-              onRowClick={(row:any) => { setPrintData(row); setIsPrintModalOpen(true); }}
-          />
-        </div>
+            <RawasiSmartTable 
+                data={logic.allFiltered} 
+                columns={invoiceColumns} 
+                enablePagination={true}
+                currentPage={logic.currentPage}
+                totalItems={logic.allFiltered.length}
+                rowsPerPage={logic.rowsPerPage}
+                onPageChange={logic.setCurrentPage}
+                onRowsChange={logic.setRowsPerPage}
+                onRowClick={(row:any) => { setPrintData(row); setIsPrintModalOpen(true); }}
+            />
+          </div>
+
+          {/* 🚀 5. شريط الإجراءات الجماعية العائم عند التحديد */}
+          {logic.selectedIds.length > 0 && (
+            <div className="floating-batch-bar">
+              <div className="batch-info">
+                <span className="batch-badge">{logic.selectedIds.length}</span>
+                <span className="batch-text">فاتورة محددة</span>
+              </div>
+
+              <div className="batch-buttons">
+                <SecureAction module="invoices" action="post">
+                  <button
+                    type="button"
+                    className="batch-btn approve"
+                    onClick={logic.handlePostSelected}
+                    disabled={logic.isSaving}
+                  >
+                    {logic.isSaving ? '⏳ جاري التنفيذ...' : '✅ اعتماد وترحيل'}
+                  </button>
+                </SecureAction>
+
+                <SecureAction module="invoices" action="post">
+                  <button
+                    type="button"
+                    className="batch-btn unpost"
+                    onClick={logic.handleUnpostSelected}
+                    disabled={logic.isSaving}
+                  >
+                    ⏸️ فك الاعتماد
+                  </button>
+                </SecureAction>
+
+                <SecureAction module="invoices" action="delete">
+                  <button
+                    type="button"
+                    className="batch-btn delete"
+                    onClick={() => {
+                      showConfirm({
+                        title: 'حذف نهائي',
+                        message: `تحذير: هل أنت متأكد من حذف الفواتير المحددة وعددها ${logic.selectedIds.length}؟`,
+                        type: 'danger',
+                        onConfirm: () => logic.handleDeleteSelected()
+                      });
+                    }}
+                    disabled={logic.isSaving}
+                  >
+                    🗑️ حذف نهائي
+                  </button>
+                </SecureAction>
+
+                <button
+                  type="button"
+                  className="batch-btn cancel"
+                  onClick={() => logic.setSelectedIds([])}
+                >
+                  إلغاء التحديد
+                </button>
+              </div>
+            </div>
+          )}
+
         </div>
       )}
       

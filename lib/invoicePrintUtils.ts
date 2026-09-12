@@ -1,4 +1,4 @@
-﻿/**
+/**
  * دالات مساعدة لطباعة ومشاركة الفواتير (A4 والحرارية وواتساب)
  * Ghayam Water Company - Invoice Utilities
  */
@@ -9,6 +9,7 @@ export interface NormalizedInvoiceLine {
     quantity: number;
     unit: string;
     unit_price: number;
+    discount?: number;
     tax: number;
     total: number;
 }
@@ -55,7 +56,8 @@ export function normalizeInvoiceLines(record: any): NormalizedInvoiceLine[] {
             const quantity = Number(item.quantity ?? item.qty ?? 1);
             const unit = item.unit || 'حبة';
             const unit_price = Number(item.unit_price ?? item.price ?? item.selected_price ?? 0);
-            const total = Number(item.total_price ?? item.total ?? (quantity * unit_price));
+            const discount = Number(item.discount ?? item.discount_amount ?? 0);
+            const total = Number(item.total_price ?? item.total ?? ((quantity * unit_price) - discount));
             const tax = Number(item.tax ?? item.tax_amount ?? (total * 0.15));
             result.push({
                 index: idx + 1,
@@ -63,6 +65,7 @@ export function normalizeInvoiceLines(record: any): NormalizedInvoiceLine[] {
                 quantity,
                 unit,
                 unit_price,
+                discount,
                 tax,
                 total
             });

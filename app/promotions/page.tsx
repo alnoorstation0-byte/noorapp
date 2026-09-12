@@ -2,46 +2,70 @@
 import React, { useState, useEffect } from 'react';
 import MasterPage from '@/components/MasterPage';
 import { usePromotionsLogic } from './promotions_logic';
-import RawasiSmartTable from '@/components/RawasiSmartTable';
-import SmartModal from '@/components/SmartModal';
+import RawasiSmartTable from '@/components/rawasismarttable';
+import AquaModalWrapper from '@/components/AquaModalWrapper';
 import { THEME } from '@/lib/theme';
-import { FaPlus, FaEdit, FaTrash, FaCheckCircle, FaTimesCircle, FaGift } from 'react-icons/fa';
+import { FaPlus, FaEdit, FaTrash, FaGift } from 'react-icons/fa';
 
 export default function PromotionsPage() {
     const logic = usePromotionsLogic();
 
     const columns = [
-        { header: 'العرض الترويجي', accessor: (row: any) => <div style={{ fontWeight: 900, color: THEME.primary }}>{row.name}</div> },
-        { header: 'النوع', accessor: (row: any) => {
-            const types: any = {
-                'BOGO': 'اشتر x واحصل على y',
-                'THRESHOLD': 'خصم عند بلوغ حد معين',
-                'CROSS_SELLING': 'شراء صنف مع صنف',
-                'TIERED': 'خصم متدرج',
-                'BUNDLE': 'باقة منتجات'
-            };
-            return types[row.type] || row.type;
-        }},
-        { header: 'الحالة', accessor: (row: any) => (
-            <span style={{ 
-                background: row.status === 'active' ? '#dcfce7' : '#f1f5f9', 
-                color: row.status === 'active' ? '#16a34a' : '#64748b', 
-                padding: '4px 8px', 
-                borderRadius: '8px', 
-                fontWeight: 'bold', 
-                fontSize: '12px' 
-            }}>
-                {row.status === 'active' ? 'نشط' : (row.status === 'inactive' ? 'غير نشط' : row.status)}
-            </span>
-        )},
-        { header: 'تاريخ البداية', accessor: (row: any) => row.start_date ? new Date(row.start_date).toLocaleDateString('ar-SA') : '-' },
-        { header: 'تاريخ النهاية', accessor: (row: any) => row.end_date ? new Date(row.end_date).toLocaleDateString('ar-SA') : '-' },
-        { header: 'إجراءات', accessor: (row: any) => (
-            <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
-                <button onClick={() => logic.handleEdit(row)} className="btn-icon" style={{ color: THEME.primary }}><FaEdit /></button>
-                <button onClick={() => logic.handleDelete(row.id)} className="btn-icon" style={{ color: '#ef4444' }}><FaTrash /></button>
-            </div>
-        )}
+        { 
+            header: 'العرض الترويجي', 
+            accessor: 'name', 
+            render: (row: any) => <div style={{ fontWeight: 900, color: THEME.primary }}>{row.name}</div> 
+        },
+        { 
+            header: 'النوع', 
+            accessor: 'type', 
+            render: (row: any) => {
+                const types: any = {
+                    'BOGO': 'اشتر x واحصل على y',
+                    'THRESHOLD': 'خصم عند بلوغ حد معين',
+                    'CROSS_SELLING': 'شراء صنف مع صنف',
+                    'TIERED': 'خصم متدرج',
+                    'BUNDLE': 'باقة منتجات'
+                };
+                return types[row.type] || row.type;
+            }
+        },
+        { 
+            header: 'الحالة', 
+            accessor: 'status', 
+            render: (row: any) => (
+                <span style={{ 
+                    background: row.status === 'active' ? '#dcfce7' : '#f1f5f9', 
+                    color: row.status === 'active' ? '#16a34a' : '#64748b', 
+                    padding: '4px 8px', 
+                    borderRadius: '8px', 
+                    fontWeight: 'bold', 
+                    fontSize: '12px' 
+                }}>
+                    {row.status === 'active' ? 'نشط' : (row.status === 'inactive' ? 'غير نشط' : row.status)}
+                </span>
+            )
+        },
+        { 
+            header: 'تاريخ البداية', 
+            accessor: 'start_date', 
+            render: (row: any) => row.start_date ? new Date(row.start_date).toLocaleDateString('ar-SA') : '-' 
+        },
+        { 
+            header: 'تاريخ النهاية', 
+            accessor: 'end_date', 
+            render: (row: any) => row.end_date ? new Date(row.end_date).toLocaleDateString('ar-SA') : '-' 
+        },
+        { 
+            header: 'إجراءات', 
+            key: 'actions', 
+            render: (row: any) => (
+                <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                    <button onClick={() => logic.handleEdit(row)} className="btn-icon" style={{ color: THEME.primary, background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '15px' }}><FaEdit /></button>
+                    <button onClick={() => logic.handleDelete(row.id)} className="btn-icon" style={{ color: '#ef4444', background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '15px' }}><FaTrash /></button>
+                </div>
+            )
+        }
     ];
 
     return (
@@ -117,7 +141,7 @@ function PromotionFormModal({ isOpen, onClose, initialData, onSave, isSaving, in
     };
 
     return (
-        <SmartModal isOpen={isOpen} onClose={onClose} title={initialData ? "تعديل العرض الترويجي" : "عـرض تـرويـجـي جـديـد"} icon={<FaGift style={{color: THEME.primary}} />}>
+        <AquaModalWrapper isOpen={isOpen} onClose={onClose} title={initialData ? "تعديل العرض الترويجي" : "عـرض تـرويـجـي جـديـد"} icon="🎁">
             <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
                     <div className="form-group">
@@ -208,6 +232,6 @@ function PromotionFormModal({ isOpen, onClose, initialData, onSave, isSaving, in
                     </button>
                 </div>
             </form>
-        </SmartModal>
+        </AquaModalWrapper>
     );
 }

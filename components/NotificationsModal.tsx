@@ -177,29 +177,132 @@ export default function NotificationsModal({ isOpen, onClose }: Props) {
         )}
 
         {/* 🎛️ شريط التحكم السريع والتصنيفات */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '10px', borderBottom: '1px solid rgba(40,145,200,0.15)', paddingBottom: '12px' }}>
+        <div className="notif-controls-row">
+          <style>{`
+            .notif-controls-row {
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              flex-wrap: wrap;
+              gap: 10px;
+              border-bottom: 1px solid rgba(40, 145, 200, 0.15);
+              padding-bottom: 12px;
+            }
+            .notif-tabs-wrapper {
+              display: flex;
+              gap: 8px;
+              overflow-x: auto;
+              -webkit-overflow-scrolling: touch;
+              scrollbar-width: none;
+              padding: 4px 2px;
+              flex: 1;
+              min-width: 0;
+            }
+            .notif-tabs-wrapper::-webkit-scrollbar {
+              display: none;
+            }
+            .notif-tab-btn {
+              white-space: nowrap !important;
+              word-break: keep-all !important;
+              word-wrap: normal !important;
+              flex-shrink: 0 !important;
+              display: inline-flex !important;
+              flex-direction: row !important;
+              align-items: center !important;
+              gap: 6px !important;
+              padding: 8px 14px !important;
+              border-radius: 14px !important;
+              font-size: 12px !important;
+              font-weight: 800 !important;
+              cursor: pointer !important;
+              transition: all 0.2s ease !important;
+              border: 1px solid rgba(40, 145, 200, 0.2) !important;
+              background: rgba(255, 255, 255, 0.75) !important;
+              color: #475569 !important;
+              height: 38px !important;
+              min-height: 38px !important;
+              max-height: 38px !important;
+              user-select: none !important;
+              width: auto !important;
+            }
+            .notif-tab-btn.active {
+              background: linear-gradient(135deg, #1C73AB, #2891C8) !important;
+              color: white !important;
+              border-color: #1C73AB !important;
+              box-shadow: 0 4px 12px rgba(28, 115, 171, 0.25) !important;
+            }
+            .notif-tab-btn span {
+              white-space: nowrap !important;
+              word-break: keep-all !important;
+            }
+            .notif-actions-group {
+              display: flex;
+              gap: 6px;
+              align-items: center;
+              flex-shrink: 0;
+            }
+            .notif-action-btn {
+              height: 38px !important;
+              min-height: 38px !important;
+              padding: 0 12px !important;
+              border-radius: 12px !important;
+              font-size: 11.5px !important;
+              font-weight: 800 !important;
+              display: inline-flex !important;
+              align-items: center !important;
+              justify-content: center !important;
+              gap: 5px !important;
+              white-space: nowrap !important;
+              cursor: pointer !important;
+              transition: 0.2s !important;
+            }
+            @media (max-width: 768px) {
+              .notif-controls-row {
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 10px !important;
+                padding-bottom: 8px !important;
+              }
+              .notif-actions-group {
+                display: flex !important;
+                justify-content: space-between !important;
+                width: 100% !important;
+                gap: 6px !important;
+                order: 1 !important;
+              }
+              .notif-actions-group button {
+                flex: 1 !important;
+                height: 36px !important;
+                min-height: 36px !important;
+                padding: 0 8px !important;
+                font-size: 11px !important;
+              }
+              .notif-tabs-wrapper {
+                width: 100% !important;
+                max-width: 100% !important;
+                padding: 4px 0 8px 0 !important;
+                order: 2 !important;
+                border-top: 1px dashed rgba(40, 145, 200, 0.2) !important;
+                padding-top: 8px !important;
+              }
+              .notif-tab-btn {
+                height: 36px !important;
+                min-height: 36px !important;
+                padding: 0 12px !important;
+                font-size: 11.5px !important;
+                border-radius: 12px !important;
+              }
+            }
+          `}</style>
           
           {/* تبويبات التصنيف */}
-          <div style={{ display: 'flex', gap: '6px', overflowX: 'auto', paddingBottom: '4px', flex: 1, minWidth: '280px' }}>
+          <div className="notif-tabs-wrapper">
             {categories.map(cat => (
               <button
                 key={cat.id}
+                type="button"
                 onClick={() => setActiveCategory(cat.id)}
-                style={{
-                  background: activeCategory === cat.id ? 'linear-gradient(135deg, #1C73AB, #2891C8)' : 'rgba(255,255,255,0.7)',
-                  color: activeCategory === cat.id ? 'white' : '#475569',
-                  border: `1px solid ${activeCategory === cat.id ? '#1C73AB' : 'rgba(40,145,200,0.2)'}`,
-                  padding: '6px 12px',
-                  borderRadius: '10px',
-                  fontSize: '11.5px',
-                  fontWeight: 900,
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  transition: '0.2s'
-                }}
+                className={`notif-tab-btn tab-btn ${activeCategory === cat.id ? 'active' : ''}`}
               >
                 <span>{cat.label}</span>
                 {cat.count !== undefined && cat.count > 0 && (
@@ -219,58 +322,47 @@ export default function NotificationsModal({ isOpen, onClose }: Props) {
           </div>
 
           {/* أزرار الإجراءات السريعة */}
-          <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+          <div className="notif-actions-group">
             <button
+              type="button"
+              className="notif-action-btn compact"
               onClick={toggleSound}
               title={isSoundOn ? 'كتم نغمة الإشعارات' : 'تفعيل نغمة الإشعارات'}
               style={{
                 background: isSoundOn ? 'rgba(240, 253, 244, 0.9)' : 'rgba(254, 242, 242, 0.9)',
                 border: `1px solid ${isSoundOn ? '#bbf7d0' : '#fecaca'}`,
-                padding: '6px 10px',
-                borderRadius: '8px',
-                fontSize: '12px',
-                cursor: 'pointer',
-                fontWeight: 800,
                 color: isSoundOn ? '#16a34a' : '#dc2626'
               }}
             >
-              {isSoundOn ? '🔊' : '🔇'}
+              <span>{isSoundOn ? '🔊 نغمة نشطة' : '🔇 كتم النغمة'}</span>
             </button>
 
             {unreadCount > 0 && (
               <button
+                type="button"
+                className="notif-action-btn compact"
                 onClick={markAllAsRead}
                 style={{
-                  background: 'rgba(255,255,255,0.8)',
+                  background: 'rgba(255,255,255,0.85)',
                   border: '1px solid rgba(40,145,200,0.25)',
-                  padding: '6px 10px',
-                  borderRadius: '8px',
-                  fontSize: '11px',
-                  fontWeight: 900,
-                  cursor: 'pointer',
-                  color: '#1C73AB',
-                  transition: '0.2s'
+                  color: '#1C73AB'
                 }}
               >
-                ✓ قراءة الكل
+                <span>✓ قراءة الكل</span>
               </button>
             )}
 
             <button
+              type="button"
+              className="notif-action-btn compact"
               onClick={clearReadNotifications}
               style={{
-                background: 'rgba(255,255,255,0.8)',
+                background: 'rgba(255,255,255,0.85)',
                 border: '1px solid rgba(239,68,68,0.2)',
-                padding: '6px 10px',
-                borderRadius: '8px',
-                fontSize: '11px',
-                fontWeight: 900,
-                cursor: 'pointer',
-                color: '#dc2626',
-                transition: '0.2s'
+                color: '#dc2626'
               }}
             >
-              🧹 مسح المقروء
+              <span>🧹 مسح المقروء</span>
             </button>
           </div>
 

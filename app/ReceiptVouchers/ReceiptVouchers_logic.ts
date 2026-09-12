@@ -177,9 +177,9 @@ export function useReceiptVouchersLogic() {
                 // 🔔 بث إشعار سند القبض في النظام وعبر الجوال
                 notifyVoucherCreated({
                     voucherType: 'receipt',
-                    voucherNumber: voucherData.voucher_number,
+                    voucherNumber: voucherData.receipt_number,
                     amount: Number(voucherData.amount) || 0,
-                    partnerName: voucherData.partner_name
+                    partnerName: record.partner_name || record.partners?.name || ''
                 }).catch(() => {});
             }
 

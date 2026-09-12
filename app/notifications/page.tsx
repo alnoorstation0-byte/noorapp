@@ -185,42 +185,97 @@ export default function NotificationsPage() {
           </div>
 
           {/* تبويبات الفلترة */}
-          <div style={{ display: 'flex', gap: '8px', overflowX: 'auto', paddingBottom: '5px', marginTop: '18px', borderTop: '1px solid rgba(40,145,200,0.15)', paddingTop: '15px' }}>
-            {categories.map(cat => (
-              <button
-                key={cat.id}
-                onClick={() => setActiveCategory(cat.id)}
-                style={{
-                  background: activeCategory === cat.id ? 'linear-gradient(135deg, #1C73AB, #2891C8)' : 'white',
-                  color: activeCategory === cat.id ? 'white' : '#475569',
-                  border: `1px solid ${activeCategory === cat.id ? '#1C73AB' : 'rgba(40,145,200,0.2)'}`,
-                  padding: '8px 16px',
-                  borderRadius: '12px',
-                  fontSize: '12px',
-                  fontWeight: 900,
-                  cursor: 'pointer',
-                  whiteSpace: 'nowrap',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  transition: '0.2s'
-                }}
-              >
-                <span>{cat.label}</span>
-                {cat.count !== undefined && cat.count > 0 && (
-                  <span style={{
-                    background: activeCategory === cat.id ? 'rgba(255,255,255,0.25)' : cat.id === 'unread' ? '#ef4444' : '#e2e8f0',
-                    color: activeCategory === cat.id || cat.id === 'unread' ? 'white' : '#334155',
-                    fontSize: '10px',
-                    padding: '2px 7px',
-                    borderRadius: '10px',
-                    fontWeight: 900
-                  }}>
-                    {cat.count}
-                  </span>
-                )}
-              </button>
-            ))}
+          <div className="notif-page-tabs-section">
+            <style>{`
+              .notif-page-tabs-wrapper {
+                display: flex;
+                gap: 8px;
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+                padding-bottom: 5px;
+                margin-top: 18px;
+                border-top: 1px solid rgba(40, 145, 200, 0.15);
+                padding-top: 15px;
+                width: 100%;
+              }
+              .notif-page-tabs-wrapper::-webkit-scrollbar {
+                display: none;
+              }
+              .notif-tab-btn {
+                white-space: nowrap !important;
+                word-break: keep-all !important;
+                word-wrap: normal !important;
+                flex-shrink: 0 !important;
+                display: inline-flex !important;
+                flex-direction: row !important;
+                align-items: center !important;
+                gap: 6px !important;
+                padding: 8px 16px !important;
+                border-radius: 12px !important;
+                font-size: 12px !important;
+                font-weight: 900 !important;
+                cursor: pointer !important;
+                transition: 0.2s !important;
+                border: 1px solid rgba(40, 145, 200, 0.2) !important;
+                background: white !important;
+                color: #475569 !important;
+                height: 38px !important;
+                min-height: 38px !important;
+                max-height: 38px !important;
+                user-select: none !important;
+                width: auto !important;
+              }
+              .notif-tab-btn.active {
+                background: linear-gradient(135deg, #1C73AB, #2891C8) !important;
+                color: white !important;
+                border-color: #1C73AB !important;
+                box-shadow: 0 4px 12px rgba(28, 115, 171, 0.25) !important;
+              }
+              .notif-tab-btn span {
+                white-space: nowrap !important;
+                word-break: keep-all !important;
+              }
+              @media (max-width: 768px) {
+                .notif-page-tabs-wrapper {
+                  padding-top: 10px !important;
+                  margin-top: 12px !important;
+                  gap: 6px !important;
+                }
+                .notif-tab-btn {
+                  height: 36px !important;
+                  min-height: 36px !important;
+                  padding: 0 12px !important;
+                  font-size: 11.5px !important;
+                  border-radius: 10px !important;
+                }
+              }
+            `}</style>
+            
+            <div className="notif-page-tabs-wrapper">
+              {categories.map(cat => (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => setActiveCategory(cat.id)}
+                  className={`notif-tab-btn tab-btn ${activeCategory === cat.id ? 'active' : ''}`}
+                >
+                  <span>{cat.label}</span>
+                  {cat.count !== undefined && cat.count > 0 && (
+                    <span style={{
+                      background: activeCategory === cat.id ? 'rgba(255,255,255,0.25)' : cat.id === 'unread' ? '#ef4444' : '#e2e8f0',
+                      color: activeCategory === cat.id || cat.id === 'unread' ? 'white' : '#334155',
+                      fontSize: '10px',
+                      padding: '2px 7px',
+                      borderRadius: '10px',
+                      fontWeight: 900
+                    }}>
+                      {cat.count}
+                    </span>
+                  )}
+                </button>
+              ))}
+            </div>
           </div>
         </GlassContainer>
 

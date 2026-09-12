@@ -464,7 +464,7 @@ export function usePosLogic() {
                 quantity: item.quantity || item.qty,
                 unit_price: item.selected_price || item.unit_price || item.price || 0,
                 discount: (item.discount || 0) + (item.promo_discount || 0),
-                total: item.total || (((item.quantity || item.qty) * (item.selected_price || item.unit_price || item.price || 0)) - ((item.discount || 0) + (item.promo_discount || 0))),
+                total: item.total !== undefined ? item.total : (((item.quantity || item.qty) * (item.selected_price || item.unit_price || item.price || 0)) - ((item.discount || 0) + (item.promo_discount || 0))),
                 warehouse_id: selectedWarehouseId,
                 is_returnable_bottle: Boolean(item.is_returnable_bottle)
             }));

@@ -123,11 +123,11 @@ export async function showBrowserNotification(
   if (typeof window === 'undefined' || !isNotificationSupported()) return;
   if (Notification.permission !== 'granted') return;
 
-  const notifOptions: NotificationOptions = {
+  const notifOptions: any = {
     body,
     icon: '/ghayam_logo.png',
     badge: '/ghayam_logo.png',
-    vibrate: [200, 100, 200] as any,
+    vibrate: [200, 100, 200],
     tag: options?.tag || 'ghayam-system-alert',
     renotify: true,
     data: {

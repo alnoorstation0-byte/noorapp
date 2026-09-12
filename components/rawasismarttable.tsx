@@ -16,6 +16,9 @@ interface Column {
     label?: React.ReactNode | string;
     key?: string;
     accessor?: string;
+    type?: string;
+    width?: string | number;
+    minWidth?: string | number;
     render?: (row: any) => React.ReactNode;
     // 🚀 الإضافة الجديدة: دالة مخصصة لاستخراج البيانات النظيفة للإكسيل
     exportValue?: (row: any) => string | number; 

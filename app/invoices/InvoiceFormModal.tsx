@@ -261,6 +261,18 @@ export default function InvoiceFormModal({ isOpen, onClose, record, setRecord, o
                         </div>
 
                         <div>
+                            <label style={{ fontSize: '12px', fontWeight: 900, color: THEME.primary, display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '6px' }}>حالة الفاتورة</label>
+                            <select 
+                                className="glass-input-field" 
+                                value={record.status === 'posted' || record.status === 'معتمد' ? 'معتمد' : 'معلق'} 
+                                onChange={e => setRecord({...record, status: e.target.value})}
+                            >
+                                <option value="معلق">⏳ معلق (مسودة قابلة للتعديل)</option>
+                                <option value="معتمد">✅ معتمد (ترحيل فوري)</option>
+                            </select>
+                        </div>
+
+                        <div>
                             <label style={{ fontSize: '12px', fontWeight: 900, color: THEME.primary, display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '6px' }}>رقم الفاتورة (تلقائي)</label>
                             <input type="text" value={record.invoice_number ?? ''} readOnly className="glass-input-field" style={{ background: 'rgba(226, 232, 240, 0.6)', color: THEME.primary }} />
                         </div>
