@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useEffect } from 'react';
 import { useSidebar } from '@/lib/SidebarContext';
+import { useLanguage } from '@/lib/LanguageContext';
 
 interface RawasiSidebarProps {
   onSearch?: (term: string) => void;
@@ -30,6 +31,7 @@ export default function RawasiFilterSidebar({
   isOpenStatus,
   setIsOpenStatus
 }: RawasiSidebarProps) {
+  const { language, isRtl } = useLanguage();
   
   const [isPinned, setIsPinned] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
@@ -136,8 +138,8 @@ export default function RawasiFilterSidebar({
           color: ${textColor};
           display: flex;
           flex-direction: column;
-          direction: rtl !important;
-          text-align: right !important;
+          direction: ${isRtl ? 'rtl' : 'ltr'} !important;
+          text-align: ${isRtl ? 'right' : 'left'} !important;
         }
 
         .mobile-sidebar-backdrop {
@@ -286,8 +288,8 @@ export default function RawasiFilterSidebar({
           height: 100%;
           overflow-y: auto;
           overflow-x: hidden;
-          direction: rtl !important;
-          text-align: right !important;
+          direction: ${isRtl ? 'rtl' : 'ltr'} !important;
+          text-align: ${isRtl ? 'right' : 'left'} !important;
         }
         .filter-content::-webkit-scrollbar { width: 5px; }
         .filter-content::-webkit-scrollbar-track { background: transparent; }
@@ -342,8 +344,8 @@ export default function RawasiFilterSidebar({
           width: 100% !important;
           box-sizing: border-box !important;
           box-shadow: 0 4px 16px rgba(28, 115, 171, 0.06) !important;
-          text-align: right !important;
-          direction: rtl !important;
+          text-align: ${isRtl ? 'right' : 'left'} !important;
+          direction: ${isRtl ? 'rtl' : 'ltr'} !important;
         }
         .summary-glass-card .val, 
         .summary-glass-card [class*="val"] {
@@ -696,7 +698,7 @@ export default function RawasiFilterSidebar({
             <img src={logoPath} alt="Logo" className="sidebar-header-logo" />
             <div className="sidebar-header-titles">
               <h2 className="sidebar-main-title">{title}</h2>
-              <span className="sidebar-sub-badge">لوحة التحكم والملخص</span>
+              <span className="sidebar-sub-badge">{language === 'en' ? 'Dashboard & Summary' : 'لوحة التحكم والملخص'}</span>
             </div>
           </div>
 
@@ -709,7 +711,7 @@ export default function RawasiFilterSidebar({
                   e.stopPropagation(); 
                   setIsPinned(!isPinned); 
                 }}
-                title={isPinned ? 'إلغاء التثبيت' : 'تثبيت اللوحة دائماً'}
+                title={isPinned ? (language === 'en' ? 'Unpin' : 'إلغاء التثبيت') : (language === 'en' ? 'Pin Sidebar' : 'تثبيت اللوحة دائماً')}
               >
                 <span>{isPinned ? '📌' : '📍'}</span>
               </button>
@@ -723,7 +725,7 @@ export default function RawasiFilterSidebar({
                 setIsPinned(false); 
                 setIsHovered(false);
               }}
-              title="إغلاق السايد بار"
+              title={language === 'en' ? 'Close Sidebar' : 'إغلاق السايد بار'}
             >
               <span>✕</span>
             </button>
@@ -735,7 +737,7 @@ export default function RawasiFilterSidebar({
           <div className="sidebar-section">
             <div className="sidebar-section-header">
               <span className="sidebar-section-icon">📊</span>
-              <span className="sidebar-section-title">ملخص وبيانات الصفحة</span>
+              <span className="sidebar-section-title">{language === 'en' ? 'Page Summary & Data' : 'ملخص وبيانات الصفحة'}</span>
             </div>
             <div className="sidebar-summary-container">
               {effectiveSummary ? (
@@ -744,7 +746,7 @@ export default function RawasiFilterSidebar({
                 <div className="sidebar-empty-summary-card">
                   <div style={{ fontSize: '13px', fontWeight: 800, color: '#122946' }}>{title}</div>
                   <div style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>
-                    استخدم أدوات البحث وتصفية التاريخ أدناه للتنقل وإدارة السجلات
+                    {language === 'en' ? 'Use search and date filters below to manage records' : 'استخدم أدوات البحث وتصفية التاريخ أدناه للتنقل وإدارة السجلات'}
                   </div>
                 </div>
               )}
@@ -756,7 +758,7 @@ export default function RawasiFilterSidebar({
             <div className="sidebar-section">
               <div className="sidebar-section-header">
                 <span className="sidebar-section-icon">⚡</span>
-                <span className="sidebar-section-title">عمليات الصفحة السريعة</span>
+                <span className="sidebar-section-title">{language === 'en' ? 'Quick Operations' : 'عمليات الصفحة السريعة'}</span>
               </div>
               <div className="sidebar-actions-grid">
                 {effectiveActions}
@@ -768,7 +770,7 @@ export default function RawasiFilterSidebar({
           <div className="sidebar-section">
             <div className="sidebar-section-header">
               <span className="sidebar-section-icon">🔍</span>
-              <span className="sidebar-section-title">البحث السريع</span>
+              <span className="sidebar-section-title">{language === 'en' ? 'Quick Search' : 'البحث السريع'}</span>
             </div>
             
             <div className="sidebar-search-box">
@@ -776,7 +778,7 @@ export default function RawasiFilterSidebar({
               <input 
                 type="text" 
                 className="sidebar-search-input" 
-                placeholder="ابحث هنا عن أي بيان..." 
+                placeholder={language === 'en' ? 'Search here for any record...' : 'ابحث هنا عن أي بيان...'} 
                 value={searchTerm}
                 onChange={(e) => {
                   setSearchTerm(e.target.value);
@@ -788,7 +790,7 @@ export default function RawasiFilterSidebar({
                   type="button"
                   className="search-clear-btn"
                   onClick={handleClearSearch}
-                  title="مسح البحث"
+                  title={language === 'en' ? 'Clear' : 'مسح البحث'}
                 >
                   ✕
                 </button>
@@ -800,15 +802,15 @@ export default function RawasiFilterSidebar({
           <div className="sidebar-section">
             <div className="sidebar-section-header">
               <span className="sidebar-section-icon">📅</span>
-              <span className="sidebar-section-title">الفترة الزمنية</span>
+              <span className="sidebar-section-title">{language === 'en' ? 'Date Range' : 'الفترة الزمنية'}</span>
               {(dates.start || dates.end) && (
                 <button
                   type="button"
                   className="date-clear-pill"
                   onClick={handleClearDates}
-                  title="مسح تصفية التاريخ"
+                  title={language === 'en' ? 'Clear Date Filter' : 'مسح تصفية التاريخ'}
                 >
-                  مسح ✕
+                  {language === 'en' ? 'Clear ✕' : 'مسح ✕'}
                 </button>
               )}
             </div>
@@ -820,35 +822,35 @@ export default function RawasiFilterSidebar({
                 className={`date-preset-pill ${activePreset === 'today' ? 'active' : ''}`}
                 onClick={() => applyPreset('today')}
               >
-                اليوم
+                {language === 'en' ? 'Today' : 'اليوم'}
               </button>
               <button
                 type="button"
                 className={`date-preset-pill ${activePreset === 'week' ? 'active' : ''}`}
                 onClick={() => applyPreset('week')}
               >
-                أسبوع
+                {language === 'en' ? 'Week' : 'أسبوع'}
               </button>
               <button
                 type="button"
                 className={`date-preset-pill ${activePreset === 'month' ? 'active' : ''}`}
                 onClick={() => applyPreset('month')}
               >
-                هذا الشهر
+                {language === 'en' ? 'This Month' : 'هذا الشهر'}
               </button>
               <button
                 type="button"
                 className={`date-preset-pill ${activePreset === 'year' ? 'active' : ''}`}
                 onClick={() => applyPreset('year')}
               >
-                هذا العام
+                {language === 'en' ? 'This Year' : 'هذا العام'}
               </button>
             </div>
 
             {/* Stacked Clean Date Inputs (Full Width) */}
             <div className="sidebar-date-stack">
               <div className="sidebar-date-row">
-                <span className="sidebar-date-tag">من</span>
+                <span className="sidebar-date-tag">{language === 'en' ? 'From' : 'من'}</span>
                 <input 
                   type="date" 
                   className="sidebar-date-input" 
@@ -863,7 +865,7 @@ export default function RawasiFilterSidebar({
               </div>
 
               <div className="sidebar-date-row">
-                <span className="sidebar-date-tag">إلى</span>
+                <span className="sidebar-date-tag">{language === 'en' ? 'To' : 'إلى'}</span>
                 <input 
                   type="date" 
                   className="sidebar-date-input" 

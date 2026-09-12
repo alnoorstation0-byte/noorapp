@@ -6,9 +6,12 @@ import RawasiSmartTable from '@/components/rawasismarttable';
 import { useRouter } from 'next/navigation';
 import { formatDate } from '@/lib/helpers';
 import { createPortal } from 'react-dom';
+import { useLanguage } from '@/lib/LanguageContext';
 
 export default function AuditLogs() {
     const router = useRouter();
+    const { language, isRtl } = useLanguage();
+    const isEn = language === 'en';
     const [logs, setLogs] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [selectedLog, setSelectedLog] = useState<any>(null);
@@ -242,79 +245,121 @@ export default function AuditLogs() {
     };
 
     return (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', animation: 'fadeUp 0.5s ease-out' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', animation: 'fadeUp 0.4s ease-out' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px', marginBottom: '6px' }}>
                 <div>
-                    <h2 style={{ fontSize: '18px', color: THEME.primary, margin: '0 0 5px 0', fontWeight: 900 }}>🕵️‍♂️ سجل المراقبة والنشاطات</h2>
-                    <p style={{ margin: 0, fontSize: '12px', color: '#64748b', fontWeight: 700 }}>تتبع دقيق لجميع التعديلات والعمليات في النظام (Audit Logs)</p>
+                    <h2 style={{ fontSize: '17px', color: THEME.primary, margin: '0 0 4px 0', fontWeight: 900 }}>
+                        {isEn ? '🕵️‍♂️ Audit Logs & System Activity' : '🕵️‍♂️ سجل المراقبة والنشاطات'}
+                    </h2>
+                    <p style={{ margin: 0, fontSize: '12px', color: '#64748b', fontWeight: 700 }}>
+                        {isEn ? 'Granular change tracking across all database entities' : 'تتبع دقيق لجميع التعديلات والعمليات في النظام (Audit Logs)'}
+                    </p>
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                    <div style={{ background: 'rgba(255, 255, 255, 0.6)', border: `1px solid ${THEME.brand.gold}`, padding: '8px 16px', borderRadius: '10px' }}>
-                        <span style={{fontSize:'12px', fontWeight:800, color:'#64748b'}}>إجمالي الحركات </span>
-                        <span style={{fontSize:'18px', fontWeight:900, color: THEME.brand.gold}}>{filteredLogs.length}</span>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                    <div style={{ background: 'rgba(255, 255, 255, 0.75)', border: '1px solid rgba(28, 115, 171, 0.2)', padding: '6px 14px', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span style={{ fontSize: '11.5px', fontWeight: 800, color: '#64748b' }}>
+                            {isEn ? 'Total:' : 'إجمالي الحركات:'}
+                        </span>
+                        <span style={{ fontSize: '16px', fontWeight: 900, color: THEME.primary }}>{filteredLogs.length}</span>
                     </div>
-                    <button onClick={fetchLogs} style={{ background: THEME.primary, color: 'white', border: 'none', padding: '10px 20px', borderRadius: '10px', cursor: 'pointer', fontWeight: 900 }}>
-                        🔄 تحديث السجل
+                    <button 
+                        onClick={fetchLogs} 
+                        style={{ 
+                            background: 'linear-gradient(135deg, #1C73AB, #2891C8)', 
+                            color: 'white', 
+                            border: 'none', 
+                            padding: '8px 16px', 
+                            borderRadius: '12px', 
+                            cursor: 'pointer', 
+                            fontWeight: 900,
+                            fontSize: '12.5px',
+                            boxShadow: '0 2px 8px rgba(28, 115, 171, 0.2)'
+                        }}
+                    >
+                        🔄 {isEn ? 'Refresh' : 'تحديث السجل'}
                     </button>
                 </div>
             </div>
+
             {logs.length === 0 && !isLoading && (
-                <div style={{ textAlign: 'center', padding: '60px', background: 'white', borderRadius: '24px', border: `1px solid ${THEME.brand.gold}40` }}>
-                    <div style={{ fontSize: '50px' }}>🛡️</div>
-                    <h3 style={{ color: THEME.brand.coffee, fontWeight: 900 }}>لم يتم تسجيل أي نشاط بعد أو أن المحرك غير مفعل</h3>
-                    <p style={{ color: '#64748b' }}>يرجى التأكد من تشغيل سكريبت (SQL) الخاص بسجل المراقبة في قاعدة البيانات لتفعيل الرصد التلقائي.</p>
+                <div style={{ textAlign: 'center', padding: '60px 20px', background: 'rgba(255,255,255,0.7)', borderRadius: '24px', border: '1px solid rgba(28, 115, 171, 0.2)', backdropFilter: 'blur(10px)' }}>
+                    <div style={{ fontSize: '48px', marginBottom: '10px' }}>🛡️</div>
+                    <h3 style={{ color: THEME.primary, fontWeight: 900, fontSize: '16px', margin: '0 0 8px' }}>
+                        {isEn ? 'No activities recorded yet' : 'لم يتم تسجيل أي نشاط بعد'}
+                    </h3>
+                    <p style={{ color: '#64748b', fontSize: '12px', margin: 0 }}>
+                        {isEn ? 'Audit logger is active and listening for database operations.' : 'سجل المراقبة مفعل ويترصد الحركات آلياً.'}
+                    </p>
                 </div>
             )}
 
             {logs.length > 0 && (
                 <>
-                    <div style={{ display: 'flex', gap: '15px', flexWrap: 'wrap', marginBottom: '5px', background: 'rgba(255, 255, 255, 0.6)', padding: '15px', borderRadius: '16px', border: '1px solid rgba(40, 145, 200, 0.15)' }}>
-                        <div style={{ flex: 1, minWidth: '150px' }}>
-                            <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#64748b', marginBottom: '5px' }}>المستخدم (User)</label>
-                            <select value={filterUser} onChange={(e) => setFilterUser(e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid rgba(40, 145, 200, 0.2)', fontSize: '13px' }}>
-                                <option value="">الكل (All)</option>
+                    {/* Responsive Filters */}
+                    <div style={{ 
+                        display: 'grid', 
+                        gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', 
+                        gap: '10px', 
+                        background: 'rgba(255, 255, 255, 0.7)', 
+                        backdropFilter: 'blur(15px)',
+                        padding: '14px', 
+                        borderRadius: '16px', 
+                        border: '1px solid rgba(28, 115, 171, 0.15)' 
+                    }}>
+                        <div>
+                            <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, color: '#64748b', marginBottom: '4px' }}>
+                                {isEn ? 'User' : 'المستخدم'}
+                            </label>
+                            <select value={filterUser} onChange={(e) => setFilterUser(e.target.value)} style={{ width: '100%', padding: '8px 10px', borderRadius: '10px', border: '1px solid rgba(28, 115, 171, 0.2)', fontSize: '12px', background: 'white' }}>
+                                <option value="">{isEn ? 'All Users' : 'الكل (All)'}</option>
                                 {uniqueUsers.map((user: string) => <option key={user} value={user}>{user}</option>)}
                             </select>
                         </div>
-                        <div style={{ flex: 1, minWidth: '150px' }}>
-                            <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#64748b', marginBottom: '5px' }}>الجدول (Table)</label>
-                            <select value={filterTable} onChange={(e) => setFilterTable(e.target.value)} style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid rgba(40, 145, 200, 0.2)', fontSize: '13px' }}>
-                                <option value="">الكل (All)</option>
+                        <div>
+                            <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, color: '#64748b', marginBottom: '4px' }}>
+                                {isEn ? 'Table' : 'الجدول'}
+                            </label>
+                            <select value={filterTable} onChange={(e) => setFilterTable(e.target.value)} style={{ width: '100%', padding: '8px 10px', borderRadius: '10px', border: '1px solid rgba(28, 115, 171, 0.2)', fontSize: '12px', background: 'white' }}>
+                                <option value="">{isEn ? 'All Tables' : 'الكل (All)'}</option>
                                 {uniqueTables.map((table: string) => <option key={table} value={table}>{table}</option>)}
                             </select>
                         </div>
-                        <div style={{ flex: 1, minWidth: '150px' }}>
-                            <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#64748b', marginBottom: '5px' }}>نوع العملية (Action)</label>
+                        <div>
+                            <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, color: '#64748b', marginBottom: '4px' }}>
+                                {isEn ? 'Action' : 'نوع العملية'}
+                            </label>
                             <select
                                 value={filterAction}
                                 onChange={(e) => setFilterAction(e.target.value)}
-                                style={{ width: '100%', padding: '10px', borderRadius: '8px', border: '1px solid rgba(40, 145, 200, 0.2)', fontSize: '13px' }}
+                                style={{ width: '100%', padding: '8px 10px', borderRadius: '10px', border: '1px solid rgba(28, 115, 171, 0.2)', fontSize: '12px', background: 'white' }}
                             >
-                                <option value="">الكل (All)</option>
+                                <option value="">{isEn ? 'All Actions' : 'الكل (All)'}</option>
                                 {uniqueActions.map((action: string) => {
-                                    const labels: any = { 'INSERT': 'إضافة', 'UPDATE': 'تعديل', 'DELETE': 'حذف', 'LOGIN': 'تسجيل دخول', 'POST': 'ترحيل', 'UNPOST': 'فك ترحيل', 'FAILED_POST': 'محاولة ترحيل مرفوضة', 'FAILED_UNPOST': 'محاولة فك ترحيل مرفوضة' };
+                                    const labels: any = { 'INSERT': isEn ? 'Insert' : 'إضافة', 'UPDATE': isEn ? 'Update' : 'تعديل', 'DELETE': isEn ? 'Delete' : 'حذف', 'LOGIN': isEn ? 'Login' : 'تسجيل دخول', 'POST': isEn ? 'Post' : 'ترحيل', 'UNPOST': isEn ? 'Unpost' : 'فك ترحيل' };
                                     return <option key={action} value={action}>{labels[action] || action}</option>;
                                 })}
                             </select>
                         </div>
-                        <div style={{ flex: 1, minWidth: '150px' }}>
-                            <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#64748b', marginBottom: '5px' }}>التاريخ (Date)</label>
-                            <input type="date" value={filterDate} onChange={(e) => setFilterDate(e.target.value)} style={{ width: '100%', padding: '9px', borderRadius: '8px', border: '1px solid rgba(40, 145, 200, 0.2)', fontSize: '13px', fontFamily: 'inherit' }} />
+                        <div>
+                            <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, color: '#64748b', marginBottom: '4px' }}>
+                                {isEn ? 'Date' : 'التاريخ'}
+                            </label>
+                            <input type="date" value={filterDate} onChange={(e) => setFilterDate(e.target.value)} style={{ width: '100%', padding: '7px 10px', borderRadius: '10px', border: '1px solid rgba(28, 115, 171, 0.2)', fontSize: '12px', background: 'white', fontFamily: 'inherit', boxSizing: 'border-box' }} />
                         </div>
                         {(filterUser || filterTable || filterAction || filterDate) && (
                             <div style={{ display: 'flex', alignItems: 'flex-end' }}>
-                                <button onClick={() => { setFilterUser(''); setFilterTable(''); setFilterAction(''); setFilterDate(''); }} style={{ padding: '10px 15px', borderRadius: '8px', border: 'none', background: '#ef4444', color: 'white', fontWeight: 800, cursor: 'pointer' }}>
-                                    مسح الفلاتر ✕
+                                <button onClick={() => { setFilterUser(''); setFilterTable(''); setFilterAction(''); setFilterDate(''); }} style={{ width: '100%', padding: '8px', borderRadius: '10px', border: 'none', background: '#ef4444', color: 'white', fontWeight: 800, fontSize: '12px', cursor: 'pointer' }}>
+                                    {isEn ? 'Clear ✕' : 'مسح الفلاتر ✕'}
                                 </button>
                             </div>
                         )}
                     </div>
 
-                    <div style={{ background: 'rgba(255, 255, 255, 0.8)', backdropFilter: 'blur(10px)', padding: '20px', borderRadius: '30px', boxShadow: '0 20px 40px rgba(0,0,0,0.05)', border: '1px solid white' }}>
+                    <div style={{ background: 'rgba(255, 255, 255, 0.75)', backdropFilter: 'blur(20px)', padding: '16px', borderRadius: '20px', boxShadow: '0 8px 32px rgba(28, 115, 171, 0.05)', border: '1px solid rgba(255, 255, 255, 0.8)' }}>
                         <RawasiSmartTable 
                             data={filteredLogs} 
                             columns={columns} 
-                            searchPlaceholder="ابحث في السجل..."
+                            searchPlaceholder={isEn ? 'Search audit logs...' : 'ابحث في السجل...'}
                             isLoading={isLoading}
                             enablePagination={true}
                             currentPage={currentPage}

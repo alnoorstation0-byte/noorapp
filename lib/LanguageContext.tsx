@@ -34,6 +34,10 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
             setLanguageState(savedLang);
             document.documentElement.setAttribute('lang', savedLang);
             document.documentElement.setAttribute('dir', savedLang === 'ar' ? 'rtl' : 'ltr');
+            if (document.body) {
+                document.body.setAttribute('dir', savedLang === 'ar' ? 'rtl' : 'ltr');
+                document.body.style.direction = savedLang === 'ar' ? 'rtl' : 'ltr';
+            }
         }
     }, []);
 
@@ -43,6 +47,10 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
             localStorage.setItem('app_language', lang);
             document.documentElement.setAttribute('lang', lang);
             document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+            if (document.body) {
+                document.body.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+                document.body.style.direction = lang === 'ar' ? 'rtl' : 'ltr';
+            }
             window.dispatchEvent(new CustomEvent('language_changed', { detail: lang }));
         }
     }, []);

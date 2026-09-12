@@ -65,10 +65,18 @@ body {
   /* The layout wrapper handles the gradient now */
   
   color: var(--text-main);
-  direction: rtl;
+  direction: inherit;
   min-height: 100vh;
   line-height: 1.5;
   letter-spacing: -0.2px; 
+}
+
+html[dir="rtl"], html[dir="rtl"] body {
+  direction: rtl;
+}
+
+html[dir="ltr"], html[dir="ltr"] body {
+  direction: ltr;
 }
 /* 🌊 كلاسات أكوا الشاملة للسيستم (Global Aqua Classes) */
 .aqua-glass-panel {
@@ -464,7 +472,7 @@ td {
 /* 1. الصفحة الأساسية (بدون خلفيات حاوية) */
 .clean-page {
     padding: 30px;
-    direction: rtl;
+    direction: inherit;
     background: transparent;
     min-height: 100vh;
 }
@@ -841,26 +849,46 @@ td {
 
   /* ─── 7. Headers ─── */
   .master-header {
-    flex-direction: row !important; flex-wrap: nowrap !important;
-    align-items: center !important; gap: 10px !important;
-    padding: 12px 15px !important; margin-bottom: 0 !important;
+    flex-direction: row !important; flex-wrap: wrap !important;
+    align-items: center !important; justify-content: space-between !important;
+    gap: 8px !important;
+    padding: 10px 12px !important; margin-bottom: 12px !important;
     border-radius: 0 0 20px 20px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
   
-  .title-area h1 { font-size: 16px !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
+  .title-area h1 { font-size: 15px !important; white-space: nowrap !important; overflow: hidden !important; text-overflow: ellipsis !important; }
   .title-area p { display: none !important; }
-  .title-area { gap: 8px !important; flex-shrink: 1 !important; min-width: 0 !important; }
-  .header-icon { width: 40px !important; height: 40px !important; min-width: 40px !important; border-radius: 10px !important; }
-  .header-icon span { font-size: 20px !important; }
+  .title-area { gap: 8px !important; flex: 1 1 auto !important; min-width: 0 !important; }
+  .header-icon { width: 38px !important; height: 38px !important; min-width: 38px !important; border-radius: 10px !important; }
+  .header-icon span { font-size: 19px !important; }
   .header-divider { display: none !important; }
-  .header-side { gap: 8px !important; flex-shrink: 0 !important; }
-  .header-actions { border: none !important; padding: 0 !important; flex-direction: row !important; gap: 6px !important; }
-  .nav-btn, .msg-btn, .nav-btn-glass { width: 38px !important; height: 38px !important; font-size: 18px !important; border-radius: 10px !important; }
+  .header-side { gap: 6px !important; flex-shrink: 0 !important; }
+  .header-actions { border: none !important; padding: 0 !important; flex-direction: row !important; gap: 5px !important; align-items: center !important; }
+  .nav-btn, .msg-btn, .nav-btn-glass:not(.lang-switcher-pill) { width: 38px !important; height: 38px !important; font-size: 18px !important; border-radius: 10px !important; }
   .nav-group { display: none !important; }
   .u-info-text { display: none !important; }
   .imperial-trigger { padding: 0 !important; background: transparent !important; border: none !important; box-shadow: none !important; }
   .imperial-trigger:hover { transform: none !important; box-shadow: none !important; border: none !important; }
-  .avatar-frame { width: 45px !important; height: 45px !important; }
+  .avatar-frame { width: 38px !important; height: 38px !important; }
+
+  /* 🌐 Language Switcher Pill Protection */
+  .lang-switcher-pill {
+    width: auto !important;
+    min-width: fit-content !important;
+    max-width: fit-content !important;
+    height: 36px !important;
+    padding: 0 10px !important;
+    font-size: 12px !important;
+    font-weight: 900 !important;
+    white-space: nowrap !important;
+    word-break: keep-all !important;
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 4px !important;
+    flex-shrink: 0 !important;
+  }
 
   /* 📱 8. Modals & Dialogs (Fixed Sizing) */
   .modal-content, .supreme-modal, .profile-modal-box,

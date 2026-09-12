@@ -5,6 +5,63 @@ import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import { toast } from 'react-hot-toast';
+import { useLanguage } from '@/lib/LanguageContext';
+
+const COLUMN_TRANSLATIONS: Record<string, string> = {
+    "كود": "Code",
+    "كود الشريك": "Partner Code",
+    "اسم الشريك": "Partner Name",
+    "اسم العميل": "Client Name",
+    "الاسم": "Name",
+    "اسم الصنف": "Item Name",
+    "الصنف": "Item",
+    "النوع": "Type",
+    "النوع / الفئة": "Type / Category",
+    "رقم الهاتف": "Phone",
+    "الهاتف": "Phone",
+    "الرقم الضريبي": "VAT Number",
+    "العنوان": "Address",
+    "الرصيد": "Balance",
+    "الرصيد الحالي": "Current Balance",
+    "الرصيد النهائي": "Final Balance",
+    "الحالة": "Status",
+    "الإجراءات": "Actions",
+    "إجراءات": "Actions",
+    "التاريخ": "Date",
+    "تاريخ الفاتورة": "Invoice Date",
+    "تاريخ السند": "Voucher Date",
+    "رقم الفاتورة": "Invoice #",
+    "رقم السند": "Voucher #",
+    "المبلغ": "Amount",
+    "المبلغ الإجمالي": "Total Amount",
+    "الإجمالي": "Total",
+    "المجموع": "Total",
+    "الضريبة": "VAT",
+    "الصافي": "Net Amount",
+    "المدفوع": "Paid",
+    "المتبقي": "Remaining",
+    "طريقة الدفع": "Payment Method",
+    "البيان": "Description",
+    "الوصف": "Description",
+    "ملاحظات": "Notes",
+    "المستودع": "Warehouse",
+    "الكمية": "Quantity",
+    "الوحدة": "Unit",
+    "سعر التكلفة": "Cost Price",
+    "سعر البيع": "Sale Price",
+    "السعر": "Price",
+    "الباركود": "Barcode",
+    "المندوب": "Delegate",
+    "العميل": "Client",
+    "المورد": "Supplier",
+    "المنفذ": "Outlet",
+    "الكاشير": "Cashier",
+    "الوردية": "Shift",
+    "الفرع": "Branch",
+    "المستخدم": "User",
+    "أنشئ بواسطة": "Created By",
+    "وقت الإنشاء": "Created At"
+};
 
 const THEME = {
     coffeeDark: '#122946', goldAccent: '#2891C8', sandLight: '#F4F1EE', sandDark: '#E6D5C3', success: '#166534', danger: '#be123c', border: '#eef2f6'
@@ -77,6 +134,17 @@ export default function RawasiSmartTable({
     keyExtractor,
     rowKey
 }: RawasiSmartTableProps) {
+    const { language, isRtl } = useLanguage();
+
+    const translateHeader = (headerNode: React.ReactNode): React.ReactNode => {
+        if (language !== 'en') return headerNode;
+        if (typeof headerNode === 'string') {
+            const trimmed = headerNode.trim();
+            return COLUMN_TRANSLATIONS[trimmed] || trimmed;
+        }
+        return headerNode;
+    };
+
     const effectivePagination = pagination !== undefined ? pagination : enablePagination;
     const effectiveRowsPerPage = externalRowsPerPage || itemsPerPage || pageSize;
     
@@ -215,11 +283,11 @@ export default function RawasiSmartTable({
             </div>
 
             <div style={{ overflowX: 'auto', borderRadius: '12px' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right' }} className="rawasi-printable-table">
+                <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: isRtl ? 'right' : 'left' }} className="rawasi-printable-table">
                     <thead style={{ background: 'rgba(0,0,0,0.02)' }}>
                         <tr>
                             {selectable && (
-                                <th className="hide-on-print" style={{ padding: '15px', width: '40px', textAlign: 'right' }}>
+                                <th className="hide-on-print" style={{ padding: '15px', width: '40px', textAlign: isRtl ? 'right' : 'left' }}>
                                     <input 
                                         type="checkbox" 
                                         onChange={(e) => {
@@ -243,7 +311,7 @@ export default function RawasiSmartTable({
                                         onClick={() => handleSort(sortKey)}
                                         style={{ 
                                             padding: isActions ? '15px 8px' : '15px', 
-                                            textAlign: 'right', 
+                                            textAlign: isRtl ? 'right' : 'left', 
                                             color: THEME.coffeeDark, 
                                             fontWeight: 900, 
                                             fontSize: '13px', 
@@ -258,7 +326,7 @@ export default function RawasiSmartTable({
                                     >
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
                                             {/* 🟢 الآن يمكن رسم الـ Checkbox هنا بدون أخطاء */}
-                                            {col.label || col.header}
+                                            {translateHeader(col.label || col.header)}
                                             
                                             {/* مؤشر الفرز */}
                                             {sortKey && (
@@ -274,7 +342,7 @@ export default function RawasiSmartTable({
                     </thead>
                     <motion.tbody variants={containerVariants} initial="hidden" animate="show">
                         {paginatedData.length === 0 ? (
-                            <tr><td colSpan={columns.length + (selectable ? 1 : 0)} style={{ padding: '40px', textAlign: 'center', color: '#475569', fontWeight: 900 }}>{emptyMessage || 'لا توجد بيانات'}</td></tr>
+                            <tr><td colSpan={columns.length + (selectable ? 1 : 0)} style={{ padding: '40px', textAlign: 'center', color: '#475569', fontWeight: 900 }}>{emptyMessage || (language === 'en' ? 'No data available' : 'لا توجد بيانات')}</td></tr>
                         ) : (
                             // 🚀 رسم البيانات المقطوعة فقط لمنع تهنيج المتصفح
                             paginatedData.map((row, rowIndex) => (
@@ -314,6 +382,7 @@ export default function RawasiSmartTable({
                                                     padding: isActions ? '10px 8px' : '12px 15px', 
                                                     color: '#334155', 
                                                     fontSize: '13px',
+                                                    textAlign: isRtl ? 'right' : 'left',
                                                     whiteSpace: isActions ? 'nowrap' : undefined,
                                                     width: col.width || (isActions ? (col.minWidth || '140px') : undefined),
                                                     minWidth: col.minWidth || (isActions ? '130px' : undefined)
@@ -337,17 +406,19 @@ export default function RawasiSmartTable({
                     background: 'rgba(255,255,255,0.4)', borderRadius: '12px', flexWrap: 'wrap', gap: '15px'
                 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <span style={{ fontSize: '12px', fontWeight: 900, color: '#64748b' }}>عرض:</span>
+                        <span style={{ fontSize: '12px', fontWeight: 900, color: '#64748b' }}>{language === 'en' ? 'Show:' : 'عرض:'}</span>
                         <select 
                             value={activeRows} 
                             onChange={(e) => handleRowsChange(Number(e.target.value))}
                             style={{ padding: '8px 15px', borderRadius: '12px', border: '1px solid rgba(40, 145, 200, 0.2)', outline: 'none', fontWeight: 800, cursor: 'pointer', background: 'white', color: '#0f172a' }}
                         >
-                            <option value="50">50 سجل</option>
-                            <option value="100">100 سجل</option>
-                            <option value="500">500 سجل</option>
+                            <option value="50">{language === 'en' ? '50 records' : '50 سجل'}</option>
+                            <option value="100">{language === 'en' ? '100 records' : '100 سجل'}</option>
+                            <option value="500">{language === 'en' ? '500 records' : '500 سجل'}</option>
                         </select>
-                        <span style={{ fontSize: '12px', fontWeight: 700, color: '#475569' }}>من إجمالي {activeTotal}</span>
+                        <span style={{ fontSize: '12px', fontWeight: 700, color: '#475569' }}>
+                            {language === 'en' ? `of ${activeTotal} total` : `من إجمالي ${activeTotal}`}
+                        </span>
                     </div>
 
                     <div className="pagination-controls" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
@@ -356,17 +427,17 @@ export default function RawasiSmartTable({
                             onClick={(e) => { e.stopPropagation(); handlePageChange(activePage - 1); }} 
                             style={{ padding: '8px 16px', borderRadius: '12px', border: '1px solid rgba(40, 145, 200, 0.2)', background: 'white', fontWeight: 900, cursor: activePage === 1 ? 'not-allowed' : 'pointer', opacity: activePage === 1 ? 0.5 : 1, color: '#0f172a', transition: '0.2s' }}
                         >
-                            السابق
+                            {language === 'en' ? 'Previous' : 'السابق'}
                         </button>
                         <div style={{ background: THEME.goldAccent, color: 'white', padding: '8px 20px', borderRadius: '12px', fontWeight: 900, fontSize: '13px', boxShadow: `0 4px 10px ${THEME.goldAccent}40`, textAlign: 'center' }}>
-                            صفحة {activePage} من {totalPages}
+                            {language === 'en' ? `Page ${activePage} of ${totalPages}` : `صفحة ${activePage} من ${totalPages}`}
                         </div>
                         <button 
                             disabled={activePage >= totalPages} 
                             onClick={(e) => { e.stopPropagation(); handlePageChange(activePage + 1); }} 
                             style={{ padding: '8px 16px', borderRadius: '12px', border: '1px solid rgba(40, 145, 200, 0.2)', background: 'white', fontWeight: 900, cursor: activePage >= totalPages ? 'not-allowed' : 'pointer', opacity: activePage >= totalPages ? 0.5 : 1, color: '#0f172a', transition: '0.2s' }}
                         >
-                            التالي
+                            {language === 'en' ? 'Next' : 'التالي'}
                         </button>
                     </div>
                 </div>

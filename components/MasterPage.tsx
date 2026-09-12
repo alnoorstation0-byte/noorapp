@@ -10,6 +10,135 @@ import { useRealtimeListener } from '@/lib/useRealtimeSync';
 import { useRouter, usePathname } from 'next/navigation';
 import { useLanguage } from '@/lib/LanguageContext';
 
+const PAGE_TITLES_EN: Record<string, string> = {
+  // Common Titles
+  "دليل العملاء": "Partners Directory",
+  "دليل العملاء والشركاء": "Partners Directory",
+  "الشركاء والعملاء": "Partners & Clients",
+  "الشركاء": "Partners Directory",
+  "دليل الشركاء": "Partners Directory",
+  "الفواتير والمبيعات": "Invoices & Sales",
+  "فواتير المبيعات": "Sales Invoices",
+  "الأصناف": "Inventory Items",
+  "إدارة الأصناف": "Inventory Items",
+  "دليل الأصناف والمخزون": "Items & Inventory Catalog",
+  "سندات القبض": "Receipt Vouchers",
+  "سندات القبض والتحصيلات": "Receipt Vouchers",
+  "سندات الصرف": "Payment Vouchers",
+  "المصروفات": "Expenses",
+  "سجل المصروفات الموحد": "Expenses Register",
+  "إدارة المصروفات": "Expenses Management",
+  "دفتر اليومية": "General Journal",
+  "دفتر اليومية الشامل": "General Journal",
+  "القيود اليدوية": "Manual Journals",
+  "القيود اليدوية (التسويات)": "Manual Journals",
+  "شجرة الحسابات": "Chart of Accounts",
+  "شجرة الحسابات والميزان": "Chart of Accounts & Trial Balance",
+  "دليل الحسابات": "Chart of Accounts",
+  "دفتر الأستاذ": "General Ledger",
+  "ميزان المراجعة": "Trial Balance",
+  "المركز المالي": "Financial Center",
+  "القوائم المالية": "Financial Statements",
+  "القوائم المالية الجاهزة": "Financial Statements",
+  "الخطة المالية والموازنة": "Financial Plan & Budget",
+  "التدفقات النقدية": "Cash Flows",
+  "أرصدة العملاء": "Partner Balances",
+  "أرصدة وذمم العملاء": "Partner Balances & Receivables",
+  "أرصدة الشركاء وكشف الحساب": "Partner Balances & Statement",
+  "ذمم المناديب": "Delegate Debts",
+  "تسويات العهد": "Delegate Settlements",
+  "تسوية عهد المناديب": "Delegate Custody Settlements",
+  "كشف حساب": "Account Statement",
+  "كشف حساب تفصيلي": "Detailed Statement",
+  "كشف حساب الشركاء": "Partner Account Statement",
+  "شاشة الكاشير (POS)": "POS Cashier",
+  "شاشة الكاشير": "POS Cashier",
+  "الكاشير ونقاط البيع": "POS & Cashier",
+  "تسوية عهد منافذ البيع": "POS Custody Settlements",
+  "تسوية عهد منافذ البيع وإغلاق الورديات": "POS Custody Settlements & Shift Closing",
+  "أرباح منافذ البيع": "Outlets Profitability",
+  "لوحة الربحية الشاملة": "Profitability Dashboard",
+  "لوحة القيادة": "Dashboard",
+  "لوحة القيادة المركزية": "Central Dashboard",
+  "الملخص العام": "Global Summary",
+  "المستودعات": "Warehouses",
+  "إدارة المستودعات": "Warehouse Management",
+  "حركات المخزون": "Stock Movements",
+  "أوامر الشراء": "Purchase Orders",
+  "التقارير الشاملة": "Comprehensive Reports",
+  "التقارير": "Reports",
+  "استيراد البيانات": "Data Import",
+  "مركز استيراد البيانات": "Data Import Center",
+  "العروض الترويجية": "Promotions & Offers",
+  "المراجعة والتدقيق": "Audit & Logs",
+  "الرادار المحاسبي المتقدم": "Accounting Audit Radar",
+  "أعمار الديون": "AR Aging",
+  "إدارة السيارات": "Fleet Management",
+  "رحلات التشغيل": "Fleet Operations",
+  "أوامر الشغل (الرحلات)": "Fleet Operations",
+  "الرواتب والأجور": "Payroll & Salaries",
+  "مسير الرواتب والأجور": "Payroll & Salaries",
+  "إعدادات النظام": "System Settings",
+  "إعدادات النظام والنسخ الاحتياطي": "System Settings & Backup",
+  "المستخدمين والصلاحيات": "Users & Permissions",
+  "إدارة الفريق": "Team Management",
+  "إدارة الفريق والشركاء": "Team Management",
+  "الملف الشخصي": "Profile",
+  "التواصل الداخلي": "Internal Communications",
+  "مركز الإشعارات والتنبيهات المباشرة": "Notifications Center",
+  "الصفحة الرئيسية": "Home Portal",
+  "نظام غيام لإدارة الموارد": "El-Ghayam ERP System",
+  "نظام إدارة الموارد": "ERP Management System"
+};
+
+const SUBTITLES_EN: Record<string, string> = {
+  "نظام غيام لإدارة الموارد": "El-Ghayam Unified ERP System",
+  "إدارة وتتبع بيانات العملاء والموردين والمناديب والوظائف": "Manage partners, clients, suppliers, delegates and job roles",
+  "إدارة ومتابعة فواتير المبيعات وضريبة القيمة المضافة": "Track sales invoices and VAT compliance",
+  "إدارة دليل الأصناف والباركود والتسعير ومستويات الأمان": "Manage item catalog, barcodes, pricing, and safety stock",
+  "سندات القبض ومقبوضات العملاء والمناديب": "Receipt vouchers from clients and delegates",
+  "سندات الصرف والمدفوعات والموردين": "Payment vouchers and vendor payouts",
+  "تسجيل ومتابعة المصروفات والبنود التشغيلية": "Record and track operational expenses",
+  "لوحة المؤشرات والتحليلات البيانية لعمليات الشركة": "Analytics dashboard and operational KPIs",
+  "إدارة ومتابعة حركة المستودعات والتحويلات": "Warehouse operations and stock transfers",
+  "متابعة أرصدة وذمم العملاء والتحصيلات": "Customer balances and collection tracking",
+  "مراقبة العمليات والمؤشرات المالية - ريال سعودي": "Monitor operational and financial KPIs (SAR)",
+  "إدارة الموردين، العملاء، المناديب، والموظفين": "Manage suppliers, clients, delegates, and staff",
+  "إدارة السندات، المراجعة، والترحيل المحاسبي": "Vouchers management, auditing, and posting",
+  "إدارة التكاليف والمشتريات وتوزيع الأصناف": "Cost management, purchases, and distribution",
+  "استعراض حركات الأستاذ العام والتحليل المالي": "General ledger movements and financial analysis",
+  "مراقبة حركات السيولة، المقبوضات، والمدفوعات بشكل لحظي وتجميعي": "Real-time cashflow, receipts, and disbursement monitoring",
+  "تتبع الديون المتأخرة والذمم المدينة للعملاء مقسمة حسب فترات التأخير.": "Track overdue debts and receivables categorized by aging brackets",
+  "لوحة التدقيق التفصيلية، الموازنة الآلية، والتطهير الشامل": "Detailed auditing board, automatic balancing, and system cleanup",
+  "استيراد الإكسيل الموحد مع المراجعة الذكية": "Unified Excel import with intelligent verification",
+  "متابعة حركة المناديب والمبيعات والتكاليف الخاصة بكل رحلة": "Monitor delegate movements, sales, and trip expenses",
+  "نظرة شاملة لعمليات البيع والتوزيع والمحاسبة": "Comprehensive overview of sales, distribution, and accounting",
+  "الرسائل والمحادثات بين فرق العمل": "Team communication and messaging portal",
+  "بوابة الإدارة المركزية لمياه غيام": "Central Management Portal - El-Ghayam Water",
+  "تحديد الرتب وتوزيع صلاحيات الوصول للمنصة بأمان": "Roles definition and secure platform access distribution"
+};
+
+function getTranslatedTitle(rawTitle: string, lang: 'ar' | 'en'): string {
+  if (!rawTitle || lang !== 'en') return rawTitle;
+  if (PAGE_TITLES_EN[rawTitle]) return PAGE_TITLES_EN[rawTitle];
+  const clean = rawTitle.replace(/[\u{1F300}-\u{1FAFF}]/gu, '').replace(/\(.*?\)/g, '').trim();
+  if (PAGE_TITLES_EN[clean]) return PAGE_TITLES_EN[clean];
+  for (const [k, v] of Object.entries(PAGE_TITLES_EN)) {
+    if (rawTitle.includes(k) || clean.includes(k)) return v;
+  }
+  return rawTitle;
+}
+
+function getTranslatedSubtitle(rawSub: string | undefined, lang: 'ar' | 'en'): string {
+  if (!rawSub) return lang === 'en' ? 'El-Ghayam ERP System' : 'نظام غيام لإدارة الموارد';
+  if (lang !== 'en') return rawSub;
+  if (SUBTITLES_EN[rawSub]) return SUBTITLES_EN[rawSub];
+  for (const [k, v] of Object.entries(SUBTITLES_EN)) {
+    if (rawSub.includes(k)) return v;
+  }
+  return rawSub;
+}
+
 export default function MasterPage({ title, subtitle, children, headerContent, icon, className }: any) {
   const { language, toggleLanguage, isRtl } = useLanguage();
   const router = useRouter();
@@ -268,19 +397,103 @@ html, body {
 .drop-item.logout:hover { background: rgba(239, 68, 68, 0.1); }
 
 .nav-btn-glass {
-    width: 44px; height: 44px; border-radius: 12px;
+    width: 40px; height: 40px; border-radius: 12px;
     background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(10px);
     border: 1px solid rgba(255, 255, 255, 0.8);
     display: flex; align-items: center; justify-content: center;
     cursor: pointer; transition: 0.3s;
     box-shadow: 0 4px 10px rgba(28, 115, 171, 0.1);
-    color: #122946; font-size: 20px;
+    color: #122946; font-size: 18px;
 }
 .nav-btn-glass:hover {
     background: rgba(255, 255, 255, 1); transform: translateY(-2px);
     border-color: #1C73AB; color: #1C73AB;
 }
-.nav-group { display: flex; gap: 8px; margin-right: 15px; border-right: 1px solid rgba(28, 115, 171, 0.1); padding-right: 15px; }
+.nav-group { display: flex; gap: 6px; margin-right: 12px; border-right: 1px solid rgba(28, 115, 171, 0.1); padding-right: 12px; }
+
+/* 🌐 زر تبديل اللغة الحصين (Unbreakable Language Switcher) */
+.lang-switcher-pill {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 6px !important;
+    min-width: fit-content !important;
+    width: auto !important;
+    height: 40px !important;
+    padding: 0 14px !important;
+    border-radius: 14px !important;
+    font-size: 13px !important;
+    font-weight: 900 !important;
+    white-space: nowrap !important;
+    word-break: keep-all !important;
+    background: rgba(255, 255, 255, 0.75) !important;
+    backdrop-filter: blur(10px) !important;
+    border: 1.5px solid rgba(28, 115, 171, 0.25) !important;
+    color: #1C73AB !important;
+    cursor: pointer !important;
+    transition: all 0.25s cubic-bezier(0.165, 0.84, 0.44, 1) !important;
+    box-shadow: 0 4px 12px rgba(28, 115, 171, 0.08) !important;
+    flex-shrink: 0 !important;
+}
+.lang-switcher-pill:hover {
+    background: white !important;
+    border-color: #1C73AB !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 18px rgba(28, 115, 171, 0.18) !important;
+}
+
+.header-action-btn {
+    width: 42px !important; height: 42px !important;
+    border-radius: 13px !important;
+    background: rgba(255, 255, 255, 0.7) !important;
+    backdrop-filter: blur(10px) !important;
+    border: 1px solid rgba(255, 255, 255, 0.9) !important;
+    display: flex !important; align-items: center !important; justify-content: center !important;
+    cursor: pointer !important; transition: 0.25s !important;
+    box-shadow: 0 4px 10px rgba(28, 115, 171, 0.08) !important;
+    color: #1C73AB !important; font-size: 20px !important;
+    position: relative !important; flex-shrink: 0 !important;
+    text-decoration: none !important;
+}
+.header-action-btn:hover {
+    background: white !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 6px 16px rgba(28, 115, 171, 0.15) !important;
+}
+
+.badge-counter {
+    position: absolute !important;
+    top: -5px !important; right: -5px !important;
+    background: #ef4444 !important; color: white !important;
+    font-size: 11px !important; font-weight: 900 !important;
+    min-width: 19px !important; height: 19px !important;
+    border-radius: 50% !important;
+    display: flex !important; align-items: center !important; justify-content: center !important;
+    box-shadow: 0 2px 6px rgba(239, 68, 68, 0.4) !important;
+    border: 2px solid white !important;
+}
+.badge-counter.msg-badge { background: #3b82f6 !important; }
+
+.pending-alert-btn {
+    background: rgba(254, 243, 199, 0.95) !important;
+    backdrop-filter: blur(10px) !important;
+    border: 1.5px solid rgba(245, 158, 11, 0.6) !important;
+    color: #b45309 !important;
+    font-size: 12px !important;
+    font-weight: 900 !important;
+    padding: 0 12px !important;
+    height: 40px !important;
+    border-radius: 14px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.2) !important;
+    transition: 0.2s !important;
+    white-space: nowrap !important;
+    cursor: pointer !important;
+    flex-shrink: 0 !important;
+}
+.pending-alert-btn:hover { transform: translateY(-2px) !important; }
 
 .glass-container {
     background: transparent;
@@ -305,21 +518,22 @@ html, body {
   
   .master-header { 
     padding: 10px 12px !important; 
-    margin-bottom: 0 !important; 
+    margin-bottom: 10px !important; 
     border-radius: 0 0 20px 20px !important;
     flex-wrap: wrap !important;
     gap: 8px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
   }
   
   .title-area { 
     gap: 8px !important; 
-    flex-shrink: 1 !important; 
+    flex: 1 1 auto !important; 
     min-width: 0 !important;
-    max-width: calc(100vw - 80px) !important;
   }
   
   .title-area h1 { 
-    font-size: 16px !important; 
+    font-size: 15px !important; 
     white-space: nowrap !important; 
     overflow: hidden !important; 
     text-overflow: ellipsis !important; 
@@ -332,10 +546,10 @@ html, body {
     min-width: 38px !important; 
     border-radius: 10px !important; 
   }
-  .header-icon span { font-size: 18px !important; }
+  .header-icon span { font-size: 20px !important; }
   
   .header-side { 
-    gap: 8px !important; 
+    gap: 6px !important; 
     flex-shrink: 0 !important; 
   }
   .header-actions { 
@@ -343,14 +557,38 @@ html, body {
     padding: 0 !important; 
     flex-direction: row !important; 
     gap: 6px !important; 
+    align-items: center !important;
   }
   
-  .msg-btn { 
-    width: 38px !important; 
-    height: 38px !important; 
-    font-size: 18px !important; 
-    border-radius: 10px !important; 
+  .lang-switcher-pill {
+    height: 36px !important;
+    padding: 0 10px !important;
+    font-size: 12px !important;
+    border-radius: 10px !important;
+    white-space: nowrap !important;
+    word-break: keep-all !important;
+    min-width: fit-content !important;
+    width: auto !important;
   }
+  
+  .header-action-btn {
+    width: 36px !important;
+    height: 36px !important;
+    font-size: 18px !important;
+    border-radius: 10px !important;
+  }
+  
+  .header-action-btn.msg-btn {
+    display: none !important; /* Hide messages icon on mobile header to ensure ample space for language pill */
+  }
+  
+  .pending-alert-btn {
+    height: 36px !important;
+    padding: 0 8px !important;
+    font-size: 11px !important;
+    border-radius: 10px !important;
+  }
+  .pending-text-full { display: none !important; }
   
   .header-divider { display: none !important; }
   
@@ -363,7 +601,7 @@ html, body {
   .u-info-text { display: none !important; }
   
   .imperial-trigger { 
-    padding: 4px !important; 
+    padding: 2px !important; 
     background: transparent !important; 
     border: none !important; 
     box-shadow: none !important; 
@@ -376,150 +614,123 @@ html, body {
   }
   
   .avatar-frame { 
-    width: 44px !important; 
-    height: 44px !important; 
+    width: 38px !important; 
+    height: 38px !important; 
   }
 }`}</style>
 
       <header className="master-header no-print" style={{
-            padding: '15px 20px', 
-            background: 'rgba(255, 255, 255, 0.4)',
+            padding: '12px 18px', 
+            background: 'rgba(255, 255, 255, 0.45)',
             backdropFilter: 'blur(30px)',
             borderRadius: '24px',
             border: '1px solid rgba(255, 255, 255, 0.6)',
-            boxShadow: '0 8px 32px rgba(28, 115, 171, 0.1)',
+            boxShadow: '0 8px 32px rgba(28, 115, 171, 0.08)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            gap: '12px',
+            gap: '10px',
             flexWrap: 'wrap'
       }}>
-        {/* Right side: Large Icon and Title */}
-        <div className="title-area" style={{ display: 'flex', alignItems: 'center', gap: '20px', minWidth: 0 }}>
+        {/* Right side: Icon and Title */}
+        <div className="title-area" style={{ display: 'flex', alignItems: 'center', gap: '14px', minWidth: 0, flex: '1 1 auto' }}>
           <div className="header-icon" style={{ 
-            width: '55px', height: '55px', borderRadius: '16px', minWidth: '55px',
-            background: 'rgba(255, 255, 255, 0.7)',
+            width: '48px', height: '48px', borderRadius: '14px', minWidth: '48px',
+            background: 'rgba(255, 255, 255, 0.75)',
             backdropFilter: 'blur(10px)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 8px 20px rgba(28, 115, 171, 0.1)',
+            boxShadow: '0 4px 15px rgba(28, 115, 171, 0.1)',
             border: '1px solid rgba(255, 255, 255, 1)'
           }}>
-            <span style={{ fontSize: '32px', filter: 'drop-shadow(0 2px 4px rgba(28,115,171,0.2))' }}>{icon || '✨'}</span>
+            <span style={{ fontSize: '26px', filter: 'drop-shadow(0 2px 4px rgba(28,115,171,0.2))' }}>{icon || '✨'}</span>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', minWidth: 0 }}>
-              <h1 style={{ margin: 0, fontSize: '24px', fontWeight: 900, color: '#122946', letterSpacing: '-0.5px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{title}</h1>
-              <p style={{ margin: 0, fontSize: '15px', color: '#475569', fontWeight: 800, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{subtitle || 'نظام غيام لإدارة الموارد'}</p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', minWidth: 0 }}>
+              <h1 style={{ margin: 0, fontSize: '20px', fontWeight: 900, color: '#122946', letterSpacing: '-0.3px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {getTranslatedTitle(title, language)}
+              </h1>
+              <p style={{ margin: 0, fontSize: '13px', color: '#64748b', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                {getTranslatedSubtitle(subtitle, language)}
+              </p>
           </div>
         </div>
 
-        {/* Left side: Header Content, Notifications, Navigation */}
-        <div className="header-side" style={{ display: 'flex', alignItems: 'center', gap: '20px', flexShrink: 0 }}>
+        {/* Left side: Header Content, Actions, Avatar */}
+        <div className="header-side" style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
           {headerContent}
           
-          <div className="header-actions" style={{ display: 'flex', flexDirection: 'row', gap: '15px', alignItems: 'center', borderRight: '2px solid rgba(28, 115, 171, 0.1)', paddingRight: '20px' }}>
+          <div className="header-actions" style={{ display: 'flex', flexDirection: 'row', gap: '8px', alignItems: 'center', borderRight: isRtl ? '2px solid rgba(28, 115, 171, 0.1)' : 'none', borderLeft: !isRtl ? '2px solid rgba(28, 115, 171, 0.1)' : 'none', paddingRight: isRtl ? '12px' : '0', paddingLeft: !isRtl ? '12px' : '0' }}>
              
-             {/* Nav Arrows & Shortcuts Button */}
-             <div className="nav-group" style={{ display: 'flex', gap: '5px', margin: 0, border: 'none', background: 'rgba(255, 255, 255, 0.5)', borderRadius: '12px', padding: '4px', boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.02)' }}>
+             {/* Desktop Nav Arrows & Shortcuts Button */}
+             <div className="nav-group" style={{ display: 'flex', gap: '4px', margin: 0, border: 'none', background: 'rgba(255, 255, 255, 0.5)', borderRadius: '12px', padding: '3px' }}>
                 <button 
                   onClick={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'F1', bubbles: true }))} 
                   className="nav-btn-glass" 
-                  title="خريطة اختصارات الكيبورد (F1)" 
-                  style={{ width: '40px', height: '40px', borderRadius: '10px', fontSize: '18px', background: 'rgba(255,255,255,0.7)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#1C73AB', transition: '0.2s', boxShadow: '0 2px 5px rgba(28,115,171,0.1)' }}
+                  title={language === 'en' ? 'Keyboard Shortcuts (F1)' : 'خريطة اختصارات الكيبورد (F1)'} 
+                  style={{ width: '36px', height: '36px', borderRadius: '10px', fontSize: '16px', background: 'rgba(255,255,255,0.7)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#1C73AB' }}
                 >
                   ⌨️
                 </button>
-                <button onClick={() => router.forward()} className="nav-btn-glass" title="تقدم للأمام" style={{ width: '40px', height: '40px', borderRadius: '10px', fontSize: '20px', background: 'rgba(255,255,255,0.7)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#1C73AB', transition: '0.2s', boxShadow: '0 2px 5px rgba(28,115,171,0.1)' }}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                <button onClick={() => router.forward()} className="nav-btn-glass" title={language === 'en' ? 'Forward' : 'تقدم للأمام'} style={{ width: '36px', height: '36px', borderRadius: '10px', fontSize: '18px', background: 'rgba(255,255,255,0.7)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#1C73AB' }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
                 </button>
-                <button onClick={() => router.back()} className="nav-btn-glass" title="رجوع للخلف" style={{ width: '40px', height: '40px', borderRadius: '10px', fontSize: '20px', background: 'rgba(255,255,255,0.7)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#1C73AB', transition: '0.2s', boxShadow: '0 2px 5px rgba(28,115,171,0.1)' }}>
-                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+                <button onClick={() => router.back()} className="nav-btn-glass" title={language === 'en' ? 'Back' : 'رجوع للخلف'} style={{ width: '36px', height: '36px', borderRadius: '10px', fontSize: '18px', background: 'rgba(255,255,255,0.7)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#1C73AB' }}>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
                 </button>
              </div>
 
-             {/* 🌐 زر تبديل اللغة (Language Switcher) */}
+             {/* 🌐 زر تبديل اللغة الأنيق وغير القابل للكسر إطلاقاً */}
              <button
                 type="button"
                 onClick={toggleLanguage}
-                className="nav-btn-glass"
+                className="lang-switcher-pill"
                 title={language === 'ar' ? 'Switch to English' : 'التحويل إلى العربية'}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '0 12px',
-                  width: 'auto',
-                  height: '40px',
-                  borderRadius: '12px',
-                  fontSize: '12px',
-                  fontWeight: 900,
-                  background: 'rgba(255, 255, 255, 0.75)',
-                  border: '1px solid rgba(28, 115, 171, 0.25)',
-                  color: '#1C73AB',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s',
-                  boxShadow: '0 2px 8px rgba(28, 115, 171, 0.1)'
-                }}
              >
-                <span style={{ fontSize: '15px' }}>🌐</span>
+                <span style={{ fontSize: '15px', lineHeight: 1 }}>🌐</span>
                 <span>{language === 'ar' ? 'English' : 'عربي'}</span>
              </button>
 
-              {/* Notifications & Messages & Pending Alert */}
-              <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                  {pendingTotalCount > 0 && (
-                      <button 
-                          type="button"
-                          onClick={togglePendingMenu}
-                          title={`يوجد ${pendingTotalCount} مستندات وعمليات معلقة تحتاج مراجعة أو ترحيل`}
-                          style={{
-                              background: 'rgba(254, 243, 199, 0.95)',
-                              backdropFilter: 'blur(10px)',
-                              border: '1px solid rgba(245, 158, 11, 0.6)',
-                              color: '#b45309',
-                              fontSize: '12px',
-                              fontWeight: 900,
-                              padding: '6px 12px',
-                              borderRadius: '12px',
-                              display: 'flex',
-                              alignItems: 'center',
-                              gap: '6px',
-                              boxShadow: '0 2px 8px rgba(245, 158, 11, 0.2)',
-                              transition: '0.2s',
-                              whiteSpace: 'nowrap',
-                              cursor: 'pointer'
-                          }}
-                      >
-                          <span>⚠️</span>
-                          <span>{pendingTotalCount} معلق</span>
-                      </button>
-                  )}
+              {/* Notifications & Pending Alert */}
+              {pendingTotalCount > 0 && (
                   <button 
-                    ref={bellRef}
-                    className="msg-btn" 
-                    onClick={togglePendingMenu} 
-                    title="التنبيهات والمعلقات"
-                    style={{ background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.9)', color: '#1C73AB', cursor: 'pointer', position: 'relative', fontSize: '22px', transition: '0.3s', width: '45px', height: '45px', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 10px rgba(28, 115, 171, 0.1)' }}
+                      type="button"
+                      onClick={togglePendingMenu}
+                      title={`يوجد ${pendingTotalCount} معلق`}
+                      className="pending-alert-btn"
                   >
-                      🔔
-                      {(unread_notifications > 0 || pendingTotalCount > 0) && (
-                        <span style={{ position: 'absolute', top: '-6px', right: '-6px', background: '#ef4444', color: 'white', fontSize: '11px', minWidth: '20px', height: '20px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 8px rgba(239, 68, 68, 0.5)', fontWeight: 900, border: '2px solid rgba(255,255,255,0.8)' }}>
-                          {(unread_notifications || 0) + (pendingTotalCount || 0)}
-                        </span>
-                      )}
+                      <span>⚠️</span>
+                      <span>{pendingTotalCount}</span>
+                      <span className="pending-text-full">{language === 'en' ? 'Pending' : 'معلق'}</span>
                   </button>
-                  <Link className="msg-btn" href="/messages" style={{ background: 'rgba(255,255,255,0.7)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.9)', color: '#1C73AB', cursor: 'pointer', position: 'relative', textDecoration: 'none', fontSize: '22px', transition: '0.3s', width: '45px', height: '45px', borderRadius: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 10px rgba(28, 115, 171, 0.1)' }}>
-                      ✉️
-                      {unread_messages > 0 && <span style={{ position: 'absolute', top: '-6px', right: '-6px', background: '#3b82f6', color: 'white', fontSize: '12px', minWidth: '22px', height: '22px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 4px 8px rgba(59, 130, 246, 0.5)', fontWeight: 900, border: '2px solid rgba(255,255,255,0.8)' }}>{unread_messages}</span>}
-                  </Link>
-              </div>
+              )}
+
+              <button 
+                ref={bellRef}
+                className="header-action-btn" 
+                onClick={togglePendingMenu} 
+                title={language === 'en' ? 'Alerts' : 'التنبيهات والمعلقات'}
+              >
+                  🔔
+                  {(unread_notifications > 0 || pendingTotalCount > 0) && (
+                    <span className="badge-counter">
+                      {(unread_notifications || 0) + (pendingTotalCount || 0)}
+                    </span>
+                  )}
+              </button>
+
+              <Link className="header-action-btn msg-btn" href="/messages" title={language === 'en' ? 'Messages' : 'الرسائل'}>
+                  ✉️
+                  {unread_messages > 0 && <span className="badge-counter msg-badge">{unread_messages}</span>}
+              </Link>
           </div>
           
           {/* Avatar Card Restored */}
           <div className="imperial-trigger" ref={triggerRef} onClick={toggleMenu} style={{ flexShrink: 0 }}>
             <div className="u-info-text">
-              <span className="u-name">{userProfile?.displayName || 'المدير'}</span>
+              <span className="u-name">{userProfile?.displayName || (language === 'en' ? 'Admin' : 'المدير')}</span>
               <span className="u-role">
-                {userProfile?.role === 'super_admin' ? 'مدير عام 👑' : 'مسؤول نظام 🛡️'}
+                {userProfile?.role === 'super_admin' 
+                  ? (language === 'en' ? 'General Manager 👑' : 'مدير عام 👑') 
+                  : (language === 'en' ? 'System Admin 🛡️' : 'مسؤول نظام 🛡️')}
               </span>
             </div>
             <div className="avatar-frame">
@@ -527,17 +738,15 @@ html, body {
               <div className="active-dot"></div>
             </div>
           </div>
-
-
         </div>
       </header>
 
       {mounted && isMenuOpen && typeof document !== 'undefined' && createPortal(
         <div className="supreme-dropdown" style={{ top: coords.top, left: coords.left }} onClick={(e) => e.stopPropagation()}>
 
-            <div className="drop-item" onClick={() => router.push('/profile')}><span>👤</span> بروفيلي</div>
-            <div className="drop-item" onClick={() => router.push('/settings')}><span>⚙️</span> الإعدادات</div>
-            <div className="drop-item logout" onClick={handleLogout}><span>🚪</span> خروج</div>
+            <div className="drop-item" onClick={() => router.push('/profile')}><span>👤</span> {language === 'en' ? 'My Profile' : 'بروفيلي'}</div>
+            <div className="drop-item" onClick={() => router.push('/settings')}><span>⚙️</span> {language === 'en' ? 'System Settings' : 'الإعدادات'}</div>
+            <div className="drop-item logout" onClick={handleLogout}><span>🚪</span> {language === 'en' ? 'Logout' : 'خروج'}</div>
         </div>,
         document.body
       )}
