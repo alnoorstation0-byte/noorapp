@@ -784,9 +784,8 @@ td {
   }
 
   /* 📱 9. Grids and Forms */
-  div[style*="gridTemplateColumns"],
-  div[style*="grid-template-columns"],
-  .grid-container {
+  .grid-container,
+  .responsive-form-grid {
       grid-template-columns: 1fr !important;
       display: flex !important;
       flex-direction: column !important;

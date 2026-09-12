@@ -186,6 +186,29 @@ function PosItemNumpadModal({
                 .pos-quick-btn:active {
                     transform: scale(0.9) !important;
                 }
+                .pos-fields-grid {
+                    display: grid !important;
+                    grid-template-columns: 1fr 1fr !important;
+                    gap: 8px !important;
+                    flex-direction: unset !important;
+                    box-sizing: border-box !important;
+                }
+                .pos-numpad-grid {
+                    display: grid !important;
+                    grid-template-columns: repeat(3, 1fr) !important;
+                    gap: 6px !important;
+                    direction: ltr !important;
+                    flex-direction: unset !important;
+                    box-sizing: border-box !important;
+                }
+                .pos-action-grid {
+                    display: grid !important;
+                    grid-template-columns: 1fr 2.2fr !important;
+                    gap: 8px !important;
+                    margin-top: 2px !important;
+                    flex-direction: unset !important;
+                    box-sizing: border-box !important;
+                }
 
                 @keyframes posCardFadeIn {
                     from { opacity: 0; transform: scale(0.96); }
@@ -247,6 +270,12 @@ function PosItemNumpadModal({
                         overflow: hidden !important;
                         padding-bottom: max(14px, env(safe-area-inset-bottom, 14px)) !important;
                     }
+                    .pos-fields-grid {
+                        display: grid !important;
+                        grid-template-columns: 1fr 1fr !important;
+                        gap: 6px !important;
+                        flex-direction: unset !important;
+                    }
                     .pos-field-box {
                         padding: 6px 8px !important;
                         border-radius: 12px !important;
@@ -266,10 +295,24 @@ function PosItemNumpadModal({
                         font-size: 11px !important;
                         min-width: 65px !important;
                     }
+                    .pos-numpad-grid {
+                        display: grid !important;
+                        grid-template-columns: repeat(3, 1fr) !important;
+                        gap: 5px !important;
+                        direction: ltr !important;
+                        flex-direction: unset !important;
+                    }
                     .pos-key-btn {
                         height: 38px !important;
                         font-size: 18px !important;
                         border-radius: 10px !important;
+                    }
+                    .pos-action-grid {
+                        display: grid !important;
+                        grid-template-columns: 1fr 2.2fr !important;
+                        gap: 6px !important;
+                        margin-top: 2px !important;
+                        flex-direction: unset !important;
                     }
                     .pos-action-btn-main {
                         height: 42px !important;
@@ -311,7 +354,7 @@ function PosItemNumpadModal({
                 <div className="pos-numpad-body">
 
                     {/* Active Field Displays */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                    <div className="pos-fields-grid">
                         {/* Qty Field */}
                         <div
                             onClick={() => switchField('qty')}
@@ -392,7 +435,7 @@ function PosItemNumpadModal({
                     </div>
 
                     {/* 📱 Phone Dialer Numpad: 1 2 3 at top */}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '6px' }}>
+                    <div className="pos-numpad-grid">
                         {numpadKeys.map(key => (
                             <button
                                 key={key}
@@ -410,7 +453,7 @@ function PosItemNumpadModal({
                     </div>
 
                     {/* Action Buttons with Integrated Total */}
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 2.2fr', gap: '8px', marginTop: '2px' }}>
+                    <div className="pos-action-grid">
                         <button
                             type="button"
                             onClick={onClose}
