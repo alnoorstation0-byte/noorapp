@@ -18,7 +18,9 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
   const [customPosition, setCustomPosition] = useState<{ x: number, y: number } | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false); 
-  const dragStartPos = useRef({ x: 0, y: 0 });
+  const currentPosRef = useRef<{ x: number, y: number } | null>(null);
+  const lastTouchTime = useRef(0);
+  const dragStartPos = useRef({ x: 0, y: 0, startX: 0, startY: 0, hasMoved: false });
 
   // لمنع مشاكل Hydration
   const [mounted, setMounted] = useState(false);
@@ -31,14 +33,27 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
   const unreadCounts = useUnreadCounts();
   const { onlineUsers, onlineCount } = usePresence();
 
-  // تحميل الموقع المخصص فقط إذا قام المستخدم بسحبه مسبقاً
+  // تحديث ref الموقع عند تغييره لتفادي مشاكل الـ closure
+  useEffect(() => {
+    currentPosRef.current = customPosition;
+  }, [customPosition]);
+
+  // تحميل الموقع المخصص مع التحقق من ملاءمته لأبعاد الشاشة الحالية
   useEffect(() => {
     const savedPos = localStorage.getItem('fabPosition_v2');
     if (savedPos) {
       try {
         const parsed = JSON.parse(savedPos);
         if (typeof parsed?.x === 'number' && typeof parsed?.y === 'number') {
-          setCustomPosition(parsed);
+          const fabSize = typeof window !== 'undefined' && window.innerWidth <= 768 ? 65 : 75;
+          const maxX = (typeof window !== 'undefined' ? window.innerWidth : 1000) - fabSize - 10;
+          const maxY = (typeof window !== 'undefined' ? window.innerHeight : 1000) - fabSize - 10;
+          const clamped = {
+            x: Math.max(10, Math.min(parsed.x, maxX)),
+            y: Math.max(10, Math.min(parsed.y, maxY))
+          };
+          setCustomPosition(clamped);
+          currentPosRef.current = clamped;
         }
       } catch(e) {}
     }
@@ -46,38 +61,143 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
     setTimeout(() => setIsInitialized(true), 100); 
   }, []);
 
+  // ضبط الموقع عند تغيير حجم الشاشة أو تدوير الجوال
+  useEffect(() => {
+    const handleResize = () => {
+      setCustomPosition(prev => {
+        if (!prev) return null;
+        const fabSize = window.innerWidth <= 768 ? 65 : 75;
+        const maxX = window.innerWidth - fabSize - 10;
+        const maxY = window.innerHeight - fabSize - 10;
+        const clamped = {
+          x: Math.max(10, Math.min(prev.x, maxX)),
+          y: Math.max(10, Math.min(prev.y, maxY))
+        };
+        currentPosRef.current = clamped;
+        return clamped;
+      });
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  // 📱 معالج سحب القائمة العائمة باللمس على الجوال (Touch Drag)
+  const onTouchStart = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    if (!touch) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    dragStartPos.current = {
+      x: touch.clientX - rect.left,
+      y: touch.clientY - rect.top,
+      startX: touch.clientX,
+      startY: touch.clientY,
+      hasMoved: false
+    };
+  };
+
+  const onTouchMove = (e: React.TouchEvent) => {
+    const touch = e.touches[0];
+    if (!touch) return;
+    const dx = Math.abs(touch.clientX - dragStartPos.current.startX);
+    const dy = Math.abs(touch.clientY - dragStartPos.current.startY);
+
+    if (dx > 6 || dy > 6) {
+      if (!dragStartPos.current.hasMoved) {
+        dragStartPos.current.hasMoved = true;
+        setIsDragging(true);
+      }
+    }
+
+    if (dragStartPos.current.hasMoved) {
+      const fabSize = window.innerWidth <= 768 ? 62 : 75;
+      const maxX = window.innerWidth - fabSize - 8;
+      const maxY = window.innerHeight - fabSize - 8;
+
+      const newX = touch.clientX - dragStartPos.current.x;
+      const newY = touch.clientY - dragStartPos.current.y;
+
+      const pos = {
+        x: Math.max(8, Math.min(newX, maxX)),
+        y: Math.max(8, Math.min(newY, maxY))
+      };
+      currentPosRef.current = pos;
+      setCustomPosition(pos);
+    }
+  };
+
+  const onTouchEnd = () => {
+    lastTouchTime.current = Date.now();
+    if (dragStartPos.current.hasMoved) {
+      if (currentPosRef.current) {
+        localStorage.setItem('fabPosition_v2', JSON.stringify(currentPosRef.current));
+      }
+      setTimeout(() => setIsDragging(false), 50);
+    } else {
+      setIsDragging(false);
+      setIsOpen(prev => !prev);
+    }
+  };
+
+  // 🖱️ معالج سحب القائمة العائمة بالماوس على الكمبيوتر (Mouse Drag)
   const onMouseDown = (e: React.MouseEvent) => {
-    if (window.innerWidth <= 768) return; // تعطيل السحب على الجوال
-    setIsDragging(false);
+    if (Date.now() - lastTouchTime.current < 500) return;
     const rect = e.currentTarget.getBoundingClientRect();
     dragStartPos.current = {
       x: e.clientX - rect.left,
-      y: e.clientY - rect.top
+      y: e.clientY - rect.top,
+      startX: e.clientX,
+      startY: e.clientY,
+      hasMoved: false
     };
-    
+
     const onMouseMove = (moveEvent: MouseEvent) => {
-      setIsDragging(true);
-      const newX = moveEvent.clientX - dragStartPos.current.x;
-      const newY = moveEvent.clientY - dragStartPos.current.y;
-      
-      const maxX = window.innerWidth - 85;
-      const maxY = window.innerHeight - 85;
-      
-      const pos = {
-        x: Math.max(10, Math.min(newX, maxX)),
-        y: Math.max(10, Math.min(newY, maxY))
-      };
-      setCustomPosition(pos);
-      localStorage.setItem('fabPosition_v2', JSON.stringify(pos));
+      const dx = Math.abs(moveEvent.clientX - dragStartPos.current.startX);
+      const dy = Math.abs(moveEvent.clientY - dragStartPos.current.startY);
+
+      if (dx > 5 || dy > 5) {
+        if (!dragStartPos.current.hasMoved) {
+          dragStartPos.current.hasMoved = true;
+          setIsDragging(true);
+        }
+      }
+
+      if (dragStartPos.current.hasMoved) {
+        const fabSize = window.innerWidth <= 768 ? 62 : 75;
+        const maxX = window.innerWidth - fabSize - 8;
+        const maxY = window.innerHeight - fabSize - 8;
+
+        const newX = moveEvent.clientX - dragStartPos.current.x;
+        const newY = moveEvent.clientY - dragStartPos.current.y;
+
+        const pos = {
+          x: Math.max(8, Math.min(newX, maxX)),
+          y: Math.max(8, Math.min(newY, maxY))
+        };
+        currentPosRef.current = pos;
+        setCustomPosition(pos);
+      }
     };
-    
+
     const onMouseUp = () => {
       window.removeEventListener('mousemove', onMouseMove);
       window.removeEventListener('mouseup', onMouseUp);
+
+      if (dragStartPos.current.hasMoved) {
+        if (currentPosRef.current) {
+          localStorage.setItem('fabPosition_v2', JSON.stringify(currentPosRef.current));
+        }
+        setTimeout(() => setIsDragging(false), 50);
+      }
     };
-    
+
     window.addEventListener('mousemove', onMouseMove);
     window.addEventListener('mouseup', onMouseUp);
+  };
+
+  const handleClick = () => {
+    if (Date.now() - lastTouchTime.current < 500) return;
+    if (isDragging || dragStartPos.current.hasMoved) return;
+    setIsOpen(prev => !prev);
   };
 
   const handleLogout = async () => {
@@ -144,7 +264,7 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
       <style dangerouslySetInnerHTML={{__html: `
         .fab-main {
           position: fixed;
-          bottom: 35px; left: 35px; right: auto !important;
+          bottom: 35px; left: 35px; right: auto;
           width: 75px; height: 75px;
           border-radius: 50%;
           background: rgba(255, 255, 255, 0.4);
@@ -152,15 +272,28 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
           -webkit-backdrop-filter: blur(25px) saturate(200%);
           border: 1px solid rgba(255,255,255,0.7);
           box-shadow: 0 10px 30px rgba(0,0,0,0.1), inset 0 0 20px rgba(255,255,255,0.5);
-          cursor: pointer; z-index: 10000;
+          cursor: grab; z-index: 10000;
           display: flex; align-items: center; justify-content: center;
-          transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
+          transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
           user-select: none; padding: 12px;
+          touch-action: none;
+          -webkit-tap-highlight-color: transparent;
           ${isOpen ? 'transform: scale(0.85) rotate(-15deg); opacity: 0.8;' : 'transform: scale(1) rotate(0deg); opacity: 1;'}
+        }
+        .fab-main.fab-has-custom-pos {
+          bottom: auto !important;
+          right: auto !important;
+        }
+        .fab-main.fab-dragging {
+          cursor: grabbing !important;
+          transition: none !important;
+          transform: scale(1.1) !important;
+          box-shadow: 0 15px 35px rgba(28, 115, 171, 0.4) !important;
+          opacity: 0.9 !important;
         }
         .fab-main:hover { transform: scale(1.05) rotate(5deg); background: rgba(255, 255, 255, 0.6); }
         .fab-main:active { transform: scale(0.95); }
-        .fab-logo { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5)); }
+        .fab-logo { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5)); pointer-events: none; }
 
         .overlay-screen {
           position: fixed; inset: 0; z-index: 9998;
@@ -255,8 +388,18 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
 
         @media (max-width: 768px) {
           .fab-main {
-            bottom: 20px !important; left: 20px !important; right: auto !important; top: auto !important;
-            width: 65px; height: 65px;
+            width: 62px; height: 62px;
+            padding: 10px;
+          }
+          .fab-main:not(.fab-has-custom-pos) {
+            bottom: 20px !important;
+            left: 20px !important;
+            right: auto !important;
+            top: auto !important;
+          }
+          .fab-main.fab-has-custom-pos {
+            bottom: auto !important;
+            right: auto !important;
           }
           .command-center { margin-top: 10px; gap: 15px; }
           .group-section { padding: 15px; border-radius: 20px; }
@@ -292,12 +435,23 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
         onDateChange={(start, end) => window.dispatchEvent(new CustomEvent('globalDateFilter', { detail: { start, end } }))}
       />
 
-      <div className="fab-main no-print" 
-           style={customPosition && (typeof window !== 'undefined' && window.innerWidth > 768) ? { left: customPosition.x, top: customPosition.y, bottom: 'auto', right: 'auto' } : { bottom: '35px', left: '35px', right: 'auto' }}
-           onMouseDown={(e) => { if(typeof window !== 'undefined' && window.innerWidth > 768) onMouseDown(e); }} 
-           onTouchStart={(e) => { if(typeof window !== 'undefined' && window.innerWidth <= 768) setIsOpen(!isOpen); }}
-           onClick={() => { if(typeof window !== 'undefined' && window.innerWidth > 768 && !isDragging) setIsOpen(!isOpen); }}>
-        <img src="/ghayam_logo.png" alt="لوجو" className="fab-logo" />
+      <div className={`fab-main no-print ${customPosition ? 'fab-has-custom-pos' : ''} ${isDragging ? 'fab-dragging' : ''}`} 
+           style={customPosition ? { 
+             left: `${customPosition.x}px`, 
+             top: `${customPosition.y}px`, 
+             bottom: 'auto', 
+             right: 'auto',
+             touchAction: 'none'
+           } : { 
+             touchAction: 'none' 
+           }}
+           onMouseDown={onMouseDown} 
+           onTouchStart={onTouchStart}
+           onTouchMove={onTouchMove}
+           onTouchEnd={onTouchEnd}
+           onClick={handleClick}
+           title="القائمة العائمة (يمكنك سحبها وتحريكها في أي مكان)">
+        <img src="/ghayam_logo.png" alt="لوجو" className="fab-logo" draggable="false" />
       </div>
 
       <div className="overlay-backdrop no-print"></div>
