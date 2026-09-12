@@ -1,4 +1,6 @@
 import { supabase } from '@/lib/supabase';
+import { ACC } from '@/lib/account-ids';
+import { emitTableChange } from '@/lib/useRealtimeSync';
 
 export const MAIN_WAREHOUSE_ID = '11111111-1111-1111-1111-111111111111';
 
@@ -129,19 +131,21 @@ export async function syncAllWarehouseBalances() {
 }
 
 /**
- * 🟢 اعتماد حركة مخزنية واحدة وتحديث أرصدة المستودع المعني ومستودع الوجهة فوراً
+ * 🟢 اعتماد حركة مخزنية واحدة وتحديث أرصدة المستودع المعني ومستودع الوجهة وتوليد القيود المحاسبية فوراً
  */
 export async function executeApproveTransaction(transactionId: string) {
   // 1. جلب بيانات الحركة
   const { data: txn, error: getErr } = await supabase
     .from('inventory_transactions')
-    .select('*, fleet_operations(vehicle_id)')
+    .select('*, inventory_items(name), partners(name, account_id), fleet_operations(operation_number, vehicle_id, driver_id)')
     .eq('id', transactionId)
     .single();
 
   if (getErr || !txn) throw new Error(getErr?.message || 'الحركة غير موجودة');
 
   const qty = Number(txn.quantity) || 0;
+  const unitPrice = Number(txn.unit_price) || 0;
+  const totalAmount = qty * unitPrice;
   const srcWh = txn.warehouse_id || MAIN_WAREHOUSE_ID;
   let destWh = txn.destination_warehouse_id;
 
@@ -156,31 +160,122 @@ export async function executeApproveTransaction(transactionId: string) {
     if (vWh) destWh = vWh.id;
   }
 
-  // 2. تحديث الحالة ومستودع الوجهة
+  // 2. توليد القيد المحاسبي المزدوج لحركة المخزون (إن لم يكن موجوداً)
+  let journalId = txn.journal_id;
+  if (!journalId && totalAmount > 0) {
+    const itemName = (txn.inventory_items as any)?.name || 'صنف';
+    const date = txn.transaction_date || new Date().toISOString().split('T')[0];
+
+    let headerDesc = '';
+    let debitAcc = '';
+    let creditAcc = '';
+    let debitNotes = '';
+    let creditNotes = '';
+    let partnerIdForLine: string | null = null;
+
+    if (txn.type === 'in' || txn.type === 'transfer_in') {
+      // توريد مخزني / شراء: من حـ/ 126 مخزون البضائع (مدين) إلى حـ/ 219 فواتير قيد الاستلام أو المورد (دائن)
+      headerDesc = `توريد مخزني #${txn.transaction_number || ''} - صنف: ${itemName} (كمية: ${qty})`;
+      debitAcc = ACC.INVENTORY;
+      creditAcc = (txn.partners as any)?.account_id || ACC.PENDING_INVOICES;
+      debitNotes = 'إضافة لمخزون البضائع (مدين)';
+      creditNotes = 'استحقاق قيد الاستلام / مورد (دائن)';
+      partnerIdForLine = txn.partner_id || null;
+    } else if (txn.type === 'waste') {
+      // إتلاف مخزني: من حـ/ 528 خسائر توالف (مدين) إلى حـ/ 126 مخزون البضائع (دائن)
+      headerDesc = `إتلاف وهدر مخزني #${txn.transaction_number || ''} - صنف: ${itemName}`;
+      debitAcc = ACC.WASTE_LOSS;
+      creditAcc = ACC.INVENTORY;
+      debitNotes = 'خسائر توالف وهدر مخزني (مدين)';
+      creditNotes = 'تخفيض مخزون البضائع (دائن)';
+    } else if (txn.fleet_operation_id) {
+      // تحميل عهدة أسطول ومندوب
+      headerDesc = `تحميل عهدة أسطول #${(txn.fleet_operations as any)?.operation_number || ''} - صنف: ${itemName} (كمية: ${qty})`;
+      debitAcc = ACC.INVENTORY_CUSTODY;
+      creditAcc = ACC.INVENTORY;
+      debitNotes = 'تحميل عهدة سيارة/مندوب (مدين)';
+      creditNotes = 'صرف من المستودع للعهدة (دائن)';
+      partnerIdForLine = (txn.fleet_operations as any)?.driver_id || txn.partner_id || null;
+    } else {
+      // صرف مخزني عادي
+      headerDesc = `صرف مخزني #${txn.transaction_number || ''} - صنف: ${itemName} (كمية: ${qty})`;
+      debitAcc = (txn.partners as any)?.account_id || ACC.CUSTOMERS_AR;
+      creditAcc = ACC.INVENTORY;
+      debitNotes = 'استحقاق مدين (ذمة)';
+      creditNotes = 'صرف من مخزون البضائع (دائن)';
+      partnerIdForLine = txn.partner_id || null;
+    }
+
+    try {
+      const { data: jHeader, error: jhErr } = await supabase
+        .from('journal_headers')
+        .insert([{
+          entry_date: date,
+          description: headerDesc,
+          status: 'posted',
+          v_type: 'inventory',
+          reference_id: transactionId
+        }])
+        .select('id')
+        .single();
+
+      if (!jhErr && jHeader) {
+        journalId = jHeader.id;
+        await supabase.from('journal_lines').insert([
+          {
+            header_id: journalId,
+            account_id: debitAcc,
+            partner_id: (txn.type === 'in' ? null : partnerIdForLine),
+            debit: totalAmount,
+            credit: 0,
+            notes: debitNotes
+          },
+          {
+            header_id: journalId,
+            account_id: creditAcc,
+            partner_id: (txn.type === 'in' ? partnerIdForLine : null),
+            debit: 0,
+            credit: totalAmount,
+            notes: creditNotes
+          }
+        ]);
+      }
+    } catch (jErr) {
+      console.warn('Could not create journal entry for inventory txn:', jErr);
+    }
+  }
+
+  // 3. تحديث الحالة ومستودع الوجهة ورقم القيد
   await supabase
     .from('inventory_transactions')
     .update({
       status: 'approved',
+      journal_id: journalId || null,
       warehouse_id: srcWh,
       destination_warehouse_id: destWh || null
     })
     .eq('id', transactionId);
 
-  // 3. استدعاء دالة قاعدة البيانات لتوليد القيود المحاسبية
+  // 4. استدعاء دالة قاعدة البيانات كإجراء إضافي
   try {
     await supabase.rpc('approve_inventory_transaction', { p_id: transactionId });
   } catch (rpcErr) {
     console.warn('RPC approve warning (handled):', rpcErr);
   }
 
-  // 4. 🚀 إعادة مزامنة وتحديث أرصدة كافة المستودعات وسيارات التوزيع فوراً
+  // 5. 🚀 إعادة مزامنة وتحديث أرصدة كافة المستودعات وسيارات التوزيع فوراً
   await syncAllWarehouseBalances();
+
+  // 6. بث التحديث اللحظي لجميع الشاشات
+  emitTableChange('inventory_transactions');
+  emitTableChange('journal_headers');
+  emitTableChange('journal_lines');
 
   return { success: true };
 }
 
 /**
- * ⏪ فك اعتماد حركة مخزنية وعكس تأثيرها على المستودعات
+ * ⏪ فك اعتماد حركة مخزنية وعكس تأثيرها على المستودعات والقيود
  */
 export async function executeUnapproveTransaction(transactionId: string) {
   const { data: txn, error: getErr } = await supabase
@@ -191,21 +286,36 @@ export async function executeUnapproveTransaction(transactionId: string) {
 
   if (getErr || !txn) throw new Error(getErr?.message || 'الحركة غير موجودة');
 
-  // 1. استدعاء دالة فك الاعتماد في قاعدة البيانات لإلغاء القيد المحاسبي
+  // 1. حذف القيد المحاسبي المرتبط إن وجد
+  if (txn.journal_id) {
+    try {
+      await supabase.from('journal_lines').delete().eq('header_id', txn.journal_id);
+      await supabase.from('journal_headers').delete().eq('id', txn.journal_id);
+    } catch (jErr) {
+      console.warn('Could not delete journal entry:', jErr);
+    }
+  }
+
+  // 2. استدعاء دالة فك الاعتماد في قاعدة البيانات
   try {
     await supabase.rpc('unapprove_inventory_transaction', { p_id: transactionId });
   } catch (rpcErr) {
     console.warn('RPC unapprove warning (handled):', rpcErr);
   }
 
-  // 2. تحديث حالة الحركة إلى مسودة مع حذف مرجع القيد
+  // 3. تحديث حالة الحركة إلى مسودة مع حذف مرجع القيد
   await supabase
     .from('inventory_transactions')
     .update({ status: 'pending', journal_id: null })
     .eq('id', transactionId);
 
-  // 3. 🚀 إعادة مزامنة وتحديث أرصدة كافة المستودعات وسيارات التوزيع فوراً
+  // 4. 🚀 إعادة مزامنة وتحديث أرصدة كافة المستودعات وسيارات التوزيع فوراً
   await syncAllWarehouseBalances();
+
+  // 5. بث التحديث اللحظي
+  emitTableChange('inventory_transactions');
+  emitTableChange('journal_headers');
+  emitTableChange('journal_lines');
 
   return { success: true };
 }

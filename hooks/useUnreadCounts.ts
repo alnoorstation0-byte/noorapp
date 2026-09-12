@@ -8,20 +8,32 @@ export function useUnreadCounts() {
     const fetchCounts = useCallback(async () => {
         try {
             const { data: { session } } = await supabase.auth.getSession();
-            if (!session) return;
+            if (!session?.user?.id) return;
 
-            const { data, error } = await supabase
-                .from('vw_unread_counts')
-                .select('*')
-                .eq('user_id', session.user.id)
-                .maybeSingle();
+            const userId = session.user.id;
+
+            // استعلام مزدوج لضمان الدقة اللحظية 100%
+            const [vwRes, notifRes] = await Promise.all([
+                supabase
+                    .from('vw_unread_counts')
+                    .select('*')
+                    .eq('user_id', userId)
+                    .maybeSingle(),
+                supabase
+                    .from('notifications')
+                    .select('id', { count: 'exact', head: true })
+                    .eq('user_id', userId)
+                    .eq('is_read', false)
+            ]);
             
-            if (data && !error) {
-                setCounts({
-                    unread_messages: Number(data.unread_messages || 0),
-                    unread_notifications: Number(data.unread_notifications || 0)
-                });
-            }
+            const unreadNotifs = typeof notifRes.count === 'number' 
+                ? notifRes.count 
+                : Number(vwRes.data?.unread_notifications || 0);
+
+            setCounts({
+                unread_messages: Number(vwRes.data?.unread_messages || 0),
+                unread_notifications: unreadNotifs
+            });
         } catch {
             // تجاهل أي خطأ اتصال مؤقت
         }
@@ -30,20 +42,25 @@ export function useUnreadCounts() {
     useEffect(() => {
         fetchCounts();
 
-        // تحديث كل 60 ثانية كاحتياط
-        const interval = setInterval(fetchCounts, 60000);
+        // ⏱️ فحص احتياطي كل 5 ثوانٍ لضمان التحديث بدون ريفرش إطلاقاً
+        const interval = setInterval(fetchCounts, 5000);
 
-        // الاستماع لحدث التحديث اليدوي الداخلي
-        const handleManualRefresh = () => fetchCounts();
-        window.addEventListener('unread_counts_refresh', handleManualRefresh);
+        // الاستماع لأحداث التحديث الفوري المحلي وتغيير التبويب
+        const handleRefresh = () => fetchCounts();
+        window.addEventListener('unread_counts_refresh', handleRefresh);
+        window.addEventListener('focus', handleRefresh);
+        window.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') fetchCounts();
+        });
 
         return () => {
             clearInterval(interval);
-            window.removeEventListener('unread_counts_refresh', handleManualRefresh);
+            window.removeEventListener('unread_counts_refresh', handleRefresh);
+            window.removeEventListener('focus', handleRefresh);
         };
     }, [fetchCounts]);
 
-    // ⚡ تحديث فوري فائق السرعة بمجرد وصول أو قراءة أي إشعار أو رسالة عبر Realtime
+    // ⚡ تحديث فوري فائق السرعة بمجرد وصول أو قراءة أو حذف أي إشعار عبر Realtime
     useRealtimeListener(['notifications', 'messages'], fetchCounts, 100);
 
     return counts;

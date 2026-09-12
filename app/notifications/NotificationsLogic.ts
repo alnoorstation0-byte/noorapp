@@ -11,6 +11,7 @@ import {
   playNotificationSound
 } from '@/lib/pushNotificationService';
 import { useToast } from '@/lib/toast-context';
+import { emitTableChange, useRealtimeListener } from '@/lib/useRealtimeSync';
 
 export interface SystemNotification {
   id: string;
@@ -69,11 +70,30 @@ export function useNotificationsLogic() {
   useEffect(() => {
     fetchNotifications();
 
+    // ⏱️ فحص دوري كل 5 ثوانٍ لضمان عدم الحاجة لأي ريفرش إطلاقاً
+    const interval = setInterval(fetchNotifications, 5000);
+
+    const handleRefresh = () => fetchNotifications();
+    window.addEventListener('unread_counts_refresh', handleRefresh);
+    window.addEventListener('focus', handleRefresh);
+    window.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') fetchNotifications();
+    });
+
     // فحص دعم المتصفح وحالة الصوت
     setIsSoundOn(isNotificationSoundEnabled());
     setPushPermission(getNotificationPermission());
     setIsMobile(isMobileDevice());
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('unread_counts_refresh', handleRefresh);
+      window.removeEventListener('focus', handleRefresh);
+    };
   }, [fetchNotifications]);
+
+  // ⚡ الاستماع للمزامنة اللحظية الشاملة
+  useRealtimeListener('notifications', fetchNotifications, 100);
 
   // 2️⃣ الاشتراك الفوري Realtime على جدول notifications
   useEffect(() => {
@@ -124,55 +144,64 @@ export function useNotificationsLogic() {
     };
   }, [userId]);
 
-  // 3️⃣ تمييز إشعار محدد كمقروء (Optimistic Update 0ms)
+  // 3️⃣ تمييز إشعار محدد كمقروء (Optimistic Update 0ms + API Service Role)
   const markAsRead = async (id: string) => {
     // تحديث فوري فائق السرعة بدون انتظار الشبكة
     setNotifications(prev =>
       prev.map(n => (n.id === id ? { ...n, is_read: true } : n))
     );
     window.dispatchEvent(new CustomEvent('unread_counts_refresh'));
+    emitTableChange('notifications');
 
     try {
-      await supabase.from('notifications').update({ is_read: true }).eq('id', id);
+      await fetch('/api/notifications', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id })
+      });
     } catch (err) {
-      console.warn('Error marking notification as read:', err);
+      console.warn('Error marking notification as read via API:', err);
     }
   };
 
-  // 4️⃣ تمييز جميع الإشعارات كمقروءة (Optimistic Update 0ms)
+  // 4️⃣ تمييز جميع الإشعارات كمقروءة (Optimistic Update 0ms + API Service Role)
   const markAllAsRead = async () => {
     if (!userId) return;
 
     // تحديث فوري بالواجهة
     setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
     window.dispatchEvent(new CustomEvent('unread_counts_refresh'));
+    emitTableChange('notifications');
     showToast('✅ تم تحديد جميع الإشعارات كمقروءة', 'success');
 
     try {
-      await supabase
-        .from('notifications')
-        .update({ is_read: true })
-        .eq('user_id', userId)
-        .eq('is_read', false);
+      await fetch('/api/notifications', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ mark_all: true, user_id: userId })
+      });
     } catch (err) {
-      console.warn('Error marking all notifications as read:', err);
+      console.warn('Error marking all notifications as read via API:', err);
     }
   };
 
-  // 5️⃣ حذف إشعار محدد (Optimistic Update 0ms)
+  // 5️⃣ حذف إشعار محدد (Optimistic Update 0ms + API Service Role)
   const deleteNotification = async (id: string) => {
     // إزالة فورية من القائمة
     setNotifications(prev => prev.filter(n => n.id !== id));
     window.dispatchEvent(new CustomEvent('unread_counts_refresh'));
+    emitTableChange('notifications');
 
     try {
-      await supabase.from('notifications').delete().eq('id', id);
+      await fetch(`/api/notifications?id=${encodeURIComponent(id)}`, {
+        method: 'DELETE'
+      });
     } catch (err) {
-      console.warn('Error deleting notification:', err);
+      console.warn('Error deleting notification via API:', err);
     }
   };
 
-  // 6️⃣ مسح جميع الإشعارات المقروءة (Optimistic Update 0ms)
+  // 6️⃣ مسح جميع الإشعارات المقروءة (Optimistic Update 0ms + API Service Role)
   const clearReadNotifications = async () => {
     if (!userId) return;
 
@@ -184,16 +213,15 @@ export function useNotificationsLogic() {
 
     setNotifications(prev => prev.filter(n => !n.is_read));
     window.dispatchEvent(new CustomEvent('unread_counts_refresh'));
+    emitTableChange('notifications');
     showToast(`🧹 تم مسح ${readCount} إشعار مقروء بنجاح`, 'success');
 
     try {
-      await supabase
-        .from('notifications')
-        .delete()
-        .eq('user_id', userId)
-        .eq('is_read', true);
+      await fetch(`/api/notifications?user_id=${encodeURIComponent(userId)}&clear_read=true`, {
+        method: 'DELETE'
+      });
     } catch (err) {
-      console.warn('Error clearing read notifications:', err);
+      console.warn('Error clearing read notifications via API:', err);
     }
   };
 

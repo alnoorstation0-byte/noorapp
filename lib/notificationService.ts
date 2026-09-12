@@ -1,4 +1,5 @@
 "use client";
+import { emitTableChange } from '@/lib/useRealtimeSync';
 
 /**
  * 📢 محرك بث وإرسال الإشعارات الموحد لنظام مياه غيام
@@ -18,7 +19,7 @@ export interface SendNotificationPayload {
 }
 
 /**
- * دالة الإرسال الأساسية - تتصل بـ API الإشعارات الداخلي
+ * دالة الإرسال الأساسية - تتصل بـ API الإشعارات الداخلي وتبث التحديث فورياً بدون ريفرش
  */
 export async function sendSystemNotification(payload: SendNotificationPayload): Promise<boolean> {
   try {
@@ -31,6 +32,13 @@ export async function sendSystemNotification(payload: SendNotificationPayload): 
     if (!res.ok) {
       console.warn('⚠️ تعذر إرسال الإشعار عبر API، الرد:', res.status);
       return false;
+    }
+
+    // ⚡ بث فوري فائق السرعة لكافة التبويبات والمكونات المفتوحة
+    emitTableChange('notifications');
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('unread_counts_refresh'));
+      window.dispatchEvent(new CustomEvent('pending_counts_refresh'));
     }
 
     return true;

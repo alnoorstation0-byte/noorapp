@@ -90,8 +90,23 @@ export default function MasterPage({ title, subtitle, children, headerContent, i
 
   useEffect(() => {
     fetchPendingCount();
-    const interval = setInterval(fetchPendingCount, 60000);
-    return () => clearInterval(interval);
+    // ⏱️ فحص احتياطي كل 5 ثوانٍ لضمان تحديث العدادات والمعلقات بدون ريفرش إطلاقاً
+    const interval = setInterval(fetchPendingCount, 5000);
+
+    const handleRefresh = () => fetchPendingCount();
+    window.addEventListener('pending_counts_refresh', handleRefresh);
+    window.addEventListener('unread_counts_refresh', handleRefresh);
+    window.addEventListener('focus', handleRefresh);
+    window.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') fetchPendingCount();
+    });
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('pending_counts_refresh', handleRefresh);
+      window.removeEventListener('unread_counts_refresh', handleRefresh);
+      window.removeEventListener('focus', handleRefresh);
+    };
   }, []);
 
   // 🔄 مزامنة لحظية شاملة مع كافة جداول المستندات والعمليات والإشعارات
@@ -147,6 +162,7 @@ export default function MasterPage({ title, subtitle, children, headerContent, i
 
   const togglePendingMenu = (e: React.MouseEvent) => {
     e.stopPropagation();
+    fetchPendingCount(); // تحديث فوري فائق السرعة عند النقر
     if (!isPendingMenuOpen && bellRef.current) {
       const rect = bellRef.current.getBoundingClientRect();
       const winWidth = typeof window !== 'undefined' ? window.innerWidth : 1000;

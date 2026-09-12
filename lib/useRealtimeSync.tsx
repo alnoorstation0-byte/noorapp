@@ -206,16 +206,24 @@ const TABLE_QUERY_KEY_MAP: Record<string, string[][]> = {
   ]
 };
 
-// دالة لبث الحدث
-function emitTableChange(table: string, eventType: string, payload: any) {
+// دالة لبث الحدث محلياً وعبر كل التبويبات المفتوحة فورياً
+export function emitTableChange(table: string, eventType: string = 'CHANGE', payload: any = {}) {
   if (typeof window !== 'undefined') {
-    window.dispatchEvent(new CustomEvent(`db:${table}`, { 
-      detail: { eventType, payload, timestamp: Date.now() } 
-    }));
-    // حدث عام لأي مكون يريد الاستماع لكل التغييرات
-    window.dispatchEvent(new CustomEvent('db:any_change', { 
-      detail: { table, eventType, payload, timestamp: Date.now() } 
-    }));
+    const detail = { table, eventType, payload, timestamp: Date.now() };
+    window.dispatchEvent(new CustomEvent(`db:${table}`, { detail }));
+    window.dispatchEvent(new CustomEvent('db:any_change', { detail }));
+    window.dispatchEvent(new CustomEvent('pending_counts_refresh'));
+
+    if (table === 'notifications' || table === 'messages') {
+      window.dispatchEvent(new CustomEvent('unread_counts_refresh'));
+    }
+
+    // بث التغيير عبر التبويبات المختلفة لنفس المتصفح
+    try {
+      const bc = new BroadcastChannel('elghayam_sync');
+      bc.postMessage({ type: 'TABLE_CHANGE', table, eventType, detail });
+      bc.close();
+    } catch {}
   }
 }
 
@@ -228,7 +236,31 @@ export function RealtimeSyncProvider({ children }: { children: React.ReactNode }
   const queryClient = useQueryClient();
 
   useEffect(() => {
-    // إنشاء قناة واحدة للاستماع لكل الجداول
+    // 1. الاستماع لـ BroadcastChannel لتبادل التحديثات الفورية بين كافة التبويبات
+    let bc: BroadcastChannel | null = null;
+    try {
+      bc = new BroadcastChannel('elghayam_sync');
+      bc.onmessage = (event) => {
+        const { table, eventType, detail } = event.data || {};
+        if (table) {
+          window.dispatchEvent(new CustomEvent(`db:${table}`, { detail }));
+          window.dispatchEvent(new CustomEvent('db:any_change', { detail }));
+          window.dispatchEvent(new CustomEvent('pending_counts_refresh'));
+          if (table === 'notifications' || table === 'messages') {
+            window.dispatchEvent(new CustomEvent('unread_counts_refresh'));
+          }
+
+          const relatedQueries = TABLE_QUERY_KEY_MAP[table];
+          if (relatedQueries && queryClient) {
+            relatedQueries.forEach(queryKey => {
+              queryClient.invalidateQueries({ queryKey, exact: false });
+            });
+          }
+        }
+      };
+    } catch {}
+
+    // 2. إنشاء قناة واحدة للاستماع لكل الجداول من Supabase
     const channel = supabase.channel('global-sync', {
       config: { broadcast: { self: true } }
     });
@@ -241,7 +273,7 @@ export function RealtimeSyncProvider({ children }: { children: React.ReactNode }
         (payload: any) => {
           console.log(`🔄 [Realtime] ${table}:`, payload.eventType);
 
-          // 1. بث الحدث للمكونات المستمعة محلياً
+          // 1. بث الحدث للمكونات المستمعة محلياً وعبر التبويبات
           emitTableChange(table, payload.eventType, payload);
 
           // 2. تحديث وإبطال كاش React Query أوتوماتيكياً لكل الصفحات المفتوحة
@@ -259,10 +291,8 @@ export function RealtimeSyncProvider({ children }: { children: React.ReactNode }
               supabase.auth.getSession().then(({ data: { session } }) => {
                 const myId = session?.user?.id;
                 if (!payload.new.user_id || payload.new.user_id === myId) {
-                  // 1. تشغيل نغمة التنبيه الصوتية
                   playNotificationSound();
 
-                  // 2. استخراج رابط الأكشن إن وُجد
                   let actionUrl = '/notifications';
                   if (payload.new.content && typeof payload.new.content === 'string' && payload.new.content.includes('__ACTION__')) {
                     actionUrl = payload.new.content.split('__ACTION__')[1] || '/notifications';
@@ -271,12 +301,10 @@ export function RealtimeSyncProvider({ children }: { children: React.ReactNode }
                   const notifTitle = payload.new.title || '🔔 إشعار جديد';
                   const notifMsg = payload.new.message || 'يوجد تحديث جديد في النظام';
 
-                  // 3. إظهار تنبيه الواجهة الداخلي (In-App Toast)
                   if (typeof showGlobalToast === 'function') {
                     showGlobalToast(`${notifTitle}: ${notifMsg}`, payload.new.type === 'alert' ? 'error' : 'info');
                   }
 
-                  // 4. إظهار الإشعار على الجوال والمتصفح (Native Mobile Web Push)
                   showBrowserNotification(notifTitle, notifMsg, {
                     actionUrl,
                     id: payload.new.id,
@@ -286,7 +314,6 @@ export function RealtimeSyncProvider({ children }: { children: React.ReactNode }
               });
             }
           }
-
 
           // 4. معالجة خاصة للرسائل الفورية
           if (table === 'messages') {
@@ -315,6 +342,7 @@ export function RealtimeSyncProvider({ children }: { children: React.ReactNode }
     channelRef.current = channel;
 
     return () => {
+      if (bc) bc.close();
       if (channelRef.current) {
         supabase.removeChannel(channelRef.current);
       }
@@ -327,18 +355,14 @@ export function RealtimeSyncProvider({ children }: { children: React.ReactNode }
 /**
  * Hook للاستماع لتغييرات جدول معين وتنفيذ callback
  * 
- * @param table - اسم الجدول (مثل 'expenses', 'inventory_transactions')
+ * @param tables - اسم الجدول أو قائمة الجداول
  * @param callback - دالة تتنفذ عند أي تغيير
- * @param debounceMs - مدة الانتظار قبل التنفيذ (لمنع التكرار السريع) - افتراضي 500ms
- * 
- * الاستخدام:
- *   useRealtimeListener('inventory_transactions', () => fetchTransactions());
- *   useRealtimeListener(['expenses', 'payment_vouchers'], () => refetch());
+ * @param debounceMs - مدة الانتظار قبل التنفيذ - افتراضي 150ms
  */
 export function useRealtimeListener(
   tables: WatchedTable | WatchedTable[] | 'any_change',
   callback: (detail?: any) => void,
-  debounceMs: number = 500
+  debounceMs: number = 150
 ) {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const callbackRef = useRef(callback);
@@ -347,6 +371,9 @@ export function useRealtimeListener(
   useEffect(() => {
     callbackRef.current = callback;
   }, [callback]);
+
+  // تثبيت مفتاح الجداول لمنع إلغاء المستمعين في كل render
+  const tablesKey = Array.isArray(tables) ? tables.slice().sort().join(',') : tables;
 
   useEffect(() => {
     const debouncedCallback = (e: Event) => {
@@ -370,7 +397,7 @@ export function useRealtimeListener(
         window.removeEventListener(`db:${table}`, debouncedCallback);
       });
     };
-  }, [tables, debounceMs]);
+  }, [tablesKey, debounceMs]);
 }
 
 /**
