@@ -225,9 +225,10 @@ export function useInventoryLogic() {
     warehouses: enrichedWarehouses,
     selectedWarehouseId, setSelectedWarehouseId,
     fleetOperations, partners,
-    handleSave: () => {
-      if (!currentRecord.name) return showToast("اسم الصنف مطلوب!", "error");
-      saveMutation.mutate(currentRecord);
+    handleSave: (customRecord?: any) => {
+      const rec = (customRecord && customRecord.name !== undefined) ? customRecord : currentRecord;
+      if (!rec?.name?.trim()) return showToast("اسم الصنف مطلوب!", "error");
+      saveMutation.mutate(rec);
     },
     deleteItem: (id: string) => deleteMutation.mutate(id),
     isSaving: saveMutation.isPending,

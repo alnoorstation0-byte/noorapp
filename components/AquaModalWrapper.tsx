@@ -20,28 +20,51 @@ export default function AquaModalWrapper({ isOpen, onClose, onConfirm, title, ic
 
     useEffect(() => setMounted(true), []);
 
+    const onCloseRef = useRef(onClose);
+    const onConfirmRef = useRef(onConfirm);
+    const hasAutoFocusedRef = useRef(false);
+
+    useEffect(() => {
+        onCloseRef.current = onClose;
+        onConfirmRef.current = onConfirm;
+    });
+
+    // 🎯 التركيز التلقائي على أول حقل مرة واحدة فقط عند فتح المودال (للديسكتوب فقط)
+    useEffect(() => {
+        if (!isOpen) {
+            hasAutoFocusedRef.current = false;
+            return;
+        }
+
+        if (!hasAutoFocusedRef.current) {
+            hasAutoFocusedRef.current = true;
+            // يتم التركيز لمرة واحدة فقط عند الفتح ولا يُعاد تشغيله مع إعادة الرسم
+            if (typeof window !== 'undefined' && window.innerWidth > 768) {
+                const timer = setTimeout(() => {
+                    if (containerRef.current) {
+                        const firstInput = containerRef.current.querySelector<HTMLElement>(
+                            'input:not([type="hidden"]):not([disabled]), select:not([disabled]), textarea:not([disabled])'
+                        );
+                        if (firstInput) {
+                            firstInput.focus();
+                        }
+                    }
+                }, 80);
+                return () => clearTimeout(timer);
+            }
+        }
+    }, [isOpen]);
+
     // ⌨️ الاختصارات العامة داخل المودال (Escape للإغلاق و Ctrl+Enter للحفظ)
     useEffect(() => {
         if (!isOpen) return;
-
-        // Auto-focus first visible input on desktop
-        const timer = setTimeout(() => {
-            if (containerRef.current) {
-                const firstInput = containerRef.current.querySelector<HTMLElement>(
-                    'input:not([type="hidden"]):not([disabled]), select:not([disabled]), textarea:not([disabled])'
-                );
-                if (firstInput) {
-                    firstInput.focus();
-                }
-            }
-        }, 80);
 
         const handleKeyDown = (e: KeyboardEvent) => {
             // 1. Esc -> إغلاق المودال
             if (e.key === 'Escape') {
                 e.preventDefault();
                 e.stopPropagation();
-                onClose();
+                onCloseRef.current?.();
                 return;
             }
 
@@ -50,8 +73,8 @@ export default function AquaModalWrapper({ isOpen, onClose, onConfirm, title, ic
                 e.preventDefault();
                 e.stopPropagation();
 
-                if (onConfirm) {
-                    onConfirm();
+                if (onConfirmRef.current) {
+                    onConfirmRef.current();
                     return;
                 }
 
@@ -68,11 +91,8 @@ export default function AquaModalWrapper({ isOpen, onClose, onConfirm, title, ic
         };
 
         window.addEventListener('keydown', handleKeyDown);
-        return () => {
-            clearTimeout(timer);
-            window.removeEventListener('keydown', handleKeyDown);
-        };
-    }, [isOpen, onClose, onConfirm]);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isOpen]);
 
     if (!isOpen || !mounted) return null;
 

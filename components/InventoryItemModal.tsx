@@ -78,150 +78,417 @@ ${price ? `<div class="price">السعر: ${price} ر.س</div>` : ''}
 export default function InventoryItemModal({ isOpen, onClose, currentRecord, setCurrentRecord, handleSave, isSaving }: any) {
   const [mounted, setMounted] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
+
+  // حالة محلية مستقلة لمنع إعادة رسم الصفحة بالكامل عند كتابة كل حرف
+  const [formData, setFormData] = useState<any>({
+    code: '',
+    name: '',
+    unit: 'حبة',
+    suggested_price: '',
+    reorder_level: 5,
+    current_quantity: '',
+    is_returnable_bottle: false,
+    notes: ''
+  });
+
   useEffect(() => setMounted(true), []);
+
+  useEffect(() => {
+    if (isOpen) {
+      setFormData({
+        id: currentRecord?.id || undefined,
+        code: currentRecord?.code || '',
+        name: currentRecord?.name || '',
+        unit: currentRecord?.unit || 'حبة',
+        suggested_price: (currentRecord?.suggested_price !== undefined && currentRecord?.suggested_price !== null) ? currentRecord.suggested_price : '',
+        reorder_level: (currentRecord?.reorder_level !== undefined && currentRecord?.reorder_level !== null) ? currentRecord.reorder_level : 5,
+        current_quantity: (currentRecord?.current_quantity !== undefined && currentRecord?.current_quantity !== null) ? currentRecord.current_quantity : '',
+        is_returnable_bottle: Boolean(currentRecord?.is_returnable_bottle),
+        notes: currentRecord?.notes || ''
+      });
+    }
+  }, [isOpen, currentRecord]);
+
   const handleBarcodeDetected = useCallback((code: string) => {
-    setCurrentRecord((prev: any) => ({ ...prev, code }));
+    setFormData((prev: any) => ({ ...prev, code }));
+    if (setCurrentRecord) setCurrentRecord((prev: any) => ({ ...prev, code }));
     setShowScanner(false);
   }, [setCurrentRecord]);
+
+  const updateField = (field: string, value: any) => {
+    setFormData((prev: any) => ({ ...prev, [field]: value }));
+    if (setCurrentRecord) {
+      setCurrentRecord((prev: any) => ({ ...prev, [field]: value }));
+    }
+  };
+
+  const onSubmit = () => {
+    if (handleSave) {
+      handleSave(formData);
+    }
+  };
+
   if (!mounted || !isOpen) return null;
-  const hasBarcode = !!(currentRecord.code?.trim());
+  const hasBarcode = !!(formData.code?.trim());
+
   return (
     <>
       {showScanner && <BarcodeScannerModal onDetected={handleBarcodeDetected} onClose={() => setShowScanner(false)} />}
-      <AquaModalWrapper isOpen={isOpen} onClose={onClose}
-        title={currentRecord.id ? 'تعديل بيانات صنف' : 'إضافة صنف جديد للدليل'}
-        icon={currentRecord.id ? '✏️' : '📦'} width="700px">
-        <div style={{ display:'flex', flexDirection:'column', gap:'20px' }}>
-          <div style={{ display:'grid', gridTemplateColumns:'1fr 2fr', gap:'15px' }}>
-            <div>
-              <label style={{ fontSize:'13px', fontWeight:900, color:THEME.primary, marginBottom:'8px', display:'block' }}>
-                🏷️ كود الصنف / الباركود
+      <AquaModalWrapper 
+        isOpen={isOpen} 
+        onClose={onClose}
+        title={formData.id ? 'تعديل بيانات الصنف 📝' : 'إضافة صنف جديد للدليل 📦'}
+        icon={formData.id ? '✏️' : '📦'} 
+        width="720px"
+      >
+        <style>{`
+          .item-modal-section {
+            background: rgba(255, 255, 255, 0.5);
+            border: 1px solid rgba(40, 145, 200, 0.2);
+            border-radius: 16px;
+            padding: 14px 16px;
+            margin-bottom: 12px;
+          }
+
+          .item-modal-sec-title {
+            font-size: 13px;
+            font-weight: 900;
+            color: #1C73AB;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            border-bottom: 1px dashed rgba(40, 145, 200, 0.2);
+            padding-bottom: 6px;
+          }
+
+          .item-modal-grid-2 {
+            display: grid;
+            grid-template-columns: 1.2fr 1fr;
+            gap: 12px;
+          }
+
+          .item-modal-grid-3 {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 12px;
+          }
+
+          .item-modal-label {
+            font-size: 12px;
+            font-weight: 900;
+            color: #1C73AB;
+            margin-bottom: 5px;
+            display: block;
+          }
+
+          .item-modal-input {
+            width: 100%;
+            height: 40px;
+            padding: 8px 12px;
+            border-radius: 10px;
+            font-size: 13px;
+            font-weight: 700;
+            box-sizing: border-box;
+          }
+
+          .item-bottle-toggle {
+            background: rgba(241, 245, 249, 0.7);
+            border: 1px solid rgba(203, 213, 225, 0.8);
+            border-radius: 14px;
+            padding: 10px 14px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            cursor: pointer;
+            transition: all 0.2s ease;
+          }
+
+          .item-bottle-toggle.active {
+            background: linear-gradient(135deg, rgba(40, 145, 200, 0.12) 0%, rgba(127, 212, 227, 0.2) 100%);
+            border-color: #2891C8;
+            box-shadow: 0 4px 12px rgba(40, 145, 200, 0.1);
+          }
+
+          .item-footer-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+          }
+
+          @media (max-width: 768px) {
+            .item-modal-section {
+              padding: 10px 12px !important;
+              margin-bottom: 10px !important;
+              border-radius: 12px !important;
+            }
+
+            .item-modal-grid-2 {
+              grid-template-columns: 1fr !important;
+              gap: 10px !important;
+            }
+
+            .item-modal-grid-3 {
+              grid-template-columns: 1fr 1fr !important;
+              gap: 8px !important;
+            }
+
+            .item-modal-grid-3 > div:last-child {
+              grid-column: span 2 !important;
+            }
+
+            .item-modal-label {
+              font-size: 11px !important;
+              margin-bottom: 3px !important;
+            }
+
+            .item-modal-input {
+              height: 38px !important;
+              font-size: 13px !important;
+              padding: 6px 10px !important;
+            }
+
+            .item-footer-actions {
+              flex-direction: row !important;
+              gap: 8px !important;
+            }
+
+            .item-footer-actions button {
+              min-height: 44px !important;
+              font-size: 13px !important;
+              padding: 8px 10px !important;
+            }
+          }
+        `}</style>
+
+        <div style={{ display: 'flex', flexDirection: 'column' }}>
+          
+          {/* 1. التعريف الأساسي للصنف */}
+          <div className="item-modal-section">
+            <div className="item-modal-sec-title">
+              <span>📦</span>
+              <span>البيانات الأساسية للصنف</span>
+            </div>
+
+            <div style={{ marginBottom: '12px' }}>
+              <label className="item-modal-label">
+                اسم الصنف / المنتج *
               </label>
-              <div style={{ display:'flex', gap:'6px', alignItems:'center' }}>
-                <input type="text" className="glass-input-field"
-                  placeholder="ادخل او امسح الباركود..."
-                  value={currentRecord.code || ''}
-                  onChange={e => setCurrentRecord({ ...currentRecord, code: e.target.value })}
-                  style={{ flex:1, fontFamily:'monospace', letterSpacing:'1px' }}
-                />
-                <button type="button" onClick={() => setShowScanner(true)} title="مسح الباركود بالكاميرا"
-                  style={{ width:'40px', height:'40px', flexShrink:0, background:'linear-gradient(135deg,#2891C8,#7FD4E3)', border:'none', borderRadius:'10px', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'18px', boxShadow:'0 4px 12px rgba(40,145,200,0.35)', transition:'transform 0.15s' }}
-                  onMouseEnter={e=>(e.currentTarget.style.transform='translateY(-2px)')}
-                  onMouseLeave={e=>(e.currentTarget.style.transform='translateY(0)')}>
-                  📷
-                </button>
-                <button type="button"
-                  onClick={() => printBarcodeLabel(currentRecord.code, currentRecord.name, currentRecord.suggested_price)}
-                  disabled={!hasBarcode} title={hasBarcode ? 'طباعة ملصق الباركود' : 'ادخل كود اولا'}
-                  style={{ width:'40px', height:'40px', flexShrink:0, background: hasBarcode ? 'linear-gradient(135deg,#16a34a,#22c55e)' : 'rgba(148,163,184,0.25)', border:'none', borderRadius:'10px', cursor: hasBarcode ? 'pointer' : 'not-allowed', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'18px', opacity: hasBarcode ? 1 : 0.45, transition:'transform 0.15s' }}
-                  onMouseEnter={e=>hasBarcode&&(e.currentTarget.style.transform='translateY(-2px)')}
-                  onMouseLeave={e=>(e.currentTarget.style.transform='translateY(0)')}>
-                  🖨️
-                </button>
-              </div>
-              {hasBarcode && (
-                <div style={{ marginTop:'6px', padding:'3px 8px', background:'rgba(40,145,200,0.08)', borderRadius:'6px', fontSize:'10px', color:'#475569', fontFamily:'monospace', display:'flex', alignItems:'center', gap:'4px' }}>
-                  <span>✅</span><span style={{ fontWeight:700 }}>{currentRecord.code}</span>
-                </div>
-              )}
+              <input 
+                type="text" 
+                className="glass-input-field item-modal-input" 
+                placeholder="مثال: مياه غيام كرتون 330 مل (40 عبوة)..."
+                value={formData.name || ''} 
+                onChange={e => updateField('name', e.target.value)} 
+                autoFocus
+              />
             </div>
-            <div>
-              <label style={{ fontSize:'13px', fontWeight:900, color:THEME.primary, marginBottom:'8px', display:'block' }}>اسم الصنف / الخامة</label>
-              <input type="text" className="glass-input-field" placeholder="مثال: مياه شرب 330 مل"
-                value={currentRecord.name || ''} onChange={e => setCurrentRecord({ ...currentRecord, name: e.target.value })} />
-            </div>
-          </div>
-          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit, minmax(180px,1fr))', gap:'15px' }}>
-            <div>
-              <label style={{ fontSize:'13px', fontWeight:900, color:THEME.primary, marginBottom:'8px', display:'block' }}>وحدة القياس</label>
-              <SearchableSelect options={['كرتون','ربطة','حبة','شوال','صندوق','كجم','لتر','جالون']}
-                value={currentRecord.unit || ''} onChange={(val:string) => setCurrentRecord({ ...currentRecord, unit:val })} placeholder="اختر وحدة القياس..." />
-            </div>
-            <div>
-              <label style={{ fontSize:'13px', fontWeight:900, color:THEME.primary, marginBottom:'8px', display:'block' }}>سعر البيع المقترح</label>
-              <input type="number" className="glass-input-field" placeholder="0"
-                value={currentRecord.suggested_price || ''} onChange={e => setCurrentRecord({ ...currentRecord, suggested_price: Number(e.target.value) })} />
-            </div>
-            <div>
-              <label style={{ fontSize:'13px', fontWeight:900, color:THEME.primary, marginBottom:'8px', display:'block' }}>حد اعادة الطلب</label>
-              <input type="number" className="glass-input-field" placeholder="5"
-                value={currentRecord.reorder_level || ''} onChange={e => setCurrentRecord({ ...currentRecord, reorder_level: Number(e.target.value) })} />
-            </div>
-          </div>
-          <div>
-            <label style={{ fontSize:'13px', fontWeight:900, color:THEME.primary, marginBottom:'8px', display:'block' }}>الرصيد الافتتاحي (اختياري)</label>
-            <input type="number" className="glass-input-field" placeholder="0"
-              value={currentRecord.current_quantity || ''} onChange={e => setCurrentRecord({ ...currentRecord, current_quantity: Number(e.target.value) })} />
-          </div>
 
-          {/* 🔄 عهدة فوارغ المياه */}
-          <div 
-            onClick={() => setCurrentRecord({ ...currentRecord, is_returnable_bottle: !currentRecord.is_returnable_bottle })}
-            style={{
-              background: currentRecord.is_returnable_bottle 
-                ? 'linear-gradient(135deg, rgba(40, 145, 200, 0.15) 0%, rgba(127, 212, 227, 0.25) 100%)' 
-                : 'rgba(241, 245, 249, 0.7)',
-              border: currentRecord.is_returnable_bottle 
-                ? '1.5px solid #2891C8' 
-                : '1px solid rgba(203, 213, 225, 0.7)',
-              borderRadius: '16px',
-              padding: '14px 18px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-              boxShadow: currentRecord.is_returnable_bottle ? '0 4px 15px rgba(40, 145, 200, 0.15)' : 'none'
-            }}
-          >
-            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-              <div style={{
-                width: '42px', height: '42px', borderRadius: '12px',
-                background: currentRecord.is_returnable_bottle ? 'linear-gradient(135deg, #1C73AB 0%, #2891C8 100%)' : '#e2e8f0',
-                color: currentRecord.is_returnable_bottle ? 'white' : '#64748b',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px',
-                boxShadow: currentRecord.is_returnable_bottle ? '0 3px 10px rgba(28, 115, 171, 0.3)' : 'none'
-              }}>
-                🔄
-              </div>
+            <div className="item-modal-grid-2">
               <div>
-                <div style={{ fontSize: '14px', fontWeight: 900, color: currentRecord.is_returnable_bottle ? '#1C73AB' : '#1e293b' }}>
-                  صنف خاضع لعهدة فوارغ المياه (جالون / عبوة مسترجعة)
+                <label className="item-modal-label">
+                  🏷️ كود الصنف / الباركود
+                </label>
+                <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
+                  <input 
+                    type="text" 
+                    className="glass-input-field item-modal-input"
+                    placeholder="ادخل أو امسح الباركود..."
+                    value={formData.code || ''}
+                    onChange={e => updateField('code', e.target.value)}
+                    style={{ flex: 1, fontFamily: 'monospace', letterSpacing: '0.5px' }}
+                  />
+                  <button 
+                    type="button" 
+                    onClick={() => setShowScanner(true)} 
+                    title="مسح الباركود بالكاميرا"
+                    style={{ 
+                      width: '38px', height: '38px', flexShrink: 0, 
+                      background: 'linear-gradient(135deg, #2891C8, #7FD4E3)', 
+                      border: 'none', borderRadius: '10px', cursor: 'pointer', 
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                      fontSize: '17px', boxShadow: '0 3px 10px rgba(40,145,200,0.3)', 
+                      transition: 'transform 0.15s' 
+                    }}
+                  >
+                    📷
+                  </button>
+                  <button 
+                    type="button"
+                    onClick={() => printBarcodeLabel(formData.code, formData.name, formData.suggested_price)}
+                    disabled={!hasBarcode} 
+                    title={hasBarcode ? 'طباعة ملصق الباركود' : 'ادخل كود أولاً للطباعة'}
+                    style={{ 
+                      width: '38px', height: '38px', flexShrink: 0, 
+                      background: hasBarcode ? 'linear-gradient(135deg, #16a34a, #22c55e)' : 'rgba(148,163,184,0.25)', 
+                      border: 'none', borderRadius: '10px', 
+                      cursor: hasBarcode ? 'pointer' : 'not-allowed', 
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                      fontSize: '17px', opacity: hasBarcode ? 1 : 0.45, 
+                      transition: 'transform 0.15s' 
+                    }}
+                  >
+                    🖨️
+                  </button>
                 </div>
-                <div style={{ fontSize: '11.5px', color: '#64748b', fontWeight: 700, marginTop: '2px' }}>
-                  عند التفعيل، تنزل كميات الصنف تلقائياً كـ &quot;عهدة فوارغ&quot; عند البيع في شاشة الكاشير والورديات
-                </div>
+                {hasBarcode && (
+                  <div style={{ marginTop: '5px', padding: '3px 8px', background: 'rgba(40,145,200,0.08)', borderRadius: '6px', fontSize: '11px', color: '#1C73AB', fontFamily: 'monospace', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                    <span>✅</span><span style={{ fontWeight: 800 }}>{formData.code}</span>
+                  </div>
+                )}
               </div>
-            </div>
-            <div style={{
-              width: '26px', height: '26px', borderRadius: '8px',
-              border: currentRecord.is_returnable_bottle ? '2px solid #2891C8' : '2px solid #94a3b8',
-              background: currentRecord.is_returnable_bottle ? '#2891C8' : 'white',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              color: 'white', fontWeight: 900, fontSize: '15px',
-              transition: '0.2s'
-            }}>
-              {currentRecord.is_returnable_bottle ? '✓' : ''}
+
+              <div>
+                <label className="item-modal-label">
+                  📏 وحدة القياس *
+                </label>
+                <SearchableSelect 
+                  options={['كرتون', 'ربطة', 'حبة', 'جالون', 'شوال', 'صندوق', 'كجم', 'لتر']}
+                  value={formData.unit || 'حبة'} 
+                  onChange={(val: string) => updateField('unit', val)} 
+                  placeholder="اختر أو اكتب وحدة القياس..." 
+                />
+              </div>
             </div>
           </div>
 
-          <div>
-            <label style={{ fontSize:'13px', fontWeight:900, color:THEME.primary, marginBottom:'8px', display:'block' }}>ملاحظات فنية ومواصفات</label>
-            <textarea className="glass-input-field" rows={2} placeholder="اي مواصفات فنية خاصة بالخامة..."
-              value={currentRecord.notes || ''} onChange={e => setCurrentRecord({ ...currentRecord, notes: e.target.value })} style={{ resize:'vertical' }} />
+          {/* 2. الأسعار ومستويات المخزون */}
+          <div className="item-modal-section">
+            <div className="item-modal-sec-title">
+              <span>💰</span>
+              <span>التسعير ومستويات الأمان بالمخزون</span>
+            </div>
+
+            <div className="item-modal-grid-3">
+              <div>
+                <label className="item-modal-label">💵 سعر البيع المقترح (ر.س)</label>
+                <input 
+                  type="number" 
+                  step="any"
+                  inputMode="decimal"
+                  className="glass-input-field item-modal-input" 
+                  placeholder="0.00"
+                  value={formData.suggested_price === '' ? '' : formData.suggested_price} 
+                  onChange={e => updateField('suggested_price', e.target.value === '' ? '' : Number(e.target.value))} 
+                />
+              </div>
+
+              <div>
+                <label className="item-modal-label">⚠️ حد إعادة الطلب (نواقص)</label>
+                <input 
+                  type="number" 
+                  step="any"
+                  inputMode="decimal"
+                  className="glass-input-field item-modal-input" 
+                  placeholder="5"
+                  value={formData.reorder_level === '' ? '' : formData.reorder_level} 
+                  onChange={e => updateField('reorder_level', e.target.value === '' ? '' : Number(e.target.value))} 
+                />
+              </div>
+
+              <div>
+                <label className="item-modal-label">📦 الرصيد الافتتاحي (اختياري)</label>
+                <input 
+                  type="number" 
+                  step="any"
+                  inputMode="decimal"
+                  className="glass-input-field item-modal-input" 
+                  placeholder="0"
+                  value={formData.current_quantity === '' ? '' : formData.current_quantity} 
+                  onChange={e => updateField('current_quantity', e.target.value === '' ? '' : Number(e.target.value))} 
+                />
+              </div>
+            </div>
           </div>
+
+          {/* 3. خيارات متقدمة (عهدة الفوارغ والملاحظات) */}
+          <div className="item-modal-section">
+            <div className="item-modal-sec-title">
+              <span>⚙️</span>
+              <span>خيارات إضافية ومواصفات</span>
+            </div>
+
+            {/* عهدة فوارغ المياه */}
+            <div 
+              onClick={() => updateField('is_returnable_bottle', !formData.is_returnable_bottle)}
+              className={`item-bottle-toggle ${formData.is_returnable_bottle ? 'active' : ''}`}
+              style={{ marginBottom: '12px' }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{
+                  width: '36px', height: '36px', borderRadius: '10px',
+                  background: formData.is_returnable_bottle ? 'linear-gradient(135deg, #1C73AB 0%, #2891C8 100%)' : '#e2e8f0',
+                  color: formData.is_returnable_bottle ? 'white' : '#64748b',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px',
+                  boxShadow: formData.is_returnable_bottle ? '0 2px 8px rgba(28, 115, 171, 0.25)' : 'none'
+                }}>
+                  🔄
+                </div>
+                <div>
+                  <div style={{ fontSize: '13px', fontWeight: 900, color: formData.is_returnable_bottle ? '#1C73AB' : '#1e293b' }}>
+                    صنف خاضع لعهدة فوارغ المياه (جالون / عبوة مسترجعة)
+                  </div>
+                  <div style={{ fontSize: '11px', color: '#64748b', fontWeight: 700, marginTop: '2px' }}>
+                    يتم احتساب الكميات المباعة تلقائياً كعهدة فوارغ لدى العميل أو المندوب
+                  </div>
+                </div>
+              </div>
+              <div style={{
+                width: '24px', height: '24px', borderRadius: '7px',
+                border: formData.is_returnable_bottle ? '2px solid #2891C8' : '2px solid #94a3b8',
+                background: formData.is_returnable_bottle ? '#2891C8' : 'white',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: 'white', fontWeight: 900, fontSize: '14px',
+                transition: '0.2s', flexShrink: 0
+              }}>
+                {formData.is_returnable_bottle ? '✓' : ''}
+              </div>
+            </div>
+
+            <div>
+              <label className="item-modal-label">📝 ملاحظات فنية ومواصفات</label>
+              <textarea 
+                className="glass-input-field" 
+                rows={2} 
+                placeholder="أي مواصفات فنية أو تفاصيل خاصة بالخامة..."
+                value={formData.notes || ''} 
+                onChange={e => updateField('notes', e.target.value)} 
+                style={{ resize: 'vertical', fontSize: '12px', padding: '8px 12px' }} 
+              />
+            </div>
+          </div>
+
         </div>
-        <div style={{ display:'flex', gap:'12px', marginTop:'35px' }}>
-          <button onClick={handleSave} disabled={isSaving} className="btn-glass-save" style={{ flex:2 }}>
-            {isSaving ? 'جاري الحفظ...' : 'حفظ الصنف'}
+
+        {/* 4. أزرار الحفظ والإلغاء */}
+        <div className="item-footer-actions">
+          <button 
+            type="button"
+            onClick={onSubmit} 
+            disabled={isSaving} 
+            className="btn-glass-save" 
+            style={{ flex: 2 }}
+          >
+            {isSaving ? '⏳ جاري الحفظ...' : (formData.id ? '💾 حفظ التعديلات' : '➕ إضافة الصنف')}
           </button>
           {hasBarcode && (
-            <button onClick={() => printBarcodeLabel(currentRecord.code, currentRecord.name, currentRecord.suggested_price)}
-              className="btn-main-glass white" style={{ flex:1, display:'flex', alignItems:'center', justifyContent:'center', gap:'6px' }}>
+            <button 
+              type="button"
+              onClick={() => printBarcodeLabel(formData.code, formData.name, formData.suggested_price)}
+              className="btn-main-glass white" 
+              style={{ flex: 1, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '6px', margin: 0 }}
+            >
               🖨️ طباعة ملصق
             </button>
           )}
-          <button onClick={onClose} className="btn-glass-cancel" style={{ flex:1 }}>إلغاء</button>
+          <button 
+            type="button"
+            onClick={onClose} 
+            className="btn-glass-cancel" 
+            style={{ flex: 1, margin: 0 }}
+          >
+            إلغاء
+          </button>
         </div>
       </AquaModalWrapper>
     </>
