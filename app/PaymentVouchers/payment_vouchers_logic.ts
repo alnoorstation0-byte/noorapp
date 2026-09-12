@@ -5,6 +5,8 @@ import { useToast } from '@/lib/toast-context';
 import { useUniversalPosting } from '@/lib/accounting_engine'; 
 import { useRealtimeInvalidate } from '@/lib/useRealtimeSync';
 import { useAuth } from '@/components/authGuard';
+import { notifyVoucherCreated } from '@/lib/notificationService';
+
 
 export function usePaymentVouchersLogic() {
     const queryClient = useQueryClient();
@@ -178,7 +180,16 @@ export function usePaymentVouchersLogic() {
 
                 const { error } = await supabase.from('payment_vouchers').insert([payload]);
                 if (error) throw new Error(error.message);
+
+                // 🔔 بث إشعار سند الصرف في النظام وعبر الجوال
+                notifyVoucherCreated({
+                    voucherType: 'payment',
+                    voucherNumber: payload.voucher_number,
+                    amount: Number(payload.amount) || 0,
+                    partnerName: payload.partner_name
+                }).catch(() => {});
             }
+
         },
         onSuccess: () => {
             showToast('تم حفظ السند بنجاح 💾', 'success');

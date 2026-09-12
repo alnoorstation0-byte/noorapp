@@ -8,6 +8,8 @@ import { fetchPaginatedData } from '@/lib/supabase-pagination';
 import { getInvoiceSummaryAndAging } from '@/lib/helpers';
 import { useRealtimeInvalidate } from '@/lib/useRealtimeSync';
 import { useAuth } from '@/components/authGuard';
+import { notifyInvoiceCreated } from '@/lib/notificationService';
+
 
 const updateInventoryQty = async (itemId: string, warehouseId: string, qtyChange: number) => {
     const { data } = await supabase.from('warehouse_inventory').select('*').eq('item_id', itemId).eq('warehouse_id', warehouseId).single();
@@ -313,7 +315,16 @@ export function useInvoicesLogic() {
                 if (invoiceHeader.warehouse_id && inserted) {
                      await supabase.rpc('post_invoices_bulk', { p_ids: [inserted.id] });
                 }
+
+                // 🔔 بث إشعار فوري في النظام وعبر الجوال
+                notifyInvoiceCreated({
+                    invoiceNumber: invoiceHeader.invoice_number,
+                    clientName: invoiceHeader.client_name,
+                    totalAmount: Number(invoiceHeader.total_amount) || 0,
+                    invoiceId: inserted?.id
+                }).catch(() => {});
             }
+
         },
         onSuccess: () => {
             setIsEditModalOpen(false);

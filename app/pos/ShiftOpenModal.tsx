@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/lib/toast-context';
+import { notifyShiftOpened } from '@/lib/notificationService';
+
 
 export default function ShiftOpenModal({ 
     isOpen, 
@@ -150,7 +152,18 @@ export default function ShiftOpenModal({
             queryClient.invalidateQueries({ queryKey: ['active_pos_shift'] });
             queryClient.invalidateQueries({ queryKey: ['pos_open_shifts'] });
             queryClient.invalidateQueries({ queryKey: ['pos_today_closed_shift'] });
+
+            // 🔔 بث إشعار فتح الوردية للمسؤولين
+            const whObj = warehouses.find((w: any) => w.id === targetWarehouseId);
+            notifyShiftOpened({
+                shiftId: res?.shift?.id || 'new-shift',
+                cashierName: userProfile?.displayName || userProfile?.full_name || 'الكاشير',
+                warehouseName: whObj?.name || 'الفرع/المنفذ',
+                startingCash: Number(startingCash) || 0
+            }).catch(() => {});
+
             if (onClose) onClose();
+
         },
         onError: (err: any) => showToast(`فشل فتح الوردية: ${err.message}`, 'error')
     });

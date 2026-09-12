@@ -1,14 +1,19 @@
 {
-  "name": "رواسي اليسر للمقاولات",
-  "short_name": "رواسي",
+  "name": "شركة مياه غيام للتوزيع",
+  "short_name": "مياه غيام",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#0f172a",
-  "theme_color": "#ca8a04",
+  "background_color": "#F4F1EE",
+  "theme_color": "#1C73AB",
   "icons": [
     {
       "src": "/ghayam_logo.png",
       "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/ghayam_logo.png",
+      "sizes": "512x512",
       "type": "image/png"
     }
   ]

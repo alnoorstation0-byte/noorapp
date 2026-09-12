@@ -3,6 +3,9 @@
 import { useEffect, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
+import { showBrowserNotification, playNotificationSound } from '@/lib/pushNotificationService';
+import { showGlobalToast } from '@/lib/toast-context';
+
 
 /**
  * 🔄 نظام المزامنة الفورية (Realtime Sync)
@@ -249,19 +252,41 @@ export function RealtimeSyncProvider({ children }: { children: React.ReactNode }
             });
           }
 
-          // 3. معالجة خاصة للإشعارات الفورية
+          // 3. معالجة خاصة للإشعارات الفورية وبثها على الجوال والمتصفح
           if (table === 'notifications') {
             window.dispatchEvent(new CustomEvent('unread_counts_refresh'));
             if (payload.eventType === 'INSERT' && payload.new) {
               supabase.auth.getSession().then(({ data: { session } }) => {
                 const myId = session?.user?.id;
                 if (!payload.new.user_id || payload.new.user_id === myId) {
-                  playNotificationAudio();
-                  showGlobalToast(payload.new.message || '🔔 إشعار جديد وارد', 'info');
+                  // 1. تشغيل نغمة التنبيه الصوتية
+                  playNotificationSound();
+
+                  // 2. استخراج رابط الأكشن إن وُجد
+                  let actionUrl = '/notifications';
+                  if (payload.new.content && typeof payload.new.content === 'string' && payload.new.content.includes('__ACTION__')) {
+                    actionUrl = payload.new.content.split('__ACTION__')[1] || '/notifications';
+                  }
+
+                  const notifTitle = payload.new.title || '🔔 إشعار جديد';
+                  const notifMsg = payload.new.message || 'يوجد تحديث جديد في النظام';
+
+                  // 3. إظهار تنبيه الواجهة الداخلي (In-App Toast)
+                  if (typeof showGlobalToast === 'function') {
+                    showGlobalToast(`${notifTitle}: ${notifMsg}`, payload.new.type === 'alert' ? 'error' : 'info');
+                  }
+
+                  // 4. إظهار الإشعار على الجوال والمتصفح (Native Mobile Web Push)
+                  showBrowserNotification(notifTitle, notifMsg, {
+                    actionUrl,
+                    id: payload.new.id,
+                    type: payload.new.type
+                  });
                 }
               });
             }
           }
+
 
           // 4. معالجة خاصة للرسائل الفورية
           if (table === 'messages') {

@@ -6,6 +6,8 @@ import { useToast } from '@/lib/toast-context';
 import { fetchPaginatedData } from '@/lib/supabase-pagination';
 import { useRealtimeInvalidate } from '@/lib/useRealtimeSync';
 import { useAuth } from '@/components/authGuard';
+import { notifyVoucherCreated } from '@/lib/notificationService';
+
 
 export function useReceiptVouchersLogic() {
     const queryClient = useQueryClient();
@@ -171,7 +173,16 @@ export function useReceiptVouchersLogic() {
             } else {
                 const { error } = await supabase.from('receipt_vouchers').insert([voucherData]);
                 if (error) throw error;
+
+                // 🔔 بث إشعار سند القبض في النظام وعبر الجوال
+                notifyVoucherCreated({
+                    voucherType: 'receipt',
+                    voucherNumber: voucherData.voucher_number,
+                    amount: Number(voucherData.amount) || 0,
+                    partnerName: voucherData.partner_name
+                }).catch(() => {});
             }
+
         },
         onSuccess: () => {
             setIsEditModalOpen(false);

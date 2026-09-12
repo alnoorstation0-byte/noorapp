@@ -5,6 +5,8 @@ import { supabase } from '@/lib/supabase';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/lib/toast-context';
 import { classifyPaymentMethod } from '@/lib/helpers';
+import { notifyShiftClosed } from '@/lib/notificationService';
+
 
 export default function ShiftCloseModal({ 
     isOpen, 
@@ -141,6 +143,15 @@ export default function ShiftCloseModal({
             showToast('تم إغلاق الوردية وتقفيل الصندوق وعهدة الفوارغ بنجاح 🔒', 'success');
             queryClient.invalidateQueries({ queryKey: ['active_pos_shift'] });
             queryClient.invalidateQueries({ queryKey: ['pos_open_shifts'] });
+            
+            // 🔔 بث إشعار إغلاق الوردية مع حالة الصندوق
+            notifyShiftClosed({
+                shiftId: activeShift?.id,
+                cashierName: activeShift?.user_name || activeShift?.cashier_name || 'الكاشير',
+                totalSales: Number(totals.total) || 0,
+                shortageOverage: Number(difference) || 0
+            }).catch(() => {});
+
             onClose();
         },
         onError: (err: any) => showToast(`فشل إغلاق الوردية: ${err.message}`, 'error')

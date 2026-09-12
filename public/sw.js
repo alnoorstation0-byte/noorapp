@@ -65,3 +65,56 @@ self.addEventListener('fetch', (event) => {
       })
   );
 });
+
+// 🔔 معالجة إشعارات الدفع (Web Push Notifications)
+self.addEventListener('push', (event) => {
+  let data = {};
+  try {
+    data = event.data ? event.data.json() : {};
+  } catch (e) {
+    data = { title: 'مياه غيام', body: event.data ? event.data.text() : 'إشعار جديد' };
+  }
+
+  const title = data.title || 'إشعار جديد | مياه غيام';
+  const options = {
+    body: data.body || data.message || '',
+    icon: '/ghayam_logo.png',
+    badge: '/ghayam_logo.png',
+    vibrate: [200, 100, 200],
+    data: {
+      url: data.url || data.actionUrl || '/notifications',
+      id: data.id,
+      timestamp: Date.now()
+    },
+    tag: data.tag || 'ghayam-notification',
+    renotify: true
+  };
+
+  event.waitUntil(self.registration.showNotification(title, options));
+});
+
+// 📱 معالجة النقر على الإشعار في الجوال أو المتصفح
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const urlToOpen = event.notification.data?.url || '/notifications';
+
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((windowClients) => {
+      // إذا كان التطبيق مفتوحاً بالفعل، ركز عليه وانتقل للرابط
+      for (const client of windowClients) {
+        if ('focus' in client) {
+          client.focus();
+          if ('navigate' in client && client.url !== urlToOpen) {
+            return client.navigate(urlToOpen);
+          }
+          return;
+        }
+      }
+      // إذا لم يكن مفتوحاً، افتح نافذة جديدة
+      if (clients.openWindow) {
+        return clients.openWindow(urlToOpen);
+      }
+    })
+  );
+});
+

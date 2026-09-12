@@ -10,6 +10,8 @@ import { useToast , showGlobalToast} from '@/lib/toast-context';
 import { checkAdminApprovalPrivilege } from '@/lib/helpers';
 import { useRealtimeInvalidate } from '@/lib/useRealtimeSync';
 import { useAuth } from '@/components/authGuard';
+import { notifyExpenseCreated } from '@/lib/notificationService';
+
 
 export function useExpensesLogic() {
     const queryClient = useQueryClient();
@@ -283,7 +285,18 @@ export function useExpensesLogic() {
                 if (updErr) console.warn("Failed to update extra fields:", updErr);
             }
 
+            // 🔔 بث إشعار المصروف في النظام وعبر الجوال
+            if (!editingId) {
+                notifyExpenseCreated({
+                    expenseNumber: data?.expense_number || passedRecord.expense_number,
+                    amount: Number(passedRecord.amount) || 0,
+                    category: passedRecord.category_id || passedRecord.category,
+                    description: passedRecord.description
+                }).catch(() => {});
+            }
+
             return { type: editingId ? 'update' : 'insert' };
+
         },
         onSuccess: (res) => {
             showToast('تم حفظ القيد بنجاح 💾', 'success');

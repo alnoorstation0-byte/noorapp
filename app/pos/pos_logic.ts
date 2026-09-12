@@ -5,6 +5,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/lib/toast-context';
 import { useRealtimeInvalidate } from '@/lib/useRealtimeSync';
 import { SALES_ACCOUNTS, CASH_ACCOUNTS, ACC } from '@/lib/account-ids';
+import { notifyInvoiceCreated } from '@/lib/notificationService';
+
 
 export function usePosLogic() {
     const { showToast } = useToast();
@@ -481,6 +483,15 @@ export function usePosLogic() {
 
             const { data: insertedInv, error: invErr } = await supabase.from('invoices').insert([invoiceHeader]).select().single();
             if (invErr) throw new Error(invErr.message);
+
+            // 🔔 بث إشعار فوري للفاتورة في النظام وعبر الجوال
+            notifyInvoiceCreated({
+                invoiceNumber: invoiceHeader.invoice_number,
+                clientName: invoiceHeader.client_name,
+                totalAmount: Number(invoiceHeader.total_amount) || 0,
+                invoiceId: insertedInv?.id
+            }).catch(() => {});
+
 
             // 🔄 التحديث التلقائي لعهدة فوارغ المياه (إن وُجدت أصناف فوارغ)
             const returnableBottlesCount = cart.reduce((acc, it) => acc + (it.is_returnable_bottle ? (Number(it.qty) || Number(it.quantity) || 0) : 0), 0);
