@@ -1,6 +1,7 @@
 "use client";
 import React from 'react';
 import MasterPage from '@/components/MasterPage';
+import { useLanguage } from '@/lib/LanguageContext';
 import { usePosLogic } from './pos_logic';
 import { THEME } from '@/lib/theme';
 import LoadingScreen from '@/components/LoadingScreen';
@@ -33,6 +34,9 @@ function PosItemNumpadModal({
     onConfirm,
     onClose,
 }: PosItemNumpadModalProps) {
+    const { language } = useLanguage();
+    const isEn = language === 'en';
+
     const [activeField, setActiveField] = React.useState<'qty' | 'price'>('qty');
     const [isFirstPress, setIsFirstPress] = React.useState(true);
     const [pressedKey, setPressedKey] = React.useState<string | null>(null);
@@ -519,13 +523,13 @@ function PosItemNumpadModal({
                                 {item.name}
                             </div>
                             <div className="pos-numpad-sub" style={{ color: 'rgba(255,255,255,0.85)', fontSize: '12px' }}>
-                                الرصيد المتاح: <span style={{ fontWeight: 800, color: '#fff' }}>{item.available_qty}</span> {item.unit}
+                                {isEn ? 'Available:' : 'الرصيد المتاح:'} <span style={{ fontWeight: 800, color: '#fff' }}>{item.available_qty}</span> {item.unit}
                             </div>
                         </div>
                         <button 
                             onClick={onClose} 
                             style={{ background: 'rgba(255,255,255,0.22)', border: 'none', color: 'white', width: '32px', height: '32px', borderRadius: '50%', cursor: 'pointer', fontSize: '17px', fontWeight: 'bold', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}
-                            aria-label="إغلاق"
+                            aria-label={isEn ? 'Close' : 'إغلاق'}
                         >
                             ×
                         </button>
@@ -552,13 +556,13 @@ function PosItemNumpadModal({
                             }}
                         >
                             <div style={{ fontSize: '10px', fontWeight: 800, color: isExceeded ? '#dc2626' : (activeField === 'qty' ? 'rgba(255,255,255,0.9)' : '#64748b'), marginBottom: '2px' }}>
-                                {isExceeded ? '⚠️ تجاوز المخزون' : 'الكمية المطلوبة'}
+                                {isExceeded ? (isEn ? '⚠️ Stock Exceeded' : '⚠️ تجاوز المخزون') : (isEn ? 'Requested Qty' : 'الكمية المطلوبة')}
                             </div>
                             <div className="pos-qty-display" style={{ color: isExceeded ? '#dc2626' : (activeField === 'qty' ? 'white' : '#0f172a') }}>
                                 {item.selected_qty || 0}
                             </div>
                             <div style={{ fontSize: '10px', fontWeight: 700, color: isExceeded ? '#dc2626' : (activeField === 'qty' ? 'rgba(255,255,255,0.75)' : '#94a3b8'), marginTop: '1px' }}>
-                                {item.unit || 'حبة'}
+                                {item.unit || (isEn ? 'Pcs' : 'حبة')}
                             </div>
                         </div>
 
@@ -573,7 +577,7 @@ function PosItemNumpadModal({
                             }}
                         >
                             <div style={{ fontSize: '10px', fontWeight: 800, color: activeField === 'price' ? 'rgba(255,255,255,0.9)' : '#64748b', marginBottom: '2px' }}>
-                                {isTaxInclusive ? 'السعر (شامل الضريبة)' : 'السعر (قبل الضريبة)'}
+                                {isTaxInclusive ? (isEn ? 'Price (Tax Inc.)' : 'السعر (شامل الضريبة)') : (isEn ? 'Price (Tax Exc.)' : 'السعر (قبل الضريبة)')}
                             </div>
                             <div className="pos-price-display" style={{ color: activeField === 'price' ? 'white' : '#16a34a' }}>
                                 {Number(item.selected_price || 0).toFixed(2)}
@@ -587,7 +591,7 @@ function PosItemNumpadModal({
                     {/* Stock Warning Message */}
                     {isExceeded && (
                         <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', padding: '4px 8px', color: '#b91c1c', fontSize: '11px', fontWeight: 800, textAlign: 'center' }}>
-                            ⛔ الكمية المطلوبة ({item.selected_qty}) تتجاوز الرصيد ({item.available_qty})!
+                            {isEn ? `⛔ Qty (${item.selected_qty}) exceeds stock (${item.available_qty})!` : `⛔ الكمية المطلوبة (${item.selected_qty}) تتجاوز الرصيد (${item.available_qty})!`}
                         </div>
                     )}
 
@@ -598,19 +602,19 @@ function PosItemNumpadModal({
                             onClick={() => { onUpdateItem({ ...item, selected_qty: Math.max(1, (item.selected_qty || 1) - 1) }); setIsFirstPress(false); }}
                             className="pos-quick-btn"
                             style={{ background: '#fee2e2', color: '#dc2626' }}
-                            title="إنقاص الكمية 1"
+                            title={isEn ? 'Decrease by 1' : 'إنقاص الكمية 1'}
                         >
                             −
                         </button>
                         <span className="pos-quick-label" style={{ fontSize: '12px', color: '#64748b', fontWeight: 800, minWidth: '70px', textAlign: 'center' }}>
-                            تعديل سريع
+                            {isEn ? 'Quick Edit' : 'تعديل سريع'}
                         </span>
                         <button
                             type="button"
                             onClick={() => { const next = (item.selected_qty || 1) + 1; if(next <= (item.available_qty || 999999)) { onUpdateItem({ ...item, selected_qty: next }); setIsFirstPress(false); } }}
                             className="pos-quick-btn"
                             style={{ background: '#dcfce7', color: '#16a34a' }}
-                            title="زيادة الكمية 1"
+                            title={isEn ? 'Increase by 1' : 'زيادة الكمية 1'}
                         >
                             +
                         </button>
@@ -681,10 +685,10 @@ function PosItemNumpadModal({
                             }}
                         >
                             {isExceeded ? (
-                                <span>⛔ تجاوز المخزون ({item.available_qty})</span>
+                                <span>{isEn ? `⛔ Stock Exceeded (${item.available_qty})` : `⛔ تجاوز المخزون (${item.available_qty})`}</span>
                             ) : (
                                 <>
-                                    <span>🛒 إضافة للسلة</span>
+                                    <span>{isEn ? '🛒 Add to Cart' : '🛒 إضافة للسلة'}</span>
                                     <span style={{ opacity: 0.65 }}>|</span>
                                     <span style={{ fontWeight: 900, fontSize: '14px' }}>
                                         {formatCurrency(totalPrice)}
@@ -696,7 +700,7 @@ function PosItemNumpadModal({
 
                     {/* Desktop Keyboard Shortcuts Hint (hidden on mobile) */}
                     <div className="pos-desktop-kbd-hint">
-                        <span>⌨️ لوحة المفاتيح: الأرقام للكمية | <strong style={{ color: '#1C73AB' }}>Enter</strong> للإضافة | <strong style={{ color: '#1C73AB' }}>Tab</strong> للتبديل | <strong style={{ color: '#1C73AB' }}>Esc</strong> للإلغاء</span>
+                        <span>{isEn ? '⌨️ Keyboard: Numbers for Qty | ' : '⌨️ لوحة المفاتيح: الأرقام للكمية | '}<strong style={{ color: '#1C73AB' }}>Enter</strong> {isEn ? 'to Add | ' : 'للإضافة | '}<strong style={{ color: '#1C73AB' }}>Tab</strong> {isEn ? 'to Switch | ' : 'للتبديل | '}<strong style={{ color: '#1C73AB' }}>Esc</strong> {isEn ? 'to Cancel' : 'للإلغاء'}</span>
                     </div>
 
                 </div>
@@ -706,14 +710,17 @@ function PosItemNumpadModal({
 }
 
 export default function PosPage() {
+    const { language } = useLanguage();
+    const isEn = language === 'en';
+
     const logic = usePosLogic();
     const [inspectShiftId, setInspectShiftId] = React.useState<string | null>(null);
     const [mobileTab, setMobileTab] = React.useState<'items' | 'cart'>('items');
 
     return (
         <MasterPage 
-            title="نقاط البيع (POS)" 
-            subtitle="شاشة المبيعات السريعة (كاشير) من منافذ البيع" 
+            title={isEn ? 'POS Cashier' : 'نقاط البيع (POS)'} 
+            subtitle={isEn ? 'Quick Sales & POS Register' : 'شاشة المبيعات السريعة (كاشير) من منافذ البيع'} 
             icon="🛍️"
             className="pos-master-page"
         >
@@ -727,27 +734,27 @@ export default function PosPage() {
                             borderColor: logic.activeShift ? 'rgba(22, 163, 74, 0.3)' : 'rgba(239, 68, 68, 0.3)'
                         }}>
                             <span style={{ fontSize: '11px', fontWeight: 800, color: logic.activeShift ? '#166534' : '#991b1b' }}>
-                                {logic.activeShift ? '🟢 الوردية الحالية نشطة' : '🔴 الوردية مغلقة حالياً'}
+                                {logic.activeShift ? (isEn ? '🟢 Shift Active' : '🟢 الوردية الحالية نشطة') : (isEn ? '🔴 Shift Closed' : '🔴 الوردية مغلقة حالياً')}
                             </span>
                             <div className="val" style={{ fontSize: '17px', fontWeight: 900, color: logic.activeShift ? '#16a34a' : '#ef4444' }}>
-                                {logic.activeShift?.warehouse_name || 'لا يوجد منفذ مرتبط'}
+                                {logic.activeShift?.warehouse_name || (isEn ? 'No linked branch' : 'لا يوجد منفذ مرتبط')}
                             </div>
                             {logic.activeShift && (
                                 <div style={{ fontSize: '11px', color: '#64748b', fontWeight: 700, marginTop: '2px' }}>
-                                    المندوب: {logic.activeShift?.delegate_name || 'غير محدد'}
+                                    {isEn ? 'Rep:' : 'المندوب:'} {logic.activeShift?.delegate_name || (isEn ? 'Not selected' : 'غير محدد')}
                                 </div>
                             )}
                         </div>
 
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                             <div className="summary-glass-card" style={{ padding: '10px', textAlign: 'center' }}>
-                                <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#64748b' }}>أصناف السلة 🛒</span>
+                                <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#64748b' }}>{isEn ? 'Cart Items 🛒' : 'أصناف السلة 🛒'}</span>
                                 <div className="val" style={{ fontSize: '18px', fontWeight: 900, color: '#1C73AB' }}>
                                     {logic.cart.length}
                                 </div>
                             </div>
                             <div className="summary-glass-card" style={{ padding: '10px', textAlign: 'center' }}>
-                                <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#64748b' }}>إجمالي السلة 💰</span>
+                                <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#64748b' }}>{isEn ? 'Cart Total 💰' : 'إجمالي السلة 💰'}</span>
                                 <div className="val" style={{ fontSize: '18px', fontWeight: 900, color: '#16a34a' }}>
                                     {formatCurrency(logic.cartTotal.total)}
                                 </div>
@@ -757,7 +764,7 @@ export default function PosPage() {
                         {logic.lowStockCount > 0 && (
                             <div className="summary-glass-card" style={{ background: 'rgba(245, 158, 11, 0.1)', borderColor: 'rgba(245, 158, 11, 0.3)', padding: '10px 12px' }}>
                                 <span style={{ fontSize: '11px', fontWeight: 800, color: '#92400e' }}>
-                                    ⚠️ أصناف قريبة من النفاد: {logic.lowStockCount}
+                                    {isEn ? `⚠️ Low stock items: ${logic.lowStockCount}` : `⚠️ أصناف قريبة من النفاد: ${logic.lowStockCount}`}
                                 </span>
                             </div>
                         )}
@@ -771,7 +778,7 @@ export default function PosPage() {
                             onClick={() => window.location.href = '/invoices'}
                         >
                             <span>🧾</span>
-                            <span>فواتير المبيعات</span>
+                            <span>{isEn ? 'Sales Invoices' : 'فواتير المبيعات'}</span>
                         </button>
                         <button 
                             type="button" 
@@ -779,7 +786,7 @@ export default function PosPage() {
                             onClick={() => window.location.href = '/pos/dashboard'}
                         >
                             <span>📈</span>
-                            <span>لوحة تحكم الورديات</span>
+                            <span>{isEn ? 'Shifts Dashboard' : 'لوحة تحكم الورديات'}</span>
                         </button>
                         {logic.activeShift ? (
                             <button 
@@ -789,7 +796,7 @@ export default function PosPage() {
                                 onClick={() => logic.setIsShiftCloseModalOpen(true)}
                             >
                                 <span>🔒</span>
-                                <span>إغلاق الوردية الحالية</span>
+                                <span>{isEn ? 'Close Current Shift' : 'إغلاق الوردية الحالية'}</span>
                             </button>
                         ) : (
                             <button 
@@ -799,7 +806,7 @@ export default function PosPage() {
                                 onClick={() => logic.setIsShiftOpenModalOpen(true)}
                             >
                                 <span>✨</span>
-                                <span>بدء وردية جديدة</span>
+                                <span>{isEn ? 'Start New Shift' : 'بدء وردية جديدة'}</span>
                             </button>
                         )}
                     </>
@@ -1503,7 +1510,7 @@ export default function PosPage() {
                     {/* منفذ البيع */}
                     <div className="pos-select-item">
                         <span className="pos-item-label" style={{ color: THEME.primary }}>
-                            🏪 منفذ البيع:
+                            🏪 {isEn ? 'Branch / POS:' : 'منفذ البيع:'}
                         </span>
                         <select 
                             className="pos-glass-select" 
@@ -1512,7 +1519,7 @@ export default function PosPage() {
                             style={{ minWidth: '190px' }}
                             disabled={logic.isDelegateLocked}
                         >
-                            <option value="" disabled>-- اختر منفذ البيع --</option>
+                            <option value="" disabled>{isEn ? '-- Select Branch --' : '-- اختر منفذ البيع --'}</option>
                             {logic.warehouses.map((w: any) => (
                                 <option key={w.id} value={w.id}>{w.name}</option>
                             ))}
@@ -1522,7 +1529,7 @@ export default function PosPage() {
                     {/* المندوب */}
                     <div className="pos-select-item">
                         <span className="pos-item-label" style={{ color: '#16a34a' }}>
-                            👤 المندوب / الكاشير:
+                            👤 {isEn ? 'Cashier / Rep:' : 'المندوب / الكاشير:'}
                         </span>
                         <select 
                             className="pos-glass-select" 
@@ -1534,14 +1541,14 @@ export default function PosPage() {
                             }}
                             disabled={logic.isDelegateLocked}
                         >
-                            <option value="">-- اختر المندوب --</option>
+                            <option value="">{isEn ? '-- Select Cashier --' : '-- اختر المندوب --'}</option>
                             {logic.delegates.map((d: any) => (
                                 <option key={d.id} value={d.id}>{d.name}</option>
                             ))}
                         </select>
                         {logic.delegateId && (
                             <span className="pos-badge-delegate">
-                                ✅ {logic.isDelegateLocked ? 'حسابك المقترن' : 'تم التعيين'}
+                                ✅ {logic.isDelegateLocked ? (isEn ? 'Your Account' : 'حسابك المقترن') : (isEn ? 'Assigned' : 'تم التعيين')}
                             </span>
                         )}
                     </div>
@@ -1558,7 +1565,7 @@ export default function PosPage() {
                             gap: '6px'
                         }}>
                             <span style={{ fontSize: '12px', fontWeight: 900, color: '#0284c7' }}>
-                                🚚 أمر التشغيل:
+                                🚚 {isEn ? 'Trip Dispatch:' : 'أمر التشغيل:'}
                             </span>
                             <span style={{ fontSize: '13px', fontWeight: 900, color: '#0f172a' }}>
                                 {logic.activeFleetOperation.operation_number}
@@ -1576,7 +1583,7 @@ export default function PosPage() {
                                 padding: '2px 6px', 
                                 borderRadius: '6px' 
                             }}>
-                                مربوط تلقائياً ⚡
+                                {isEn ? 'Auto-linked ⚡' : 'مربوط تلقائياً ⚡'}
                             </span>
                         </div>
                     )}
@@ -1590,7 +1597,7 @@ export default function PosPage() {
                                 <span className="pos-pulse-dot green"></span>
                                 <div>
                                     <div style={{ fontWeight: 900, fontSize: '13px' }}>
-                                        وردية نشطة #{String(logic.activeShift.id).slice(-4)}
+                                        {isEn ? 'Active Shift' : 'وردية نشطة'} #{String(logic.activeShift.id).slice(-4)}
                                     </div>
                                     <div style={{ fontSize: '10px', color: '#166534', fontWeight: 700 }}>
                                         {logic.warehouses.find((w: any) => w.id === logic.activeShift.warehouse_id)?.name || ''}
@@ -1616,15 +1623,15 @@ export default function PosPage() {
                                     backdropFilter: 'blur(10px)',
                                     minHeight: '40px'
                                 }}
-                                title="مراجعة وتدقيق تفاصيل الوردية كمرجع"
+                                title={isEn ? 'Review shift details' : 'مراجعة وتدقيق تفاصيل الوردية كمرجع'}
                             >
-                                🔍 تفاصيل الوردية
+                                🔍 {isEn ? 'Shift Details' : 'تفاصيل الوردية'}
                             </button>
                             <button 
                                 onClick={() => logic.setIsShiftCloseModalOpen(true)}
                                 className="pos-btn-shift close"
                             >
-                                🔒 إغلاق الوردية
+                                🔒 {isEn ? 'Close Shift' : 'إغلاق الوردية'}
                             </button>
                         </div>
                     ) : (
@@ -1632,9 +1639,9 @@ export default function PosPage() {
                             <div className="pos-shift-status closed" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 <span className="pos-pulse-dot gray"></span>
                                 <div>
-                                    <div style={{ fontWeight: 800, fontSize: '13px' }}>لا توجد وردية مفتوحة</div>
+                                    <div style={{ fontWeight: 800, fontSize: '13px' }}>{isEn ? 'No Open Shift' : 'لا توجد وردية مفتوحة'}</div>
                                     <div style={{ fontSize: '10px', color: '#64748b' }}>
-                                        {logic.warehouses.find((w: any) => w.id === logic.selectedWarehouseId)?.name || 'اختر منفذ البيع'}
+                                        {logic.warehouses.find((w: any) => w.id === logic.selectedWarehouseId)?.name || (isEn ? 'Select Branch' : 'اختر منفذ البيع')}
                                         {logic.delegateId && ` • ${logic.delegates.find((d: any) => d.id === logic.delegateId)?.name || ''}`}
                                     </div>
                                 </div>
@@ -1643,7 +1650,7 @@ export default function PosPage() {
                                 onClick={() => logic.setIsShiftOpenModalOpen(true)}
                                 className="pos-btn-shift open"
                             >
-                                ✨ فتح وردية جديدة
+                                ✨ {isEn ? 'Open New Shift' : 'فتح وردية جديدة'}
                             </button>
                         </div>
                     )}
@@ -1669,9 +1676,9 @@ export default function PosPage() {
                                 backdropFilter: 'blur(10px)',
                                 minHeight: '40px'
                             }}
-                            title="عرض ورديات كل المناديب والمستودعات والتبديل بينها"
+                            title={isEn ? 'View all open shifts across branches' : 'عرض ورديات كل المناديب والمستودعات والتبديل بينها'}
                         >
-                            📋 الورديات النشطة ({logic.allOpenShifts.length})
+                            📋 {isEn ? 'Active Shifts' : 'الورديات النشطة'} ({logic.allOpenShifts.length})
                         </button>
                     )}
                 </div>
@@ -1685,7 +1692,7 @@ export default function PosPage() {
                     onClick={() => setMobileTab('items')}
                 >
                     <span>📦</span>
-                    <span>قائمة الأصناف</span>
+                    <span>{isEn ? 'Products List' : 'قائمة الأصناف'}</span>
                 </button>
                 <button
                     type="button"
@@ -1693,7 +1700,7 @@ export default function PosPage() {
                     onClick={() => setMobileTab('cart')}
                 >
                     <span>🛒</span>
-                    <span>الفاتورة الحالية</span>
+                    <span>{isEn ? 'Current Invoice' : 'الفاتورة الحالية'}</span>
                     {logic.cart.length > 0 && (
                         <span className="pos-mobile-badge">{logic.cart.length}</span>
                     )}
@@ -1701,7 +1708,7 @@ export default function PosPage() {
             </div>
 
             {logic.isLoading ? (
-                <LoadingScreen message="جاري تحضير شاشة الكاشير..." fullScreen={false} />
+                <LoadingScreen message={isEn ? 'Preparing POS interface...' : 'جاري تحضير شاشة الكاشير...'} fullScreen={false} />
             ) : (
                 <div className="pos-grid">
 
@@ -1733,10 +1740,10 @@ export default function PosPage() {
                                     </div>
                                     <div>
                                         <div style={{ fontWeight: 900, fontSize: '14px', color: '#b91c1c' }}>
-                                            الوردية مغلقة حالياً — لا يمكن إجراء أي عملية بيع
+                                            {isEn ? 'Shift is currently closed — Sales are disabled' : 'الوردية مغلقة حالياً — لا يمكن إجراء أي عملية بيع'}
                                         </div>
                                         <div style={{ fontSize: '11.5px', color: '#64748b', fontWeight: 700 }}>
-                                            يجب على المندوب أو البائع الضغط على "بدء الوردية" لتسجيل العهدة وتفعيل نقطة البيع
+                                            {isEn ? 'The cashier must click "Open New Shift" to declare starting cash and activate POS.' : 'يجب على المندوب أو البائع الضغط على "بدء الوردية" لتسجيل العهدة وتفعيل نقطة البيع'}
                                         </div>
                                     </div>
                                 </div>
@@ -1759,7 +1766,7 @@ export default function PosPage() {
                                     }}
                                 >
                                     <span>✨</span>
-                                    <span>بدء الوردية الآن</span>
+                                    <span>{isEn ? 'Open Shift Now' : 'بدء الوردية الآن'}</span>
                                 </button>
                             </div>
                         )}
@@ -1783,7 +1790,7 @@ export default function PosPage() {
                                 }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', fontWeight: 800, color: '#92400e' }}>
                                         <span style={{ fontSize: '16px' }}>⚠️</span>
-                                        <span>تنبيه: يوجد <strong>{logic.lowStockCount}</strong> صنف وصل لحد إعادة الطلب في هذا المنفذ!</span>
+                                        <span>{isEn ? 'Alert: There are ' : 'تنبيه: يوجد '}<strong>{logic.lowStockCount}</strong>{isEn ? ' items below reorder level in this branch!' : ' صنف وصل لحد إعادة الطلب في هذا المنفذ!'}</span>
                                     </div>
                                     <button
                                         type="button"
@@ -1801,7 +1808,7 @@ export default function PosPage() {
                                             whiteSpace: 'nowrap'
                                         }}
                                     >
-                                        {logic.onlyLowStock ? 'عرض كل الأصناف' : 'تصفية النواقص فقط 🔍'}
+                                        {logic.onlyLowStock ? (isEn ? 'Show All Items' : 'عرض كل الأصناف') : (isEn ? 'Filter Low Stock 🔍' : 'تصفية النواقص فقط 🔍')}
                                     </button>
                                 </div>
                             )}
@@ -1809,7 +1816,7 @@ export default function PosPage() {
                             <input 
                                 type="text" 
                                 className="glass-input-field" 
-                                placeholder="ابحث عن صنف بالاسم... (اضغط Enter للاختيار السريع)" 
+                                placeholder={isEn ? 'Search item by name... (Press Enter for quick select)' : 'ابحث عن صنف بالاسم... (اضغط Enter للاختيار السريع)'} 
                                 value={logic.searchQuery}
                                 onChange={(e) => logic.setSearchQuery(e.target.value)}
                                 onKeyDown={(e) => {
@@ -1825,7 +1832,7 @@ export default function PosPage() {
                         <div className="items-grid cinematic-scroll">
                             {logic.inventoryItems.length === 0 ? (
                                 <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '50px', color: '#64748b', fontWeight: 'bold' }}>
-                                    {logic.onlyLowStock ? 'لا توجد أصناف تحت حد الطلب حالياً 🎉' : 'لا توجد أصناف متاحة في هذا المنفذ حالياً'}
+                                    {logic.onlyLowStock ? (isEn ? 'No low stock items 🎉' : 'لا توجد أصناف تحت حد الطلب حالياً 🎉') : (isEn ? 'No items available in this branch currently' : 'لا توجد أصناف متاحة في هذا المنفذ حالياً')}
                                 </div>
                             ) : (
                                 logic.inventoryItems.map((item: any) => {
@@ -1845,7 +1852,7 @@ export default function PosPage() {
                                                     borderRadius: '6px',
                                                     border: '1px solid rgba(239, 68, 68, 0.4)'
                                                 }}>
-                                                    ⚠️ حد الطلب ({item.reorder_level})
+                                                    ⚠️ {isEn ? 'Reorder Level' : 'حد الطلب'} ({item.reorder_level})
                                                 </span>
                                             ) : item.isNearLow ? (
                                                 <span style={{
@@ -1860,7 +1867,7 @@ export default function PosPage() {
                                                     borderRadius: '6px',
                                                     border: '1px solid rgba(245, 158, 11, 0.4)'
                                                 }}>
-                                                    ⚡ قارب على النفاد
+                                                    ⚡ {isEn ? 'Low Stock' : 'قارب على النفاد'}
                                                 </span>
                                             ) : null}
                                             <div className="pos-item-name" style={{ marginTop: (item.isCriticalLow || item.isNearLow) ? '16px' : '0' }}>{item.name}</div>
@@ -1872,7 +1879,7 @@ export default function PosPage() {
                                                     fontWeight: 800,
                                                     flex: 1
                                                 }}>
-                                                    المتاح: {item.available_qty} {item.unit}
+                                                    {isEn ? 'Available:' : 'المتاح:'} {item.available_qty} {item.unit}
                                                 </div>
                                                 {item.is_returnable_bottle && (
                                                     <span style={{
@@ -1932,7 +1939,7 @@ export default function PosPage() {
                                 <button
                                     type="button"
                                     onClick={() => {
-                                        if (window.confirm('هل تريد بالتأكيد إفراغ السلة الحالية؟')) {
+                                        if (window.confirm(isEn ? 'Are you sure you want to clear the current cart?' : 'هل تريد بالتأكيد إفراغ السلة الحالية؟')) {
                                             logic.cart.forEach((it: any) => logic.removeFromCart(it.id));
                                         }
                                     }}
@@ -1947,9 +1954,9 @@ export default function PosPage() {
                                         borderRadius: '6px',
                                         transition: '0.2s'
                                     }}
-                                    title="إفراغ الفاتورة"
+                                    title={isEn ? 'Clear Invoice' : 'إفراغ الفاتورة'}
                                 >
-                                    🗑️ إفراغ
+                                    🗑️ {isEn ? 'Clear' : 'إفراغ'}
                                 </button>
                             )}
                         </div>
@@ -1968,8 +1975,8 @@ export default function PosPage() {
                                     gap: '10px'
                                 }}>
                                     <span style={{ fontSize: '38px', opacity: 0.6 }}>🛍️</span>
-                                    <span style={{ fontSize: '14px', color: '#475569' }}>السلة فارغة حالياً</span>
-                                    <span style={{ fontSize: '12px', color: '#94a3b8' }}>انقر على الأصناف من القائمة لإضافتها للفاتورة</span>
+                                    <span style={{ fontSize: '14px', color: '#475569' }}>{isEn ? 'Cart is currently empty' : 'السلة فارغة حالياً'}</span>
+                                    <span style={{ fontSize: '12px', color: '#94a3b8' }}>{isEn ? 'Click on items from the list to add to invoice' : 'انقر على الأصناف من القائمة لإضافتها للفاتورة'}</span>
                                     <button
                                         type="button"
                                         onClick={() => setMobileTab('items')}
@@ -1982,7 +1989,7 @@ export default function PosPage() {
                                             width: 'auto'
                                         }}
                                     >
-                                        👈 الذهاب لقائمة الأصناف
+                                        👈 {isEn ? 'Go to Products List' : 'الذهاب لقائمة الأصناف'}
                                     </button>
                                 </div>
                             ) : (
@@ -2005,7 +2012,7 @@ export default function PosPage() {
                                                         fontWeight: 800,
                                                         whiteSpace: 'nowrap'
                                                     }}>
-                                                        🔄 عهدة ({item.qty} فوارغ)
+                                                        🔄 عهدة ({item.qty} {isEn ? 'returnable' : 'فوارغ'})
                                                     </span>
                                                 )}
                                                 {((item.discount || 0) + (item.promo_discount || 0) > 0) && (
@@ -2019,7 +2026,7 @@ export default function PosPage() {
                                                         fontWeight: 800,
                                                         whiteSpace: 'nowrap'
                                                     }}>
-                                                        خصم: {formatCurrency((item.discount || 0) + (item.promo_discount || 0))}
+                                                        {isEn ? 'Discount:' : 'خصم:'} {formatCurrency((item.discount || 0) + (item.promo_discount || 0))}
                                                     </span>
                                                 )}
                                             </div>
@@ -2027,7 +2034,7 @@ export default function PosPage() {
                                                 type="button"
                                                 className="cart-item-remove-btn"
                                                 onClick={() => logic.removeFromCart(item.id)}
-                                                title="حذف من الفاتورة"
+                                                title={isEn ? 'Remove from invoice' : 'حذف من الفاتورة'}
                                             >
                                                 🗑️
                                             </button>
@@ -2041,7 +2048,7 @@ export default function PosPage() {
                                                     type="button"
                                                     className="cart-qty-btn minus"
                                                     onClick={() => logic.updateCartItemQty(item.id, Math.max(1, item.qty - 1))}
-                                                    title="إنقاص الكمية"
+                                                    title={isEn ? 'Decrease Qty' : 'إنقاص الكمية'}
                                                 >
                                                     -
                                                 </button>
@@ -2058,7 +2065,7 @@ export default function PosPage() {
                                                     type="button"
                                                     className="cart-qty-btn plus"
                                                     onClick={() => logic.updateCartItemQty(item.id, item.qty + 1)}
-                                                    title="زيادة الكمية"
+                                                    title={isEn ? 'Increase Qty' : 'زيادة الكمية'}
                                                 >
                                                     +
                                                 </button>
@@ -2066,7 +2073,7 @@ export default function PosPage() {
 
                                             {/* 2. Clear, Balanced Price Field */}
                                             <div className="cart-unit-price-box">
-                                                <span className="cart-price-label">السعر:</span>
+                                                <span className="cart-price-label">{isEn ? 'Price:' : 'السعر:'}</span>
                                                 <input
                                                     type="number"
                                                     className="cart-price-input"
@@ -2077,12 +2084,12 @@ export default function PosPage() {
                                                     step="any"
                                                     inputMode="decimal"
                                                 />
-                                                <span className="cart-currency-badge">ر.س</span>
+                                                <span className="cart-currency-badge">{isEn ? 'SAR' : 'ر.س'}</span>
                                             </div>
 
                                             {/* 3. Prominent Line Total */}
                                             <div className="cart-line-total-box">
-                                                <span className="cart-total-label">الصافي:</span>
+                                                <span className="cart-total-label">{isEn ? 'Net:' : 'الصافي:'}</span>
                                                 <span className="cart-total-value">
                                                     {formatCurrency(item.total)}
                                                 </span>
@@ -2099,7 +2106,7 @@ export default function PosPage() {
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                                 <div>
                                     <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, color: '#1C73AB', marginBottom: '3px' }}>
-                                        👤 العميل:
+                                        👤 {isEn ? 'Customer:' : 'العميل:'}
                                     </label>
                                     <select 
                                         className="glass-input-field" 
@@ -2117,7 +2124,7 @@ export default function PosPage() {
                                         value={logic.partnerId}
                                         onChange={e => logic.setPartnerId(e.target.value)}
                                     >
-                                        <option value="">عميل نقدي (بدون اسم)</option>
+                                        <option value="">{isEn ? 'Walk-in Customer (Cash)' : 'عميل نقدي (بدون اسم)'}</option>
                                         {logic.customers.map((c: any) => (
                                             <option key={c.id} value={c.id}>{c.name}</option>
                                         ))}
@@ -2126,7 +2133,7 @@ export default function PosPage() {
 
                                 <div>
                                     <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, color: '#1C73AB', marginBottom: '3px' }}>
-                                        💳 طريقة الدفع:
+                                        💳 {isEn ? 'Payment Method:' : 'طريقة الدفع:'}
                                     </label>
                                     <select 
                                         className="glass-input-field" 
@@ -2144,9 +2151,9 @@ export default function PosPage() {
                                         value={logic.paymentMethod}
                                         onChange={(e: any) => logic.setPaymentMethod(e.target.value)}
                                     >
-                                        <option value="نقدي (كاش)">نقدي (كاش)</option>
-                                        <option value="شبكة (مدى)">شبكة (مدى / بطاقة)</option>
-                                        <option value="آجل">آجل (على الحساب)</option>
+                                        <option value="نقدي (كاش)">{isEn ? 'Cash' : 'نقدي (كاش)'}</option>
+                                        <option value="شبكة (مدى)">{isEn ? 'Card / POS' : 'شبكة (مدى / بطاقة)'}</option>
+                                        <option value="آجل">{isEn ? 'Credit (On Account)' : 'آجل (على الحساب)'}</option>
                                     </select>
                                 </div>
                             </div>
@@ -2161,7 +2168,7 @@ export default function PosPage() {
                                 borderRadius: '10px',
                                 border: '1px solid rgba(239, 68, 68, 0.12)'
                             }}>
-                                <span style={{ fontWeight: 800, color: '#ef4444', fontSize: '11.5px' }}>خصم إضافي:</span>
+                                <span style={{ fontWeight: 800, color: '#ef4444', fontSize: '11.5px' }}>{isEn ? 'Extra Discount:' : 'خصم إضافي:'}</span>
                                 <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
                                     <input 
                                         type="number"
@@ -2197,13 +2204,13 @@ export default function PosPage() {
                                             color: '#ef4444'
                                         }}
                                     >
-                                        <option value="amount">ر.س</option>
+                                        <option value="amount">{isEn ? 'SAR' : 'ر.س'}</option>
                                         <option value="percentage">%</option>
                                     </select>
                                 </div>
                             </div>
 
-                            {/* طريقة الحساب (شامل / غير شامل الضريبة) */}
+                            {/* طريقة الحساب (شامل / غير {isEn ? 'Tax Inclusive' : 'شامل الضريبة'}) */}
                             <div style={{
                                 display: 'flex',
                                 alignItems: 'center',
@@ -2213,7 +2220,7 @@ export default function PosPage() {
                                 borderRadius: '10px',
                                 border: '1px solid rgba(28, 115, 171, 0.12)'
                             }}>
-                                <span style={{ fontWeight: 800, color: '#122946', fontSize: '11.5px' }}>طريقة الحساب:</span>
+                                <span style={{ fontWeight: 800, color: '#122946', fontSize: '11.5px' }}>{isEn ? 'Calc Method:' : 'طريقة الحساب:'}</span>
                                 <div style={{ display: 'flex', background: 'rgba(255, 255, 255, 0.85)', padding: '2px', borderRadius: '8px', border: '1px solid rgba(28, 115, 171, 0.15)' }}>
                                     <button 
                                         type="button"
@@ -2231,7 +2238,7 @@ export default function PosPage() {
                                             transition: '0.2s'
                                         }}
                                     >
-                                        شامل الضريبة
+                                        {isEn ? 'Tax Inclusive' : 'شامل الضريبة'}
                                     </button>
                                     <button 
                                         type="button"
@@ -2249,7 +2256,7 @@ export default function PosPage() {
                                             transition: '0.2s'
                                         }}
                                     >
-                                        غير شامل
+                                        {isEn ? 'Tax Exclusive' : 'غير شامل'}
                                     </button>
                                 </div>
                             </div>
@@ -2266,19 +2273,19 @@ export default function PosPage() {
                                 fontSize: '11.5px'
                             }}>
                                 <div>
-                                    <span style={{ color: '#64748b', fontWeight: 700 }}>المجموع الفرعي: </span>
+                                    <span style={{ color: '#64748b', fontWeight: 700 }}>{isEn ? 'Subtotal:' : 'المجموع الفرعي:'} </span>
                                     <span style={{ fontWeight: 900, color: '#122946' }}>{formatCurrency(logic.cartTotal.subtotal)}</span>
                                 </div>
                                 <div style={{ width: '1px', height: '14px', background: 'rgba(28, 115, 171, 0.2)' }}></div>
                                 <div>
-                                    <span style={{ color: '#64748b', fontWeight: 700 }}>الضريبة (15%): </span>
+                                    <span style={{ color: '#64748b', fontWeight: 700 }}>{isEn ? 'VAT (15%):' : 'الضريبة (15%):'} </span>
                                     <span style={{ fontWeight: 900, color: '#122946' }}>{formatCurrency(logic.cartTotal.tax)}</span>
                                 </div>
                             </div>
 
                             {/* الإجمالي المطلوب الماسي */}
                             <div className="pos-total-banner">
-                                <span style={{ fontSize: '13px', fontWeight: 900, color: '#166534' }}>الإجمالي المطلوب:</span>
+                                <span style={{ fontSize: '13px', fontWeight: 900, color: '#166534' }}>{isEn ? 'Grand Total:' : 'الإجمالي المطلوب:'}</span>
                                 <span style={{ fontSize: '19px', fontWeight: 900, color: '#16a34a', letterSpacing: '-0.3px' }}>
                                     {formatCurrency(logic.cartTotal.total)}
                                 </span>
@@ -2301,10 +2308,10 @@ export default function PosPage() {
                                     }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                                             <span style={{ fontSize: '16px' }}>🔄</span>
-                                            <span style={{ fontSize: '11px', fontWeight: 900, color: '#1C73AB' }}>عهدة فوارغ مستحقة:</span>
+                                            <span style={{ fontSize: '11px', fontWeight: 900, color: '#1C73AB' }}>{isEn ? 'Returnables Custody:' : 'عهدة فوارغ مستحقة:'}</span>
                                         </div>
                                         <span style={{ fontSize: '12px', fontWeight: 900, color: '#122946', background: 'white', padding: '2px 8px', borderRadius: '6px', border: '1px solid rgba(40, 145, 200, 0.3)' }}>
-                                            {totalReturnable} عبوة
+                                            {totalReturnable} {isEn ? 'Bottles' : 'عبوة'}
                                         </span>
                                     </div>
                                 );
@@ -2327,7 +2334,7 @@ export default function PosPage() {
                                     }}
                                 >
                                     <span>🔒</span>
-                                    <span>اضغط لبدء الوردية أولاً لإتمام البيع</span>
+                                    <span>{isEn ? 'Open shift first to process sale' : 'اضغط لبدء الوردية أولاً لإتمام البيع'}</span>
                                 </button>
                             ) : (
                                 <button 
@@ -2348,7 +2355,7 @@ export default function PosPage() {
                                     }}
                                 >
                                     <span>{logic.isCheckingOut ? '⏳' : '✅'}</span>
-                                    <span>{logic.isCheckingOut ? 'جاري إصدار الفاتورة...' : 'الدفع وإصدار الفاتورة'}</span>
+                                    <span>{logic.isCheckingOut ? (isEn ? 'Issuing Invoice...' : 'جاري إصدار الفاتورة...') : (isEn ? 'Checkout & Print' : 'الدفع وإصدار الفاتورة')}</span>
                                 </button>
                             )}
                         </div>
@@ -2367,10 +2374,10 @@ export default function PosPage() {
                         <span style={{ fontSize: '22px' }}>🛒</span>
                         <div>
                             <div style={{ fontSize: '13px', fontWeight: 900 }}>
-                                السلة ({logic.cart.length} أصناف)
+                                {isEn ? `Cart (${logic.cart.length} Items)` : `السلة (${logic.cart.length} أصناف)`}
                             </div>
                             <div style={{ fontSize: '11px', opacity: 0.85 }}>
-                                الإجمالي: {formatCurrency(logic.cartTotal.total)}
+                                {isEn ? 'Total:' : 'الإجمالي:'} {formatCurrency(logic.cartTotal.total)}
                             </div>
                         </div>
                     </div>
@@ -2384,7 +2391,7 @@ export default function PosPage() {
                         alignItems: 'center',
                         gap: '4px'
                     }}>
-                        <span>إتمام الطلب</span>
+                        <span>{isEn ? 'Checkout' : 'إتمام الطلب'}</span>
                         <span>←</span>
                     </div>
                 </div>

@@ -1,5 +1,6 @@
 
 "use client";
+import { useLanguage } from '@/lib/LanguageContext';
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
@@ -15,6 +16,9 @@ export default function ShiftCloseModal({
     warehouses = [],
     delegates = []
 }: any) {
+    const { language } = useLanguage();
+    const isEn = language === 'en';
+
     const [actualCash, setActualCash] = useState<number | ''>('');
     const [actualBottlesReturned, setActualBottlesReturned] = useState<number | ''>('');
     const [bottlesSold, setBottlesSold] = useState(0);
@@ -40,7 +44,7 @@ export default function ShiftCloseModal({
                 .from('invoices')
                 .select('id, total_amount, payment_method, lines_data')
                 .eq('shift_id', activeShift.id)
-                .neq('status', 'ملغي');
+                .neq('status', 'ملغي'); // Arabic status check remains in logic
 
             // Fetch active expenses created during this shift (exclude deleted)
             const { data: expenses } = await supabase
@@ -54,7 +58,7 @@ export default function ShiftCloseModal({
                 .from('receipt_vouchers')
                 .select('amount, payment_method, invoice_id')
                 .eq('shift_id', activeShift.id)
-                .neq('status', 'ملغي');
+                .neq('status', 'ملغي'); // Arabic status check remains in logic
 
             let cash = 0, card = 0, credit = 0;
             let cashExpenses = 0, totalExpenses = 0;
@@ -107,7 +111,7 @@ export default function ShiftCloseModal({
 
             setTotals({ cash, card, credit, total: cash + card + credit, cashExpenses, totalExpenses } as any);
             setBottlesSold(soldUnits);
-            setActualBottlesReturned(soldUnits); // الافتراضي مطابقة كاملة
+            setActualBottlesReturned(soldUnits);
         } catch (error) {
             console.error(error);
         } finally {
@@ -122,7 +126,7 @@ export default function ShiftCloseModal({
 
     const closeShiftMutation = useMutation({
         mutationFn: async () => {
-            if (actualCash === '') throw new Error('الرجاء إدخال النقدية الفعلية الموجودة في الدرج');
+            if (actualCash === '') throw new Error(isEn ? 'Please enter the actual cash in the register' : 'الرجاء إدخال النقدية الفعلية الموجودة في الدرج');
             
             const { error } = await supabase.from('pos_shifts').update({
                 closed_at: new Date().toISOString(),
@@ -143,7 +147,7 @@ export default function ShiftCloseModal({
             if (error) throw new Error(error.message);
         },
         onSuccess: () => {
-            showToast('تم إغلاق الوردية وتقفيل الصندوق وعهدة الفوارغ بنجاح 🔒', 'success');
+            showToast(isEn ? 'Shift closed and register reconciled successfully 🔒' : 'تم إغلاق الوردية وتقفيل الصندوق وعهدة الفوارغ بنجاح 🔒', 'success');
             queryClient.invalidateQueries({ queryKey: ['active_pos_shift'] });
             queryClient.invalidateQueries({ queryKey: ['pos_open_shifts'] });
             
@@ -208,9 +212,9 @@ export default function ShiftCloseModal({
                     border: '1px solid rgba(255, 255, 255, 0.8)'
                 }}>
                     <div style={{ fontSize: '55px', marginBottom: '12px' }}>ℹ️</div>
-                    <h3 style={{ color: '#1C73AB', marginBottom: '10px', fontWeight: 900, fontSize: '20px' }}>لا توجد وردية نشطة حالياً</h3>
+                    <h3 style={{ color: '#1C73AB', marginBottom: '10px', fontWeight: 900, fontSize: '20px' }}>{isEn ? 'No active shift' : 'لا توجد وردية نشطة حالياً'}</h3>
                     <p style={{ color: '#64748b', fontSize: '14px', marginBottom: '25px', fontWeight: 700, lineHeight: '1.6' }}>
-                        لا توجد وردية مفتوحة حالياً لحسابك لإغلاقها. يمكنك فتح وردية جديدة من شريط التحكم بأعلى الشاشة.
+                        {isEn ? 'You do not have an active shift to close. You can open a new shift from the top control bar.' : 'لا توجد وردية مفتوحة حالياً لحسابك لإغلاقها. يمكنك فتح وردية جديدة من شريط التحكم بأعلى الشاشة.'}
                     </p>
                     <button
                         onClick={onClose}
@@ -226,7 +230,7 @@ export default function ShiftCloseModal({
                             boxShadow: '0 4px 15px rgba(28, 115, 171, 0.3)'
                         }}
                     >
-                        حسناً، فهمت
+                        {isEn ? 'Got it' : 'حسناً، فهمت'}
                     </button>
                 </div>
             </div>
@@ -262,9 +266,9 @@ export default function ShiftCloseModal({
                 {/* Header */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '15px', marginBottom: '14px' }}>
                     <div>
-                        <h2 style={{ color: '#1C73AB', margin: 0, fontSize: '20px', fontWeight: 900 }}>🔒 تقفيل الصندوق والوردية (Z-Report)</h2>
+                        <h2 style={{ color: '#1C73AB', margin: 0, fontSize: '20px', fontWeight: 900 }}>🔒 {isEn ? 'Close Register & Shift (Z-Report)' : 'تقفيل الصندوق والوردية (Z-Report)'}</h2>
                         <span style={{ fontSize: '12px', color: '#64748b', fontWeight: 700 }}>
-                            وردية رقم: #{String(activeShift.id).slice(-6)}
+                            {isEn ? 'Shift ID:' : 'وردية رقم:'} #{String(activeShift.id).slice(-6)}
                         </span>
                     </div>
                     <button 
@@ -301,15 +305,15 @@ export default function ShiftCloseModal({
                     gap: '10px'
                 }}>
                     <div>
-                        <span style={{ color: '#64748b', fontSize: '11px', display: 'block', fontWeight: 700 }}>🏪 منفذ البيع:</span>
-                        <strong style={{ color: '#1C73AB', fontSize: '13px' }}>{currentWarehouse?.name || 'مستودع غير محدد'}</strong>
+                        <span style={{ color: '#64748b', fontSize: '11px', display: 'block', fontWeight: 700 }}>🏪 {isEn ? 'Branch:' : 'منفذ البيع:'}</span>
+                        <strong style={{ color: '#1C73AB', fontSize: '13px' }}>{currentWarehouse?.name || (isEn ? 'Unknown Branch' : 'مستودع غير محدد')}</strong>
                     </div>
                     <div>
-                        <span style={{ color: '#64748b', fontSize: '11px', display: 'block', fontWeight: 700 }}>👤 المندوب / الكاشير:</span>
-                        <strong style={{ color: '#0f172a', fontSize: '13px' }}>{currentDelegate?.name || 'مبيعات مباشرة (بدون مندوب)'}</strong>
+                        <span style={{ color: '#64748b', fontSize: '11px', display: 'block', fontWeight: 700 }}>👤 {isEn ? 'Cashier / Rep:' : 'المندوب / الكاشير:'}</span>
+                        <strong style={{ color: '#0f172a', fontSize: '13px' }}>{currentDelegate?.name || (isEn ? 'Direct Sales (No Rep)' : 'مبيعات مباشرة (بدون مندوب)')}</strong>
                     </div>
                     <div>
-                        <span style={{ color: '#64748b', fontSize: '11px', display: 'block', fontWeight: 700 }}>🕒 وقت الفتح:</span>
+                        <span style={{ color: '#64748b', fontSize: '11px', display: 'block', fontWeight: 700 }}>🕒 {isEn ? 'Open Time:' : 'وقت الفتح:'}</span>
                         <strong style={{ color: '#0f172a', fontSize: '12px' }}>
                             {activeShift?.opened_at ? new Date(activeShift.opened_at).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }) : '—'}
                         </strong>
@@ -318,39 +322,39 @@ export default function ShiftCloseModal({
 
                 {isLoadingStats ? (
                     <div style={{ textAlign: 'center', padding: '40px', color: '#64748b', fontWeight: 800, fontSize: '15px' }}>
-                        ⏳ جاري جرد وحساب مبيعات الوردية...
+                        {isEn ? '⏳ Calculating shift sales...' : '⏳ جاري جرد وحساب مبيعات الوردية...'}
                     </div>
                 ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                         {/* ملخص المبيعات */}
                         <div style={{ background: 'rgba(248, 250, 252, 0.9)', border: '1px solid #e2e8f0', padding: '16px', borderRadius: '16px' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', fontSize: '14px', fontWeight: 700, color: '#475569' }}>
-                                <span>💵 العهدة الافتتاحية:</span>
-                                <strong style={{ color: '#0f172a' }}>{Number(activeShift.starting_cash || 0).toFixed(2)} ريال</strong>
+                                <span>💵 {isEn ? 'Opening Cash:' : 'العهدة الافتتاحية:'}</span>
+                                <strong style={{ color: '#0f172a' }}>{Number(activeShift.starting_cash || 0).toFixed(2)} {isEn ? 'SAR' : 'ريال'}</strong>
                             </div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', fontSize: '14px', fontWeight: 700, color: '#16a34a' }}>
-                                <span>💰 المبيعات النقدية (كاش):</span>
-                                <strong>+ {totals.cash.toFixed(2)} ريال</strong>
+                                <span>💰 {isEn ? 'Cash Sales:' : 'المبيعات النقدية (كاش):'}</span>
+                                <strong>+ {totals.cash.toFixed(2)} {isEn ? 'SAR' : 'ريال'}</strong>
                             </div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', fontSize: '14px', fontWeight: 700, color: '#2891C8' }}>
-                                <span>💳 مبيعات الشبكة / مدى:</span>
-                                <strong>{totals.card.toFixed(2)} ريال</strong>
+                                <span>💳 {isEn ? 'Card / POS Sales:' : 'مبيعات الشبكة / مدى:'}</span>
+                                <strong>{totals.card.toFixed(2)} {isEn ? 'SAR' : 'ريال'}</strong>
                             </div>
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', fontSize: '14px', fontWeight: 700, color: '#d97706' }}>
-                                <span>📋 المبيعات الآجلة:</span>
-                                <strong>{totals.credit.toFixed(2)} ريال</strong>
+                                <span>📋 {isEn ? 'Credit Sales:' : 'المبيعات الآجلة:'}</span>
+                                <strong>{totals.credit.toFixed(2)} {isEn ? 'SAR' : 'ريال'}</strong>
                             </div>
                             <hr style={{ borderColor: '#e2e8f0', margin: '10px 0' }} />
                             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '16px', fontWeight: 900, color: '#1C73AB' }}>
-                                <span>🏦 النقدية المتوقعة بالدرج:</span>
-                                <span style={{ fontSize: '20px', color: '#1C73AB' }}>{expectedCash.toFixed(2)} ريال</span>
+                                <span>🏦 {isEn ? 'Expected Cash in Register:' : 'النقدية المتوقعة بالدرج:'}</span>
+                                <span style={{ fontSize: '20px', color: '#1C73AB' }}>{expectedCash.toFixed(2)} {isEn ? 'SAR' : 'ريال'}</span>
                             </div>
                         </div>
 
                         {/* إدخال النقدية الفعلية */}
                         <div className="form-group">
                             <label style={{ fontWeight: 900, color: '#ef4444', fontSize: '14px', display: 'block', marginBottom: '8px' }}>
-                                💵 المبلغ الفعلي الموجود في الدرج الآن (بعد العد):
+                                💵 {isEn ? 'Actual Cash in Register (Counted):' : 'المبلغ الفعلي الموجود في الدرج الآن (بعد العد):'}
                             </label>
                             <input 
                                 type="number" 
@@ -375,22 +379,22 @@ export default function ShiftCloseModal({
                                 border: `1px solid ${difference === 0 ? '#86efac' : difference > 0 ? '#7dd3fc' : '#fca5a5'}`
                             }}>
                                 {difference === 0 
-                                    ? '✅ الصندوق مطابق تماماً (لا يوجد عجز أو زيادة)' 
+                                    ? (isEn ? '✅ Register matches exactly (No variance)' : '✅ الصندوق مطابق تماماً (لا يوجد عجز أو زيادة)') 
                                     : difference > 0 
-                                        ? `💰 يوجد زيادة بقيمة: +${difference.toFixed(2)} ريال` 
-                                        : `⚠️ يوجد عجز بقيمة: -${Math.abs(difference).toFixed(2)} ريال`}
+                                        ? `💰 يوجد زيادة بقيمة: +${difference.toFixed(2)} {isEn ? 'SAR' : 'ريال'}` 
+                                        : `⚠️ يوجد عجز بقيمة: -${Math.abs(difference).toFixed(2)} {isEn ? 'SAR' : 'ريال'}`}
                             </div>
                         )}
 
                         {/* 🔄 مطابقة عهدة فوارغ الجالونات والعبوات */}
                         <div style={{ background: 'rgba(240, 249, 255, 0.9)', border: '1.5px solid rgba(40, 145, 200, 0.35)', padding: '15px', borderRadius: '16px' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                                <span style={{ fontSize: '13px', fontWeight: 900, color: '#1C73AB' }}>🔄 عهدة فوارغ المياه المباعة:</span>
-                                <span style={{ fontSize: '15px', fontWeight: 900, color: '#122946' }}>{bottlesSold} عبوة / جالون</span>
+                                <span style={{ fontSize: '13px', fontWeight: 900, color: '#1C73AB' }}>🔄 {isEn ? 'Sold Returnables Custody:' : 'عهدة فوارغ المياه المباعة:'}</span>
+                                <span style={{ fontSize: '15px', fontWeight: 900, color: '#122946' }}>{bottlesSold} {isEn ? 'Bottles / Gallons' : 'عبوة / جالون'}</span>
                             </div>
 
                             <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: '10px', alignItems: 'center', marginTop: '10px' }}>
-                                <label style={{ fontSize: '12px', fontWeight: 800, color: '#334155' }}>عدد الفوارغ المستلمة فعلياً:</label>
+                                <label style={{ fontSize: '12px', fontWeight: 800, color: '#334155' }}>{isEn ? 'Actual returnables received:' : 'عدد الفوارغ المستلمة فعلياً:'}</label>
                                 <input 
                                     type="number"
                                     min="0"
@@ -399,16 +403,16 @@ export default function ShiftCloseModal({
                                     onChange={(e) => setActualBottlesReturned(e.target.value === '' ? '' : Number(e.target.value))}
                                     onFocus={(e) => e.target.select()}
                                     style={{ fontSize: '18px', fontWeight: 'bold', textAlign: 'center', borderColor: '#2891C8', padding: '6px' }}
-                                    placeholder="الفوارغ"
+                                    placeholder={isEn ? 'Returnables' : 'الفوارغ'}
                                 />
                             </div>
 
                             <div style={{ marginTop: '10px', fontSize: '12px', fontWeight: 800, textAlign: 'center', padding: '8px', borderRadius: '10px', background: bottlesShortage === 0 ? '#dcfce7' : bottlesShortage > 0 ? '#fee2e2' : '#f0f9ff', color: bottlesShortage === 0 ? '#16a34a' : bottlesShortage > 0 ? '#b91c1c' : '#0369a1' }}>
                                 {bottlesShortage === 0 
-                                    ? '✅ الفوارغ مطابقة تماماً' 
+                                    ? (isEn ? '✅ Returnables match exactly' : '✅ الفوارغ مطابقة تماماً') 
                                     : bottlesShortage > 0 
-                                        ? `⚠️ عجز فوارغ: ${bottlesShortage} عبوة (تُقيد كذمة على المندوب)` 
-                                        : `ℹ️ فوارغ إضافية مستلمة: +${Math.abs(bottlesShortage)} عبوة`}
+                                        ? (isEn ? `⚠️ Returnables shortage: ${bottlesShortage} bottles (Charged to rep)` : `⚠️ عجز فوارغ: ${bottlesShortage} عبوة (تُقيد كذمة على المندوب)`) 
+                                        : (isEn ? `ℹ️ Extra returnables received: +${Math.abs(bottlesShortage)} bottles` : `ℹ️ فوارغ إضافية مستلمة: +${Math.abs(bottlesShortage)} عبوة`)}
                             </div>
                         </div>
 
@@ -430,7 +434,7 @@ export default function ShiftCloseModal({
                                     transition: '0.2s'
                                 }}
                             >
-                                {closeShiftMutation.isPending ? '⏳ جاري الإغلاق...' : '🔒 تأكيد وإغلاق الصندوق'}
+                                {closeShiftMutation.isPending ? (isEn ? '⏳ Closing...' : '⏳ جاري الإغلاق...') : (isEn ? '🔒 Confirm & Close Register' : '🔒 تأكيد وإغلاق الصندوق')}
                             </button>
                             <button
                                 onClick={onClose}

@@ -1,4 +1,5 @@
 "use client";
+import { useLanguage } from '@/lib/LanguageContext';
 import React from 'react';
 
 export default function OpenShiftsModal({
@@ -12,6 +13,9 @@ export default function OpenShiftsModal({
     onOpenNewShift,
     onViewDetails
 }: any) {
+    const { language } = useLanguage();
+    const isEn = language === 'en';
+
     if (!isOpen) return null;
 
     return (
@@ -86,10 +90,10 @@ export default function OpenShiftsModal({
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '14px', marginBottom: '16px' }}>
                     <div>
                         <h2 style={{ color: '#1C73AB', margin: 0, fontSize: '20px', fontWeight: 900 }}>
-                            📋 الورديات النشطة حالياً بالنظام ({openShifts.length})
+                            📋 {isEn ? 'Currently Active Shifts in System' : 'الورديات النشطة حالياً بالنظام'} ({openShifts.length})
                         </h2>
                         <span style={{ fontSize: '12px', color: '#64748b', fontWeight: 700 }}>
-                            لكل مندوب ولكل مستودع وردية مستقلة تماماً
+                            {isEn ? 'Each rep and branch has an independent shift' : 'لكل مندوب ولكل مستودع وردية مستقلة تماماً'}
                         </span>
                     </div>
                     <button 
@@ -118,10 +122,10 @@ export default function OpenShiftsModal({
                     <div style={{ textAlign: 'center', padding: '40px 20px', color: '#64748b' }}>
                         <div style={{ fontSize: '48px', marginBottom: '10px' }}>📦</div>
                         <h3 style={{ fontSize: '16px', fontWeight: 900, color: '#1C73AB', marginBottom: '6px' }}>
-                            لا توجد أي وردية نشطة حالياً
+                            {isEn ? 'No active shifts currently' : 'لا توجد أي وردية نشطة حالياً'}
                         </h3>
                         <p style={{ fontSize: '13px', color: '#94a3b8', marginBottom: '20px' }}>
-                            يمكنك اختيار منفذ البيع والمندوب ثم الضغط على فتح وردية جديدة للبدء.
+                            {isEn ? 'You can select a branch and a rep, then click open new shift to start.' : 'يمكنك اختيار منفذ البيع والمندوب ثم الضغط على فتح وردية جديدة للبدء.'}
                         </p>
                         <button
                             type="button"
@@ -132,7 +136,7 @@ export default function OpenShiftsModal({
                             className="btn-switch-shift"
                             style={{ padding: '12px 26px', fontSize: '15px' }}
                         >
-                            ✨ فتح وردية جديدة الآن
+                            ✨ {isEn ? 'Open New Shift Now' : 'فتح وردية جديدة الآن'}
                         </button>
                     </div>
                 ) : (
@@ -158,7 +162,7 @@ export default function OpenShiftsModal({
                                                 display: 'inline-block' 
                                             }}></span>
                                             <strong style={{ color: '#0f172a', fontSize: '15px', fontWeight: 900 }}>
-                                                {wh?.name || 'مستودع غير محدد'}
+                                                {wh?.name || (isEn ? 'Unknown Branch' : 'مستودع غير محدد')}
                                             </strong>
                                             {wh?.type === 'vehicle' && (
                                                 <span style={{ 
@@ -169,7 +173,7 @@ export default function OpenShiftsModal({
                                                     padding: '2px 8px', 
                                                     borderRadius: '8px' 
                                                 }}>
-                                                    🚚 سيارة
+                                                    🚚 {isEn ? 'Van' : 'سيارة'}
                                                 </span>
                                             )}
                                         </div>
@@ -177,21 +181,21 @@ export default function OpenShiftsModal({
                                         <div style={{ fontSize: '13px', color: '#475569', display: 'flex', gap: '15px', flexWrap: 'wrap', marginTop: '2px' }}>
                                             <span>
                                                 👤 <strong style={{ color: del ? '#16a34a' : '#64748b' }}>
-                                                    {del?.name || 'مبيعات مباشرة (بدون مندوب)'}
+                                                    {del?.name || (isEn ? 'Direct Sales (No Rep)' : 'مبيعات مباشرة (بدون مندوب)')}
                                                 </strong>
                                             </span>
                                             <span>
-                                                💵 العهدة: <strong>{Number(shift.starting_cash || 0).toFixed(2)} ريال</strong>
+                                                💵 {isEn ? 'Opening Cash:' : 'العهدة:'} <strong>{Number(shift.starting_cash || 0).toFixed(2)} {isEn ? 'SAR' : 'ريال'}</strong>
                                             </span>
                                             <span>
-                                                🕒 الفتح: <strong>
+                                                🕒 {isEn ? 'Opened:' : 'الفتح:'} <strong>
                                                     {shift.opened_at ? new Date(shift.opened_at).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }) : '—'}
                                                 </strong>
                                             </span>
                                         </div>
 
                                         <div style={{ fontSize: '11px', color: '#94a3b8' }}>
-                                            رقم الوردية: #{String(shift.id).slice(-6)}
+                                            {isEn ? 'Shift ID:' : 'رقم الوردية:'} #{String(shift.id).slice(-6)}
                                         </div>
                                     </div>
 
@@ -213,9 +217,9 @@ export default function OpenShiftsModal({
                                                     alignItems: 'center',
                                                     gap: '4px'
                                                 }}
-                                                title="مراجعة ملف وتفاصيل الوردية كمرجع"
+                                                title={isEn ? 'Review shift file and details' : 'مراجعة ملف وتفاصيل الوردية كمرجع'}
                                             >
-                                                🔍 التفاصيل
+                                                🔍 {isEn ? 'Details' : 'التفاصيل'}
                                             </button>
                                         )}
                                         {isCurrent ? (
@@ -228,7 +232,7 @@ export default function OpenShiftsModal({
                                                 borderRadius: '10px',
                                                 display: 'inline-block' 
                                             }}>
-                                                🟢 معروضة حالياً
+                                                🟢 {isEn ? 'Currently Displayed' : 'معروضة حالياً'}
                                             </span>
                                         ) : (
                                             <button
@@ -239,7 +243,7 @@ export default function OpenShiftsModal({
                                                 }}
                                                 className="btn-switch-shift"
                                             >
-                                                ⚡ التبديل إليها
+                                                ⚡ {isEn ? 'Switch to this' : 'التبديل إليها'}
                                             </button>
                                         )}
                                     </div>
@@ -267,7 +271,7 @@ export default function OpenShiftsModal({
                                     transition: 'all 0.2s ease'
                                 }}
                             >
-                                ➕ فتح وردية جديدة لمستودع أو مندوب آخر
+                                ➕ {isEn ? 'Open new shift for another branch/rep' : 'فتح وردية جديدة لمستودع أو مندوب آخر'}
                             </button>
                         </div>
                     </div>

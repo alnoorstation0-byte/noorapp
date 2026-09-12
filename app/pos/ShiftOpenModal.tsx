@@ -1,4 +1,5 @@
 "use client";
+import { useLanguage } from '@/lib/LanguageContext';
 import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
@@ -17,6 +18,9 @@ export default function ShiftOpenModal({
     onWarehouseChange,
     onDelegateChange
 }: any) {
+    const { language } = useLanguage();
+    const isEn = language === 'en';
+
     const [targetWarehouseId, setTargetWarehouseId] = useState<string>(warehouseId || '');
     const [targetDelegateId, setTargetDelegateId] = useState<string>(delegateId || '');
     const [startingCash, setStartingCash] = useState<number | ''>(0);
@@ -108,7 +112,7 @@ export default function ShiftOpenModal({
     const openShiftMutation = useMutation({
         mutationFn: async () => {
             if (!targetWarehouseId) {
-                throw new Error('يرجى تحديد منفذ البيع / المستودع أولاً');
+                throw new Error(isEn ? 'Please select a branch first' : 'يرجى تحديد منفذ البيع / المستودع أولاً');
             }
 
             let currentUserId = userProfile?.id;
@@ -142,7 +146,7 @@ export default function ShiftOpenModal({
         },
         onSuccess: (res: any) => {
             const isResumed = res?.is_resumed;
-            showToast(isResumed ? (res?.message || 'تم استئناف وردية اليوم بنجاح وتكملة المبيعات عليها 🔄') : 'تم فتح الوردية بنجاح 🚀', 'success');
+            showToast(isResumed ? (res?.message || (isEn ? 'Shift resumed successfully 🔄' : 'تم استئناف وردية اليوم بنجاح وتكملة المبيعات عليها 🔄')) : (isEn ? 'Shift opened successfully 🚀' : 'تم فتح الوردية بنجاح 🚀'), 'success');
             if (onWarehouseChange && targetWarehouseId !== warehouseId) {
                 onWarehouseChange(targetWarehouseId);
             }
@@ -296,9 +300,9 @@ export default function ShiftOpenModal({
                 )}
                 <div style={{ textAlign: 'center', marginBottom: '14px' }}>
                     <div style={{ fontSize: '42px', marginBottom: '4px' }}>💵</div>
-                    <h2 style={{ color: '#1C73AB', margin: 0, fontWeight: 900, fontSize: '21px' }}>فتح وردية جديدة</h2>
+                    <h2 style={{ color: '#1C73AB', margin: 0, fontWeight: 900, fontSize: '21px' }}>{isEn ? 'Open New Shift' : 'فتح وردية جديدة'}</h2>
                     <p style={{ color: '#64748b', margin: '4px 0 0 0', fontWeight: 700, fontSize: '12px' }}>
-                        تسجيل العهدة الافتتاحية وبدء تشغيل الصندوق
+                        {isEn ? 'Record opening cash and start register' : 'تسجيل العهدة الافتتاحية وبدء تشغيل الصندوق'}
                     </p>
                 </div>
 
@@ -315,19 +319,19 @@ export default function ShiftOpenModal({
                 }}>
                     <div>
                         <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#1C73AB', marginBottom: '5px' }}>
-                            🏪 منفذ البيع / المستودع المراد فتح ورديته:
+                            🏪 {isEn ? 'Branch / Warehouse to open shift for:' : 'منفذ البيع / المستودع المراد فتح ورديته:'}
                         </label>
                         <select 
                             className="shift-select-field"
                             value={targetWarehouseId}
                             onChange={(e) => setTargetWarehouseId(e.target.value)}
                         >
-                            <option value="">-- اختر منفذ البيع --</option>
+                            <option value="">{isEn ? '-- Select Branch --' : '-- اختر منفذ البيع --'}</option>
                             {warehouses.map((w: any) => {
                                 const hasOpen = allActiveShifts.some((s: any) => s.warehouse_id === w.id);
                                 return (
                                     <option key={w.id} value={w.id}>
-                                        {w.name} {hasOpen ? '🔴 (مشغول - به وردية نشطة)' : '🟢 (متاح لفتح وردية)'}
+                                        {w.name} {hasOpen ? (isEn ? '🔴 (Busy - Active Shift)' : '🔴 (مشغول - به وردية نشطة)') : (isEn ? '🟢 (Available)' : '🟢 (متاح لفتح وردية)')}
                                     </option>
                                 );
                             })}
@@ -336,19 +340,19 @@ export default function ShiftOpenModal({
 
                     <div>
                         <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#1C73AB', marginBottom: '5px' }}>
-                            👤 المندوب / الكاشير المسؤول عن الوردية:
+                            👤 {isEn ? 'Cashier / Rep responsible for shift:' : 'المندوب / الكاشير المسؤول عن الوردية:'}
                         </label>
                         <select 
                             className="shift-select-field"
                             value={targetDelegateId}
                             onChange={(e) => setTargetDelegateId(e.target.value)}
                         >
-                            <option value="">مبيعات مباشرة (بدون مندوب)</option>
+                            <option value="">{isEn ? 'Direct Sales (No Rep)' : 'مبيعات مباشرة (بدون مندوب)'}</option>
                             {delegates.map((d: any) => {
                                 const hasOpen = allActiveShifts.some((s: any) => s.delegate_id === d.id);
                                 return (
                                     <option key={d.id} value={d.id}>
-                                        {d.name} {hasOpen ? '🔴 (مسؤول عن وردية نشطة حالياً)' : '🟢 (متاح)'}
+                                        {d.name} {hasOpen ? (isEn ? '🔴 (Has active shift)' : '🔴 (مسؤول عن وردية نشطة حالياً)') : (isEn ? '🟢 (Available)' : '🟢 (متاح)')}
                                     </option>
                                 );
                             })}
@@ -368,12 +372,12 @@ export default function ShiftOpenModal({
                     }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#dc2626', fontWeight: 900, fontSize: '14px', marginBottom: '6px' }}>
                             <span style={{ fontSize: '18px' }}>⛔</span>
-                            <span>المستودع قيد التشغيل بالفعل!</span>
+                            <span>{isEn ? 'Branch already running!' : 'المستودع قيد التشغيل بالفعل!'}</span>
                         </div>
                         <p style={{ color: '#991b1b', fontSize: '12.5px', margin: '0 0 8px 0', lineHeight: 1.6, fontWeight: 700 }}>
-                            توجد حالياً وردية مفتوحة في <strong>{selectedWarehouse?.name}</strong> برقم <strong>#{String(existingWarehouseShift.id).slice(-6)}</strong>.
+                            {isEn ? 'There is currently an active shift in ' : 'توجد حالياً وردية مفتوحة في '}<strong>{selectedWarehouse?.name}</strong>{isEn ? ' ID: ' : ' برقم '}<strong>#{String(existingWarehouseShift.id).slice(-6)}</strong>.
                             <br />
-                            المسؤول الحالي: <strong style={{ color: '#111827' }}>{(Array.isArray(existingWarehouseShift.delegate) ? existingWarehouseShift.delegate[0]?.name : (existingWarehouseShift.delegate as any)?.name) || 'مبيعات مباشرة'}</strong>.
+                            {isEn ? 'Current Cashier: ' : 'المسؤول الحالي: '}<strong style={{ color: '#111827' }}>{(Array.isArray(existingWarehouseShift.delegate) ? existingWarehouseShift.delegate[0]?.name : (existingWarehouseShift.delegate as any)?.name) || (isEn ? 'Direct Sales' : 'مبيعات مباشرة')}</strong>.
                         </p>
                         <div style={{
                             background: 'rgba(255, 255, 255, 0.9)',
@@ -384,7 +388,7 @@ export default function ShiftOpenModal({
                             fontWeight: 800,
                             border: '1px dashed #ef4444'
                         }}>
-                            🔒 حماية النظام: المسؤول شخص واحد في المستودع ولا يمكن فتح ورديتين معاً في نفس الوقت. يجب إنهاء وتقفيل الوردية الحالية أولاً لبدء وردية جديدة.
+                            {isEn ? '🔒 System Protection: Only one active shift per branch is allowed. Please close the current shift first.' : '🔒 حماية النظام: المسؤول شخص واحد في المستودع ولا يمكن فتح ورديتين معاً في نفس الوقت. يجب إنهاء وتقفيل الوردية الحالية أولاً لبدء وردية جديدة.'}
                         </div>
                     </div>
                 )}
@@ -401,12 +405,12 @@ export default function ShiftOpenModal({
                     }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#d97706', fontWeight: 900, fontSize: '14px', marginBottom: '6px' }}>
                             <span style={{ fontSize: '18px' }}>⚠️</span>
-                            <span>المندوب مسؤول عن وردية نشطة في منفذ آخر!</span>
+                            <span>{isEn ? 'Rep has active shift in another branch!' : 'المندوب مسؤول عن وردية نشطة في منفذ آخر!'}</span>
                         </div>
                         <p style={{ color: '#92400e', fontSize: '12.5px', margin: 0, lineHeight: 1.6, fontWeight: 700 }}>
-                            المندوب <strong>{selectedDelegate?.name}</strong> يدير حالياً وردية نشطة في <strong>{(Array.isArray(existingDelegateShift?.warehouse) ? existingDelegateShift?.warehouse[0]?.name : (existingDelegateShift?.warehouse as any)?.name) || 'منفذ آخر'}</strong>.
+                            {isEn ? 'Rep ' : 'المندوب '}<strong>{selectedDelegate?.name}</strong>{isEn ? ' is currently managing an active shift in ' : ' يدير حالياً وردية نشطة في '}<strong>{(Array.isArray(existingDelegateShift?.warehouse) ? existingDelegateShift?.warehouse[0]?.name : (existingDelegateShift?.warehouse as any)?.name) || (isEn ? 'another branch' : 'منفذ آخر')}</strong>.
                             <br />
-                            المسؤول شخص واحد ولا يمكن الجمع بين ورديتين لنفس الشخص في نفس الوقت.
+                            {isEn ? 'A rep cannot manage two shifts simultaneously.' : 'المسؤول شخص واحد ولا يمكن الجمع بين ورديتين لنفس الشخص في نفس الوقت.'}
                         </p>
                     </div>
                 )}
@@ -423,19 +427,19 @@ export default function ShiftOpenModal({
                     }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#1C73AB', fontWeight: 900, fontSize: '13.5px', marginBottom: '4px' }}>
                             <span style={{ fontSize: '18px' }}>🔄</span>
-                            <span>استئناف وردية اليوم لنفس المندوب</span>
+                            <span>{isEn ? 'Resume today\'s shift for this rep' : 'استئناف وردية اليوم لنفس المندوب'}</span>
                         </div>
                         <p style={{ color: '#0369a1', fontSize: '12px', margin: 0, lineHeight: 1.5, fontWeight: 700 }}>
-                            توجد وردية أُغلقت اليوم لهذا المندوب في هذا المنفذ برقم <strong>#{todayClosedShift.shift_number || String(todayClosedShift.id).slice(-6)}</strong>.
+                            {isEn ? 'There is a closed shift today for this rep in this branch ID: ' : 'توجد وردية أُغلقت اليوم لهذا المندوب في هذا المنفذ برقم '}<strong>#{todayClosedShift.shift_number || String(todayClosedShift.id).slice(-6)}</strong>.
                             <br />
-                            النقر أدناه سيقوم بـ <strong>استئناف نفس الوردية</strong> لتكملة مبيعات اليوم عليها دون فتح وردية مكررة.
+                            {isEn ? 'Clicking below will ' : 'النقر أدناه سيقوم بـ '}<strong>{isEn ? 'resume the same shift' : 'استئناف نفس الوردية'}</strong>{isEn ? ' to continue today\'s sales.' : ' لتكملة مبيعات اليوم عليها دون فتح وردية مكررة.'}
                         </p>
                     </div>
                 )}
 
                 <div style={{ textAlign: 'right', marginBottom: '20px' }}>
                     <label style={{ display: 'block', marginBottom: '6px', color: '#1C73AB', fontWeight: 900, fontSize: '13px' }}>
-                        العهدة الافتتاحية (المبلغ بالدرج الآن بالريال):
+                        {isEn ? 'Opening Cash (Amount in register SAR):' : 'العهدة الافتتاحية (المبلغ بالدرج الآن بالريال):'}
                     </label>
                     <input 
                         type="number" 
@@ -475,16 +479,16 @@ export default function ShiftOpenModal({
                         }}
                     >
                         {openShiftMutation.isPending 
-                            ? (todayClosedShift ? '⏳ جاري استئناف الوردية...' : '⏳ جاري فتح الوردية...')
+                            ? (todayClosedShift ? (isEn ? '⏳ Resuming shift...' : '⏳ جاري استئناف الوردية...') : (isEn ? '⏳ Opening shift...' : '⏳ جاري فتح الوردية...'))
                             : existingWarehouseShift 
-                                ? '⛔ المستودع به وردية نشطة بالفعل' 
+                                ? (isEn ? '⛔ Branch has active shift' : '⛔ المستودع به وردية نشطة بالفعل') 
                                 : isConflictWithOtherWarehouse 
-                                    ? '⛔ المندوب لديه وردية نشطة' 
+                                    ? (isEn ? '⛔ Rep has active shift' : '⛔ المندوب لديه وردية نشطة') 
                                     : !targetWarehouseId
-                                        ? '⚠️ اختر منفذ البيع'
+                                        ? (isEn ? '⚠️ Select Branch' : '⚠️ اختر منفذ البيع')
                                         : todayClosedShift
-                                            ? '🔄 استئناف وردية اليوم وتكملة المبيعات'
-                                            : '✨ فتح الصندوق وبدء الوردية'
+                                            ? (isEn ? '🔄 Resume Shift' : '🔄 استئناف وردية اليوم وتكملة المبيعات')
+                                            : (isEn ? '✨ Open Shift & Start' : '✨ فتح الصندوق وبدء الوردية')
                         }
                     </button>
                     {onClose && (
@@ -502,7 +506,7 @@ export default function ShiftOpenModal({
                                 cursor: 'pointer'
                             }}
                         >
-                            إلغاء
+                            {isEn ? 'Cancel' : 'إلغاء'}
                         </button>
                     )}
                 </div>
