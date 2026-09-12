@@ -133,11 +133,22 @@ export default function PosDashboardPage() {
         {
             key: 'profit_margin',
             header: 'هامش الربح',
-            render: (r: any) => (
-                <span style={{ fontWeight: 900, color: '#1C73AB', fontSize: '13px' }}>
-                    {r.profit_margin || 0}%
-                </span>
-            )
+            render: (r: any) => {
+                const isPos = (r.profit_margin || 0) >= 0;
+                return (
+                    <span style={{
+                        fontWeight: 900,
+                        color: isPos ? '#1C73AB' : '#dc2626',
+                        fontSize: '13px',
+                        background: isPos ? 'rgba(28, 115, 171, 0.08)' : 'rgba(220, 38, 38, 0.08)',
+                        padding: '3px 8px',
+                        borderRadius: '8px',
+                        border: `1px solid ${isPos ? 'rgba(28, 115, 171, 0.2)' : 'rgba(220, 38, 38, 0.25)'}`
+                    }}>
+                        {r.profit_margin || 0}%
+                    </span>
+                );
+            }
         },
         {
             key: 'actions',
@@ -181,7 +192,7 @@ export default function PosDashboardPage() {
                 const isPos = r.grossProfit >= 0;
                 return (
                     <span style={{ fontWeight: 900, color: isPos ? '#15803d' : '#dc2626' }}>
-                        {formatCurrency(r.grossProfit)}
+                        {isPos ? `+${formatCurrency(r.grossProfit)}` : formatCurrency(r.grossProfit)}
                     </span>
                 );
             }
@@ -189,17 +200,21 @@ export default function PosDashboardPage() {
         {
             key: 'margin',
             header: 'نسبة هامش الربح',
-            render: (r: any) => (
-                <span style={{
-                    fontWeight: 900,
-                    color: '#1C73AB',
-                    background: 'rgba(28, 115, 171, 0.1)',
-                    padding: '2px 8px',
-                    borderRadius: '8px'
-                }}>
-                    {r.margin}%
-                </span>
-            )
+            render: (r: any) => {
+                const isPos = (r.margin || 0) >= 0;
+                return (
+                    <span style={{
+                        fontWeight: 900,
+                        color: isPos ? '#1C73AB' : '#dc2626',
+                        background: isPos ? 'rgba(28, 115, 171, 0.1)' : 'rgba(220, 38, 38, 0.1)',
+                        padding: '3px 8px',
+                        borderRadius: '8px',
+                        border: `1px solid ${isPos ? 'rgba(28, 115, 171, 0.2)' : 'rgba(220, 38, 38, 0.25)'}`
+                    }}>
+                        {r.margin}%
+                    </span>
+                );
+            }
         }
     ];
 
@@ -361,22 +376,31 @@ export default function PosDashboardPage() {
                             <span style={{ fontSize: '11px', color: '#94a3b8' }}>محروقات وصيانة ونثريات</span>
                         </div>
 
-                        <div className="aqua-card" style={{
-                            padding: '18px',
-                            display: 'flex',
-                            flexDirection: 'column',
-                            gap: '6px',
-                            background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(220, 252, 231, 0.9) 100%)',
-                            border: '1.5px solid #86efac'
-                        }}>
-                            <div style={{ fontSize: '12.5px', fontWeight: 900, color: '#166534' }}>صافي أرباح المنافذ المحققة 🎯</div>
-                            <div style={{ fontSize: '24px', fontWeight: 900, color: totals.totalNetProfit >= 0 ? '#15803d' : '#dc2626' }}>
-                                {totals.totalNetProfit >= 0 ? `+${formatCurrency(totals.totalNetProfit)}` : formatCurrency(totals.totalNetProfit)}
-                            </div>
-                            <span style={{ fontSize: '11.5px', fontWeight: 800, color: '#15803d' }}>
-                                هامش الربحية: {totals.overallMargin}%
-                            </span>
-                        </div>
+                        {(() => {
+                            const isLoss = totals.totalNetProfit < 0;
+                            return (
+                                <div className="aqua-card" style={{
+                                    padding: '18px',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    gap: '6px',
+                                    background: isLoss 
+                                        ? 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(254, 226, 226, 0.9) 100%)' 
+                                        : 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(220, 252, 231, 0.9) 100%)',
+                                    border: `1.5px solid ${isLoss ? '#fca5a5' : '#86efac'}`
+                                }}>
+                                    <div style={{ fontSize: '12.5px', fontWeight: 900, color: isLoss ? '#991b1b' : '#166534' }}>
+                                        {isLoss ? 'صافي خسائر المنافذ 🚨' : 'صافي أرباح المنافذ المحققة 🎯'}
+                                    </div>
+                                    <div style={{ fontSize: '24px', fontWeight: 900, color: isLoss ? '#dc2626' : '#15803d' }}>
+                                        {isLoss ? formatCurrency(totals.totalNetProfit) : `+${formatCurrency(totals.totalNetProfit)}`}
+                                    </div>
+                                    <span style={{ fontSize: '11.5px', fontWeight: 800, color: isLoss ? '#dc2626' : '#15803d' }}>
+                                        هامش الربحية: {totals.overallMargin}%
+                                    </span>
+                                </div>
+                            );
+                        })()}
                     </div>
 
                     {/* 🟢 القسم الخاص: "المنفذ وهو شغال مطلع أرباح كام" (المنافذ النشطة قيد التشغيل حالياً) */}
@@ -461,37 +485,42 @@ export default function PosDashboardPage() {
                                             </div>
                                         </div>
 
-                                        <div style={{
-                                            display: 'flex',
-                                            justifyContent: 'space-between',
-                                            alignItems: 'center',
-                                            background: '#dcfce7',
-                                            border: '1px solid #86efac',
-                                            borderRadius: '12px',
-                                            padding: '10px 14px'
-                                        }}>
-                                            <div>
-                                                <span style={{ fontSize: '11px', color: '#166534', fontWeight: 700, display: 'block' }}>
-                                                    صافي الأرباح التي أنتجها حتى الآن:
-                                                </span>
-                                                <strong style={{ fontSize: '18px', color: '#14532d', fontWeight: 900 }}>
-                                                    {shift.net_profit >= 0 ? `+${formatCurrency(shift.net_profit)}` : formatCurrency(shift.net_profit)}
-                                                </strong>
-                                            </div>
-                                            <div style={{ textAlign: 'left' }}>
-                                                <span style={{
-                                                    fontSize: '12px',
-                                                    fontWeight: 900,
-                                                    color: '#15803d',
-                                                    background: 'white',
-                                                    padding: '4px 10px',
-                                                    borderRadius: '10px',
-                                                    border: '1px solid #86efac'
+                                        {(() => {
+                                            const isShiftLoss = (shift.net_profit || 0) < 0;
+                                            return (
+                                                <div style={{
+                                                    display: 'flex',
+                                                    justifyContent: 'space-between',
+                                                    alignItems: 'center',
+                                                    background: isShiftLoss ? '#fee2e2' : '#dcfce7',
+                                                    border: `1px solid ${isShiftLoss ? '#fca5a5' : '#86efac'}`,
+                                                    borderRadius: '12px',
+                                                    padding: '10px 14px'
                                                 }}>
-                                                    هامش: {shift.profit_margin}%
-                                                </span>
-                                            </div>
-                                        </div>
+                                                    <div>
+                                                        <span style={{ fontSize: '11px', color: isShiftLoss ? '#991b1b' : '#166534', fontWeight: 700, display: 'block' }}>
+                                                            {isShiftLoss ? 'صافي خسائر التشغيل حتى الآن ⚠️:' : 'صافي الأرباح التي أنتجها حتى الآن:'}
+                                                        </span>
+                                                        <strong style={{ fontSize: '18px', color: isShiftLoss ? '#dc2626' : '#14532d', fontWeight: 900 }}>
+                                                            {shift.net_profit >= 0 ? `+${formatCurrency(shift.net_profit)}` : formatCurrency(shift.net_profit)}
+                                                        </strong>
+                                                    </div>
+                                                    <div style={{ textAlign: 'left' }}>
+                                                        <span style={{
+                                                            fontSize: '12px',
+                                                            fontWeight: 900,
+                                                            color: isShiftLoss ? '#dc2626' : '#15803d',
+                                                            background: 'white',
+                                                            padding: '4px 10px',
+                                                            borderRadius: '10px',
+                                                            border: `1px solid ${isShiftLoss ? '#fca5a5' : '#86efac'}`
+                                                        }}>
+                                                            هامش: {shift.profit_margin}%
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })()}
 
                                         <button
                                             type="button"

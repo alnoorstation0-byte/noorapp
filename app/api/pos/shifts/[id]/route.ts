@@ -16,16 +16,7 @@ export async function GET(
             return NextResponse.json({ success: false, error: 'معرف الوردية مطلوب' }, { status: 400 });
         }
 
-        // 1. محاولة استدعاء الدالة المركزية RPC من قاعدة البيانات
-        const { data: rpcData, error: rpcError } = await supabaseAdmin.rpc('get_pos_shift_details', {
-            p_shift_id: id
-        });
-
-        if (!rpcError && rpcData) {
-            return NextResponse.json({ success: true, source: 'rpc', data: rpcData });
-        }
-
-        // 2. خط الدفاع الثاني: التجميع المباشر من الجداول لضمان العمل 100% بدون أي انقطاع
+        // 1. التجميع المباشر اللحظي من الجداول لضمان دقة الحسابات، تكلفة البضاعة المباعة (COGS)، وهوامش الربح الحقيقية
         const { data: shift, error: shiftErr } = await supabaseAdmin
             .from('pos_shifts')
             .select(`
@@ -67,6 +58,18 @@ export async function GET(
         const costMap: Record<string, number> = {};
         (invItems || []).forEach((it: any) => {
             costMap[it.id] = Number(it.cost_price || 0);
+        });
+
+        // خط دفاع إضافي: جلب أحدث أسعار شراء للأصناف التي ليس لها سعر تكلفة مسجل
+        const { data: purchaseTxns } = await supabaseAdmin
+            .from('inventory_transactions')
+            .select('item_id, unit_price')
+            .eq('type', 'in')
+            .order('transaction_date', { ascending: false });
+        (purchaseTxns || []).forEach((tx: any) => {
+            if ((!costMap[tx.item_id] || costMap[tx.item_id] === 0) && tx.unit_price > 0) {
+                costMap[tx.item_id] = Number(tx.unit_price);
+            }
         });
 
         // جلب المصروفات التشغيلية المرتبطة بالوردية

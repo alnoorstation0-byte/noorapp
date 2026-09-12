@@ -118,7 +118,8 @@ export function useInventoryLogic() {
         available_qty: qty,
         reorder_level: reorderLvl,
         isLowStock: isLow,
-        last_purchase_price: lastPrices[item.id] || 0,
+        cost_price: Number(item.cost_price || 0),
+        last_purchase_price: lastPrices[item.id] || Number(item.cost_price) || 0,
         avg_cost: 0
       };
     }).filter(i => {
@@ -176,7 +177,9 @@ export function useInventoryLogic() {
         unit: payload.unit || 'حبة',
         current_quantity: Number(payload.current_quantity) || 0,
         reorder_level: Number(payload.reorder_level) || 5,
+        cost_price: Number(payload.cost_price) || 0,
         suggested_price: Number(payload.suggested_price) || 0,
+        default_price: Number(payload.suggested_price) || 0,
         is_returnable_bottle: Boolean(payload.is_returnable_bottle)
       };
 

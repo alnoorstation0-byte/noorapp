@@ -349,56 +349,73 @@ export default function ShiftDetailsModal({
                                 </div>
 
                                 {/* 📈 تحليل ربحية الوردية الفعلي */}
-                                <div style={{
-                                    background: 'linear-gradient(135deg, rgba(22, 163, 74, 0.08) 0%, rgba(40, 145, 200, 0.08) 100%)',
-                                    border: '1.5px solid rgba(22, 163, 74, 0.3)',
-                                    borderRadius: '16px',
-                                    padding: '16px'
-                                }}>
-                                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-                                        <h4 style={{ margin: 0, fontSize: '14px', color: '#15803d', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                            <span>📈</span>
-                                            <span>تحليل أرباح الوردية والتشغيل (Profitability)</span>
-                                        </h4>
-                                        <span style={{
-                                            background: '#dcfce7',
-                                            color: '#15803d',
-                                            fontWeight: 900,
-                                            fontSize: '12px',
-                                            padding: '3px 10px',
-                                            borderRadius: '20px',
-                                            border: '1px solid #86efac'
+                                {(() => {
+                                    const net = Number(details.financials.net_profit || 0);
+                                    const isLoss = net < 0;
+                                    const gross = Number(details.financials.gross_profit || 0);
+                                    const margin = Number(details.financials.profit_margin || 0);
+                                    return (
+                                        <div style={{
+                                            background: isLoss 
+                                                ? 'linear-gradient(135deg, rgba(239, 68, 68, 0.08) 0%, rgba(220, 38, 38, 0.12) 100%)' 
+                                                : 'linear-gradient(135deg, rgba(22, 163, 74, 0.08) 0%, rgba(40, 145, 200, 0.08) 100%)',
+                                            border: `1.5px solid ${isLoss ? 'rgba(239, 68, 68, 0.4)' : 'rgba(22, 163, 74, 0.3)'}`,
+                                            borderRadius: '16px',
+                                            padding: '16px'
                                         }}>
-                                            هامش الربح: {details.financials.profit_margin || 0}%
-                                        </span>
-                                    </div>
-                                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '12px' }}>
-                                        <div className="shift-kpi-box" style={{ background: 'rgba(255,255,255,0.85)' }}>
-                                            <span style={{ fontSize: '11px', color: '#64748b', fontWeight: 700 }}>📦 تكلفة البضاعة المباعة (COGS):</span>
-                                            <strong style={{ fontSize: '16px', color: '#dc2626', fontWeight: 900 }}>
-                                                - {formatCurrency(details.financials.total_cogs || 0)}
-                                            </strong>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px', flexWrap: 'wrap', gap: '8px' }}>
+                                                <h4 style={{ margin: 0, fontSize: '14px', color: isLoss ? '#dc2626' : '#15803d', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                    <span>{isLoss ? '📉' : '📈'}</span>
+                                                    <span>{isLoss ? 'تحليل نتائج الوردية (عجز / خسائر تشغيلية)' : 'تحليل أرباح الوردية والتشغيل (Profitability)'}</span>
+                                                </h4>
+                                                <span style={{
+                                                    background: isLoss ? '#fee2e2' : '#dcfce7',
+                                                    color: isLoss ? '#dc2626' : '#15803d',
+                                                    fontWeight: 900,
+                                                    fontSize: '12px',
+                                                    padding: '3px 10px',
+                                                    borderRadius: '20px',
+                                                    border: `1px solid ${isLoss ? '#fca5a5' : '#86efac'}`
+                                                }}>
+                                                    هامش الربح: {margin}%
+                                                </span>
+                                            </div>
+                                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '12px' }}>
+                                                <div className="shift-kpi-box" style={{ background: 'rgba(255,255,255,0.85)' }}>
+                                                    <span style={{ fontSize: '11px', color: '#64748b', fontWeight: 700 }}>📦 تكلفة البضاعة المباعة (COGS):</span>
+                                                    <strong style={{ fontSize: '16px', color: '#dc2626', fontWeight: 900 }}>
+                                                        - {formatCurrency(details.financials.total_cogs || 0)}
+                                                    </strong>
+                                                </div>
+                                                <div className="shift-kpi-box" style={{ background: 'rgba(255,255,255,0.85)' }}>
+                                                    <span style={{ fontSize: '11px', color: '#64748b', fontWeight: 700 }}>💸 مصروفات الوردية التشغيلية:</span>
+                                                    <strong style={{ fontSize: '16px', color: '#ea580c', fontWeight: 900 }}>
+                                                        - {formatCurrency(details.financials.total_expenses || 0)}
+                                                    </strong>
+                                                </div>
+                                                <div className="shift-kpi-box" style={{ background: 'rgba(255,255,255,0.85)' }}>
+                                                    <span style={{ fontSize: '11px', color: gross >= 0 ? '#15803d' : '#dc2626', fontWeight: 700 }}>
+                                                        {gross >= 0 ? '✨ مجمل الربح (قبل المصروفات):' : '⚠️ مجمل الخسارة (قبل المصروفات):'}
+                                                    </span>
+                                                    <strong style={{ fontSize: '16px', color: gross >= 0 ? '#15803d' : '#dc2626', fontWeight: 900 }}>
+                                                        {gross >= 0 ? `+${formatCurrency(gross)}` : formatCurrency(gross)}
+                                                    </strong>
+                                                </div>
+                                                <div className="shift-kpi-box" style={{ 
+                                                    background: isLoss ? '#fee2e2' : '#dcfce7', 
+                                                    border: `1.5px solid ${isLoss ? '#fca5a5' : '#86efac'}` 
+                                                }}>
+                                                    <span style={{ fontSize: '11px', color: isLoss ? '#991b1b' : '#166534', fontWeight: 800 }}>
+                                                        {isLoss ? '🚨 صافي خسائر الوردية النهائي:' : '🎯 صافي ربح الوردية النهائي:'}
+                                                    </span>
+                                                    <strong style={{ fontSize: '18px', color: isLoss ? '#dc2626' : '#14532d', fontWeight: 900 }}>
+                                                        {isLoss ? formatCurrency(net) : `+${formatCurrency(net)}`}
+                                                    </strong>
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div className="shift-kpi-box" style={{ background: 'rgba(255,255,255,0.85)' }}>
-                                            <span style={{ fontSize: '11px', color: '#64748b', fontWeight: 700 }}>💸 مصروفات الوردية التشغيلية:</span>
-                                            <strong style={{ fontSize: '16px', color: '#ea580c', fontWeight: 900 }}>
-                                                - {formatCurrency(details.financials.total_expenses || 0)}
-                                            </strong>
-                                        </div>
-                                        <div className="shift-kpi-box" style={{ background: 'rgba(255,255,255,0.85)' }}>
-                                            <span style={{ fontSize: '11px', color: '#15803d', fontWeight: 700 }}>✨ مجمل الربح (قبل المصروفات):</span>
-                                            <strong style={{ fontSize: '16px', color: '#15803d', fontWeight: 900 }}>
-                                                {formatCurrency(details.financials.gross_profit || 0)}
-                                            </strong>
-                                        </div>
-                                        <div className="shift-kpi-box" style={{ background: '#dcfce7', border: '1.5px solid #86efac' }}>
-                                            <span style={{ fontSize: '11px', color: '#166534', fontWeight: 800 }}>🎯 صافي ربح الوردية النهائي:</span>
-                                            <strong style={{ fontSize: '18px', color: '#14532d', fontWeight: 900 }}>
-                                                {formatCurrency(details.financials.net_profit || 0)}
-                                            </strong>
-                                        </div>
-                                    </div>
-                                </div>
+                                    );
+                                })()}
 
                                 {/* مطابقة عهدة فوارغ المياه */}
                                 <div style={{ background: 'rgba(240, 249, 255, 0.9)', border: '1.5px solid rgba(40, 145, 200, 0.3)', borderRadius: '16px', padding: '16px' }}>
@@ -461,9 +478,9 @@ export default function ShiftDetailsModal({
                                                             {formatCurrency(item.total_cogs || 0)}
                                                         </td>
                                                         <td style={{ textAlign: 'center', fontWeight: 900, color: (item.gross_profit || 0) >= 0 ? '#15803d' : '#dc2626' }}>
-                                                            {formatCurrency(item.gross_profit || 0)}
+                                                            {(item.gross_profit || 0) >= 0 ? `+${formatCurrency(item.gross_profit || 0)}` : formatCurrency(item.gross_profit || 0)}
                                                         </td>
-                                                        <td style={{ textAlign: 'center', fontWeight: 800, color: '#0284c7' }}>
+                                                        <td style={{ textAlign: 'center', fontWeight: 800, color: (item.profit_margin || 0) >= 0 ? '#0284c7' : '#dc2626' }}>
                                                             {item.profit_margin || 0}%
                                                         </td>
                                                     </tr>

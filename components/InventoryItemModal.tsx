@@ -84,6 +84,7 @@ export default function InventoryItemModal({ isOpen, onClose, currentRecord, set
     code: '',
     name: '',
     unit: 'حبة',
+    cost_price: '',
     suggested_price: '',
     reorder_level: 5,
     current_quantity: '',
@@ -100,7 +101,8 @@ export default function InventoryItemModal({ isOpen, onClose, currentRecord, set
         code: currentRecord?.code || '',
         name: currentRecord?.name || '',
         unit: currentRecord?.unit || 'حبة',
-        suggested_price: (currentRecord?.suggested_price !== undefined && currentRecord?.suggested_price !== null) ? currentRecord.suggested_price : '',
+        cost_price: (currentRecord?.cost_price !== undefined && currentRecord?.cost_price !== null) ? currentRecord.cost_price : '',
+        suggested_price: (currentRecord?.suggested_price !== undefined && currentRecord?.suggested_price !== null) ? currentRecord.suggested_price : ((currentRecord?.default_price !== undefined && currentRecord?.default_price !== null) ? currentRecord.default_price : ''),
         reorder_level: (currentRecord?.reorder_level !== undefined && currentRecord?.reorder_level !== null) ? currentRecord.reorder_level : 5,
         current_quantity: (currentRecord?.current_quantity !== undefined && currentRecord?.current_quantity !== null) ? currentRecord.current_quantity : '',
         is_returnable_bottle: Boolean(currentRecord?.is_returnable_bottle),
@@ -359,7 +361,20 @@ export default function InventoryItemModal({ isOpen, onClose, currentRecord, set
               <span>التسعير ومستويات الأمان بالمخزون</span>
             </div>
 
-            <div className="item-modal-grid-3">
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '12px' }}>
+              <div>
+                <label className="item-modal-label">🏷️ سعر التكلفة (بدون ضريبة)</label>
+                <input 
+                  type="number" 
+                  step="any"
+                  inputMode="decimal"
+                  className="glass-input-field item-modal-input" 
+                  placeholder="0.00"
+                  value={formData.cost_price === '' ? '' : formData.cost_price} 
+                  onChange={e => updateField('cost_price', e.target.value === '' ? '' : Number(e.target.value))} 
+                />
+              </div>
+
               <div>
                 <label className="item-modal-label">💵 سعر البيع المقترح (ر.س)</label>
                 <input 

@@ -1,9 +1,11 @@
 "use client";
 import { useState, useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useRealtimeListener } from '@/lib/useRealtimeSync';
 
 export function usePosDashboardLogic() {
+    const queryClient = useQueryClient();
     const [selectedWarehouseId, setSelectedWarehouseId] = useState<string>('all');
     const [statusFilter, setStatusFilter] = useState<'all' | 'open' | 'closed'>('all');
     
@@ -51,8 +53,30 @@ export function usePosDashboardLogic() {
                     unit: it.unit || 'عدد'
                 };
             });
+
+            // خط دفاع: جلب أحدث أسعار شراء للأصناف التي لم يُحدد لها cost_price
+            const { data: purchases } = await supabase
+                .from('inventory_transactions')
+                .select('item_id, unit_price')
+                .eq('type', 'in')
+                .order('transaction_date', { ascending: false });
+
+            (purchases || []).forEach((p: any) => {
+                if (map[p.item_id] && (!map[p.item_id].cost || map[p.item_id].cost === 0) && p.unit_price > 0) {
+                    map[p.item_id].cost = Number(p.unit_price);
+                }
+            });
+
             return map;
         }
+    });
+
+    // مزامنة فورية لتحديث لوحة التحكم تلقائياً عند أي حركة مبيعات أو ورديات أو مصروفات أو تكاليف
+    useRealtimeListener(['pos_shifts', 'invoices', 'expenses', 'inventory_items', 'inventory_transactions'], () => {
+        queryClient.invalidateQueries({ queryKey: ['pos_dashboard_sales_all'] });
+        queryClient.invalidateQueries({ queryKey: ['pos_dashboard_shifts_all'] });
+        queryClient.invalidateQueries({ queryKey: ['pos_dashboard_expenses_all'] });
+        queryClient.invalidateQueries({ queryKey: ['pos_dashboard_item_costs'] });
     });
 
     // 3. جلب فواتير منافذ البيع والكاشير مع البنود التفصيلية lines_data

@@ -256,6 +256,19 @@ export async function executeApproveTransaction(transactionId: string) {
     })
     .eq('id', transactionId);
 
+  // تحديث سعر التكلفة للصنف تلقائياً عند اعتماد حركة توريد أو شراء
+  if ((txn.type === 'in' || txn.type === 'purchase') && unitPrice > 0 && txn.item_id) {
+    try {
+      await supabase
+        .from('inventory_items')
+        .update({ cost_price: unitPrice })
+        .eq('id', txn.item_id);
+      emitTableChange('inventory_items');
+    } catch (costErr) {
+      console.warn('Could not auto-sync cost_price:', costErr);
+    }
+  }
+
   // 4. استدعاء دالة قاعدة البيانات كإجراء إضافي
   try {
     await supabase.rpc('approve_inventory_transaction', { p_id: transactionId });
