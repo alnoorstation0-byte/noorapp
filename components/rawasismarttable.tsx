@@ -232,6 +232,7 @@ export default function RawasiSmartTable({
                             {columns.map((col, idx) => {
                                 const sortKey = col.key || col.accessor;
                                 const isSorted = sortConfig?.key === sortKey;
+                                const isActions = sortKey === 'actions' || col.type === 'actions';
                                 
                                 return (
                                     <th 
@@ -246,7 +247,9 @@ export default function RawasiSmartTable({
                                             borderBottom: `2px solid ${THEME.goldAccent}40`,
                                             cursor: sortKey ? 'pointer' : 'default',
                                             userSelect: 'none',
-                                            whiteSpace: 'nowrap'
+                                            whiteSpace: 'nowrap',
+                                            width: isActions ? '135px' : undefined,
+                                            minWidth: isActions ? '130px' : undefined
                                         }}
                                         title={sortKey ? `فرز حسب ${typeof col.label === 'string' ? col.label : (typeof col.header === 'string' ? col.header : '')}` : ''}
                                     >
@@ -299,11 +302,24 @@ export default function RawasiSmartTable({
                                             />
                                         </td>
                                     )}
-                                    {columns.map((col, colIndex) => (
-                                        <td key={colIndex} style={{ padding: '12px 15px', color: '#334155', fontSize: '13px' }}>
-                                            {col.render ? col.render(row) : (row[col.key || col.accessor || ''] || '---')}
-                                        </td>
-                                    ))}
+                                    {columns.map((col, colIndex) => {
+                                        const isActions = col.key === 'actions' || col.accessor === 'actions' || col.type === 'actions';
+                                        return (
+                                            <td 
+                                                key={colIndex} 
+                                                style={{ 
+                                                    padding: '12px 15px', 
+                                                    color: '#334155', 
+                                                    fontSize: '13px',
+                                                    whiteSpace: isActions ? 'nowrap' : undefined,
+                                                    width: isActions ? '135px' : undefined,
+                                                    minWidth: isActions ? '130px' : undefined
+                                                }}
+                                            >
+                                                {col.render ? col.render(row) : (row[col.key || col.accessor || ''] || '---')}
+                                            </td>
+                                        );
+                                    })}
                                 </motion.tr>
                             ))
                         )}

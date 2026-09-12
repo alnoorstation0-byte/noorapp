@@ -18,13 +18,13 @@ export default function FleetPage() {
             {row.status}
         </span>
     ) },
-    { key: 'actions', label: 'إجراءات', render: (row: any) => (
-        <div style={{ display: 'flex', gap: '8px' }}>
+    { key: 'actions', label: 'إجراءات', type: 'actions', render: (row: any) => (
+        <div className="table-actions-container" style={{ display: 'flex', flexDirection: 'row', flexWrap: 'nowrap', gap: '6px', justifyContent: 'center', alignItems: 'center', minWidth: '125px' }}>
             <SecureAction module="fleet" action="edit">
-                <button onClick={() => logic.handleEdit(row)} style={{ padding: '6px 12px', borderRadius: '8px', border: '1px solid #3b82f6', background: 'transparent', color: '#3b82f6', cursor: 'pointer', fontWeight: 700 }}>تعديل</button>
+                <button onClick={() => logic.handleEdit(row)} className="table-action-btn edit-btn" style={{ padding: '5px 9px', borderRadius: '8px', border: 'none', background: 'linear-gradient(135deg, #1C73AB 0%, #2891C8 100%)', color: 'white', cursor: 'pointer', fontWeight: 800, fontSize: '11px', whiteSpace: 'nowrap', flexShrink: 0 }}>✏️ تعديل</button>
             </SecureAction>
             <SecureAction module="fleet" action="delete">
-                <button onClick={() => logic.handleDelete(row.id)} style={{ padding: '6px 12px', borderRadius: '8px', border: '1px solid #ef4444', background: 'transparent', color: '#ef4444', cursor: 'pointer', fontWeight: 700 }}>حذف</button>
+                <button onClick={() => logic.handleDelete(row.id)} className="table-action-btn delete-btn" style={{ padding: '5px 9px', borderRadius: '8px', border: 'none', background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)', color: 'white', cursor: 'pointer', fontWeight: 800, fontSize: '11px', whiteSpace: 'nowrap', flexShrink: 0 }}>🗑️ حذف</button>
             </SecureAction>
         </div>
     ) }

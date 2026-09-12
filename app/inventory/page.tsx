@@ -94,23 +94,53 @@ export default function InventoryPage() {
     {
       key: 'actions', label: 'الإجراءات', type: 'actions',
       render: (row: any) => (
-        <div style={{ display: 'flex', gap: '5px', justifyContent: 'center' }}>
+        <div className="table-actions-container" style={{ display: 'flex', flexDirection: 'row', flexWrap: 'nowrap', gap: '6px', justifyContent: 'center', alignItems: 'center', minWidth: '125px' }}>
           <SecureAction module="inventory" action="edit">
             <button 
-              className="btn-main-glass" 
-              style={{ background: '#3b82f6', color: 'white', padding: '5px 10px', fontSize: '11px' }}
+              className="table-action-btn edit-btn" 
+              style={{
+                background: 'linear-gradient(135deg, #1C73AB 0%, #2891C8 100%)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                padding: '5px 9px',
+                fontSize: '11px',
+                fontWeight: 800,
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                whiteSpace: 'nowrap',
+                flexShrink: 0
+              }}
               onClick={() => {
                 logic.setCurrentRecord(row);
                 logic.setIsModalOpen(true);
               }}
+              title="تعديل الصنف"
             >
-              تعديل الصنف
+              <span>✏️</span>
+              <span>تعديل</span>
             </button>
           </SecureAction>
           <SecureAction module="inventory" action="delete">
             <button 
-              className="btn-main-glass" 
-              style={{ background: '#ef4444', color: 'white', padding: '5px 10px', fontSize: '11px' }}
+              className="table-action-btn delete-btn" 
+              style={{
+                background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                padding: '5px 9px',
+                fontSize: '11px',
+                fontWeight: 800,
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '4px',
+                whiteSpace: 'nowrap',
+                flexShrink: 0
+              }}
               onClick={() => {
                 showConfirm({
                   title: 'حذف الصنف',
@@ -119,8 +149,10 @@ export default function InventoryPage() {
                   onConfirm: () => logic.deleteItem(row.id)
                 });
               }}
+              title="حذف الصنف"
             >
-              حذف
+              <span>🗑️</span>
+              <span>حذف</span>
             </button>
           </SecureAction>
         </div>

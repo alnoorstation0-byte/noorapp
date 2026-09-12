@@ -25,11 +25,51 @@ export default function WarehousesPage() {
     { key: 'manager_name', label: 'المسؤول', render: (row: any) => row.manager_name || '---' },
     { key: 'is_active', label: 'الحالة', sortable: true, render: (row: any) => row.is_active ? 'نشط' : 'غير نشط' },
   
-    { key: 'actions', label: 'إجراءات', render: (row: any) => (
-        <div style={{ display: 'flex', gap: '5px' }}>
-            <button onClick={(e) => { e.stopPropagation(); logic.handleEdit(row); }} className="btn-main-glass white" style={{ padding: '4px 8px', margin: 0, fontSize: '11px' }}>✏️ تعديل</button>
+    { key: 'actions', label: 'إجراءات', type: 'actions', render: (row: any) => (
+        <div className="table-actions-container" style={{ display: 'flex', flexDirection: 'row', flexWrap: 'nowrap', gap: '6px', justifyContent: 'center', alignItems: 'center', minWidth: '125px' }}>
+            <button 
+                onClick={(e) => { e.stopPropagation(); logic.handleEdit(row); }} 
+                className="table-action-btn edit-btn" 
+                style={{
+                    background: 'linear-gradient(135deg, #1C73AB 0%, #2891C8 100%)',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '8px',
+                    padding: '5px 9px',
+                    fontSize: '11px',
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    whiteSpace: 'nowrap',
+                    flexShrink: 0
+                }}
+            >
+                ✏️ تعديل
+            </button>
             {row.type !== 'main' && row.type !== 'vehicle' && (
-                <button onClick={(e) => { e.stopPropagation(); logic.handleDelete(row.id); }} className="btn-main-glass red" style={{ padding: '4px 8px', margin: 0, fontSize: '11px' }}>🗑️ حذف</button>
+                <button 
+                    onClick={(e) => { e.stopPropagation(); logic.handleDelete(row.id); }} 
+                    className="table-action-btn delete-btn" 
+                    style={{
+                        background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                        color: 'white',
+                        border: 'none',
+                        borderRadius: '8px',
+                        padding: '5px 9px',
+                        fontSize: '11px',
+                        fontWeight: 800,
+                        cursor: 'pointer',
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '4px',
+                        whiteSpace: 'nowrap',
+                        flexShrink: 0
+                    }}
+                >
+                    🗑️ حذف
+                </button>
             )}
         </div>
     )},
