@@ -1,58 +1,80 @@
 "use client";
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { createPortal } from 'react-dom'; 
 import { THEME } from '@/lib/theme';
 import { formatCurrency, tafqeet } from '@/lib/helpers'; 
 import { useToast } from '@/lib/toast-context'; 
 import ZatcaQRCode from './ZatcaQRCode'; 
 import { QRCodeSVG } from 'qrcode.react'; 
-import { supabase } from '@/lib/supabase'; // 🚀 استدعاء Supabase
+import { supabase } from '@/lib/supabase';
+import { generateZatcaQR } from '@/lib/zatca_qr';
+import { 
+    normalizeInvoiceLines, 
+    formatPhoneForWhatsApp, 
+    generateInvoiceWhatsAppMessage,
+    NormalizedInvoiceLine 
+} from '@/lib/invoicePrintUtils';
 
-// --- [المودال الرئيسي لطباعة ومعاينة الفاتورة] ---
-export default function InvoicePrintModal({ isOpen, onClose, record, setRecord = () => {}, onSave, isSaving }: any) {
+interface InvoicePrintModalProps {
+    isOpen: boolean;
+    onClose: () => void;
+    record: any;
+    setRecord?: (record: any) => void;
+    onSave?: () => void;
+    isSaving?: boolean;
+    projects?: any[];
+}
+
+export default function InvoicePrintModal({ 
+    isOpen, 
+    onClose, 
+    record, 
+    setRecord = () => {} 
+}: InvoicePrintModalProps) {
     const { showToast } = useToast(); 
     const [mounted, setMounted] = useState(false); 
     const [creatorInfo, setCreatorInfo] = useState<{username: string, fullName: string} | null>(null); 
+    const [customerDetails, setCustomerDetails] = useState<any>(null);
+    const [delegateDetails, setDelegateDetails] = useState<any>(null);
+    const [warehouseDetails, setWarehouseDetails] = useState<any>(null);
     const [printFormat, setPrintFormat] = useState<'a4' | 'thermal'>('a4');
+
+    // حالة نافذة إرسال الواتساب
+    const [isWhatsAppDialog, setIsWhatsAppDialog] = useState(false);
+    const [whatsAppPhone, setWhatsAppPhone] = useState('');
 
     useEffect(() => {
         setMounted(true);
     }, []);
 
     // =========================================================================
-    // 🚀 جلب بيانات منشئ الفاتورة (فلتر كاسح لكل احتمالات أسماء الأعمدة)
+    // 🚀 جلب بيانات منشئ الفاتورة، العميل، المندوب، والمنفذ من Supabase
     // =========================================================================
     useEffect(() => {
-        const fetchCreatorInfo = async () => {
-            if (!isOpen) return;
+        if (!isOpen || !record) return;
 
+        // 1. جلب بيانات المحاسب / الكاشير
+        const fetchCreatorInfo = async () => {
             try {
-                // 1. جلب بيانات الجلسة الحالية عشان نستخدمها كبديل قوي لو الفاتورة جديدة
                 const { data: { session } } = await supabase.auth.getSession();
-                
-                // 2. تحديد الـ ID (بتاع اللي كرت الفاتورة، ولو مفيش يبقى اللي فاتح السيستم دلوقتي)
                 const targetUserId = record?.created_by || session?.user?.id;
 
                 let fetchedFullName = '';
                 let fetchedUsername = '';
 
                 if (targetUserId) {
-                    // سحب *كل* الأعمدة من جدول profiles عشان نتفادى مشكلة اسم العمود
-                    const { data: profile, error } = await supabase
+                    const { data: profile } = await supabase
                         .from('profiles')
                         .select('*')
                         .eq('id', targetUserId)
-                        .single();
+                        .maybeSingle();
                     
-                    if (!error && profile) {
-                        // سحب الاسم الفعلي من أي عمود محتمل
+                    if (profile) {
                         fetchedFullName = profile.full_name || profile.name || profile.nickname || '';
-                        // سحب اليوزر نيم
                         fetchedUsername = profile.username || profile.email || '';
                     }
                 }
 
-                // 3. خطة بديلة: لو البروفايل فاضي، هنسحب من الميتا-داتا بتاعت الـ Session نفسه
                 if (!fetchedFullName && session?.user) {
                     fetchedFullName = session.user.user_metadata?.full_name || session.user.user_metadata?.name || '';
                 }
@@ -60,110 +82,176 @@ export default function InvoicePrintModal({ isOpen, onClose, record, setRecord =
                     fetchedUsername = session.user.email ? session.user.email.split('@')[0] : '';
                 }
 
-                // 4. اعتماد البيانات النهائية
                 setCreatorInfo({ 
                     username: fetchedUsername || 'مستخدم النظام', 
                     fullName: fetchedFullName || record?.created_by_name || 'المحاسب المعتمد' 
                 });
-
             } catch (err) {
-                console.error("خطأ في جلب بيانات المحاسب للباركود:", err);
+                console.error("خطأ في جلب بيانات المحاسب:", err);
             }
         };
-        fetchCreatorInfo();
-    }, [isOpen, record?.created_by]);
 
-    // =========================================================================
-    // 🛡️ 1. سحب البيانات والمنطق الحسابي (متروك بالكامل لحماية النظام)
-    // =========================================================================
-    useEffect(() => {
-        if (!isOpen || !record) return;
-        let updates: any = {};
-        let needsUpdate = false;
-
-        if (!record.invoice_number) {
-            updates.invoice_number = `INV-${new Date().getFullYear()}-${Math.floor(10000 + Math.random() * 90000)}`;
-            updates.date = record.date || new Date().toISOString();
-            updates.tax_acc_id = record.tax_acc_id || '990c949c-5f32-40d7-8d36-5fe45a6c892c'; 
-            updates.materials_acc_id = record.materials_acc_id || '85e61a6a-8c85-4219-a733-3b2180dfe043';
-            updates.guarantee_acc_id = record.guarantee_acc_id || '8bf39cb1-4028-4c9e-817d-27c239873030';
-            updates.lines = record.lines || []; 
-            needsUpdate = true;
-        }
-
-        if (record.id && !record.client_name && record.partners?.name) {
-            updates.client_name = record.partners.name;
-            needsUpdate = true;
-        }
-
-        if (needsUpdate && typeof setRecord === 'function') {
-            setRecord((prev: any) => ({ ...prev, ...updates }));
-        }
-    }, [record?.id, isOpen, setRecord]); 
-
-    useEffect(() => {
-        if (!record) return; 
-        const qty = Number(record.quantity || 0);
-        const price = Number(record.unit_price || 0);
-        
-        // 🚀 إضافة حساب lines_data للإجمالي في حالة وجوده
-        const linesTotal = (record.lines || []).reduce((sum: number, line: any) => sum + (Number(line.quantity) * Number(line.unit_price)), 0);
-        const linesDataTotal = (record.lines_data || []).reduce((sum: number, line: any) => sum + (Number(line.total_price) || (Number(line.quantity || 0) * Number(line.unit_price || 0))), 0);
-        
-        const lineTotal = (qty * price) + linesTotal + linesDataTotal;
-        const materialsDiscount = Number(record.materials_discount || 0);
-        const taxableAmount = lineTotal - materialsDiscount;
-        const guaranteePercent = Number(record.guarantee_percent || 0);
-        const guaranteeAmount = (taxableAmount * guaranteePercent) / 100;
-        const taxAmount = record.skip_zatca ? 0 : (taxableAmount * 0.15); 
-        const finalTotal = taxableAmount + taxAmount - guaranteeAmount;
-        const days = Number(record.due_in_days || 0);
-        const invoiceDate = record.date ? new Date(record.date) : new Date();
-        const dueDateCalculated = new Date(invoiceDate);
-        dueDateCalculated.setDate(dueDateCalculated.getDate() + days);
-
-        if (
-            record.line_total !== lineTotal ||
-            record.taxable_amount !== taxableAmount ||
-            record.guarantee_amount !== guaranteeAmount ||
-            record.tax_amount !== taxAmount ||
-            record.total_amount !== finalTotal ||
-            record.due_date !== dueDateCalculated.toISOString()
-        ) {
-            if (typeof setRecord === 'function') {
-                setRecord((prev: any) => ({
-                    ...prev,
-                    line_total: lineTotal,
-                    taxable_amount: taxableAmount,
-                    guarantee_amount: guaranteeAmount,
-                    tax_amount: taxAmount,
-                    total_amount: finalTotal,
-                    due_date: dueDateCalculated.toISOString()
-                }));
+        // 2. جلب بيانات العميل الكاملة (الاسم، الجوال، الضريبة، العنوان، السجل التجاري)
+        const fetchCustomerInfo = async () => {
+            const pId = record.partner_id || record.customer_id;
+            if (pId) {
+                try {
+                    const { data } = await supabase.from('partners').select('*').eq('id', pId).maybeSingle();
+                    if (data) {
+                        setCustomerDetails(data);
+                        setWhatsAppPhone(data.phone || '');
+                        return;
+                    }
+                } catch (e) {
+                    console.error("خطأ في جلب بيانات العميل:", e);
+                }
             }
-        }
-    }, [record?.quantity, record?.unit_price, record?.materials_discount, record?.guarantee_percent, record?.date, record?.due_in_days, record?.skip_zatca, record?.lines, record?.lines_data, setRecord]); 
+            if (record.partners) {
+                setCustomerDetails(record.partners);
+                setWhatsAppPhone(record.partners.phone || '');
+            } else if (record.customer) {
+                setCustomerDetails(record.customer);
+                setWhatsAppPhone(record.customer.phone || '');
+            } else {
+                setCustomerDetails(null);
+                setWhatsAppPhone(record.phone || '');
+            }
+        };
 
-    const handleAddStatement = (e: React.MouseEvent) => { /* محفوظة للمنطق */ };
-    const handleRemoveLine = (indexToRemove: number) => { /* محفوظة للمنطق */ };
-    const handleValidateAndSave = () => { /* محفوظة للمنطق */ };
+        // 3. جلب بيانات المندوب
+        const fetchDelegateInfo = async () => {
+            const dId = record.delegate_id;
+            if (dId) {
+                try {
+                    const { data } = await supabase.from('partners').select('id, name, phone, code').eq('id', dId).maybeSingle();
+                    if (data) {
+                        setDelegateDetails(data);
+                        return;
+                    }
+                } catch (e) {
+                    console.error("خطأ في جلب بيانات المندوب:", e);
+                }
+            }
+            if (record.delegate) {
+                setDelegateDetails(record.delegate);
+            } else {
+                setDelegateDetails(null);
+            }
+        };
 
-    const handlePrintOrPDF = React.useCallback(() => {
+        // 4. جلب بيانات المنفذ / المستودع
+        const fetchWarehouseInfo = async () => {
+            const wId = record.warehouse_id;
+            if (wId) {
+                try {
+                    const { data } = await supabase.from('warehouses').select('id, name, type').eq('id', wId).maybeSingle();
+                    if (data) {
+                        setWarehouseDetails(data);
+                        return;
+                    }
+                } catch (e) {
+                    console.error("خطأ في جلب بيانات المنفذ:", e);
+                }
+            }
+            if (record.warehouse) {
+                setWarehouseDetails(record.warehouse);
+            } else {
+                setWarehouseDetails(null);
+            }
+        };
+
+        fetchCreatorInfo();
+        fetchCustomerInfo();
+        fetchDelegateInfo();
+        fetchWarehouseInfo();
+    }, [isOpen, record]);
+
+    // =========================================================================
+    // 🛡️ استخراج الأصناف وتوحيدها عبر normalizeInvoiceLines
+    // =========================================================================
+    const lines: NormalizedInvoiceLine[] = useMemo(() => {
+        return normalizeInvoiceLines(record);
+    }, [record]);
+
+    // =========================================================================
+    // 💰 العمليات المالية والإجماليات
+    // =========================================================================
+    const totalAmount = Number(record?.total_amount || 0);
+    const taxableAmount = Number(record?.taxable_amount || (totalAmount / 1.15));
+    const discountAmount = Number(record?.materials_discount || 0);
+    const taxAmount = Number(record?.tax_amount || (totalAmount - taxableAmount));
+    const guaranteePercent = Number(record?.guarantee_percent || 0);
+    const guaranteeAmount = Number(record?.guarantee_amount || 0);
+    const paidAmount = Number(record?.paid_amount ?? (record?.payment_method !== 'آجل' ? totalAmount : 0));
+    const remainingAmount = Math.max(0, totalAmount - paidAmount);
+
+    const amountInWords = useMemo(() => tafqeet(totalAmount), [totalAmount]);
+
+    // Formatters
+    const formatNumberEn = (num: number) => {
+        return new Intl.NumberFormat('en-US', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(num);
+    };
+    
+    const formatCurrencyEn = (val: any) => {
+        const num = Number(val) || 0;
+        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'SAR', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(num);
+    };
+
+    // توقيع وبيانات الاعتماد
+    const finalFullName = creatorInfo?.fullName || 'المحاسب المعتمد';
+    const creationDateObj = record?.created_at ? new Date(record.created_at) : (record?.date ? new Date(record.date) : new Date());
+    const creationTime = creationDateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
+    const creationDate = creationDateObj.toLocaleDateString('en-US');
+
+    // باركود ZATCA للحراري
+    const thermalZatcaQr = useMemo(() => {
+        if (!record) return '';
+        const dateStr = record.date ? `${record.date.split('T')[0]}T12:00:00Z` : new Date().toISOString();
+        return generateZatcaQR('شركة مياه غيام', '312487477800003', dateStr, totalAmount.toFixed(2), taxAmount.toFixed(2));
+    }, [record, totalAmount, taxAmount]);
+
+    // دالة الطباعة
+    const handlePrintOrPDF = useCallback(() => {
         const originalTitle = document.title;
         document.title = record?.invoice_number ? `فاتورة_${record.invoice_number}` : 'فاتورة_ضريبية';
         window.print();
         setTimeout(() => { document.title = originalTitle; }, 1000);
     }, [record?.invoice_number]);
 
-    // ⌨️ استجابة لوحة المفاتيح: Esc للإغلاق و Ctrl+P أو Enter للطباعة
-    React.useEffect(() => {
+    // دالة فتح نافذة الواتساب
+    const handleTriggerWhatsApp = () => {
+        const phone = whatsAppPhone || customerDetails?.phone || record?.phone || '';
+        setWhatsAppPhone(phone);
+        setIsWhatsAppDialog(true);
+    };
+
+    // تنفيذ الإرسال للواتساب
+    const handleExecuteWhatsApp = (overridePhone?: string) => {
+        const targetPhone = formatPhoneForWhatsApp(overridePhone || whatsAppPhone);
+        const msg = generateInvoiceWhatsAppMessage(record, customerDetails, lines);
+        
+        let url = `https://wa.me/?text=${encodeURIComponent(msg)}`;
+        if (targetPhone) {
+            url = `https://wa.me/${targetPhone}?text=${encodeURIComponent(msg)}`;
+        }
+        
+        window.open(url, '_blank');
+        setIsWhatsAppDialog(false);
+    };
+
+    // ⌨️ اختصارات لوحة المفاتيح
+    useEffect(() => {
         if (!isOpen) return;
 
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'Escape') {
-                e.preventDefault();
-                e.stopPropagation();
-                onClose();
+                if (isWhatsAppDialog) {
+                    setIsWhatsAppDialog(false);
+                } else {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    onClose();
+                }
             } else if ((e.ctrlKey || e.metaKey) && (e.key === 'p' || e.key === 'P')) {
                 e.preventDefault();
                 e.stopPropagation();
@@ -173,50 +261,18 @@ export default function InvoicePrintModal({ isOpen, onClose, record, setRecord =
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [isOpen, onClose, handlePrintOrPDF]);
+    }, [isOpen, isWhatsAppDialog, onClose, handlePrintOrPDF]);
 
     if (!isOpen || !mounted || !record) return null;
 
-    // 🚀 تهيئة بيانات التوقيع والباركود
-    const finalFullName = creatorInfo?.fullName || 'المحاسب المعتمد';
-    
-    // 🚀 استخراج تاريخ ووقت إنشاء الفاتورة من الداتابيز (created_at) بدلاً من وقت الطباعة
-    const creationDateObj = record?.created_at ? new Date(record.created_at) : (record?.date ? new Date(record.date) : new Date());
-    const creationTime = creationDateObj.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false });
-    const creationDate = creationDateObj.toLocaleDateString('en-US');
-    
-    // 🚀 الباركود يحمل اسم المحاسب الحقيقي والتاريخ والوقت فقط (بدون يوزرنيم للأمان)
-    const signatureData = `تم الاعتماد إلكترونياً\nتاريخ الإصدار: ${creationDate}\nوقت الإصدار: ${creationTime}\nبواسطة: ${finalFullName}`;
-    
-    const amountInWords = tafqeet(Number(record.total_amount || 0));
+    const customerDisplayName = customerDetails?.name || record.client_name || 'عميل نقدي';
+    const customerPhone = customerDetails?.phone || record.phone || '';
+    const customerVat = customerDetails?.vat_number || customerDetails?.tax_id || '';
+    const customerAddress = customerDetails?.address || record.address || 'المملكة العربية السعودية';
+    const customerCr = customerDetails?.commercial_reg || customerDetails?.cr_number || '';
+    const delegateName = delegateDetails?.name || (record.delegate?.name ? record.delegate.name : (record.delegate_id ? 'مندوب مبيعات' : 'مبيعات مباشرة'));
+    const outletName = warehouseDetails?.name || (record.warehouse?.name ? record.warehouse.name : 'الفرع الرئيسي');
 
-    // متغير لحساب الترقيم المتسلسل بشكل صحيح
-    const hasMainItem = (Number(record.quantity) > 0 || Number(record.unit_price) > 0 || record.description);
-    const baseLinesCount = (hasMainItem ? 1 : 0) + (record.lines?.length || 0);
-
-    // 🚀 استنتاج إجمالي العمليات لحظياً لضمان عدم ظهوره بـ 0 أثناء الرندر
-    const calcQty = Number(record.quantity || 0);
-    const calcPrice = Number(record.unit_price || 0);
-    const calcLinesTotal = (record.lines || []).reduce((sum: number, line: any) => sum + (Number(line.quantity) * Number(line.unit_price)), 0);
-    const calcLinesDataTotal = (record.lines_data || []).reduce((sum: number, line: any) => sum + (Number(line.total_price) || (Number(line.quantity || 0) * Number(line.unit_price || 0))), 0);
-    let displayLineTotal = (calcQty * calcPrice) + calcLinesTotal + calcLinesDataTotal;
-    
-    if (displayLineTotal === 0 && Number(record.taxable_amount) > 0) {
-        displayLineTotal = Number(record.taxable_amount) + Number(record.materials_discount || 0);
-    }
-
-    // Custom formatting wrapper to force English numbers
-    const formatNumberEn = (num: number) => {
-        return new Intl.NumberFormat('en-US', { style: 'decimal', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(num);
-    };
-    
-    // Wrapper for currency if the original function uses Arabic numbers
-    const formatCurrencyEn = (val: any) => {
-        const num = Number(val) || 0;
-        return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'SAR', minimumFractionDigits: 2, maximumFractionDigits: 2 }).format(num);
-    }
-
-    // 📦 محتوى المعاينة 
     const modalContent = (
         <div className="print-modal-overlay">
             
@@ -233,149 +289,250 @@ export default function InvoicePrintModal({ isOpen, onClose, record, setRecord =
                     flex-direction: column !important; 
                     align-items: center !important; 
                     justify-content: flex-start !important; 
-                    padding: 30px 20px !important; 
+                    padding: 25px 20px !important; 
                     overflow-y: auto !important;
-                    font-family: 'Arial', sans-serif;
+                    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
                 }
 
                 .print-actions-bar {
                     display: flex !important; 
-                    gap: 15px !important; 
+                    gap: 12px !important; 
                     margin-bottom: 25px !important;
                     background: white !important; 
-                    padding: 15px 30px !important; 
+                    padding: 12px 25px !important; 
                     border-radius: 50px !important;
                     box-shadow: 0 10px 30px rgba(0,0,0,0.3) !important;
                     position: sticky !important; 
                     top: 20px !important; 
                     z-index: 1000000000 !important; 
+                    flex-wrap: wrap !important;
+                    justify-content: center !important;
                 }
-                .action-btn { padding: 12px 25px; border-radius: 10px; border: none; font-weight: 900; font-size: 16px; cursor: pointer; transition: 0.2s; }
+                .action-btn { 
+                    padding: 10px 22px; 
+                    border-radius: 12px; 
+                    border: none; 
+                    font-weight: 900; 
+                    font-size: 14px; 
+                    cursor: pointer; 
+                    transition: 0.2s; 
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                }
+                .action-btn:hover { 
+                    transform: translateY(-2px); 
+                    box-shadow: 0 5px 15px rgba(0,0,0,0.2); 
+                }
                 .action-btn.print { background: linear-gradient(135deg, #2891C8, #7FD4E3); color: #122946; }
+                .action-btn.whatsapp { background: #25D366; color: white; box-shadow: 0 4px 12px rgba(37,211,102,0.3); }
+                .action-btn.whatsapp:hover { background: #20ba59; }
+                .action-btn.format-switch { background: #f59e0b; color: white; }
                 .action-btn.close { background: #fee2e2; color: #dc2626; }
-                .action-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
 
+                /* نافذة الواتساب المنبثقة */
+                .wa-modal-box {
+                    position: fixed;
+                    top: 50%; left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: white;
+                    padding: 24px;
+                    border-radius: 20px;
+                    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+                    z-index: 100000000;
+                    width: 90%;
+                    max-width: 380px;
+                    direction: rtl;
+                    text-align: center;
+                }
+                .wa-modal-box h3 { margin: 0 0 10px 0; color: #122946; font-size: 18px; font-weight: 900; }
+                .wa-input {
+                    width: 100%; padding: 12px 14px; border: 2px solid #25D366;
+                    border-radius: 12px; font-size: 16px; font-weight: 800;
+                    direction: ltr; text-align: center; margin: 15px 0;
+                    box-sizing: border-box; outline: none;
+                }
+
+                /* =================== تصميم A4 الاحترافي =================== */
                 .a4-preview-box {
                     width: 210mm !important; 
                     min-height: 297mm !important; 
                     background: white !important; 
                     color: #000;
-                    padding: 15mm !important; 
+                    padding: 12mm 15mm !important; 
                     margin: 0 auto 40px auto !important; 
                     box-shadow: 0 20px 50px rgba(0,0,0,0.4);
                     direction: rtl; 
-                    border-radius: 24px !important; 
+                    border-radius: 20px !important; 
                     overflow: visible !important;
                     display: flex !important;
                     flex-direction: column !important; 
                     box-sizing: border-box !important; 
                 }
 
-                .inv-header { display: grid; grid-template-columns: 120px 1fr 120px; align-items: center; border-bottom: 3px solid #2891C8; padding-bottom: 10px; margin-bottom: 15px; width: 100%; gap: 10px; position: relative; z-index: 99; }
+                .inv-header { 
+                    display: grid; 
+                    grid-template-columns: 100px 1fr 110px; 
+                    align-items: center; 
+                    border-bottom: 3px solid #2891C8; 
+                    padding-bottom: 10px; 
+                    margin-bottom: 15px; 
+                    width: 100%; 
+                    gap: 15px; 
+                }
                 
-                .header-qr { display: flex; justify-content: flex-start; align-items: flex-start; position: relative; z-index: 100; } 
+                .header-qr { display: flex; justify-content: flex-start; align-items: center; } 
                 .header-center { text-align: center; }
                 .header-logo { display: flex; justify-content: flex-end; align-items: center; } 
-                
-                .header-logo img { max-height: 80px; width: auto; max-width: 100%; object-fit: contain; } 
+                .header-logo img { max-height: 75px; width: auto; max-width: 100%; object-fit: contain; } 
                 
                 .qr-container { 
                     width: 80px !important; 
                     height: 80px !important; 
-                    min-width: 80px !important;
-                    min-height: 80px !important;
                     display: flex !important; 
                     justify-content: center !important; 
                     align-items: center !important; 
                     padding: 3px !important; 
                     background: #fff !important; 
                     border: 1.5px solid rgba(40, 145, 200, 0.2) !important; 
-                    border-radius: 6px !important; 
-                    position: relative !important;
-                    z-index: 9999999 !important; 
-                    box-shadow: 0 2px 5px rgba(0,0,0,0.1) !important; 
-                    overflow: hidden !important;
-                }
-                
-                .qr-container svg, .qr-container canvas, .qr-container img, .qr-container > div {
-                    max-width: 100% !important;
-                    max-height: 100% !important;
-                    width: 100% !important;
-                    height: 100% !important;
-                    display: block !important;
+                    border-radius: 8px !important; 
+                    box-shadow: 0 2px 5px rgba(0,0,0,0.08) !important; 
                 }
 
                 .inv-title-box { text-align: center; margin-bottom: 15px; }
-                .inv-title { font-size: 18px; font-weight: 900; border: 2.5px solid #2891C8; padding: 4px 25px; display: inline-block; background: linear-gradient(135deg, rgba(40, 145, 200, 0.08), rgba(127, 212, 227, 0.08)); color: #122946; text-transform: uppercase; letter-spacing: 1px; border-radius: 10px; }
+                .inv-title { 
+                    font-size: 17px; 
+                    font-weight: 900; 
+                    border: 2.5px solid #2891C8; 
+                    padding: 5px 30px; 
+                    display: inline-block; 
+                    background: linear-gradient(135deg, rgba(40, 145, 200, 0.08), rgba(127, 212, 227, 0.08)); 
+                    color: #122946; 
+                    letter-spacing: 0.5px; 
+                    border-radius: 12px; 
+                }
 
-                .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 25px; }
+                .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
                 
                 .info-box { 
-                    border: 1.5px solid rgba(40, 145, 200, 0.2); 
-                    border-radius: 16px !important; 
-                    padding: 16px 15px 10px 15px; 
+                    border: 1.5px solid rgba(40, 145, 200, 0.25); 
+                    border-radius: 14px !important; 
+                    padding: 14px 14px 10px 14px; 
                     display: flex; flex-direction: column; justify-content: center;
                     position: relative; background: #fff; min-height: 85px; 
                 }
                 .box-label { 
-                    position: absolute; top: -10px; right: 20px; background: white; 
-                    padding: 0 10px; font-size: 11px; font-weight: 900; color: #475569; 
-                    border-radius: 20px; 
+                    position: absolute; top: -10px; right: 16px; background: white; 
+                    padding: 0 8px; font-size: 11px; font-weight: 900; color: #1C73AB; 
+                    border-radius: 12px; border: 1px solid rgba(40, 145, 200, 0.2);
                 }
 
                 .inner-table { width: 100%; border-collapse: collapse; }
-                .inner-table td { padding: 4px 0; font-size: 13px; vertical-align: middle; }
-                .label-cell { text-align: left; font-weight: 900; color: #64748b; padding-left: 10px !important; }
-                .value-cell { text-align: right; font-weight: 900; color: #0f172a; }
-                .value-highlight { color: ${THEME.primary}; font-size: 15px; font-weight: 900; }
+                .inner-table td { padding: 3px 0; font-size: 12px; vertical-align: middle; }
+                .label-cell { text-align: right; font-weight: 800; color: #64748b; width: 32%; }
+                .value-cell { text-align: left; font-weight: 900; color: #0f172a; width: 68%; }
+                .value-highlight { color: #1C73AB; font-size: 14px; font-weight: 900; }
 
-                .inv-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 12px; border-radius: 8px; overflow: hidden; }
-                .inv-table th { background: linear-gradient(135deg, rgba(40, 145, 200, 0.08), rgba(127, 212, 227, 0.05)); padding: 6px 4px; text-align: center; border-bottom: 2px solid #2891C8; border-top: 2px solid #2891C8; color: #122946; font-weight: 900; font-size: 12px; }
-                .inv-table td { padding: 6px 4px; border-bottom: 1px solid rgba(40, 145, 200, 0.15); text-align: center; color: #1e293b; font-weight: 700; font-size: 12px; }
-                .inv-table td.desc { text-align: right; font-weight: 900; font-size: 13px; line-height: 1.5; }
+                .inv-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 11.5px; border-radius: 8px; overflow: hidden; }
+                .inv-table th { 
+                    background: linear-gradient(135deg, rgba(40, 145, 200, 0.12), rgba(127, 212, 227, 0.08)); 
+                    padding: 7px 5px; 
+                    text-align: center; 
+                    border-bottom: 2px solid #2891C8; 
+                    border-top: 2px solid #2891C8; 
+                    color: #122946; 
+                    font-weight: 900; 
+                    font-size: 11.5px; 
+                }
+                .inv-table td { 
+                    padding: 6px 5px; 
+                    border-bottom: 1px solid rgba(40, 145, 200, 0.15); 
+                    text-align: center; 
+                    color: #1e293b; 
+                    font-weight: 700; 
+                }
+                .inv-table td.desc { text-align: right; font-weight: 900; font-size: 12px; line-height: 1.4; }
 
-                /* 🚀 جعلنا المربعات السفلية متوازية (align-items: flex-end) بدلا من flex-start */
-                .inv-footer-flex { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 30px; flex-grow: 1; gap: 30px; }
+                .inv-footer-flex { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 15px; flex-grow: 1; gap: 20px; }
                 .inv-amount-words { flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
-                .inv-amount-words .words-box { background: rgba(255, 255, 255, 0.6); border: 1px dashed rgba(40, 145, 200, 0.2); padding: 12px; border-radius: 12px; font-weight: 900; font-size: 13px; color: #0f172a; line-height: 1.5; }
+                .inv-amount-words .words-box { 
+                    background: rgba(248, 250, 252, 0.8); 
+                    border: 1px dashed rgba(40, 145, 200, 0.3); 
+                    padding: 10px; 
+                    border-radius: 10px; 
+                    font-weight: 800; 
+                    font-size: 12px; 
+                    color: #0f172a; 
+                    line-height: 1.4; 
+                }
                 
-                .signature-area { margin-top: 20px; text-align: center; align-self: flex-start; }
-                .signature-title { font-weight: 900; font-size: 12px; color: #64748b; margin-bottom: 10px; border-bottom: 1px solid rgba(40, 145, 200, 0.15); padding-bottom: 6px; }
+                .signature-area { margin-top: 15px; text-align: center; align-self: flex-start; }
+                .signature-title { font-weight: 900; font-size: 11px; color: #64748b; margin-bottom: 6px; border-bottom: 1px solid rgba(40, 145, 200, 0.15); padding-bottom: 4px; }
 
-                /* 🚀 تم تكبير السامري وزيادة عرضة (420px) والخطوط جواه */
-                .inv-totals-box { width: 420px; }
-                .inv-total-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 13px; font-weight: 800; color: #334155; align-items: center; }
+                .inv-totals-box { width: 380px; }
+                .inv-total-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 12px; font-weight: 800; color: #334155; align-items: center; }
                 .inv-total-row.tax { color: #0284c7; }
                 .inv-total-row.discount { color: #dc2626; }
-                .inv-total-row.grand-total { border-top: 3px solid #2891C8; padding-top: 10px; margin-top: 10px; font-size: 17px; font-weight: 900; color: #122946; background: linear-gradient(135deg, rgba(40, 145, 200, 0.06), rgba(127, 212, 227, 0.06)); padding: 10px; border-radius: 10px; }
+                .inv-total-row.grand-total { 
+                    border-top: 2.5px solid #2891C8; 
+                    padding-top: 8px; 
+                    margin-top: 6px; 
+                    font-size: 15px; 
+                    font-weight: 900; 
+                    color: #122946; 
+                    background: linear-gradient(135deg, rgba(40, 145, 200, 0.08), rgba(127, 212, 227, 0.08)); 
+                    padding: 8px 10px; 
+                    border-radius: 10px; 
+                }
 
                 .inv-footer-contact { 
                     margin-top: auto !important; 
-                    border-top: 2px solid rgba(40, 145, 200, 0.25); 
-                    padding-top: 15px; 
+                    border-top: 1.5px solid rgba(40, 145, 200, 0.25); 
+                    padding-top: 10px; 
                     text-align: center; 
-                    font-size: 12px; 
+                    font-size: 11px; 
                     color: #64748b; 
                     font-weight: 700; 
                 }
 
-                /* 🚀 Thermal Styles */
+                /* =================== تصميم الإيصال الحراري 80mm =================== */
                 .thermal-preview-box {
-                    width: 80mm;
-                    background: white;
-                    padding: 10px;
-                    margin: 0 auto;
-                    color: black;
-                    font-family: 'Courier New', Courier, monospace;
-                    font-size: 13px;
-                    font-weight: bold;
-                    text-align: center;
-                    direction: rtl;
-                    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+                    width: 80mm !important; 
+                    max-width: 80mm !important; 
+                    background: white !important; 
+                    padding: 6mm 5mm !important; 
+                    margin: 0 auto 40px auto !important; 
+                    color: black !important; 
+                    font-family: 'Courier New', Courier, monospace !important; 
+                    font-size: 11.5px !important; 
+                    font-weight: bold !important; 
+                    text-align: center !important; 
+                    direction: rtl !important; 
+                    border-radius: 16px !important;
+                    box-shadow: 0 15px 40px rgba(0,0,0,0.4) !important;
+                    box-sizing: border-box !important;
                 }
-                .thermal-preview-box table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-                .thermal-preview-box th, .thermal-preview-box td { border-bottom: 1px dashed #000; padding: 4px 0; font-size: 12px; }
+                .thermal-logo {
+                    width: 70px; height: auto; max-height: 65px;
+                    object-fit: contain; margin: 0 auto 5px auto; display: block;
+                    filter: grayscale(100%) contrast(150%);
+                }
+                .thermal-divider { border-bottom: 1px dashed #000; margin: 7px 0; width: 100%; }
+                .thermal-divider-double { border-bottom: 2px solid #000; margin: 8px 0; width: 100%; }
+                .badge-invoice-type { display: inline-block; border: 1.5px solid #000; padding: 3px 8px; font-size: 11px; font-weight: 900; margin: 4px 0; border-radius: 4px; }
                 
+                .meta-table { width: 100%; border-collapse: collapse; margin: 4px 0; font-size: 11px; text-align: right; }
+                .meta-table td { padding: 2px 0; vertical-align: top; }
+                .meta-label { color: #333; white-space: nowrap; font-weight: bold; width: 32%; }
+                .meta-val { color: #000; font-weight: 900; width: 68%; word-break: break-word; }
+
+                .thermal-items-table { width: 100%; border-collapse: collapse; margin: 6px 0; font-size: 11px; }
+                .thermal-items-table th { border-bottom: 1.5px solid #000; border-top: 1.5px solid #000; padding: 4px 1px; font-weight: 900; text-align: center; }
+                .thermal-items-table td { padding: 4px 1px; border-bottom: 1px dashed #444; vertical-align: middle; }
+
+                .totals-row { display: flex; justify-content: space-between; align-items: center; padding: 2px 0; font-size: 11px; }
+                .totals-row.grand { border-top: 1.5px solid #000; border-bottom: 1.5px solid #000; padding: 6px 4px; margin: 5px 0; font-size: 13.5px; font-weight: 900; background: #f0f0f0; }
+
                 @media print {
                     html, body { 
                         margin: 0 !important; 
@@ -401,7 +558,7 @@ export default function InvoicePrintModal({ isOpen, onClose, record, setRecord =
                         .a4-preview-box {
                             position: absolute !important; top: 0 !important; left: 0 !important; 
                             width: 210mm !important; height: 297mm !important; 
-                            padding: 15mm !important; margin: 0 !important; border: none !important; box-shadow: none !important;
+                            padding: 12mm 15mm !important; margin: 0 !important; border: none !important; box-shadow: none !important;
                             page-break-inside: avoid !important;
                         }
                     }
@@ -411,22 +568,27 @@ export default function InvoicePrintModal({ isOpen, onClose, record, setRecord =
             {printFormat === 'thermal' && (
                 <style>{`
                     @media print {
-                        @page { size: 80mm auto; margin: 0 !important; }
+                        @page { size: 80mm auto !important; margin: 0 !important; }
                         html, body, .print-modal-overlay { width: 80mm !important; }
                         .thermal-preview-box {
                             position: absolute !important; top: 0 !important; left: 0 !important; 
-                            width: 80mm !important; margin: 0 !important; padding: 5px !important; 
-                            border: none !important; box-shadow: none !important;
+                            width: 80mm !important; max-width: 80mm !important; margin: 0 !important; 
+                            padding: 4mm 3mm !important; border: none !important; box-shadow: none !important;
+                            border-radius: 0 !important;
                         }
                     }
                 `}</style>
             )}
 
+            {/* شريط الإجراءات العلوي */}
             <div className="print-actions-bar no-print">
                 <button onClick={handlePrintOrPDF} className="action-btn print">
-                    🖨️ طباعة
+                    🖨️ طباعة ({printFormat === 'a4' ? 'A4' : 'حراري 80mm'})
                 </button>
-                <button onClick={() => setPrintFormat(f => f === 'a4' ? 'thermal' : 'a4')} className="action-btn print" style={{ background: '#f59e0b', color: 'white' }}>
+                <button onClick={handleTriggerWhatsApp} className="action-btn whatsapp">
+                    📱 إرسال واتساب (WhatsApp)
+                </button>
+                <button onClick={() => setPrintFormat(f => f === 'a4' ? 'thermal' : 'a4')} className="action-btn format-switch">
                     تغيير للطباعة {printFormat === 'a4' ? 'الحرارية 🧾' : 'A4 📄'}
                 </button>
                 <button onClick={onClose} className="action-btn close">
@@ -434,13 +596,51 @@ export default function InvoicePrintModal({ isOpen, onClose, record, setRecord =
                 </button>
             </div>
 
+            {/* نافذة تأكيد رقم الواتساب قبل الإرسال */}
+            {isWhatsAppDialog && (
+                <div className="wa-modal-box no-print">
+                    <div style={{ fontSize: '36px', marginBottom: '8px' }}>💬</div>
+                    <h3>إرسال الفاتورة عبر واتساب</h3>
+                    <p style={{ fontSize: '13px', color: '#64748b', margin: '0 0 10px 0' }}>
+                        العميل: <strong>{customerDisplayName}</strong>
+                    </p>
+                    <label style={{ fontSize: '12px', fontWeight: 800, color: '#334155', display: 'block', textAlign: 'right' }}>
+                        رقم هاتف العميل (مثال: 05xxxxxxxx أو 9665xxxxxxxx):
+                    </label>
+                    <input 
+                        type="text" 
+                        className="wa-input"
+                        placeholder="05xxxxxxxx"
+                        value={whatsAppPhone}
+                        onChange={(e) => setWhatsAppPhone(e.target.value)}
+                        autoFocus
+                    />
+                    <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+                        <button 
+                            onClick={() => handleExecuteWhatsApp()}
+                            style={{ flex: 1, padding: '12px', background: '#25D366', color: 'white', border: 'none', borderRadius: '10px', fontWeight: 900, cursor: 'pointer' }}
+                        >
+                            إرسال الآن 🚀
+                        </button>
+                        <button 
+                            onClick={() => setIsWhatsAppDialog(false)}
+                            style={{ padding: '12px 18px', background: '#e2e8f0', color: '#475569', border: 'none', borderRadius: '10px', fontWeight: 800, cursor: 'pointer' }}
+                        >
+                            إلغاء
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {/* ========================================================================= */}
+            {/* المعاينة الأولى: فاتورة A4 الرسمية                                         */}
+            {/* ========================================================================= */}
             {printFormat === 'a4' ? (
                 <div className="a4-preview-box">
                     
                     {/* 1️⃣ رأس الفاتورة */}
                     <div className="inv-header">
                         <div className="header-qr">
-                            {/* 🚀 باركود الزكاة والضريبة */}
                             {!record.skip_zatca && (
                                 <div className="qr-container">
                                     <ZatcaQRCode record={record} />
@@ -449,10 +649,10 @@ export default function InvoicePrintModal({ isOpen, onClose, record, setRecord =
                         </div>
 
                         <div className="header-center">
-                            <h1 style={{ fontSize: '18px', fontWeight: 900, color: '#122946', margin: '0 0 4px 0' }}>شركة مياه غيام</h1>
-                            <h2 style={{ fontSize: '15px', fontWeight: 900, color: '#2891C8', margin: '0 0 8px 0', letterSpacing: '0.5px' }}>Ghayam Water Company</h2>
-                            <div style={{ fontSize: '13px', fontWeight: 700, color: '#334155', fontFamily: 'Arial, sans-serif' }}>الرقم الضريبي (VAT No): 312487477800003</div>
-                            <div style={{ fontSize: '13px', fontWeight: 700, color: '#334155', marginTop: '2px', fontFamily: 'Arial, sans-serif' }}>الرقم الموحد (Unified No): 7051013519</div>
+                            <h1 style={{ fontSize: '19px', fontWeight: 900, color: '#122946', margin: '0 0 4px 0' }}>شركة مياه غيام</h1>
+                            <h2 style={{ fontSize: '14px', fontWeight: 900, color: '#2891C8', margin: '0 0 6px 0', letterSpacing: '0.5px' }}>Ghayam Water Company</h2>
+                            <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#334155' }}>الرقم الضريبي (VAT No): 312487477800003</div>
+                            <div style={{ fontSize: '12px', fontWeight: 700, color: '#334155', marginTop: '2px' }}>الرقم الموحد (Unified No): 7051013519</div>
                         </div>
 
                         <div className="header-logo">
@@ -461,208 +661,331 @@ export default function InvoicePrintModal({ isOpen, onClose, record, setRecord =
                     </div>
 
                     <div className="inv-title-box">
-                        <div className="inv-title">فاتورة ضريبية | TAX INVOICE</div>
+                        <div className="inv-title">
+                            {record.skip_zatca ? 'فاتورة مبيعات داخلية | SALES INVOICE' : 'فاتورة ضريبية | TAX INVOICE'}
+                        </div>
                     </div>
 
-                    {/* 2️⃣ مربعات البيانات (المعدلة عربي/إنجليزي) بخاصية توزيع المساحات المحمية لمنع الالتفاف السعري السفلي */}
+                    {/* 2️⃣ مربعات البيانات (بيانات العميل بالكامل + بيانات الفاتورة) */}
                     <div className="info-grid">
+                        
+                        {/* مربع العميل - يسحب كافة البيانات الحقيقية من Supabase */}
                         <div className="info-box">
                             <span className="box-label">صُدرت إلى / Invoice To</span>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '6px' }}>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px dashed rgba(40, 145, 200, 0.15)', paddingBottom: '4px' }}>
-                                    <span style={{ width: '26%', textAlign: 'right', fontWeight: 900, color: '#64748b', fontSize: '11px', whiteSpace: 'nowrap' }}>العميل</span>
-                                    <span style={{ width: '70%', textAlign: 'left', fontWeight: 900, color: '#0f172a', fontSize: '13px' }}>{record.client_name || 'عميل نقدي'}</span>
-                                </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px dashed rgba(40, 145, 200, 0.15)', paddingBottom: '4px' }}>
-                                    <span style={{ width: '26%', textAlign: 'right', fontWeight: 900, color: '#64748b', fontSize: '11px', whiteSpace: 'nowrap' }}>Customer</span>
-                                    <span style={{ width: '70%', textAlign: 'left', fontWeight: 900, color: '#0f172a', fontSize: '12px' }}>{record.client_name || 'Cash Customer'}</span>
-                                </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px dashed rgba(40, 145, 200, 0.15)', paddingBottom: '4px' }}>
-                                    <span style={{ width: '35%', textAlign: 'right', fontWeight: 900, color: '#64748b', fontSize: '11px', whiteSpace: 'nowrap' }}>الرقم الضريبي</span>
-                                    <span style={{ width: '60%', textAlign: 'left', fontWeight: 900, color: '#0f172a', fontSize: '13px' }}>{record.partners?.vat_number || '---'}</span>
-                                </div>
-                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <span style={{ width: '26%', textAlign: 'right', fontWeight: 900, color: '#64748b', fontSize: '11px', whiteSpace: 'nowrap' }}>العنوان</span>
-                                    <span style={{ width: '70%', textAlign: 'left', fontWeight: 900, color: '#0f172a', fontSize: '12px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{record.partners?.address || '---'}</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div className="info-box">
-                            <span className="box-label">تفاصيل الفاتورة / Details</span>
                             <table className="inner-table">
                                 <tbody>
                                     <tr>
-                                        <td className="label-cell">رقم الفاتورة<br/><span style={{fontSize:'10px', color:'#94a3b8'}}>Invoice No</span></td>
-                                        <td className="value-cell value-highlight">{record.invoice_number}</td>
+                                        <td className="label-cell">اسم العميل:</td>
+                                        <td className="value-cell value-highlight">{customerDisplayName}</td>
                                     </tr>
                                     <tr>
-                                        <td className="label-cell">تاريخ الإصدار<br/><span style={{fontSize:'10px', color:'#94a3b8'}}>Issue Date</span></td>
-                                        <td className="value-cell" style={{ direction: 'ltr' }}>{new Date(record.date).toLocaleString('en-GB')}</td>
+                                        <td className="label-cell">رقم الجوال:</td>
+                                        <td className="value-cell" style={{ direction: 'ltr', textAlign: 'left' }}>{customerPhone || '---'}</td>
                                     </tr>
                                     <tr>
-                                        <td className="label-cell">طريقة الدفع<br/><span style={{fontSize:'10px', color:'#94a3b8'}}>Payment</span></td>
+                                        <td className="label-cell">الرقم الضريبي:</td>
+                                        <td className="value-cell">{customerVat || '---'}</td>
+                                    </tr>
+                                    <tr>
+                                        <td className="label-cell">العنوان:</td>
+                                        <td className="value-cell" style={{ whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{customerAddress}</td>
+                                    </tr>
+                                    {customerCr && (
+                                        <tr>
+                                            <td className="label-cell">السجل التجاري:</td>
+                                            <td className="value-cell">{customerCr}</td>
+                                        </tr>
+                                    )}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        {/* مربع بيانات الفاتورة والعملية */}
+                        <div className="info-box">
+                            <span className="box-label">بيانات الفاتورة / Invoice Details</span>
+                            <table className="inner-table">
+                                <tbody>
+                                    <tr>
+                                        <td className="label-cell">رقم الفاتورة:</td>
+                                        <td className="value-cell value-highlight">#{record.invoice_number || record.id?.substring(0, 8)}</td>
+                                    </tr>
+                                    <tr>
+                                        <td className="label-cell">تاريخ الإصدار:</td>
+                                        <td className="value-cell" style={{ direction: 'ltr', textAlign: 'left' }}>{creationDate} {creationTime}</td>
+                                    </tr>
+                                    <tr>
+                                        <td className="label-cell">طريقة الدفع:</td>
                                         <td className="value-cell">{record.payment_method || 'آجل'}</td>
+                                    </tr>
+                                    <tr>
+                                        <td className="label-cell">المنفذ / الفرع:</td>
+                                        <td className="value-cell">{outletName}</td>
+                                    </tr>
+                                    <tr>
+                                        <td className="label-cell">المندوب / البائع:</td>
+                                        <td className="value-cell">{delegateName}</td>
                                     </tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
 
-                    {/* 3️⃣ جدول الأصناف */}
-                    <div style={{ minHeight: '300px' }}>
+                    {/* 3️⃣ جدول الأصناف المفصل - يدعم lines_data, lines, items, وكل الأصناف المسجلة */}
+                    <div style={{ minHeight: '260px' }}>
                         <table className="inv-table">
                             <thead>
                                 <tr>
-                                    <th style={{ width: '5%' }}>م</th>
-                                    <th style={{ width: '35%', textAlign: 'right' }}>الصنف / Item</th>
+                                    <th style={{ width: '5%' }}>#</th>
+                                    <th style={{ width: '40%', textAlign: 'right' }}>الصنف / Description</th>
+                                    <th style={{ width: '10%' }}>الوحدة<br/>Unit</th>
                                     <th style={{ width: '10%' }}>الكمية<br/>Qty</th>
-                                    <th style={{ width: '15%' }}>السعر<br/>Price</th>
-                                    <th style={{ width: '15%' }}>الضريبة<br/>VAT</th>
-                                    <th style={{ width: '20%' }}>المجموع<br/>Total</th>
+                                    <th style={{ width: '15%' }}>السعر (غير شامل)<br/>Price</th>
+                                    <th style={{ width: '10%' }}>الضريبة (15%)<br/>VAT</th>
+                                    <th style={{ width: '15%' }}>المجموع شامل<br/>Total</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {record.lines?.map((item: any, index: number) => {
-                                    const qty = Number(item.quantity) || 0;
-                                    const price = Number(item.unit_price) || Number(item.price) || 0;
-                                    const lineTax = (qty * price) * 0.15;
-                                    const lineTotal = (qty * price) + lineTax;
-                                    
-                                    return (
+                                {lines.length > 0 ? (
+                                    lines.map((item, index) => (
                                         <tr key={index}>
-                                            <td>{index + 1}</td>
-                                            <td className="desc">{item.item_name || item.name}</td>
-                                            <td>{qty}</td>
-                                            <td>{formatCurrencyEn(price)}</td>
-                                            <td>{formatCurrencyEn(lineTax)}</td>
-                                            <td style={{ fontWeight: 900, color: '#122946' }}>{formatCurrencyEn(lineTotal)}</td>
+                                            <td>{item.index}</td>
+                                            <td className="desc">{item.name}</td>
+                                            <td>{item.unit}</td>
+                                            <td>{formatNumberEn(item.quantity)}</td>
+                                            <td>{formatCurrencyEn(item.unit_price)}</td>
+                                            <td>{formatCurrencyEn(item.tax)}</td>
+                                            <td style={{ fontWeight: 900, color: '#122946' }}>{formatCurrencyEn(item.total)}</td>
                                         </tr>
-                                    );
-                                })}
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan={7} style={{ padding: '20px', color: '#64748b' }}>
+                                            لا توجد أصناف مسجلة في الفاتورة
+                                        </td>
+                                    </tr>
+                                )}
                             </tbody>
                         </table>
                     </div>
 
-                    {/* 4️⃣ التفقيط والإجماليات (flex-end) */}
+                    {/* 4️⃣ التفقيط والإجماليات والتوقيع */}
                     <div className="inv-footer-flex">
                         <div className="inv-amount-words">
                             <div className="words-box">
-                                <span style={{ color: '#64748b', fontSize: '11px', display: 'block', marginBottom: '4px' }}>المبلغ فقط / Amount in words:</span>
-                                {tafqeet(record.total_amount || 0)} ريال سعودي لا غير.
+                                <span style={{ color: '#64748b', fontSize: '11px', display: 'block', marginBottom: '3px' }}>المبلغ فقط / Amount in words:</span>
+                                {amountInWords} ريال سعودي لا غير.
                             </div>
                             
-                            {/* توقيع المحاسب في أسفل يسار المربع الأول ليكون متوازياً مع الإجماليات */}
                             <div className="signature-area">
                                 <div className="signature-title">المحاسب المعتمد / Authorized By</div>
-                                <div style={{ fontSize: '13px', fontWeight: 800, color: '#334155' }}>{creatorInfo?.username}</div>
-                                <div style={{ fontSize: '14px', fontWeight: 900, marginTop: '8px', color: THEME.primary }}>{creatorInfo?.fullName}</div>
+                                <div style={{ fontSize: '12px', fontWeight: 800, color: '#334155' }}>{creatorInfo?.username}</div>
+                                <div style={{ fontSize: '13.5px', fontWeight: 900, marginTop: '4px', color: THEME.primary }}>{finalFullName}</div>
                             </div>
                         </div>
 
-                        <div className="inv-totals-box" style={{ fontFamily: 'Arial, sans-serif' }}>
+                        <div className="inv-totals-box">
                             <div className="inv-total-row">
-                                <span style={{ fontFamily: "'Arial', sans-serif" }}>إجمالي العمليات / Subtotal:</span>
-                                <span>{formatCurrencyEn(record.line_total || record.taxable_amount)}</span>
+                                <span>إجمالي العمليات / Subtotal:</span>
+                                <span>{formatCurrencyEn(taxableAmount + discountAmount)}</span>
                             </div>
-                            {Number(record.materials_discount) > 0 && (
+                            {discountAmount > 0 && (
                                 <div className="inv-total-row discount">
-                                    <span style={{ fontFamily: "'Arial', sans-serif" }}>يخصم (مواد) / Mat. Discount:</span>
-                                    <span>{formatCurrencyEn(record.materials_discount)} -</span>
+                                    <span>يخصم (خصم تجاري) / Discount:</span>
+                                    <span>{formatCurrencyEn(discountAmount)} -</span>
                                 </div>
                             )}
                             <div className="inv-total-row">
-                                <span style={{ fontFamily: "'Arial', sans-serif" }}>الخاضع للضريبة / Taxable:</span>
-                                <span>{formatCurrencyEn(record.taxable_amount)}</span>
+                                <span>الخاضع للضريبة / Taxable:</span>
+                                <span>{formatCurrencyEn(taxableAmount)}</span>
                             </div>
                             <div className="inv-total-row tax">
-                                <span style={{ fontFamily: "'Arial', sans-serif" }}>الضريبة (15%) / VAT (15%):</span>
-                                <span>{formatCurrencyEn(record.tax_amount)}</span>
+                                <span>الضريبة (15%) / VAT (15%):</span>
+                                <span>{formatCurrencyEn(taxAmount)}</span>
                             </div>
-                            {Number(record.guarantee_amount) > 0 && (
+                            {guaranteeAmount > 0 && (
                                 <div className="inv-total-row discount">
-                                    <span style={{ fontFamily: "'Arial', sans-serif" }}>ضمان عمليات / Guarantee ({record.guarantee_percent}%):</span>
-                                    <span>{formatCurrencyEn(record.guarantee_amount)} -</span>
+                                    <span>ضمان عمليات / Guarantee ({guaranteePercent}%):</span>
+                                    <span>{formatCurrencyEn(guaranteeAmount)} -</span>
                                 </div>
                             )}
                             <div className="inv-total-row grand-total">
-                                <span style={{ fontFamily: "'Arial', sans-serif" }}>الصافي المستحق / Grand Total:</span>
-                                <span>{formatCurrencyEn(record.total_amount)}</span>
+                                <span>الصافي المستحق / Grand Total:</span>
+                                <span>{formatCurrencyEn(totalAmount)}</span>
                             </div>
+                            {paidAmount > 0 && (
+                                <div className="inv-total-row" style={{ marginTop: '4px', color: '#16a34a' }}>
+                                    <span>المبلغ المسدد / Paid:</span>
+                                    <span>{formatCurrencyEn(paidAmount)}</span>
+                                </div>
+                            )}
+                            {remainingAmount > 0 && (
+                                <div className="inv-total-row" style={{ color: '#dc2626' }}>
+                                    <span>المتبقي المستحق / Balance Due:</span>
+                                    <span>{formatCurrencyEn(remainingAmount)}</span>
+                                </div>
+                            )}
                         </div>
                     </div>
 
-                    {/* 5️⃣ صنف الإقرار القانوني - مدمج */}
-                    <div style={{ marginTop: '10px', border: '1px solid rgba(40,145,200,0.3)', borderRadius: '10px', padding: '8px 12px', background: 'linear-gradient(135deg, rgba(40,145,200,0.03), rgba(127,212,227,0.03))', direction: 'rtl' }}>
-                        <p style={{ fontSize: '9px', lineHeight: '1.6', color: '#334155', fontWeight: 600, margin: '0 0 6px 0' }}>
-                            <strong style={{color:'#122946', fontSize: '9.5px'}}>إقرار بالاستلام والسداد:</strong> أقرّ بأنني استلمت البضائع/الخدمات الواردة أعلاه كاملةً، وأتعهد بسداد قيمتها البالغة <strong style={{color:'#2891C8'}}>{formatCurrencyEn(record.total_amount)}</strong>. وفي حال التأخر يحق لمياه غيام اتخاذ الإجراءات النظامية أمام المحاكم التجارية بالمملكة.
+                    {/* 5️⃣ إقرار الاستلام والتعهد القانوني المعتمد */}
+                    <div style={{ marginTop: '10px', border: '1px solid rgba(40,145,200,0.3)', borderRadius: '10px', padding: '8px 12px', background: 'linear-gradient(135deg, rgba(40,145,200,0.03), rgba(127,212,227,0.03))' }}>
+                        <p style={{ fontSize: '9px', lineHeight: '1.5', color: '#334155', fontWeight: 600, margin: '0 0 6px 0' }}>
+                            <strong style={{color:'#122946', fontSize: '9.5px'}}>إقرار بالاستلام والسداد:</strong> أقرّ بأنني استلمت البضائع/الخدمات الواردة أعلاه كاملة بحالة سليمة، وأتعهد بسداد قيمتها البالغة <strong style={{color:'#2891C8'}}>{formatCurrencyEn(totalAmount)}</strong>. وفي حال التأخر يحق لمياه غيام اتخاذ الإجراءات النظامية أمام المحاكم والجهات المختصة.
                         </p>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px' }}>
-                            <div style={{ textAlign: 'center' }}><div style={{ fontSize: '9px', fontWeight: 800, color: '#64748b' }}>الاسم والصفة</div><div style={{ borderBottom: '1px solid #2891C8', height: '22px' }}></div></div>
-                            <div style={{ textAlign: 'center' }}><div style={{ fontSize: '9px', fontWeight: 800, color: '#64748b' }}>رقم الهوية</div><div style={{ borderBottom: '1px solid #2891C8', height: '22px' }}></div></div>
-                            <div style={{ textAlign: 'center' }}><div style={{ fontSize: '9px', fontWeight: 800, color: '#64748b' }}>التوقيع / البصمة</div><div style={{ borderBottom: '1px solid #2891C8', height: '22px' }}></div></div>
+                            <div style={{ textAlign: 'center' }}><div style={{ fontSize: '9px', fontWeight: 800, color: '#64748b' }}>الاسم والصفة</div><div style={{ borderBottom: '1px solid #2891C8', height: '18px' }}></div></div>
+                            <div style={{ textAlign: 'center' }}><div style={{ fontSize: '9px', fontWeight: 800, color: '#64748b' }}>رقم الهوية / الإقامة</div><div style={{ borderBottom: '1px solid #2891C8', height: '18px' }}></div></div>
+                            <div style={{ textAlign: 'center' }}><div style={{ fontSize: '9px', fontWeight: 800, color: '#64748b' }}>التوقيع / الختم</div><div style={{ borderBottom: '1px solid #2891C8', height: '18px' }}></div></div>
                         </div>
                     </div>
 
                     {/* 6️⃣ الفوتر الثابت أسفل الصفحة */}
                     <div className="inv-footer-contact">
-                        المملكة العربية السعودية &nbsp;|&nbsp; info@ghayamwater.com &nbsp;|&nbsp; مياه غيام © {new Date().getFullYear()}
+                        المملكة العربية السعودية &nbsp;|&nbsp; info@ghayamwater.com &nbsp;|&nbsp; شركة مياه غيام © {new Date().getFullYear()}
                     </div>
 
                 </div>
             ) : (
+                /* ========================================================================= */
+                /* المعاينة الثانية: الإيصال الحراري 80mm المتكامل بالشعار وباركود ZATCA      */
+                /* ========================================================================= */
                 <div className="thermal-preview-box">
-                    <div style={{ fontSize: '18px', fontWeight: 900, marginBottom: '5px' }}>شركة مياه غيام</div>
-                    <div>الرقم الضريبي: 312487477800003</div>
-                    <div style={{ borderBottom: '1px dashed #000', margin: '10px 0' }}></div>
+                    <img src="/ghayam_logo.png" alt="Ghayam Logo" className="thermal-logo" />
+                    <div style={{ fontSize: '16px', fontWeight: 900, color: '#000', margin: '2px 0' }}>شركة مياه غيام</div>
+                    <div style={{ fontSize: '10.5px', fontWeight: 700, letterSpacing: '0.5px' }}>Ghayam Water Company</div>
+                    <div style={{ fontSize: '10.5px', marginTop: '3px' }}>الرقم الضريبي: 312487477800003</div>
+                    <div style={{ fontSize: '10px' }}>الرقم الموحد: 7051013519</div>
                     
-                    <div style={{ textAlign: 'right', marginBottom: '10px' }}>
-                        <div>رقم الفاتورة: {record.invoice_number || record.id?.substring(0,6)}</div>
-                        <div>التاريخ: {new Date(record.date || Date.now()).toLocaleString('ar-SA')}</div>
-                        {record.delegate?.name && <div>المندوب: {record.delegate.name}</div>}
-                        {record.client_name && <div>العميل: {record.client_name}</div>}
+                    <div style={{ margin: '5px 0' }}>
+                        <div className="badge-invoice-type">
+                            فاتورة ضريبية مبسطة | SIMPLIFIED INVOICE
+                        </div>
                     </div>
 
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>الصنف</th>
-                                <th>الكمية</th>
-                                <th>السعر</th>
-                                <th>المجموع</th>
-                            </tr>
-                        </thead>
+                    <div className="thermal-divider" />
+
+                    <table className="meta-table">
                         <tbody>
-                            {record.lines?.map((line:any, idx:number) => {
-                                const qty = Number(line.quantity) || 0;
-                                const price = Number(line.unit_price) || Number(line.price) || 0;
-                                return (
-                                    <tr key={idx}>
-                                        <td>{line.item_name || line.name}</td>
-                                        <td style={{textAlign:'center'}}>{qty}</td>
-                                        <td>{price.toFixed(2)}</td>
-                                        <td>{(qty * price).toFixed(2)}</td>
-                                    </tr>
-                                );
-                            })}
+                            <tr>
+                                <td className="meta-label">رقم الفاتورة:</td>
+                                <td className="meta-val">#{record.invoice_number || record.id?.substring(0, 8)}</td>
+                            </tr>
+                            <tr>
+                                <td className="meta-label">التاريخ والوقت:</td>
+                                <td className="meta-val" style={{ direction: 'ltr', textAlign: 'right' }}>{creationDate} {creationTime}</td>
+                            </tr>
+                            <tr>
+                                <td className="meta-label">المنفذ / الفرع:</td>
+                                <td className="meta-val">{outletName}</td>
+                            </tr>
+                            <tr>
+                                <td className="meta-label">المندوب / البائع:</td>
+                                <td className="meta-val">{delegateName}</td>
+                            </tr>
+                            <tr>
+                                <td className="meta-label">الكاشير:</td>
+                                <td className="meta-val">{creatorInfo?.fullName || 'الكاشير'}</td>
+                            </tr>
+                            <tr>
+                                <td className="meta-label">العميل:</td>
+                                <td className="meta-val">{customerDisplayName}</td>
+                            </tr>
+                            {customerPhone && (
+                                <tr>
+                                    <td className="meta-label">جوال العميل:</td>
+                                    <td className="meta-val" style={{ direction: 'ltr', textAlign: 'right' }}>{customerPhone}</td>
+                                </tr>
+                            )}
+                            {customerVat && (
+                                <tr>
+                                    <td className="meta-label">ضريبة العميل:</td>
+                                    <td className="meta-val">{customerVat}</td>
+                                </tr>
+                            )}
+                            <tr>
+                                <td className="meta-label">طريقة الدفع:</td>
+                                <td className="meta-val">{record.payment_method || 'نقدي (كاش)'}</td>
+                            </tr>
                         </tbody>
                     </table>
 
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', marginTop: '10px', fontWeight: 'bold' }}>
-                        <span>الإجمالي (شامل الضريبة):</span>
-                        <span>{Number(record.total_amount || 0).toFixed(2)} ر.س</span>
+                    <div className="thermal-divider" />
+
+                    <table className="thermal-items-table">
+                        <thead>
+                            <tr>
+                                <th style={{ textAlign: 'right', width: '42%' }}>الصنف</th>
+                                <th style={{ width: '16%' }}>الكمية</th>
+                                <th style={{ width: '20%' }}>السعر</th>
+                                <th style={{ width: '22%', textAlign: 'left' }}>المجموع</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {lines.map((line, idx) => (
+                                <tr key={idx}>
+                                    <td style={{ textAlign: 'right', fontWeight: 'bold' }}>{line.name}</td>
+                                    <td style={{ textAlign: 'center' }}>{line.quantity}</td>
+                                    <td style={{ textAlign: 'center' }}>{line.unit_price.toFixed(2)}</td>
+                                    <td style={{ textAlign: 'left', fontWeight: '900' }}>{line.total.toFixed(2)}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+
+                    <div className="thermal-divider-double" />
+
+                    <div style={{ padding: '2px 0' }}>
+                        <div className="totals-row">
+                            <span>المبلغ الخاضع للضريبة:</span>
+                            <span>{taxableAmount.toFixed(2)} ر.س</span>
+                        </div>
+                        {discountAmount > 0 && (
+                            <div className="totals-row">
+                                <span>خصم تجاري:</span>
+                                <span>{discountAmount.toFixed(2)} - ر.س</span>
+                            </div>
+                        )}
+                        <div className="totals-row">
+                            <span>ضريبة القيمة المضافة (15%):</span>
+                            <span>{taxAmount.toFixed(2)} ر.س</span>
+                        </div>
+                        <div className="totals-row grand">
+                            <span>الإجمالي شامل الضريبة:</span>
+                            <span>{totalAmount.toFixed(2)} ر.س</span>
+                        </div>
+                        <div className="totals-row">
+                            <span>المدفوع:</span>
+                            <span>{paidAmount.toFixed(2)} ر.س</span>
+                        </div>
+                        {remainingAmount > 0 && (
+                            <div className="totals-row" style={{ fontWeight: 'bold' }}>
+                                <span>المتبقي (آجل):</span>
+                                <span>{remainingAmount.toFixed(2)} ر.س</span>
+                            </div>
+                        )}
+                        <div style={{ fontSize: '10px', marginTop: '6px', textAlign: 'center', color: '#222' }}>
+                            {amountInWords} ريال سعودي فقط لا غير.
+                        </div>
                     </div>
-                    
-                    <div style={{ borderBottom: '1px dashed #000', margin: '10px 0' }}></div>
-                    
-                    {!record.skip_zatca && (
-                        <div style={{ display: 'flex', justifyContent: 'center', margin: '15px 0' }}>
-                            <ZatcaQRCode record={record} />
+
+                    <div className="thermal-divider" />
+
+                    {!record.skip_zatca && thermalZatcaQr && (
+                        <div style={{ margin: '10px 0', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                            <QRCodeSVG value={thermalZatcaQr} size={125} level="M" />
+                            <div style={{ fontSize: '9px', marginTop: '4px', color: '#444' }}>
+                                رمز التحقق الإلكتروني (هيئة الزكاة والضريبة)
+                            </div>
                         </div>
                     )}
 
-                    <div style={{ fontSize: '11px', marginTop: '10px' }}>
-                        شكراً لتعاملكم معنا<br/>
-                        تم الإصدار عبر نظام غيام
+                    <div className="thermal-divider" />
+
+                    <div style={{ fontSize: '10px', marginTop: '6px', color: '#111', lineHeight: '1.4' }}>
+                        البضاعة المباعة تستبدل أو ترد خلال 3 أيام بحالتها الأصلية.<br/>
+                        شكراً لتعاملكم مع <strong>مياه غيام</strong> 💧<br/>
+                        خدمة العملاء: info@ghayamwater.com<br/>
+                        <span style={{ fontSize: '8.5px', color: '#555' }}>تم الإصدار إلكترونياً عبر نظام غيام</span>
                     </div>
                 </div>
             )}
