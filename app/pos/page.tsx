@@ -946,7 +946,7 @@ export default function PosPage() {
                     display: grid;
                     grid-template-columns: 1.85fr 1.15fr;
                     gap: 16px;
-                    height: calc(100vh - 200px);
+                    height: calc(100vh - 220px);
                     min-height: 0;
                 }
                 @media (max-width: 1024px) {
@@ -1020,7 +1020,7 @@ export default function PosPage() {
                         overflow: hidden !important;
                         display: flex !important;
                         flex-direction: column !important;
-                        padding: 12px 16px !important;
+                        padding: 10px 14px !important;
                     }
                     .clean-page.pos-master-page .items-grid {
                         flex: 1 1 0% !important;
@@ -1035,21 +1035,21 @@ export default function PosPage() {
                         overflow: hidden !important;
                         display: flex !important;
                         flex-direction: column !important;
-                        padding: 12px 16px !important;
+                        padding: 10px 14px !important;
                     }
                     .clean-page.pos-master-page .cart-list {
                         flex: 1 1 0% !important;
                         min-height: 0 !important;
                         max-height: 100% !important;
                         overflow-y: auto !important;
-                        margin-top: 6px !important;
-                        margin-bottom: 6px !important;
+                        margin-top: 4px !important;
+                        margin-bottom: 4px !important;
                     }
                     .clean-page.pos-master-page .checkout-panel {
                         flex-shrink: 0 !important;
                         margin-top: auto !important;
-                        padding: 10px 14px !important;
-                        gap: 7px !important;
+                        padding: 8px 12px !important;
+                        gap: 5px !important;
                         border-radius: 16px !important;
                     }
                 }
@@ -1956,7 +1956,7 @@ export default function PosPage() {
 
                         {/* Cart Items List */}
                         <div className="cart-list cinematic-scroll">
-                            {logic.cart.length === 0 ? (
+                            {logic.processedCart.length === 0 ? (
                                 <div style={{
                                     textAlign: 'center',
                                     padding: '45px 15px',
@@ -1986,7 +1986,7 @@ export default function PosPage() {
                                     </button>
                                 </div>
                             ) : (
-                                logic.cart.map((item: any) => (
+                                logic.processedCart.map((item: any) => (
                                     <div key={item.id} className="cart-item">
                                         {/* Row 1: Item Name + Custody Badge + Remove Button */}
                                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
@@ -2006,6 +2006,20 @@ export default function PosPage() {
                                                         whiteSpace: 'nowrap'
                                                     }}>
                                                         🔄 عهدة ({item.qty} فوارغ)
+                                                    </span>
+                                                )}
+                                                {((item.discount || 0) + (item.promo_discount || 0) > 0) && (
+                                                    <span style={{
+                                                        background: 'rgba(239, 68, 68, 0.12)',
+                                                        color: '#ef4444',
+                                                        border: '1px solid rgba(239, 68, 68, 0.28)',
+                                                        borderRadius: '6px',
+                                                        padding: '1px 6px',
+                                                        fontSize: '10px',
+                                                        fontWeight: 800,
+                                                        whiteSpace: 'nowrap'
+                                                    }}>
+                                                        خصم: {formatCurrency((item.discount || 0) + (item.promo_discount || 0))}
                                                     </span>
                                                 )}
                                             </div>
@@ -2068,9 +2082,9 @@ export default function PosPage() {
 
                                             {/* 3. Prominent Line Total */}
                                             <div className="cart-line-total-box">
-                                                <span className="cart-total-label">الإجمالي:</span>
+                                                <span className="cart-total-label">الصافي:</span>
                                                 <span className="cart-total-value">
-                                                    {formatCurrency(item.qty * (item.unit_price !== undefined ? item.unit_price : (item.price || 0)))}
+                                                    {formatCurrency(item.total)}
                                                 </span>
                                             </div>
                                         </div>
@@ -2133,6 +2147,58 @@ export default function PosPage() {
                                         <option value="نقدي (كاش)">نقدي (كاش)</option>
                                         <option value="شبكة (مدى)">شبكة (مدى / بطاقة)</option>
                                         <option value="آجل">آجل (على الحساب)</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            {/* الخصم اليدوي */}
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                background: 'rgba(239, 68, 68, 0.05)',
+                                padding: '5px 10px',
+                                borderRadius: '10px',
+                                border: '1px solid rgba(239, 68, 68, 0.12)'
+                            }}>
+                                <span style={{ fontWeight: 800, color: '#ef4444', fontSize: '11.5px' }}>خصم إضافي:</span>
+                                <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                                    <input 
+                                        type="number"
+                                        min="0"
+                                        step="any"
+                                        value={logic.manualDiscountAmount === 0 ? '' : logic.manualDiscountAmount}
+                                        onChange={e => logic.setManualDiscountAmount(Number(e.target.value) || 0)}
+                                        placeholder="0"
+                                        style={{
+                                            width: '60px',
+                                            height: '26px',
+                                            padding: '0 4px',
+                                            textAlign: 'center',
+                                            borderRadius: '6px',
+                                            border: '1px solid rgba(239, 68, 68, 0.2)',
+                                            outline: 'none',
+                                            fontWeight: 'bold',
+                                            color: '#ef4444'
+                                        }}
+                                    />
+                                    <select 
+                                        value={logic.discountType}
+                                        onChange={e => logic.setDiscountType(e.target.value as 'amount' | 'percentage')}
+                                        style={{
+                                            height: '26px',
+                                            borderRadius: '6px',
+                                            border: '1px solid rgba(239, 68, 68, 0.2)',
+                                            outline: 'none',
+                                            fontWeight: 'bold',
+                                            fontSize: '11px',
+                                            padding: '0 4px',
+                                            background: '#fff',
+                                            color: '#ef4444'
+                                        }}
+                                    >
+                                        <option value="amount">ر.س</option>
+                                        <option value="percentage">%</option>
                                     </select>
                                 </div>
                             </div>

@@ -6,6 +6,7 @@ import { useToast } from '@/lib/toast-context';
 import { useRealtimeInvalidate } from '@/lib/useRealtimeSync';
 import { SALES_ACCOUNTS, CASH_ACCOUNTS, ACC } from '@/lib/account-ids';
 import { notifyInvoiceCreated } from '@/lib/notificationService';
+import { distributeManualDiscount, applyPromotions, Promotion, PosCartItem } from '@/lib/promotions_engine';
 
 
 export function usePosLogic() {
@@ -22,6 +23,8 @@ export function usePosLogic() {
     const [partnerId, setPartnerId] = useState<string>('');
     const [delegateId, setDelegateId] = useState<string>(''); // المندوب المسؤول
     const [isDelegateLocked, setIsDelegateLocked] = useState(false); // القفل إذا كان المستخدم مندوب
+    const [manualDiscountAmount, setManualDiscountAmount] = useState<number>(0);
+    const [discountType, setDiscountType] = useState<'amount' | 'percentage'>('amount');
 
     // Fetch current user and profile
     const { data: userProfile, isLoading: loadingProfile } = useQuery({
@@ -396,10 +399,40 @@ export function usePosLogic() {
         }
     }, [loadingShift, loadingProfile, selectedWarehouseId, activeShift, hasAutoOpenedShift]);
 
+    // Fetch Active Promotions
+    const { data: promotions = [] } = useQuery({
+        queryKey: ['active_promotions'],
+        queryFn: async () => {
+            const { data, error } = await supabase.from('promotions').select('*').eq('status', 'active');
+            if (error) return [];
+            return data as Promotion[];
+        }
+    });
+
+    const processedCart = useMemo(() => {
+        let currentCart = [...cart];
+        
+        if (promotions.length > 0) {
+            currentCart = applyPromotions(currentCart, promotions);
+        }
+        
+        if (manualDiscountAmount > 0) {
+            currentCart = distributeManualDiscount(currentCart, manualDiscountAmount, discountType);
+        } else {
+             currentCart = currentCart.map(item => {
+                 const gross = (item.unit_price || item.price || 0) * (item.qty || item.quantity);
+                 const d = (item.discount || 0) + (item.promo_discount || 0);
+                 return { ...item, total: gross - d };
+             });
+        }
+        
+        return currentCart;
+    }, [cart, promotions, manualDiscountAmount, discountType]);
+
     const cartTotal = useMemo(() => {
         let sum = 0;
-        cart.forEach(item => {
-            sum += ((item.unit_price || item.price || 0) * item.qty) - (item.discount || 0);
+        processedCart.forEach(item => {
+            sum += item.total || 0;
         });
         
         if (isTaxInclusive) {
@@ -411,7 +444,7 @@ export function usePosLogic() {
             const tax = subtotal * 0.15;
             return { subtotal, tax, total: subtotal + tax };
         }
-    }, [cart, isTaxInclusive]);
+    }, [processedCart, isTaxInclusive]);
 
     const checkoutMutation = useMutation({
         mutationFn: async () => {
@@ -425,16 +458,18 @@ export function usePosLogic() {
 
             const autoNumber = `INV-POS-${Date.now().toString().slice(-6)}`;
             
-            const linesData = cart.map(item => ({
+            const linesData = processedCart.map(item => ({
                 item_id: item.inventory_items?.id || item.id,
                 name: item.inventory_items?.name || item.name,
                 quantity: item.quantity || item.qty,
                 unit_price: item.selected_price || item.unit_price || item.price || 0,
-                discount: item.discount || 0,
-                total: ((item.quantity || item.qty) * (item.selected_price || item.unit_price || item.price || 0)) - (item.discount || 0),
+                discount: (item.discount || 0) + (item.promo_discount || 0),
+                total: item.total || (((item.quantity || item.qty) * (item.selected_price || item.unit_price || item.price || 0)) - ((item.discount || 0) + (item.promo_discount || 0))),
                 warehouse_id: selectedWarehouseId,
                 is_returnable_bottle: Boolean(item.is_returnable_bottle)
             }));
+
+            const totalInvoiceDiscount = processedCart.reduce((sum, item) => sum + (item.discount || 0) + (item.promo_discount || 0), 0);
 
             // Resolve fleet_operation_id if warehouse is a vehicle
             let fleetOpId = activeFleetOperation?.id || null;
@@ -468,6 +503,7 @@ export function usePosLogic() {
                 total_amount: cartTotal.total,
                 taxable_amount: cartTotal.subtotal,
                 tax_amount: cartTotal.tax,
+                materials_discount: totalInvoiceDiscount, // Add total discount here
                 status: 'معلق',
                 warehouse_id: selectedWarehouseId,
                 delegate_id: delegateId || null,
@@ -662,6 +698,9 @@ export function usePosLogic() {
         onlyLowStock, setOnlyLowStock, lowStockCount,
         handleCheckout: () => checkoutMutation.mutate(),
         isCheckingOut: checkoutMutation.isPending,
-        isLoading: loadingWarehouses || loadingItems || loadingShift
+        isLoading: loadingWarehouses || loadingItems || loadingShift,
+        manualDiscountAmount, setManualDiscountAmount,
+        discountType, setDiscountType,
+        processedCart
     };
 }

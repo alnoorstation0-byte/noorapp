@@ -56,6 +56,7 @@ export const menuGroups = [
         items: [
             { id: 'reports', title: 'التقارير الشاملة', icon: '📊', path: '/reports' }, 
             { id: 'import', title: 'استيراد البيانات', icon: '⬆️', path: '/import' },
+            { id: 'promotions', title: 'العروض الترويجية', icon: '🎁', path: '/promotions' },
             { id: 'audit', title: 'المراجعة والتدقيق', icon: '🔍', path: '/audit' },
             { id: 'fleet', title: 'إدارة السيارات', icon: '🚙', path: '/fleet' },
             { id: 'payroll', title: 'الرواتب والأجور', icon: '💵', path: '/payroll' },
