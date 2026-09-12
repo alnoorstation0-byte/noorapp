@@ -47,6 +47,7 @@ export function useExpensesLogic() {
     const [bulkFixAccounts, setBulkFixAccounts] = useState({ creditor_account: '', payment_account: '' });
 
     const [disburseProgress, setDisburseProgress] = useState({ current: 0, total: 0, isActive: false });
+    const [rowActionLoadingId, setRowActionLoadingId] = useState<string | null>(null);
 
     // 🚀 القيمة الافتراضية أصبحت "آجل" تماشياً مع التحديث المحاسبي، وتم إضافة حقول الربط الجديدة
     const defaultExp = { 
@@ -142,14 +143,14 @@ export function useExpensesLogic() {
             const [part, acc, fleet, vehicles] = await Promise.all([
                 supabase.from('partners').select('id, name, partner_type'),
                 supabase.from('accounts').select('id, code, name'),
-                supabase.from('fleet_operations').select('id, operation_number, operation_date, description, vehicle:fleet_vehicles(plate_number), driver:partners(name), description').eq('status', 'مفتوح'),
+                supabase.from('fleet_operations').select('id, operation_number, operation_date, description, vehicle:fleet_vehicles(plate_number), driver:partners(name)').neq('status', 'مغلق').neq('status', 'closed').order('operation_date', { ascending: false }),
                 supabase.from('fleet_vehicles').select('id, plate_number, vehicle_model')
             ]);
             
             const partnersData = part.data || [];
-            const formattedFleet = fleet.data?.map(op => ({
+            const formattedFleet = fleet.data?.map((op: any) => ({
                 id: op.id,
-                name: ``
+                name: `🚚 ${op.operation_number} | ${op.driver?.name ? `مندوب: ${op.driver.name}` : 'بدون مندوب'} | ${op.vehicle?.plate_number ? `سيارة: ${op.vehicle.plate_number}` : ''} ${op.description ? `(${op.description})` : ''}`
             })) || [];
 
             return {
@@ -157,7 +158,7 @@ export function useExpensesLogic() {
                 contractors: partnersData.filter(p => p.partner_type === 'مورد'),
                 payees: partnersData.filter(p => p.partner_type === 'مورد' || p.partner_type === 'مندوب'),
                 accounts_raw: acc.data || [], 
-                accounts: (acc.data || []).map(a => ({ id: a.id, code: a.code, name: `` })),
+                accounts: (acc.data || []).map(a => ({ id: a.id, code: a.code, name: `${a.code} - ${a.name}` })),
                 boqItems: [],
                 fleetOperations: formattedFleet,
                 fleetVehicles: vehicles.data || []
@@ -557,7 +558,7 @@ export function useExpensesLogic() {
             setSelectedIds([]);
 
             try {
-                const { error } = await supabase.rpc('unpost_expenses_bulk', { record_ids: idsToProcess });
+                const { error } = await supabase.rpc('unpost_expenses_bulk', { p_ids: idsToProcess });
                 if (error) throw error;
                 showToast('تم فك الترحيل بنجاح ↩️', 'success');
                 queryClient.invalidateQueries({ queryKey: ['payment_vouchers'] });
@@ -592,6 +593,51 @@ export function useExpensesLogic() {
                 bulkDisburseMutation.mutate(selectedIds);
             }
         },
-        isDisbursing: bulkDisburseMutation.isPending
+        isDisbursing: bulkDisburseMutation.isPending,
+
+        rowActionLoadingId,
+        handlePostSingle: async (id: string) => {
+            if (!id) return;
+            setRowActionLoadingId(id);
+            await queryClient.cancelQueries({ queryKey: ['expenses'] });
+            const previousData = queryClient.getQueryData(['expenses']);
+            updateRowsInCache([id], { is_posted: true });
+
+            try {
+                const { error } = await supabase.rpc('post_expenses_bulk', { p_ids: [id] });
+                if (error) throw error;
+                showToast('تم اعتماد وترحيل المصروف بنجاح 🚀', 'success');
+                queryClient.invalidateQueries({ queryKey: ['expenses'] });
+                queryClient.invalidateQueries({ queryKey: ['journal_master_view'] });
+            } catch (error: any) {
+                queryClient.setQueryData(['expenses'], previousData);
+                import('@/lib/audit').then(({ logCustomAuditEvent }) => logCustomAuditEvent('expenses', 'FAILED_POST', id, null, { error: error.message }));
+                showToast(`خطأ في الترحيل: ${error.message}`, 'error');
+            } finally {
+                setRowActionLoadingId(null);
+            }
+        },
+
+        handleUnpostSingle: async (id: string) => {
+            if (!id) return;
+            setRowActionLoadingId(id);
+            await queryClient.cancelQueries({ queryKey: ['expenses'] });
+            const previousData = queryClient.getQueryData(['expenses']);
+            updateRowsInCache([id], { is_posted: false, paid_amount: 0 });
+
+            try {
+                const { error } = await supabase.rpc('unpost_expenses_bulk', { p_ids: [id] });
+                if (error) throw error;
+                showToast('تم فك ترحيل المصروف بنجاح ↩️', 'success');
+                queryClient.invalidateQueries({ queryKey: ['expenses'] });
+                queryClient.invalidateQueries({ queryKey: ['journal_master_view'] });
+                queryClient.invalidateQueries({ queryKey: ['payment_vouchers'] });
+            } catch (error: any) {
+                queryClient.setQueryData(['expenses'], previousData);
+                showToast(`خطأ في فك الترحيل: ${error.message}`, 'error');
+            } finally {
+                setRowActionLoadingId(null);
+            }
+        }
     };
 }

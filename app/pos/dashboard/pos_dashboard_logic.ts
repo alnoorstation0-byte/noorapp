@@ -69,6 +69,30 @@ export function usePosDashboardLogic() {
         }
     });
 
+    // Fetch Shifts History for Audit & Review
+    const { data: shiftsHistory = [], isLoading: loadingShifts } = useQuery({
+        queryKey: ['pos_dashboard_shifts', selectedWarehouseId, dateRange],
+        queryFn: async () => {
+            let query = supabase
+                .from('pos_shifts')
+                .select(`
+                    *,
+                    warehouse:warehouses(id, name, type),
+                    delegate:partners!delegate_id(id, name, phone, code)
+                `)
+                .order('opened_at', { ascending: false });
+
+            if (selectedWarehouseId !== 'all') {
+                query = query.eq('warehouse_id', selectedWarehouseId);
+            }
+            if (dateRange.start) query = query.gte('opened_at', `${dateRange.start}T00:00:00Z`);
+            if (dateRange.end) query = query.lte('opened_at', `${dateRange.end}T23:59:59Z`);
+
+            const { data } = await query;
+            return data || [];
+        }
+    });
+
     const totalStockValue = useMemo(() => inventoryBalances.reduce((sum: number, item: any) => sum + item.value, 0), [inventoryBalances]);
     const totalSalesValue = useMemo(() => sales.reduce((sum: number, inv: any) => sum + Number(inv.total_amount), 0), [sales]);
     const totalCollected = useMemo(() => sales.reduce((sum: number, inv: any) => sum + Number(inv.paid_amount), 0), [sales]);
@@ -76,8 +100,8 @@ export function usePosDashboardLogic() {
     return {
         warehouses, selectedWarehouseId, setSelectedWarehouseId,
         dateRange, setDateRange,
-        inventoryBalances, sales,
+        inventoryBalances, sales, shiftsHistory,
         totalStockValue, totalSalesValue, totalCollected,
-        isLoading: loadingWarehouses || loadingInv || loadingSales
+        isLoading: loadingWarehouses || loadingInv || loadingSales || loadingShifts
     };
 }

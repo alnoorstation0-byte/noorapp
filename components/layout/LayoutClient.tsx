@@ -87,6 +87,10 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
 
   let animationDelayCounter = 0;
 
+  if (pathname === '/login' || pathname === '/signup') {
+    return <>{children}</>;
+  }
+
   if (!mounted || !isInitialized || loading) {
     return <LoadingScreen message="جاري تهيئة النظام..." />; 
   }

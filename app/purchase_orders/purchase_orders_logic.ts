@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { showGlobalToast } from '@/lib/toast-context';
 import { useRealtimeListener } from '@/lib/useRealtimeSync';
+import { executeApproveTransaction, executeUnapproveTransaction } from '@/lib/inventory_engine';
 
 import { useAuth } from '@/components/authGuard';
 
@@ -87,8 +88,7 @@ export function usePurchaseOrdersLogic() {
     try {
       setIsLoading(true);
       for (const id of transaction.ids) {
-          const { error: rpcError } = await supabase.rpc('approve_inventory_transaction', { p_id: id });
-          if (rpcError) throw new Error(rpcError.message);
+          await executeApproveTransaction(id);
       }
 
       showGlobalToast('تم اعتماد أمر الشراء واستلامه بالمستودع بنجاح', 'success');
@@ -107,44 +107,9 @@ export function usePurchaseOrdersLogic() {
 
     try {
       setIsLoading(true);
-        for (const id of transaction.ids) {
-            // Fetch transaction details
-            const { data: txn, error: txnError } = await supabase
-                .from('inventory_transactions')
-                .select('*')
-                .eq('id', id)
-                .single();
-            if (txnError || !txn) throw new Error('Transaction not found');
-
-            // 1. Subtract from main inventory
-            const { data: itemData } = await supabase.from('inventory_items').select('current_quantity').eq('id', txn.item_id).single();
-            if (itemData) {
-                await supabase.from('inventory_items').update({
-                    current_quantity: Number(itemData.current_quantity) - Number(txn.quantity)
-                }).eq('id', txn.item_id);
-            }
-
-            // 2. Subtract from warehouse inventory (if applicable)
-            const targetWarehouseId = txn.warehouse_id || '11111111-1111-1111-1111-111111111111';
-            const { data: whInv } = await supabase.from('warehouse_inventory').select('id, quantity').eq('warehouse_id', targetWarehouseId).eq('item_id', txn.item_id).maybeSingle();
-            
-            if (whInv) {
-                await supabase.from('warehouse_inventory').update({
-                    quantity: Number(whInv.quantity) - Number(txn.quantity)
-                }).eq('id', whInv.id);
-            }
-
-            // 3. Delete Journal Entry
-            if (txn.journal_id) {
-                await supabase.from('journal_headers').delete().eq('id', txn.journal_id);
-            }
-
-            // 4. Reset Transaction Status
-            await supabase.from('inventory_transactions').update({
-                status: 'pending',
-                journal_id: null
-            }).eq('id', id);
-        }
+      for (const id of transaction.ids) {
+          await executeUnapproveTransaction(id);
+      }
 
       // Clean up entitlement vouchers if any from expenses
       await supabase.from('expenses').delete().eq('expense_number', `PO-${transaction.transaction_number}`);

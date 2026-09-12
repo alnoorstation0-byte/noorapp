@@ -9,14 +9,222 @@ import InvoicePrintModal from '../invoices/InvoicePrintModal';
 import ThermalReceiptModal from '../invoices/ThermalReceiptModal';
 import ShiftOpenModal from './ShiftOpenModal';
 import ShiftCloseModal from './ShiftCloseModal';
+import OpenShiftsModal from './OpenShiftsModal';
+import ShiftDetailsModal from './ShiftDetailsModal';
 import { FaPlus, FaMinus, FaTrash, FaCheckCircle, FaBarcode } from 'react-icons/fa';
+
+const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('ar-SA', { style: 'currency', currency: 'SAR' }).format(amount || 0);
+};
+
+interface PosItemNumpadModalProps {
+    item: any;
+    isTaxInclusive: boolean;
+    onUpdateItem: (updated: any) => void;
+    onConfirm: () => void;
+    onClose: () => void;
+}
+
+function PosItemNumpadModal({
+    item,
+    isTaxInclusive,
+    onUpdateItem,
+    onConfirm,
+    onClose,
+}: PosItemNumpadModalProps) {
+    const [activeField, setActiveField] = React.useState<'qty' | 'price'>('qty');
+    const [isFirstPress, setIsFirstPress] = React.useState(true);
+
+    const handleNumpad = (key: string) => {
+        const currentVal = activeField === 'qty'
+            ? String(item.selected_qty || '')
+            : String(item.selected_price || '');
+
+        let newVal: string;
+
+        if (key === '⌫') {
+            newVal = currentVal.slice(0, -1) || '0';
+        } else if (key === '.') {
+            newVal = isFirstPress ? '0.' : (currentVal.includes('.') ? currentVal : currentVal + '.');
+        } else {
+            newVal = isFirstPress ? key : currentVal + key;
+        }
+
+        setIsFirstPress(false);
+        const num = parseFloat(newVal) || 0;
+
+        if (activeField === 'qty') {
+            onUpdateItem({ ...item, selected_qty: key === '⌫' ? (Number(newVal) || 0) : num });
+        } else {
+            onUpdateItem({ ...item, selected_price: key === '⌫' ? (Number(newVal) || 0) : parseFloat(newVal) || 0 });
+        }
+    };
+
+    const switchField = (field: 'qty' | 'price') => {
+        setActiveField(field);
+        setIsFirstPress(true);
+    };
+
+    const numpadKeys = ['7', '8', '9', '4', '5', '6', '1', '2', '3', '.', '0', '⌫'];
+
+    return (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(8px)' }}>
+            <div style={{ background: 'rgba(255,255,255,0.97)', borderRadius: '28px', width: '95vw', maxWidth: '460px', boxShadow: '0 25px 60px rgba(0,0,0,0.35)', border: '1px solid rgba(255,255,255,0.6)', overflow: 'hidden' }}>
+
+                {/* Header */}
+                <div style={{ background: 'linear-gradient(135deg, #1C73AB 0%, #2891C8 100%)', padding: '18px 22px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div>
+                        <div style={{ color: 'white', fontWeight: 900, fontSize: '18px' }}>{item.name}</div>
+                        <div style={{ color: 'rgba(255,255,255,0.75)', fontSize: '13px', marginTop: '3px' }}>المتاح: {item.available_qty} {item.unit}</div>
+                    </div>
+                    <button onClick={onClose} style={{ background: 'rgba(255,255,255,0.2)', border: 'none', color: 'white', width: '36px', height: '36px', borderRadius: '50%', cursor: 'pointer', fontSize: '18px', fontWeight: 'bold' }}>×</button>
+                </div>
+
+                <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
+
+                    {/* Active Field Displays */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                        {/* Qty Field */}
+                        <div
+                            onClick={() => switchField('qty')}
+                            style={{ 
+                                background: (item.selected_qty > item.available_qty)
+                                    ? '#fee2e2'
+                                    : (activeField === 'qty' ? 'linear-gradient(135deg,#1C73AB,#2891C8)' : '#f1f5f9'), 
+                                borderRadius: '16px', 
+                                padding: '14px', 
+                                cursor: 'pointer', 
+                                border: (item.selected_qty > item.available_qty)
+                                    ? '2px solid #ef4444'
+                                    : (activeField === 'qty' ? '2px solid #2891C8' : '2px solid transparent'), 
+                                transition: '0.2s', 
+                                textAlign: 'center' 
+                            }}
+                        >
+                            <div style={{ fontSize: '11px', fontWeight: 700, color: (item.selected_qty > item.available_qty) ? '#dc2626' : (activeField === 'qty' ? 'rgba(255,255,255,0.8)' : '#64748b'), marginBottom: '6px' }}>
+                                {(item.selected_qty > item.available_qty) ? '⚠️ الكمية (تجاوزت المخزون)' : 'الكمية'}
+                            </div>
+                            <div style={{ fontSize: '32px', fontWeight: 900, color: (item.selected_qty > item.available_qty) ? '#dc2626' : (activeField === 'qty' ? 'white' : '#0f172a'), letterSpacing: '-1px' }}>
+                                {item.selected_qty || 0}
+                            </div>
+                            <div style={{ fontSize: '11px', color: (item.selected_qty > item.available_qty) ? '#dc2626' : (activeField === 'qty' ? 'rgba(255,255,255,0.65)' : '#94a3b8'), marginTop: '4px' }}>{item.unit}</div>
+                        </div>
+
+                        {/* Price Field */}
+                        <div
+                            onClick={() => switchField('price')}
+                            style={{ background: activeField === 'price' ? 'linear-gradient(135deg,#16a34a,#10b981)' : '#f1f5f9', borderRadius: '16px', padding: '14px', cursor: 'pointer', border: activeField === 'price' ? '2px solid #16a34a' : '2px solid transparent', transition: '0.2s', textAlign: 'center' }}
+                        >
+                            <div style={{ fontSize: '11px', fontWeight: 700, color: activeField === 'price' ? 'rgba(255,255,255,0.8)' : '#64748b', marginBottom: '6px' }}>
+                                {isTaxInclusive ? 'السعر شامل ض.ق.م' : 'السعر قبل ض.ق.م'}
+                            </div>
+                            <div style={{ fontSize: '28px', fontWeight: 900, color: activeField === 'price' ? 'white' : '#16a34a', letterSpacing: '-1px' }}>
+                                {Number(item.selected_price || 0).toFixed(2)}
+                            </div>
+                            <div style={{ fontSize: '11px', color: activeField === 'price' ? 'rgba(255,255,255,0.65)' : '#94a3b8', marginTop: '4px' }}>ريال</div>
+                        </div>
+                    </div>
+
+                    {/* Stock Warning Message */}
+                    {item.selected_qty > item.available_qty && (
+                        <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '12px', padding: '8px 12px', color: '#b91c1c', fontSize: '12px', fontWeight: 800, textAlign: 'center' }}>
+                            ⛔ الكمية المطلوبة ({item.selected_qty}) تتجاوز الرصيد المتاح بالمستودع ({item.available_qty})!
+                        </div>
+                    )}
+
+                    {/* Quick +/- for Qty */}
+                    <div style={{ display: 'flex', gap: '10px', alignItems: 'center', justifyContent: 'center' }}>
+                        <button
+                            onClick={() => { onUpdateItem({ ...item, selected_qty: Math.max(1, (item.selected_qty || 1) - 1) }); setIsFirstPress(false); }}
+                            style={{ width: '52px', height: '52px', borderRadius: '50%', border: 'none', background: '#fee2e2', color: '#dc2626', fontSize: '24px', fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                        >−</button>
+                        <span style={{ fontSize: '13px', color: '#64748b', fontWeight: 700, minWidth: '80px', textAlign: 'center' }}>الكمية السريعة</span>
+                        <button
+                            onClick={() => { const next = (item.selected_qty || 1) + 1; if(next <= item.available_qty) { onUpdateItem({ ...item, selected_qty: next }); setIsFirstPress(false); } }}
+                            style={{ width: '52px', height: '52px', borderRadius: '50%', border: 'none', background: '#dcfce7', color: '#16a34a', fontSize: '24px', fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+                        >+</button>
+                    </div>
+
+                    {/* Numpad */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
+                        {numpadKeys.map(key => (
+                            <button
+                                key={key}
+                                onClick={() => handleNumpad(key)}
+                                style={{
+                                    height: '58px',
+                                    borderRadius: '14px',
+                                    border: 'none',
+                                    background: key === '⌫' ? '#fee2e2' : key === '.' ? '#f0f9ff' : 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
+                                    color: key === '⌫' ? '#dc2626' : key === '.' ? '#0ea5e9' : '#0f172a',
+                                    fontSize: key === '⌫' ? '20px' : '22px',
+                                    fontWeight: 900,
+                                    cursor: 'pointer',
+                                    boxShadow: '0 2px 6px rgba(0,0,0,0.08)',
+                                    transition: 'all 0.1s',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                }}
+                                onMouseDown={e => (e.currentTarget.style.transform = 'scale(0.94)')}
+                                onMouseUp={e => (e.currentTarget.style.transform = 'scale(1)')}
+                                onTouchStart={e => (e.currentTarget.style.transform = 'scale(0.94)')}
+                                onTouchEnd={e => (e.currentTarget.style.transform = 'scale(1)')}
+                            >
+                                {key}
+                            </button>
+                        ))}
+                    </div>
+
+                    {/* Total Preview */}
+                    <div style={{ background: 'linear-gradient(135deg,#0f172a,#1e293b)', borderRadius: '14px', padding: '14px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ color: '#94a3b8', fontWeight: 700, fontSize: '14px' }}>الإجمالي المتوقع:</span>
+                        <span style={{ color: '#10b981', fontWeight: 900, fontSize: '22px' }}>
+                            {formatCurrency((item.selected_qty || 0) * (item.selected_price || 0))}
+                        </span>
+                    </div>
+
+                    {/* Action Buttons */}
+                    <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '10px' }}>
+                        <button
+                            onClick={onConfirm}
+                            disabled={!item.selected_qty || item.selected_qty <= 0 || item.selected_qty > item.available_qty}
+                            style={{ 
+                                height: '54px', 
+                                background: (item.selected_qty > item.available_qty)
+                                    ? 'linear-gradient(135deg, #ef4444, #991b1b)'
+                                    : 'linear-gradient(135deg,#2891C8,#1C73AB)', 
+                                color: 'white', 
+                                border: 'none', 
+                                borderRadius: '14px', 
+                                fontWeight: 900, 
+                                fontSize: '15px', 
+                                cursor: (item.selected_qty > item.available_qty) ? 'not-allowed' : 'pointer', 
+                                boxShadow: '0 4px 15px rgba(40,145,200,0.4)',
+                                transition: '0.2s'
+                            }}
+                        >
+                            {item.selected_qty > item.available_qty 
+                                ? `⛔ تجاوز المخزون (المتاح ${item.available_qty})`
+                                : '🛒 إضافة للسلة'}
+                        </button>
+                        <button
+                            onClick={onClose}
+                            style={{ height: '54px', background: '#f1f5f9', color: '#64748b', border: 'none', borderRadius: '14px', fontWeight: 700, fontSize: '15px', cursor: 'pointer' }}
+                        >
+                            إلغاء
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    );
+}
 
 export default function PosPage() {
     const logic = usePosLogic();
-
-    const formatCurrency = (amount: number) => {
-        return new Intl.NumberFormat('ar-SA', { style: 'currency', currency: 'SAR' }).format(amount || 0);
-    };
+    const [inspectShiftId, setInspectShiftId] = React.useState<string | null>(null);
 
     return (
         <MasterPage 
@@ -340,16 +548,81 @@ export default function PosPage() {
                             </span>
                         )}
                     </div>
+
+                    {/* أمر تشغيل الرحلة المرتبط تلقائياً */}
+                    {logic.activeFleetOperation && (
+                        <div className="pos-select-item" style={{
+                            background: 'rgba(2, 132, 199, 0.08)',
+                            border: '1.5px solid rgba(2, 132, 199, 0.3)',
+                            padding: '5px 12px',
+                            borderRadius: '12px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '6px'
+                        }}>
+                            <span style={{ fontSize: '12px', fontWeight: 900, color: '#0284c7' }}>
+                                🚚 أمر التشغيل:
+                            </span>
+                            <span style={{ fontSize: '13px', fontWeight: 900, color: '#0f172a' }}>
+                                {logic.activeFleetOperation.operation_number}
+                            </span>
+                            {logic.activeFleetOperation.vehicle?.plate_number && (
+                                <span style={{ fontSize: '11px', color: '#64748b', fontWeight: 800 }}>
+                                    ({logic.activeFleetOperation.vehicle.plate_number})
+                                </span>
+                            )}
+                            <span style={{ 
+                                fontSize: '10px', 
+                                fontWeight: 800, 
+                                background: '#dcfce7', 
+                                color: '#16a34a', 
+                                padding: '2px 6px', 
+                                borderRadius: '6px' 
+                            }}>
+                                مربوط تلقائياً ⚡
+                            </span>
+                        </div>
+                    )}
                 </div>
 
                 {/* إدارة الوردية */}
                 <div className="pos-shift-group">
                     {logic.activeShift ? (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                            <div className="pos-shift-status open">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                            <div className="pos-shift-status open" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 <span className="pos-pulse-dot green"></span>
-                                <span>وردية نشطة #{logic.activeShift.id ? String(logic.activeShift.id).slice(-4) : ''}</span>
+                                <div>
+                                    <div style={{ fontWeight: 900, fontSize: '13px' }}>
+                                        وردية نشطة #{String(logic.activeShift.id).slice(-4)}
+                                    </div>
+                                    <div style={{ fontSize: '10px', color: '#166534', fontWeight: 700 }}>
+                                        {logic.warehouses.find((w: any) => w.id === logic.activeShift.warehouse_id)?.name || ''}
+                                        {logic.activeShift.delegate_id && ` • ${logic.delegates.find((d: any) => d.id === logic.activeShift.delegate_id)?.name || ''}`}
+                                    </div>
+                                </div>
                             </div>
+                            <button 
+                                onClick={() => setInspectShiftId(logic.activeShift.id)}
+                                type="button"
+                                style={{
+                                    padding: '9px 14px',
+                                    borderRadius: '12px',
+                                    border: '1.5px solid rgba(28, 115, 171, 0.3)',
+                                    background: 'rgba(255, 255, 255, 0.85)',
+                                    color: '#1C73AB',
+                                    fontWeight: 800,
+                                    fontSize: '12px',
+                                    cursor: 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '5px',
+                                    backdropFilter: 'blur(10px)',
+                                    minHeight: '40px'
+                                }}
+                                title="مراجعة وتدقيق تفاصيل الوردية كمرجع"
+                            >
+                                🔍 تفاصيل الوردية
+                            </button>
                             <button 
                                 onClick={() => logic.setIsShiftCloseModalOpen(true)}
                                 className="pos-btn-shift close"
@@ -358,10 +631,16 @@ export default function PosPage() {
                             </button>
                         </div>
                     ) : (
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                            <div className="pos-shift-status closed">
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                            <div className="pos-shift-status closed" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 <span className="pos-pulse-dot gray"></span>
-                                <span>لا توجد وردية مفتوحة</span>
+                                <div>
+                                    <div style={{ fontWeight: 800, fontSize: '13px' }}>لا توجد وردية مفتوحة</div>
+                                    <div style={{ fontSize: '10px', color: '#64748b' }}>
+                                        {logic.warehouses.find((w: any) => w.id === logic.selectedWarehouseId)?.name || 'اختر منفذ البيع'}
+                                        {logic.delegateId && ` • ${logic.delegates.find((d: any) => d.id === logic.delegateId)?.name || ''}`}
+                                    </div>
+                                </div>
                             </div>
                             <button 
                                 onClick={() => logic.setIsShiftOpenModalOpen(true)}
@@ -370,6 +649,33 @@ export default function PosPage() {
                                 ✨ فتح وردية جديدة
                             </button>
                         </div>
+                    )}
+
+                    {/* زر استعراض الورديات المفتوحة لكل المناديب والمستودعات */}
+                    {logic.allOpenShifts && logic.allOpenShifts.length > 0 && (
+                        <button
+                            type="button"
+                            onClick={() => logic.setIsOpenShiftsDrawerOpen(true)}
+                            style={{
+                                background: 'rgba(255, 255, 255, 0.75)',
+                                border: '1.5px solid rgba(28, 115, 171, 0.3)',
+                                color: '#1C73AB',
+                                padding: '8px 14px',
+                                borderRadius: '12px',
+                                fontSize: '12px',
+                                fontWeight: 800,
+                                cursor: 'pointer',
+                                transition: 'all 0.2s ease',
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                backdropFilter: 'blur(10px)',
+                                minHeight: '40px'
+                            }}
+                            title="عرض ورديات كل المناديب والمستودعات والتبديل بينها"
+                        >
+                            📋 الورديات النشطة ({logic.allOpenShifts.length})
+                        </button>
                     )}
                 </div>
             </div>
@@ -382,6 +688,63 @@ export default function PosPage() {
                     
                     {/* Left: Items Selection */}
                     <div className="items-section">
+                        {/* Shift Required Alert Banner */}
+                        {!logic.activeShift && (
+                            <div style={{
+                                background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.12) 0%, rgba(220, 38, 38, 0.05) 100%)',
+                                border: '1.5px solid rgba(239, 68, 68, 0.35)',
+                                borderRadius: '16px',
+                                padding: '14px 20px',
+                                marginBottom: '14px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                flexWrap: 'wrap',
+                                gap: '12px',
+                                backdropFilter: 'blur(10px)',
+                                boxShadow: '0 4px 15px rgba(239, 68, 68, 0.08)'
+                            }}>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                    <div style={{
+                                        width: '42px', height: '42px', borderRadius: '12px',
+                                        background: '#fee2e2', display: 'flex', alignItems: 'center',
+                                        justifyContent: 'center', fontSize: '22px'
+                                    }}>
+                                        🔒
+                                    </div>
+                                    <div>
+                                        <div style={{ fontWeight: 900, fontSize: '14px', color: '#b91c1c' }}>
+                                            الوردية مغلقة حالياً — لا يمكن إجراء أي عملية بيع
+                                        </div>
+                                        <div style={{ fontSize: '11.5px', color: '#64748b', fontWeight: 700 }}>
+                                            يجب على المندوب أو البائع الضغط على "بدء الوردية" لتسجيل العهدة وتفعيل نقطة البيع
+                                        </div>
+                                    </div>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={() => logic.setIsShiftOpenModalOpen(true)}
+                                    style={{
+                                        background: 'linear-gradient(135deg, #1C73AB 0%, #2891C8 100%)',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '12px',
+                                        padding: '10px 20px',
+                                        fontSize: '13px',
+                                        fontWeight: 900,
+                                        cursor: 'pointer',
+                                        boxShadow: '0 4px 12px rgba(28, 115, 171, 0.3)',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        gap: '6px'
+                                    }}
+                                >
+                                    <span>✨</span>
+                                    <span>بدء الوردية الآن</span>
+                                </button>
+                            </div>
+                        )}
+
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                             {/* Barcode Scanner */}
                             <BarcodeScannerWidget onScan={logic.handleBarcodeScan} />
@@ -477,12 +840,32 @@ export default function PosPage() {
                                             ) : null}
                                             <div className="pos-item-name" style={{ marginTop: (item.isCriticalLow || item.isNearLow) ? '16px' : '0' }}>{item.name}</div>
                                             <div className="pos-item-price">{formatCurrency(item.suggested_price || item.price || 0)}</div>
-                                            <div className="pos-item-qty" style={{
-                                                background: item.isCriticalLow ? '#fecaca' : (item.isNearLow ? '#fef08a' : '#f1f5f9'),
-                                                color: item.isCriticalLow ? '#991b1b' : (item.isNearLow ? '#854d0e' : '#64748b'),
-                                                fontWeight: 800
-                                            }}>
-                                                المتاح: {item.available_qty} {item.unit}
+                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '4px', width: '100%' }}>
+                                                <div className="pos-item-qty" style={{
+                                                    background: item.isCriticalLow ? '#fecaca' : (item.isNearLow ? '#fef08a' : '#f1f5f9'),
+                                                    color: item.isCriticalLow ? '#991b1b' : (item.isNearLow ? '#854d0e' : '#64748b'),
+                                                    fontWeight: 800,
+                                                    flex: 1
+                                                }}>
+                                                    المتاح: {item.available_qty} {item.unit}
+                                                </div>
+                                                {item.is_returnable_bottle && (
+                                                    <span style={{
+                                                        background: 'rgba(40, 145, 200, 0.15)',
+                                                        border: '1px solid rgba(40, 145, 200, 0.35)',
+                                                        color: '#1C73AB',
+                                                        fontSize: '10px',
+                                                        fontWeight: 800,
+                                                        padding: '4px 6px',
+                                                        borderRadius: '8px',
+                                                        whiteSpace: 'nowrap',
+                                                        display: 'flex',
+                                                        alignItems: 'center',
+                                                        gap: '2px'
+                                                    }}>
+                                                        🔄 عهدة
+                                                    </span>
+                                                )}
                                             </div>
                                         </div>
                                     );
@@ -506,11 +889,27 @@ export default function PosPage() {
                                 logic.cart.map((item: any) => (
                                     <div key={item.id} className="cart-item">
                                         <div style={{ flex: 1 }}>
-                                            <div style={{ fontWeight: 900, fontSize: '13px', color: '#1e293b' }}>{item.name}</div>
+                                            <div style={{ fontWeight: 900, fontSize: '13px', color: '#1e293b', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
+                                                <span>{item.name}</span>
+                                                {item.is_returnable_bottle && (
+                                                    <span style={{
+                                                        background: 'rgba(40, 145, 200, 0.15)',
+                                                        color: '#1C73AB',
+                                                        border: '1px solid rgba(40, 145, 200, 0.3)',
+                                                        borderRadius: '6px',
+                                                        padding: '1px 6px',
+                                                        fontSize: '10px',
+                                                        fontWeight: 800
+                                                    }}>
+                                                        🔄 عهدة ({item.qty} فوارغ)
+                                                    </span>
+                                                )}
+                                            </div>
                                             <input 
                                                 type="number" 
                                                 value={item.unit_price !== undefined ? item.unit_price : (item.price || 0)}
                                                 onChange={(e) => logic.updateCartItemPrice(item.id, Number(e.target.value))}
+                                                onFocus={(e) => e.target.select()}
                                                 style={{ width: '80px', fontSize: '12px', color: '#16a34a', fontWeight: 'bold', border: '1px solid #cbd5e1', borderRadius: '5px', padding: '2px 5px', marginTop: '2px' }}
                                                 min={0}
                                                 step="any"
@@ -522,6 +921,7 @@ export default function PosPage() {
                                                 type="number" 
                                                 value={item.qty}
                                                 onChange={(e) => logic.updateCartItemQty(item.id, Number(e.target.value))}
+                                                onFocus={(e) => e.target.select()}
                                                 style={{ width: '40px', textAlign: 'center', fontWeight: 'bold', border: '1px solid #cbd5e1', borderRadius: '5px', padding: '2px' }}
                                                 min={1}
                                             />
@@ -562,7 +962,7 @@ export default function PosPage() {
                                 </select>
                             </div>
 
-                                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '15px', background: 'rgba(255,255,255,0.5)', padding: '10px', borderRadius: '10px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '15px', background: 'rgba(255,255,255,0.5)', padding: '10px', borderRadius: '10px' }}>
                                 <span style={{ fontWeight: 'bold', color: '#1e293b', fontSize: '14px' }}>طريقة الحساب:</span>
                                 <div style={{ display: 'flex', background: '#e2e8f0', borderRadius: '8px', overflow: 'hidden' }}>
                                     <button 
@@ -588,18 +988,67 @@ export default function PosPage() {
                                 <span>{formatCurrency(logic.cartTotal.total)}</span>
                             </div>
 
-                            <button 
-                                onClick={logic.handleCheckout}
-                                disabled={logic.cart.length === 0 || logic.isCheckingOut}
-                                className="btn-main-glass"
-                                style={{ 
-                                    width: '100%', marginTop: '20px', 
-                                    background: logic.cart.length > 0 ? '#10b981' : 'rgba(255,255,255,0.1)', 
-                                    color: 'white', fontSize: '18px', padding: '15px' 
-                                }}
-                            >
-                                {logic.isCheckingOut ? '⏳ جاري الإصدار...' : '✅ الدفع وإصدار الفاتورة'}
-                            </button>
+                            {/* 🔄 إشعار عهدة الفوارغ المستحقة إن وُجدت أصناف فوارغ بالسلة */}
+                            {(() => {
+                                const totalReturnable = logic.cart.reduce((acc: number, it: any) => acc + (it.is_returnable_bottle ? (Number(it.qty) || 0) : 0), 0);
+                                if (totalReturnable <= 0) return null;
+                                return (
+                                    <div style={{
+                                        margin: '12px 0',
+                                        padding: '10px 14px',
+                                        background: 'linear-gradient(135deg, rgba(40, 145, 200, 0.15) 0%, rgba(127, 212, 227, 0.25) 100%)',
+                                        border: '1.5px solid rgba(40, 145, 200, 0.4)',
+                                        borderRadius: '12px',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'space-between',
+                                        boxShadow: '0 4px 12px rgba(40, 145, 200, 0.08)'
+                                    }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <span style={{ fontSize: '20px' }}>🔄</span>
+                                            <div>
+                                                <div style={{ fontSize: '12.5px', fontWeight: 900, color: '#1C73AB' }}>عهدة فوارغ مستحقة:</div>
+                                                <div style={{ fontSize: '10.5px', color: '#64748b', fontWeight: 700 }}>تنزل تلقائياً بالوردية وحساب العميل</div>
+                                            </div>
+                                        </div>
+                                        <span style={{ fontSize: '14px', fontWeight: 900, color: '#122946', background: 'white', padding: '4px 10px', borderRadius: '8px', border: '1px solid rgba(40, 145, 200, 0.3)' }}>
+                                            {totalReturnable} عبوة / جالون
+                                        </span>
+                                    </div>
+                                );
+                            })()}
+
+                            {!logic.activeShift ? (
+                                <button 
+                                    type="button"
+                                    onClick={() => logic.setIsShiftOpenModalOpen(true)}
+                                    className="btn-main-glass"
+                                    style={{ 
+                                        width: '100%', marginTop: '20px', 
+                                        background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', 
+                                        color: 'white', fontSize: '15px', fontWeight: 900, padding: '15px',
+                                        boxShadow: '0 4px 15px rgba(217, 119, 6, 0.35)',
+                                        cursor: 'pointer',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
+                                    }}
+                                >
+                                    <span>🔒</span>
+                                    <span>اضغط لبدء الوردية أولاً لإتمام البيع</span>
+                                </button>
+                            ) : (
+                                <button 
+                                    onClick={logic.handleCheckout}
+                                    disabled={logic.cart.length === 0 || logic.isCheckingOut}
+                                    className="btn-main-glass"
+                                    style={{ 
+                                        width: '100%', marginTop: '20px', 
+                                        background: logic.cart.length > 0 ? '#10b981' : 'rgba(255,255,255,0.1)', 
+                                        color: 'white', fontSize: '18px', padding: '15px' 
+                                    }}
+                                >
+                                    {logic.isCheckingOut ? '⏳ جاري الإصدار...' : '✅ الدفع وإصدار الفاتورة'}
+                                </button>
+                            )}
                         </div>
                     </div>
 
@@ -607,197 +1056,15 @@ export default function PosPage() {
             )}
         
             {/* ===== NUMPAD MODAL ===== */}
-            {logic.selectedItemForCart && (() => {
-                const item = logic.selectedItemForCart;
-                const [activeField, setActiveField] = React.useState<'qty' | 'price'>('qty');
-                const [isFirstPress, setIsFirstPress] = React.useState(true);
-
-                const handleNumpad = (key: string) => {
-                    const currentVal = activeField === 'qty'
-                        ? String(item.selected_qty || '')
-                        : String(item.selected_price || '');
-
-                    let newVal: string;
-
-                    if (key === '⌫') {
-                        newVal = currentVal.slice(0, -1) || '0';
-                    } else if (key === '.') {
-                        newVal = isFirstPress ? '0.' : (currentVal.includes('.') ? currentVal : currentVal + '.');
-                    } else {
-                        newVal = isFirstPress ? key : currentVal + key;
-                    }
-
-                    setIsFirstPress(false);
-                    const num = parseFloat(newVal) || 0;
-
-                    if (activeField === 'qty') {
-                        logic.setSelectedItemForCart({ ...item, selected_qty: key === '⌫' ? (Number(newVal) || 0) : num });
-                    } else {
-                        logic.setSelectedItemForCart({ ...item, selected_price: key === '⌫' ? (Number(newVal) || 0) : parseFloat(newVal) || 0 });
-                    }
-                };
-
-                const switchField = (field: 'qty' | 'price') => {
-                    setActiveField(field);
-                    setIsFirstPress(true);
-                };
-
-                const numpadKeys = ['7','8','9','4','5','6','1','2','3','.','0','⌫'];
-
-                return (
-                    <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(8px)' }}>
-                        <div style={{ background: 'rgba(255,255,255,0.97)', borderRadius: '28px', width: '95vw', maxWidth: '460px', boxShadow: '0 25px 60px rgba(0,0,0,0.35)', border: '1px solid rgba(255,255,255,0.6)', overflow: 'hidden' }}>
-
-                            {/* Header */}
-                            <div style={{ background: 'linear-gradient(135deg, #1C73AB 0%, #2891C8 100%)', padding: '18px 22px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                                <div>
-                                    <div style={{ color: 'white', fontWeight: 900, fontSize: '18px' }}>{item.name}</div>
-                                    <div style={{ color: 'rgba(255,255,255,0.75)', fontSize: '13px', marginTop: '3px' }}>المتاح: {item.available_qty} {item.unit}</div>
-                                </div>
-                                <button onClick={() => logic.setSelectedItemForCart(null)} style={{ background: 'rgba(255,255,255,0.2)', border: 'none', color: 'white', width: '36px', height: '36px', borderRadius: '50%', cursor: 'pointer', fontSize: '18px', fontWeight: 'bold' }}>×</button>
-                            </div>
-
-                            <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '14px' }}>
-
-                                {/* Active Field Displays */}
-                                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
-                                    {/* Qty Field */}
-                                    <div
-                                        onClick={() => switchField('qty')}
-                                        style={{ 
-                                            background: (item.selected_qty > item.available_qty)
-                                                ? '#fee2e2'
-                                                : (activeField === 'qty' ? 'linear-gradient(135deg,#1C73AB,#2891C8)' : '#f1f5f9'), 
-                                            borderRadius: '16px', 
-                                            padding: '14px', 
-                                            cursor: 'pointer', 
-                                            border: (item.selected_qty > item.available_qty)
-                                                ? '2px solid #ef4444'
-                                                : (activeField === 'qty' ? '2px solid #2891C8' : '2px solid transparent'), 
-                                            transition: '0.2s', 
-                                            textAlign: 'center' 
-                                        }}
-                                    >
-                                        <div style={{ fontSize: '11px', fontWeight: 700, color: (item.selected_qty > item.available_qty) ? '#dc2626' : (activeField === 'qty' ? 'rgba(255,255,255,0.8)' : '#64748b'), marginBottom: '6px' }}>
-                                            {(item.selected_qty > item.available_qty) ? '⚠️ الكمية (تجاوزت المخزون)' : 'الكمية'}
-                                        </div>
-                                        <div style={{ fontSize: '32px', fontWeight: 900, color: (item.selected_qty > item.available_qty) ? '#dc2626' : (activeField === 'qty' ? 'white' : '#0f172a'), letterSpacing: '-1px' }}>
-                                            {item.selected_qty || 0}
-                                        </div>
-                                        <div style={{ fontSize: '11px', color: (item.selected_qty > item.available_qty) ? '#dc2626' : (activeField === 'qty' ? 'rgba(255,255,255,0.65)' : '#94a3b8'), marginTop: '4px' }}>{item.unit}</div>
-                                    </div>
-
-                                    {/* Price Field */}
-                                    <div
-                                        onClick={() => switchField('price')}
-                                        style={{ background: activeField === 'price' ? 'linear-gradient(135deg,#16a34a,#10b981)' : '#f1f5f9', borderRadius: '16px', padding: '14px', cursor: 'pointer', border: activeField === 'price' ? '2px solid #16a34a' : '2px solid transparent', transition: '0.2s', textAlign: 'center' }}
-                                    >
-                                        <div style={{ fontSize: '11px', fontWeight: 700, color: activeField === 'price' ? 'rgba(255,255,255,0.8)' : '#64748b', marginBottom: '6px' }}>
-                                            {logic.isTaxInclusive ? 'السعر شامل ض.ق.م' : 'السعر قبل ض.ق.م'}
-                                        </div>
-                                        <div style={{ fontSize: '28px', fontWeight: 900, color: activeField === 'price' ? 'white' : '#16a34a', letterSpacing: '-1px' }}>
-                                            {Number(item.selected_price || 0).toFixed(2)}
-                                        </div>
-                                        <div style={{ fontSize: '11px', color: activeField === 'price' ? 'rgba(255,255,255,0.65)' : '#94a3b8', marginTop: '4px' }}>ريال</div>
-                                    </div>
-                                </div>
-
-                                {/* Stock Warning Message */}
-                                {item.selected_qty > item.available_qty && (
-                                    <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '12px', padding: '8px 12px', color: '#b91c1c', fontSize: '12px', fontWeight: 800, textAlign: 'center' }}>
-                                        ⛔ الكمية المطلوبة ({item.selected_qty}) تتجاوز الرصيد المتاح بالمستودع ({item.available_qty})!
-                                    </div>
-                                )}
-
-                                {/* Quick +/- for Qty */}
-                                <div style={{ display: 'flex', gap: '10px', alignItems: 'center', justifyContent: 'center' }}>
-                                    <button
-                                        onClick={() => { logic.setSelectedItemForCart({ ...item, selected_qty: Math.max(1, (item.selected_qty || 1) - 1) }); setIsFirstPress(false); }}
-                                        style={{ width: '52px', height: '52px', borderRadius: '50%', border: 'none', background: '#fee2e2', color: '#dc2626', fontSize: '24px', fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                                    >−</button>
-                                    <span style={{ fontSize: '13px', color: '#64748b', fontWeight: 700, minWidth: '80px', textAlign: 'center' }}>الكمية السريعة</span>
-                                    <button
-                                        onClick={() => { const next = (item.selected_qty || 1) + 1; if(next <= item.available_qty) { logic.setSelectedItemForCart({ ...item, selected_qty: next }); setIsFirstPress(false); } }}
-                                        style={{ width: '52px', height: '52px', borderRadius: '50%', border: 'none', background: '#dcfce7', color: '#16a34a', fontSize: '24px', fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                                    >+</button>
-                                </div>
-
-                                {/* Numpad */}
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '10px' }}>
-                                    {numpadKeys.map(key => (
-                                        <button
-                                            key={key}
-                                            onClick={() => handleNumpad(key)}
-                                            style={{
-                                                height: '58px',
-                                                borderRadius: '14px',
-                                                border: 'none',
-                                                background: key === '⌫' ? '#fee2e2' : key === '.' ? '#f0f9ff' : 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
-                                                color: key === '⌫' ? '#dc2626' : key === '.' ? '#0ea5e9' : '#0f172a',
-                                                fontSize: key === '⌫' ? '20px' : '22px',
-                                                fontWeight: 900,
-                                                cursor: 'pointer',
-                                                boxShadow: '0 2px 6px rgba(0,0,0,0.08)',
-                                                transition: 'all 0.1s',
-                                                display: 'flex',
-                                                alignItems: 'center',
-                                                justifyContent: 'center',
-                                            }}
-                                            onMouseDown={e => (e.currentTarget.style.transform = 'scale(0.94)')}
-                                            onMouseUp={e => (e.currentTarget.style.transform = 'scale(1)')}
-                                            onTouchStart={e => (e.currentTarget.style.transform = 'scale(0.94)')}
-                                            onTouchEnd={e => (e.currentTarget.style.transform = 'scale(1)')}
-                                        >
-                                            {key}
-                                        </button>
-                                    ))}
-                                </div>
-
-                                {/* Total Preview */}
-                                <div style={{ background: 'linear-gradient(135deg,#0f172a,#1e293b)', borderRadius: '14px', padding: '14px 18px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <span style={{ color: '#94a3b8', fontWeight: 700, fontSize: '14px' }}>الإجمالي المتوقع:</span>
-                                    <span style={{ color: '#10b981', fontWeight: 900, fontSize: '22px' }}>
-                                        {formatCurrency((item.selected_qty || 0) * (item.selected_price || 0))}
-                                    </span>
-                                </div>
-
-                                {/* Action Buttons */}
-                                <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '10px' }}>
-                                    <button
-                                        onClick={logic.confirmAddToCart}
-                                        disabled={!item.selected_qty || item.selected_qty <= 0 || item.selected_qty > item.available_qty}
-                                        style={{ 
-                                            height: '54px', 
-                                            background: (item.selected_qty > item.available_qty)
-                                                ? 'linear-gradient(135deg, #ef4444, #991b1b)'
-                                                : 'linear-gradient(135deg,#2891C8,#1C73AB)', 
-                                            color: 'white', 
-                                            border: 'none', 
-                                            borderRadius: '14px', 
-                                            fontWeight: 900, 
-                                            fontSize: '15px', 
-                                            cursor: (item.selected_qty > item.available_qty) ? 'not-allowed' : 'pointer', 
-                                            boxShadow: '0 4px 15px rgba(40,145,200,0.4)',
-                                            transition: '0.2s'
-                                        }}
-                                    >
-                                        {item.selected_qty > item.available_qty 
-                                            ? `⛔ تجاوز المخزون (المتاح ${item.available_qty})`
-                                            : '🛒 إضافة للسلة'}
-                                    </button>
-                                    <button
-                                        onClick={() => logic.setSelectedItemForCart(null)}
-                                        style={{ height: '54px', background: '#f1f5f9', color: '#64748b', border: 'none', borderRadius: '14px', fontWeight: 700, fontSize: '15px', cursor: 'pointer' }}
-                                    >
-                                        إلغاء
-                                    </button>
-                                </div>
-
-                            </div>
-                        </div>
-                    </div>
-                );
-            })()}
+            {logic.selectedItemForCart && (
+                <PosItemNumpadModal
+                    item={logic.selectedItemForCart}
+                    isTaxInclusive={logic.isTaxInclusive}
+                    onUpdateItem={logic.setSelectedItemForCart}
+                    onConfirm={logic.confirmAddToCart}
+                    onClose={() => logic.setSelectedItemForCart(null)}
+                />
+            )}
 
 
         
@@ -815,16 +1082,41 @@ export default function PosPage() {
             />
 
             <ShiftOpenModal 
-                isOpen={!logic.activeShift && !logic.isLoading && logic.userProfile?.role !== 'super_admin'} 
+                isOpen={logic.isShiftOpenModalOpen} 
+                onClose={() => logic.setIsShiftOpenModalOpen(false)} 
                 userProfile={logic.userProfile} 
                 delegateId={logic.delegateId} 
                 warehouseId={logic.selectedWarehouseId} 
+                warehouses={logic.warehouses}
+                delegates={logic.delegates}
+                onWarehouseChange={(id: string) => logic.setSelectedWarehouseId(id)}
+                onDelegateChange={(id: string) => logic.setDelegateId(id)}
             />
 
             <ShiftCloseModal 
                 isOpen={logic.isShiftCloseModalOpen} 
                 onClose={() => logic.setIsShiftCloseModalOpen(false)} 
                 activeShift={logic.activeShift} 
+                warehouses={logic.warehouses}
+                delegates={logic.delegates}
+            />
+
+            <OpenShiftsModal
+                isOpen={logic.isOpenShiftsDrawerOpen}
+                onClose={() => logic.setIsOpenShiftsDrawerOpen(false)}
+                openShifts={logic.allOpenShifts}
+                warehouses={logic.warehouses}
+                delegates={logic.delegates}
+                currentShiftId={logic.activeShift?.id}
+                onSelectShift={(shift: any) => logic.switchToShift(shift)}
+                onOpenNewShift={() => logic.setIsShiftOpenModalOpen(true)}
+                onViewDetails={(id: string) => setInspectShiftId(id)}
+            />
+
+            <ShiftDetailsModal
+                isOpen={!!inspectShiftId}
+                onClose={() => setInspectShiftId(null)}
+                shiftId={inspectShiftId}
             />
         </MasterPage>
 

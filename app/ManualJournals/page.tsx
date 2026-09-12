@@ -130,15 +130,84 @@ export default function ManualJournalsPage() {
         {
             header: 'إجراءات',
             accessor: 'actions',
-            render: (row: any) => (
-                <SecureAction module="manual_journals" action="edit">
-                    <button className="btn-main-glass icon-only blue" onClick={() => openModal(row)} disabled={row.is_posted || row.status === 'مرحل'}>
-                        ✏️
-                    </button>
-                </SecureAction>
-            )
+            render: (row: any) => {
+                const isPosted = row.is_posted || row.status === 'معتمد' || row.status === 'مرحل';
+                return (
+                    <div style={{ display: 'flex', gap: '6px', alignItems: 'center', justifyContent: 'center' }}>
+                        <SecureAction module="manual_journals" action="post">
+                            {isPosted ? (
+                                <button
+                                    type="button"
+                                    disabled={logic.state.isProcessing}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        logic.actions.handleUnpostSingle(row.id);
+                                    }}
+                                    style={{
+                                        background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.2) 100%)',
+                                        color: '#b45309',
+                                        border: '1px solid rgba(245, 158, 11, 0.4)',
+                                        padding: '6px 12px',
+                                        borderRadius: '10px',
+                                        cursor: logic.state.isProcessing ? 'wait' : 'pointer',
+                                        fontWeight: 900,
+                                        fontSize: '11px',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '4px',
+                                        boxShadow: '0 2px 6px rgba(245, 158, 11, 0.15)',
+                                        transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                                        whiteSpace: 'nowrap',
+                                        opacity: logic.state.isProcessing ? 0.6 : 1
+                                    }}
+                                    title="فك ترحيل قيد التسوية"
+                                >
+                                    <span>↩️</span>
+                                    <span>فك الترحيل</span>
+                                </button>
+                            ) : (
+                                <button
+                                    type="button"
+                                    disabled={logic.state.isProcessing}
+                                    onClick={(e) => {
+                                        e.stopPropagation();
+                                        logic.actions.handlePostSingle(row.id);
+                                    }}
+                                    style={{
+                                        background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                                        color: 'white',
+                                        border: 'none',
+                                        padding: '6px 14px',
+                                        borderRadius: '10px',
+                                        cursor: logic.state.isProcessing ? 'wait' : 'pointer',
+                                        fontWeight: 900,
+                                        fontSize: '11px',
+                                        display: 'inline-flex',
+                                        alignItems: 'center',
+                                        gap: '4px',
+                                        boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+                                        transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                                        whiteSpace: 'nowrap',
+                                        opacity: logic.state.isProcessing ? 0.6 : 1
+                                    }}
+                                    title="اعتماد وترحيل قيد التسوية"
+                                >
+                                    <span>🚀</span>
+                                    <span>ترحيل</span>
+                                </button>
+                            )}
+                        </SecureAction>
+
+                        <SecureAction module="manual_journals" action="edit">
+                            <button className="btn-main-glass icon-only blue" onClick={() => openModal(row)} disabled={isPosted}>
+                                ✏️
+                            </button>
+                        </SecureAction>
+                    </div>
+                );
+            }
         }
-    ], []);
+    ], [logic.state.isProcessing, logic.actions]);
 
     const sidebarActions = useMemo(() => (
         <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>

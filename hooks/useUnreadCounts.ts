@@ -1,11 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
+import { useRealtimeListener } from '@/lib/useRealtimeSync';
 
 export function useUnreadCounts() {
     const [counts, setCounts] = useState({ unread_messages: 0, unread_notifications: 0 });
 
-    useEffect(() => {
-        const fetchCounts = async () => {
+    const fetchCounts = useCallback(async () => {
+        try {
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) return;
 
@@ -13,7 +14,7 @@ export function useUnreadCounts() {
                 .from('vw_unread_counts')
                 .select('*')
                 .eq('user_id', session.user.id)
-                .single();
+                .maybeSingle();
             
             if (data && !error) {
                 setCounts({
@@ -21,15 +22,29 @@ export function useUnreadCounts() {
                     unread_notifications: Number(data.unread_notifications || 0)
                 });
             }
-        };
+        } catch {
+            // تجاهل أي خطأ اتصال مؤقت
+        }
+    }, []);
 
+    useEffect(() => {
         fetchCounts();
 
-        // Optional: you can add an interval or realtime subscription to refresh it
-        const interval = setInterval(fetchCounts, 60000); // refresh every minute
+        // تحديث كل 60 ثانية كاحتياط
+        const interval = setInterval(fetchCounts, 60000);
 
-        return () => clearInterval(interval);
-    }, []);
+        // الاستماع لحدث التحديث اليدوي الداخلي
+        const handleManualRefresh = () => fetchCounts();
+        window.addEventListener('unread_counts_refresh', handleManualRefresh);
+
+        return () => {
+            clearInterval(interval);
+            window.removeEventListener('unread_counts_refresh', handleManualRefresh);
+        };
+    }, [fetchCounts]);
+
+    // ⚡ تحديث فوري فائق السرعة بمجرد وصول أو قراءة أي إشعار أو رسالة عبر Realtime
+    useRealtimeListener(['notifications', 'messages'], fetchCounts, 100);
 
     return counts;
 }

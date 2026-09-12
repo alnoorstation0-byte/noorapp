@@ -870,3 +870,15 @@ img[src="/ghayam_logo.jpg"] {
   }
 }
 
+/* 🎨 Aqua Glassmorphism Input Auto-Selection Highlight */
+input::selection, textarea::selection {
+  background: rgba(40, 145, 200, 0.35) !important;
+  color: #0f172a !important;
+}
+
+input::-moz-selection, textarea::-moz-selection {
+  background: rgba(40, 145, 200, 0.35) !important;
+  color: #0f172a !important;
+}
+
+

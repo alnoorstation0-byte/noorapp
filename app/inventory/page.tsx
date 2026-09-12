@@ -26,7 +26,26 @@ export default function InventoryPage() {
     },
     { key: 'name', label: 'اسم الصنف', type: 'text', 
       render: (row: any) => (
-        <span style={{ fontWeight: 900, color: '#0f172a' }}>{row.name}</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+          <span style={{ fontWeight: 900, color: '#0f172a' }}>{row.name}</span>
+          {row.is_returnable_bottle && (
+            <span style={{
+              fontSize: '11px',
+              fontWeight: 800,
+              color: '#1C73AB',
+              background: 'rgba(40, 145, 200, 0.12)',
+              border: '1px solid rgba(40, 145, 200, 0.35)',
+              padding: '2px 8px',
+              borderRadius: '8px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px'
+            }}>
+              <span>🔄</span>
+              <span>عهدة فوارغ</span>
+            </span>
+          )}
+        </div>
       )
     },
     { key: 'last_purchase_price', label: 'آخر سعر شراء', type: 'number',
@@ -265,6 +284,23 @@ export default function InventoryPage() {
                       🔄 استرجاع فوارغ
                     </button>
                   </SecureAction>
+
+                  <button 
+                    type="button"
+                    onClick={() => logic.handleSyncBalances()}
+                    disabled={logic.isSyncing}
+                    className="btn-main-glass" 
+                    style={{ 
+                      background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)', 
+                      color: 'white', 
+                      fontSize: '13px', 
+                      fontWeight: 800,
+                      cursor: logic.isSyncing ? 'not-allowed' : 'pointer',
+                      opacity: logic.isSyncing ? 0.7 : 1
+                    }}
+                  >
+                    {logic.isSyncing ? '⏳ جاري المزامنة...' : '🔄 مزامنة أرصدة المستودعات'}
+                  </button>
 
                   <button 
                     type="button"

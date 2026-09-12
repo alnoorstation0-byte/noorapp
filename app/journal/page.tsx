@@ -36,6 +36,7 @@ function useJournalLogic() {
     const [rowsPerPage, setRowsPerPage] = useState<number>(100);
     const [currentPage, setCurrentPage] = useState<number>(1);
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
+    const [rowActionLoadingId, setRowActionLoadingId] = useState<string | null>(null);
 
     useEffect(() => {
         setCurrentPage(1);
@@ -222,6 +223,43 @@ function useJournalLogic() {
             if (confirm('تنبيه: سيتم حذف القيود المحددة بالكامل (مدين ودائن). هل أنت متأكد؟')) {
                 deleteHeadersMutation.mutate();
             }
+        },
+        rowActionLoadingId,
+        handlePostSingleHeader: async (headerId: string) => {
+            if (!headerId) return;
+            setRowActionLoadingId(headerId);
+            try {
+                const { error } = await supabase
+                    .from('journal_headers')
+                    .update({ status: 'posted' })
+                    .eq('id', headerId);
+                if (error) throw error;
+                showToast('✅ تم اعتماد وترحيل القيد بنجاح!', 'success');
+                queryClient.invalidateQueries({ queryKey: ['journal_master_view'] });
+                queryClient.invalidateQueries({ queryKey: ['pending_journals_count'] });
+            } catch (err: any) {
+                showToast(`❌ فشل ترحيل القيد: ${err.message}`, 'error');
+            } finally {
+                setRowActionLoadingId(null);
+            }
+        },
+        handleUnpostSingleHeader: async (headerId: string) => {
+            if (!headerId) return;
+            setRowActionLoadingId(headerId);
+            try {
+                const { error } = await supabase
+                    .from('journal_headers')
+                    .update({ status: 'draft' })
+                    .eq('id', headerId);
+                if (error) throw error;
+                showToast('↩️ تم فك ترحيل القيد وإعادته لمسودة!', 'success');
+                queryClient.invalidateQueries({ queryKey: ['journal_master_view'] });
+                queryClient.invalidateQueries({ queryKey: ['pending_journals_count'] });
+            } catch (err: any) {
+                showToast(`❌ فشل فك الترحيل: ${err.message}`, 'error');
+            } finally {
+                setRowActionLoadingId(null);
+            }
         }
     };
 }
@@ -304,8 +342,104 @@ export default function JournalPage() {
           <span className="badge-glass green">معتمد ✅</span> : 
           <span className="badge-glass yellow">مسودة ⏳</span>;
       }
+    },
+    {
+      header: 'الإجراءات',
+      accessor: 'actions',
+      render: (row: any) => {
+        if (!row || !row.header_id) return null;
+        const isPosted = row.header_status === 'معتمد';
+        const isLoading = logic.rowActionLoadingId === row.header_id;
+        return (
+          <div style={{ display: 'flex', gap: '6px', justifyContent: 'center', alignItems: 'center' }}>
+            <SecureAction module="journal" action="post">
+              {isPosted ? (
+                <button
+                  type="button"
+                  disabled={isLoading}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    logic.handleUnpostSingleHeader(row.header_id);
+                  }}
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.2) 100%)',
+                    color: '#b45309',
+                    border: '1px solid rgba(245, 158, 11, 0.4)',
+                    padding: '6px 12px',
+                    borderRadius: '10px',
+                    cursor: isLoading ? 'wait' : 'pointer',
+                    fontWeight: 900,
+                    fontSize: '11px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    boxShadow: '0 2px 6px rgba(245, 158, 11, 0.15)',
+                    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                    whiteSpace: 'nowrap',
+                    opacity: isLoading ? 0.6 : 1
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isLoading) {
+                      e.currentTarget.style.transform = 'translateY(-2px)';
+                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(245, 158, 11, 0.25)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 2px 6px rgba(245, 158, 11, 0.15)';
+                  }}
+                  title="فك ترحيل هذا القيد وإعادته لمسودة"
+                >
+                  <span>{isLoading ? '⏳' : '↩️'}</span>
+                  <span>{isLoading ? 'جاري الفك...' : 'فك الترحيل'}</span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  disabled={isLoading}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    logic.handlePostSingleHeader(row.header_id);
+                  }}
+                  style={{
+                    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                    color: 'white',
+                    border: 'none',
+                    padding: '6px 14px',
+                    borderRadius: '10px',
+                    cursor: isLoading ? 'wait' : 'pointer',
+                    fontWeight: 900,
+                    fontSize: '11px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '4px',
+                    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+                    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                    whiteSpace: 'nowrap',
+                    opacity: isLoading ? 0.6 : 1
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isLoading) {
+                      e.currentTarget.style.transform = 'translateY(-2px)';
+                      e.currentTarget.style.boxShadow = '0 6px 16px rgba(16, 185, 129, 0.45)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.3)';
+                  }}
+                  title="اعتماد وترحيل هذا القيد"
+                >
+                  <span>{isLoading ? '⏳' : '🚀'}</span>
+                  <span>{isLoading ? 'جاري الترحيل...' : 'ترحيل'}</span>
+                </button>
+              )}
+            </SecureAction>
+          </div>
+        );
+      }
     }
-  ], []);
+  ], [logic.rowActionLoadingId, logic.handlePostSingleHeader, logic.handleUnpostSingleHeader]);
 
   const sidebarActions = useMemo(() => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>

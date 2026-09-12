@@ -4,14 +4,14 @@ import { supabase } from '@/lib/supabase';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/lib/toast-context';
 import { useRealtimeInvalidate } from '@/lib/useRealtimeSync';
-import { SALES_ACCOUNTS } from '@/lib/account-ids';
+import { SALES_ACCOUNTS, CASH_ACCOUNTS, ACC } from '@/lib/account-ids';
 
 export function usePosLogic() {
     const { showToast } = useToast();
     const queryClient = useQueryClient();
 
-    // 🔄 مزامنة فورية - تحديث المخزون والفواتير تلقائياً
-    useRealtimeInvalidate(['warehouse_inventory', 'invoices'], ['pos_inventory', 'invoices']);
+    // 🔄 مزامنة فورية - تحديث المخزون والفواتير والورديات تلقائياً
+    useRealtimeInvalidate(['warehouse_inventory', 'invoices', 'pos_shifts'], ['pos_inventory', 'invoices', 'active_pos_shift', 'pos_open_shifts']);
 
     const [selectedWarehouseId, setSelectedWarehouseId] = useState<string>('');
     const [cart, setCart] = useState<any[]>([]);
@@ -25,14 +25,21 @@ export function usePosLogic() {
     const { data: userProfile, isLoading: loadingProfile } = useQuery({
         queryKey: ['pos_user_profile'],
         queryFn: async () => {
+            let userId: string | undefined;
             const { data: { session } } = await supabase.auth.getSession();
-            if (!session?.user?.id) return null;
+            userId = session?.user?.id;
+            if (!userId) {
+                const { data: { user } } = await supabase.auth.getUser();
+                userId = user?.id;
+            }
+            if (!userId) return null;
+
             const { data: profile } = await supabase
                 .from('profiles')
                 .select('id, linked_partner_id, role')
-                .eq('id', session.user.id)
-                .single();
-            return profile || { id: session.user.id };
+                .eq('id', userId)
+                .maybeSingle();
+            return profile || { id: userId };
         }
     });
 
@@ -59,20 +66,107 @@ export function usePosLogic() {
         }
     });
 
-    // Fetch Active Shift
+    // Fetch Active Shift (حماية أمنية: وردية واحدة فقط لكل مستودع في نفس الوقت)
     const { data: activeShift, isLoading: loadingShift } = useQuery({
-        queryKey: ['active_pos_shift', userProfile?.id],
-        enabled: !!userProfile?.id,
+        queryKey: ['active_pos_shift', selectedWarehouseId],
         queryFn: async () => {
-            const { data } = await supabase
+            if (!selectedWarehouseId) return null;
+
+            const { data, error } = await supabase
+                .from('pos_shifts')
+                .select(`
+                    *,
+                    warehouse:warehouses(id, name, type),
+                    delegate:partners!delegate_id(id, name, phone, code)
+                `)
+                .eq('status', 'open')
+                .eq('warehouse_id', selectedWarehouseId)
+                .order('opened_at', { ascending: false })
+                .limit(1);
+
+            if (error) {
+                console.warn('Error fetching active pos shift:', error);
+                return null;
+            }
+            return data?.[0] || null;
+        },
+        enabled: !!selectedWarehouseId
+    });
+
+    // 🔒 مزامنة المندوب المسؤول تلقائياً مع الوردية النشطة للمستودع المختار
+    useEffect(() => {
+        if (activeShift && activeShift.warehouse_id === selectedWarehouseId) {
+            if (activeShift.delegate_id && activeShift.delegate_id !== delegateId) {
+                setDelegateId(activeShift.delegate_id);
+            } else if (!activeShift.delegate_id && delegateId) {
+                setDelegateId('');
+            }
+        }
+    }, [activeShift?.id, activeShift?.delegate_id, selectedWarehouseId]);
+
+    // Fetch all currently open shifts across the system (لاستعراض ورديات كل المناديب والمستودعات والتبديل السريع بينها)
+    const { data: allOpenShifts = [], isLoading: loadingAllShifts } = useQuery({
+        queryKey: ['pos_open_shifts'],
+        queryFn: async () => {
+            const { data, error } = await supabase
                 .from('pos_shifts')
                 .select('*')
-                .eq('user_id', userProfile.id)
                 .eq('status', 'open')
-                .single();
+                .order('opened_at', { ascending: false });
+
+            if (error) {
+                console.warn('Error fetching all open shifts:', error);
+                return [];
+            }
+            return data || [];
+        }
+    });
+
+    // 🚚 جلب أمر التشغيل المفتوح تلقائياً إذا كان منفذ البيع المختار سيارة
+    const { data: activeFleetOperation = null } = useQuery({
+        queryKey: ['pos_active_fleet_op', selectedWarehouseId],
+        enabled: !!selectedWarehouseId,
+        queryFn: async () => {
+            if (!selectedWarehouseId) return null;
+            const currentWh = warehouses.find(w => w.id === selectedWarehouseId);
+            if (!currentWh || currentWh.type !== 'vehicle') return null;
+
+            const targetVehicleId = currentWh.vehicle_id || currentWh.id;
+
+            const { data, error } = await supabase
+                .from('fleet_operations')
+                .select(`
+                    id,
+                    operation_number,
+                    operation_date,
+                    status,
+                    driver_id,
+                    vehicle_id,
+                    warehouse_id,
+                    driver:partners!driver_id(id, name, phone),
+                    vehicle:fleet_vehicles(id, plate_number)
+                `)
+                .or(`vehicle_id.eq.${targetVehicleId},warehouse_id.eq.${selectedWarehouseId}`)
+                .neq('status', 'مغلق')
+                .neq('status', 'closed')
+                .order('operation_date', { ascending: false })
+                .limit(1)
+                .maybeSingle();
+
+            if (error) {
+                console.warn('Could not fetch active fleet operation for POS:', error);
+                return null;
+            }
             return data || null;
         }
     });
+
+    // مزامنة المندوب تلقائياً من أمر تشغيل الرحلة إذا كان منفذ البيع سيارة والمندوب غير مقفل
+    useEffect(() => {
+        if (activeFleetOperation?.driver_id && !isDelegateLocked) {
+            setDelegateId(activeFleetOperation.driver_id);
+        }
+    }, [activeFleetOperation, isDelegateLocked]);
 
     // Auto-select delegate and warehouse based on logged-in user
     useEffect(() => {
@@ -113,9 +207,10 @@ export function usePosLogic() {
             if (!selectedWarehouseId) return [];
 
             // 1. Fetch all catalog items
+            // 1. Fetch Item Master Catalog
             const { data: catalog, error: catErr } = await supabase
                 .from('inventory_items')
-                .select('id, name, default_price, suggested_price, unit, code, reorder_level, current_quantity')
+                .select('id, name, default_price, suggested_price, unit, code, reorder_level, current_quantity, is_returnable_bottle')
                 .order('name');
 
             if (catErr) throw catErr;
@@ -156,7 +251,8 @@ export function usePosLogic() {
                     available_qty: availableQty,
                     reorder_level: reorderLvl,
                     isCriticalLow: isCritical,
-                    isNearLow: isNear
+                    isNearLow: isNear,
+                    is_returnable_bottle: Boolean(item.is_returnable_bottle)
                 };
             });
         },
@@ -190,6 +286,11 @@ export function usePosLogic() {
     const [selectedItemForCart, setSelectedItemForCart] = useState<any>(null);
 
     const addToCart = (item: any, qty: number = 1, price?: number) => {
+        if (!activeShift) {
+            setTimeout(() => showToast("⛔ يجب بدء الوردية أولاً قبل إجراء أي مبيعات!", "warning"), 0);
+            setIsShiftOpenModalOpen(true);
+            return;
+        }
         setCart(prev => {
             const existing = prev.find(i => i.id === item.id);
             const unitPrice = price !== undefined ? price : (existing ? existing.unit_price : (item.suggested_price || 0));
@@ -210,10 +311,20 @@ export function usePosLogic() {
     };
 
     const handleItemClick = (item: any) => {
+        if (!activeShift) {
+            showToast("⛔ يجب بدء الوردية أولاً قبل اختيار الأصناف!", "warning");
+            setIsShiftOpenModalOpen(true);
+            return;
+        }
         setSelectedItemForCart({ ...item, selected_qty: 1, selected_price: item.suggested_price || 0 });
     };
 
     const confirmAddToCart = () => {
+        if (!activeShift) {
+            showToast("⛔ يجب بدء الوردية أولاً!", "warning");
+            setIsShiftOpenModalOpen(true);
+            return;
+        }
         if (selectedItemForCart) {
             if (selectedItemForCart.selected_qty > selectedItemForCart.available_qty) {
                 showToast(`⛔ منع البيع: الكمية المطلوبة (${selectedItemForCart.selected_qty}) تتجاوز الرصيد المتوفر في المستودع (${selectedItemForCart.available_qty})!`, 'error');
@@ -226,6 +337,11 @@ export function usePosLogic() {
 
 
     const handleBarcodeScan = (barcode: string) => {
+        if (!activeShift) {
+            showToast("⛔ يجب بدء الوردية أولاً قبل مسح الباركود وإجراء المبيعات!", "warning");
+            setIsShiftOpenModalOpen(true);
+            return;
+        }
         const item = inventoryItems.find((i: any) => String(i.code) === barcode || String(i.id) === barcode);
         if (item) {
             if (1 > item.available_qty) {
@@ -266,6 +382,16 @@ export function usePosLogic() {
     const [isThermalPrintModalOpen, setIsThermalPrintModalOpen] = useState<boolean>(false);
     const [isShiftCloseModalOpen, setIsShiftCloseModalOpen] = useState<boolean>(false);
     const [isShiftOpenModalOpen, setIsShiftOpenModalOpen] = useState<boolean>(false);
+    const [isOpenShiftsDrawerOpen, setIsOpenShiftsDrawerOpen] = useState<boolean>(false);
+    const [hasAutoOpenedShift, setHasAutoOpenedShift] = useState<boolean>(false);
+
+    // تذكير بفتح الوردية لمرة واحدة عند التحميل للكاشير/المندوب
+    useEffect(() => {
+        if (!loadingShift && !loadingProfile && selectedWarehouseId && !activeShift && !hasAutoOpenedShift) {
+            setIsShiftOpenModalOpen(true);
+            setHasAutoOpenedShift(true);
+        }
+    }, [loadingShift, loadingProfile, selectedWarehouseId, activeShift, hasAutoOpenedShift]);
 
     const cartTotal = useMemo(() => {
         let sum = 0;
@@ -286,11 +412,13 @@ export function usePosLogic() {
 
     const checkoutMutation = useMutation({
         mutationFn: async () => {
+            // 🔒 حماية صارمة: منع أي عملية بيع بدون بدء وفتح الوردية أولاً
+            if (!activeShift) {
+                setIsShiftOpenModalOpen(true);
+                throw new Error("⛔ منع أمني: لا يمكن إتمام أي عملية بيع بدون بدء وفتح الوردية أولاً! يرجى الضغط على 'بدء الوردية' لتسجيل العهدة وبدء البيع.");
+            }
             if (cart.length === 0) throw new Error("السلة فارغة!");
             if (!selectedWarehouseId) throw new Error("يرجى تحديد منفذ البيع!");
-            if (!activeShift && userProfile?.role !== 'super_admin') {
-                throw new Error("يجب فتح وردية أولاً!");
-            }
 
             const autoNumber = `INV-POS-${Date.now().toString().slice(-6)}`;
             
@@ -301,19 +429,24 @@ export function usePosLogic() {
                 unit_price: item.selected_price || item.unit_price || item.price || 0,
                 discount: item.discount || 0,
                 total: ((item.quantity || item.qty) * (item.selected_price || item.unit_price || item.price || 0)) - (item.discount || 0),
-                warehouse_id: selectedWarehouseId
+                warehouse_id: selectedWarehouseId,
+                is_returnable_bottle: Boolean(item.is_returnable_bottle)
             }));
 
             // Resolve fleet_operation_id if warehouse is a vehicle
-            let fleetOpId = null;
-            if (selectedWarehouseId) {
-                const { data: wh } = await supabase.from('warehouses').select('type, vehicle_id').eq('id', selectedWarehouseId).single();
-                if (wh?.type === 'vehicle' && wh.vehicle_id) {
+            let fleetOpId = activeFleetOperation?.id || null;
+            if (!fleetOpId && selectedWarehouseId) {
+                const wh = warehouses.find(w => w.id === selectedWarehouseId);
+                if (wh?.type === 'vehicle') {
+                    const targetVehicleId = wh.vehicle_id || wh.id;
                     const { data: op } = await supabase.from('fleet_operations')
-                        .select('id')
-                        .eq('vehicle_id', wh.vehicle_id)
-                        .eq('status', 'مفتوح')
-                        .single();
+                        .select('id, driver_id')
+                        .or(`vehicle_id.eq.${targetVehicleId},warehouse_id.eq.${selectedWarehouseId}`)
+                        .neq('status', 'مغلق')
+                        .neq('status', 'closed')
+                        .order('operation_date', { ascending: false })
+                        .limit(1)
+                        .maybeSingle();
                     if (op) {
                         fleetOpId = op.id;
                     }
@@ -341,15 +474,64 @@ export function usePosLogic() {
                 credit_account_id: SALES_ACCOUNTS.REVENUE,  // 41 إيرادات المبيعات
                 lines_data: linesData,
                 shift_id: activeShift?.id,
-                fleet_operation_id: fleetOpId
+                fleet_operation_id: fleetOpId,
+                payment_status: paymentMethod !== 'آجل' ? 'paid' : 'unpaid'
             };
 
             const { data: insertedInv, error: invErr } = await supabase.from('invoices').insert([invoiceHeader]).select().single();
             if (invErr) throw new Error(invErr.message);
 
+            // 🔄 التحديث التلقائي لعهدة فوارغ المياه (إن وُجدت أصناف فوارغ)
+            const returnableBottlesCount = cart.reduce((acc, it) => acc + (it.is_returnable_bottle ? (Number(it.qty) || Number(it.quantity) || 0) : 0), 0);
+            if (returnableBottlesCount > 0) {
+                // 1. تسجيل عهدة الفوارغ في حساب العميل المسجل
+                if (partnerId) {
+                    try {
+                        const { data: pRec } = await supabase.from('partners').select('bottle_custody').eq('id', partnerId).maybeSingle();
+                        const currentCustody = Number(pRec?.bottle_custody || 0);
+                        await supabase.from('partners').update({
+                            bottle_custody: currentCustody + returnableBottlesCount
+                        }).eq('id', partnerId);
+                    } catch (custodyErr) {
+                        console.error('Error updating partner bottle custody:', custodyErr);
+                    }
+                }
 
-            // Deduct from warehouse
+                // 2. تحديث عداد الفوارغ المباعة في الوردية الحالية
+                if (activeShift?.id) {
+                    try {
+                        const { data: sRec } = await supabase.from('pos_shifts').select('bottles_sold').eq('id', activeShift.id).maybeSingle();
+                        const curSold = Number(sRec?.bottles_sold || 0);
+                        await supabase.from('pos_shifts').update({
+                            bottles_sold: curSold + returnableBottlesCount
+                        }).eq('id', activeShift.id);
+                    } catch (shiftErr) {
+                        console.error('Error updating shift bottles_sold:', shiftErr);
+                    }
+                }
+            }
+
+            // Deduct from warehouse and create inventory transaction history
             for (let line of linesData) {
+                // 1. Insert inventory_transaction to persist history (bypassing RPC to prevent double accounting)
+                const txNumber = 'TX-POS-' + Math.floor(Math.random() * 1000000);
+                await supabase.from('inventory_transactions').insert([{
+                    transaction_number: txNumber,
+                    transaction_date: new Date().toISOString().split('T')[0],
+                    type: 'sales_deduction',
+                    quantity: line.quantity,
+                    item_id: line.item_id,
+                    partner_id: partnerId || null,
+                    unit_price: line.unit_price,
+                    total_price: line.total_price,
+                    status: 'approved',
+                    invoice_id: insertedInv?.id || null,
+                    warehouse_id: line.warehouse_id,
+                    shift_id: activeShift?.id,
+                    fleet_operation_id: fleetOpId
+                }]);
+
+                // 2. Direct quantity deduction
                 const { data: invItem } = await supabase.from('warehouse_inventory')
                     .select('quantity, id').eq('item_id', line.item_id).eq('warehouse_id', line.warehouse_id).maybeSingle();
                 if (invItem) {
@@ -380,6 +562,36 @@ export function usePosLogic() {
             // AUTO POST INVOICE (Creates Journal Lines & sets status to مرحل)
             if (insertedInv) {
                 await supabase.rpc('post_invoices_bulk', { p_ids: [insertedInv.id] });
+
+                // 🧾 إنشاء وترحيل سند القبض تلقائياً للمبيعات النقدية والشبكة (كل ما هو غير آجل)
+                if (paymentMethod !== 'آجل' && cartTotal.total > 0) {
+                    try {
+                        const { error: rpcReceiptErr } = await supabase.rpc('auto_create_pos_receipt', {
+                            p_invoice_id: insertedInv.id
+                        });
+                        if (rpcReceiptErr) {
+                            console.warn('auto_create_pos_receipt RPC error, using direct insert fallback:', rpcReceiptErr);
+                            const autoRvNumber = `RV-POS-${Date.now().toString().slice(-6)}`;
+                            await supabase.from('receipt_vouchers').insert([{
+                                receipt_number: autoRvNumber,
+                                date: new Date().toISOString().split('T')[0],
+                                amount: cartTotal.total,
+                                payment_method: paymentMethod,
+                                notes: `سداد فاتورة مبيعات نقاط بيع #${insertedInv.invoice_number || autoNumber}`,
+                                invoice_id: insertedInv.id,
+                                partner_id: partnerId || null,
+                                delegate_id: delegateId || null,
+                                status: 'مرحل',
+                                shift_id: activeShift?.id,
+                                fleet_operation_id: fleetOpId,
+                                safe_bank_acc_id: paymentMethod === 'شبكة (مدى)' ? CASH_ACCOUNTS.BANKS : CASH_ACCOUNTS.CASH_BOX,
+                                partner_acc_id: SALES_ACCOUNTS.AR
+                            }]);
+                        }
+                    } catch (receiptErr) {
+                        console.error('Error auto-creating receipt voucher for POS sale:', receiptErr);
+                    }
+                }
             }
 
             return insertedInv;
@@ -387,10 +599,11 @@ export function usePosLogic() {
         onSuccess: (data) => {
             setLastInvoice(data);
             setIsThermalPrintModalOpen(true);
-            showToast("تمت عملية البيع بنجاح! ✅", "success");
+            showToast("تمت عملية البيع وإصدار سند القبض بنجاح! ✅", "success");
             setCart([]);
             queryClient.invalidateQueries({ queryKey: ['pos_inventory'] });
             queryClient.invalidateQueries({ queryKey: ['invoices'] });
+            queryClient.invalidateQueries({ queryKey: ['pos_invoices'] });
             queryClient.invalidateQueries({ queryKey: ['receipt_vouchers'] });
         },
         onError: (err: any) => {
@@ -408,11 +621,19 @@ export function usePosLogic() {
         isThermalPrintModalOpen, setIsThermalPrintModalOpen,
         isShiftCloseModalOpen, setIsShiftCloseModalOpen,
         isShiftOpenModalOpen, setIsShiftOpenModalOpen,
+        isOpenShiftsDrawerOpen, setIsOpenShiftsDrawerOpen,
         activeShift, loadingShift, userProfile,
+        allOpenShifts, loadingAllShifts,
+        switchToShift: (shift: any) => {
+            if (shift.warehouse_id) setSelectedWarehouseId(shift.warehouse_id);
+            if (shift.delegate_id) setDelegateId(shift.delegate_id);
+            else setDelegateId('');
+        },
         cartTotal, isTaxInclusive, setIsTaxInclusive,
         paymentMethod, setPaymentMethod,
         customers, partnerId, setPartnerId,
-        delegates, delegateId, setDelegateId, isDelegateLocked,
+        delegates, delegateId, setDelegateId, isDelegateLocked: isDelegateLocked || !!activeShift,
+        activeFleetOperation,
         onlyLowStock, setOnlyLowStock, lowStockCount,
         handleCheckout: () => checkoutMutation.mutate(),
         isCheckingOut: checkoutMutation.isPending,

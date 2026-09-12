@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { showGlobalToast } from '@/lib/toast-context';
 import { useRealtimeListener } from '@/lib/useRealtimeSync';
+import { executeApproveTransaction, executeUnapproveTransaction } from '@/lib/inventory_engine';
 
 export function useInventoryTransactionsLogic() {
   const [rawRecords, setRawRecords] = useState<any[]>([]);
@@ -104,11 +105,7 @@ export function useInventoryTransactionsLogic() {
     try {
       setIsLoading(true);
 
-      const { error: rpcError } = await supabase.rpc('approve_inventory_transaction', { p_id: transaction.id });
-      
-      if (rpcError) {
-          throw new Error(`خطأ في الاعتماد: ${rpcError.message}`);
-      }
+      await executeApproveTransaction(transaction.id);
 
       showGlobalToast("✅ تم الاعتماد وتوليد القيود المحاسبية وتحديث المستودع بنجاح.", 'warning');
       fetchTransactions();
@@ -133,8 +130,12 @@ export function useInventoryTransactionsLogic() {
       setIsLoading(true);
       let success = 0;
       for (const t of pendingList) {
-        const { error } = await supabase.rpc('approve_inventory_transaction', { p_id: t.id });
-        if (!error) success++;
+        try {
+          await executeApproveTransaction(t.id);
+          success++;
+        } catch (subErr) {
+          console.error(`Failed to approve ${t.id}:`, subErr);
+        }
       }
       showGlobalToast(`✅ تم اعتماد ${success} حركة مخزنية وتحديث القيود بنجاح!`, 'warning');
       fetchTransactions();
@@ -153,12 +154,9 @@ export function useInventoryTransactionsLogic() {
     try {
       setIsLoading(true);
 
-      const { error: rpcError } = await supabase.rpc('unapprove_inventory_transaction', { p_id: transaction.id });
-      if (rpcError) {
-          throw new Error(`خطأ في الإلغاء: ${rpcError.message}`);
-      }
+      await executeUnapproveTransaction(transaction.id);
 
-      showGlobalToast("✅ تم فك الاعتماد ومسح القيد المحاسبي بنجاح.", 'warning');
+      showGlobalToast("✅ تم فك الاعتماد ومسح القيد المحاسبي وعكس أرصدة المستودع بنجاح.", 'warning');
       fetchTransactions();
     } catch (error: any) {
       console.error("خطأ في فك الاعتماد:", error);

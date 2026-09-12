@@ -211,6 +211,8 @@ export function useManualJournalsLogic() {
         actions: {
             handlePostSelected: () => postRecords(selectedIds),
             handleUnpostSelected: () => unpostRecords(selectedIds),
+            handlePostSingle: (id: string) => postRecords([id]),
+            handleUnpostSingle: (id: string) => unpostRecords([id]),
             handleDeleteSelected: () => {
                 if(confirm('هل أنت متأكد من مسح القيود المحددة؟')) {
                     deleteMutation.mutate(selectedIds);

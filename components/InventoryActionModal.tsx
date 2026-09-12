@@ -28,6 +28,7 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
     action_date: new Date().toISOString().split('T')[0],
     project_id: '',
     fleet_operation_id: '',
+    delegate_id: '',
     partner_id: '',
     notes: '',
     waste_reason: 'كسر عبوة / جالون',
@@ -47,6 +48,7 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
           action_date: initialData.transaction_date || new Date().toISOString().split('T')[0],
           project_id: '',
           fleet_operation_id: initialData.fleet_operation_id || '',
+          delegate_id: initialData.delegate_id || initialData.partner_id || '',
           partner_id: initialData.partner_id || '',
           notes: initialData.notes || '',
           waste_reason: 'كسر عبوة / جالون',
@@ -64,6 +66,7 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
           action_date: new Date().toISOString().split('T')[0],
           project_id: '',
           fleet_operation_id: '',
+          delegate_id: '',
           partner_id: '',
           notes: '',
           waste_reason: 'كسر عبوة / جالون',
@@ -77,12 +80,11 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
 
   // Projects were removed as per user request
 
-  // Fetch Partners (Suppliers / Subcontractors)
+  // Fetch Partners (Suppliers / Subcontractors / Delegates)
   const { data: partners = [] } = useQuery({
     queryKey: ['active_partners_quick', actionType],
     queryFn: async () => {
-      const type = actionType === 'in' ? 'مورد' : 'مقاول';
-      const { data } = await supabase.from('partners').select('id, name, partner_type');
+      const { data } = await supabase.from('partners').select('id, name, partner_type').order('name');
       return data || [];
     }
   });
@@ -90,18 +92,44 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
   const { data: warehousesList = [] } = useQuery({
     queryKey: ['warehouses_list'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('warehouses').select('id, name');
+      const { data, error } = await supabase.from('warehouses').select('id, name, type, vehicle_id').eq('is_active', true);
       if (error) throw error;
       return data || [];
     }
   });
 
   const { data: fleetOperations = [] } = useQuery({
-    queryKey: ['fleet_operations_open_inv'],
+    queryKey: ['fleet_operations', 'open'],
     queryFn: async () => {
-      const { data, error } = await supabase.from('fleet_operations').select('id, operation_number, operation_date, description, vehicle:fleet_vehicles(plate_number, vehicle_model), driver:partners(name), description').eq('status', 'مفتوح');
-      if (error) throw error;
-      return data;
+      const { data, error } = await supabase
+        .from('fleet_operations')
+        .select(`
+          id,
+          operation_number,
+          operation_date,
+          status,
+          vehicle_id,
+          driver_id,
+          warehouse_id,
+          description,
+          vehicle:fleet_vehicles(plate_number, vehicle_model),
+          driver:partners!driver_id(id, name, phone, partner_type)
+        `)
+        .neq('status', 'مغلق')
+        .neq('status', 'closed')
+        .order('operation_date', { ascending: false });
+      
+      if (error) {
+        console.error("Error fetching fleet operations:", error);
+        const { data: fallbackData } = await supabase
+          .from('fleet_operations')
+          .select('*, vehicle:fleet_vehicles(plate_number), driver:partners(name)')
+          .neq('status', 'مغلق')
+          .neq('status', 'closed')
+          .order('created_at', { ascending: false });
+        return fallbackData || [];
+      }
+      return data || [];
     }
   });
 
@@ -119,7 +147,7 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
         }
       }
 
-      const cleanId = (id: string) => id && id.trim() !== '' ? id : null;
+      const cleanId = (id: string | null | undefined) => (id && typeof id === 'string' && id.trim() !== '') ? id : null;
       
       const taxAmount = (actionType === 'in' && formData.include_tax) 
           ? (formData.quantity * formData.unit_price * 0.15) 
@@ -131,7 +159,7 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
         ? `[سبب التلف: ${formData.waste_reason}] ${formData.notes || ''}`.trim()
         : formData.notes;
 
-      const payload = {
+      const payload: any = {
         transaction_number: formData.transaction_number || `${prefix}-${Date.now().toString().slice(-6)}`,
         transaction_date: formData.action_date,
         type: actionType,
@@ -140,7 +168,8 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
         tax_amount: taxAmount,
         include_tax: formData.include_tax,
         item_id: formData.item_id,
-        partner_id: cleanId(formData.partner_id),
+        partner_id: cleanId(formData.partner_id || formData.delegate_id),
+        delegate_id: cleanId(formData.delegate_id || formData.partner_id),
         fleet_operation_id: cleanId(formData.fleet_operation_id),
         warehouse_id: cleanId(formData.warehouse_id),
         destination_warehouse_id: actionType === 'out' ? cleanId(formData.destination_warehouse_id) : null,
@@ -160,6 +189,9 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
     },
     onSuccess: () => {
       showToast("تم الحفظ بنجاح ⏳ بانتظار الاعتماد", "success");
+      queryClient.invalidateQueries({ queryKey: ['inventory_transactions'] });
+      queryClient.invalidateQueries({ queryKey: ['warehouse_inventory'] });
+      queryClient.invalidateQueries({ queryKey: ['fleet_operations'] });
       onSuccess();
       onClose();
     },
@@ -230,12 +262,30 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
               <label style={{ fontSize: '13px', fontWeight: 900, color: THEME.primary, marginBottom: '8px', display: 'block' }}>
                 🏢 {actionType === 'out' ? 'المستودع المصدر (من)' : 'المستودع / منفذ البيع'}
               </label>
-              <select
-                className="glass-input-field"
-                value={formData.warehouse_id}
-                onChange={e => setFormData({ ...formData, warehouse_id: e.target.value })}
-                style={{ width: '100%', padding: '10px' }}
-              >
+                <select
+                  className="glass-input-field"
+                  value={formData.warehouse_id}
+                  onChange={e => {
+                    const whId = e.target.value;
+                    const wh = warehousesList?.find((w: any) => w.id === whId);
+                    let matchedOp: any = null;
+                    if (actionType !== 'out' && wh && (wh.type === 'vehicle' || wh.vehicle_id)) {
+                      matchedOp = fleetOperations?.find((op: any) => 
+                        (wh.vehicle_id && op.vehicle_id === wh.vehicle_id) ||
+                        op.vehicle_id === wh.id ||
+                        op.warehouse_id === wh.id
+                      );
+                    }
+                    setFormData(prev => ({ 
+                      ...prev, 
+                      warehouse_id: whId,
+                      fleet_operation_id: matchedOp ? matchedOp.id : prev.fleet_operation_id,
+                      delegate_id: matchedOp?.driver_id || prev.delegate_id,
+                      partner_id: matchedOp?.driver_id || prev.partner_id
+                    }));
+                  }}
+                  style={{ width: '100%', padding: '10px' }}
+                >
                 <option value="">-- اختر المستودع --</option>
                 {warehousesList.map((wh: any) => (
                   <option key={wh.id} value={wh.id}>{wh.name}</option>
@@ -246,20 +296,43 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
             {/* حقل مستودع الوجهة - يظهر فقط عند الصرف */}
             {actionType === 'out' && (
               <div>
-                <label style={{ fontSize: '13px', fontWeight: 900, color: '#ef4444', marginBottom: '8px', display: 'block' }}>
-                  🚛 مستودع الوجهة (إلى) <span style={{ fontSize: '11px', fontWeight: 600, color: '#94a3b8' }}>- اختياري للنقل الداخلي</span>
+                <label style={{ fontSize: '13px', fontWeight: 900, color: '#0284c7', marginBottom: '8px', display: 'block' }}>
+                  🚛 مستودع الوجهة (سيارة المندوب / المستودع المستلم) <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b' }}>- يُحدد تلقائياً مع أمر تشغيل الرحلة</span>
                 </label>
                 <select
                   className="glass-input-field"
                   value={formData.destination_warehouse_id}
-                  onChange={e => setFormData({ ...formData, destination_warehouse_id: e.target.value })}
-                  style={{ width: '100%', padding: '10px', borderColor: formData.destination_warehouse_id ? '#ef4444' : undefined }}
+                  onChange={e => {
+                    const destWhId = e.target.value;
+                    const destWh = warehousesList?.find((w: any) => w.id === destWhId);
+                    
+                    // 🚀 ربط ذكي تلقائي: إذا تم اختيار مستودع سيارة، يتم فوراً ربط أمر تشغيل الرحلة النشط لهذه السيارة والمندوب
+                    let matchedOp: any = null;
+                    if (destWh && (destWh.type === 'vehicle' || destWh.vehicle_id)) {
+                      matchedOp = fleetOperations?.find((op: any) => 
+                        (destWh.vehicle_id && op.vehicle_id === destWh.vehicle_id) ||
+                        op.vehicle_id === destWh.id ||
+                        op.warehouse_id === destWh.id
+                      );
+                    }
+                    
+                    setFormData(prev => ({
+                      ...prev,
+                      destination_warehouse_id: destWhId,
+                      fleet_operation_id: matchedOp ? matchedOp.id : prev.fleet_operation_id,
+                      delegate_id: matchedOp?.driver_id || prev.delegate_id,
+                      partner_id: matchedOp?.driver_id || prev.partner_id
+                    }));
+                  }}
+                  style={{ width: '100%', padding: '10px', borderColor: formData.destination_warehouse_id ? '#0284c7' : undefined }}
                 >
-                  <option value="">-- بدون نقل (صرف نهائي) --</option>
+                  <option value="">-- بدون نقل لمستودع آخر (صرف نهائي) --</option>
                   {warehousesList
                     .filter((wh: any) => wh.id !== formData.warehouse_id)
                     .map((wh: any) => (
-                      <option key={wh.id} value={wh.id}>{wh.name}</option>
+                      <option key={wh.id} value={wh.id}>
+                        {wh.type === 'vehicle' ? '🚚 ' : '🏢 '} {wh.name}
+                      </option>
                     ))}
                 </select>
               </div>
@@ -351,6 +424,89 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
 
           {/* Column 2: Partners, Details & Summary */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            
+            {/* 🚚 أمر تشغيل الرحلة */}
+            <div style={{
+              background: actionType === 'out' ? 'rgba(2, 132, 199, 0.05)' : undefined,
+              padding: actionType === 'out' ? '12px' : 0,
+              borderRadius: actionType === 'out' ? '16px' : 0,
+              border: actionType === 'out' ? '1px dashed rgba(2, 132, 199, 0.3)' : undefined
+            }}>
+              <label style={{ fontSize: '13px', fontWeight: 900, color: THEME.primary, marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <span>🚚</span>
+                  <span>أمر تشغيل الرحلة (رحلة التوزيع)</span>
+                </span>
+                <span style={{ fontSize: '11px', fontWeight: 700, color: '#0284c7' }}>
+                  {actionType === 'out' ? '⚡ يربط المندوب والسيارة تلقائياً' : 'اختياري'}
+                </span>
+              </label>
+              <select 
+                  className="glass-input-field" 
+                  style={{ 
+                    borderColor: formData.fleet_operation_id ? '#0284c7' : undefined,
+                    fontWeight: formData.fleet_operation_id ? 800 : 'normal'
+                  }}
+                  value={formData.fleet_operation_id || ''} 
+                  onChange={e => {
+                    const opId = e.target.value;
+                    const op = fleetOperations?.find((o: any) => String(o.id) === String(opId));
+                    if (op) {
+                      const targetWh = warehousesList?.find((w: any) => 
+                        op.vehicle_id && w.vehicle_id === op.vehicle_id
+                      ) || warehousesList?.find((w: any) => 
+                        op.vehicle_id && w.id === op.vehicle_id
+                      );
+                      setFormData(prev => ({
+                        ...prev,
+                        fleet_operation_id: opId,
+                        delegate_id: op.driver_id || prev.delegate_id,
+                        partner_id: op.driver_id || prev.partner_id,
+                        destination_warehouse_id: (actionType === 'out' && targetWh) ? targetWh.id : prev.destination_warehouse_id
+                      }));
+                    } else {
+                      setFormData(prev => ({
+                        ...prev,
+                        fleet_operation_id: '',
+                        delegate_id: '',
+                        partner_id: ''
+                      }));
+                    }
+                  }}
+              >
+                  <option value="">-- ربط بأمر تشغيل رحلة --</option>
+                  {fleetOperations?.map((op: any) => {
+                      const driverName = op.driver?.name || 'بدون مندوب';
+                      const carPlate = op.vehicle?.plate_number || 'بدون سيارة';
+                      const desc = op.description ? ` (${op.description})` : '';
+                      return (
+                        <option key={op.id} value={op.id}>
+                          {`🚚 ${op.operation_number} | المندوب: ${driverName} | سيارة: ${carPlate}${desc} - [${op.operation_date || ''}]`}
+                        </option>
+                      );
+                  })}
+              </select>
+
+              {formData.fleet_operation_id && (() => {
+                const selectedOp = fleetOperations?.find((o: any) => String(o.id) === String(formData.fleet_operation_id));
+                return selectedOp ? (
+                  <div style={{ 
+                    marginTop: '8px', padding: '8px 12px', borderRadius: '10px', 
+                    background: 'rgba(2, 132, 199, 0.1)', border: '1px solid rgba(2, 132, 199, 0.25)', 
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px' 
+                  }}>
+                    <span style={{ fontWeight: 800, color: '#0369a1' }}>
+                      ✅ تم ربط الرحلة: {selectedOp.operation_number}
+                    </span>
+                    <span style={{ color: '#0284c7', fontWeight: 800 }}>
+                      👤 المندوب: {selectedOp.driver?.name || 'محدد'} | 🚗 {selectedOp.vehicle?.plate_number || ''}
+                    </span>
+                  </div>
+                ) : null;
+              })()}
+            </div>
+
+            {/* الطرف المرتبط / المندوب */}
             <div>
               <label style={{ fontSize: '13px', fontWeight: 900, color: THEME.primary, marginBottom: '8px', display: 'block' }}>
                 {actionType === 'in' 
@@ -359,33 +515,17 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
                   ? '👤 المسؤول عن التلف / السائق (اختياري)'
                   : actionType === 'empty_return'
                   ? '👤 العميل أو المندوب المسلم للفوارغ (اختياري)'
-                  : '👤 العميل / المستلم / المقاول (اختياري)'}
+                  : '👤 المندوب المستلم / الطرف المرتبط'}
               </label>
               <SearchableSelect
                 options={partners.map((p: any) => ({
-                  label: `${p.name} (${p.partner_type})`,
+                  label: `${p.name} (${p.partner_type || 'طرف'})`,
                   value: p.id
                 }))}
-                value={formData.partner_id}
-                onChange={val => setFormData({...formData, partner_id: val})}
-                placeholder="-- ابحث عن الطرف المرتبط --"
+                value={formData.partner_id || formData.delegate_id}
+                onChange={val => setFormData(prev => ({ ...prev, partner_id: val, delegate_id: val }))}
+                placeholder="-- ابحث عن الطرف أو المندوب المرتبط --"
               />
-            </div>
-
-            <div>
-              <label style={{ fontSize: '13px', fontWeight: 900, color: THEME.primary, marginBottom: '8px', display: 'block' }}>🚚 رحلة التوزيع (أمر تشغيل السيارات)</label>
-              <select 
-                  className="glass-input-field" 
-                  value={formData.fleet_operation_id || ''} 
-                  onChange={e => setFormData({...formData, fleet_operation_id: e.target.value})}
-              >
-                  <option value="">-- ربط برحلة توزيع (اختياري) --</option>
-                  {fleetOperations?.map((op: any) => (
-                      <option key={op.id} value={op.id}>
-                          {op.operation_number} | {op.operation_date} | سيارة: {op.vehicle?.plate_number} | المندوب: {op.driver?.name}{op.description ? ' | ' + op.description : ''}
-                      </option>
-                  ))}
-              </select>
             </div>
 
             <div>

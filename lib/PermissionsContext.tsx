@@ -1,90 +1,40 @@
 "use client";
-import React, { createContext, useContext, useEffect, useState, useMemo } from 'react';
-import { supabase } from './supabase';
+import React, { createContext, useContext, useMemo } from 'react';
+import { useAuth } from '@/components/authGuard';
 
 const PermissionsContext = createContext<any>(null);
 
 export const PermissionsProvider = ({ children }: { children: React.ReactNode }) => {
-    const [permissions, setPermissions] = useState<any>(null);
-    const [role, setRole] = useState<string>('client');
-    const [loading, setLoading] = useState(true);
-    const [profile, setProfile] = useState<any>(null);
+    const auth = useAuth();
+    const profile = auth?.profile;
+    const loading = auth?.loading ?? false;
 
-    useEffect(() => {
-        let isMounted = true; // 🛡️ حماية ضد الـ Memory Leak وتحديث الواجهة وهي مقفولة
+    const role = useMemo(() => {
+        if (!profile) return 'client';
+        if (profile.is_admin || profile.role === 'super_admin') return 'super_admin';
+        return profile.role || 'client';
+    }, [profile]);
 
-        const fetchPerms = async (sessionUser?: any) => {
-            if (!permissions) setLoading(true); 
-            
-            try {
-                // الاعتماد على اليوزر الممرر من الـ Listener لتخفيف الضغط
-                let currentUser = sessionUser;
-                if (!currentUser) {
-                    const { data: { user } } = await supabase.auth.getUser();
-                    currentUser = user;
-                }
-                
-                if (currentUser && isMounted) {
-                    const { data, error } = await supabase
-                        .from('profiles')
-                        .select('id, role, permissions, is_admin, full_name, avatar_url')
-                        .eq('id', currentUser.id)
-                        .single();
-                        
-                    if (data && isMounted) {
-                        const userRole = data.is_admin ? 'super_admin' : (data.role || 'client');
-                        setRole(userRole);
-                        setPermissions(data.permissions || {});
-                        setProfile(data);
-                    }
-                } else if (isMounted) {
-                     setLoading(false);
-                }
-            } catch (err) {
-                console.error("❌ خطأ في تحميل الصلاحيات:", err);
-            } finally {
-                if (isMounted) setLoading(false); 
+    const permissions = useMemo(() => {
+        return profile?.permissions || {};
+    }, [profile]);
+
+    const can = useMemo(() => {
+        return (moduleName: string, actionName: string) => {
+            if (role === 'super_admin' || role === 'admin') return true;
+            const perms = permissions || {};
+            if (Array.isArray(perms[moduleName])) {
+                return perms[moduleName].includes(actionName);
+            } else if (perms[moduleName] && typeof perms[moduleName] === 'object') {
+                return perms[moduleName][actionName] === true;
             }
+            return false;
         };
-
-        // فحص فوري عند التركيب لضمان عدم الانتظار للـ listener لو كان فات
-        fetchPerms();
-
-        const safetyTimer = setTimeout(() => {
-            if (isMounted) setLoading(false);
-        }, 2500);
-
-        // 🚀 الاستماع لأحداث الجلسة
-        const { data: authListener } = supabase.auth.onAuthStateChange((event, session) => {
-            if (event === 'INITIAL_SESSION' || event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-                fetchPerms(session?.user);
-            } else if (event === 'SIGNED_OUT') {
-                if (isMounted) {
-                    setPermissions(null);
-                    setRole('client');
-                    setLoading(false);
-                }
-            }
-        });
-
-        return () => {
-            isMounted = false;
-            clearTimeout(safetyTimer);
-            authListener.subscription.unsubscribe();
-        };
-    }, []); // 👈 مصفوفة فارغة لضمان عدم إعادة التشغيل نهائياً
-
-
-    const can = (moduleName: string, actionName: string) => {
-        if (role === 'super_admin' || role === 'admin') return true;
-        return permissions?.[moduleName]?.[actionName] === true;
-    };
+    }, [role, permissions]);
 
     const value = useMemo(() => ({
         can, role, permissions, loading, profile
-    }), [permissions, role, loading, profile]);
-
-    // 🚀 لا نعرض شاشة تحميل هنا - AuthGuard يتكفل بذلك
+    }), [can, role, permissions, loading, profile]);
 
     return (
         <PermissionsContext.Provider value={value}>
@@ -95,6 +45,14 @@ export const PermissionsProvider = ({ children }: { children: React.ReactNode })
 
 export const usePermissions = () => {
     const context = useContext(PermissionsContext);
-    if (!context) throw new Error("usePermissions must be used within a PermissionsProvider");
+    if (!context) {
+        return {
+            can: () => true,
+            role: 'super_admin',
+            permissions: {},
+            loading: false,
+            profile: null
+        };
+    }
     return context;
-};
+};

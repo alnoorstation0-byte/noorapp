@@ -153,6 +153,58 @@ export default function InventoryItemModal({ isOpen, onClose, currentRecord, set
             <input type="number" className="glass-input-field" placeholder="0"
               value={currentRecord.current_quantity || ''} onChange={e => setCurrentRecord({ ...currentRecord, current_quantity: Number(e.target.value) })} />
           </div>
+
+          {/* 🔄 عهدة فوارغ المياه */}
+          <div 
+            onClick={() => setCurrentRecord({ ...currentRecord, is_returnable_bottle: !currentRecord.is_returnable_bottle })}
+            style={{
+              background: currentRecord.is_returnable_bottle 
+                ? 'linear-gradient(135deg, rgba(40, 145, 200, 0.15) 0%, rgba(127, 212, 227, 0.25) 100%)' 
+                : 'rgba(241, 245, 249, 0.7)',
+              border: currentRecord.is_returnable_bottle 
+                ? '1.5px solid #2891C8' 
+                : '1px solid rgba(203, 213, 225, 0.7)',
+              borderRadius: '16px',
+              padding: '14px 18px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              boxShadow: currentRecord.is_returnable_bottle ? '0 4px 15px rgba(40, 145, 200, 0.15)' : 'none'
+            }}
+          >
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+              <div style={{
+                width: '42px', height: '42px', borderRadius: '12px',
+                background: currentRecord.is_returnable_bottle ? 'linear-gradient(135deg, #1C73AB 0%, #2891C8 100%)' : '#e2e8f0',
+                color: currentRecord.is_returnable_bottle ? 'white' : '#64748b',
+                display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px',
+                boxShadow: currentRecord.is_returnable_bottle ? '0 3px 10px rgba(28, 115, 171, 0.3)' : 'none'
+              }}>
+                🔄
+              </div>
+              <div>
+                <div style={{ fontSize: '14px', fontWeight: 900, color: currentRecord.is_returnable_bottle ? '#1C73AB' : '#1e293b' }}>
+                  صنف خاضع لعهدة فوارغ المياه (جالون / عبوة مسترجعة)
+                </div>
+                <div style={{ fontSize: '11.5px', color: '#64748b', fontWeight: 700, marginTop: '2px' }}>
+                  عند التفعيل، تنزل كميات الصنف تلقائياً كـ &quot;عهدة فوارغ&quot; عند البيع في شاشة الكاشير والورديات
+                </div>
+              </div>
+            </div>
+            <div style={{
+              width: '26px', height: '26px', borderRadius: '8px',
+              border: currentRecord.is_returnable_bottle ? '2px solid #2891C8' : '2px solid #94a3b8',
+              background: currentRecord.is_returnable_bottle ? '#2891C8' : 'white',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              color: 'white', fontWeight: 900, fontSize: '15px',
+              transition: '0.2s'
+            }}>
+              {currentRecord.is_returnable_bottle ? '✓' : ''}
+            </div>
+          </div>
+
           <div>
             <label style={{ fontSize:'13px', fontWeight:900, color:THEME.primary, marginBottom:'8px', display:'block' }}>ملاحظات فنية ومواصفات</label>
             <textarea className="glass-input-field" rows={2} placeholder="اي مواصفات فنية خاصة بالخامة..."

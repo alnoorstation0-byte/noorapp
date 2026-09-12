@@ -51,7 +51,12 @@ export function usePaymentVouchersLogic() {
     const { data: fleetOperations = [] } = useQuery({
         queryKey: ['fleet_operations_open'],
         queryFn: async () => {
-            const { data, error } = await supabase.from('fleet_operations').select('id, operation_number, operation_date, status, vehicle_id, description, vehicle:fleet_vehicles(plate_number), driver:partners(name)').eq('status', 'مفتوح');
+            const { data, error } = await supabase
+                .from('fleet_operations')
+                .select('id, operation_number, operation_date, status, vehicle_id, description, vehicle:fleet_vehicles(plate_number), driver:partners(name)')
+                .neq('status', 'مغلق')
+                .neq('status', 'closed')
+                .order('operation_date', { ascending: false });
             if (error) throw error;
             return data?.map((op:any) => ({
                 id: op.id,
@@ -282,6 +287,21 @@ export function usePaymentVouchersLogic() {
                 queryClient.invalidateQueries({ queryKey: ['vouchers_server_totals'] });
                 queryClient.invalidateQueries({ queryKey: ['payment_vouchers'] });
             },
+            handlePostSingle: async (id: string) => {
+                if (!id) return;
+                await postRecords([id]);
+                queryClient.invalidateQueries({ queryKey: ['vouchers_server_totals'] });
+                queryClient.invalidateQueries({ queryKey: ['payment_vouchers'] });
+                queryClient.invalidateQueries({ queryKey: ['journal_master_view'] });
+            },
+            handleUnpostSingle: async (id: string) => {
+                if (!id) return;
+                await unpostRecords([id]);
+                queryClient.invalidateQueries({ queryKey: ['vouchers_server_totals'] });
+                queryClient.invalidateQueries({ queryKey: ['payment_vouchers'] });
+                queryClient.invalidateQueries({ queryKey: ['journal_master_view'] });
+            },
+            isProcessing,
             handleBulkFixSave,
             exportToExcel: () => {}
         }

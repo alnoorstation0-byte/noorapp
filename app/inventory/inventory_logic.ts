@@ -3,6 +3,8 @@ import { useState, useEffect, useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useMutation, useQueryClient } from '@tanstack/react-query'; 
 import { useToast } from '@/lib/toast-context'; 
+import { useRealtimeListener } from '@/lib/useRealtimeSync';
+import { syncAllWarehouseBalances, MAIN_WAREHOUSE_ID } from '@/lib/inventory_engine'; 
 
 export function useInventoryLogic() {
   const { showToast } = useToast();
@@ -22,7 +24,7 @@ export function useInventoryLogic() {
   const [isModalOpen, setIsModalOpen] = useState(false); // For adding new product to catalog
   const [isActionModalOpen, setIsActionModalOpen] = useState(false); // For Quick Action In/Out
   const [currentRecord, setCurrentRecord] = useState<any>({
-    code: '', name: '', unit: 'حبة', current_quantity: 0, reorder_level: 5
+    code: '', name: '', unit: 'حبة', current_quantity: 0, reorder_level: 5, suggested_price: 0, is_returnable_bottle: false
   });
 
   const categories = useMemo(() => {
@@ -67,7 +69,12 @@ export function useInventoryLogic() {
       if (pData) setPartners(pData);
 
       // Fetch active fleet operations
-      const { data: opData } = await supabase.from('fleet_operations').select('*, vehicle:fleet_vehicles(plate_number), driver:partners(name), description').in('status', ['draft', 'pending', 'active']).order('created_at', { ascending: false });
+      const { data: opData } = await supabase
+        .from('fleet_operations')
+        .select('*, vehicle:fleet_vehicles(plate_number), driver:partners(name)')
+        .neq('status', 'مغلق')
+        .neq('status', 'closed')
+        .order('operation_date', { ascending: false });
       if (opData) setFleetOperations(opData);
 
     } catch (err) {
@@ -79,15 +86,27 @@ export function useInventoryLogic() {
 
   useEffect(() => { fetchData(); }, [selectedWarehouseId]); // Re-fetch if warehouse changes
 
+  // 🔄 مزامنة فورية ذكية لكافة شاشات المستودعات
+  useRealtimeListener(['warehouse_inventory', 'inventory_items', 'inventory_transactions'], () => fetchData());
+
+  const syncMutation = useMutation({
+    mutationFn: async () => {
+      await syncAllWarehouseBalances();
+    },
+    onSuccess: () => {
+      showToast("تمت مزامنة وتحديث أرصدة كافة المستودعات بنجاح 🔄", "success");
+      fetchData();
+    },
+    onError: (err: any) => showToast(`خطأ أثناء المزامنة: ${err.message}`, "error")
+  });
+
   const [filterLowStockOnly, setFilterLowStockOnly] = useState(false);
 
   const enrichedItems = useMemo(() => {
     return items.map(item => {
       const whItem = warehouseInventory.find(wi => wi.item_id === item.id && wi.warehouse_id === selectedWarehouseId);
-      // If we are looking at the main warehouse, fallback to current_quantity if warehouse_inventory is empty
-      // because we just migrated. Otherwise use 0.
-      let qty = whItem ? Number(whItem.quantity) : 0;
-      if (!whItem && selectedWarehouseId === '11111111-1111-1111-1111-111111111111') {
+      let qty = whItem ? Math.max(0, Number(whItem.quantity)) : 0;
+      if (!whItem && selectedWarehouseId === MAIN_WAREHOUSE_ID && warehouseInventory.length === 0) {
           qty = Number(item.current_quantity || 0);
       }
 
@@ -121,22 +140,23 @@ export function useInventoryLogic() {
       let totalQty = 0;
       let totalValue = 0;
 
-      if (wh.id === '11111111-1111-1111-1111-111111111111' && whItems.length === 0) {
+      whItems.forEach(wi => {
+         const qty = Number(wi.quantity || 0);
+         if (qty > 0) {
+           itemCount++;
+           totalQty += qty;
+           totalValue += qty * (lastPrices[wi.item_id] || 0);
+         }
+      });
+
+      // Fallback للمستودع الرئيسي فقط في حال كان جدول أرصدة المستودعات فارغاً تماماً
+      if (wh.id === MAIN_WAREHOUSE_ID && totalQty === 0 && warehouseInventory.length === 0) {
         items.forEach(item => {
            const qty = Number(item.current_quantity || 0);
            if (qty > 0) {
              itemCount++;
              totalQty += qty;
              totalValue += qty * (lastPrices[item.id] || 0);
-           }
-        });
-      } else {
-        whItems.forEach(wi => {
-           const qty = Number(wi.quantity || 0);
-           if (qty > 0) {
-             itemCount++;
-             totalQty += qty;
-             totalValue += qty * (lastPrices[wi.item_id] || 0);
            }
         });
       }
@@ -150,13 +170,18 @@ export function useInventoryLogic() {
 
   const saveMutation = useMutation({
     mutationFn: async (payload: any) => {
-      const cleanPayload = {
-        code: payload.code,
+      const cleanPayload: any = {
+        code: payload.code || null,
         name: payload.name,
-        unit: payload.unit,
-        current_quantity: payload.current_quantity || 0,
-        reorder_level: payload.reorder_level || 5
+        unit: payload.unit || 'حبة',
+        current_quantity: Number(payload.current_quantity) || 0,
+        reorder_level: Number(payload.reorder_level) || 5,
+        suggested_price: Number(payload.suggested_price) || 0,
+        is_returnable_bottle: Boolean(payload.is_returnable_bottle)
       };
+
+      if (payload.barcode) cleanPayload.barcode = payload.barcode;
+      if (payload.item_type) cleanPayload.item_type = payload.item_type;
 
       if (payload.id) {
         const { error } = await supabase.from('inventory_items').update(cleanPayload).eq('id', payload.id);
@@ -206,6 +231,8 @@ export function useInventoryLogic() {
     },
     deleteItem: (id: string) => deleteMutation.mutate(id),
     isSaving: saveMutation.isPending,
-    refreshData: fetchData
+    refreshData: fetchData,
+    handleSyncBalances: () => syncMutation.mutate(),
+    isSyncing: syncMutation.isPending
   };
 }

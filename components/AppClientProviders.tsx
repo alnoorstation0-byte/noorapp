@@ -14,6 +14,7 @@ import { SidebarProvider } from '@/lib/SidebarContext';
 import LayoutClient from './layout/LayoutClient';
 import PwaManager from './PwaManager';
 import GlobalNavigationShortcuts from './GlobalNavigationShortcuts';
+import GlobalAutoSelectNumber from './GlobalAutoSelectNumber';
 import { THEME } from '@/lib/theme'; 
 import { RealtimeSyncProvider } from '@/lib/useRealtimeSync';
 
@@ -40,6 +41,7 @@ export default function AppClientProviders({ children }: { children: React.React
                                                     <RealtimeSyncProvider>
                                                     <PwaManager />
                                                     <GlobalNavigationShortcuts />
+                                                    <GlobalAutoSelectNumber />
                                                     <div style={{ position: 'relative', zIndex: 1 }}>
                                                         {children}
                                                     </div>

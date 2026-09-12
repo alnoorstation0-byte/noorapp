@@ -141,6 +141,7 @@ export default function PurchaseOrderModal({ isOpen, onClose, items, initialData
         tax_amount: l.tax_amount,
         include_tax: l.include_tax,
         notes: notes,
+        warehouse_id: '11111111-1111-1111-1111-111111111111',
         status: 'pending'
       }));
 

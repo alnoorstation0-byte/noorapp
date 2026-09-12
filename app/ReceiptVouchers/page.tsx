@@ -1,4 +1,4 @@
-﻿// @ts-nocheck
+// @ts-nocheck
 "use client";
 
 import React, { useEffect, useState, useMemo } from 'react';
@@ -121,7 +121,8 @@ export default function ReceiptVouchersPage() {
             accessor: 'partner_name',
             render: (row: any) => {
                 if (!row) return null;
-                return <span style={{ fontWeight: 800, color: '#1e293b' }}>{row.partners?.name || '---'}</span>;
+                const displayName = row.partners?.name || (row.invoices?.invoice_number ? `مبيعات نقدية (فاتورة #${row.invoices.invoice_number})` : (row.notes || 'عميل نقدي'));
+                return <span style={{ fontWeight: 800, color: '#1e293b' }}>{displayName}</span>;
             }
         },
         {

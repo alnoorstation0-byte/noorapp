@@ -18,15 +18,16 @@ export function useLoginLogic() {
   // 🛡️ 1. الحارس الذكي
   useEffect(() => {
     const checkExistingSession = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (session) {
-        // 👈 توجيه ذكي: يقرأ من الرابط، أو من الذاكرة، أو يروح للداشبورد كافتراضي
-        const redirectParam = searchParams?.get('redirect');
-        router.replace(redirectParam || '/'); 
-      }
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (session?.user) {
+          const redirectParam = searchParams?.get('redirect');
+          window.location.replace(redirectParam || '/'); 
+        }
+      } catch (_) {}
     };
     checkExistingSession();
-  }, [router, searchParams]);
+  }, [searchParams]);
 
   // 2. مزامنة قيم المتصفح (Autofill)
   useEffect(() => {

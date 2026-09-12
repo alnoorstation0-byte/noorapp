@@ -40,6 +40,9 @@ export function useUniversalPosting(queryKey: string, tableName: string, postRpc
             } else if (tableName === 'invoices') {
                 const res = await supabase.rpc('unpost_invoices_bulk', { p_ids: selectedIds });
                 rpcError = res.error;
+            } else if (tableName === 'expenses') {
+                const res = await supabase.rpc('unpost_expenses_bulk', { p_ids: selectedIds });
+                rpcError = res.error;
             } else {
                 const res = await supabase.rpc('unpost_universal_bulk', { 
                     p_ids: selectedIds,

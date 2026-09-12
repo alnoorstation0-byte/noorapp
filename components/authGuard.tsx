@@ -70,6 +70,27 @@ const ROUTE_MODULE_MAP: Record<string, string> = {
   '/messages': 'messages',
 };
 
+function getInitialAuthUser() {
+  if (typeof window === 'undefined') return { user: null, hasStoredToken: false };
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.startsWith('sb-') && key.endsWith('-auth-token')) {
+        const item = localStorage.getItem(key);
+        if (item) {
+          const parsed = JSON.parse(item);
+          const cachedUser = parsed?.user || parsed?.currentSession?.user;
+          if (cachedUser) {
+            return { user: cachedUser, hasStoredToken: true };
+          }
+          return { user: null, hasStoredToken: true };
+        }
+      }
+    }
+  } catch (_) {}
+  return { user: null, hasStoredToken: false };
+}
+
 export default function AuthGuard({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<any>(null);
   const [profile, setProfile] = useState<any>(null);
@@ -79,13 +100,41 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     let isMounted = true;
+    const { user: initialUser, hasStoredToken } = getInitialAuthUser();
 
-    // 🛡️ مؤقت أمان فوري (2.5 ثانية كحد أقصى) لضمان عدم تعليق الشاشة أبداً تحت أي ظرف
+    // ⚡ مسار سريع: إذا كان المستخدم في مسار محمي ولا يوجد أي توكن إطلاقاً
+    if (!hasStoredToken && pathname !== '/login' && pathname !== '/signup') {
+      setLoading(false);
+      window.location.replace('/login');
+      return;
+    }
+
+    // إذا وجدنا يوزر مخزن محلياً، نضعه فوراً لتفادي أي وميض أو تأخير
+    if (initialUser && !user) {
+      setUser(initialUser);
+      setLoading(false);
+    }
+
+    // 🛡️ مؤقت أمان فوري (1.5 ثانية كحد أقصى) لضمان عدم تعليق الشاشة تحت أي ظرف
     const safetyTimer = setTimeout(() => {
       if (isMounted) {
         setLoading(false);
       }
-    }, 2500);
+    }, 1500);
+
+    const purgeDeadSession = async () => {
+      try {
+        await supabase.auth.signOut();
+      } catch (_) {}
+      try {
+        for (let i = localStorage.length - 1; i >= 0; i--) {
+          const key = localStorage.key(i);
+          if (key && key.startsWith('sb-') && key.endsWith('-auth-token')) {
+            localStorage.removeItem(key);
+          }
+        }
+      } catch (_) {}
+    };
 
     const handleSession = async (session: any) => {
       if (!isMounted) return;
@@ -94,13 +143,17 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
         setUser(null);
         setProfile(null);
         setLoading(false);
+        if (pathname !== '/login' && pathname !== '/signup') {
+          await purgeDeadSession();
+          window.location.replace('/login');
+        }
         return;
       }
 
       setUser(session.user);
 
       try {
-        const { data: profileData, error: profileErr } = await supabase
+        const { data: profileData } = await supabase
           .from("profiles")
           .select("*")
           .eq("id", session.user.id)
@@ -109,18 +162,18 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
         if (!isMounted) return;
 
         if (profileData?.is_active === false) {
-          await supabase.auth.signOut();
+          await purgeDeadSession();
           alert("⛔ تم إيقاف حسابك من قبل الإدارة. يرجى مراجعة مدير النظام.");
-          window.location.href = "/login";
+          window.location.replace("/login");
           setLoading(false);
           return;
         }
 
-        setProfile(profileData || { id: session.user.id, role: 'admin' });
+        setProfile(profileData || { id: session.user.id, role: 'admin', is_admin: true });
       } catch (err) {
         console.warn("⚠️ لم نتمكن من جلب بيانات البروفايل، السماح بالدخول الافتراضي:", err);
         if (isMounted) {
-          setProfile({ id: session.user.id, role: 'admin' });
+          setProfile({ id: session.user.id, role: 'admin', is_admin: true });
         }
       } finally {
         if (isMounted) {
@@ -129,9 +182,13 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
       }
     };
 
-    // 1. فحص فوري للجلسة الحالية
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      handleSession(session);
+    // 1. فحص الجلسة الحالية
+    supabase.auth.getSession().then(({ data: { session }, error }) => {
+      if (error || !session) {
+        handleSession(null);
+      } else {
+        handleSession(session);
+      }
     }).catch(() => {
       if (isMounted) setLoading(false);
     });
@@ -143,6 +200,9 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
           setUser(null);
           setProfile(null);
           setLoading(false);
+          if (pathname !== '/login' && pathname !== '/signup') {
+            window.location.replace('/login');
+          }
         }
       } else if (session) {
         handleSession(session);
@@ -160,7 +220,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
       clearTimeout(safetyTimer);
       authListener.subscription.unsubscribe();
     };
-  }, []); // 👈 يعمل مرة واحدة فقط عند التحميل بدون إعادة بناء مع كل تغيير مسار
+  }, []); // 👈 يعمل مرة واحدة فقط عند التحميل
 
   // 🛡️ توجيه ذكي منفصل بناء على المسار وحالة الدخول
   useEffect(() => {
@@ -168,7 +228,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
 
     if (!user) {
       if (pathname !== "/login" && pathname !== "/signup") {
-        router.replace("/login");
+        window.location.replace("/login");
       }
     } else {
       if (pathname === "/login" || pathname === "/signup") {
@@ -177,10 +237,9 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     }
   }, [user, loading, pathname, router]);
 
-
   const can = (moduleName: string, action: string) => {
     if (!profile) return false;
-    if (profile.role === 'admin' || profile.is_admin) return true; 
+    if (profile.role === 'admin' || profile.role === 'super_admin' || profile.is_admin) return true; 
     
     const perms = profile.permissions || {};
     // Check for array format (old) or object format (new)
@@ -218,39 +277,45 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     return can(requiredModule, 'view');
   }, [pathname, profile, loading, user]);
 
-  if (loading && !user) {
-    if (pathname === '/login' || pathname === '/signup') return <>{children}</>;
-    return <LoadingScreen message="جاري الدخول..." subMessage="لحظات وستكون جاهزاً" fullScreen={true} />;
-  }
-
-  if (!isAuthorized) {
-    return (
-      <div style={{ height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', background: 'rgba(255, 255, 255, 0.6)', padding: '20px', textAlign: 'center' }}>
-        <div style={{ marginBottom: '15px', fontSize: '60px' }}>
-          🛑
-        </div>
-        <h1 style={{ color: '#dc2626', fontWeight: 900, fontSize: '32px', margin: '0' }}>عفواً، ليس لديك صلاحية للوصول إلى هذه الصفحة!</h1>
-        <button 
-          onClick={() => router.push('/')}
-          style={{ marginTop: '25px', padding: '14px 30px', background: '#dc2626', color: 'white', borderRadius: '12px', border: 'none', cursor: 'pointer', fontWeight: 900, fontSize: '16px', boxShadow: '0 4px 15px rgba(220,38,38,0.4)', transition: '0.3s' }}
-          onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
-          onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
-        >
-          🏠 العودة للرئيسية
-        </button>
-      </div>
-    );
-  }
-
   return (
     <AuthContext.Provider value={{ user, profile, loading, can }}>
-      {children}
+      {loading && !user && pathname !== '/login' && pathname !== '/signup' ? (
+        <LoadingScreen message="جاري الدخول..." subMessage="لحظات وستكون جاهزاً" fullScreen={true} />
+      ) : !user && pathname !== '/login' && pathname !== '/signup' ? (
+        <LoadingScreen message="جاري التحويل لصفحة الدخول..." subMessage="يرجى الانتظار" fullScreen={true} />
+      ) : !isAuthorized ? (
+        <div style={{ height: '100vh', display: 'flex', justifyContent: 'center', alignItems: 'center', flexDirection: 'column', background: 'rgba(255, 255, 255, 0.6)', padding: '20px', textAlign: 'center' }}>
+          <div style={{ marginBottom: '15px', fontSize: '60px' }}>
+            🛑
+          </div>
+          <h1 style={{ color: '#dc2626', fontWeight: 900, fontSize: '32px', margin: '0' }}>عفواً، ليس لديك صلاحية للوصول إلى هذه الصفحة!</h1>
+          <button 
+            onClick={() => router.push('/')}
+            style={{ marginTop: '25px', padding: '14px 30px', background: '#dc2626', color: 'white', borderRadius: '12px', border: 'none', cursor: 'pointer', fontWeight: 900, fontSize: '16px', boxShadow: '0 4px 15px rgba(220,38,38,0.4)', transition: '0.3s' }}
+            onMouseOver={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
+            onMouseOut={(e) => e.currentTarget.style.transform = 'scale(1)'}
+          >
+            🏠 العودة للرئيسية
+          </button>
+        </div>
+      ) : (
+        children
+      )}
     </AuthContext.Provider>
   );
 }
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) throw new Error("useAuth must be used within AuthGuard");
+  if (!context) {
+    return {
+      user: null,
+      profile: null,
+      loading: false,
+      can: () => false,
+    };
+  }
   return context;
 };
+
+

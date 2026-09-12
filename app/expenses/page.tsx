@@ -374,6 +374,94 @@ export default function ExpensesPage() {
 
         return (
           <div style={{ display: 'flex', gap: '8px', justifyContent: 'center', alignItems: 'center' }}>
+            {/* 🚀 زر الترحيل وفك الترحيل الفوري بجانب القيد */}
+            <SecureAction module="expenses" action="post">
+              {row.is_posted ? (
+                <button
+                  type="button"
+                  disabled={logic.rowActionLoadingId === row.id}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    logic.handleUnpostSingle(row.id);
+                  }}
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.2) 100%)',
+                    color: '#b45309',
+                    border: '1px solid rgba(245, 158, 11, 0.4)',
+                    padding: '6px 12px',
+                    borderRadius: '10px',
+                    cursor: logic.rowActionLoadingId === row.id ? 'wait' : 'pointer',
+                    fontWeight: 900,
+                    fontSize: '11px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    backdropFilter: 'blur(10px)',
+                    boxShadow: '0 2px 6px rgba(245, 158, 11, 0.15)',
+                    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                    whiteSpace: 'nowrap',
+                    opacity: logic.rowActionLoadingId === row.id ? 0.6 : 1
+                  }}
+                  onMouseEnter={(e) => {
+                    if (logic.rowActionLoadingId !== row.id) {
+                      e.currentTarget.style.transform = 'translateY(-2px)';
+                      e.currentTarget.style.background = 'linear-gradient(135deg, rgba(245, 158, 11, 0.25) 0%, rgba(217, 119, 6, 0.3) 100%)';
+                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(245, 158, 11, 0.25)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.background = 'linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.2) 100%)';
+                    e.currentTarget.style.boxShadow = '0 2px 6px rgba(245, 158, 11, 0.15)';
+                  }}
+                  title="فك ترحيل هذا المصروف وإعادته لمسودة"
+                >
+                  <span>{logic.rowActionLoadingId === row.id ? '⏳' : '↩️'}</span>
+                  <span>{logic.rowActionLoadingId === row.id ? 'جاري الفك...' : 'فك الترحيل'}</span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  disabled={logic.rowActionLoadingId === row.id}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    logic.handlePostSingle(row.id);
+                  }}
+                  style={{
+                    background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                    color: 'white',
+                    border: '1px solid rgba(255, 255, 255, 0.3)',
+                    padding: '6px 14px',
+                    borderRadius: '10px',
+                    cursor: logic.rowActionLoadingId === row.id ? 'wait' : 'pointer',
+                    fontWeight: 900,
+                    fontSize: '11px',
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '5px',
+                    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+                    transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                    whiteSpace: 'nowrap',
+                    opacity: logic.rowActionLoadingId === row.id ? 0.6 : 1
+                  }}
+                  onMouseEnter={(e) => {
+                    if (logic.rowActionLoadingId !== row.id) {
+                      e.currentTarget.style.transform = 'translateY(-2px)';
+                      e.currentTarget.style.boxShadow = '0 6px 16px rgba(16, 185, 129, 0.45)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(16, 185, 129, 0.3)';
+                  }}
+                  title="اعتماد وترحيل هذا المصروف محاسبياً"
+                >
+                  <span>{logic.rowActionLoadingId === row.id ? '⏳' : '🚀'}</span>
+                  <span>{logic.rowActionLoadingId === row.id ? 'جاري الترحيل...' : 'ترحيل'}</span>
+                </button>
+              )}
+            </SecureAction>
+
             <button 
               onClick={(e) => { e.stopPropagation(); setPrintData(row); setIsPrintModalOpen(true); }} 
               style={{ background: 'rgba(255,255,255,0.5)', border: '1px solid rgba(0,0,0,0.1)', padding: '6px 10px', borderRadius: '8px', cursor: 'pointer', transition: '0.2s', fontSize: '14px' }}

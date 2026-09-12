@@ -22,12 +22,9 @@ export function useKpisLogic() {
     const receiptsQuery = useQuery({
         queryKey: ['kpis_receipts', dateFrom, dateTo],
         queryFn: async () => {
-            // Wait, receipt vouchers are typically in 'journal_headers' or 'receipt_vouchers' if such table exists.
-            // In earlier exploration, we saw 'journal_headers' has 'receipt' type.
-            // Let's just fetch journal_headers where type is 'receipt'
-            let q = supabase.from('journal_headers').select('total_amount, journal_date, reference_type').in('reference_type', ['سند قبض', 'receipt', 'قبض']);
-            if (dateFrom) q = q.gte('journal_date', dateFrom);
-            if (dateTo) q = q.lte('journal_date', dateTo);
+            let q = supabase.from('receipt_vouchers').select('amount, date').eq('status', 'مرحل');
+            if (dateFrom) q = q.gte('date', dateFrom);
+            if (dateTo) q = q.lte('date', dateTo);
             const { data, error } = await q;
             if (error) throw error;
             return data || [];
@@ -37,7 +34,10 @@ export function useKpisLogic() {
     const clientsQuery = useQuery({
         queryKey: ['kpis_clients'],
         queryFn: async () => {
-            const { data, error } = await supabase.from('partners').select('current_balance').eq('partner_type', 'عميل');
+            // Outstanding debts = Debit - Credit on AR Account (4f828d0d-a1f4-4762-83e3-c17dafae802d)
+            const { data, error } = await supabase.from('journal_lines')
+                .select('debit, credit')
+                .eq('account_id', '4f828d0d-a1f4-4762-83e3-c17dafae802d');
             if (error) throw error;
             return data || [];
         }
@@ -45,23 +45,21 @@ export function useKpisLogic() {
 
     const rawInvoices = invoicesQuery.data || [];
     const rawReceipts = receiptsQuery.data || [];
-    const rawClients = clientsQuery.data || [];
-
+    const rawClientsLines = clientsQuery.data || [];
     const {
         totalSales,
         totalCollections,
         totalOutstandingDebts,
         collectionRate
     } = useMemo(() => {
-        // Calculate Sales (filter out non-sales if needed, usually invoices table contains sales)
+        // Calculate Sales
         const totalSales = rawInvoices.reduce((sum, inv) => sum + Number(inv.total_amount || 0), 0);
         
         // Calculate Collections
-        const totalCollections = rawReceipts.reduce((sum, rec) => sum + Number(rec.total_amount || 0), 0);
+        const totalCollections = rawReceipts.reduce((sum, rec) => sum + Number(rec.amount || 0), 0);
 
-        // Calculate Outstanding Debts (from partners where type = عميل)
-        // Usually positive balance means they owe us money.
-        const totalOutstandingDebts = rawClients.reduce((sum, client) => sum + Number(client.current_balance || 0), 0);
+        // Calculate Outstanding Debts (AR Debit - AR Credit)
+        const totalOutstandingDebts = rawClientsLines.reduce((sum, line) => sum + (Number(line.debit || 0) - Number(line.credit || 0)), 0);
 
         // Collection Rate against Sales
         const collectionRate = totalSales > 0 ? (totalCollections / totalSales) * 100 : 0;

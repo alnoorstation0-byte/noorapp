@@ -17,8 +17,42 @@ import { supabase } from '@/lib/supabase';
  *   useRealtimeListener('expenses', fetchExpenses);
  */
 
-// الجداول اللي محتاجة مزامنة فورية
-const WATCHED_TABLES = [
+/**
+ * 🔄 تشغيل نغمة تنبيه ناعمة وأنيقة عند وصول إشعار جديد (Web Audio API)
+ */
+function playNotificationAudio() {
+  if (typeof window === 'undefined') return;
+  try {
+    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+    if (!AudioContextClass) return;
+    const ctx = new AudioContextClass();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(587.33, ctx.currentTime); // D5
+    osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.12); // A5
+
+    gain.gain.setValueAtTime(0.12, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.35);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start();
+    osc.stop(ctx.currentTime + 0.35);
+  } catch {
+    // تجاهل القيود إذا لم يتفاعل المستخدم مع الصفحة بعد
+  }
+}
+
+// 🌐 الجداول المشمولة في المزامنة اللحظية الشاملة
+export const WATCHED_TABLES = [
+  'notifications',
+  'messages',
+  'user_tasks',
+  'user_requests',
+  'cash_flows',
   'inventory_transactions',
   'expenses',
   'payment_vouchers',
@@ -30,15 +64,144 @@ const WATCHED_TABLES = [
   'manual_journals',
   'inventory_items',
   'warehouse_inventory',
+  'vehicle_inventory',
   'warehouses',
   'partners',
   'accounts',
   'fleet_operations',
+  'fleet_vehicles',
   'pos_shifts',
   'payroll_slips',
 ] as const;
 
-type WatchedTable = typeof WATCHED_TABLES[number];
+export type WatchedTable = typeof WATCHED_TABLES[number];
+
+// خريطة إبطال الكاش التلقائي لجميع استعلامات React Query عبر كافة صفحات التطبيق
+const TABLE_QUERY_KEY_MAP: Record<string, string[][]> = {
+  invoices: [
+    ['invoices'], 
+    ['pos_invoices'], 
+    ['ar_aging_invoices'], 
+    ['kpis_invoices'], 
+    ['dashboard'], 
+    ['accounts_report_with_lines']
+  ],
+  expenses: [
+    ['expenses'], 
+    ['expenses_for_vehicles'], 
+    ['dashboard'], 
+    ['accounts_report_with_lines']
+  ],
+  receipt_vouchers: [
+    ['receipt_vouchers'], 
+    ['kpis_receipts'], 
+    ['invoices'], 
+    ['accounts_report_with_lines']
+  ],
+  payment_vouchers: [
+    ['payment_vouchers'], 
+    ['expenses'], 
+    ['accounts_report_with_lines']
+  ],
+  inventory_transactions: [
+    ['inventory'], 
+    ['warehouse_inventory'], 
+    ['item_transactions'], 
+    ['warehouse_items'], 
+    ['pos_inventory']
+  ],
+  inventory_items: [
+    ['inventory_items'], 
+    ['inventory_items_list'], 
+    ['warehouse_items'], 
+    ['pos_inventory']
+  ],
+  warehouse_inventory: [
+    ['warehouse_inventory'], 
+    ['inventory'], 
+    ['warehouse_items'], 
+    ['pos_inventory']
+  ],
+  vehicle_inventory: [
+    ['vehicle_inventory'], 
+    ['inventory']
+  ],
+  warehouses: [
+    ['warehouses'], 
+    ['pos_warehouses']
+  ],
+  partners: [
+    ['partners'], 
+    ['partner_balances_summary'], 
+    ['partner_balances'], 
+    ['kpis_clients'], 
+    ['clients_list'], 
+    ['delegates'], 
+    ['pos_delegates']
+  ],
+  accounts: [
+    ['accounts'], 
+    ['accounts_report_with_lines'], 
+    ['ledger_accounts_list'], 
+    ['ledger_entries'], 
+    ['trial_balance']
+  ],
+  fleet_operations: [
+    ['fleet_operations'], 
+    ['fleet_operations_open'], 
+    ['operations_for_vehicles']
+  ],
+  fleet_vehicles: [
+    ['fleet_vehicles'], 
+    ['fleet_vehicles_list']
+  ],
+  pos_shifts: [
+    ['pos_shifts'], 
+    ['active_pos_shift'], 
+    ['pos_open_shifts'], 
+    ['active_shift_status']
+  ],
+  payroll_slips: [
+    ['payroll_slips']
+  ],
+  journal_headers: [
+    ['journal_master_view'], 
+    ['pending_journals_count'], 
+    ['ledger_entries'], 
+    ['accounts_report_with_lines']
+  ],
+  journal_lines: [
+    ['journal_master_view'], 
+    ['pending_journals_count'], 
+    ['ledger_entries'], 
+    ['accounts_report_with_lines']
+  ],
+  manual_journals: [
+    ['manual_journals'], 
+    ['journal_master_view'], 
+    ['pending_journals_count']
+  ],
+  notifications: [
+    ['notifications'], 
+    ['unread_counts'], 
+    ['user_profile']
+  ],
+  messages: [
+    ['messages'], 
+    ['unread_counts']
+  ],
+  user_tasks: [
+    ['user_tasks'], 
+    ['user_profile']
+  ],
+  user_requests: [
+    ['user_requests'], 
+    ['user_profile']
+  ],
+  cash_flows: [
+    ['cash_flows']
+  ]
+};
 
 // دالة لبث الحدث
 function emitTableChange(table: string, eventType: string, payload: any) {
@@ -55,10 +218,11 @@ function emitTableChange(table: string, eventType: string, payload: any) {
 
 /**
  * المكون الرئيسي - يوضع مرة واحدة في AppClientProviders
- * يشترك في Supabase Realtime على كل الجداول المهمة
+ * يشترك في Supabase Realtime على كل الجداول المهمة ويقوم بالتحديث الفوري
  */
 export function RealtimeSyncProvider({ children }: { children: React.ReactNode }) {
   const channelRef = useRef<any>(null);
+  const queryClient = useQueryClient();
 
   useEffect(() => {
     // إنشاء قناة واحدة للاستماع لكل الجداول
@@ -73,7 +237,46 @@ export function RealtimeSyncProvider({ children }: { children: React.ReactNode }
         { event: '*', schema: 'public', table },
         (payload: any) => {
           console.log(`🔄 [Realtime] ${table}:`, payload.eventType);
+
+          // 1. بث الحدث للمكونات المستمعة محلياً
           emitTableChange(table, payload.eventType, payload);
+
+          // 2. تحديث وإبطال كاش React Query أوتوماتيكياً لكل الصفحات المفتوحة
+          const relatedQueries = TABLE_QUERY_KEY_MAP[table];
+          if (relatedQueries && queryClient) {
+            relatedQueries.forEach(queryKey => {
+              queryClient.invalidateQueries({ queryKey, exact: false });
+            });
+          }
+
+          // 3. معالجة خاصة للإشعارات الفورية
+          if (table === 'notifications') {
+            window.dispatchEvent(new CustomEvent('unread_counts_refresh'));
+            if (payload.eventType === 'INSERT' && payload.new) {
+              supabase.auth.getSession().then(({ data: { session } }) => {
+                const myId = session?.user?.id;
+                if (!payload.new.user_id || payload.new.user_id === myId) {
+                  playNotificationAudio();
+                  showGlobalToast(payload.new.message || '🔔 إشعار جديد وارد', 'info');
+                }
+              });
+            }
+          }
+
+          // 4. معالجة خاصة للرسائل الفورية
+          if (table === 'messages') {
+            window.dispatchEvent(new CustomEvent('unread_counts_refresh'));
+            if (payload.eventType === 'INSERT' && payload.new) {
+              supabase.auth.getSession().then(({ data: { session } }) => {
+                const myId = session?.user?.id;
+                if (payload.new.receiver_id === myId) {
+                  playNotificationAudio();
+                  const sender = payload.new.sender_name ? `${payload.new.sender_name}: ` : '';
+                  showGlobalToast(`💬 رسالة جديدة: ${sender}${payload.new.content || payload.new.message || 'رسالة جديدة'}`, 'info');
+                }
+              });
+            }
+          }
         }
       );
     });
@@ -91,7 +294,7 @@ export function RealtimeSyncProvider({ children }: { children: React.ReactNode }
         supabase.removeChannel(channelRef.current);
       }
     };
-  }, []);
+  }, [queryClient]);
 
   return <>{children}</>;
 }

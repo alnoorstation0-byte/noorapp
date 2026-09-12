@@ -84,7 +84,12 @@ export function usePosInvoicesLogic() {
     const { data: fleetOperations = [] } = useQuery({
         queryKey: ['fleet_operations_open'],
         queryFn: async () => {
-            const { data, error } = await supabase.from('fleet_operations').select('id, operation_number, operation_date, status, vehicle_id, driver_id, description, vehicle:fleet_vehicles(plate_number), driver:partners(name), description').eq('status', 'مفتوح');
+            const { data, error } = await supabase
+                .from('fleet_operations')
+                .select('id, operation_number, operation_date, status, vehicle_id, driver_id, description, vehicle:fleet_vehicles(plate_number), driver:partners(name)')
+                .neq('status', 'مغلق')
+                .neq('status', 'closed')
+                .order('operation_date', { ascending: false });
             if (error) throw error;
             return data?.map((op:any) => ({
                 id: op.id,
@@ -92,7 +97,7 @@ export function usePosInvoicesLogic() {
                 status: op.status,
                 vehicle_id: op.vehicle_id,
                 driver_id: op.driver_id,
-                name: ``
+                name: `🚚 ${op.operation_number} | ${op.driver?.name ? `مندوب: ${op.driver.name}` : 'بدون مندوب'} | ${op.vehicle?.plate_number ? `سيارة: ${op.vehicle.plate_number}` : ''} ${op.description ? `(${op.description})` : ''}`
             })) || [];
         }
     });
@@ -121,7 +126,7 @@ export function usePosInvoicesLogic() {
             if (currentRecord?.warehouse_id) {
                 const { data, error } = await supabase
                     .from('warehouse_inventory')
-                    .select('quantity, item_id, inventory_items(name, unit, default_price)')
+                    .select('quantity, item_id, inventory_items(name, unit, default_price, is_returnable_bottle)')
                     .eq('warehouse_id', currentRecord.warehouse_id)
                     .gt('quantity', 0);
                 if (error) throw error;
@@ -130,17 +135,19 @@ export function usePosInvoicesLogic() {
                     name: d.inventory_items?.name,
                     unit: d.inventory_items?.unit,
                     price: d.inventory_items?.default_price || 0,
-                    quantity: d.quantity
+                    quantity: d.quantity,
+                    is_returnable_bottle: Boolean(d.inventory_items?.is_returnable_bottle)
                 })) || [];
             } else {
-                const { data, error } = await supabase.from('inventory_items').select('id, name, unit, default_price');
+                const { data, error } = await supabase.from('inventory_items').select('id, name, unit, default_price, is_returnable_bottle');
                 if (error) throw error;
                 return data?.map((d: any) => ({
                     id: d.id,
                     name: d.name,
                     unit: d.unit,
                     price: d.default_price || 0,
-                    quantity: 'غير محدد'
+                    quantity: 'غير محدد',
+                    is_returnable_bottle: Boolean(d.is_returnable_bottle)
                 })) || [];
             }
         },
@@ -304,6 +311,15 @@ export function usePosInvoicesLogic() {
                 // AUTO POST INVOICE (If Warehouse is specified)
                 if (invoiceHeader.warehouse_id && inserted) {
                      await supabase.rpc('post_invoices_bulk', { p_ids: [inserted.id] });
+
+                     // 🧾 إنشاء وترحيل سند القبض تلقائياً للمبيعات النقدية
+                     if (invoiceHeader.payment_method !== 'آجل' && Number(invoiceHeader.paid_amount || 0) > 0) {
+                         try {
+                             await supabase.rpc('auto_create_pos_receipt', { p_invoice_id: inserted.id });
+                         } catch (e) {
+                             console.warn('Could not auto create receipt for invoice:', e);
+                         }
+                     }
                 }
             }
         },
@@ -311,6 +327,7 @@ export function usePosInvoicesLogic() {
             setIsEditModalOpen(false);
             showToast("تم حفظ الفاتورة بنجاح 💾", "success");
             queryClient.invalidateQueries({ queryKey: ['pos_invoices'] });
+            queryClient.invalidateQueries({ queryKey: ['receipt_vouchers'] });
         },
         onError: (err: any) => {
             showToast(`حدث خطأ أثناء الحفظ! ❌ ${err.message}`, "error");
