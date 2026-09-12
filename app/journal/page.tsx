@@ -13,6 +13,7 @@ import RawasiSidebarManager from '@/components/RawasiSidebarManager';
 import RawasiSmartTable from '@/components/rawasismarttable';
 import LoadingScreen from '@/components/LoadingScreen';
 import PrintHeader from '@/components/PrintHeader';
+import { reconcileShiftOnJournalDeletion, reconcileShiftOnJournalUnpost } from '@/lib/shift_sync_engine';
 
 // ==========================================
 // 🧠 العقل المدبر (Logic) - متوافق مع قوانين Supabase
@@ -159,21 +160,24 @@ function useJournalLogic() {
     const deleteHeadersMutation = useMutation({
         mutationFn: async () => {
             const selectedLines = journalMaster.filter(l => selectedIds.includes(String(l.line_id)));
-            const invalidStatusLines = selectedLines.filter(l => l.header_status !== 'مسودة');
-            if (invalidStatusLines.length > 0) {
-                 throw new Error('مرفوض ⛔: لا يمكن مسح قيد حالته "مرحل" أو "معتمد". يجب فك الترحيل أولاً.');
-            }
-
             const headerIds = [...new Set(selectedLines.map(l => l.header_id))];
 
             if (headerIds.length === 0) throw new Error('لم يتم تحديد أي قيود صالحة.');
-            const { error } = await supabase.from('journal_headers').delete().in('id', headerIds);
-            if (error) throw error;
+            
+            return await reconcileShiftOnJournalDeletion(headerIds);
         },
-        onSuccess: () => {
-            showToast('تم حذف القيود وارتباطاتها بنجاح 🗑️', 'success');
+        onSuccess: (res: any) => {
+            if (res?.affectedShiftsCount > 0) {
+                showToast(`تم حذف القيود وتعديل وتحديث إجماليات ${res.affectedShiftsCount} وردية مرتبطة بنجاح 🔄`, 'success');
+            } else {
+                showToast('تم حذف القيود وارتباطاتها بنجاح 🗑️', 'success');
+            }
             setSelectedIds([]);
             queryClient.invalidateQueries({ queryKey: ['journal_master_view'] });
+            queryClient.invalidateQueries({ queryKey: ['pending_journals_count'] });
+            queryClient.invalidateQueries({ queryKey: ['active_pos_shift'] });
+            queryClient.invalidateQueries({ queryKey: ['pos_dashboard_sales_all'] });
+            queryClient.invalidateQueries({ queryKey: ['pos_dashboard_shifts_all'] });
         },
         onError: (err: any) => showToast(`فشل في الحذف: ${err.message}`, 'error')
     });
@@ -225,7 +229,7 @@ function useJournalLogic() {
             }
         },
         handleDeleteHeaders: () => {
-            if (confirm('تنبيه: سيتم حذف القيود المحددة بالكامل (مدين ودائن). هل أنت متأكد؟')) {
+            if (confirm('تنبيه هام ⚠️: سيتم حذف القيود المحددة بالكامل.\nإذا كان أي قيد مرتبطاً بوردية كاشير أو فاتورة، سيتم إلغاء الفاتورة وتعديل إجماليات الوردية وإرجاع الكميات المباعة للمستودع تلقائياً.\nهل تريد الاستمرار؟')) {
                 deleteHeadersMutation.mutate();
             }
         },
@@ -252,16 +256,37 @@ function useJournalLogic() {
             if (!headerId) return;
             setRowActionLoadingId(headerId);
             try {
-                const { error } = await supabase
-                    .from('journal_headers')
-                    .update({ status: 'draft' })
-                    .eq('id', headerId);
-                if (error) throw error;
-                showToast('↩️ تم فك ترحيل القيد وإعادته لمسودة!', 'success');
+                await reconcileShiftOnJournalUnpost(headerId);
+                showToast('↩️ تم فك ترحيل القيد وتحديث الوردية المرتبطة بنجاح!', 'success');
                 queryClient.invalidateQueries({ queryKey: ['journal_master_view'] });
                 queryClient.invalidateQueries({ queryKey: ['pending_journals_count'] });
+                queryClient.invalidateQueries({ queryKey: ['active_pos_shift'] });
+                queryClient.invalidateQueries({ queryKey: ['pos_dashboard_sales_all'] });
+                queryClient.invalidateQueries({ queryKey: ['pos_dashboard_shifts_all'] });
             } catch (err: any) {
                 showToast(`❌ فشل فك الترحيل: ${err.message}`, 'error');
+            } finally {
+                setRowActionLoadingId(null);
+            }
+        },
+        handleDeleteSingleHeader: async (headerId: string) => {
+            if (!headerId) return;
+            if (!confirm('تنبيه هام ⚠️: سيتم حذف هذا القيد بالكامل.\nإذا كان مرتبطاً بوردية كاشير، سيتم إلغاء الفاتورة وتعديل أرقام ومبيعات الوردية وإرجاع البضاعة للمستودع تلقائياً.\nهل أنت متأكد؟')) return;
+            setRowActionLoadingId(headerId);
+            try {
+                const res = await reconcileShiftOnJournalDeletion([headerId]);
+                if (res?.affectedShiftsCount > 0) {
+                    showToast(`تم حذف القيد وتعديل أرقام الوردية المرتبطة بنجاح 🔄`, 'success');
+                } else {
+                    showToast('تم حذف القيد بنجاح 🗑️', 'success');
+                }
+                queryClient.invalidateQueries({ queryKey: ['journal_master_view'] });
+                queryClient.invalidateQueries({ queryKey: ['pending_journals_count'] });
+                queryClient.invalidateQueries({ queryKey: ['active_pos_shift'] });
+                queryClient.invalidateQueries({ queryKey: ['pos_dashboard_sales_all'] });
+                queryClient.invalidateQueries({ queryKey: ['pos_dashboard_shifts_all'] });
+            } catch (err: any) {
+                showToast(`❌ فشل الحذف: ${err.message}`, 'error');
             } finally {
                 setRowActionLoadingId(null);
             }
@@ -440,11 +465,52 @@ export default function JournalPage() {
                 </button>
               )}
             </SecureAction>
+            <SecureAction module="journal" action="delete">
+              <button
+                type="button"
+                disabled={isLoading}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  logic.handleDeleteSingleHeader(row.header_id);
+                }}
+                style={{
+                  background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.12) 0%, rgba(220, 38, 38, 0.2) 100%)',
+                  color: '#dc2626',
+                  border: '1px solid rgba(239, 68, 68, 0.3)',
+                  padding: '6px 10px',
+                  borderRadius: '10px',
+                  cursor: isLoading ? 'wait' : 'pointer',
+                  fontWeight: 900,
+                  fontSize: '11px',
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: '4px',
+                  boxShadow: '0 2px 6px rgba(239, 68, 68, 0.1)',
+                  transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                  whiteSpace: 'nowrap',
+                  opacity: isLoading ? 0.6 : 1
+                }}
+                onMouseEnter={(e) => {
+                  if (!isLoading) {
+                    e.currentTarget.style.transform = 'translateY(-2px)';
+                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(239, 68, 68, 0.25)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 2px 6px rgba(239, 68, 68, 0.1)';
+                }}
+                title="حذف هذا القيد وتعديل الوردية المرتبطة تلقائياً"
+              >
+                <span>🗑️</span>
+                <span>حذف</span>
+              </button>
+            </SecureAction>
           </div>
         );
       }
     }
-  ], [logic.rowActionLoadingId, logic.handlePostSingleHeader, logic.handleUnpostSingleHeader]);
+  ], [logic.rowActionLoadingId, logic.handlePostSingleHeader, logic.handleUnpostSingleHeader, logic.handleDeleteSingleHeader]);
 
   const sidebarActions = useMemo(() => (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>

@@ -142,7 +142,8 @@ export function usePosDashboardLogic() {
         queryFn: async () => {
             let query = supabase
                 .from('expenses')
-                .select('id, total_price, exp_date, shift_id, description, payment_method');
+                .select('id, total_price, exp_date, shift_id, description, payment_method')
+                .neq('is_deleted', true);
             if (dateRange.start) query = query.gte('exp_date', dateRange.start);
             if (dateRange.end) query = query.lte('exp_date', dateRange.end);
             const { data, error } = await query;

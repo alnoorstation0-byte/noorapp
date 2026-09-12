@@ -44,11 +44,12 @@ export async function GET(
             }
         }
 
-        // جلب الفواتير التابعة للوردية
+        // جلب الفواتير التابعة للوردية (باستثناء الملغاة)
         const { data: invoices = [] } = await supabaseAdmin
             .from('invoices')
             .select('id, invoice_number, date, created_at, client_name, partner_id, total_amount, tax_amount, taxable_amount, paid_amount, payment_method, status, fleet_operation_id, lines_data')
             .eq('shift_id', id)
+            .neq('status', 'ملغي')
             .order('created_at', { ascending: false });
 
         // جلب أسعار التكلفة للأصناف لحساب تكلفة البضاعة المباعة COGS وهامش الربحية
@@ -72,11 +73,12 @@ export async function GET(
             }
         });
 
-        // جلب المصروفات التشغيلية المرتبطة بالوردية
+        // جلب المصروفات التشغيلية المرتبطة بالوردية (باستثناء المحذوفة)
         const { data: shiftExpenses } = await supabaseAdmin
             .from('expenses')
             .select('id, total_price, expense_number, exp_date, description, payment_method')
-            .eq('shift_id', id);
+            .eq('shift_id', id)
+            .neq('is_deleted', true);
         const recordedExpenses = (shiftExpenses || []).reduce((sum, e) => sum + Number(e.total_price || e.amount || 0), 0);
         const totalExpenses = Math.max(recordedExpenses, Number(shift.total_expenses || 0));
 
@@ -128,6 +130,7 @@ export async function GET(
                 .from('receipt_vouchers')
                 .select('id, receipt_number, amount, payment_method, date')
                 .in('invoice_id', invoiceIds)
+                .neq('status', 'ملغي')
                 .order('created_at', { ascending: false });
             receipts = rcData || [];
         }

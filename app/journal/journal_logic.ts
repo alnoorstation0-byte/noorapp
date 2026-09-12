@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/lib/toast-context';
 import { fetchPaginatedData } from '@/lib/supabase-pagination';
 import { useAuth } from '@/components/authGuard';
+import { reconcileShiftOnJournalDeletion } from '@/lib/shift_sync_engine';
 
 /**
  * العقل المدبر لدفتر اليومية الشامل - رواسي V12
@@ -112,37 +113,34 @@ export function useJournalLogic() {
         };
     }, [displayedLines]);
 
-    // 🚀 5. محرك الحذف المجمع
+    // 🚀 5. محرك الحذف المجمع مع تعديل الورديات تلقائياً
     const deleteHeadersMutation = useMutation({
         mutationFn: async () => {
             const selectedLines = journalMaster.filter(l => selectedIds.includes(String(l.line_id)));
             const headerIds = [...new Set(selectedLines.map(l => l.header_id))];
-            
-            // 🛡️ حماية القيود المعتمدة
-            const { data: { session } } = await supabase.auth.getSession();
-            const { data: profile } = await supabase.from('profiles').select('role').eq('id', session?.user?.id).single();
-            const isAdmin = profile?.role === 'super_admin' || profile?.role === 'admin';
-            
-            const hasApproved = selectedLines.some((l:any) => l.header_status === 'معتمد' || l.header_status === 'مرحل');
-            if (hasApproved) {
-                throw new Error('عفواً، لا يمكن حذف القيود المعتمدة والمرحلة. يرجى فك الترحيل أولاً.');
-            }
 
             if (headerIds.length === 0) throw new Error('لم يتم تحديد أي قيود صالحة.');
 
-            const { error } = await supabase.from('journal_headers').delete().in('id', headerIds);
-            if (error) throw new Error(error.message);
+            return await reconcileShiftOnJournalDeletion(headerIds);
         },
-        onSuccess: () => {
-            showToast('تم حذف القيود وارتباطاتها بنجاح 🗑️', 'success');
+        onSuccess: (res: any) => {
+            if (res?.affectedShiftsCount > 0) {
+                showToast(`تم حذف القيود وتحديث ${res.affectedShiftsCount} وردية مرتبطة بنجاح 🔄`, 'success');
+            } else {
+                showToast('تم حذف القيود وارتباطاتها بنجاح 🗑️', 'success');
+            }
             setSelectedIds([]);
             queryClient.invalidateQueries({ queryKey: ['journal_master_view'] });
+            queryClient.invalidateQueries({ queryKey: ['pending_journals_count'] });
+            queryClient.invalidateQueries({ queryKey: ['active_pos_shift'] });
+            queryClient.invalidateQueries({ queryKey: ['pos_dashboard_sales_all'] });
+            queryClient.invalidateQueries({ queryKey: ['pos_dashboard_shifts_all'] });
         },
         onError: (err: any) => showToast(`فشل الحذف: ${err.message}`, 'error')
     });
 
     const handleDeleteHeaders = useCallback(() => {
-        if (confirm('تنبيه: سيتم حذف القيود المحددة بالكامل (مدين ودائن). هل أنت متأكد؟')) {
+        if (confirm('تنبيه هام ⚠️: سيتم حذف القيود المحددة بالكامل.\nإذا كان أي قيد مرتبطاً بوردية كاشير، سيتم إلغاء الفاتورة وتعديل إجماليات الوردية وإرجاع البضاعة للمستودع تلقائياً.\nهل تريد الاستمرار؟')) {
             deleteHeadersMutation.mutate();
         }
     }, [deleteHeadersMutation]);

@@ -35,23 +35,26 @@ export default function ShiftCloseModal({
     const calculateZReport = async () => {
         setIsLoadingStats(true);
         try {
-            // Fetch invoices created during this shift
+            // Fetch active invoices created during this shift (exclude cancelled)
             const { data: invoices } = await supabase
                 .from('invoices')
                 .select('id, total_amount, payment_method, lines_data')
-                .eq('shift_id', activeShift.id);
+                .eq('shift_id', activeShift.id)
+                .neq('status', 'ملغي');
 
-            // Fetch expenses created during this shift
+            // Fetch active expenses created during this shift (exclude deleted)
             const { data: expenses } = await supabase
                 .from('expenses')
                 .select('paid_amount, payment_method')
-                .eq('shift_id', activeShift.id);
+                .eq('shift_id', activeShift.id)
+                .neq('is_deleted', true);
 
-            // Fetch any standalone receipts collected during this shift (e.g. debt payments)
+            // Fetch active standalone receipts collected during this shift
             const { data: shiftReceipts } = await supabase
                 .from('receipt_vouchers')
                 .select('amount, payment_method, invoice_id')
-                .eq('shift_id', activeShift.id);
+                .eq('shift_id', activeShift.id)
+                .neq('status', 'ملغي');
 
             let cash = 0, card = 0, credit = 0;
             let cashExpenses = 0, totalExpenses = 0;
