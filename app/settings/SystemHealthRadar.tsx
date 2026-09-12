@@ -1,127 +1,351 @@
 "use client";
 import React, { useEffect, useState } from 'react';
-import { THEME } from '@/lib/theme';
 import { supabase } from '@/lib/supabase';
+import { THEME } from '@/lib/theme';
 import { useLanguage } from '@/lib/LanguageContext';
+
+type AuditIssue = {
+    id: string;
+    titleAr: string;
+    titleEn: string;
+    descriptionAr: string;
+    descriptionEn: string;
+    count: number;
+    severity: 'high' | 'medium' | 'low';
+    data?: any[];
+};
 
 export default function SystemHealthRadar() {
     const { language } = useLanguage();
-    const [dbLatency, setDbLatency] = useState<number | null>(null);
-    const [isDbOnline, setIsDbOnline] = useState<boolean>(false);
+    const isEn = language === 'en';
+    const [loading, setLoading] = useState(true);
+    const [issues, setIssues] = useState<AuditIssue[]>([]);
+    const [expandedId, setExpandedId] = useState<string | null>(null);
 
     useEffect(() => {
-        const pingDb = async () => {
-            const start = performance.now();
-            const { error } = await supabase.from('profiles').select('id').limit(1);
-            const end = performance.now();
-            if (!error) {
-                setIsDbOnline(true);
-                setDbLatency(Math.round(end - start));
-            } else {
-                setIsDbOnline(false);
-            }
-        };
-        pingDb();
-        const interval = setInterval(pingDb, 10000);
-        return () => clearInterval(interval);
+        runAuditScan();
     }, []);
 
-    const isEn = language === 'en';
+    const runAuditScan = async () => {
+        setLoading(true);
+        const detectedIssues: AuditIssue[] = [];
+
+        try {
+            // 1. Negative Inventory
+            const { data: negInv } = await supabase
+                .from('warehouse_inventory')
+                .select('id, quantity, warehouse:warehouses(name), item:inventory_items(name)')
+                .lt('quantity', 0);
+            
+            if (negInv && negInv.length > 0) {
+                detectedIssues.push({
+                    id: 'neg_inv',
+                    titleAr: 'أرصدة المخزون بالسالب',
+                    titleEn: 'Negative Inventory Balances',
+                    descriptionAr: 'صرف أو بيع بضاعة غير متوفرة دفترياً بسبب تأخر إثبات فواتير المشتريات.',
+                    descriptionEn: 'Issuing or selling goods not available in books due to delayed purchase invoices.',
+                    count: negInv.length,
+                    severity: 'high',
+                    data: negInv
+                });
+            }
+
+            // 2. Suspended Transfers
+            const { data: suspTransfers } = await supabase
+                .from('inventory_transactions')
+                .select('id, transaction_number, transaction_date')
+                .eq('type', 'transfer_out')
+                .eq('status', 'pending');
+
+            if (suspTransfers && suspTransfers.length > 0) {
+                detectedIssues.push({
+                    id: 'susp_transfers',
+                    titleAr: 'التحويلات المخزنية المعلقة',
+                    titleEn: 'Suspended Inventory Transfers',
+                    descriptionAr: 'بضاعة خرجت من المستودع الرئيسي ولم يتم تأكيد استلامها.',
+                    descriptionEn: 'Goods issued from main warehouse but not confirmed received.',
+                    count: suspTransfers.length,
+                    severity: 'medium',
+                    data: suspTransfers
+                });
+            }
+
+            // 3. Suspended Shifts
+            const yesterday = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString();
+            const { data: suspShifts } = await supabase
+                .from('pos_shifts')
+                .select('id, opened_at, expected_cash')
+                .eq('status', 'open')
+                .lt('opened_at', yesterday);
+
+            if (suspShifts && suspShifts.length > 0) {
+                detectedIssues.push({
+                    id: 'susp_shifts',
+                    titleAr: 'الورديات المعلقة (غير المغلقة)',
+                    titleEn: 'Suspended POS Shifts',
+                    descriptionAr: 'مبيعات تمت وانتهى يومها ولم يتم إغلاق الوردية أو ترحيل قيودها.',
+                    descriptionEn: 'Sales completed but shift not closed after 24 hours.',
+                    count: suspShifts.length,
+                    severity: 'high',
+                    data: suspShifts
+                });
+            }
+
+            // 4. Cash Shortages
+            const { data: shortages } = await supabase
+                .from('pos_shifts')
+                .select('id, shortage_overage, closed_at')
+                .lt('shortage_overage', 0);
+
+            if (shortages && shortages.length > 0) {
+                detectedIssues.push({
+                    id: 'shortages',
+                    titleAr: 'عجز الصناديق',
+                    titleEn: 'Cash Register Shortages',
+                    descriptionAr: 'فروقات سالبة بين المبيعات المسجلة بالنظام والنقدية الموردة.',
+                    descriptionEn: 'Negative differences between system sales and actual cash.',
+                    count: shortages.length,
+                    severity: 'high',
+                    data: shortages
+                });
+            }
+
+            // 5. Unallocated Payments
+            const { data: unallocated } = await supabase
+                .from('receipt_vouchers')
+                .select('id, receipt_number, amount, date')
+                .is('invoice_id', null)
+                .in('status', ['معتمد', 'posted', 'approved']);
+
+            if (unallocated && unallocated.length > 0) {
+                detectedIssues.push({
+                    id: 'unallocated',
+                    titleAr: 'الدفعات غير المسواة (Unallocated)',
+                    titleEn: 'Unallocated Payments',
+                    descriptionAr: 'مبالغ نقدية حصلها المناديب دون ربطها أو إقفالها مع الفواتير المستحقة.',
+                    descriptionEn: 'Cash amounts collected without linking to due invoices.',
+                    count: unallocated.length,
+                    severity: 'medium',
+                    data: unallocated
+                });
+            }
+
+            // 6. Ghost Invoices
+            const { data: ghosts } = await supabase
+                .from('invoices')
+                .select('id, invoice_number, total_amount')
+                .eq('total_amount', 0);
+
+            if (ghosts && ghosts.length > 0) {
+                detectedIssues.push({
+                    id: 'ghost_invoices',
+                    titleAr: 'فواتير شبحية (صفرية)',
+                    titleEn: 'Ghost Invoices (Zero Amount)',
+                    descriptionAr: 'سجلات فواتير فارغة تماماً أو قيمتها صفر ولا يوجد لها تأثير مالي.',
+                    descriptionEn: 'Empty invoice records or zero value with no financial impact.',
+                    count: ghosts.length,
+                    severity: 'low',
+                    data: ghosts
+                });
+            }
+
+            // 7. Zero Journals
+            const { data: zeroJournals } = await supabase
+                .from('journal_lines')
+                .select('id, debit, credit')
+                .eq('debit', 0)
+                .eq('credit', 0);
+
+            if (zeroJournals && zeroJournals.length > 0) {
+                detectedIssues.push({
+                    id: 'zero_journals',
+                    titleAr: 'قيود صفرية وعمياء',
+                    titleEn: 'Zero & Blind Entries',
+                    descriptionAr: 'سجلات قيود يومية قيمتها صفر ولا يوجد لها أي تأثير مالي.',
+                    descriptionEn: 'Journal entry records with zero value and no financial impact.',
+                    count: zeroJournals.length,
+                    severity: 'low',
+                    data: zeroJournals
+                });
+            }
+
+            // 8. Orphaned Records
+            const { data: orphans } = await supabase
+                .from('journal_lines')
+                .select('id')
+                .is('header_id', null);
+
+            if (orphans && orphans.length > 0) {
+                detectedIssues.push({
+                    id: 'orphaned_lines',
+                    titleAr: 'سجلات يتيمة (Orphaned)',
+                    titleEn: 'Orphaned Records',
+                    descriptionAr: 'سجلات معطوبة لعدم ارتباطها بمستند أساسي (مثل قيد بدون ترويسة).',
+                    descriptionEn: 'Corrupted records missing their parent document.',
+                    count: orphans.length,
+                    severity: 'high',
+                    data: orphans
+                });
+            }
+
+        } catch (error) {
+            console.error("Audit Scan Error:", error);
+        }
+
+        setIssues(detectedIssues);
+        setLoading(false);
+    };
+
+    const deleteZeroJournals = async () => {
+        const { error } = await supabase
+            .from('journal_lines')
+            .delete()
+            .eq('debit', 0)
+            .eq('credit', 0);
+        if (!error) {
+            runAuditScan();
+        }
+    };
+
+    const getSeverityColor = (sev: string) => {
+        if (sev === 'high') return '#ef4444';
+        if (sev === 'medium') return '#f59e0b';
+        return '#1C73AB';
+    };
 
     return (
         <div style={{ animation: 'fadeUp 0.4s ease-out' }}>
-            <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-                gap: '16px'
-            }}>
-                {/* Database Status Card */}
-                <div style={{
-                    background: 'rgba(255, 255, 255, 0.7)',
-                    backdropFilter: 'blur(20px)',
-                    borderRadius: '20px',
-                    padding: '24px 20px',
-                    border: '1px solid rgba(255, 255, 255, 0.9)',
-                    textAlign: 'center',
-                    boxShadow: '0 8px 32px rgba(28, 115, 171, 0.06)',
-                    transition: '0.3s'
-                }}>
-                    <div style={{ fontSize: '36px', marginBottom: '10px' }}>{isDbOnline ? '🟢' : '🔴'}</div>
-                    <h3 style={{ margin: '0 0 8px 0', color: THEME.primary, fontWeight: 900, fontSize: '15px' }}>
-                        {isEn ? 'Database Status' : 'حالة قاعدة البيانات'}
-                    </h3>
-                    <div style={{
-                        display: 'inline-flex',
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+                <div>
+                    <h2 style={{ margin: 0, color: THEME.primary, fontWeight: 900, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span>🔍</span>
+                        {isEn ? 'System Diagnostic & Audit Radar' : 'رادار التشخيص والتدقيق المالي'}
+                    </h2>
+                    <p style={{ margin: '4px 0 0', color: '#666', fontSize: '14px' }}>
+                        {isEn ? 'Detects accounting anomalies, inventory mismatches, and ghost records' : 'يكشف الشذوذ المحاسبي، اختلالات المخزون، والسجلات الشبحية'}
+                    </p>
+                </div>
+                <button
+                    onClick={runAuditScan}
+                    style={{
+                        background: 'rgba(255, 255, 255, 0.7)',
+                        border: '1px solid rgba(255, 255, 255, 0.9)',
+                        padding: '10px 20px',
+                        borderRadius: '12px',
+                        cursor: 'pointer',
+                        fontWeight: 'bold',
+                        color: THEME.primary,
+                        backdropFilter: 'blur(10px)',
+                        display: 'flex',
                         alignItems: 'center',
-                        gap: '6px',
-                        padding: '6px 14px',
-                        borderRadius: '20px',
-                        fontSize: '13px',
-                        fontWeight: 900,
-                        background: isDbOnline ? 'rgba(220, 252, 231, 0.8)' : 'rgba(254, 226, 226, 0.8)',
-                        color: isDbOnline ? '#15803d' : '#b91c1c',
-                        border: `1px solid ${isDbOnline ? '#86efac' : '#fca5a5'}`
-                    }}>
-                        {isDbOnline 
-                            ? (isEn ? 'Online & Healthy' : 'متصلة وتعمل بكفاءة') 
-                            : (isEn ? 'Disconnected' : 'مقطوعة الاتصال')}
-                    </div>
-                </div>
-
-                {/* Latency Card */}
-                <div style={{
-                    background: 'rgba(255, 255, 255, 0.7)',
-                    backdropFilter: 'blur(20px)',
-                    borderRadius: '20px',
-                    padding: '24px 20px',
-                    border: '1px solid rgba(255, 255, 255, 0.9)',
-                    textAlign: 'center',
-                    boxShadow: '0 8px 32px rgba(28, 115, 171, 0.06)',
-                    transition: '0.3s'
-                }}>
-                    <div style={{ fontSize: '36px', marginBottom: '10px' }}>⚡</div>
-                    <h3 style={{ margin: '0 0 8px 0', color: THEME.primary, fontWeight: 900, fontSize: '15px' }}>
-                        {isEn ? 'Response Latency' : 'زمن استجابة السيرفر'}
-                    </h3>
-                    <div style={{ fontSize: '26px', color: '#1C73AB', fontWeight: 900, direction: 'ltr' }}>
-                        {dbLatency !== null ? `${dbLatency} ms` : '...'}
-                    </div>
-                    <span style={{ fontSize: '11px', color: '#64748b', fontWeight: 700, marginTop: '4px', display: 'block' }}>
-                        {isEn ? 'Live ping every 10s' : 'قياس مباشر كل 10 ثوانٍ'}
-                    </span>
-                </div>
-
-                {/* Security Card */}
-                <div style={{
-                    background: 'rgba(255, 255, 255, 0.7)',
-                    backdropFilter: 'blur(20px)',
-                    borderRadius: '20px',
-                    padding: '24px 20px',
-                    border: '1px solid rgba(255, 255, 255, 0.9)',
-                    textAlign: 'center',
-                    boxShadow: '0 8px 32px rgba(28, 115, 171, 0.06)',
-                    transition: '0.3s'
-                }}>
-                    <div style={{ fontSize: '36px', marginBottom: '10px' }}>🛡️</div>
-                    <h3 style={{ margin: '0 0 8px 0', color: THEME.primary, fontWeight: 900, fontSize: '15px' }}>
-                        {isEn ? 'Security & SSL' : 'نظام الأمان والتشفير'}
-                    </h3>
-                    <div style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '6px',
-                        padding: '6px 14px',
-                        borderRadius: '20px',
-                        fontSize: '13px',
-                        fontWeight: 900,
-                        background: 'rgba(224, 242, 254, 0.8)',
-                        color: '#0369a1',
-                        border: '1px solid #7dd3fc'
-                    }}>
-                        {isEn ? 'Active (AES-256 / TLS 1.3)' : 'نشط (مُشفر بالكامل)'}
-                    </div>
-                </div>
+                        gap: '8px',
+                        boxShadow: '0 4px 15px rgba(0,0,0,0.05)'
+                    }}
+                >
+                    {loading ? '⏳...' : '🔄'}
+                    {isEn ? (loading ? 'Scanning...' : 'Rescan System') : (loading ? 'جاري الفحص...' : 'إعادة الفحص')}
+                </button>
             </div>
+
+            {loading ? (
+                <div style={{ textAlign: 'center', padding: '60px', color: THEME.primary, fontWeight: 'bold' }}>
+                    <div style={{ fontSize: '40px', marginBottom: '16px', animation: 'spin 2s linear infinite' }}>?3</div>
+                    {isEn ? 'Running Deep Diagnostic Scan...' : 'جاري تشغيل الفحص العميق للنظام...'}
+                </div>
+            ) : issues.length === 0 ? (
+                <div style={{
+                    background: 'rgba(255, 255, 255, 0.6)',
+                    backdropFilter: 'blur(20px)',
+                    borderRadius: '20px',
+                    padding: '60px 20px',
+                    textAlign: 'center',
+                    border: '1px solid rgba(255,255,255,0.8)'
+                }}>
+                    <div style={{ fontSize: '50px', marginBottom: '16px' }}>🎉</div>
+                    <h3 style={{ margin: '0 0 8px', color: '#16a34a' }}>
+                        {isEn ? 'System is 100% Healthy!' : 'النظام سليم 100%!'}
+                    </h3>
+                    <p style={{ margin: 0, color: '#666' }}>
+                        {isEn ? 'No anomalies, ghost records, or mismatches detected.' : 'لم يتم اكتشاف أي شذوذ، سجلات شبحية، أو أخطاء مخزنية.'}
+                    </p>
+                </div>
+            ) : (
+                <div style={{ display: 'grid', gap: '16px' }}>
+                    {issues.map(issue => (
+                        <div key={issue.id} style={{
+                            background: 'rgba(255, 255, 255, 0.7)',
+                            backdropFilter: 'blur(20px)',
+                            borderRadius: '16px',
+                            border: '1px solid rgba(255, 255, 255, 0.9)',
+                            boxShadow: '0 4px 20px rgba(0,0,0,0.03)',
+                            overflow: 'hidden'
+                        }}>
+                            <div 
+                                onClick={() => setExpandedId(expandedId === issue.id ? null : issue.id)}
+                                style={{
+                                    padding: '20px',
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center',
+                                    cursor: 'pointer',
+                                    borderLeft: `6px solid ${getSeverityColor(issue.severity)}`
+                                }}
+                            >
+                                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                                    <div style={{
+                                        width: '40px', height: '40px', borderRadius: '50%',
+                                        background: `${getSeverityColor(issue.severity)}20`,
+                                        color: getSeverityColor(issue.severity),
+                                        display: 'flex', justifyContent: 'center', alignItems: 'center',
+                                        fontWeight: 'bold', fontSize: '18px'
+                                    }}>
+                                        {issue.count}
+                                    </div>
+                                    <div>
+                                        <h3 style={{ margin: '0 0 4px', fontSize: '16px', color: '#333' }}>
+                                            {isEn ? issue.titleEn : issue.titleAr}
+                                        </h3>
+                                        <p style={{ margin: 0, fontSize: '13px', color: '#666' }}>
+                                            {isEn ? issue.descriptionEn : issue.descriptionAr}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div style={{ color: THEME.primary, fontWeight: 'bold' }}>
+                                    {expandedId === issue.id ? '➖' : '➕'}
+                                </div>
+                            </div>
+
+                            {expandedId === issue.id && (
+                                <div style={{ padding: '0 20px 20px', borderTop: '1px solid rgba(0,0,0,0.05)' }}>
+                                    <div style={{ marginTop: '16px', background: 'rgba(255,255,255,0.5)', padding: '12px', borderRadius: '8px', maxHeight: '200px', overflowY: 'auto' }}>
+                                        <pre style={{ margin: 0, fontSize: '12px', whiteSpace: 'pre-wrap', direction: 'ltr', textAlign: 'left' }}>
+                                            {JSON.stringify(issue.data, null, 2)}
+                                        </pre>
+                                    </div>
+                                    
+                                    {issue.id === 'zero_journals' && (
+                                        <button 
+                                            onClick={deleteZeroJournals}
+                                            style={{
+                                                marginTop: '12px',
+                                                background: '#ef4444',
+                                                color: 'white',
+                                                border: 'none',
+                                                padding: '8px 16px',
+                                                borderRadius: '8px',
+                                                cursor: 'pointer',
+                                                fontWeight: 'bold'
+                                            }}
+                                        >
+                                            {isEn ? '🗑️ Clean Zero Entries' : '🗑️ تطهير السجلات الصفرية'}
+                                        </button>
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    ))}
+                </div>
+            )}
         </div>
     );
 }
