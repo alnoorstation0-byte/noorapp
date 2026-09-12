@@ -11,6 +11,7 @@ import ShiftOpenModal from './ShiftOpenModal';
 import ShiftCloseModal from './ShiftCloseModal';
 import OpenShiftsModal from './OpenShiftsModal';
 import ShiftDetailsModal from './ShiftDetailsModal';
+import RawasiSidebarManager from '@/components/RawasiSidebarManager';
 import { FaPlus, FaMinus, FaTrash, FaCheckCircle, FaBarcode } from 'react-icons/fa';
 
 const formatCurrency = (amount: number) => {
@@ -526,6 +527,97 @@ export default function PosPage() {
             subtitle="شاشة المبيعات السريعة (كاشير) من منافذ البيع" 
             icon="🛍️"
         >
+            <RawasiSidebarManager 
+                summary={
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        <div className="summary-glass-card" style={{ 
+                            background: logic.activeShift 
+                                ? 'linear-gradient(135deg, rgba(22, 163, 74, 0.08) 0%, rgba(16, 185, 129, 0.14) 100%)'
+                                : 'linear-gradient(135deg, rgba(239, 68, 68, 0.08) 0%, rgba(220, 38, 38, 0.12) 100%)',
+                            borderColor: logic.activeShift ? 'rgba(22, 163, 74, 0.3)' : 'rgba(239, 68, 68, 0.3)'
+                        }}>
+                            <span style={{ fontSize: '11px', fontWeight: 800, color: logic.activeShift ? '#166534' : '#991b1b' }}>
+                                {logic.activeShift ? '🟢 الوردية الحالية نشطة' : '🔴 الوردية مغلقة حالياً'}
+                            </span>
+                            <div className="val" style={{ fontSize: '17px', fontWeight: 900, color: logic.activeShift ? '#16a34a' : '#ef4444' }}>
+                                {logic.activeShift?.warehouse_name || 'لا يوجد منفذ مرتبط'}
+                            </div>
+                            {logic.activeShift && (
+                                <div style={{ fontSize: '11px', color: '#64748b', fontWeight: 700, marginTop: '2px' }}>
+                                    المندوب: {logic.activeShift?.delegate_name || 'غير محدد'}
+                                </div>
+                            )}
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                            <div className="summary-glass-card" style={{ padding: '10px', textAlign: 'center' }}>
+                                <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#64748b' }}>أصناف السلة 🛒</span>
+                                <div className="val" style={{ fontSize: '18px', fontWeight: 900, color: '#1C73AB' }}>
+                                    {logic.cart.length}
+                                </div>
+                            </div>
+                            <div className="summary-glass-card" style={{ padding: '10px', textAlign: 'center' }}>
+                                <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#64748b' }}>إجمالي السلة 💰</span>
+                                <div className="val" style={{ fontSize: '18px', fontWeight: 900, color: '#16a34a' }}>
+                                    {formatCurrency(logic.cartTotal.total)}
+                                </div>
+                            </div>
+                        </div>
+
+                        {logic.lowStockCount > 0 && (
+                            <div className="summary-glass-card" style={{ background: 'rgba(245, 158, 11, 0.1)', borderColor: 'rgba(245, 158, 11, 0.3)', padding: '10px 12px' }}>
+                                <span style={{ fontSize: '11px', fontWeight: 800, color: '#92400e' }}>
+                                    ⚠️ أصناف قريبة من النفاد: {logic.lowStockCount}
+                                </span>
+                            </div>
+                        )}
+                    </div>
+                }
+                actions={
+                    <>
+                        <button 
+                            type="button" 
+                            className="btn-main-glass"
+                            onClick={() => window.location.href = '/pos/invoices'}
+                        >
+                            <span>🧾</span>
+                            <span>فواتير نقاط البيع</span>
+                        </button>
+                        <button 
+                            type="button" 
+                            className="btn-main-glass"
+                            onClick={() => window.location.href = '/pos/dashboard'}
+                        >
+                            <span>📈</span>
+                            <span>لوحة تحكم الورديات</span>
+                        </button>
+                        {logic.activeShift ? (
+                            <button 
+                                type="button" 
+                                className="btn-main-glass"
+                                style={{ background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important' }}
+                                onClick={() => logic.setIsShiftCloseModalOpen(true)}
+                            >
+                                <span>🔒</span>
+                                <span>إغلاق الوردية الحالية</span>
+                            </button>
+                        ) : (
+                            <button 
+                                type="button" 
+                                className="btn-main-glass"
+                                style={{ background: 'linear-gradient(135deg, #16a34a 0%, #10b981 100%) !important' }}
+                                onClick={() => logic.setIsShiftOpenModalOpen(true)}
+                            >
+                                <span>✨</span>
+                                <span>بدء وردية جديدة</span>
+                            </button>
+                        )}
+                    </>
+                }
+                onSearch={logic.setSearchQuery}
+                watchDeps={[logic.activeShift?.id, logic.cart.length, logic.cartTotal.total, logic.lowStockCount]}
+            />
+
             <style>{`
                 /* 🎛️ شريط تحكم الكاشير الماسي */
                 .pos-control-bar {

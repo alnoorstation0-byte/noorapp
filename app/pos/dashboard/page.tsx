@@ -208,7 +208,54 @@ export default function PosDashboardPage() {
             subtitle="متابعة حركة المبيعات وقيمة المخزون لكل نقطة بيع" 
             icon="📈"
         >
-            <RawasiSidebarManager customFilters={customFilters} />
+            <RawasiSidebarManager 
+                summary={
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                        <div className="summary-glass-card">
+                            <span style={{ fontSize: '11px', fontWeight: 800, color: '#64748b' }}>إجمالي مبيعات المنافذ 🛒</span>
+                            <div className="val" style={{ fontSize: '20px', fontWeight: 900, color: '#16a34a' }}>
+                                {formatCurrency(logic.totalSalesValue)}
+                            </div>
+                        </div>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+                            <div className="summary-glass-card" style={{ padding: '10px', textAlign: 'center' }}>
+                                <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#64748b' }}>قيمة المخزون 📦</span>
+                                <div className="val" style={{ fontSize: '16px', fontWeight: 900, color: '#122946' }}>
+                                    {formatCurrency(logic.totalStockValue)}
+                                </div>
+                            </div>
+                            <div className="summary-glass-card" style={{ padding: '10px', textAlign: 'center' }}>
+                                <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#64748b' }}>المتحصلات 💰</span>
+                                <div className="val" style={{ fontSize: '16px', fontWeight: 900, color: '#1C73AB' }}>
+                                    {formatCurrency(logic.totalCollected)}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+                actions={
+                    <>
+                        <button 
+                            type="button" 
+                            className="btn-main-glass"
+                            onClick={() => window.location.href = '/pos'}
+                        >
+                            <span>🛍️</span>
+                            <span>شاشة الكاشير (POS)</span>
+                        </button>
+                        <button 
+                            type="button" 
+                            className="btn-main-glass"
+                            onClick={() => window.location.href = '/pos/invoices'}
+                        >
+                            <span>🧾</span>
+                            <span>فواتير نقاط البيع</span>
+                        </button>
+                    </>
+                }
+                customFilters={customFilters} 
+                watchDeps={[logic.totalStockValue, logic.totalSalesValue, logic.totalCollected]}
+            />
 
             {logic.isLoading ? (
                 <LoadingScreen message="جاري تحميل التقارير..." fullScreen={false} />

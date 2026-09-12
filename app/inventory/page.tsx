@@ -132,7 +132,53 @@ export default function InventoryPage() {
 
   return (
     <>
-      <RawasiSidebarManager />
+      <RawasiSidebarManager 
+        summary={
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div className="summary-glass-card">
+              <span style={{ fontSize: '11px', fontWeight: 800, color: '#64748b' }}>إجمالي الأصناف بالمستودع 📦</span>
+              <div className="val" style={{ fontSize: '20px', fontWeight: 900, color: '#1C73AB' }}>
+                {logic.items?.length || 0} صنف
+              </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+              <div className="summary-glass-card" style={{ padding: '10px', textAlign: 'center' }}>
+                <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#b91c1c' }}>تحت حد الطلب ⚠️</span>
+                <div className="val" style={{ fontSize: '17px', fontWeight: 900, color: '#ef4444' }}>
+                  {logic.items?.filter((it: any) => (Number(it.available_qty) || 0) <= (Number(it.reorder_level) || 0)).length || 0}
+                </div>
+              </div>
+              <div className="summary-glass-card" style={{ padding: '10px', textAlign: 'center' }}>
+                <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#1C73AB' }}>أصناف عهدة 🔄</span>
+                <div className="val" style={{ fontSize: '17px', fontWeight: 900, color: '#1C73AB' }}>
+                  {logic.items?.filter((it: any) => it.is_returnable_bottle).length || 0}
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+        actions={
+          <>
+            <button 
+              type="button" 
+              className="btn-main-glass"
+              onClick={() => logic.setIsModalOpen(true)}
+            >
+              <span>➕</span>
+              <span>إضافة صنف جديد</span>
+            </button>
+            <button 
+              type="button" 
+              className="btn-main-glass"
+              onClick={() => window.location.href = '/inventory/transactions'}
+            >
+              <span>🔄</span>
+              <span>حركات المخزون</span>
+            </button>
+          </>
+        }
+        watchDeps={[logic.items?.length]}
+      />
       <div className="clean-page">
         <MasterPage 
           icon="📦" 
