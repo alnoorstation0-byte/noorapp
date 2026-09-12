@@ -84,29 +84,32 @@ export async function POST(request: Request) {
         } 
         // ب. إذا تم تحديد أدوار معينة
         else if (Array.isArray(target_roles) && target_roles.length > 0) {
+            // نضمن شمول طاقم العمل 'staff' مع الأدوار المطلوبة حتى لا يُستثنى المستخدم الحالي
+            const effectiveRoles = Array.from(new Set([...target_roles, 'staff']));
             const { data: profs } = await admin
                 .from('profiles')
                 .select('id, role')
-                .in('role', target_roles);
+                .in('role', effectiveRoles);
             
             if (profs && profs.length > 0) {
                 targetUserIds = profs.map(p => p.id);
             }
         } 
-        // ج. الإرسال الافتراضي للإدارة العامة والمسؤولين
+        // ج. الإرسال الافتراضي للإدارة العامة والمسؤولين وطاقم العمل
         else {
             const { data: profs } = await admin
                 .from('profiles')
-                .select('id, role')
-                .in('role', ['super_admin', 'admin', 'manager']);
+                .select('id, role');
             
             if (profs && profs.length > 0) {
                 targetUserIds = profs.map(p => p.id);
-            } else {
-                // في حالة عدم وجود أي مستخدم بأدوار محددة، نرسل لجميع المستخدمين
-                const { data: allProfs } = await admin.from('profiles').select('id').limit(20);
-                targetUserIds = (allProfs || []).map(p => p.id);
             }
+        }
+
+        // د. إذا لم يتم العثور على أي مستخدم، نرسل لجميع المسجلين كإجراء وقائي
+        if (targetUserIds.length === 0) {
+            const { data: allProfs } = await admin.from('profiles').select('id').limit(50);
+            targetUserIds = (allProfs || []).map(p => p.id);
         }
 
         if (targetUserIds.length === 0) {

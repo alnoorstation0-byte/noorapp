@@ -60,7 +60,7 @@ export async function notifyInvoiceCreated(params: {
     type: 'sale',
     related_id: params.invoiceId,
     action_url: `/invoices?highlight=${params.invoiceNumber}`,
-    target_roles: ['super_admin', 'admin', 'accountant', 'manager']
+    target_roles: ['super_admin', 'admin', 'accountant', 'manager', 'staff']
   });
 }
 
@@ -83,7 +83,7 @@ export async function notifyShiftOpened(params: {
     type: 'pos',
     related_id: params.shiftId,
     action_url: '/pos/dashboard',
-    target_roles: ['super_admin', 'admin', 'manager']
+    target_roles: ['super_admin', 'admin', 'manager', 'staff']
   });
 }
 
@@ -114,7 +114,7 @@ export async function notifyShiftClosed(params: {
     type: isAlert ? 'alert' : 'pos',
     related_id: params.shiftId,
     action_url: '/pos/dashboard',
-    target_roles: ['super_admin', 'admin', 'accountant', 'manager']
+    target_roles: ['super_admin', 'admin', 'accountant', 'manager', 'staff']
   });
 }
 
@@ -142,7 +142,7 @@ export async function notifyVoucherCreated(params: {
     type: 'finance',
     related_id: params.voucherId,
     action_url: isReceipt ? '/ReceiptVouchers' : '/PaymentVouchers',
-    target_roles: ['super_admin', 'admin', 'accountant', 'manager']
+    target_roles: ['super_admin', 'admin', 'accountant', 'manager', 'staff']
   });
 }
 
@@ -165,7 +165,7 @@ export async function notifyExpenseCreated(params: {
     type: 'finance',
     related_id: params.expenseId,
     action_url: '/expenses',
-    target_roles: ['super_admin', 'admin', 'accountant', 'manager']
+    target_roles: ['super_admin', 'admin', 'accountant', 'manager', 'staff']
   });
 }
 
@@ -188,7 +188,51 @@ export async function notifyLowStockAlert(params: {
     message: `الرصيد المتبقي للصنف ${params.itemName} وصل إلى ${params.currentQty} فقط (حد الطلب المعتمد: ${params.minQty})${whText}`,
     type: 'alert',
     action_url: '/reorder-alerts',
-    target_roles: ['super_admin', 'admin', 'manager']
+    target_roles: ['super_admin', 'admin', 'manager', 'staff']
+  });
+}
+
+// =========================================================================
+// 🚚 إشعارات الأسطول والتوزيع
+// =========================================================================
+
+/**
+ * إشعار عملية أسطول جديدة أو معلقة تحتاج مراجعة وإغلاق
+ */
+export async function notifyFleetOperationAlert(params: {
+  tripNumber: string;
+  driverName?: string;
+  vehiclePlate?: string;
+  status?: string;
+  operationId?: string;
+}) {
+  const driverText = params.driverName ? ` (السائق: ${params.driverName})` : '';
+  const plateText = params.vehiclePlate ? ` - شاحنة: ${params.vehiclePlate}` : '';
+  return sendSystemNotification({
+    title: `🚚 رحلة أسطول معلقة #${params.tripNumber}`,
+    message: `رحلة توزيع بانتظار المراجعة والاعتماد النهائي${driverText}${plateText}`,
+    type: 'fleet',
+    related_id: params.operationId,
+    action_url: `/fleet_operations`,
+    target_roles: ['super_admin', 'admin', 'accountant', 'manager', 'staff']
+  });
+}
+
+/**
+ * إشعار مستندات تحتاج مراجعة أو ترحيل
+ */
+export async function notifyPendingReviewAlert(params: {
+  documentType: string;
+  documentNumber: string;
+  message?: string;
+  actionUrl: string;
+}) {
+  return sendSystemNotification({
+    title: `⚠️ مستند يحتاج مراجعة: ${params.documentType} #${params.documentNumber}`,
+    message: params.message || `يوجد مستند بانتظار التدقيق والترحيل المحاسبي`,
+    type: 'alert',
+    action_url: params.actionUrl,
+    target_roles: ['super_admin', 'admin', 'accountant', 'manager', 'staff']
   });
 }
 
@@ -209,6 +253,6 @@ export async function notifySystemAlert(params: {
     message: params.message,
     type: 'alert',
     action_url: params.actionUrl || '/settings',
-    target_roles: ['super_admin', 'admin']
+    target_roles: ['super_admin', 'admin', 'staff']
   });
 }
