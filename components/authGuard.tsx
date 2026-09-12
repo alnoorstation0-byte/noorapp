@@ -17,7 +17,6 @@ const ROUTE_MODULE_MAP: Record<string, string> = {
   '/kpis': 'global_summary',
   
   '/pos': 'pos',
-  '/pos/invoices': 'pos_invoices',
   '/pos/dashboard': 'pos_dashboard',
   
   '/fleet': 'fleet',

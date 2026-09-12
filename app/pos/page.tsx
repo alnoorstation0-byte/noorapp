@@ -768,10 +768,10 @@ export default function PosPage() {
                         <button 
                             type="button" 
                             className="btn-main-glass"
-                            onClick={() => window.location.href = '/pos/invoices'}
+                            onClick={() => window.location.href = '/invoices'}
                         >
                             <span>🧾</span>
-                            <span>فواتير نقاط البيع</span>
+                            <span>فواتير المبيعات</span>
                         </button>
                         <button 
                             type="button" 

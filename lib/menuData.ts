@@ -10,7 +10,6 @@ export const menuGroups = [
         group: "التشغيل والمبيعات", 
         items: [
             { id: 'pos', title: 'شاشة الكاشير (POS)', icon: '🛍️', path: '/pos' },
-            { id: 'pos_invoices', title: 'فواتير الكاشير', icon: '🧾', path: '/pos/invoices' },
             { id: 'pos_dashboard', title: 'أرباح منافذ البيع', icon: '📈', path: '/pos/dashboard' },
             { id: 'fleet_operations', title: 'رحلات التشغيل', icon: '🚚', path: '/fleet_operations' },
             { id: 'invoices', title: 'الفواتير والمبيعات', icon: '🧾', path: '/invoices' }

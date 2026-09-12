@@ -83,7 +83,6 @@ export type WatchedTable = typeof WATCHED_TABLES[number];
 const TABLE_QUERY_KEY_MAP: Record<string, string[][]> = {
   invoices: [
     ['invoices'], 
-    ['pos_invoices'], 
     ['ar_aging_invoices'], 
     ['kpis_invoices'], 
     ['dashboard'], 
