@@ -55,6 +55,39 @@ export default function ShiftOpenModal({
         }
     });
 
+    // 🔄 فحص هل نفس المندوب لديه وردية أُغلقت اليوم في هذا المنفذ؟
+    const { data: todayClosedShift = null } = useQuery({
+        queryKey: ['pos_today_closed_shift', targetWarehouseId, targetDelegateId],
+        enabled: !!isOpen && !!targetWarehouseId,
+        queryFn: async () => {
+            const now = new Date();
+            const todayDateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+            const todayStartIso = `${todayDateStr}T00:00:00.000Z`;
+
+            let q = supabase
+                .from('pos_shifts')
+                .select('id, shift_number, starting_cash, opened_at, closed_at, total_sales')
+                .eq('warehouse_id', targetWarehouseId)
+                .eq('status', 'closed')
+                .gte('opened_at', todayStartIso)
+                .order('closed_at', { ascending: false })
+                .limit(1);
+
+            if (targetDelegateId) {
+                q = q.eq('delegate_id', targetDelegateId);
+            } else {
+                q = q.is('delegate_id', null);
+            }
+
+            const { data, error } = await q;
+            if (error) {
+                console.warn('Error checking today closed shift:', error);
+                return null;
+            }
+            return data?.[0] || null;
+        }
+    });
+
     // 1. هل المستودع المختار لديه وردية مفتوحة بالفعل؟
     const existingWarehouseShift = (allActiveShifts || []).find(
         (s: any) => s.warehouse_id === targetWarehouseId
@@ -103,10 +136,11 @@ export default function ShiftOpenModal({
                 throw new Error(result.error || 'فشل فتح الوردية');
             }
 
-            return result.data;
+            return result;
         },
-        onSuccess: (data) => {
-            showToast('تم فتح الوردية بنجاح 🚀', 'success');
+        onSuccess: (res: any) => {
+            const isResumed = res?.is_resumed;
+            showToast(isResumed ? (res?.message || 'تم استئناف وردية اليوم بنجاح وتكملة المبيعات عليها 🔄') : 'تم فتح الوردية بنجاح 🚀', 'success');
             if (onWarehouseChange && targetWarehouseId !== warehouseId) {
                 onWarehouseChange(targetWarehouseId);
             }
@@ -115,6 +149,7 @@ export default function ShiftOpenModal({
             }
             queryClient.invalidateQueries({ queryKey: ['active_pos_shift'] });
             queryClient.invalidateQueries({ queryKey: ['pos_open_shifts'] });
+            queryClient.invalidateQueries({ queryKey: ['pos_today_closed_shift'] });
             if (onClose) onClose();
         },
         onError: (err: any) => showToast(`فشل فتح الوردية: ${err.message}`, 'error')
@@ -363,6 +398,28 @@ export default function ShiftOpenModal({
                     </div>
                 )}
 
+                {/* 🔄 إشعار استئناف وردية اليوم لنفس المندوب */}
+                {todayClosedShift && !existingWarehouseShift && !isConflictWithOtherWarehouse && (
+                    <div style={{
+                        background: 'linear-gradient(135deg, rgba(40, 145, 200, 0.12) 0%, rgba(28, 115, 171, 0.05) 100%)',
+                        border: '1.5px solid #2891C8',
+                        borderRadius: '16px',
+                        padding: '12px 14px',
+                        marginBottom: '16px',
+                        textAlign: 'right'
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#1C73AB', fontWeight: 900, fontSize: '13.5px', marginBottom: '4px' }}>
+                            <span style={{ fontSize: '18px' }}>🔄</span>
+                            <span>استئناف وردية اليوم لنفس المندوب</span>
+                        </div>
+                        <p style={{ color: '#0369a1', fontSize: '12px', margin: 0, lineHeight: 1.5, fontWeight: 700 }}>
+                            توجد وردية أُغلقت اليوم لهذا المندوب في هذا المنفذ برقم <strong>#{todayClosedShift.shift_number || String(todayClosedShift.id).slice(-6)}</strong>.
+                            <br />
+                            النقر أدناه سيقوم بـ <strong>استئناف نفس الوردية</strong> لتكملة مبيعات اليوم عليها دون فتح وردية مكررة.
+                        </p>
+                    </div>
+                )}
+
                 <div style={{ textAlign: 'right', marginBottom: '20px' }}>
                     <label style={{ display: 'block', marginBottom: '6px', color: '#1C73AB', fontWeight: 900, fontSize: '13px' }}>
                         العهدة الافتتاحية (المبلغ بالدرج الآن بالريال):
@@ -399,18 +456,22 @@ export default function ShiftOpenModal({
                             cursor: (!targetWarehouseId || !!existingWarehouseShift || !!isConflictWithOtherWarehouse) ? 'not-allowed' : 'pointer',
                             background: (existingWarehouseShift || isConflictWithOtherWarehouse)
                                 ? '#94a3b8'
-                                : 'linear-gradient(135deg, #2891C8 0%, #1C73AB 100%)'
+                                : todayClosedShift
+                                    ? 'linear-gradient(135deg, #10b981 0%, #1C73AB 100%)'
+                                    : 'linear-gradient(135deg, #2891C8 0%, #1C73AB 100%)'
                         }}
                     >
                         {openShiftMutation.isPending 
-                            ? '⏳ جاري فتح الوردية...' 
+                            ? (todayClosedShift ? '⏳ جاري استئناف الوردية...' : '⏳ جاري فتح الوردية...')
                             : existingWarehouseShift 
                                 ? '⛔ المستودع به وردية نشطة بالفعل' 
                                 : isConflictWithOtherWarehouse 
                                     ? '⛔ المندوب لديه وردية نشطة' 
                                     : !targetWarehouseId
                                         ? '⚠️ اختر منفذ البيع'
-                                        : '✨ فتح الصندوق وبدء الوردية'
+                                        : todayClosedShift
+                                            ? '🔄 استئناف وردية اليوم وتكملة المبيعات'
+                                            : '✨ فتح الصندوق وبدء الوردية'
                         }
                     </button>
                     {onClose && (

@@ -60,7 +60,25 @@ export async function GET(
             .eq('shift_id', id)
             .order('created_at', { ascending: false });
 
-        // تجميع الأصناف المباعة خلال الوردية
+        // جلب أسعار التكلفة للأصناف لحساب تكلفة البضاعة المباعة COGS وهامش الربحية
+        const { data: invItems } = await supabaseAdmin
+            .from('inventory_items')
+            .select('id, name, cost_price, default_price');
+        const costMap: Record<string, number> = {};
+        (invItems || []).forEach((it: any) => {
+            costMap[it.id] = Number(it.cost_price || 0);
+        });
+
+        // جلب المصروفات التشغيلية المرتبطة بالوردية
+        const { data: shiftExpenses } = await supabaseAdmin
+            .from('expenses')
+            .select('id, amount, expense_number, expense_date, title, payment_method')
+            .eq('shift_id', id);
+        const recordedExpenses = (shiftExpenses || []).reduce((sum, e) => sum + Number(e.amount || 0), 0);
+        const totalExpenses = Math.max(recordedExpenses, Number(shift.total_expenses || 0));
+
+        // تجميع الأصناف المباعة خلال الوردية مع حساب التكلفة وهامش الربح
+        let totalCOGS = 0;
         const itemMap = new Map();
         (invoices || []).forEach((inv: any) => {
             const lines = Array.isArray(inv.lines_data) ? inv.lines_data : [];
@@ -70,19 +88,33 @@ export async function GET(
                 const qty = Number(line.quantity || line.qty || 0);
                 const price = Number(line.unit_price || line.price || line.selected_price || 0);
                 const total = Number(line.total || (qty * price));
+                const unitCost = costMap[key] || Number(line.cost_price || 0);
+                const lineCOGS = qty * unitCost;
+                totalCOGS += lineCOGS;
 
                 if (!itemMap.has(key)) {
-                    itemMap.set(key, { item_id: key, item_name: name, total_quantity: 0, total_amount: 0 });
+                    itemMap.set(key, { 
+                        item_id: key, 
+                        item_name: name, 
+                        total_quantity: 0, 
+                        total_amount: 0,
+                        unit_cost: unitCost,
+                        total_cogs: 0,
+                        gross_profit: 0
+                    });
                 }
                 const item = itemMap.get(key);
                 item.total_quantity += qty;
                 item.total_amount += total;
+                item.total_cogs += lineCOGS;
+                item.gross_profit += (total - lineCOGS);
             });
         });
 
         const itemsSummary = Array.from(itemMap.values()).map(i => ({
             ...i,
-            avg_price: i.total_quantity > 0 ? Number((i.total_amount / i.total_quantity).toFixed(2)) : 0
+            avg_price: i.total_quantity > 0 ? Number((i.total_amount / i.total_quantity).toFixed(2)) : 0,
+            profit_margin: i.total_amount > 0 ? Number(((i.gross_profit / i.total_amount) * 100).toFixed(1)) : 0
         })).sort((a, b) => b.total_quantity - a.total_quantity);
 
         // جلب أي سندات قبض مرتبطة بهذه الفواتير
@@ -123,6 +155,11 @@ export async function GET(
         const startingCash = Number(shift.starting_cash || 0);
         const finalExpectedCash = isShiftClosed ? Number(shift.expected_cash || 0) : (startingCash + liveCash);
 
+        // 💰 احتساب مقاييس الربحية للوردية (المبيعات - تكلفة البضاعة - المصروفات)
+        const grossProfit = finalTotalSales - totalCOGS;
+        const netProfit = grossProfit - totalExpenses;
+        const profitMargin = finalTotalSales > 0 ? Number(((netProfit / finalTotalSales) * 100).toFixed(1)) : 0;
+
         const fullDossier = {
             shift_id: shift.id,
             status: shift.status,
@@ -153,7 +190,12 @@ export async function GET(
                 total_sales: finalTotalSales,
                 total_cash_sales: finalTotalCash,
                 total_card_sales: finalTotalCard,
-                total_credit_sales: finalTotalCredit
+                total_credit_sales: finalTotalCredit,
+                total_cogs: totalCOGS,
+                total_expenses: totalExpenses,
+                gross_profit: grossProfit,
+                net_profit: netProfit,
+                profit_margin: profitMargin
             },
             bottles: {
                 sold: Number(shift.bottles_sold || 0),

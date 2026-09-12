@@ -14,7 +14,7 @@ export function useProfitDashboardLogic() {
             let q = supabase.from('invoices').select(`
                 id, total_amount, paid_amount, lines_data, status, date,
                 delegate:partners!invoices_delegate_id_fkey(name)
-            `).in('status', ['مرحل', 'معتمد', 'مغلق', 'مدفوع']);
+            `).neq('status', 'ملغي');
             
             if (dateFrom) q = q.gte('date', dateFrom);
             if (dateTo) q = q.lte('date', dateTo);

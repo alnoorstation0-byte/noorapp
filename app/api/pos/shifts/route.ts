@@ -217,7 +217,78 @@ export async function POST(request: Request) {
             if (users && users.length > 0) resolvedUserId = users[0].id;
         }
 
-        // 4. إنشاء الوردية بأمان تام
+        // 🔄 3.5. فحص استئناف الوردية في نفس اليوم لنفس المندوب أو البائع
+        // إذا كان نفس المندوب لديه وردية مغلقة اليوم في نفس المستودع، يتم استئنافها وتكملة المبيعات عليها
+        const now = new Date();
+        const todayDateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+        const todayStartIso = `${todayDateStr}T00:00:00.000Z`;
+
+        let closedShiftQuery = supabaseAdmin
+            .from('pos_shifts')
+            .select(`
+                *,
+                warehouse:warehouses(id, name, type),
+                delegate:partners!delegate_id(id, name, phone, code)
+            `)
+            .eq('warehouse_id', warehouse_id)
+            .eq('status', 'closed')
+            .gte('opened_at', todayStartIso)
+            .order('closed_at', { ascending: false })
+            .limit(1);
+
+        if (delegate_id) {
+            closedShiftQuery = closedShiftQuery.eq('delegate_id', delegate_id);
+        } else if (resolvedUserId) {
+            closedShiftQuery = closedShiftQuery.is('delegate_id', null).eq('user_id', resolvedUserId);
+        }
+
+        const { data: closedShiftsToday, error: closedShiftErr } = await closedShiftQuery;
+        if (closedShiftErr) {
+            console.error('Error checking closed shift for today:', closedShiftErr);
+        }
+
+        const existingClosedShift = closedShiftsToday?.[0];
+
+        // 🌟 إذا وُجدت وردية مغلقة اليوم لنفس المندوب والمنفذ: استئناف نفس الوردية!
+        if (existingClosedShift) {
+            const shiftNumberDisplay = existingClosedShift.shift_number ? `#${existingClosedShift.shift_number}` : (existingClosedShift.id ? `#${existingClosedShift.id.slice(0, 8)}` : '');
+            
+            // تحديث الوردية لتصبح مفتوحة ومستأنفة
+            const updatePayload: any = {
+                status: 'open',
+                closed_at: null
+            };
+
+            // إذا أدخل الكاشير عهدة بداية وكانت السابقة 0
+            if (Number(starting_cash) > 0 && (!existingClosedShift.starting_cash || existingClosedShift.starting_cash === 0)) {
+                updatePayload.starting_cash = Number(starting_cash);
+            }
+
+            const { data: resumedShift, error: resumeErr } = await supabaseAdmin
+                .from('pos_shifts')
+                .update(updatePayload)
+                .eq('id', existingClosedShift.id)
+                .select(`
+                    *,
+                    warehouse:warehouses(id, name, type),
+                    delegate:partners!delegate_id(id, name, phone, code)
+                `)
+                .single();
+
+            if (resumeErr) {
+                console.error('Error resuming shift:', resumeErr);
+                throw resumeErr;
+            }
+
+            return NextResponse.json({
+                success: true,
+                is_resumed: true,
+                message: `تم استئناف وردية اليوم السابقة للمندوب بنجاح (${shiftNumberDisplay}) لتكملة مبيعات اليوم عليها دون ازدواجية 🔄`,
+                data: resumedShift
+            });
+        }
+
+        // 4. إنشاء الوردية بأمان تام لمندوب جديد أو لبداية يوم جديد
         const { data: newShift, error: insertError } = await supabaseAdmin
             .from('pos_shifts')
             .insert([{
@@ -252,6 +323,7 @@ export async function POST(request: Request) {
 
         return NextResponse.json({
             success: true,
+            is_resumed: false,
             message: 'تم فتح الوردية بنجاح 🚀',
             data: newShift
         });
