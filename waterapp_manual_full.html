@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WaterApp - الدليل التقني الشامل للإصدار الكامل</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700;800&display=swap');
+        
+        :root {
+            --primary: #1C73AB;
+            --accent: #2891C8;
+            --dark: #0f172a;
+            --light: #f8fafc;
+            --border: #e2e8f0;
+            --text: #334155;
+        }
+
+        body {
+            font-family: 'Tajawal', sans-serif;
+            background-color: var(--light);
+            color: var(--text);
+            line-height: 1.8;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        .cover {
+            text-align: center;
+            padding: 150px 20px;
+            background: linear-gradient(135deg, var(--dark), var(--primary));
+            color: white;
+            border-radius: 0 0 40px 40px;
+            margin-bottom: 60px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+
+        .cover h1 {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            font-weight: 800;
+        }
+
+        .cover p {
+            font-size: 1.5rem;
+            opacity: 0.9;
+        }
+
+        h2 {
+            color: var(--primary);
+            font-size: 2.2rem;
+            border-bottom: 4px solid var(--accent);
+            padding-bottom: 10px;
+            margin-top: 60px;
+            page-break-after: avoid;
+        }
+
+        h3 {
+            color: var(--dark);
+            font-size: 1.5rem;
+            margin-top: 40px;
+            border-right: 4px solid var(--accent);
+            padding-right: 15px;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.02);
+            break-inside: avoid;
+        }
+
+        .card-header {
+            font-weight: 700;
+            color: var(--primary);
+            font-size: 1.2rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .badge {
+            background: var(--accent);
+            color: white;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+            background: white;
+            break-inside: avoid;
+        }
+
+        th, td {
+            border: 1px solid var(--border);
+            padding: 12px 15px;
+            text-align: right;
+        }
+
+        th {
+            background-color: var(--primary);
+            color: white;
+            font-weight: 700;
+        }
+
+        tr:nth-child(even) {
+            background-color: #f1f5f9;
+        }
+
+        .page-break {
+            page-break-before: always;
+        }
+
+        code {
+            direction: ltr;
+            display: inline-block;
+            background: #e2e8f0;
+            padding: 2px 6px;
+            border-radius: 4px;
+            color: #b91c1c;
+            font-family: monospace;
+        }
+
+        @media print {
+            body { background: white; }
+            .cover { 
+                height: 100vh; 
+                display: flex; 
+                flex-direction: column; 
+                justify-content: center;
+                border-radius: 0;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .container { padding: 0; }
+            .card { box-shadow: none; border: 1px solid #ccc; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="cover">
+        <h1>💧 WaterApp ERP</h1>
+        <p>الدليل التقني الشامل - المرجع الموحد للنظام</p>
+        <p style="font-size: 1.1rem; margin-top: 50px;">التوثيق الرسمي لجميع الشاشات، قواعد البيانات، والعمليات المحاسبية</p>
+    </div>
+
+    <div class="container">
+        
+        <h2>الفصل الأول: نظرة عامة والبنية التحتية (Infrastructure)</h2>
+        <div class="card">
+            <p>نظام <strong>WaterApp</strong> هو نظام تخطيط موارد المؤسسات (ERP) السحابي الأحدث، مصمم خصيصاً لإدارة مصانع وشركات توزيع المياه. يجمع النظام بين إدارة المبيعات اللحظية (POS)، أسطول التوزيع، المخازن، والمالية في بيئة واحدة متزامنة تماماً.</p>
+            <ul>
+                <li><strong>الواجهات (Frontend):</strong> Next.js 14, React 18, Tailwind CSS</li>
+                <li><strong>الخوادم وقواعد البيانات (Backend):</strong> Supabase (PostgreSQL 15), Row Level Security (RLS)</li>
+                <li><strong>الربط اللحظي (Realtime):</strong> Supabase Realtime Channels (لتحديث الشاشات فوراً بدون Refresh)</li>
+                <li><strong>نمط التصميم (Design System):</strong> Aqua Glassmorphism</li>
+            </ul>
+        </div>
+
+        <div class="page-break"></div>
+
+        <h2>الفصل الثاني: دليل الشاشات والصفحات (Pages Directory)</h2>
+        <p>يحتوي النظام على أكثر من 35 شاشة تغطي كافة أقسام الشركة. إليك تفصيل كل شاشة ومسارها:</p>
+
+        <h3>1. قسم نقاط البيع والمبيعات (Sales & POS)</h3>
+        <div class="grid-2">
+            <div class="card">
+                <div class="card-header">شاشة الكاشير السريعة <code>/pos</code></div>
+                <p>الشاشة الرئيسية للبيع المباشر والمناديب. تتطلب فتح وردية أولاً. تدعم قراءة الباركود، حساب عهدة الفوارغ، وطباعة الفواتير الحرارية. مربوطة لحظياً بالمخزون.</p>
+            </div>
+            <div class="card">
+                <div class="card-header">إدارة الفواتير <code>/invoices</code></div>
+                <p>مركز الفواتير الشامل (نقدي/آجل). يتيح إنشاء وتعديل الفواتير، ويقوم تلقائياً بتوليد القيود المحاسبية وإغلاقها بسندات قبض إذا تم الدفع.</p>
+            </div>
+            <div class="card">
+                <div class="card-header">لوحة تحكم الورديات <code>/pos/dashboard</code></div>
+                <p>مراقبة حية لجميع ورديات المناديب المفتوحة، المبيعات اللحظية، والعجز/الزيادة في الصناديق وعُهد المياه.</p>
+            </div>
+            <div class="card">
+                <div class="card-header">تحليل المبيعات <code>/sales-analysis</code></div>
+                <p>رسوم بيانية تفاعلية (Charts) لتحليل مبيعات الأصناف، المناديب، ومقارنة الأرباح اليومية والشهرية.</p>
+            </div>
+        </div>
+
+        <h3>2. قسم المخازن والمنتجات (Inventory & Warehousing)</h3>
+        <div class="grid-2">
+            <div class="card">
+                <div class="card-header">حركات المخزون <code>/inventory/transactions</code></div>
+                <p>السجل التاريخي الشامل (كارت الصنف). يراقب عمليات الصرف، الإضافة، المرتجعات، وتالف المصنع.</p>
+            </div>
+            <div class="card">
+                <div class="card-header">إدارة المستودعات <code>/inventory/warehouses</code></div>
+                <p>تعريف المخازن (رئيسي، فرعي، سيارة). ومتابعة الرصيد الفعلي لكل مستودع منفصل.</p>
+            </div>
+            <div class="card">
+                <div class="card-header">بطاقة الصنف <code>/item-card</code></div>
+                <p>تعريف المنتجات (مياه، فوارغ، أخرى). وتحديد التسعيرة الافتراضية والتكلفة وحد إعادة الطلب.</p>
+            </div>
+            <div class="card">
+                <div class="card-header">تقييم المخزون والتنبيهات <code>/inventory-valuation</code> & <code>/reorder-alerts</code></div>
+                <p>حساب قيمة البضاعة في المخازن بناءً على متوسط التكلفة، وتنبيهات فورية للمنتجات التي أوشكت على النفاذ.</p>
+            </div>
+        </div>
+
+        <h3>3. قسم الحسابات والمالية (Accounting & Finance)</h3>
+        <div class="grid-2">
+            <div class="card">
+                <div class="card-header">القيود اليومية <code>/journal</code> & <code>/ManualJournals</code></div>
+                <p>سجل القيود المحاسبية الآلية المزدوجة الناتجة عن الفواتير والمخازن، وشاشة لإدخال قيود التسويات اليدوية.</p>
+            </div>
+            <div class="card">
+                <div class="card-header">دفتر الأستاذ <code>/ledger</code></div>
+                <p>كشف حركة تفصيلي لأي حساب في شجرة الحسابات، لمعرفة الرصيد الافتتاحي، الحركات، والرصيد الختامي.</p>
+            </div>
+            <div class="card">
+                <div class="card-header">سندات القبض والصرف <code>/ReceiptVouchers</code> & <code>/PaymentVouchers</code></div>
+                <p>تسجيل الحركات المالية النقدية والبنكية. يتم ربط السندات آلياً بالفواتير والمناديب لتحديث كشوفات الحساب.</p>
+            </div>
+            <div class="card">
+                <div class="card-header">المصروفات <code>/expenses</code></div>
+                <p>إدارة المصروفات التشغيلية للمصنع أو للسيارات (وقود، صيانة)، وترحيلها تلقائياً على مراكز التكلفة.</p>
+            </div>
+            <div class="card">
+                <div class="card-header">التقارير الختامية <code>/financial-statements</code> & <code>/trialbalance</code></div>
+                <p>ميزان المراجعة، قائمة الدخل، والمركز المالي (الميزانية العمومية) يتم إنشاؤها آلياً بناءً على القيود المعتمدة.</p>
+            </div>
+            <div class="card">
+                <div class="card-header">الإقرار الضريبي <code>/vat-return</code></div>
+                <p>حساب ضريبة القيمة المضافة (ZATCA) للمخرجات (المبيعات) والمدخلات (المشتريات) والضريبة المستحقة الدفع.</p>
+            </div>
+        </div>
+
+        <h3>4. قسم الأسطول واللوجستيات (Fleet Operations)</h3>
+        <div class="grid-2">
+            <div class="card">
+                <div class="card-header">إدارة السيارات <code>/fleet</code></div>
+                <p>بيانات الشاحنات، السائقين، وحالة السيارة (متاحة، في الصيانة).</p>
+            </div>
+            <div class="card">
+                <div class="card-header">عمليات الأسطول <code>/fleet_operations</code></div>
+                <p>أهم شاشة للمناديب. يتم هنا فتح "رحلة/عملية توزيع"، وتحميل السيارة بالبضاعة (عهدة). يتم ربط كل فواتير الـ POS بهذه العملية.</p>
+            </div>
+            <div class="card">
+                <div class="card-header">ربحية الرحلات <code>/trip-profitability</code></div>
+                <p>تقرير يقارن إيرادات الرحلة بمصروفاتها (الوقود، الصيانة) وتكلفة البضاعة المباعة لحساب الصافي لكل سيارة.</p>
+            </div>
+            <div class="card">
+                <div class="card-header">تسويات المناديب <code>/delegate-settlements</code></div>
+                <p>تصفية عهدة المندوب المالية والعينية في نهاية اليوم وإخلاء طرفه.</p>
+            </div>
+        </div>
+
+        <h3>5. الإدارة والموارد البشرية (HR & Admin)</h3>
+        <div class="grid-2">
+            <div class="card">
+                <div class="card-header">الشركاء والرواتب <code>/partners</code> & <code>/payroll</code></div>
+                <p>قاعدة بيانات العملاء والموردين والموظفين. ونظام مسيرات الرواتب لحساب الراتب الأساسي والخصومات (الغرامات).</p>
+            </div>
+            <div class="card">
+                <div class="card-header">لوحة القياس الشاملة <code>/GlobalSummary</code> & <code>/kpis</code></div>
+                <p>لوحة تحكم (Dashboard) للإدارة العليا تعرض ملخص الأرباح، الديون المتعثرة، وأداء المناديب.</p>
+            </div>
+            <div class="card">
+                <div class="card-header">سجل التدقيق <code>/audit</code></div>
+                <p>سجل يراقب تحركات المستخدمين (من أضاف، من عدل، من حذف) لتتبع الأخطاء أو التلاعب.</p>
+            </div>
+            <div class="card">
+                <div class="card-header">الإعدادات والصلاحيات <code>/settings/permissions</code></div>
+                <p>تخصيص ثيم النظام، وتحديد صلاحيات دقيقة لكل دور (Manager, Cashier, Admin).</p>
+            </div>
+        </div>
+
+        <div class="page-break"></div>
+
+        <h2>الفصل الثالث: الدورات المستندية وحركة البيانات (Workflows)</h2>
+
+        <h3>1. الدورة المستندية الكاملة لرحلة المندوب (Fleet & POS Cycle)</h3>
+        <p>توضح هذه الدورة كيف تتناغم أقسام المستودعات، السيارات، المبيعات، والحسابات معاً في يوم عمل المندوب.</p>
+        
+        <table style="font-size: 0.9rem;">
+            <tr>
+                <th width="5%">#</th>
+                <th width="20%">الإجراء</th>
+                <th width="25%">الشاشة (Route)</th>
+                <th width="50%">ماذا يحدث خلف الكواليس (System Action)</th>
+            </tr>
+            <tr>
+                <td>1</td>
+                <td>بدء رحلة التوزيع</td>
+                <td><code>/fleet_operations</code></td>
+                <td>ينشئ النظام سجل <code>fleet_operation</code> للسيارة ويحدد العداد الافتتاحي والسائق.</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>تحميل السيارة (العهدة)</td>
+                <td><code>/inventory/transactions</code></td>
+                <td>يتم عمل حركة مخزنية <code>transfer_out</code> من المستودع الرئيسي. عند اعتمادها، تضاف الكميات إلى <code>vehicle_inventory</code> الخاص بالسيارة.</td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td>فتح وردية البيع</td>
+                <td><code>/pos</code></td>
+                <td>يتم إنشاء <code>pos_shift</code> للمندوب، وتسجل العهدة النقدية وعدد الفوارغ التي استلمها لبدء العمل.</td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td>تنفيذ عملية بيع (كاش)</td>
+                <td><code>/pos</code></td>
+                <td>
+                    1. ينشئ فاتورة <code>invoices</code>.<br>
+                    2. ينشئ قيد محاسبي مزدوج (مبيعات/ضرائب/صندوق).<br>
+                    3. ينشئ سند قبض <code>receipt_vouchers</code> ويجعله <code>paid</code>.<br>
+                    4. يخصم المخزون اللحظي عبر <code>inventory_transactions</code>.
+                </td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td>مصروفات الطريق</td>
+                <td><code>/pos/ShiftCloseModal</code> أو <code>/expenses</code></td>
+                <td>تسجيل تعبئة وقود. يقلل النظام من (إجمالي النقدية المتوقعة في الدرج).</td>
+            </tr>
+            <tr>
+                <td>6</td>
+                <td>إغلاق الوردية والرحلة</td>
+                <td><code>/pos</code> ثم <code>/fleet_operations</code></td>
+                <td>يطابق النظام (النقد الفعلي) مع (النقد المتوقع = الرصيد الافتتاحي + المبيعات الكاش - المصروفات الكاش). كما يطابق الفوارغ ويغلق الرحلة.</td>
+            </tr>
+        </table>
+
+        <h3>2. دورة المشتريات (Procurement Cycle)</h3>
+        <table style="font-size: 0.9rem;">
+            <tr>
+                <th width="5%">#</th>
+                <th width="20%">الإجراء</th>
+                <th width="75%">ماذا يحدث خلف الكواليس (System Action)</th>
+            </tr>
+            <tr>
+                <td>1</td>
+                <td>فاتورة مشتريات</td>
+                <td>إنشاء فاتورة مشتريات (آجلة). يولد النظام قيد: مدين(المخزون والضريبة) / دائن(المورد).</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>دخول المستودع</td>
+                <td>يتم زيادة الرصيد <code>warehouse_inventory</code> ورفع متوسط التكلفة <code>avg_price</code> بناءً على الفاتورة.</td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td>سداد المورد</td>
+                <td>إصدار <code>payment_voucher</code> من البنك/الصندوق. يخفض مديونية المورد عبر <code>journal_lines</code> ويتم تحديث <code>current_balance</code>.</td>
+            </tr>
+        </table>
+
+        <div class="page-break"></div>
+
+        <h2>الفصل الرابع: بنية قاعدة البيانات بالتفصيل (Database Schema)</h2>
+        <p>يعتمد النظام على جداول علائقية قوية بضوابط (Constraints) لمنع تضارب البيانات. أهم الجداول وحقولها:</p>
+
+        <div class="card">
+            <h3>🗄️ الجداول الأساسية (Core Tables)</h3>
+            <ul>
+                <li><strong>accounts:</strong> <code>id, code, name, account_type, parent_id, is_transactional</code><br>
+                <small style="color:gray">تمنع شجرة الحسابات الحذف إذا كان الحساب مرتبطاً بحركات مالية.</small></li>
+                
+                <li><strong>partners:</strong> <code>id, name, partner_type (عميل/مورد/مندوب), account_id, current_balance</code><br>
+                <small style="color:gray">كل شريك يربط تلقائياً بحساب فرعي في شجرة الحسابات.</small></li>
+                
+                <li><strong>inventory_items:</strong> <code>id, name, current_quantity, is_returnable_bottle, tax_rate</code><br>
+                <small style="color:gray">يدعم الأصناف القابلة للاسترجاع (الفوارغ).</small></li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h3>🧾 جداول العمليات (Transaction Tables)</h3>
+            <ul>
+                <li><strong>pos_shifts:</strong> <code>opened_at, closed_at, starting_cash, expected_cash, total_expenses, fleet_operation_id</code><br>
+                <small style="color:gray">تضم كافة بيانات الصندوق للمندوب في فترة زمنية.</small></li>
+
+                <li><strong>invoices:</strong> <code>invoice_number, total_amount, paid_amount, payment_status, shift_id, fleet_operation_id</code><br>
+                <small style="color:gray">مرتبطة برقم الرحلة والوردية لضمان التقارير الدقيقة.</small></li>
+
+                <li><strong>inventory_transactions:</strong> <code>type (in/out/transfer), quantity, status (approved/pending), source/dest_warehouse_id</code><br>
+                <small style="color:gray">لا يتغير المخزون إلا بتواجد سجل هنا معتمد.</small></li>
+            </ul>
+        </div>
+
+        <div class="page-break"></div>
+
+        <h2>الفصل الخامس: الإجراءات المخزنة والمحفزات (Triggers & RPCs)</h2>
+        <p>لحماية النظام من تلاعب الـ API، تم نقل كل العمليات الحسابية الحساسة لتتم داخل محرك قاعدة البيانات (Supabase PostgreSQL):</p>
+
+        <div class="grid-2">
+            <div class="card">
+                <h3>🛠️ دوال الترحيل (RPC Functions)</h3>
+                <ul>
+                    <li><code>post_invoices_bulk()</code><br>
+                    تقوم بقراءة الأصناف في الفاتورة، تجميع الضرائب، وتوليد القيد المحاسبي في <code>journal_headers</code> وحفظه بشكل نهائي.</li>
+                    <li><code>approve_inventory_transaction()</code><br>
+                    تقوم بخصم أو إضافة الكمية إلى <code>warehouse_inventory</code>، وفي حالة المرتجع تنشئ قيد مالي بالتكلفة.</li>
+                    <li><code>auto_create_pos_receipt()</code><br>
+                    وظيفة مخصصة للكاشير تنشئ سند قبض وتغلق الفاتورة.</li>
+                </ul>
+            </div>
+            
+            <div class="card">
+                <h3>⚡ المحفزات الآلية (Triggers)</h3>
+                <ul>
+                    <li><code>trg_update_partner_balance</code><br>
+                    فور كتابة أي قيد في <code>journal_lines</code> يمس حساب العميل، يجمع المحفز (المدين - الدائن) ويحدّث رصيد العميل <code>current_balance</code> لسرعة القراءة في الواجهة.</li>
+                    <li><code>trg_set_invoice_payment_status</code><br>
+                    تراقب <code>receipt_vouchers</code>، وتغير حالة الفاتورة المرتبطة إلى <code>paid</code> إذا طابق مبلغ الدفع مبلغ الفاتورة.</li>
+                </ul>
+            </div>
+        </div>
+
+        <h2>الفصل السادس: الحماية والصلاحيات (Security & RLS)</h2>
+        <div class="card">
+            <p>يعتمد النظام على <strong>Row Level Security (RLS)</strong> الخاصة بـ PostgreSQL:</p>
+            <ul>
+                <li><strong>المناديب (Staff/Delegate):</strong> لا يمكنهم رؤية إلا الورديات (Shifts) والفواتير الخاصة بهم، أو السيارات المعينة لهم.</li>
+                <li><strong>حماية التعديل (Immutability):</strong> الفواتير والقيود والسندات التي تم تغيير حالتها إلى (مرحل Posted) يقفل التعديل عليها نهائياً برمجياً ومن قاعدة البيانات.</li>
+                <li><strong>حماية التزامن (Concurrency):</strong> لا يمكن فتح ورديتين لنفس المستودع أو السيارة في نفس اللحظة.</li>
+            </ul>
+        </div>
+
+        <div style="text-align: center; margin-top: 60px; padding: 20px; border-top: 1px solid var(--border); color: #94a3b8;">
+            <p>تم استخراج وتوليد هذا الدليل بواسطة نظام الذكاء الاصطناعي - WaterApp ERP System © 2026</p>
+            <p>لطباعة هذا الدليل كملف PDF عالي الدقة، اضغط (Ctrl + P) أو (Cmd + P) من المتصفح، مع تفعيل "Background Graphics".</p>
+        </div>
+
+    </div>
+</body>
+</html>

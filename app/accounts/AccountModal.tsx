@@ -119,13 +119,45 @@ export default function AccountModal({ isOpen, onClose, record, setRecord, onSav
             width="600px"
         >
             <style>{`
-                .glass-input-dark { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #cbd5e1; background: #f8fafc; color: #1e293b; font-weight: 700; outline: none; transition: 0.3s; }
+                .glass-input-dark { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #cbd5e1; background: #f8fafc; color: #1e293b; font-weight: 700; outline: none; transition: 0.3s; min-height: 44px; box-sizing: border-box; }
                 .glass-input-dark:focus { background: white; border-color: ${THEME.primary}; box-shadow: 0 0 0 3px rgba(40, 145, 200, 0.1); }
+                .acc-modal-grid-1-2 { display: grid; grid-template-columns: 1fr 2fr; gap: 15px; }
+                .acc-modal-grid-1-1 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+                .acc-radio-group { display: flex; gap: 15px; margin-top: 5px; flex-wrap: wrap; }
+                .acc-modal-actions { padding: 20px 25px; background: rgba(0,0,0,0.02); border-top: 1px solid rgba(0,0,0,0.05); display: flex; gap: 10px; justifyContent: flex-end; margin: 0 -25px -25px -25px; border-radius: 0 0 25px 25px; }
+                .acc-modal-body { padding: 25px; display: flex; flex-direction: column; gap: 20px; }
+
+                @media (max-width: 768px) {
+                    .acc-modal-grid-1-2,
+                    .acc-modal-grid-1-1 {
+                        grid-template-columns: 1fr !important;
+                        gap: 12px !important;
+                    }
+                    .acc-modal-body {
+                        padding: 15px 10px !important;
+                        gap: 14px !important;
+                    }
+                    .acc-modal-actions {
+                        flex-direction: column-reverse !important;
+                        padding: 15px 12px !important;
+                        margin: 0 -10px -15px -10px !important;
+                        gap: 10px !important;
+                    }
+                    .acc-modal-actions button {
+                        width: 100% !important;
+                        min-height: 44px !important;
+                        font-size: 14px !important;
+                        justify-content: center !important;
+                    }
+                    .acc-radio-group {
+                        flex-direction: column !important;
+                        gap: 10px !important;
+                    }
+                }
             `}</style>
 
-
-                <div style={{ padding: '25px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 2fr', gap: '15px' }}>
+                <div className="acc-modal-body">
+                    <div className="acc-modal-grid-1-2">
                         <div>
                             <label style={{ fontSize: '12px', fontWeight: 800, color: '#475569', marginBottom: '8px', display: 'block' }}>رمز / كود الحساب *</label>
                             <input 
@@ -148,7 +180,7 @@ export default function AccountModal({ isOpen, onClose, record, setRecord, onSav
                         </div>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                    <div className="acc-modal-grid-1-1">
                         <div>
                             <label style={{ fontSize: '12px', fontWeight: 800, color: '#475569', marginBottom: '8px', display: 'block' }}>الحساب الرئيسي</label>
                             <select
@@ -198,7 +230,7 @@ export default function AccountModal({ isOpen, onClose, record, setRecord, onSav
                         </div>
                     </div>
 
-                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>
+                    <div className="acc-modal-grid-1-1">
                         <div>
                             <label style={{ fontSize: '12px', fontWeight: 800, color: '#475569', marginBottom: '8px', display: 'block' }}>التصنيف المالي *</label>
                             <select 
@@ -215,35 +247,35 @@ export default function AccountModal({ isOpen, onClose, record, setRecord, onSav
                             {localRootId && <span style={{ fontSize: '10px', color: '#64748b' }}>موروث من الحساب الرئيسي</span>}
                         </div>
 
-                    <div>
-                        <label style={{ fontSize: '12px', fontWeight: 800, color: '#475569', marginBottom: '8px', display: 'block' }}>نوع الحساب</label>
-                        <div style={{ display: 'flex', gap: '15px', marginTop: '5px' }}>
-                            <label style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer', fontSize: '13px', fontWeight: 700, color: '#334155' }}>
-                                <input 
-                                    type="radio" 
-                                    name="acc_type" 
-                                    checked={initialRecord.is_transactional === true}
-                                    onChange={() => handleChange('is_transactional', true)}
-                                    style={{ accentColor: THEME.goldAccent, width: '16px', height: '16px' }}
-                                />
-                                حساب فرعي (يقبل حركات)
-                            </label>
-                            <label style={{ display: 'flex', alignItems: 'center', gap: '5px', cursor: 'pointer', fontSize: '13px', fontWeight: 700, color: '#334155' }}>
-                                <input 
-                                    type="radio" 
-                                    name="acc_type" 
-                                    checked={initialRecord.is_transactional === false}
-                                    onChange={() => handleChange('is_transactional', false)}
-                                    style={{ accentColor: THEME.goldAccent, width: '16px', height: '16px' }}
-                                />
-                                رئيسي (تجميعي فقط)
-                            </label>
+                        <div>
+                            <label style={{ fontSize: '12px', fontWeight: 800, color: '#475569', marginBottom: '8px', display: 'block' }}>نوع الحساب</label>
+                            <div className="acc-radio-group">
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: 700, color: '#334155', minHeight: '36px' }}>
+                                    <input 
+                                        type="radio" 
+                                        name="acc_type" 
+                                        checked={initialRecord.is_transactional === true}
+                                        onChange={() => handleChange('is_transactional', true)}
+                                        style={{ accentColor: THEME.goldAccent, width: '18px', height: '18px' }}
+                                    />
+                                    حساب فرعي (يقبل حركات)
+                                </label>
+                                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '13px', fontWeight: 700, color: '#334155', minHeight: '36px' }}>
+                                    <input 
+                                        type="radio" 
+                                        name="acc_type" 
+                                        checked={initialRecord.is_transactional === false}
+                                        onChange={() => handleChange('is_transactional', false)}
+                                        style={{ accentColor: THEME.goldAccent, width: '18px', height: '18px' }}
+                                    />
+                                    رئيسي (تجميعي فقط)
+                                </label>
+                            </div>
                         </div>
-                    </div>
                     </div>
                 </div>
 
-                <div style={{ padding: '20px 25px', background: 'rgba(0,0,0,0.02)', borderTop: '1px solid rgba(0,0,0,0.05)', display: 'flex', gap: '10px', justifyContent: 'flex-end', margin: '0 -25px -25px -25px', borderRadius: '0 0 25px 25px' }}>
+                <div className="acc-modal-actions">
                     <button onClick={onClose} style={{ padding: '12px 24px', borderRadius: '12px', border: '1px solid #cbd5e1', background: 'white', color: '#64748b', fontWeight: 800, cursor: 'pointer' }}>إلغاء</button>
                     <button onClick={() => {
                         if (!initialRecord.code || !initialRecord.name) {
