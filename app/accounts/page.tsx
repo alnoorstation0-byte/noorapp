@@ -307,12 +307,16 @@ export default function HierarchicalLedgerPage() {
             <div className="table-inner-scroll cinematic-scroll">
               
               <div className="table-header">
-                 <div></div>
-                 <div>اسم الحساب / الكود</div>
-                 <div>التصنيف</div>
-                 <div style={{textAlign: 'center'}}>إجمالي مدين</div>
-                 <div style={{textAlign: 'center'}}>إجمالي دائن</div>
-                 <div style={{textAlign: 'center'}}>الرصيد النهائي</div>
+                <div className="table-header-main">
+                  <div className="table-header-check-space" />
+                  <div className="table-header-title">اسم الحساب / الكود</div>
+                  <div className="table-header-type">التصنيف</div>
+                </div>
+                <div className="table-header-stats">
+                  <div className="table-header-stat">إجمالي مدين</div>
+                  <div className="table-header-stat">إجمالي دائن</div>
+                  <div className="table-header-stat">الرصيد النهائي</div>
+                </div>
               </div>
 
               {(isLoading || permsLoading) ? (
@@ -373,23 +377,85 @@ export default function HierarchicalLedgerPage() {
 
         /* 🖥️ Desktop Header & Rows */
         .table-header {
-          display: grid; grid-template-columns: 40px 2.5fr 1fr 1fr 1fr 1.2fr; 
-          padding: 15px 20px; font-weight: 900; color: #64748b; font-size: 13px;
-          background: rgba(0,0,0,0.02); border-radius: 16px; margin-bottom: 15px; border: 1px solid rgba(255, 255, 255, 0.4);
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 16px;
+          padding: 14px 20px;
+          font-weight: 900;
+          color: #64748b;
+          font-size: 13px;
+          background: rgba(0, 0, 0, 0.02);
+          border-radius: 16px;
+          margin-bottom: 12px;
+          border: 1px solid rgba(255, 255, 255, 0.4);
+          box-sizing: border-box;
+        }
+
+        .table-header-main {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          flex: 1;
+          min-width: 0;
+        }
+
+        .table-header-check-space {
+          width: 18px;
+          min-width: 18px;
+          flex-shrink: 0;
+        }
+
+        .table-header-title {
+          flex: 1;
+          min-width: 0;
+          text-align: right;
+          font-weight: 800;
+          color: #122946;
+        }
+
+        .table-header-type {
+          width: 100px;
+          text-align: center;
+          flex-shrink: 0;
+          font-weight: 800;
+          color: #64748b;
+        }
+
+        .table-header-stats {
+          display: grid;
+          grid-template-columns: 120px 120px 140px;
+          gap: 12px;
+          align-items: center;
+          flex-shrink: 0;
+        }
+
+        .table-header-stat {
+          text-align: center;
+          font-weight: 800;
+          color: #64748b;
         }
 
         .account-node-wrapper {
-          margin-right: calc(var(--node-depth, 0) * 28px);
+          margin-right: calc(var(--node-depth, 0) * 24px);
           position: relative;
           transition: margin-right 0.2s ease;
         }
 
         .acc-row { 
-          border-radius: 16px; margin-bottom: 8px; 
-          display: grid; grid-template-columns: 40px 2.5fr 1fr 1fr 1fr 1.2fr; 
-          align-items: center; padding: 14px 20px; cursor: pointer; 
-          border: 1px solid rgba(255, 255, 255, 0.4); transition: 0.2s; box-shadow: 0 2px 10px rgba(0,0,0,0.01);
+          border-radius: 16px;
+          margin-bottom: 8px; 
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 16px;
+          padding: 12px 20px;
+          cursor: pointer; 
+          border: 1px solid rgba(255, 255, 255, 0.4);
+          transition: 0.2s;
+          box-shadow: 0 2px 10px rgba(0,0,0,0.01);
           box-sizing: border-box;
+          background: white;
         }
         .acc-row.root-node {
           background: rgba(15, 23, 42, 0.03); 
@@ -399,64 +465,222 @@ export default function HierarchicalLedgerPage() {
           background: white;
         }
 
-        .acc-row:hover { border-color: ${THEME.goldAccent}; transform: translateY(-1px); box-shadow: 0 5px 15px rgba(40, 145, 200, 0.1); }
-        .acc-row.selected { background: rgba(40, 145, 200, 0.05); border-color: ${THEME.goldAccent}; }
+        .acc-row:hover {
+          border-color: ${THEME.goldAccent};
+          transform: translateY(-1px);
+          box-shadow: 0 5px 15px rgba(40, 145, 200, 0.1);
+        }
+        .acc-row.selected {
+          background: rgba(40, 145, 200, 0.05);
+          border-color: ${THEME.goldAccent};
+        }
 
-        .acc-row-main-block { display: contents; }
-        .acc-row-stats-block { display: contents; }
-        .acc-stat-label { display: none; }
-        .acc-expand-arrow { display: none; }
+        .acc-row-main-block {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          flex: 1;
+          min-width: 0;
+        }
+
+        .custom-checkbox {
+          width: 18px !important;
+          height: 18px !important;
+          min-width: 18px !important;
+          max-width: 18px !important;
+          min-height: 18px !important;
+          max-height: 18px !important;
+          flex-shrink: 0 !important;
+          align-self: center !important;
+          margin: 0 !important;
+          cursor: pointer;
+          accent-color: ${THEME.goldAccent};
+        }
 
         .acc-name-info {
-          display: flex; align-items: center; gap: 8px; min-width: 0;
-        }
-        .acc-name-text {
-          font-weight: 700; color: ${THEME.primary};
-          white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-        }
-        .acc-code-badge {
-          font-size: 11px; color: #475569; font-weight: 800; font-family: monospace;
-          background: rgba(0,0,0,0.04); padding: 2px 6px; border-radius: 6px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex: 1;
+          min-width: 0;
         }
 
-        .mobile-only { display: none !important; }
-        .desktop-only { display: inline-flex !important; }
-        .acc-code-row { display: contents; }
+        .acc-name-text {
+          font-weight: 700;
+          color: ${THEME.primary};
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          font-size: 14px;
+        }
+
+        .acc-code-row {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          flex-shrink: 0;
+        }
+
+        .acc-code-badge {
+          font-size: 11px;
+          color: #475569;
+          font-weight: 800;
+          font-family: monospace;
+          background: rgba(0,0,0,0.05);
+          padding: 2px 7px;
+          border-radius: 6px;
+          white-space: nowrap;
+        }
 
         .acc-type-pill {
-          display: flex; align-items: center; gap: 6px;
+          width: 100px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+          flex-shrink: 0;
         }
-        .acc-type-tag {
-          font-size: 11px; font-weight: 800; padding: 2px 8px; border-radius: 6px;
-          display: inline-flex; align-items: center; justify-content: center;
-          white-space: nowrap; line-height: 1.2; box-sizing: border-box;
-        }
-        .acc-type-tag.trans { color: #64748b; background: rgba(100, 116, 139, 0.08); border: 1px solid rgba(100, 116, 139, 0.2); }
-        .acc-type-tag.summary { color: ${THEME.goldAccent}; background: rgba(40, 145, 200, 0.1); border: 1px solid rgba(40, 145, 200, 0.25); }
 
-        .acc-stat-box { text-align: center; }
-        .acc-stat-box.debit .acc-stat-val { color: ${THEME.success}; font-weight: 700; font-family: monospace; font-size: 14px; }
-        .acc-stat-box.credit .acc-stat-val { color: ${THEME.danger}; font-weight: 700; font-family: monospace; font-size: 14px; }
+        .acc-type-tag {
+          font-size: 11px;
+          font-weight: 800;
+          padding: 3px 9px;
+          border-radius: 6px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          white-space: nowrap;
+          line-height: 1.2;
+          box-sizing: border-box;
+        }
+        .acc-type-tag.trans {
+          color: #64748b;
+          background: rgba(100, 116, 139, 0.08);
+          border: 1px solid rgba(100, 116, 139, 0.2);
+        }
+        .acc-type-tag.summary {
+          color: ${THEME.goldAccent};
+          background: rgba(40, 145, 200, 0.1);
+          border: 1px solid rgba(40, 145, 200, 0.25);
+        }
+
+        .acc-expand-arrow {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          width: 22px;
+          height: 22px;
+          border-radius: 50%;
+          background: rgba(28, 115, 171, 0.08);
+          color: ${THEME.primary};
+          font-size: 9px;
+          flex-shrink: 0;
+          cursor: pointer;
+          transition: transform 0.2s;
+        }
+
+        .acc-row-stats-block {
+          display: grid;
+          grid-template-columns: 120px 120px 140px;
+          gap: 12px;
+          align-items: center;
+          flex-shrink: 0;
+        }
+
+        .acc-stat-box {
+          text-align: center;
+        }
+        .acc-stat-box.debit .acc-stat-val {
+          color: ${THEME.success};
+          font-weight: 800;
+          font-family: monospace;
+          font-size: 13px;
+        }
+        .acc-stat-box.credit .acc-stat-val {
+          color: ${THEME.danger};
+          font-weight: 800;
+          font-family: monospace;
+          font-size: 13px;
+        }
         .acc-stat-box.balance .acc-stat-val {
-          font-weight: 900; color: ${THEME.primary}; font-family: monospace; font-size: 14px;
-          background: rgba(255, 255, 255, 0.5); padding: 4px 8px; border-radius: 8px; display: inline-block;
+          font-weight: 900;
+          color: ${THEME.primary};
+          font-family: monospace;
+          font-size: 13px;
+          background: rgba(255, 255, 255, 0.6);
+          border: 1px solid rgba(0,0,0,0.06);
+          padding: 4px 10px;
+          border-radius: 8px;
+          display: inline-block;
+          min-width: 90px;
+          box-sizing: border-box;
         }
         .acc-stat-box.root-balance .acc-stat-val {
-          color: white; background: ${THEME.primary};
+          color: white;
+          background: ${THEME.primary};
+          border-color: ${THEME.primary};
+        }
+
+        .acc-stat-label {
+          display: none;
+        }
+        .mobile-only {
+          display: none !important;
+        }
+        .desktop-only {
+          display: inline-flex !important;
         }
 
         /* 📜 Entry lines (Transactions) on Desktop */
         .entry-line { 
-          background: rgba(255, 255, 255, 0.6); margin: 4px 20px 8px 60px; padding: 12px 20px; 
-          border-radius: 12px; border-right: 3px solid ${THEME.goldAccent}; display: grid; 
-          grid-template-columns: 120px 2fr 120px 120px; gap: 15px; font-size: 12px;
+          background: rgba(255, 255, 255, 0.6);
+          margin: 4px 20px 8px 30px;
+          padding: 10px 16px; 
+          border-radius: 12px;
+          border-right: 3px solid ${THEME.goldAccent};
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 16px;
+          font-size: 12px;
           border: 1px solid rgba(255, 255, 255, 0.4);
+          box-sizing: border-box;
         }
-        .entry-line-top { display: contents; }
-        .entry-line-date { font-weight: 800; color: ${THEME.goldAccent}; }
-        .entry-line-desc { color: ${THEME.primary}; font-weight: 700; }
-        .entry-line-values { display: contents; }
-        .entry-stat-chip { text-align: center; font-weight: 800; font-family: monospace; }
+        .entry-line-top {
+          display: flex;
+          align-items: center;
+          gap: 16px;
+          flex: 1;
+          min-width: 0;
+        }
+        .entry-line-date {
+          font-weight: 800;
+          color: ${THEME.goldAccent};
+          font-family: monospace;
+          width: 95px;
+          flex-shrink: 0;
+        }
+        .entry-line-desc {
+          color: ${THEME.primary};
+          font-weight: 700;
+          flex: 1;
+          min-width: 0;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .entry-line-values {
+          display: grid;
+          grid-template-columns: 120px 120px 140px;
+          gap: 12px;
+          align-items: center;
+          flex-shrink: 0;
+        }
+        .entry-stat-chip {
+          text-align: center;
+          font-weight: 800;
+          font-family: monospace;
+        }
         .entry-stat-chip.text-success { color: ${THEME.success}; }
         .entry-stat-chip.text-danger { color: ${THEME.danger}; }
         .entry-stat-label { display: none; }
@@ -464,7 +688,6 @@ export default function HierarchicalLedgerPage() {
         .mobile-summary-strip { display: none; }
         .mobile-accounts-toolbar { display: none; }
 
-        .custom-checkbox { width: 18px; height: 18px; accent-color: ${THEME.goldAccent}; cursor: pointer; }
         .cinematic-scroll::-webkit-scrollbar { width: 6px; }
         .cinematic-scroll::-webkit-scrollbar-track { background: transparent; }
         .cinematic-scroll::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
@@ -668,48 +891,66 @@ export default function HierarchicalLedgerPage() {
           .acc-row-main-block {
             display: flex !important;
             align-items: center !important;
-            gap: 8px !important;
+            gap: 10px !important;
             width: 100% !important;
             max-width: 100% !important;
             box-sizing: border-box !important;
+          }
+
+          .custom-checkbox {
+            width: 18px !important;
+            height: 18px !important;
+            min-width: 18px !important;
+            max-width: 18px !important;
+            min-height: 18px !important;
+            max-height: 18px !important;
+            flex-shrink: 0 !important;
+            align-self: center !important;
+            margin: 0 !important;
+            cursor: pointer !important;
           }
 
           .acc-name-info {
             display: flex !important;
             flex-direction: column !important;
             align-items: flex-start !important;
-            gap: 2px !important;
+            gap: 3px !important;
             flex: 1 !important;
             min-width: 0 !important;
           }
 
           .acc-name-text {
             font-size: 13px !important;
+            font-weight: 800 !important;
             line-height: 1.3 !important;
             display: block !important;
             max-width: 100% !important;
             white-space: nowrap !important;
             overflow: hidden !important;
             text-overflow: ellipsis !important;
+            color: #122946 !important;
           }
 
           .acc-code-row {
             display: flex !important;
             align-items: center !important;
             gap: 6px !important;
-            margin-top: 2px !important;
+            flex-wrap: wrap !important;
+            margin-top: 1px !important;
           }
 
           .acc-code-badge {
             font-size: 10px !important;
-            padding: 1px 5px !important;
+            padding: 1px 6px !important;
+            border-radius: 4px !important;
             white-space: nowrap !important;
           }
 
           .acc-type-pill {
+            width: auto !important;
             display: flex !important;
             align-items: center !important;
-            gap: 5px !important;
+            gap: 4px !important;
             flex-shrink: 0 !important;
           }
 
@@ -729,8 +970,8 @@ export default function HierarchicalLedgerPage() {
             display: inline-flex !important;
             align-items: center !important;
             justify-content: center !important;
-            width: 26px !important;
-            height: 26px !important;
+            width: 28px !important;
+            height: 28px !important;
             border-radius: 50% !important;
             background: rgba(28, 115, 171, 0.08) !important;
             color: #1C73AB !important;
@@ -791,9 +1032,10 @@ export default function HierarchicalLedgerPage() {
           .acc-stat-box.balance .acc-stat-val {
             font-size: 11px !important;
             font-weight: 900 !important;
-            padding: 1px 4px !important;
-            border-radius: 4px !important;
+            padding: 1px 6px !important;
+            border-radius: 5px !important;
             max-width: 100% !important;
+            min-width: unset !important;
             overflow: hidden !important;
             text-overflow: ellipsis !important;
             white-space: nowrap !important;
@@ -875,10 +1117,10 @@ function AccountNode({ node, expandedIds, toggleExpand, selectedIds, toggleSelec
           <div className="acc-name-info">
             <span className="acc-name-text" style={{ fontWeight: isRoot ? 900 : 700, fontSize: isRoot ? '15px' : '13px', color: THEME.primary }}>
               {hasSub ? (isExpanded ? '📂 ' : '📁 ') : '📄 '}
-              {node.name}
+              {node.name || 'بدون اسم'}
             </span>
             <div className="acc-code-row">
-              <span className="acc-code-badge">#{node.code}</span>
+              <span className="acc-code-badge">#{node.code || '-'}</span>
               <span className={`acc-type-tag mobile-only ${node.is_transactional ? 'trans' : 'summary'}`}>
                 {node.is_transactional ? 'فرعي' : 'تجميعي'}
               </span>
@@ -932,6 +1174,9 @@ function AccountNode({ node, expandedIds, toggleExpand, selectedIds, toggleSelec
                 <div className="entry-stat-chip text-danger">
                   <span className="entry-stat-label">دائن:</span>
                   <span>{t.credit ? formatCurrency(t.credit) : '-'}</span>
+                </div>
+                <div className="entry-stat-chip desktop-only" style={{ color: '#94a3b8' }}>
+                  <span>-</span>
                 </div>
               </div>
             </div>
