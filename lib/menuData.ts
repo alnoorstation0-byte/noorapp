@@ -11,6 +11,7 @@ export const menuGroups = [
         items: [
             { id: 'pos', title: 'شاشة الكاشير (POS)', icon: '🛍️', path: '/pos' },
             { id: 'pos_dashboard', title: 'أرباح منافذ البيع', icon: '📈', path: '/pos/dashboard' },
+            { id: 'pos_settlements', title: 'تسوية عهد منافذ البيع', icon: '🏪', path: '/pos-settlements' },
             { id: 'fleet_operations', title: 'رحلات التشغيل', icon: '🚚', path: '/fleet_operations' },
             { id: 'invoices', title: 'الفواتير والمبيعات', icon: '🧾', path: '/invoices' }
         ] 
