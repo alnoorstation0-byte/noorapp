@@ -518,6 +518,7 @@ function PosItemNumpadModal({
 export default function PosPage() {
     const logic = usePosLogic();
     const [inspectShiftId, setInspectShiftId] = React.useState<string | null>(null);
+    const [mobileTab, setMobileTab] = React.useState<'items' | 'cart'>('items');
 
     return (
         <MasterPage 
@@ -661,13 +662,101 @@ export default function PosPage() {
 
                 .pos-grid {
                     display: grid;
-                    grid-template-columns: 2fr 1fr;
-                    gap: 20px;
+                    grid-template-columns: 1.85fr 1.15fr;
+                    gap: 18px;
                     height: calc(100vh - 235px);
                     min-height: 480px;
                 }
                 @media (max-width: 1024px) {
-                    .pos-grid { grid-template-columns: 1fr; height: auto; }
+                    .pos-grid { 
+                        grid-template-columns: 1fr; 
+                        height: auto; 
+                    }
+                    .pos-mobile-nav-tabs { 
+                        display: flex !important; 
+                    }
+                    .pos-section-hidden-mobile { 
+                        display: none !important; 
+                    }
+                }
+                @media (min-width: 1025px) {
+                    .pos-mobile-nav-tabs { 
+                        display: none !important; 
+                    }
+                    .pos-section-hidden-mobile { 
+                        display: flex !important; 
+                    }
+                }
+
+                .pos-mobile-nav-tabs {
+                    display: none;
+                    gap: 8px;
+                    background: rgba(255, 255, 255, 0.85);
+                    backdrop-filter: blur(20px);
+                    -webkit-backdrop-filter: blur(20px);
+                    padding: 6px;
+                    border-radius: 16px;
+                    border: 1px solid rgba(255, 255, 255, 0.9);
+                    margin-bottom: 12px;
+                    box-shadow: 0 4px 15px rgba(28, 115, 171, 0.08);
+                }
+                .pos-mobile-nav-tab {
+                    flex: 1;
+                    padding: 10px 14px;
+                    border: none;
+                    border-radius: 12px;
+                    font-size: 13.5px;
+                    font-weight: 800;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 8px;
+                    background: transparent;
+                    color: #64748b;
+                    transition: all 0.2s ease;
+                    -webkit-tap-highlight-color: transparent;
+                }
+                .pos-mobile-nav-tab.active {
+                    background: linear-gradient(135deg, #1C73AB 0%, #2891C8 100%);
+                    color: white;
+                    box-shadow: 0 4px 14px rgba(28, 115, 171, 0.35);
+                }
+                .pos-mobile-badge {
+                    background: #ef4444;
+                    color: white;
+                    font-size: 11px;
+                    font-weight: 900;
+                    padding: 2px 7px;
+                    border-radius: 99px;
+                    box-shadow: 0 2px 6px rgba(239, 68, 68, 0.4);
+                }
+                .pos-mobile-cart-float {
+                    display: none;
+                }
+                @media (max-width: 1024px) {
+                    .pos-mobile-cart-float {
+                        position: fixed;
+                        bottom: 16px;
+                        left: 16px;
+                        right: 16px;
+                        z-index: 900;
+                        background: linear-gradient(135deg, #122946 0%, #1C73AB 100%);
+                        color: white;
+                        border-radius: 18px;
+                        padding: 12px 18px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: space-between;
+                        box-shadow: 0 10px 30px rgba(18, 41, 70, 0.45);
+                        border: 1px solid rgba(255, 255, 255, 0.25);
+                        cursor: pointer;
+                        animation: slideUpFloat 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+                    }
+                }
+                @keyframes slideUpFloat {
+                    from { transform: translateY(30px); opacity: 0; }
+                    to { transform: translateY(0); opacity: 1; }
                 }
                 @media (max-width: 768px) {
                     .pos-control-bar {
@@ -699,13 +788,39 @@ export default function PosPage() {
                         width: 100%;
                         justify-content: center;
                     }
+                    .items-section, .cart-section {
+                        padding: 14px 12px !important;
+                        border-radius: 18px !important;
+                    }
+                    .cart-item {
+                        padding: 10px 12px !important;
+                        gap: 8px !important;
+                    }
+                    .cart-item-controls-row {
+                        gap: 6px !important;
+                    }
+                    .cart-unit-price-box {
+                        padding: 2px 6px !important;
+                    }
+                    .cart-price-input {
+                        width: 55px !important;
+                        font-size: 13px !important;
+                    }
+                    .cart-total-value {
+                        font-size: 14px !important;
+                    }
+                    .checkout-panel {
+                        padding: 14px 12px !important;
+                        border-radius: 16px !important;
+                    }
                 }
                 .items-section, .cart-section {
-                    background: rgba(255, 255, 255, 0.6);
-                    backdrop-filter: blur(20px);
+                    background: rgba(255, 255, 255, 0.65);
+                    backdrop-filter: blur(25px) saturate(180%);
+                    -webkit-backdrop-filter: blur(25px);
                     border-radius: 24px;
-                    border: 1px solid rgba(255,255,255,0.8);
-                    box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+                    border: 1px solid rgba(255, 255, 255, 0.85);
+                    box-shadow: 0 10px 30px rgba(28, 115, 171, 0.06);
                     padding: 20px;
                     display: flex;
                     flex-direction: column;
@@ -748,49 +863,207 @@ export default function PosPage() {
                     box-shadow: 0 8px 20px rgba(28, 115, 171, 0.15);
                     border-color: ${THEME.goldAccent};
                 }
-                .pos-item-name { font-weight: 900; color: #122946; fontSize: 14px; }
-                .pos-item-price { font-weight: 900; color: #16a34a; fontSize: 16px; }
+                .pos-item-name { font-weight: 900; color: #122946; font-size: 14px; }
+                .pos-item-price { font-weight: 900; color: #16a34a; font-size: 16px; }
                 .pos-item-qty { font-size: 11px; color: #64748b; font-weight: bold; background: #f1f5f9; padding: 3px 8px; border-radius: 10px; }
                 
                 .cart-list {
                     flex: 1;
                     overflow-y: auto;
-                    margin-top: 15px;
-                    padding-right: 5px;
+                    margin-top: 12px;
+                    padding-left: 3px;
+                    padding-right: 3px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 10px;
+                    min-height: 100px;
+                }
+
+                /* 🛒 بطاقة الصنف داخل سلة الفاتورة الحالية (Aqua Glassmorphism) */
+                .cart-item {
+                    background: rgba(255, 255, 255, 0.94);
+                    backdrop-filter: blur(15px);
+                    -webkit-backdrop-filter: blur(15px);
+                    border: 1.5px solid rgba(28, 115, 171, 0.14);
+                    border-radius: 16px;
+                    padding: 12px 14px;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 10px;
+                    box-shadow: 0 3px 12px rgba(28, 115, 171, 0.04);
+                    transition: all 0.2s ease;
+                }
+                .cart-item:hover {
+                    border-color: rgba(40, 145, 200, 0.4);
+                    box-shadow: 0 6px 20px rgba(28, 115, 171, 0.08);
+                    transform: translateY(-1px);
+                }
+                .cart-item-remove-btn {
+                    width: 28px;
+                    height: 28px;
+                    border-radius: 8px;
+                    background: rgba(239, 68, 68, 0.08);
+                    border: 1px solid rgba(239, 68, 68, 0.2);
+                    color: #ef4444;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 13px;
+                    transition: 0.2s;
+                    flex-shrink: 0;
+                    user-select: none;
+                    -webkit-tap-highlight-color: transparent;
+                }
+                .cart-item-remove-btn:hover {
+                    background: #fee2e2;
+                    color: #dc2626;
+                    transform: scale(1.06);
+                }
+                .cart-item-remove-btn:active {
+                    transform: scale(0.92);
+                }
+
+                .cart-item-controls-row {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    flex-wrap: wrap;
+                    gap: 8px;
+                    padding-top: 8px;
+                    border-top: 1px dashed rgba(28, 115, 171, 0.14);
+                }
+
+                .cart-qty-pill {
+                    display: flex;
+                    align-items: center;
+                    background: #f8fafc;
+                    border: 1.5px solid rgba(28, 115, 171, 0.2);
+                    border-radius: 10px;
+                    padding: 2px;
+                    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+                }
+                .cart-qty-btn {
+                    width: 26px;
+                    height: 26px;
+                    border-radius: 7px;
+                    border: none;
+                    font-size: 14px;
+                    font-weight: 900;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    transition: 0.12s;
+                    user-select: none;
+                    -webkit-tap-highlight-color: transparent;
+                }
+                .cart-qty-btn.minus {
+                    background: white;
+                    color: #ef4444;
+                    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+                }
+                .cart-qty-btn.plus {
+                    background: white;
+                    color: #1C73AB;
+                    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+                }
+                .cart-qty-btn:active {
+                    transform: scale(0.9);
+                }
+                .cart-qty-input {
+                    width: 34px;
+                    text-align: center;
+                    font-weight: 900;
+                    font-size: 13px;
+                    color: #122946;
+                    border: none;
+                    background: transparent;
+                    outline: none;
+                    padding: 0 2px;
+                }
+
+                .cart-unit-price-box {
+                    display: flex;
+                    align-items: center;
+                    gap: 4px;
+                    background: rgba(28, 115, 171, 0.05);
+                    border: 1px solid rgba(28, 115, 171, 0.2);
+                    border-radius: 10px;
+                    padding: 3px 8px;
+                }
+                .cart-price-label {
+                    font-size: 11px;
+                    font-weight: 700;
+                    color: #64748b;
+                }
+                .cart-price-input {
+                    width: 60px;
+                    font-size: 13.5px;
+                    font-weight: 900;
+                    color: #1C73AB;
+                    border: none;
+                    background: transparent;
+                    outline: none;
+                    text-align: center;
+                }
+                .cart-currency-badge {
+                    font-size: 11px;
+                    font-weight: 800;
+                    color: #64748b;
+                }
+
+                .cart-line-total-box {
+                    display: flex;
+                    align-items: center;
+                    gap: 4px;
+                    margin-right: auto;
+                }
+                .cart-total-label {
+                    font-size: 11px;
+                    font-weight: 700;
+                    color: #64748b;
+                }
+                .cart-total-value {
+                    font-size: 15px;
+                    font-weight: 900;
+                    color: #16a34a;
+                    letter-spacing: -0.3px;
+                }
+
+                /* 💳 لوحة السداد وتفاصيل الفاتورة */
+                .checkout-panel {
+                    background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(240, 249, 255, 0.88) 100%);
+                    backdrop-filter: blur(25px) saturate(180%);
+                    -webkit-backdrop-filter: blur(25px);
+                    border: 1.5px solid rgba(28, 115, 171, 0.2);
+                    border-radius: 20px;
+                    padding: 16px 18px;
+                    margin-top: 14px;
+                    box-shadow: 0 8px 25px rgba(28, 115, 171, 0.06), inset 0 1px 0 rgba(255, 255, 255, 0.9);
                     display: flex;
                     flex-direction: column;
                     gap: 10px;
                 }
-                .cart-item {
-                    background: white;
-                    border: 1px solid #e2e8f0;
-                    border-radius: 12px;
-                    padding: 10px 15px;
+                .pos-summary-row {
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
+                    font-size: 12.5px;
+                    font-weight: 700;
+                    color: #64748b;
                 }
-                .qty-btn {
-                    width: 28px; height: 28px;
-                    border-radius: 50%;
-                    border: none;
-                    background: #f1f5f9;
-                    color: #0f172a;
-                    font-weight: bold;
-                    cursor: pointer;
-                    display: flex; align-items: center; justify-content: center;
+                .pos-total-banner {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    background: linear-gradient(135deg, rgba(22, 163, 74, 0.08) 0%, rgba(16, 185, 129, 0.14) 100%);
+                    border: 1.5px solid rgba(22, 163, 74, 0.3);
+                    border-radius: 14px;
+                    padding: 10px 14px;
+                    box-shadow: 0 4px 12px rgba(22, 163, 74, 0.06);
+                    margin-top: 4px;
                 }
-                .qty-btn:hover { background: #e2e8f0; }
-                .remove-btn { color: #ef4444; background: #fee2e2; border: none; padding: 5px 10px; border-radius: 8px; cursor: pointer; font-size: 11px; font-weight: bold; }
-                .checkout-panel {
-                    background: #122946;
-                    color: white;
-                    border-radius: 20px;
-                    padding: 20px;
-                    margin-top: 15px;
-                }
-                .summary-row { display: flex; justify-content: space-between; font-size: 14px; font-weight: 600; margin-bottom: 8px; color: #cbd5e1; }
-                .summary-total { display: flex; justify-content: space-between; font-size: 22px; font-weight: 900; margin-top: 15px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.1); color: #10b981; }
             `}</style>
 
             {/* 🎛️ شريط تحكم الكاشير المتكامل (منفذ البيع + المندوب + الوردية) */}
@@ -973,14 +1246,36 @@ export default function PosPage() {
                 </div>
             </div>
 
+            {/* 📱 تبويبات التنقل للشاشات الصغيرة (الجوال والتابلت) */}
+            <div className="pos-mobile-nav-tabs">
+                <button
+                    type="button"
+                    className={`pos-mobile-nav-tab ${mobileTab === 'items' ? 'active' : ''}`}
+                    onClick={() => setMobileTab('items')}
+                >
+                    <span>📦</span>
+                    <span>قائمة الأصناف</span>
+                </button>
+                <button
+                    type="button"
+                    className={`pos-mobile-nav-tab ${mobileTab === 'cart' ? 'active' : ''}`}
+                    onClick={() => setMobileTab('cart')}
+                >
+                    <span>🛒</span>
+                    <span>الفاتورة الحالية</span>
+                    {logic.cart.length > 0 && (
+                        <span className="pos-mobile-badge">{logic.cart.length}</span>
+                    )}
+                </button>
+            </div>
+
             {logic.isLoading ? (
                 <LoadingScreen message="جاري تحضير شاشة الكاشير..." fullScreen={false} />
             ) : (
                 <div className="pos-grid">
 
-                    
                     {/* Left: Items Selection */}
-                    <div className="items-section">
+                    <div className={`items-section ${mobileTab !== 'items' ? 'pos-section-hidden-mobile' : ''}`}>
                         {/* Shift Required Alert Banner */}
                         {!logic.activeShift && (
                             <div style={{
@@ -1168,117 +1463,288 @@ export default function PosPage() {
                     </div>
 
                     {/* Right: Cart & Checkout */}
-                    <div className="cart-section">
-                        <h3 style={{ margin: 0, color: THEME.primary, fontWeight: 900, borderBottom: '2px solid rgba(0,0,0,0.05)', paddingBottom: '10px' }}>
-                            🛒 الفاتورة الحالية
-                        </h3>
+                    <div className={`cart-section ${mobileTab !== 'cart' ? 'pos-section-hidden-mobile' : ''}`}>
+                        {/* Cart Header */}
+                        <div style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            borderBottom: '1.5px solid rgba(28, 115, 171, 0.12)',
+                            paddingBottom: '12px',
+                            marginBottom: '6px'
+                        }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <span style={{ fontSize: '20px' }}>🛒</span>
+                                <h3 style={{ margin: 0, color: THEME.primary, fontWeight: 900, fontSize: '17px' }}>
+                                    الفاتورة الحالية
+                                </h3>
+                                {logic.cart.length > 0 && (
+                                    <span style={{
+                                        background: 'rgba(28, 115, 171, 0.12)',
+                                        color: '#1C73AB',
+                                        fontSize: '11px',
+                                        fontWeight: 800,
+                                        padding: '2px 8px',
+                                        borderRadius: '20px'
+                                    }}>
+                                        {logic.cart.length} أصناف
+                                    </span>
+                                )}
+                            </div>
+                            {logic.cart.length > 0 && (
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        if (window.confirm('هل تريد بالتأكيد إفراغ السلة الحالية؟')) {
+                                            logic.cart.forEach((it: any) => logic.removeFromCart(it.id));
+                                        }
+                                    }}
+                                    style={{
+                                        background: 'transparent',
+                                        border: 'none',
+                                        color: '#ef4444',
+                                        fontSize: '12px',
+                                        fontWeight: 800,
+                                        cursor: 'pointer',
+                                        padding: '4px 8px',
+                                        borderRadius: '6px',
+                                        transition: '0.2s'
+                                    }}
+                                    title="إفراغ الفاتورة"
+                                >
+                                    🗑️ إفراغ
+                                </button>
+                            )}
+                        </div>
 
+                        {/* Cart Items List */}
                         <div className="cart-list cinematic-scroll">
                             {logic.cart.length === 0 ? (
-                                <div style={{ textAlign: 'center', padding: '40px 0', color: '#94a3b8', fontWeight: 'bold' }}>
-                                    السلة فارغة. انقر على الأصناف لإضافتها.
+                                <div style={{
+                                    textAlign: 'center',
+                                    padding: '45px 15px',
+                                    color: '#64748b',
+                                    fontWeight: 700,
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                    gap: '10px'
+                                }}>
+                                    <span style={{ fontSize: '38px', opacity: 0.6 }}>🛍️</span>
+                                    <span style={{ fontSize: '14px', color: '#475569' }}>السلة فارغة حالياً</span>
+                                    <span style={{ fontSize: '12px', color: '#94a3b8' }}>انقر على الأصناف من القائمة لإضافتها للفاتورة</span>
+                                    <button
+                                        type="button"
+                                        onClick={() => setMobileTab('items')}
+                                        className="pos-mobile-nav-tab active"
+                                        style={{
+                                            display: mobileTab === 'cart' ? 'inline-flex' : 'none',
+                                            marginTop: '8px',
+                                            padding: '8px 16px',
+                                            fontSize: '12.5px',
+                                            width: 'auto'
+                                        }}
+                                    >
+                                        👈 الذهاب لقائمة الأصناف
+                                    </button>
                                 </div>
                             ) : (
                                 logic.cart.map((item: any) => (
                                     <div key={item.id} className="cart-item">
-                                        <div style={{ flex: 1 }}>
-                                            <div style={{ fontWeight: 900, fontSize: '13px', color: '#1e293b', display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap' }}>
-                                                <span>{item.name}</span>
+                                        {/* Row 1: Item Name + Custody Badge + Remove Button */}
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', flex: 1, minWidth: 0 }}>
+                                                <span style={{ fontWeight: 900, fontSize: '13.5px', color: '#122946', wordBreak: 'break-word' }}>
+                                                    {item.name}
+                                                </span>
                                                 {item.is_returnable_bottle && (
                                                     <span style={{
-                                                        background: 'rgba(40, 145, 200, 0.15)',
+                                                        background: 'rgba(40, 145, 200, 0.12)',
                                                         color: '#1C73AB',
-                                                        border: '1px solid rgba(40, 145, 200, 0.3)',
+                                                        border: '1px solid rgba(40, 145, 200, 0.28)',
                                                         borderRadius: '6px',
                                                         padding: '1px 6px',
                                                         fontSize: '10px',
-                                                        fontWeight: 800
+                                                        fontWeight: 800,
+                                                        whiteSpace: 'nowrap'
                                                     }}>
                                                         🔄 عهدة ({item.qty} فوارغ)
                                                     </span>
                                                 )}
                                             </div>
-                                            <input 
-                                                type="number" 
-                                                value={item.unit_price !== undefined ? item.unit_price : (item.price || 0)}
-                                                onChange={(e) => logic.updateCartItemPrice(item.id, Number(e.target.value))}
-                                                onFocus={(e) => e.target.select()}
-                                                style={{ width: '80px', fontSize: '12px', color: '#16a34a', fontWeight: 'bold', border: '1px solid #cbd5e1', borderRadius: '5px', padding: '2px 5px', marginTop: '2px' }}
-                                                min={0}
-                                                step="any"
-                                            />
+                                            <button
+                                                type="button"
+                                                className="cart-item-remove-btn"
+                                                onClick={() => logic.removeFromCart(item.id)}
+                                                title="حذف من الفاتورة"
+                                            >
+                                                🗑️
+                                            </button>
                                         </div>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', margin: '0 15px' }}>
-                                            <button className="qty-btn" onClick={() => logic.updateCartItemQty(item.id, item.qty + 1)}>+</button>
-                                            <input 
-                                                type="number" 
-                                                value={item.qty}
-                                                onChange={(e) => logic.updateCartItemQty(item.id, Number(e.target.value))}
-                                                onFocus={(e) => e.target.select()}
-                                                style={{ width: '40px', textAlign: 'center', fontWeight: 'bold', border: '1px solid #cbd5e1', borderRadius: '5px', padding: '2px' }}
-                                                min={1}
-                                            />
-                                            <button className="qty-btn" onClick={() => logic.updateCartItemQty(item.id, item.qty - 1)}>-</button>
+
+                                        {/* Row 2: Balanced Controls (Qty Pill + Price Box + Line Total) */}
+                                        <div className="cart-item-controls-row">
+                                            {/* 1. Sleek Compact Stepper Pill */}
+                                            <div className="cart-qty-pill">
+                                                <button
+                                                    type="button"
+                                                    className="cart-qty-btn minus"
+                                                    onClick={() => logic.updateCartItemQty(item.id, Math.max(1, item.qty - 1))}
+                                                    title="إنقاص الكمية"
+                                                >
+                                                    -
+                                                </button>
+                                                <input
+                                                    type="number"
+                                                    className="cart-qty-input"
+                                                    value={item.qty}
+                                                    onChange={(e) => logic.updateCartItemQty(item.id, Math.max(1, Number(e.target.value) || 1))}
+                                                    onFocus={(e) => e.target.select()}
+                                                    min={1}
+                                                />
+                                                <button
+                                                    type="button"
+                                                    className="cart-qty-btn plus"
+                                                    onClick={() => logic.updateCartItemQty(item.id, item.qty + 1)}
+                                                    title="زيادة الكمية"
+                                                >
+                                                    +
+                                                </button>
+                                            </div>
+
+                                            {/* 2. Clear, Balanced Price Field */}
+                                            <div className="cart-unit-price-box">
+                                                <span className="cart-price-label">السعر:</span>
+                                                <input
+                                                    type="number"
+                                                    className="cart-price-input"
+                                                    value={item.unit_price !== undefined ? item.unit_price : (item.price || 0)}
+                                                    onChange={(e) => logic.updateCartItemPrice(item.id, Number(e.target.value))}
+                                                    onFocus={(e) => e.target.select()}
+                                                    min={0}
+                                                    step="any"
+                                                />
+                                                <span className="cart-currency-badge">ر.س</span>
+                                            </div>
+
+                                            {/* 3. Prominent Line Total */}
+                                            <div className="cart-line-total-box">
+                                                <span className="cart-total-label">الإجمالي:</span>
+                                                <span className="cart-total-value">
+                                                    {formatCurrency(item.qty * (item.unit_price !== undefined ? item.unit_price : (item.price || 0)))}
+                                                </span>
+                                            </div>
                                         </div>
-                                        <div style={{ fontWeight: 900, fontSize: '14px', color: '#0f172a', width: '70px', textAlign: 'left' }}>
-                                            {formatCurrency(item.qty * (item.unit_price || item.price || 0))}
-                                        </div>
-                                        <button className="remove-btn" onClick={() => logic.removeFromCart(item.id)}>❌</button>
                                     </div>
                                 ))
                             )}
                         </div>
 
+                        {/* Checkout Panel */}
                         <div className="checkout-panel">
                             {/* Customer & Payment Method */}
-                            <div style={{ marginBottom: '15px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                                <select 
-                                    className="glass-input-field" 
-                                    style={{ background: 'rgba(255,255,255,0.1)', color: 'white', border: '1px solid rgba(255,255,255,0.2)' }}
-                                    value={logic.partnerId}
-                                    onChange={e => logic.setPartnerId(e.target.value)}
-                                >
-                                    <option value="" style={{ color: 'black' }}>عميل نقدي (بدون اسم)</option>
-                                    {logic.customers.map((c: any) => (
-                                        <option key={c.id} value={c.id} style={{ color: 'black' }}>{c.name}</option>
-                                    ))}
-                                </select>
-                                <select 
-                                    className="glass-input-field" 
-                                    style={{ background: 'rgba(255,255,255,0.1)', color: 'white', border: '1px solid rgba(255,255,255,0.2)' }}
-                                    value={logic.paymentMethod}
-                                    onChange={(e: any) => logic.setPaymentMethod(e.target.value)}
-                                >
-                                    <option value="نقدي (كاش)" style={{ color: 'black' }}>الدفع نقدي (كاش)</option>
-                                    <option value="شبكة (مدى)" style={{ color: 'black' }}>شبكة (مدى / بطاقة)</option>
-                                    <option value="آجل" style={{ color: 'black' }}>آجل (على الحساب)</option>
-                                </select>
-                            </div>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, color: '#1C73AB', marginBottom: '4px' }}>
+                                        👤 العميل:
+                                    </label>
+                                    <select 
+                                        className="glass-input-field" 
+                                        style={{ width: '100%', background: 'rgba(255, 255, 255, 0.85)', color: '#122946', fontWeight: 700, border: '1.5px solid rgba(28, 115, 171, 0.2)' }}
+                                        value={logic.partnerId}
+                                        onChange={e => logic.setPartnerId(e.target.value)}
+                                    >
+                                        <option value="">عميل نقدي (بدون اسم)</option>
+                                        {logic.customers.map((c: any) => (
+                                            <option key={c.id} value={c.id}>{c.name}</option>
+                                        ))}
+                                    </select>
+                                </div>
 
-                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '15px', background: 'rgba(255,255,255,0.5)', padding: '10px', borderRadius: '10px' }}>
-                                <span style={{ fontWeight: 'bold', color: '#1e293b', fontSize: '14px' }}>طريقة الحساب:</span>
-                                <div style={{ display: 'flex', background: '#e2e8f0', borderRadius: '8px', overflow: 'hidden' }}>
-                                    <button 
-                                        onClick={() => logic.setIsTaxInclusive(true)}
-                                        style={{ border: 'none', padding: '6px 12px', fontSize: '13px', fontWeight: 'bold', cursor: 'pointer', background: logic.isTaxInclusive ? '#16a34a' : 'transparent', color: logic.isTaxInclusive ? 'white' : '#475569', transition: '0.3s' }}
-                                    >شامل الضريبة</button>
-                                    <button 
-                                        onClick={() => logic.setIsTaxInclusive(false)}
-                                        style={{ border: 'none', padding: '6px 12px', fontSize: '13px', fontWeight: 'bold', cursor: 'pointer', background: !logic.isTaxInclusive ? '#3b82f6' : 'transparent', color: !logic.isTaxInclusive ? 'white' : '#475569', transition: '0.3s' }}
-                                    >غير شامل</button>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, color: '#1C73AB', marginBottom: '4px' }}>
+                                        💳 طريقة الدفع:
+                                    </label>
+                                    <select 
+                                        className="glass-input-field" 
+                                        style={{ width: '100%', background: 'rgba(255, 255, 255, 0.85)', color: '#122946', fontWeight: 700, border: '1.5px solid rgba(28, 115, 171, 0.2)' }}
+                                        value={logic.paymentMethod}
+                                        onChange={(e: any) => logic.setPaymentMethod(e.target.value)}
+                                    >
+                                        <option value="نقدي (كاش)">الدفع نقدي (كاش)</option>
+                                        <option value="شبكة (مدى)">شبكة (مدى / بطاقة)</option>
+                                        <option value="آجل">آجل (على الحساب)</option>
+                                    </select>
                                 </div>
                             </div>
-                            <div className="summary-row">
+
+                            {/* طريقة الحساب (شامل / غير شامل الضريبة) */}
+                            <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'space-between',
+                                background: 'rgba(28, 115, 171, 0.05)',
+                                padding: '8px 12px',
+                                borderRadius: '12px',
+                                border: '1px solid rgba(28, 115, 171, 0.12)'
+                            }}>
+                                <span style={{ fontWeight: 800, color: '#122946', fontSize: '12.5px' }}>طريقة الحساب:</span>
+                                <div style={{ display: 'flex', background: 'rgba(255, 255, 255, 0.8)', padding: '2px', borderRadius: '10px', border: '1px solid rgba(28, 115, 171, 0.15)' }}>
+                                    <button 
+                                        type="button"
+                                        onClick={() => logic.setIsTaxInclusive(true)}
+                                        style={{
+                                            border: 'none',
+                                            padding: '5px 10px',
+                                            fontSize: '12px',
+                                            fontWeight: 800,
+                                            borderRadius: '8px',
+                                            cursor: 'pointer',
+                                            background: logic.isTaxInclusive ? 'linear-gradient(135deg, #16a34a 0%, #10b981 100%)' : 'transparent',
+                                            color: logic.isTaxInclusive ? 'white' : '#64748b',
+                                            boxShadow: logic.isTaxInclusive ? '0 2px 6px rgba(22, 163, 74, 0.3)' : 'none',
+                                            transition: '0.2s'
+                                        }}
+                                    >
+                                        شامل الضريبة
+                                    </button>
+                                    <button 
+                                        type="button"
+                                        onClick={() => logic.setIsTaxInclusive(false)}
+                                        style={{
+                                            border: 'none',
+                                            padding: '5px 10px',
+                                            fontSize: '12px',
+                                            fontWeight: 800,
+                                            borderRadius: '8px',
+                                            cursor: 'pointer',
+                                            background: !logic.isTaxInclusive ? 'linear-gradient(135deg, #1C73AB 0%, #2891C8 100%)' : 'transparent',
+                                            color: !logic.isTaxInclusive ? 'white' : '#64748b',
+                                            boxShadow: !logic.isTaxInclusive ? '0 2px 6px rgba(28, 115, 171, 0.3)' : 'none',
+                                            transition: '0.2s'
+                                        }}
+                                    >
+                                        غير شامل
+                                    </button>
+                                </div>
+                            </div>
+
+                            {/* ملخص المبالغ */}
+                            <div className="pos-summary-row">
                                 <span>المجموع الفرعي:</span>
-                                <span>{formatCurrency(logic.cartTotal.subtotal)}</span>
+                                <span style={{ fontWeight: 800, color: '#122946' }}>{formatCurrency(logic.cartTotal.subtotal)}</span>
                             </div>
-                            <div className="summary-row">
+                            <div className="pos-summary-row">
                                 <span>ضريبة القيمة المضافة (15%):</span>
-                                <span>{formatCurrency(logic.cartTotal.tax)}</span>
+                                <span style={{ fontWeight: 800, color: '#122946' }}>{formatCurrency(logic.cartTotal.tax)}</span>
                             </div>
-                            <div className="summary-total">
-                                <span>الإجمالي المطلوب:</span>
-                                <span>{formatCurrency(logic.cartTotal.total)}</span>
+
+                            {/* الإجمالي المطلوب الماسي */}
+                            <div className="pos-total-banner">
+                                <span style={{ fontSize: '13.5px', fontWeight: 900, color: '#166534' }}>الإجمالي المطلوب:</span>
+                                <span style={{ fontSize: '18px', fontWeight: 900, color: '#16a34a', letterSpacing: '-0.3px' }}>
+                                    {formatCurrency(logic.cartTotal.total)}
+                                </span>
                             </div>
 
                             {/* 🔄 إشعار عهدة الفوارغ المستحقة إن وُجدت أصناف فوارغ بالسلة */}
@@ -1287,24 +1753,23 @@ export default function PosPage() {
                                 if (totalReturnable <= 0) return null;
                                 return (
                                     <div style={{
-                                        margin: '12px 0',
                                         padding: '10px 14px',
-                                        background: 'linear-gradient(135deg, rgba(40, 145, 200, 0.15) 0%, rgba(127, 212, 227, 0.25) 100%)',
-                                        border: '1.5px solid rgba(40, 145, 200, 0.4)',
+                                        background: 'linear-gradient(135deg, rgba(40, 145, 200, 0.12) 0%, rgba(127, 212, 227, 0.2) 100%)',
+                                        border: '1.5px solid rgba(40, 145, 200, 0.35)',
                                         borderRadius: '12px',
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'space-between',
-                                        boxShadow: '0 4px 12px rgba(40, 145, 200, 0.08)'
+                                        boxShadow: '0 4px 12px rgba(40, 145, 200, 0.06)'
                                     }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                             <span style={{ fontSize: '20px' }}>🔄</span>
                                             <div>
-                                                <div style={{ fontSize: '12.5px', fontWeight: 900, color: '#1C73AB' }}>عهدة فوارغ مستحقة:</div>
-                                                <div style={{ fontSize: '10.5px', color: '#64748b', fontWeight: 700 }}>تنزل تلقائياً بالوردية وحساب العميل</div>
+                                                <div style={{ fontSize: '12px', fontWeight: 900, color: '#1C73AB' }}>عهدة فوارغ مستحقة:</div>
+                                                <div style={{ fontSize: '10px', color: '#64748b', fontWeight: 700 }}>تنزل تلقائياً بالوردية وحساب العميل</div>
                                             </div>
                                         </div>
-                                        <span style={{ fontSize: '14px', fontWeight: 900, color: '#122946', background: 'white', padding: '4px 10px', borderRadius: '8px', border: '1px solid rgba(40, 145, 200, 0.3)' }}>
+                                        <span style={{ fontSize: '13px', fontWeight: 900, color: '#122946', background: 'white', padding: '3px 9px', borderRadius: '8px', border: '1px solid rgba(40, 145, 200, 0.3)' }}>
                                             {totalReturnable} عبوة / جالون
                                         </span>
                                     </div>
@@ -1317,9 +1782,9 @@ export default function PosPage() {
                                     onClick={() => logic.setIsShiftOpenModalOpen(true)}
                                     className="btn-main-glass"
                                     style={{ 
-                                        width: '100%', marginTop: '20px', 
+                                        width: '100%', marginTop: '6px', 
                                         background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', 
-                                        color: 'white', fontSize: '15px', fontWeight: 900, padding: '15px',
+                                        color: 'white', fontSize: '14px', fontWeight: 900, padding: '13px',
                                         boxShadow: '0 4px 15px rgba(217, 119, 6, 0.35)',
                                         cursor: 'pointer',
                                         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
@@ -1330,21 +1795,60 @@ export default function PosPage() {
                                 </button>
                             ) : (
                                 <button 
+                                    type="button"
                                     onClick={logic.handleCheckout}
                                     disabled={logic.cart.length === 0 || logic.isCheckingOut}
                                     className="btn-main-glass"
                                     style={{ 
-                                        width: '100%', marginTop: '20px', 
-                                        background: logic.cart.length > 0 ? '#10b981' : 'rgba(255,255,255,0.1)', 
-                                        color: 'white', fontSize: '18px', padding: '15px' 
+                                        width: '100%', marginTop: '6px', 
+                                        background: logic.cart.length > 0 ? 'linear-gradient(135deg, #16a34a 0%, #10b981 100%)' : 'rgba(203, 213, 225, 0.6)', 
+                                        color: logic.cart.length > 0 ? 'white' : '#64748b', 
+                                        fontSize: '16px', fontWeight: 900, padding: '13px',
+                                        boxShadow: logic.cart.length > 0 ? '0 4px 16px rgba(22, 163, 74, 0.35)' : 'none',
+                                        cursor: logic.cart.length > 0 && !logic.isCheckingOut ? 'pointer' : 'not-allowed',
+                                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
                                     }}
                                 >
-                                    {logic.isCheckingOut ? '⏳ جاري الإصدار...' : '✅ الدفع وإصدار الفاتورة'}
+                                    <span>{logic.isCheckingOut ? '⏳' : '✅'}</span>
+                                    <span>{logic.isCheckingOut ? 'جاري إصدار الفاتورة...' : 'الدفع وإصدار الفاتورة'}</span>
                                 </button>
                             )}
                         </div>
                     </div>
 
+                </div>
+            )}
+
+            {/* 📱 زر عائم في الجوال للتوجه إلى السلة عند إضافة أصناف */}
+            {mobileTab === 'items' && logic.cart.length > 0 && (
+                <div 
+                    className="pos-mobile-cart-float"
+                    onClick={() => setMobileTab('cart')}
+                >
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <span style={{ fontSize: '22px' }}>🛒</span>
+                        <div>
+                            <div style={{ fontSize: '13px', fontWeight: 900 }}>
+                                السلة ({logic.cart.length} أصناف)
+                            </div>
+                            <div style={{ fontSize: '11px', opacity: 0.85 }}>
+                                الإجمالي: {formatCurrency(logic.cartTotal.total)}
+                            </div>
+                        </div>
+                    </div>
+                    <div style={{
+                        background: 'rgba(255, 255, 255, 0.2)',
+                        padding: '6px 12px',
+                        borderRadius: '10px',
+                        fontSize: '12px',
+                        fontWeight: 900,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '4px'
+                    }}>
+                        <span>إتمام الطلب</span>
+                        <span>←</span>
+                    </div>
                 </div>
             )}
         
