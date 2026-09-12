@@ -43,8 +43,10 @@ export function useInventoryValuationLogic() {
 
         return rawData.items.map(item => {
             const qty = Number(item.current_quantity || 0);
-            // Get cost: prefer item.cost, fallback to last purchase price, fallback to 0
-            const cost = Number(item.cost) > 0 ? Number(item.cost) : (rawData.lastPrices[item.id] || 0);
+            // Get cost: prefer item.cost_price, fallback to item.cost, fallback to default_price, fallback to last purchase price, fallback to 0
+            const cost = Number(item.cost_price) > 0 
+                ? Number(item.cost_price) 
+                : (Number(item.cost) > 0 ? Number(item.cost) : (Number(item.default_price) > 0 ? Number(item.default_price) : (rawData.lastPrices[item.id] || 0)));
             const totalValue = qty * cost;
 
             return {

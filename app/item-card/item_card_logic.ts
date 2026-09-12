@@ -33,7 +33,7 @@ export function useItemCardLogic() {
                     type, 
                     quantity, 
                     notes,
-                    warehouse:warehouse_inventory!inventory_transactions_warehouse_id_fkey(warehouse_name)
+                    warehouse:warehouses!inventory_transactions_warehouse_id_fkey(name)
                 `)
                 .eq('item_id', selectedItemId)
                 .order('transaction_date', { ascending: true })
@@ -71,7 +71,7 @@ export function useItemCardLogic() {
                 ...tx,
                 actualQty,
                 runningBalance,
-                warehouseName: tx.warehouse?.[0]?.warehouse_name || 'غير محدد'
+                warehouseName: (tx.warehouse as any)?.name || (Array.isArray(tx.warehouse) ? tx.warehouse[0]?.name : 'غير محدد') || 'غير محدد'
             };
         });
 

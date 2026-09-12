@@ -52,10 +52,14 @@ export function useDelegateDebtsLogic() {
       if (invError) throw invError;
 
       // 2. Fetch partners (delegates) to map names
-      const { data: partners, error: partError } = await supabase
-        .from('partners')
-        .select('id, name')
-        .eq('job_role', 'مندوب');
+      const delIds = Array.from(new Set((invoices || []).map(i => i.delegate_id).filter(Boolean)));
+      let partnersQuery = supabase.from('partners').select('id, name');
+      if (delIds.length > 0) {
+        partnersQuery = partnersQuery.or(`id.in.(${delIds.join(',')}),job_role.eq.مندوب,partner_type.eq.delegate,partner_type.eq.مندوب`);
+      } else {
+        partnersQuery = partnersQuery.or('job_role.eq.مندوب,partner_type.eq.delegate,partner_type.eq.مندوب');
+      }
+      const { data: partners, error: partError } = await partnersQuery;
 
       if (partError) throw partError;
 

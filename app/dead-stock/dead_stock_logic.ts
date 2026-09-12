@@ -63,7 +63,7 @@ export function useDeadStockLogic() {
             const diffTime = Math.abs(today.getTime() - lastMovementDate.getTime());
             const daysSinceLastMovement = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
             
-            const cost = Number(item.cost || 0);
+            const cost = Number(item.cost_price || item.cost || item.default_price || 0);
             const qty = Number(item.current_quantity || 0);
             const frozenCapital = qty * cost;
 

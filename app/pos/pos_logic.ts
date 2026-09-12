@@ -5,6 +5,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/lib/toast-context';
 import { useRealtimeInvalidate } from '@/lib/useRealtimeSync';
 import { SALES_ACCOUNTS, CASH_ACCOUNTS, ACC } from '@/lib/account-ids';
+import { syncAllWarehouseBalances } from '@/lib/inventory_engine';
 import { notifyInvoiceCreated } from '@/lib/notificationService';
 import { distributeManualDiscount, applyPromotions, Promotion, PosCartItem } from '@/lib/promotions_engine';
 
@@ -511,6 +512,7 @@ export function usePosLogic() {
                 paid_amount: paymentMethod !== 'آجل' ? cartTotal.total : 0,
                 debit_account_id: SALES_ACCOUNTS.AR,        // 123 العملاء
                 credit_account_id: SALES_ACCOUNTS.REVENUE,  // 41 إيرادات المبيعات
+                tax_acc_id: SALES_ACCOUNTS.VAT,             // 215 ضريبة القيمة المضافة
                 lines_data: linesData,
                 shift_id: activeShift?.id,
                 fleet_operation_id: fleetOpId,
@@ -652,6 +654,13 @@ export function usePosLogic() {
                     } catch (receiptErr) {
                         console.error('Error auto-creating receipt voucher for POS sale:', receiptErr);
                     }
+                }
+
+                // 🔄 مزامنة أرصدة كافة المستودعات ومنع أي انحرافات أو أرقام سالبة فوراً
+                try {
+                    await syncAllWarehouseBalances();
+                } catch (syncErr) {
+                    console.warn('Sync warehouse balances warning in POS:', syncErr);
                 }
             }
 

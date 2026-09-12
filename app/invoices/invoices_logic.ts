@@ -324,7 +324,7 @@ export function useInvoicesLogic() {
                 credit_account_id: cleanId(record.credit_account_id),
                 materials_acc_id: cleanId(record.materials_acc_id), 
                 guarantee_acc_id: cleanId(record.guarantee_acc_id),
-                tax_acc_id: cleanId(record.tax_acc_id), 
+                tax_acc_id: cleanId(record.tax_acc_id) || '990c949c-5f32-40d7-8d36-5fe45a6c892c', 
                 status: record.status || 'معلق', 
                 due_in_days: Number(record.due_in_days) || 0,
                 due_date: record.due_date, 

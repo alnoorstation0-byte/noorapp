@@ -40,7 +40,14 @@ export default function FinancialStatementsPage() {
   };
 
   useEffect(() => {
-    fetchStatements();
+    const init = async () => {
+      await fetchStatements();
+      try {
+        await supabase.rpc('generate_financial_reports_json');
+        await fetchStatements();
+      } catch (e) {}
+    };
+    init();
   }, []);
 
   const handleRefresh = async () => {
@@ -67,10 +74,10 @@ export default function FinancialStatementsPage() {
             </tr>
           </thead>
           <tbody>
-            {dataArray.map((acc: any) => (
-              <tr key={acc.id} style={{ transition: 'all 0.2s ease', cursor: 'default' }} className="hover:bg-white/5">
-                <td style={{ textAlign: 'right', padding: '12px 20px', fontWeight: '500' }}>{acc.name}</td>
-                <td style={{ textAlign: 'left', padding: '12px 20px' }} className="amount-cell positive">{formatCurrency(acc.balance)}</td>
+            {dataArray.map((acc: any, idx: number) => (
+              <tr key={acc.id || acc.account_code || idx} style={{ transition: 'all 0.2s ease', cursor: 'default' }} className="hover:bg-white/5">
+                <td style={{ textAlign: 'right', padding: '12px 20px', fontWeight: '500' }}>{acc.account_name || acc.name}</td>
+                <td style={{ textAlign: 'left', padding: '12px 20px' }} className="amount-cell positive">{formatCurrency(acc.amount ?? acc.balance ?? 0)}</td>
               </tr>
             ))}
           </tbody>
@@ -171,19 +178,25 @@ export default function FinancialStatementsPage() {
                         {renderSection('الإيرادات (Revenues)', incomeStatement.revenues, incomeStatement.total_revenue)}
                         {renderSection('المصروفات (Expenses)', incomeStatement.expenses, incomeStatement.total_expense)}
 
-                        <div className="summary-card" style={{ 
-                          marginTop: '30px',
-                          background: incomeStatement.net_income >= 0 ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.05))' : 'linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(239, 68, 68, 0.05))', 
-                          border: incomeStatement.net_income >= 0 ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid rgba(239, 68, 68, 0.3)',
-                          boxShadow: incomeStatement.net_income >= 0 ? '0 10px 30px rgba(16, 185, 129, 0.1)' : '0 10px 30px rgba(239, 68, 68, 0.1)'
-                        }}>
-                          <div className="summary-title" style={{ fontSize: '1.1rem', color: incomeStatement.net_income >= 0 ? '#34d399' : '#f87171' }}>
-                            {incomeStatement.net_income >= 0 ? 'صافي الربح (Net Income)' : 'صافي الخسارة (Net Loss)'}
-                          </div>
-                          <div className="summary-value amount-cell positive" style={{ fontSize: '2rem', color: incomeStatement.net_income >= 0 ? '#10b981' : '#ef4444' }}>
-                            {formatCurrency(Math.abs(incomeStatement.net_income))}
-                          </div>
-                        </div>
+                        {(() => {
+                          const netProfit = Number(incomeStatement.net_profit ?? incomeStatement.net_income ?? 0);
+                          const isPositive = netProfit >= 0;
+                          return (
+                            <div className="summary-card" style={{ 
+                              marginTop: '30px',
+                              background: isPositive ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(16, 185, 129, 0.05))' : 'linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(239, 68, 68, 0.05))', 
+                              border: isPositive ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid rgba(239, 68, 68, 0.3)',
+                              boxShadow: isPositive ? '0 10px 30px rgba(16, 185, 129, 0.1)' : '0 10px 30px rgba(239, 68, 68, 0.1)'
+                            }}>
+                              <div className="summary-title" style={{ fontSize: '1.1rem', color: isPositive ? '#34d399' : '#f87171' }}>
+                                {isPositive ? 'صافي الربح (Net Income)' : 'صافي الخسارة (Net Loss)'}
+                              </div>
+                              <div className="summary-value amount-cell positive" style={{ fontSize: '2rem', color: isPositive ? '#10b981' : '#ef4444' }}>
+                                {formatCurrency(Math.abs(netProfit))}
+                              </div>
+                            </div>
+                          );
+                        })()}
                       </>
                     )}
                   </div>
@@ -211,7 +224,7 @@ export default function FinancialStatementsPage() {
                         }}>
                           <div className="summary-title" style={{ fontSize: '1.1rem', color: '#60a5fa' }}>إجمالي الالتزامات وحقوق الملكية + الدخل</div>
                           <div className="summary-value amount-cell positive" style={{ fontSize: '2rem', color: '#3b82f6' }}>
-                            {formatCurrency(balanceSheet.total_liabilities_and_equity)}
+                            {formatCurrency(balanceSheet.total_liabilities_and_equity ?? ((Number(balanceSheet.total_liabilities) || 0) + (Number(balanceSheet.total_equity) || 0) + (Number(balanceSheet.net_profit) || 0)))}
                           </div>
                         </div>
                       </>

@@ -48,8 +48,11 @@ export function useVehicleExpensesLogic() {
 
     const processedData = useMemo(() => {
         return rawVehicles.map(vehicle => {
-            // Expenses linked via site_ref
-            const vehicleExpenses = rawExpenses.filter(e => e.site_ref === vehicle.id);
+            const vehicleOps = rawOperations.filter(op => op.vehicle_id === vehicle.id);
+            const opIds = new Set(vehicleOps.map(op => op.id));
+
+            // Expenses linked via site_ref or via operations belonging to this vehicle
+            const vehicleExpenses = rawExpenses.filter(e => e.site_ref === vehicle.id || (e.fleet_operation_id && opIds.has(e.fleet_operation_id)));
             
             let dieselCost = 0;
             let maintenanceCost = 0;
@@ -66,10 +69,12 @@ export function useVehicleExpensesLogic() {
                 }
             });
 
-            // Trip expenses
-            const vehicleOps = rawOperations.filter(op => op.vehicle_id === vehicle.id);
+            // Trip expenses (if not already counted in expenses)
             const totalTrips = vehicleOps.length;
-            const tripExpenses = vehicleOps.reduce((sum, op) => sum + Number(op.total_expenses || 0), 0);
+            const tripExpenses = vehicleOps.reduce((sum, op) => {
+                const hasDirectExpenses = rawExpenses.some(e => e.fleet_operation_id === op.id);
+                return sum + (hasDirectExpenses ? 0 : Number(op.total_expenses || 0));
+            }, 0);
 
             const totalCost = dieselCost + maintenanceCost + otherCost + tripExpenses;
 

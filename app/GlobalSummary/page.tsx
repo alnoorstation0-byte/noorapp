@@ -22,19 +22,28 @@ export default function MasterDashboard() {
             setLoading(true);
             try {
                 // 🚀 سحب البيانات من كافة الموديولات (توزيع ومبيعات)
-                const [lines, fleetOps, invoices, expenses, auditErrors] = await Promise.all([
+                const [lines, fleetOps, invoices, expenses, auditErrors, accounts] = await Promise.all([
                     fetchAllSupabaseData(supabase, 'journal_lines'),
                     fetchAllSupabaseData(supabase, 'fleet_operations'),
                     fetchAllSupabaseData(supabase, 'invoices'),
                     fetchAllSupabaseData(supabase, 'expenses'),
-                    fetchAllSupabaseData(supabase, 'vw_advanced_audit')
+                    fetchAllSupabaseData(supabase, 'vw_advanced_audit'),
+                    fetchAllSupabaseData(supabase, 'accounts')
                 ]);
 
                 // --- 1. التحليل المالي (السيولة والمصروفات) ---
-                const cash = lines?.filter(l => l.account_id?.startsWith('11')).reduce((a, c) => a + (Number(c.debit) - Number(c.credit)), 0) || 0;
+                const cashAccountIds = new Set(
+                    (accounts || [])
+                        .filter((a: any) => 
+                            (a.code && (a.code.startsWith('121') || a.code.startsWith('122') || a.code.startsWith('129') || a.code.startsWith('11') || a.code.startsWith('125'))) ||
+                            (a.name && (a.name.includes('خزين') || a.name.includes('نقد') || a.name.includes('بنك') || a.name.includes('عهدة')))
+                        )
+                        .map((a: any) => a.id)
+                );
+                const cash = lines?.filter(l => cashAccountIds.has(l.account_id)).reduce((a, c) => a + (Number(c.debit) - Number(c.credit)), 0) || 0;
                 const totalExp = expenses?.reduce((a, c) => a + Number(c.amount || c.total_price || 0), 0) || 0;
-                const pendingInvoices = invoices?.filter(i => i.status !== 'مدفوع').reduce((a, c) => a + Number(c.total_amount || 0), 0) || 0;
-                const totalSales = invoices?.reduce((a, c) => a + Number(c.total_amount || 0), 0) || 0;
+                const pendingInvoices = invoices?.filter(i => i.status !== 'مدفوع' && i.status !== 'مرحل' && i.payment_status !== 'paid').reduce((a, c) => a + (Number(c.total_amount || 0) - Number(c.paid_amount || 0)), 0) || 0;
+                const totalSales = invoices?.filter(i => ['مرحل', 'معتمد', 'مدفوع', 'مغلق', 'posted'].includes(i.status)).reduce((a, c) => a + Number(c.total_amount || 0), 0) || 0;
 
                 // --- 2. إدارة رحلات التشغيل والتوزيع ---
                 const activeTrips = fleetOps?.filter(f => f.status === 'نشط' || f.status === 'قيد التنفيذ').length || 0;

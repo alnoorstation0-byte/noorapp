@@ -10,7 +10,11 @@ export function useKpisLogic() {
     const invoicesQuery = useQuery({
         queryKey: ['kpis_invoices', dateFrom, dateTo],
         queryFn: async () => {
-            let q = supabase.from('invoices').select('total_amount, date, status').neq('status', 'مسودة');
+            let q = supabase.from('invoices').select('total_amount, date, status')
+                .neq('status', 'مسودة')
+                .neq('status', 'ملغاة')
+                .neq('status', 'draft')
+                .neq('status', 'cancelled');
             if (dateFrom) q = q.gte('date', dateFrom);
             if (dateTo) q = q.lte('date', dateTo);
             const { data, error } = await q;
@@ -22,7 +26,9 @@ export function useKpisLogic() {
     const receiptsQuery = useQuery({
         queryKey: ['kpis_receipts', dateFrom, dateTo],
         queryFn: async () => {
-            let q = supabase.from('receipt_vouchers').select('amount, date').eq('status', 'مرحل');
+            let q = supabase.from('receipt_vouchers')
+                .select('amount, date, status')
+                .in('status', ['مرحل', 'معتمد', 'posted', 'approved']);
             if (dateFrom) q = q.gte('date', dateFrom);
             if (dateTo) q = q.lte('date', dateTo);
             const { data, error } = await q;

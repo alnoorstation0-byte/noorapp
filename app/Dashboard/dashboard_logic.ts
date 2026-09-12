@@ -99,7 +99,7 @@ export const useDashboardLogic = () => {
           Number(item.paid_amount || 0);
       };
 
-      const validStatuses = ['معتمد', 'posted', 'مدفوع'];
+      const validStatuses = ['معتمد', 'posted', 'مرحل', 'مدفوع', 'مغلق', 'approved'];
       const totalExpenses = expenses.reduce((sum, item) => sum + getExpenseAmount(item), 0);
       const totalInvoices = invoices.reduce((sum, item) => sum + Number(item.total_amount || 0), 0);
       const approvedExpenses = expenses.filter(e => e.is_posted === true).reduce((sum, item) => sum + getExpenseAmount(item), 0);

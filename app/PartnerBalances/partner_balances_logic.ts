@@ -18,9 +18,9 @@ export function usePartnerBalancesLogic() {
     queryKey: ['partner_balances_summary', profile?.id],
     queryFn: async () => {
       let q = supabase
-        .from('partner_balances_summary')
+        .from('all_partners_account_summary')
         .select('*')
-        .order('current_balance', { ascending: false }); // ترتيب بالأعلى رصيداً
+        .order('net_balance', { ascending: false }); // ترتيب بالأعلى رصيداً
       
       if (profile) {
           const role = String(profile.role || '').toLowerCase();
@@ -36,7 +36,12 @@ export function usePartnerBalancesLogic() {
         showToast("فشل جلب الأرصدة", 'error');
         throw error;
       }
-      return data;
+      return (data || []).map((row: any) => ({
+        ...row,
+        total_earned: Number(row.total_earned ?? row.total_debit ?? 0),
+        total_paid: Number(row.total_paid ?? row.total_credit ?? 0),
+        current_balance: Number(row.current_balance ?? row.net_balance ?? 0)
+      }));
     },
     enabled: !!profile
   });
@@ -53,9 +58,9 @@ export function usePartnerBalancesLogic() {
   // 📊 إجماليات الرادار
   const totals = useMemo(() => {
     return filteredData.reduce((acc: any, row: any) => {
-      acc.earned += Number(row.total_earned || 0);
-      acc.paid += Number(row.total_paid || 0);
-      acc.balance += Number(row.current_balance || 0);
+      acc.earned += Number(row.total_earned || row.total_debit || 0);
+      acc.paid += Number(row.total_paid || row.total_credit || 0);
+      acc.balance += Number(row.current_balance || row.net_balance || 0);
       return acc;
     }, { earned: 0, paid: 0, balance: 0 });
   }, [filteredData]);
