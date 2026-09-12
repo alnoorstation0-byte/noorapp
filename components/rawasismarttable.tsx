@@ -312,7 +312,7 @@ export default function RawasiSmartTable({
             </div>
 
             {enablePagination && activeTotal > 0 && (
-                <div className="hide-on-print" style={{ 
+                <div className="hide-on-print table-pagination-mobile" style={{ 
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center', 
                     padding: '15px 20px', marginTop: '15px', borderTop: '1px solid rgba(0,0,0,0.05)',
                     background: 'rgba(255,255,255,0.4)', borderRadius: '12px', flexWrap: 'wrap', gap: '15px'
@@ -331,7 +331,7 @@ export default function RawasiSmartTable({
                         <span style={{ fontSize: '12px', fontWeight: 700, color: '#475569' }}>من إجمالي {activeTotal}</span>
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div className="pagination-controls" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <button 
                             disabled={activePage === 1} 
                             onClick={(e) => { e.stopPropagation(); handlePageChange(activePage - 1); }} 
@@ -339,7 +339,7 @@ export default function RawasiSmartTable({
                         >
                             السابق
                         </button>
-                        <div style={{ background: THEME.goldAccent, color: 'white', padding: '8px 20px', borderRadius: '12px', fontWeight: 900, fontSize: '13px', boxShadow: `0 4px 10px ${THEME.goldAccent}40` }}>
+                        <div style={{ background: THEME.goldAccent, color: 'white', padding: '8px 20px', borderRadius: '12px', fontWeight: 900, fontSize: '13px', boxShadow: `0 4px 10px ${THEME.goldAccent}40`, textAlign: 'center' }}>
                             صفحة {activePage} من {totalPages}
                         </div>
                         <button 
@@ -353,10 +353,58 @@ export default function RawasiSmartTable({
                 </div>
             )}
 
-            {/* 🎨 CSS للطباعة ولتأثيرات الهوفر */}
+            {/* 🎨 CSS للطباعة ولتأثيرات الهوفر والجوال */}
             <style>{`
                 .table-row-hover:hover { background: rgba(255, 255, 255, 0.9) !important; box-shadow: 0 4px 10px rgba(0,0,0,0.05); transform: translateY(-1px); }
                 
+                @media (max-width: 768px) {
+                    .rawasi-table-wrapper {
+                        padding: 10px 8px !important;
+                        border-radius: 14px !important;
+                        margin: 0 !important;
+                        width: 100% !important;
+                        max-width: 100% !important;
+                        box-sizing: border-box !important;
+                    }
+                    .rawasi-printable-table th {
+                        padding: 8px 10px !important;
+                        font-size: 11px !important;
+                        white-space: nowrap !important;
+                    }
+                    .rawasi-printable-table td {
+                        padding: 8px 10px !important;
+                        font-size: 11px !important;
+                    }
+                    .table-toolbar {
+                        justify-content: stretch !important;
+                        width: 100% !important;
+                    }
+                    .table-toolbar > div {
+                        width: 100% !important;
+                        display: flex !important;
+                    }
+                    .table-toolbar button {
+                        flex: 1 !important;
+                        justify-content: center !important;
+                        min-height: 42px !important;
+                    }
+                    .table-pagination-mobile {
+                        flex-direction: column !important;
+                        align-items: stretch !important;
+                        gap: 10px !important;
+                        padding: 10px !important;
+                    }
+                    .table-pagination-mobile .pagination-controls {
+                        width: 100% !important;
+                        display: flex !important;
+                        justify-content: space-between !important;
+                    }
+                    .table-pagination-mobile .pagination-controls button {
+                        min-height: 42px !important;
+                        flex: 1 !important;
+                    }
+                }
+
                 @media print {
                     body * { visibility: hidden; }
                     .rawasi-printable-table, .rawasi-printable-table * { visibility: visible; }

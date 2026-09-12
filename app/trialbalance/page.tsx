@@ -60,6 +60,15 @@ export default function TrialBalancePage() {
         .tb-totals { font-weight: 900 !important; }
         .tb-totals td { border-top: 3px double #475569 !important; font-size: 15px; }
 
+        @media (max-width: 768px) {
+          .tb-container { flex-direction: column !important; gap: 12px !important; }
+          .tb-filter-bar { flex-direction: column !important; align-items: stretch !important; gap: 10px !important; padding: 12px !important; }
+          .tb-date-group { width: 100% !important; justify-content: space-between !important; }
+          .tb-date-group input { flex: 1 !important; }
+          .tb-table th, .tb-table td { padding: 6px 4px !important; font-size: 11px !important; }
+          .tb-table { min-width: 650px !important; }
+        }
+
         /* تنسيقات الطباعة المعزولة */
         @media print {
           .no-print { display: none !important; }
@@ -75,16 +84,16 @@ export default function TrialBalancePage() {
         }
       `}</style>
 
-      <div style={{ display: 'flex', gap: '20px' }} className="no-print">
+      <div style={{ display: 'flex', gap: '20px' }} className="no-print tb-container">
         
         {/* منطقة المحتوى الرئيسي */}
-        <div style={{ flex: 1, overflowX: 'auto' }}>
+        <div style={{ flex: 1, overflowX: 'auto', width: '100%' }}>
           
           {/* لوحة الفلاتر */}
-          <div style={{ display: 'flex', gap: '15px', alignItems: 'center', background: '#ffffff', padding: '15px 20px', borderRadius: '12px', marginBottom: '20px', border: `1px solid ${THEME.border}`, boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
+          <div className="tb-filter-bar" style={{ display: 'flex', gap: '15px', alignItems: 'center', background: '#ffffff', padding: '15px 20px', borderRadius: '12px', marginBottom: '20px', border: `1px solid ${THEME.border}`, boxShadow: '0 2px 4px rgba(0,0,0,0.02)', flexWrap: 'wrap' }}>
             <div style={{ fontWeight: '900', color: THEME.primary, fontSize: '15px', minWidth: '100px' }}>📅 فترة الميزان:</div>
             
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: THEME.slate, padding: '5px 15px', borderRadius: '8px' }}>
+            <div className="tb-date-group" style={{ display: 'flex', alignItems: 'center', gap: '10px', background: THEME.slate, padding: '5px 15px', borderRadius: '8px' }}>
               <label style={{ fontSize: '13px', color: THEME.textMain, fontWeight: '900' }}>من:</label>
               <input 
                 type="date" 
@@ -94,7 +103,7 @@ export default function TrialBalancePage() {
               />
             </div>
             
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: THEME.slate, padding: '5px 15px', borderRadius: '8px' }}>
+            <div className="tb-date-group" style={{ display: 'flex', alignItems: 'center', gap: '10px', background: THEME.slate, padding: '5px 15px', borderRadius: '8px' }}>
               <label style={{ fontSize: '13px', color: THEME.textMain, fontWeight: '900' }}>إلى:</label>
               <input 
                 type="date" 

@@ -18,9 +18,21 @@ export default function KpisPage() {
     } = useKpisLogic();
 
     return (
-        <div style={{ padding: '20px', minHeight: '100vh', background: `linear-gradient(135deg, ${THEME.primary} 0%, #0a192f 100%)`, fontFamily: 'Tajawal, sans-serif', direction: 'rtl' }}>
+        <div className="kpis-container" style={{ padding: '20px', minHeight: '100vh', background: `linear-gradient(135deg, ${THEME.primary} 0%, #0a192f 100%)`, fontFamily: 'Tajawal, sans-serif', direction: 'rtl', maxWidth: '100vw', overflowX: 'hidden', boxSizing: 'border-box' }}>
+            <style>{`
+                @media (max-width: 768px) {
+                    .kpis-container { padding: 10px 8px !important; }
+                    .kpis-header { padding: 15px !important; border-radius: 16px !important; margin-bottom: 15px !important; }
+                    .kpis-header h1 { font-size: 20px !important; }
+                    .kpis-filters { flex-direction: column !important; gap: 10px !important; margin-top: 15px !important; }
+                    .kpis-filters > div { width: 100% !important; flex: 1 1 100% !important; }
+                    .kpis-grid { grid-template-columns: 1fr !important; gap: 15px !important; }
+                    .kpi-item-card { padding: 20px 15px !important; border-radius: 16px !important; }
+                    .kpi-item-card .kpi-val { font-size: 28px !important; }
+                }
+            `}</style>
             {/* Header */}
-            <div style={{ background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(20px)', borderRadius: '24px', padding: '30px', marginBottom: '25px', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}>
+            <div className="kpis-header" style={{ background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(20px)', borderRadius: '24px', padding: '30px', marginBottom: '25px', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
                     <div>
                         <h1 style={{ color: 'white', margin: '0 0 10px 0', fontSize: '32px', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '15px' }}>
@@ -34,7 +46,7 @@ export default function KpisPage() {
                 </div>
 
                 {/* Filters */}
-                <div style={{ display: 'flex', gap: '15px', marginTop: '30px', flexWrap: 'wrap' }}>
+                <div className="kpis-filters" style={{ display: 'flex', gap: '15px', marginTop: '30px', flexWrap: 'wrap' }}>
                     <div style={{ flex: '1 1 200px' }}>
                         <div style={{ color: THEME.accentLight, fontSize: '13px', fontWeight: 800, marginBottom: '8px' }}>من تاريخ</div>
                         <input 
@@ -59,36 +71,36 @@ export default function KpisPage() {
             {isLoading ? (
                 <div style={{ padding: '50px', textAlign: 'center', color: 'white', fontWeight: 900, fontSize: '20px' }}>جاري الحساب...</div>
             ) : (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '30px' }}>
+                <div className="kpis-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '30px' }}>
                     {/* Total Sales KPI */}
-                    <div style={{ background: 'linear-gradient(135deg, rgba(56, 189, 248, 0.15), rgba(2, 132, 199, 0.25))', border: '1px solid rgba(56, 189, 248, 0.4)', padding: '35px 25px', borderRadius: '24px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
+                    <div className="kpi-item-card" style={{ background: 'linear-gradient(135deg, rgba(56, 189, 248, 0.15), rgba(2, 132, 199, 0.25))', border: '1px solid rgba(56, 189, 248, 0.4)', padding: '35px 25px', borderRadius: '24px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
                         <div style={{ position: 'absolute', top: '-10px', right: '-10px', fontSize: '100px', opacity: 0.1 }}>💰</div>
                         <div style={{ color: '#7dd3fc', fontSize: '16px', fontWeight: 900, marginBottom: '15px', position: 'relative' }}>إجمالي المبيعات (الفواتير)</div>
-                        <div style={{ color: 'white', fontSize: '42px', fontWeight: 900, position: 'relative' }}>{formatCurrency(totalSales)}</div>
+                        <div className="kpi-val" style={{ color: 'white', fontSize: '42px', fontWeight: 900, position: 'relative' }}>{formatCurrency(totalSales)}</div>
                         <div style={{ color: '#38bdf8', fontSize: '13px', fontWeight: 700, marginTop: '10px', position: 'relative' }}>حجم المبيعات خلال الفترة المحددة</div>
                     </div>
 
                     {/* Total Collections KPI */}
-                    <div style={{ background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.25))', border: '1px solid rgba(16, 185, 129, 0.4)', padding: '35px 25px', borderRadius: '24px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
+                    <div className="kpi-item-card" style={{ background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.25))', border: '1px solid rgba(16, 185, 129, 0.4)', padding: '35px 25px', borderRadius: '24px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
                         <div style={{ position: 'absolute', top: '-10px', right: '-10px', fontSize: '100px', opacity: 0.1 }}>💵</div>
                         <div style={{ color: '#6ee7b7', fontSize: '16px', fontWeight: 900, marginBottom: '15px', position: 'relative' }}>إجمالي التحصيلات (السيولة)</div>
-                        <div style={{ color: 'white', fontSize: '42px', fontWeight: 900, position: 'relative' }}>{formatCurrency(totalCollections)}</div>
+                        <div className="kpi-val" style={{ color: 'white', fontSize: '42px', fontWeight: 900, position: 'relative' }}>{formatCurrency(totalCollections)}</div>
                         <div style={{ color: '#10b981', fontSize: '13px', fontWeight: 700, marginTop: '10px', position: 'relative' }}>المبالغ المقبوضة فعلياً</div>
                     </div>
 
                     {/* Outstanding Debts KPI */}
-                    <div style={{ background: 'linear-gradient(135deg, rgba(244, 63, 94, 0.15), rgba(159, 18, 57, 0.25))', border: '1px solid rgba(244, 63, 94, 0.4)', padding: '35px 25px', borderRadius: '24px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
+                    <div className="kpi-item-card" style={{ background: 'linear-gradient(135deg, rgba(244, 63, 94, 0.15), rgba(159, 18, 57, 0.25))', border: '1px solid rgba(244, 63, 94, 0.4)', padding: '35px 25px', borderRadius: '24px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
                         <div style={{ position: 'absolute', top: '-10px', right: '-10px', fontSize: '100px', opacity: 0.1 }}>⚠️</div>
                         <div style={{ color: '#fda4af', fontSize: '16px', fontWeight: 900, marginBottom: '15px', position: 'relative' }}>الديون المتبقية في السوق (رصيد العملاء)</div>
-                        <div style={{ color: 'white', fontSize: '42px', fontWeight: 900, position: 'relative' }}>{formatCurrency(totalOutstandingDebts)}</div>
+                        <div className="kpi-val" style={{ color: 'white', fontSize: '42px', fontWeight: 900, position: 'relative' }}>{formatCurrency(totalOutstandingDebts)}</div>
                         <div style={{ color: '#fb7185', fontSize: '13px', fontWeight: 700, marginTop: '10px', position: 'relative' }}>إجمالي المستحقات غير المحصلة</div>
                     </div>
 
                     {/* Collection Rate KPI */}
-                    <div style={{ background: 'linear-gradient(135deg, rgba(217, 70, 239, 0.15), rgba(162, 28, 175, 0.25))', border: '1px solid rgba(217, 70, 239, 0.4)', padding: '35px 25px', borderRadius: '24px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
+                    <div className="kpi-item-card" style={{ background: 'linear-gradient(135deg, rgba(217, 70, 239, 0.15), rgba(162, 28, 175, 0.25))', border: '1px solid rgba(217, 70, 239, 0.4)', padding: '35px 25px', borderRadius: '24px', textAlign: 'center', position: 'relative', overflow: 'hidden' }}>
                         <div style={{ position: 'absolute', top: '-10px', right: '-10px', fontSize: '100px', opacity: 0.1 }}>📈</div>
                         <div style={{ color: '#f0abfc', fontSize: '16px', fontWeight: 900, marginBottom: '15px', position: 'relative' }}>نسبة التحصيل إلى المبيعات</div>
-                        <div style={{ color: 'white', fontSize: '42px', fontWeight: 900, position: 'relative' }}>{collectionRate}%</div>
+                        <div className="kpi-val" style={{ color: 'white', fontSize: '42px', fontWeight: 900, position: 'relative' }}>{collectionRate}%</div>
                         
                         {/* Progress Bar for Visual Impact */}
                         <div style={{ width: '100%', height: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '10px', marginTop: '20px', overflow: 'hidden' }}>

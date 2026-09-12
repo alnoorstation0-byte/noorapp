@@ -400,6 +400,23 @@ export default function PartnerBalancesPage() {
                     .pill-btn { padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 800; cursor: pointer; border: 1px solid rgba(40, 145, 200, 0.2); transition: 0.2s; background: white; color: #475569; white-space: nowrap; }
                     .pill-btn.active { background: ${THEME.primary || '#3b82f6'}; color: white; border-color: ${THEME.primary || '#3b82f6'}; box-shadow: 0 4px 10px rgba(59, 130, 246, 0.3); }
                     .pill-btn:hover:not(.active) { background: rgba(255, 255, 255, 0.4); }
+
+                    @media (max-width: 768px) {
+                        .glass-panel { padding: 12px 10px !important; border-radius: 12px !important; margin-bottom: 12px !important; }
+                        .stat-card { flex: 1 1 100% !important; padding: 12px !important; border-radius: 10px !important; }
+                        .stat-card > div:last-child { font-size: 20px !important; }
+                        .pb-filters-row { flex-direction: column !important; gap: 10px !important; }
+                        .pb-filters-row > div { width: 100% !important; min-width: 100% !important; }
+                        .pb-filters-row button { width: 100% !important; justify-content: center !important; }
+                        .pb-table-wrapper { border-radius: 12px; overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
+                        .smart-table { min-width: 650px !important; }
+                        .smart-table th, .smart-table td { padding: 8px 10px !important; font-size: 11px !important; }
+                        .ledger-container { padding: 8px !important; overflow-x: auto !important; }
+                        .ledger-table { min-width: 550px !important; }
+                        .ledger-table th, .ledger-table td { padding: 6px 8px !important; font-size: 10px !important; }
+                        .pb-pagination { flex-direction: column !important; gap: 10px !important; text-align: center !important; }
+                        .pb-pagination > div { justify-content: center !important; }
+                    }
                 `}</style>
 
                 <div className="glass-panel" style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>
@@ -420,7 +437,7 @@ export default function PartnerBalancesPage() {
                 </div>
 
                 <div className="glass-panel no-print" style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                    <div style={{ display: 'flex', gap: '15px', alignItems: 'flex-end', flexWrap: 'wrap' }}>
+                    <div className="pb-filters-row" style={{ display: 'flex', gap: '15px', alignItems: 'flex-end', flexWrap: 'wrap' }}>
                         <div style={{ flex: 2, minWidth: '250px' }}>
                             <label style={{ fontSize: '12px', fontWeight: 900, color: '#64748b', marginBottom: '5px', display: 'block' }}>بحث عام</label>
                             <input type="text" className="glass-input" placeholder="🔍 ابحث بالاسم أو الكود..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
@@ -482,6 +499,7 @@ export default function PartnerBalancesPage() {
                     <LoadingScreen message="جاري تحميل وتجميع الحسابات بدقة..." fullScreen={false} />
                 ) : (
                     <>
+                        <div className="pb-table-wrapper" style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', width: '100%' }}>
                         <table className="smart-table">
                             <thead>
                                 <tr>
@@ -622,10 +640,11 @@ export default function PartnerBalancesPage() {
                                 })}
                             </tbody>
                         </table>
+                        </div>
 
                         {/* 🚀 زراير التقسيم (Pagination) */}
                         {filteredData.length > 0 && (
-                            <div className="no-print" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '20px', background: 'white', padding: '15px', borderRadius: '12px', border: '1px solid rgba(40, 145, 200, 0.15)' }}>
+                            <div className="no-print pb-pagination" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '20px', background: 'white', padding: '15px', borderRadius: '12px', border: '1px solid rgba(40, 145, 200, 0.15)' }}>
                                 <div style={{ fontSize: '14px', fontWeight: 900, color: '#475569' }}>
                                     الحسابات المعروضة: <span style={{ color: THEME.primary || '#3b82f6' }}>{filteredData.length}</span> حساب
                                 </div>

@@ -24,9 +24,22 @@ export default function ItemCardPage() {
     } = useItemCardLogic();
 
     return (
-        <div style={{ padding: '20px', minHeight: '100vh', background: `linear-gradient(135deg, ${THEME.primary} 0%, #0a192f 100%)`, fontFamily: 'Tajawal, sans-serif', direction: 'rtl' }}>
+        <div className="itemcard-container" style={{ padding: '20px', minHeight: '100vh', background: `linear-gradient(135deg, ${THEME.primary} 0%, #0a192f 100%)`, fontFamily: 'Tajawal, sans-serif', direction: 'rtl', maxWidth: '100vw', overflowX: 'hidden', boxSizing: 'border-box' }}>
+            <style>{`
+                @media (max-width: 768px) {
+                    .itemcard-container { padding: 10px 8px !important; }
+                    .itemcard-header { padding: 15px !important; border-radius: 16px !important; margin-bottom: 15px !important; }
+                    .itemcard-header h1 { font-size: 20px !important; }
+                    .itemcard-btn { width: 100% !important; justify-content: center !important; min-height: 44px !important; }
+                    .itemcard-filters { flex-direction: column !important; gap: 10px !important; margin-top: 15px !important; }
+                    .itemcard-filters > div { width: 100% !important; flex: 1 1 100% !important; }
+                    .itemcard-kpis { grid-template-columns: 1fr !important; gap: 12px !important; }
+                    .itemcard-table { min-width: 650px !important; }
+                    .itemcard-table th, .itemcard-table td { padding: 8px 10px !important; font-size: 11px !important; }
+                }
+            `}</style>
             {/* Header */}
-            <div style={{ background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(20px)', borderRadius: '24px', padding: '30px', marginBottom: '25px', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}>
+            <div className="itemcard-header" style={{ background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(20px)', borderRadius: '24px', padding: '30px', marginBottom: '25px', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
                     <div>
                         <h1 style={{ color: 'white', margin: '0 0 10px 0', fontSize: '32px', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '15px' }}>
@@ -39,7 +52,7 @@ export default function ItemCardPage() {
                     </div>
                     
                     <div style={{ display: 'flex', gap: '15px' }}>
-                        <button onClick={exportToExcel} disabled={transactions.length === 0} style={{ background: transactions.length === 0 ? 'rgba(255,255,255,0.1)' : 'linear-gradient(45deg, #10b981, #059669)', color: transactions.length === 0 ? '#64748b' : 'white', border: 'none', padding: '12px 25px', borderRadius: '12px', fontWeight: 900, cursor: transactions.length === 0 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '10px', boxShadow: transactions.length === 0 ? 'none' : '0 10px 20px rgba(16,185,129,0.3)', transition: '0.3s' }}>
+                        <button className="itemcard-btn" onClick={exportToExcel} disabled={transactions.length === 0} style={{ background: transactions.length === 0 ? 'rgba(255,255,255,0.1)' : 'linear-gradient(45deg, #10b981, #059669)', color: transactions.length === 0 ? '#64748b' : 'white', border: 'none', padding: '12px 25px', borderRadius: '12px', fontWeight: 900, cursor: transactions.length === 0 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '10px', boxShadow: transactions.length === 0 ? 'none' : '0 10px 20px rgba(16,185,129,0.3)', transition: '0.3s' }}>
                             <span>تصدير Excel</span>
                             <span style={{ fontSize: '18px' }}>📑</span>
                         </button>
@@ -47,7 +60,7 @@ export default function ItemCardPage() {
                 </div>
 
                 {/* Filters */}
-                <div style={{ display: 'flex', gap: '15px', marginTop: '30px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
+                <div className="itemcard-filters" style={{ display: 'flex', gap: '15px', marginTop: '30px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
                     <div style={{ flex: '2 1 300px' }}>
                         <div style={{ color: THEME.accentLight, fontSize: '13px', fontWeight: 800, marginBottom: '8px' }}>اختيار الصنف 📦</div>
                         <select 
@@ -95,7 +108,7 @@ export default function ItemCardPage() {
             ) : (
                 <>
                     {/* Global KPIs */}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px', marginBottom: '30px' }}>
+                    <div className="itemcard-kpis" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px', marginBottom: '30px' }}>
                         <div style={{ background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.2))', border: '1px solid rgba(16, 185, 129, 0.3)', padding: '25px', borderRadius: '24px', textAlign: 'center' }}>
                             <div style={{ color: '#6ee7b7', fontSize: '14px', fontWeight: 900, marginBottom: '8px' }}>إجمالي الوارد 📥</div>
                             <div style={{ color: 'white', fontSize: '36px', fontWeight: 900 }}>{totalIn}</div>
@@ -112,8 +125,8 @@ export default function ItemCardPage() {
 
                     {/* Data Table */}
                     <div style={{ background: 'rgba(255,255,255,0.02)', backdropFilter: 'blur(20px)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden' }}>
-                        <div style={{ overflowX: 'auto' }}>
-                            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right', color: 'white' }}>
+                        <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+                            <table className="itemcard-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right', color: 'white' }}>
                                 <thead style={{ background: 'rgba(0,0,0,0.4)' }}>
                                     <tr>
                                         <th style={{ padding: '20px', fontSize: '14px', color: THEME.accentLight, borderBottom: '1px solid rgba(255,255,255,0.1)' }}>التاريخ 📅</th>

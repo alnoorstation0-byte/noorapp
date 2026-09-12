@@ -14,13 +14,24 @@ export default function ProfitDashboardPage() {
 
     return (
         <MasterPage icon="💰" title="لوحة الربحية الشاملة" subtitle="تحليل الأرباح للمناديب، الأصناف، والرحلات">
+            <style>{`
+                @media (max-width: 768px) {
+                    .profit-filter-header { flex-direction: column !important; align-items: stretch !important; padding: 15px !important; }
+                    .profit-filter-item { width: 100% !important; justify-content: space-between !important; }
+                    .profit-filter-item input { flex: 1 !important; }
+                    .profit-kpi-grid { grid-template-columns: 1fr !important; gap: 12px !important; }
+                    .profit-charts-grid { grid-template-columns: 1fr !important; gap: 15px !important; }
+                    .profit-chart-box { padding: 15px !important; border-radius: 16px !important; }
+                    .profit-fleet-box { padding: 15px !important; border-radius: 16px !important; }
+                }
+            `}</style>
             {/* Header Filters */}
-            <div style={{ background: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(20px)', borderRadius: '20px', padding: '20px', marginBottom: '20px', border: '1px solid rgba(255,255,255,0.4)', display: 'flex', gap: '15px', flexWrap: 'wrap', alignItems: 'center' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <div className="profit-filter-header" style={{ background: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(20px)', borderRadius: '20px', padding: '20px', marginBottom: '20px', border: '1px solid rgba(255,255,255,0.4)', display: 'flex', gap: '15px', flexWrap: 'wrap', alignItems: 'center' }}>
+                <div className="profit-filter-item" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <label style={{ fontWeight: 'bold', color: THEME.primary }}>من تاريخ:</label>
                     <input type="date" className="glass-input-field" value={logic.dateFrom} onChange={e => logic.setDateFrom(e.target.value)} style={{ padding: '8px 15px' }} />
                 </div>
-                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div className="profit-filter-item" style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <label style={{ fontWeight: 'bold', color: THEME.primary }}>إلى تاريخ:</label>
                     <input type="date" className="glass-input-field" value={logic.dateTo} onChange={e => logic.setDateTo(e.target.value)} style={{ padding: '8px 15px' }} />
                 </div>
@@ -28,14 +39,14 @@ export default function ProfitDashboardPage() {
             </div>
 
             {/* Top KPIs */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px', marginBottom: '25px' }}>
+            <div className="profit-kpi-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '20px', marginBottom: '25px' }}>
                 <KpiCard title="إجمالي الإيرادات" value={formatCurrency(logic.totalRevenue)} icon="📈" />
                 <KpiCard title="تكلفة البضاعة المباعة" value={formatCurrency(logic.totalCOGS)} icon="📦" color="#ef4444" />
                 <KpiCard title="إجمالي الربح (أصناف)" value={formatCurrency(logic.grossProfit)} icon="💎" color="#16a34a" />
                 <KpiCard title="هامش الربح %" value={`${logic.grossMargin.toFixed(1)}%`} icon="📊" color={logic.grossMargin > 0 ? '#16a34a' : '#f59e0b'} />
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '25px' }}>
+            <div className="profit-charts-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '25px' }}>
                 
                 {/* Items Profitability Chart */}
                 <div style={{ background: 'rgba(255,255,255,0.6)', backdropFilter: 'blur(20px)', borderRadius: '20px', padding: '25px', border: '1px solid rgba(255,255,255,0.4)' }}>

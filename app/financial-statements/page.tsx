@@ -136,6 +136,14 @@ export default function FinancialStatementsPage() {
             .summary-value { font-size: 1.8rem !important; font-weight: bold !important; color: #000 !important; }
             @page { size: A4 landscape; margin: 1.5cm; }
           }
+          @media (max-width: 768px) {
+            .theatre-layout { display: block !important; }
+            .theatre-main-stage { width: 100% !important; padding: 0 !important; }
+            .theatre-main-stage > div { grid-template-columns: 1fr !important; gap: 15px !important; }
+            .glass-panel > div { padding: 15px !important; }
+            .modern-table th, .modern-table td { padding: 8px 10px !important; font-size: 12px !important; }
+            .table-wrapper { overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; }
+          }
         `}</style>
 
         <PrintHeader title="القوائم المالية" subtitle="قائمة الدخل والمركز المالي" />

@@ -343,6 +343,25 @@ export default function CashFlowsPage() {
                     .view-toggle-btn.active { background: #2891C8; color: white; }
                     .view-toggle-btn:not(.active) { background: transparent; color: #64748b; }
                     .view-toggle-btn:not(.active):hover { background: rgba(40, 145, 200, 0.05); color: #1e293b; }
+
+                    @media (max-width: 768px) {
+                        .summary-card { flex: 1 1 100% !important; padding: 15px !important; margin-bottom: 8px !important; border-radius: 14px !important; }
+                        .summary-val { font-size: 22px !important; }
+                        .summary-label { font-size: 12px !important; margin-bottom: 6px !important; }
+                        .source-breakdown-card { flex: 1 1 100% !important; min-width: 100% !important; padding: 12px 15px !important; border-radius: 12px !important; }
+                        .source-breakdown-val { font-size: 16px !important; }
+                        .cashflows-filters { flex-direction: column !important; padding: 15px !important; gap: 10px !important; }
+                        .cashflows-filters > div { width: 100% !important; min-width: 100% !important; flex: 1 1 100% !important; }
+                        .cashflows-filters button { width: 100% !important; }
+                        .cashflows-table-wrapper { border-radius: 14px; overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
+                        .tree-table { min-width: 600px !important; }
+                        .child-table { min-width: 650px !important; }
+                        .child-tree-container { padding: 10px !important; }
+                        .tree-thead th { padding: 10px 8px !important; font-size: 11px !important; }
+                        .master-group-row td { padding: 10px 8px !important; font-size: 11px !important; }
+                        .cashflows-pagination { flex-direction: column !important; gap: 12px !important; padding: 12px !important; align-items: stretch !important; text-align: center !important; }
+                        .cashflows-pagination > div { justify-content: center !important; }
+                    }
                 `}</style>
 
                 {/* 📊 بطاقات الملخص الرئيسية */}
@@ -418,7 +437,7 @@ export default function CashFlowsPage() {
 
 
                 {/* 🔍 شريط الفلاتر */}
-                <div style={{ display: 'flex', gap: '15px', marginBottom: '30px', background: 'rgba(255,255,255,0.8)', padding: '25px', borderRadius: '20px', boxShadow: '0 5px 20px rgba(0,0,0,0.02)', border: `1px solid rgba(255,255,255,0.9)`, flexWrap: 'wrap', alignItems: 'flex-end', backdropFilter: 'blur(10px)' }}>
+                <div className="cashflows-filters" style={{ display: 'flex', gap: '15px', marginBottom: '30px', background: 'rgba(255,255,255,0.8)', padding: '25px', borderRadius: '20px', boxShadow: '0 5px 20px rgba(0,0,0,0.02)', border: `1px solid rgba(255,255,255,0.9)`, flexWrap: 'wrap', alignItems: 'flex-end', backdropFilter: 'blur(10px)' }}>
                     
                     <div style={{ flex: '1', minWidth: '180px' }}>
                         <label style={{ fontSize: '11px', fontWeight: 900, color: '#64748b', marginBottom: '6px', display: 'block' }}>بحث عام</label>
@@ -480,6 +499,7 @@ export default function CashFlowsPage() {
                 {logic.isLoading ? (
                     <LoadingScreen message="جاري تحميل شجرة التدفقات النقدية..." fullScreen={false} />
                 ) : (
+                    <div className="cashflows-table-wrapper" style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', width: '100%' }}>
                     <table className="tree-table">
                         <thead className="tree-thead">
                             <tr>
@@ -592,11 +612,12 @@ export default function CashFlowsPage() {
                             )}
                         </tbody>
                     </table>
+                    </div>
                 )}
 
                 {/* 🔢 تقسيم الصفحات */}
                 {!logic.isLoading && treeGroupedData.length > 0 && (
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '20px', padding: '20px', background: 'rgba(255,255,255,0.8)', borderRadius: '16px', border: `1px solid rgba(255,255,255,0.9)`, backdropFilter: 'blur(10px)', boxShadow: '0 5px 20px rgba(0,0,0,0.02)' }}>
+                    <div className="cashflows-pagination" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '20px', padding: '20px', background: 'rgba(255,255,255,0.8)', borderRadius: '16px', border: `1px solid rgba(255,255,255,0.9)`, backdropFilter: 'blur(10px)', boxShadow: '0 5px 20px rgba(0,0,0,0.02)' }}>
                         <div style={{ fontSize: '14px', color: '#334155', fontWeight: 900 }}>
                             إجمالي الـ {groupBy === 'partner' ? 'الشركاء' : 'أيام الحركة'}: <b style={{ color: '#2891C8', fontSize: '18px' }}>{treeGroupedData.length}</b>
                         </div>

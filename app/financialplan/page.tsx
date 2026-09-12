@@ -254,7 +254,8 @@ export default function FinancialPlanPage() {
           </button>
         </div>
         
-        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right' }}>
+        <div className="fp-table-wrapper" style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch', width: '100%' }}>
+        <table className="fp-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right' }}>
           <thead style={{ background: THEME.slate, color: THEME.textMain, fontSize: '14px' }}>
             <tr>
               <th style={{ padding: '12px 15px', borderBottom: `1px solid ${THEME.border}` }}>اسم الصنف</th>
@@ -296,6 +297,7 @@ export default function FinancialPlanPage() {
             })}
           </tbody>
         </table>
+        </div>
       </div>
     );
   };
@@ -316,11 +318,22 @@ export default function FinancialPlanPage() {
           .print-header-exp { background-color: #ffe4e6 !important; color: ${THEME.ruby} !important; font-weight: 900 !important; font-size: 15px !important; }
           @page { size: portrait; margin: 12mm 10mm; }
         }
+
+        @media (max-width: 768px) {
+          .fp-top-bar { flex-direction: column !important; align-items: stretch !important; padding: 12px 10px !important; gap: 10px !important; }
+          .fp-top-bar > div { width: 100% !important; flex-wrap: wrap !important; }
+          .fp-top-bar button { flex: 1 1 100% !important; justify-content: center !important; min-height: 44px !important; }
+          .fp-main-layout { flex-direction: column !important; gap: 15px !important; }
+          .fp-side-summary { width: 100% !important; position: static !important; margin-bottom: 20px !important; }
+          .fp-table-wrapper { overflow-x: auto !important; -webkit-overflow-scrolling: touch; }
+          .fp-table { min-width: 580px !important; }
+          .fp-table th, .fp-table td { padding: 8px 10px !important; font-size: 11px !important; }
+        }
       `}</style>
 
       {/* 🖥️ قسم الشاشة التفاعلي الافتراضي (يختفي بالكامل أثناء الطباعة) */}
       <div className="no-print">
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'white', padding: '15px 20px', borderRadius: '12px', marginBottom: '20px', border: `1px solid ${THEME.border}`, boxShadow: '0 2px 4px rgba(0,0,0,0.02)', flexWrap: 'wrap', gap: '15px' }}>
+        <div className="fp-top-bar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'white', padding: '15px 20px', borderRadius: '12px', marginBottom: '20px', border: `1px solid ${THEME.border}`, boxShadow: '0 2px 4px rgba(0,0,0,0.02)', flexWrap: 'wrap', gap: '15px' }}>
           <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
             <div style={{ fontWeight: '900', color: THEME.primary, fontSize: '14px' }}>فترة الخطة:</div>
             <select value={logic.selectedMonth} onChange={e => logic.setSelectedMonth(Number(e.target.value))} style={{ padding: '8px 12px', borderRadius: '6px', border: `1px solid ${THEME.border}`, fontWeight: 'bold', color: THEME.textMain }}>
@@ -357,7 +370,7 @@ export default function FinancialPlanPage() {
         {logic.isLoading ? (
           <LoadingScreen message="جاري تحميل أصناف الخطة من النظام..." fullScreen={false} />
         ) : (
-          <div style={{ display: 'flex', gap: '25px', alignItems: 'flex-start' }}>
+          <div className="fp-main-layout" style={{ display: 'flex', gap: '25px', alignItems: 'flex-start' }}>
             
             {/* الجداول الأساسية التفاعلية */}
             <div style={{ flex: 1 }}>
@@ -366,7 +379,7 @@ export default function FinancialPlanPage() {
             </div>
 
             {/* 🛡️ كارت المخلص الجانبي (مؤمن ومحمي داخل no-print فلن يظهر في الطباعة أبداً) */}
-            <div style={{ width: '320px', background: THEME.primary, borderRadius: '12px', padding: '20px', color: 'white', position: 'sticky', top: '20px', boxShadow: '0 10px 25px rgba(15,23,42,0.08)' }}>
+            <div className="fp-side-summary" style={{ width: '320px', background: THEME.primary, borderRadius: '12px', padding: '20px', color: 'white', position: 'sticky', top: '20px', boxShadow: '0 10px 25px rgba(15,23,42,0.08)' }}>
               <h3 style={{ margin: '0 0 20px 0', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '10px', fontWeight: 900, fontSize: '15px' }}>📊 ملخص الخطة والمستهدف</h3>
               
               <div style={{ marginBottom: '15px' }}>

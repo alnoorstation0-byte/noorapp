@@ -46,6 +46,14 @@ export default function ArAgingPage() {
                 .data-table td { padding: 20px; font-weight: 800; border-bottom: 1px solid rgba(28, 115, 171, 0.05); }
                 .data-table tr:hover { background: rgba(255,255,255,0.9); }
                 .data-table tr:nth-child(even) { background: rgba(255,255,255,0.4); }
+
+                @media (max-width: 768px) {
+                    .data-table-container { border-radius: 16px !important; }
+                    .data-table { min-width: 650px !important; }
+                    .data-table th, .data-table td { padding: 8px 10px !important; font-size: 11px !important; }
+                    .stat-card { padding: 12px 10px !important; min-width: 140px !important; }
+                    .stat-value { font-size: 16px !important; }
+                }
             `}</style>
 
             {/* Filters */}

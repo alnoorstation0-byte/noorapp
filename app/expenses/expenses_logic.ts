@@ -276,9 +276,10 @@ export function useExpensesLogic() {
             if (error) throw error;
             if (data && data.success === false) throw new Error(data.error);
 
-            // 🚀 حفظ fleet_operation_id بشكل منفصل
+            // 🚀 حفظ fleet_operation_id و shift_id بشكل منفصل
             let updates: any = {};
             if (passedRecord.fleet_operation_id !== undefined) updates.fleet_operation_id = passedRecord.fleet_operation_id || null;
+            if (passedRecord.shift_id !== undefined) updates.shift_id = passedRecord.shift_id || null;
 
             if (Object.keys(updates).length > 0 && data.expense_number) {
                 const { error: updErr } = await supabase.from('expenses').update(updates).eq('expense_number', data.expense_number);

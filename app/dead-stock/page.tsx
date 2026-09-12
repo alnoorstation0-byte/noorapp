@@ -18,9 +18,24 @@ export default function DeadStockPage() {
     } = useDeadStockLogic();
 
     return (
-        <div style={{ padding: '20px', minHeight: '100vh', background: `linear-gradient(135deg, ${THEME.primary} 0%, #0a192f 100%)`, fontFamily: 'Tajawal, sans-serif', direction: 'rtl' }}>
+        <div className="dead-stock-container" style={{ padding: '20px', minHeight: '100vh', background: `linear-gradient(135deg, ${THEME.primary} 0%, #0a192f 100%)`, fontFamily: 'Tajawal, sans-serif', direction: 'rtl', maxWidth: '100vw', overflowX: 'hidden', boxSizing: 'border-box' }}>
+            <style>{`
+                @media (max-width: 768px) {
+                    .dead-stock-container { padding: 10px 8px !important; }
+                    .dead-stock-header { padding: 15px !important; border-radius: 16px !important; }
+                    .dead-stock-header h1 { font-size: 20px !important; }
+                    .dead-stock-filters { flex-direction: column !important; gap: 10px !important; }
+                    .dead-stock-filters > div { flex: 1 1 100% !important; width: 100% !important; }
+                    .dead-stock-kpi-grid { grid-template-columns: 1fr !important; gap: 12px !important; }
+                    .dead-stock-kpi-card { padding: 15px !important; border-radius: 16px !important; }
+                    .dead-stock-kpi-card div:nth-child(2) { font-size: 24px !important; }
+                    .dead-stock-table-card { border-radius: 16px !important; }
+                    .dead-stock-table { min-width: 650px !important; }
+                    .dead-stock-table th, .dead-stock-table td { padding: 8px 10px !important; font-size: 11px !important; }
+                }
+            `}</style>
             {/* Header */}
-            <div style={{ background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(20px)', borderRadius: '24px', padding: '30px', marginBottom: '25px', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}>
+            <div className="dead-stock-header" style={{ background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(20px)', borderRadius: '24px', padding: '30px', marginBottom: '25px', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
                     <div>
                         <h1 style={{ color: 'white', margin: '0 0 10px 0', fontSize: '32px', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '15px' }}>
@@ -41,7 +56,7 @@ export default function DeadStockPage() {
                 </div>
 
                 {/* Filters */}
-                <div style={{ display: 'flex', gap: '15px', marginTop: '30px', flexWrap: 'wrap' }}>
+                <div className="dead-stock-filters" style={{ display: 'flex', gap: '15px', marginTop: '30px', flexWrap: 'wrap' }}>
                     <div style={{ flex: '1 1 300px' }}>
                         <div style={{ color: THEME.accentLight, fontSize: '13px', fontWeight: 800, marginBottom: '8px' }}>بحث برمز أو اسم الصنف 🔍</div>
                         <input 
@@ -74,22 +89,22 @@ export default function DeadStockPage() {
             ) : (
                 <>
                     {/* Global KPIs */}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px', marginBottom: '30px' }}>
-                        <div style={{ background: 'linear-gradient(135deg, rgba(244, 63, 94, 0.1), rgba(159, 18, 57, 0.2))', border: '1px solid rgba(244, 63, 94, 0.3)', padding: '25px', borderRadius: '24px', textAlign: 'center' }}>
+                    <div className="dead-stock-kpi-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px', marginBottom: '30px' }}>
+                        <div className="dead-stock-kpi-card" style={{ background: 'linear-gradient(135deg, rgba(244, 63, 94, 0.1), rgba(159, 18, 57, 0.2))', border: '1px solid rgba(244, 63, 94, 0.3)', padding: '25px', borderRadius: '24px', textAlign: 'center' }}>
                             <div style={{ color: '#fda4af', fontSize: '14px', fontWeight: 900, marginBottom: '8px' }}>إجمالي رأس المال المجمد 🥶💰</div>
                             <div style={{ color: 'white', fontSize: '36px', fontWeight: 900 }}>{formatCurrency(totalFrozenCapital)}</div>
                             <div style={{ color: '#fb7185', fontSize: '12px', marginTop: '10px' }}>قيمة البضاعة التي لا تتحرك</div>
                         </div>
-                        <div style={{ background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(217, 119, 6, 0.2))', border: '1px solid rgba(245, 158, 11, 0.3)', padding: '25px', borderRadius: '24px', textAlign: 'center' }}>
+                        <div className="dead-stock-kpi-card" style={{ background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(217, 119, 6, 0.2))', border: '1px solid rgba(245, 158, 11, 0.3)', padding: '25px', borderRadius: '24px', textAlign: 'center' }}>
                             <div style={{ color: '#fcd34d', fontSize: '14px', fontWeight: 900, marginBottom: '8px' }}>عدد الأصناف الراكدة 🏷️</div>
                             <div style={{ color: 'white', fontSize: '36px', fontWeight: 900 }}>{totalDeadItems} <span style={{ fontSize: '16px', fontWeight: 700, color: '#fcd34d' }}>صنف</span></div>
                         </div>
                     </div>
 
                     {/* Data Table */}
-                    <div style={{ background: 'rgba(255,255,255,0.02)', backdropFilter: 'blur(20px)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden' }}>
+                    <div className="dead-stock-table-card" style={{ background: 'rgba(255,255,255,0.02)', backdropFilter: 'blur(20px)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden' }}>
                         <div style={{ overflowX: 'auto' }}>
-                            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right', color: 'white' }}>
+                            <table className="dead-stock-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right', color: 'white' }}>
                                 <thead style={{ background: 'rgba(0,0,0,0.4)' }}>
                                     <tr>
                                         <th style={{ padding: '20px', fontSize: '14px', color: THEME.accentLight, borderBottom: '1px solid rgba(255,255,255,0.1)' }}>كود الصنف 🔑</th>

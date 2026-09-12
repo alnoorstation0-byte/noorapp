@@ -24,7 +24,7 @@ export default function AccountLedger() {
         <div>
           <div style={{ fontWeight: 900, color: THEME.primary }}>{row.notes || row.journal_headers?.description || row.item_name || 'بدون بيان'}</div>
           <div style={{ fontSize: '11px', opacity: 0.7, color: '#64748b' }}>
-            {row.projects?.name || row.projects?.Property || 'مصاريف إدارية'} | {row.partners?.name || 'عام'}
+            {row.partners?.name || 'عام'}
           </div>
         </div>
       ) : null
@@ -83,6 +83,19 @@ export default function AccountLedger() {
           padding: 20px;
           border-radius: 20px;
           box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        @media (max-width: 768px) {
+          .control-panel {
+            padding: 15px !important;
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 12px !important;
+            border-radius: 16px !important;
+          }
+          .control-panel button {
+            width: 100% !important;
+            min-height: 48px !important;
+          }
         }
       `}</style>
 

@@ -74,14 +74,19 @@ function useJournalLogic() {
                 if (filterVType && filterVType !== 'الكل') query = query.eq('v_type', filterVType);
 
                 if (filterStatus === 'غير متزن') {
-                     // نقوم بجلب القيود غير المتزنة عبر استعلام مباشر:
-                     const { data: headersData } = await supabase.from('journal_headers').select('id, total_debit, total_credit');
-                     if (headersData) {
-                         const unbalancedIds = headersData.filter(h => h.total_debit !== h.total_credit).map(h => h.id);
+                     // نقوم بفحص عدم اتزان القيود عبر أسطر اليومية الفعلية:
+                     const { data: linesData } = await supabase.from('journal_lines').select('journal_id, debit, credit');
+                     if (linesData) {
+                         const sums: Record<string, { debit: number; credit: number }> = {};
+                         linesData.forEach((l: any) => {
+                             if (!sums[l.journal_id]) sums[l.journal_id] = { debit: 0, credit: 0 };
+                             sums[l.journal_id].debit += Number(l.debit || 0);
+                             sums[l.journal_id].credit += Number(l.credit || 0);
+                         });
+                         const unbalancedIds = Object.keys(sums).filter(id => Math.abs(sums[id].debit - sums[id].credit) > 0.01);
                          if (unbalancedIds.length > 0) {
                              query = query.in('header_id', unbalancedIds);
                          } else {
-                             // لا توجد قيود غير متزنة
                              query = query.eq('header_id', '00000000-0000-0000-0000-000000000000'); 
                          }
                      }

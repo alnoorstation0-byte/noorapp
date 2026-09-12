@@ -23,11 +23,26 @@ export default function SalesAnalysisPage() {
     } = useSalesAnalysisLogic();
 
     return (
-        <div style={{ padding: '20px', minHeight: '100vh', background: `linear-gradient(135deg, ${THEME.primary} 0%, #0a192f 100%)`, fontFamily: 'Tajawal, sans-serif' }}>
+        <div className="sales-analysis-container" style={{ padding: '20px', minHeight: '100vh', background: `linear-gradient(135deg, ${THEME.primary} 0%, #0a192f 100%)`, fontFamily: 'Tajawal, sans-serif', maxWidth: '100vw', overflowX: 'hidden', boxSizing: 'border-box' }}>
+            <style>{`
+                @media (max-width: 768px) {
+                    .sales-analysis-container { padding: 10px 8px !important; }
+                    .sales-header-card { padding: 15px !important; border-radius: 16px !important; }
+                    .sales-header-card h1 { font-size: 20px !important; }
+                    .sales-btn-group { width: 100% !important; flex-direction: column !important; }
+                    .sales-btn-group button { width: 100% !important; justify-content: center !important; min-height: 44px !important; }
+                    .sales-kpi-grid { grid-template-columns: 1fr !important; gap: 12px !important; }
+                    .sales-kpi-card { padding: 16px !important; border-radius: 16px !important; }
+                    .sales-kpi-card div:last-child { font-size: 24px !important; }
+                    .sales-chart-card { padding: 15px 10px !important; border-radius: 16px !important; }
+                    .sales-chart-wrapper { height: 260px !important; }
+                    .sales-items-grid { grid-template-columns: 1fr !important; gap: 15px !important; }
+                }
+            `}</style>
             <PrintHeader title="تحليل المبيعات الشامل" subtitle={`عن الفترة من ${dateFrom} إلى ${dateTo}`} />
             
             {/* Header */}
-            <div className="no-print" style={{ background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(20px)', borderRadius: '24px', padding: '30px', marginBottom: '25px', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}>
+            <div className="no-print sales-header-card" style={{ background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(20px)', borderRadius: '24px', padding: '30px', marginBottom: '25px', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
                     <div>
                         <h1 style={{ color: 'white', margin: '0 0 10px 0', fontSize: '32px', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '15px' }}>
@@ -39,7 +54,7 @@ export default function SalesAnalysisPage() {
                         </p>
                     </div>
                     
-                    <div style={{ display: 'flex', gap: '15px' }}>
+                    <div className="sales-btn-group" style={{ display: 'flex', gap: '15px' }}>
                         <button onClick={() => window.print()} style={{ background: 'rgba(255,255,255,0.1)', color: 'white', border: '1px solid rgba(255,255,255,0.2)', padding: '12px 25px', borderRadius: '12px', fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', transition: '0.3s' }}>
                             <span>طباعة 🖨️</span>
                         </button>
@@ -78,16 +93,16 @@ export default function SalesAnalysisPage() {
             ) : (
                 <>
                     {/* Global KPIs */}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px', marginBottom: '30px' }}>
-                        <div style={{ background: 'linear-gradient(135deg, rgba(56, 189, 248, 0.1), rgba(2, 132, 199, 0.2))', border: '1px solid rgba(56, 189, 248, 0.3)', padding: '25px', borderRadius: '24px', textAlign: 'center' }}>
+                    <div className="sales-kpi-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px', marginBottom: '30px' }}>
+                        <div className="sales-kpi-card" style={{ background: 'linear-gradient(135deg, rgba(56, 189, 248, 0.1), rgba(2, 132, 199, 0.2))', border: '1px solid rgba(56, 189, 248, 0.3)', padding: '25px', borderRadius: '24px', textAlign: 'center' }}>
                             <div style={{ color: '#7dd3fc', fontSize: '14px', fontWeight: 900, marginBottom: '8px' }}>إجمالي المبيعات 💰</div>
                             <div style={{ color: 'white', fontSize: '36px', fontWeight: 900 }}>{formatCurrency(totalRevenue)}</div>
                         </div>
-                        <div style={{ background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.2))', border: '1px solid rgba(16, 185, 129, 0.3)', padding: '25px', borderRadius: '24px', textAlign: 'center' }}>
+                        <div className="sales-kpi-card" style={{ background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.2))', border: '1px solid rgba(16, 185, 129, 0.3)', padding: '25px', borderRadius: '24px', textAlign: 'center' }}>
                             <div style={{ color: '#6ee7b7', fontSize: '14px', fontWeight: 900, marginBottom: '8px' }}>عدد الفواتير 🧾</div>
                             <div style={{ color: 'white', fontSize: '36px', fontWeight: 900 }}>{totalInvoices} <span style={{ fontSize: '16px', fontWeight: 700, color: '#a7f3d0' }}>فاتورة</span></div>
                         </div>
-                        <div style={{ background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(217, 119, 6, 0.2))', border: '1px solid rgba(245, 158, 11, 0.3)', padding: '25px', borderRadius: '24px', textAlign: 'center' }}>
+                        <div className="sales-kpi-card" style={{ background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(217, 119, 6, 0.2))', border: '1px solid rgba(245, 158, 11, 0.3)', padding: '25px', borderRadius: '24px', textAlign: 'center' }}>
                             <div style={{ color: '#fcd34d', fontSize: '14px', fontWeight: 900, marginBottom: '8px' }}>متوسط قيمة الفاتورة 📈</div>
                             <div style={{ color: 'white', fontSize: '36px', fontWeight: 900 }}>{formatCurrency(averageInvoiceValue)}</div>
                         </div>
@@ -95,11 +110,11 @@ export default function SalesAnalysisPage() {
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: '30px' }}>
                         {/* Top Clients Chart */}
-                        <div style={{ background: 'rgba(255,255,255,0.02)', backdropFilter: 'blur(20px)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)', padding: '25px' }}>
+                        <div className="sales-chart-card" style={{ background: 'rgba(255,255,255,0.02)', backdropFilter: 'blur(20px)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)', padding: '25px' }}>
                             <h2 style={{ color: THEME.accentLight, fontSize: '20px', margin: '0 0 20px 0', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '10px' }}>
                                 🌟 أفضل 10 عملاء (حسب الإيرادات)
                             </h2>
-                            <div style={{ height: '350px', width: '100%' }} dir="ltr">
+                            <div className="sales-chart-wrapper" style={{ height: '350px', width: '100%' }} dir="ltr">
                                 <ResponsiveContainer>
                                     <BarChart data={topClients} layout="vertical" margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                                         <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" horizontal={false} />
@@ -121,11 +136,11 @@ export default function SalesAnalysisPage() {
                         </div>
 
                         {/* Top Delegates Chart */}
-                        <div style={{ background: 'rgba(255,255,255,0.02)', backdropFilter: 'blur(20px)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)', padding: '25px' }}>
+                        <div className="sales-chart-card" style={{ background: 'rgba(255,255,255,0.02)', backdropFilter: 'blur(20px)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)', padding: '25px' }}>
                             <h2 style={{ color: '#10b981', fontSize: '20px', margin: '0 0 20px 0', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '10px' }}>
                                 🚚 أفضل 10 مناديب (حسب الإيرادات)
                             </h2>
-                            <div style={{ height: '350px', width: '100%' }} dir="ltr">
+                            <div className="sales-chart-wrapper" style={{ height: '350px', width: '100%' }} dir="ltr">
                                 <ResponsiveContainer>
                                     <BarChart data={topDelegates} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                                         <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" vertical={false} />
@@ -147,12 +162,12 @@ export default function SalesAnalysisPage() {
                         </div>
 
                         {/* Top Items Table & Chart */}
-                        <div style={{ background: 'rgba(255,255,255,0.02)', backdropFilter: 'blur(20px)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)', padding: '25px' }}>
+                        <div className="sales-chart-card" style={{ background: 'rgba(255,255,255,0.02)', backdropFilter: 'blur(20px)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)', padding: '25px' }}>
                             <h2 style={{ color: '#f59e0b', fontSize: '20px', margin: '0 0 20px 0', borderBottom: '1px solid rgba(255,255,255,0.1)', paddingBottom: '10px' }}>
                                 📦 أفضل 10 أصناف (حسب الكمية المباعة)
                             </h2>
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '30px' }}>
-                                <div style={{ height: '350px', width: '100%' }} dir="ltr">
+                            <div className="sales-items-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '30px' }}>
+                                <div className="sales-chart-wrapper" style={{ height: '350px', width: '100%' }} dir="ltr">
                                     <ResponsiveContainer>
                                         <BarChart data={topItems} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
                                             <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" vertical={false} />

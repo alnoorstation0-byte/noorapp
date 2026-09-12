@@ -10,7 +10,7 @@ export function useKpisLogic() {
     const invoicesQuery = useQuery({
         queryKey: ['kpis_invoices', dateFrom, dateTo],
         queryFn: async () => {
-            let q = supabase.from('invoices').select('total_amount, date, status, type').neq('status', 'مسودة');
+            let q = supabase.from('invoices').select('total_amount, date, status').neq('status', 'مسودة');
             if (dateFrom) q = q.gte('date', dateFrom);
             if (dateTo) q = q.lte('date', dateTo);
             const { data, error } = await q;

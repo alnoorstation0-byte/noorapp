@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 import React, { useMemo, useEffect, useState } from 'react';
 import { useStatementLogic } from './statement_logic';
 import { THEME } from '@/lib/theme';
@@ -244,7 +244,16 @@ function PartnerStatementContent() {
                 .btn-main-glass:disabled { opacity: 0.5; cursor: not-allowed; }
                 .welcome-placeholder { text-align: center; padding: 100px; color: #bba58f; background: rgba(44, 34, 27, 0.4); border-radius: 20px; border: 1px dashed rgba(40, 145, 200, 0.3); }
                 .welcome-placeholder .icon { font-size: 64px; margin-bottom: 20px; color: ${THEME.goldAccent}; }
-                .table-wrapper-glass { background: rgba(255, 255, 255, 0.95); border-radius: 20px; overflow: hidden; padding: 10px; border: 1px solid rgba(40, 145, 200, 0.2); box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
+                .table-wrapper-glass { background: rgba(255, 255, 255, 0.95); border-radius: 20px; overflow-x: auto; padding: 10px; border: 1px solid rgba(40, 145, 200, 0.2); box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
+
+                @media (max-width: 768px) {
+                    .filter-dashboard-glass { padding: 15px !important; border-radius: 16px !important; }
+                    .filters-grid { grid-template-columns: 1fr !important; gap: 12px !important; }
+                    .balances-grid { grid-template-columns: 1fr !important; gap: 10px !important; }
+                    .dashboard-stats-grid { grid-template-columns: 1fr !important; }
+                    .glass-panel { padding: 15px !important; border-radius: 16px !important; }
+                    .final-balance span { font-size: 24px !important; }
+                }
             `}</style>
         </div>
     );

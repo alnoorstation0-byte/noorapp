@@ -251,6 +251,15 @@ export default function DelegateDebtsPage() {
           .aqua-table tbody tr:hover {
             background: rgba(255,255,255,0.5);
           }
+
+          @media (max-width: 768px) {
+            .delegate-header { flex-direction: column !important; align-items: flex-start !important; gap: 12px !important; padding: 15px !important; }
+            .delegate-total { width: 100% !important; justify-content: space-between !important; }
+            .delegate-total .amount { font-size: 18px !important; }
+            .delegate-invoices-container { overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; padding: 5px !important; }
+            .aqua-table { min-width: 600px !important; }
+            .aqua-table th, .aqua-table td { padding: 8px 10px !important; font-size: 11px !important; }
+          }
         `}</style>
       </MasterPage>
     </div>

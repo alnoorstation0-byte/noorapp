@@ -75,10 +75,10 @@ export function usePayrollLogic() {
                 .neq('status', 'مسودة');
 
             const { data: recData } = await supabase
-                .from('journal_headers')
-                .select('fleet_operation_id, total_amount')
+                .from('receipt_vouchers')
+                .select('fleet_operation_id, amount')
                 .not('fleet_operation_id', 'is', null)
-                .in('reference_type', ['سند قبض', 'receipt', 'قبض']);
+                .neq('status', 'مسودة');
 
             const custodyMap = new Map<string, number>();
             const opCashMap = new Map<string, number>();
@@ -97,7 +97,7 @@ export function usePayrollLogic() {
             (recData || []).forEach((rec: any) => {
                 const opId = rec.fleet_operation_id;
                 if (opId) {
-                    opCashMap.set(opId, (opCashMap.get(opId) || 0) - Number(rec.total_amount || 0));
+                    opCashMap.set(opId, (opCashMap.get(opId) || 0) - Number(rec.amount || 0));
                 }
             });
             opCashMap.forEach((netCash, opId) => {

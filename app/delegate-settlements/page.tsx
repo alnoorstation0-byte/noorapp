@@ -19,9 +19,24 @@ export default function DelegateSettlementsPage() {
     } = useDelegateSettlementsLogic();
 
     return (
-        <div style={{ padding: '30px', minHeight: '100vh', direction: 'rtl' }}>
+        <div className="settlements-container" style={{ padding: '30px', minHeight: '100vh', direction: 'rtl', maxWidth: '100vw', overflowX: 'hidden', boxSizing: 'border-box' }}>
+            <style>{`
+                @media (max-width: 768px) {
+                    .settlements-container { padding: 10px 8px !important; }
+                    .settlements-header { padding: 15px !important; border-radius: 16px !important; }
+                    .settlements-header h1 { font-size: 20px !important; }
+                    .settlements-btn { width: 100% !important; justify-content: center !important; min-height: 44px !important; }
+                    .settlements-filters { flex-direction: column !important; gap: 10px !important; }
+                    .settlements-filters > div { flex: 1 1 100% !important; width: 100% !important; }
+                    .settlements-kpi-grid { grid-template-columns: 1fr !important; gap: 12px !important; }
+                    .settlements-kpi-card { padding: 15px !important; border-radius: 16px !important; }
+                    .settlements-table-card { border-radius: 16px !important; }
+                    .settlements-table { min-width: 750px !important; }
+                    .settlements-table th, .settlements-table td { padding: 8px 10px !important; font-size: 11px !important; }
+                }
+            `}</style>
             {/* Header */}
-            <div className="aqua-glass-panel" style={{ 
+            <div className="aqua-glass-panel settlements-header" style={{ 
                 background: 'rgba(255, 255, 255, 0.4)', 
                 backdropFilter: 'blur(30px)', 
                 borderRadius: '40px', 
@@ -41,7 +56,7 @@ export default function DelegateSettlementsPage() {
                         </p>
                     </div>
                     
-                    <div style={{ display: 'flex', gap: '15px' }}>
+                    <div style={{ display: 'flex', gap: '15px' }} style-responsive="true">
                         <button onClick={exportToExcel} disabled={filteredSettlements.length === 0} style={{ 
                             background: filteredSettlements.length === 0 ? 'rgba(28, 115, 171, 0.1)' : '#1C73AB', 
                             color: filteredSettlements.length === 0 ? '#122946' : '#FFFFFF', 
@@ -56,7 +71,7 @@ export default function DelegateSettlementsPage() {
                             gap: '12px', 
                             boxShadow: filteredSettlements.length === 0 ? 'none' : '-5px -5px 15px rgba(255,255,255,0.8), 5px 5px 20px rgba(28, 115, 171, 0.3), inset 0 2px 2px rgba(255,255,255,0.4)', 
                             transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)' 
-                        }} className="aqua-button">
+                        }} className="aqua-button settlements-btn">
                             <span>تصدير Excel</span>
                             <span style={{ fontSize: '18px', filter: 'brightness(10)' }}>📑</span>
                         </button>
@@ -64,7 +79,7 @@ export default function DelegateSettlementsPage() {
                 </div>
 
                 {/* Filters */}
-                <div style={{ display: 'flex', gap: '20px', marginTop: '35px', flexWrap: 'wrap' }}>
+                <div className="settlements-filters" style={{ display: 'flex', gap: '20px', marginTop: '35px', flexWrap: 'wrap' }}>
                     <div style={{ flex: '1 1 250px', position: 'relative' }}>
                         <div style={{ color: '#1C73AB', fontSize: '13px', fontWeight: 800, marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                             <span>بحث باسم المندوب أو الرحلة</span>
@@ -136,8 +151,8 @@ export default function DelegateSettlementsPage() {
             ) : (
                 <>
                     {/* Global KPIs */}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '30px', marginBottom: '40px' }}>
-                        <div className="aqua-float-card" style={{ 
+                    <div className="settlements-kpi-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '30px', marginBottom: '40px' }}>
+                        <div className="aqua-float-card settlements-kpi-card" style={{ 
                             background: 'rgba(255, 255, 255, 0.5)', backdropFilter: 'blur(30px)', 
                             border: '1px solid rgba(255, 255, 255, 0.7)', padding: '30px', borderRadius: '35px', 
                             textAlign: 'center', boxShadow: '-10px -10px 30px rgba(255,255,255,0.8), 10px 10px 30px rgba(28, 115, 171, 0.15), inset 0 2px 2px rgba(255,255,255,1)',
@@ -152,7 +167,7 @@ export default function DelegateSettlementsPage() {
                                 <span style={{ color: '#122946', fontSize: '13px', fontWeight: 800 }}>آجل: <span style={{ color: '#1C73AB', marginLeft: '4px' }}>{formatCurrency(totals.creditSales)}</span></span>
                             </div>
                         </div>
-                        <div className="aqua-float-card" style={{ 
+                        <div className="aqua-float-card settlements-kpi-card" style={{ 
                             background: 'rgba(255, 255, 255, 0.5)', backdropFilter: 'blur(30px)', 
                             border: '1px solid rgba(255, 255, 255, 0.7)', padding: '30px', borderRadius: '35px', 
                             textAlign: 'center', boxShadow: '-10px -10px 30px rgba(255,255,255,0.8), 10px 10px 30px rgba(28, 115, 171, 0.15), inset 0 2px 2px rgba(255,255,255,1)',
@@ -162,7 +177,7 @@ export default function DelegateSettlementsPage() {
                             <div style={{ color: '#122946', fontSize: '16px', fontWeight: 900, marginBottom: '15px', letterSpacing: '0.5px' }}>النقدية المستلمة (السدادات) 💵</div>
                             <div style={{ color: '#2ECC71', fontSize: '42px', fontWeight: 900, textShadow: '0 4px 15px rgba(46, 204, 113, 0.3)' }}>{formatCurrency(totals.totalCash)}</div>
                         </div>
-                        <div className="aqua-float-card" style={{ 
+                        <div className="aqua-float-card settlements-kpi-card" style={{ 
                             background: 'rgba(255, 255, 255, 0.5)', backdropFilter: 'blur(30px)', 
                             border: '1px solid rgba(255, 255, 255, 0.7)', padding: '30px', borderRadius: '35px', 
                             textAlign: 'center', boxShadow: '-10px -10px 30px rgba(255,255,255,0.8), 10px 10px 30px rgba(28, 115, 171, 0.15), inset 0 2px 2px rgba(255,255,255,1)',
@@ -175,7 +190,7 @@ export default function DelegateSettlementsPage() {
                     </div>
 
                     {/* Data Table */}
-                    <div style={{ 
+                    <div className="settlements-table-card" style={{ 
                         background: 'rgba(255, 255, 255, 0.4)', 
                         backdropFilter: 'blur(30px)', 
                         borderRadius: '35px', 
@@ -183,8 +198,8 @@ export default function DelegateSettlementsPage() {
                         boxShadow: '-10px -10px 30px rgba(255,255,255,0.8), 10px 10px 30px rgba(28, 115, 171, 0.15)',
                         overflow: 'hidden' 
                     }}>
-                        <div style={{ overflowX: 'auto' }}>
-                            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right', color: '#122946' }}>
+                        <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+                            <table className="settlements-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right', color: '#122946' }}>
                                 <thead style={{ background: 'rgba(28, 115, 171, 0.05)', borderBottom: '1px solid rgba(28, 115, 171, 0.1)' }}>
                                     <tr>
                                         <th style={{ padding: '20px', fontSize: '14px', color: '#1C73AB', fontWeight: 900 }}>رقم الرحلة 🚚</th>

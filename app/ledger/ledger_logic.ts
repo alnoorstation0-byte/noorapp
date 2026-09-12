@@ -26,7 +26,6 @@ export function useLedgerLogic() {
         .select(`
           id, debit, credit, item_name, notes,
           journal_headers (entry_date, description),
-          projects (name),
           partners (name)
         `)
         .eq('account_id', selectedAccountId)

@@ -118,9 +118,9 @@ export function usePosDashboardLogic() {
         queryFn: async () => {
             let query = supabase
                 .from('expenses')
-                .select('id, amount, expense_date, shift_id, title, payment_method');
-            if (dateRange.start) query = query.gte('expense_date', dateRange.start);
-            if (dateRange.end) query = query.lte('expense_date', dateRange.end);
+                .select('id, total_price, exp_date, shift_id, description, payment_method');
+            if (dateRange.start) query = query.gte('exp_date', dateRange.start);
+            if (dateRange.end) query = query.lte('exp_date', dateRange.end);
             const { data, error } = await query;
             if (error) console.error('Error fetching shift expenses:', error);
             return data || [];
@@ -133,7 +133,7 @@ export function usePosDashboardLogic() {
         const expensesByShift: Record<string, number> = {};
         shiftExpenses.forEach((exp: any) => {
             if (exp.shift_id) {
-                expensesByShift[exp.shift_id] = (expensesByShift[exp.shift_id] || 0) + Number(exp.amount || 0);
+                expensesByShift[exp.shift_id] = (expensesByShift[exp.shift_id] || 0) + Number(exp.total_price || exp.amount || 0);
             }
         });
 

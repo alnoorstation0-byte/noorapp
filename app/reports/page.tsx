@@ -183,6 +183,17 @@ export default function ReportsPage() {
           .btn-main-glass.white { background: white; color: #122946; border: 1px solid rgba(28,115,171,0.2); }
           .btn-main-glass:hover { transform: translateY(-3px); filter: brightness(1.1); box-shadow: 0 8px 15px rgba(28, 115, 171, 0.15); }
           .summary-glass-card { background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(10px); padding: 20px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.9); margin-bottom: 25px; box-shadow: 0 4px 15px rgba(28, 115, 171, 0.05); }
+
+          @media (max-width: 768px) {
+            .filter-bar { flex-direction: column !important; align-items: stretch !important; padding: 12px 10px !important; gap: 10px !important; }
+            .filter-group { width: 100% !important; }
+            .filter-group input { width: 100% !important; }
+            .reports-grid { grid-template-columns: 1fr !important; gap: 12px !important; }
+            .section-title { font-size: 16px !important; margin-top: 25px !important; }
+            .report-link-card { padding: 16px !important; border-radius: 16px !important; }
+            .report-link-icon { font-size: 28px !important; margin-bottom: 2px !important; }
+            .report-link-title { font-size: 14px !important; }
+          }
         `}</style>
       </MasterPage>
     </div>

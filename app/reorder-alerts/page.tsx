@@ -16,9 +16,28 @@ export default function ReorderAlertsPage() {
     } = useReorderAlertsLogic();
 
     return (
-        <div style={{ padding: '20px', minHeight: '100vh', background: `linear-gradient(135deg, ${THEME.primary} 0%, #0a192f 100%)`, fontFamily: 'Tajawal, sans-serif', direction: 'rtl' }}>
+        <div className="reorder-container" style={{ padding: '20px', minHeight: '100vh', background: `linear-gradient(135deg, ${THEME.primary} 0%, #0a192f 100%)`, fontFamily: 'Tajawal, sans-serif', direction: 'rtl', maxWidth: '100vw', overflowX: 'hidden', boxSizing: 'border-box' }}>
+            <style>{`
+                @keyframes pulse {
+                    0% { box-shadow: 0 0 0 0 rgba(225, 29, 72, 0.4); }
+                    70% { box-shadow: 0 0 0 15px rgba(225, 29, 72, 0); }
+                    100% { box-shadow: 0 0 0 0 rgba(225, 29, 72, 0); }
+                }
+                @media (max-width: 768px) {
+                    .reorder-container { padding: 10px 8px !important; }
+                    .reorder-header { padding: 15px !important; border-radius: 16px !important; }
+                    .reorder-header h1 { font-size: 20px !important; }
+                    .reorder-btn { width: 100% !important; justify-content: center !important; min-height: 44px !important; }
+                    .reorder-kpi-grid { grid-template-columns: 1fr !important; gap: 12px !important; }
+                    .reorder-kpi-card { padding: 15px !important; border-radius: 16px !important; }
+                    .reorder-kpi-card div:nth-child(2) { font-size: 24px !important; }
+                    .reorder-table-card { border-radius: 16px !important; }
+                    .reorder-table { min-width: 600px !important; }
+                    .reorder-table th, .reorder-table td { padding: 8px 10px !important; font-size: 11px !important; }
+                }
+            `}</style>
             {/* Header */}
-            <div style={{ background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(20px)', borderRadius: '24px', padding: '30px', marginBottom: '25px', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}>
+            <div className="reorder-header" style={{ background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(20px)', borderRadius: '24px', padding: '30px', marginBottom: '25px', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
                     <div>
                         <h1 style={{ color: 'white', margin: '0 0 10px 0', fontSize: '32px', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '15px' }}>
@@ -31,7 +50,7 @@ export default function ReorderAlertsPage() {
                     </div>
                     
                     <div style={{ display: 'flex', gap: '15px' }}>
-                        <button onClick={exportToExcel} disabled={sortedItems.length === 0} style={{ background: sortedItems.length === 0 ? 'rgba(255,255,255,0.1)' : 'linear-gradient(45deg, #10b981, #059669)', color: sortedItems.length === 0 ? '#64748b' : 'white', border: 'none', padding: '12px 25px', borderRadius: '12px', fontWeight: 900, cursor: sortedItems.length === 0 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '10px', boxShadow: sortedItems.length === 0 ? 'none' : '0 10px 20px rgba(16,185,129,0.3)', transition: '0.3s' }}>
+                        <button className="reorder-btn" onClick={exportToExcel} disabled={sortedItems.length === 0} style={{ background: sortedItems.length === 0 ? 'rgba(255,255,255,0.1)' : 'linear-gradient(45deg, #10b981, #059669)', color: sortedItems.length === 0 ? '#64748b' : 'white', border: 'none', padding: '12px 25px', borderRadius: '12px', fontWeight: 900, cursor: sortedItems.length === 0 ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', gap: '10px', boxShadow: sortedItems.length === 0 ? 'none' : '0 10px 20px rgba(16,185,129,0.3)', transition: '0.3s' }}>
                             <span>تصدير Excel</span>
                             <span style={{ fontSize: '18px' }}>📑</span>
                         </button>
@@ -58,33 +77,25 @@ export default function ReorderAlertsPage() {
             ) : (
                 <>
                     {/* Global KPIs */}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px', marginBottom: '30px' }}>
-                        <div style={{ background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(217, 119, 6, 0.2))', border: '1px solid rgba(245, 158, 11, 0.3)', padding: '25px', borderRadius: '24px', textAlign: 'center' }}>
+                    <div className="reorder-kpi-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '20px', marginBottom: '30px' }}>
+                        <div className="reorder-kpi-card" style={{ background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(217, 119, 6, 0.2))', border: '1px solid rgba(245, 158, 11, 0.3)', padding: '25px', borderRadius: '24px', textAlign: 'center' }}>
                             <div style={{ color: '#fcd34d', fontSize: '14px', fontWeight: 900, marginBottom: '8px' }}>أصناف تحتاج للشراء 🛒</div>
                             <div style={{ color: 'white', fontSize: '36px', fontWeight: 900 }}>{totalShortageItems} <span style={{ fontSize: '16px', fontWeight: 700, color: '#fcd34d' }}>صنف</span></div>
                         </div>
-                        <div style={{ background: 'linear-gradient(135deg, rgba(225, 29, 72, 0.1), rgba(190, 18, 60, 0.2))', border: '1px solid rgba(225, 29, 72, 0.3)', padding: '25px', borderRadius: '24px', textAlign: 'center', animation: outOfStockItems > 0 ? 'pulse 2s infinite' : 'none' }}>
+                        <div className="reorder-kpi-card" style={{ background: 'linear-gradient(135deg, rgba(225, 29, 72, 0.1), rgba(190, 18, 60, 0.2))', border: '1px solid rgba(225, 29, 72, 0.3)', padding: '25px', borderRadius: '24px', textAlign: 'center', animation: outOfStockItems > 0 ? 'pulse 2s infinite' : 'none' }}>
                             <div style={{ color: '#fda4af', fontSize: '14px', fontWeight: 900, marginBottom: '8px' }}>أصناف نفذت تماماً 🚨</div>
                             <div style={{ color: 'white', fontSize: '36px', fontWeight: 900 }}>{outOfStockItems} <span style={{ fontSize: '16px', fontWeight: 700, color: '#fda4af' }}>صنف</span></div>
                         </div>
-                        <div style={{ background: 'linear-gradient(135deg, rgba(56, 189, 248, 0.1), rgba(2, 132, 199, 0.2))', border: '1px solid rgba(56, 189, 248, 0.3)', padding: '25px', borderRadius: '24px', textAlign: 'center' }}>
+                        <div className="reorder-kpi-card" style={{ background: 'linear-gradient(135deg, rgba(56, 189, 248, 0.1), rgba(2, 132, 199, 0.2))', border: '1px solid rgba(56, 189, 248, 0.3)', padding: '25px', borderRadius: '24px', textAlign: 'center' }}>
                             <div style={{ color: '#7dd3fc', fontSize: '14px', fontWeight: 900, marginBottom: '8px' }}>إجمالي الكميات المطلوبة 📦</div>
                             <div style={{ color: 'white', fontSize: '36px', fontWeight: 900 }}>{totalRequiredQty.toLocaleString()}</div>
                         </div>
                     </div>
 
-                    <style>{`
-                        @keyframes pulse {
-                            0% { box-shadow: 0 0 0 0 rgba(225, 29, 72, 0.4); }
-                            70% { box-shadow: 0 0 0 15px rgba(225, 29, 72, 0); }
-                            100% { box-shadow: 0 0 0 0 rgba(225, 29, 72, 0); }
-                        }
-                    `}</style>
-
                     {/* Data Table */}
-                    <div style={{ background: 'rgba(255,255,255,0.02)', backdropFilter: 'blur(20px)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden' }}>
+                    <div className="reorder-table-card" style={{ background: 'rgba(255,255,255,0.02)', backdropFilter: 'blur(20px)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden' }}>
                         <div style={{ overflowX: 'auto' }}>
-                            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right', color: 'white' }}>
+                            <table className="reorder-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right', color: 'white' }}>
                                 <thead style={{ background: 'rgba(0,0,0,0.4)' }}>
                                     <tr>
                                         <th style={{ padding: '20px', fontSize: '14px', color: THEME.accentLight, borderBottom: '1px solid rgba(255,255,255,0.1)' }}>كود الصنف 🔑</th>

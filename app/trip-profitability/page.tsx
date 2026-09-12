@@ -322,6 +322,18 @@ export default function TripProfitabilityPage() {
             background: rgba(245, 158, 11, 0.15);
             color: #d97706;
           }
+
+          @media (max-width: 768px) {
+            .filter-bar { flex-direction: column !important; align-items: stretch !important; padding: 15px !important; }
+            .filter-group { width: 100% !important; justify-content: space-between !important; }
+            .filter-group input { flex: 1 !important; }
+            .profit-summary-grid { grid-template-columns: 1fr !important; gap: 15px !important; }
+            .profit-card { padding: 15px !important; border-radius: 16px !important; }
+            .profit-amount { font-size: 24px !important; }
+            .table-glass-container { border-radius: 16px !important; overflow-x: auto !important; }
+            .aqua-table { min-width: 650px !important; }
+            .aqua-table th, .aqua-table td { padding: 8px 10px !important; font-size: 11px !important; }
+          }
         `}</style>
       </MasterPage>
     </div>

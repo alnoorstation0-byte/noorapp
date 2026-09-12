@@ -72,9 +72,9 @@ export async function GET(
         // جلب المصروفات التشغيلية المرتبطة بالوردية
         const { data: shiftExpenses } = await supabaseAdmin
             .from('expenses')
-            .select('id, amount, expense_number, expense_date, title, payment_method')
+            .select('id, total_price, expense_number, exp_date, description, payment_method')
             .eq('shift_id', id);
-        const recordedExpenses = (shiftExpenses || []).reduce((sum, e) => sum + Number(e.amount || 0), 0);
+        const recordedExpenses = (shiftExpenses || []).reduce((sum, e) => sum + Number(e.total_price || e.amount || 0), 0);
         const totalExpenses = Math.max(recordedExpenses, Number(shift.total_expenses || 0));
 
         // تجميع الأصناف المباعة خلال الوردية مع حساب التكلفة وهامش الربح

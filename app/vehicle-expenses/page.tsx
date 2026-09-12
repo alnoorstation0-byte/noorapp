@@ -19,9 +19,25 @@ export default function VehicleExpensesPage() {
     } = useVehicleExpensesLogic();
 
     return (
-        <div style={{ padding: '20px', minHeight: '100vh', background: `linear-gradient(135deg, ${THEME.primary} 0%, #0a192f 100%)`, fontFamily: 'Tajawal, sans-serif' }}>
+        <div className="veh-exp-container" style={{ padding: '20px', minHeight: '100vh', background: `linear-gradient(135deg, ${THEME.primary} 0%, #0a192f 100%)`, fontFamily: 'Tajawal, sans-serif', maxWidth: '100vw', overflowX: 'hidden', boxSizing: 'border-box' }}>
+            <style>{`
+                @media (max-width: 768px) {
+                    .veh-exp-container { padding: 10px 8px !important; }
+                    .veh-exp-header { padding: 15px !important; border-radius: 16px !important; }
+                    .veh-exp-header h1 { font-size: 20px !important; }
+                    .veh-exp-btn { width: 100% !important; justify-content: center !important; min-height: 44px !important; }
+                    .veh-exp-filters { flex-direction: column !important; gap: 10px !important; }
+                    .veh-exp-filters > div { flex: 1 1 100% !important; width: 100% !important; }
+                    .veh-exp-totals-grid { grid-template-columns: 1fr !important; gap: 12px !important; }
+                    .veh-exp-total-card { padding: 15px !important; border-radius: 16px !important; }
+                    .veh-exp-total-card div:last-child { font-size: 22px !important; }
+                    .veh-exp-table-card { border-radius: 16px !important; }
+                    .veh-exp-table { min-width: 650px !important; }
+                    .veh-exp-table th, .veh-exp-table td { padding: 8px 10px !important; font-size: 11px !important; }
+                }
+            `}</style>
             {/* Header Section */}
-            <div style={{ background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(20px)', borderRadius: '24px', padding: '30px', marginBottom: '25px', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}>
+            <div className="veh-exp-header" style={{ background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(20px)', borderRadius: '24px', padding: '30px', marginBottom: '25px', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
                     <div>
                         <h1 style={{ color: 'white', margin: '0 0 10px 0', fontSize: '32px', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '15px' }}>
@@ -34,7 +50,7 @@ export default function VehicleExpensesPage() {
                     </div>
                     
                     <div style={{ display: 'flex', gap: '15px' }}>
-                        <button onClick={exportToExcel} style={{ background: 'linear-gradient(45deg, #10b981, #059669)', color: 'white', border: 'none', padding: '12px 25px', borderRadius: '12px', fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', boxShadow: '0 10px 20px rgba(16,185,129,0.3)', transition: '0.3s' }}>
+                        <button className="veh-exp-btn" onClick={exportToExcel} style={{ background: 'linear-gradient(45deg, #10b981, #059669)', color: 'white', border: 'none', padding: '12px 25px', borderRadius: '12px', fontWeight: 900, cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '10px', boxShadow: '0 10px 20px rgba(16,185,129,0.3)', transition: '0.3s' }}>
                             <span>تصدير Excel</span>
                             <span style={{ fontSize: '18px' }}>📊</span>
                         </button>
@@ -42,7 +58,7 @@ export default function VehicleExpensesPage() {
                 </div>
 
                 {/* Filters */}
-                <div style={{ display: 'flex', gap: '15px', marginTop: '30px', flexWrap: 'wrap' }}>
+                <div className="veh-exp-filters" style={{ display: 'flex', gap: '15px', marginTop: '30px', flexWrap: 'wrap' }}>
                     <div style={{ flex: '1 1 300px' }}>
                         <div style={{ color: THEME.accentLight, fontSize: '13px', fontWeight: 800, marginBottom: '8px' }}>بحث شامل</div>
                         <input 
@@ -75,32 +91,32 @@ export default function VehicleExpensesPage() {
             </div>
 
             {/* Global Totals Dashboard */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '30px' }}>
-                <div style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.3)', padding: '20px', borderRadius: '20px', textAlign: 'center' }}>
+            <div className="veh-exp-totals-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '20px', marginBottom: '30px' }}>
+                <div className="veh-exp-total-card" style={{ background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.3)', padding: '20px', borderRadius: '20px', textAlign: 'center' }}>
                     <div style={{ color: '#10b981', fontSize: '13px', fontWeight: 900, marginBottom: '5px' }}>إجمالي الديزل/المحروقات</div>
                     <div style={{ color: 'white', fontSize: '28px', fontWeight: 900 }}>{formatCurrency(totals.totalDiesel)}</div>
                 </div>
-                <div style={{ background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.3)', padding: '20px', borderRadius: '20px', textAlign: 'center' }}>
+                <div className="veh-exp-total-card" style={{ background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.3)', padding: '20px', borderRadius: '20px', textAlign: 'center' }}>
                     <div style={{ color: '#f59e0b', fontSize: '13px', fontWeight: 900, marginBottom: '5px' }}>إجمالي الصيانة</div>
                     <div style={{ color: 'white', fontSize: '28px', fontWeight: 900 }}>{formatCurrency(totals.totalMaintenance)}</div>
                 </div>
-                <div style={{ background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.3)', padding: '20px', borderRadius: '20px', textAlign: 'center' }}>
+                <div className="veh-exp-total-card" style={{ background: 'rgba(59, 130, 246, 0.1)', border: '1px solid rgba(59, 130, 246, 0.3)', padding: '20px', borderRadius: '20px', textAlign: 'center' }}>
                     <div style={{ color: '#3b82f6', fontSize: '13px', fontWeight: 900, marginBottom: '5px' }}>إجمالي مصاريف الرحلات</div>
                     <div style={{ color: 'white', fontSize: '28px', fontWeight: 900 }}>{formatCurrency(totals.totalTripExpenses)}</div>
                 </div>
-                <div style={{ background: 'rgba(225, 29, 72, 0.1)', border: '1px solid rgba(225, 29, 72, 0.3)', padding: '20px', borderRadius: '20px', textAlign: 'center', boxShadow: '0 10px 30px rgba(225, 29, 72, 0.2)' }}>
+                <div className="veh-exp-total-card" style={{ background: 'rgba(225, 29, 72, 0.1)', border: '1px solid rgba(225, 29, 72, 0.3)', padding: '20px', borderRadius: '20px', textAlign: 'center', boxShadow: '0 10px 30px rgba(225, 29, 72, 0.2)' }}>
                     <div style={{ color: '#fb7185', fontSize: '13px', fontWeight: 900, marginBottom: '5px' }}>إجمالي التكاليف الكلية</div>
                     <div style={{ color: 'white', fontSize: '28px', fontWeight: 900 }}>{formatCurrency(totals.totalOverallCost)}</div>
                 </div>
             </div>
 
             {/* Data Table */}
-            <div style={{ background: 'rgba(255,255,255,0.02)', backdropFilter: 'blur(20px)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden' }}>
+            <div className="veh-exp-table-card" style={{ background: 'rgba(255,255,255,0.02)', backdropFilter: 'blur(20px)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden' }}>
                 {isLoading ? (
                     <div style={{ padding: '50px', textAlign: 'center', color: 'white', fontWeight: 900, fontSize: '20px' }}>جاري التحميل...</div>
                 ) : (
                     <div style={{ overflowX: 'auto' }}>
-                        <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right', color: 'white' }}>
+                        <table className="veh-exp-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right', color: 'white' }}>
                             <thead style={{ background: 'rgba(0,0,0,0.4)' }}>
                                 <tr>
                                     <th style={{ padding: '20px', fontSize: '14px', color: THEME.accentLight, borderBottom: '1px solid rgba(255,255,255,0.1)' }}>السيارة (اللوحة)</th>

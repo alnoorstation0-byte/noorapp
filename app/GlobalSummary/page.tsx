@@ -64,28 +64,37 @@ export default function MasterDashboard() {
         <MasterPage title="الملخص العام (Global Summary)" subtitle="نظرة شاملة لعمليات البيع والتوزيع والمحاسبة" icon="📊">
         
         <div style={{ padding: '10px', direction: 'rtl' }}>
+            <style>{`
+                @media (max-width: 768px) {
+                    .gs-header-card { flex-direction: column !important; padding: 15px !important; gap: 15px !important; }
+                    .gs-header-col { border-left: none !important; border-bottom: 1px solid rgba(28, 115, 171, 0.15) !important; padding: 0 0 10px 0 !important; }
+                    .gs-header-col:last-child { border-bottom: none !important; }
+                    .gs-header-col span:last-child { font-size: 22px !important; }
+                    .gs-grid { grid-template-columns: 1fr !important; gap: 15px !important; }
+                }
+            `}</style>
             
             {/* 👑 الهيدر العلوي: شريط المعلومات السريع */}
-            <div className="summary-glass-card fade-in-up" style={{ 
+            <div className="summary-glass-card gs-header-card fade-in-up" style={{ 
                 marginBottom: '30px',
                 display: 'flex',
                 padding: '25px 35px',
                 justifyContent: 'space-between',
                 borderBottom: '4px solid #1C73AB'
             }}>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1, borderLeft: '1px solid rgba(28, 115, 171, 0.2)' }}>
+                <div className="gs-header-col" style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1, borderLeft: '1px solid rgba(28, 115, 171, 0.2)' }}>
                     <span style={{ color: '#475569', fontSize: '14px', fontWeight: 700 }}>صافي السيولة النقدية</span>
                     <span style={{ color: '#10b981', fontSize: '28px', fontWeight: 900, textShadow: '0 0 20px rgba(16,185,129,0.4)' }}>
                         {formatCurrency(summary.finance.liquidity)}
                     </span>
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1, borderLeft: '1px solid rgba(28, 115, 171, 0.2)', paddingRight: '35px' }}>
+                <div className="gs-header-col" style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1, borderLeft: '1px solid rgba(28, 115, 171, 0.2)', paddingRight: '35px' }}>
                     <span style={{ color: '#475569', fontSize: '14px', fontWeight: 700 }}>رحلات التوزيع النشطة</span>
                     <span style={{ color: '#1e293b', fontSize: '28px', fontWeight: 900 }}>
                         {summary.operations.activeTrips} <span style={{ fontSize: '16px', fontWeight: 500, color: '#475569' }}>رحلة</span>
                     </span>
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1, paddingRight: '35px' }}>
+                <div className="gs-header-col" style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1, paddingRight: '35px' }}>
                     <span style={{ color: '#475569', fontSize: '14px', fontWeight: 700 }}>تنبيهات محاسبية</span>
                     <span style={{ color: summary.audit.unbalanced + summary.audit.orphans > 0 ? '#ef4444' : '#10b981', fontSize: '28px', fontWeight: 900 }}>
                         {summary.audit.unbalanced + summary.audit.orphans} <span style={{ fontSize: '16px', fontWeight: 500, color: '#94a3b8' }}>تنبيه</span>
@@ -102,7 +111,7 @@ export default function MasterDashboard() {
             </div>
 
             {/* 🧩 مصفوفة البيانات الكبرى (The Grid) */}
-            <div style={{ display: 'grid', gridTemplateColumns: '2fr 1.2fr', gap: '25px' }}>
+            <div className="gs-grid" style={{ display: 'grid', gridTemplateColumns: '2fr 1.2fr', gap: '25px' }}>
                 
                 {/* العمود الأيمن: تحليل العمليات */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>

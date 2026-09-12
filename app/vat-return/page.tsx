@@ -349,6 +349,19 @@ export default function VATReturnPage() {
             color: #b91c1c;
           }
 
+          @media (max-width: 768px) {
+            .filter-bar { flex-direction: column !important; align-items: stretch !important; padding: 15px !important; }
+            .filter-group { width: 100% !important; justify-content: space-between !important; }
+            .filter-group input { flex: 1 !important; }
+            .vat-summary-grid { grid-template-columns: 1fr !important; gap: 15px !important; }
+            .vat-card { padding: 15px !important; border-radius: 16px !important; }
+            .vat-amount { font-size: 24px !important; }
+            .vat-chart-container { padding: 15px !important; border-radius: 16px !important; }
+            .table-glass-container { border-radius: 16px !important; overflow-x: auto !important; }
+            .aqua-table { min-width: 600px !important; }
+            .aqua-table th, .aqua-table td { padding: 10px 12px !important; font-size: 12px !important; }
+          }
+
           @media print {
             body { 
                 background: white !important; 
