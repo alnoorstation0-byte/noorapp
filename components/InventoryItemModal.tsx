@@ -4,61 +4,7 @@ import AquaModalWrapper from '@/components/AquaModalWrapper';
 import SearchableSelect from './SearchableSelect';
 import TranslatableInput from './TranslatableInput';
 import { THEME } from '@/lib/theme';
-
-function BarcodeScannerModal({ onDetected, onClose }: { onDetected: (code: string) => void; onClose: () => void }) {
-  const scannerRef = useRef<any>(null);
-  const [error, setError] = useState('');
-  const [scanning, setScanning] = useState(false);
-  useEffect(() => {
-    let stopped = false;
-    let isRunning = false;
-    const start = async () => {
-      try {
-        const { Html5Qrcode } = await import('html5-qrcode');
-        const scanner = new Html5Qrcode('bc-reader');
-        scannerRef.current = scanner;
-        await scanner.start(
-          { facingMode: 'environment' },
-          { fps: 10, qrbox: { width: 240, height: 120 } },
-          (text: string) => {
-            if (!stopped) {
-              stopped = true;
-              isRunning = false;
-              scanner.stop().catch(() => {});
-              onDetected(text);
-            }
-          },
-          () => {}
-        );
-        isRunning = true;
-        setScanning(true);
-      } catch {
-        setError('ERROR');
-      }
-    };
-    start();
-    return () => {
-      stopped = true;
-      if (scannerRef.current && isRunning) {
-        scannerRef.current.stop().catch(() => {});
-        isRunning = false;
-      }
-    };
-  }, [onDetected]);
-  return (
-    <div style={{ position:'fixed', inset:0, zIndex:99999, background:'rgba(0,0,0,0.88)', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', gap:'20px' }}>
-      <div style={{ color:'white', fontWeight:900, fontSize:'18px' }}>
-        📷 وجّه الكاميرا نحو الباركود
-      </div>
-      <div style={{ width:'300px', height:'200px', background:'#000', borderRadius:'16px', overflow:'hidden', border:'3px solid #2891C8', boxShadow:'0 0 40px rgba(40,145,200,0.6)' }}>
-        <div id="bc-reader" style={{ width:'100%', height:'100%' }} />
-      </div>
-      {scanning && <div style={{ color:'#7FD4E3', fontSize:'13px', fontWeight:800 }}>🔍 جاري المسح تلقائياً...</div>}
-      {error && <div style={{ color:'#ef4444', fontWeight:700 }}>تعذر الوصول للكاميرا - تحقق من الاذن</div>}
-      <button onClick={onClose} style={{ background:'rgba(255,255,255,0.1)', border:'1px solid rgba(255,255,255,0.3)', color:'white', borderRadius:'12px', padding:'10px 32px', fontWeight:900, cursor:'pointer' }}>X الغاء</button>
-    </div>
-  );
-}
+import { ProfessionalBarcodeModal } from './BarcodeScannerWidget';
 
 async function printBarcodeLabel(barcode: string, itemName: string, price?: number) {
   if (!barcode?.trim()) return;
@@ -136,7 +82,7 @@ export default function InventoryItemModal({ isOpen, onClose, currentRecord, set
 
   return (
     <>
-      {showScanner && <BarcodeScannerModal onDetected={handleBarcodeDetected} onClose={() => setShowScanner(false)} />}
+      {showScanner && <ProfessionalBarcodeModal onDetected={handleBarcodeDetected} onClose={() => setShowScanner(false)} />}
       <AquaModalWrapper 
         isOpen={isOpen} 
         onClose={onClose}

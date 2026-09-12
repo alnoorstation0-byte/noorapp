@@ -654,36 +654,47 @@ export default function HierarchicalLedgerPage() {
 
         /* 📜 Entry lines (Transactions) on Desktop */
         .entry-line { 
-          background: rgba(255, 255, 255, 0.6);
-          margin: 4px 20px 8px 30px;
-          padding: 10px 16px; 
-          border-radius: 12px;
+          background: rgba(255, 255, 255, 0.75);
+          margin: 4px 6px 6px 6px;
+          padding: 6px 14px; 
+          border-radius: 10px;
           border-right: 3px solid ${THEME.goldAccent};
           display: flex;
           align-items: center;
           justify-content: space-between;
-          gap: 16px;
-          font-size: 12px;
-          border: 1px solid rgba(255, 255, 255, 0.4);
+          gap: 12px;
+          font-size: 11px;
+          border: 1px solid rgba(28, 115, 171, 0.15);
           box-sizing: border-box;
+          max-width: 100%;
+          overflow: hidden;
+          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
         }
         .entry-line-top {
           display: flex;
           align-items: center;
-          gap: 16px;
+          gap: 10px;
           flex: 1;
           min-width: 0;
+          overflow: hidden;
         }
         .entry-line-date {
           font-weight: 800;
-          color: ${THEME.goldAccent};
+          color: #475569;
           font-family: monospace;
-          width: 95px;
+          font-size: 11px;
+          width: 82px;
           flex-shrink: 0;
+          background: rgba(0, 0, 0, 0.04);
+          padding: 2px 6px;
+          border-radius: 5px;
+          text-align: center;
+          letter-spacing: -0.2px;
         }
         .entry-line-desc {
           color: ${THEME.primary};
           font-weight: 700;
+          font-size: 12px;
           flex: 1;
           min-width: 0;
           white-space: nowrap;
@@ -691,20 +702,39 @@ export default function HierarchicalLedgerPage() {
           text-overflow: ellipsis;
         }
         .entry-line-values {
-          display: grid;
-          grid-template-columns: 120px 120px 140px;
-          gap: 12px;
+          display: flex;
           align-items: center;
+          gap: 8px;
           flex-shrink: 0;
         }
         .entry-stat-chip {
           text-align: center;
           font-weight: 800;
           font-family: monospace;
+          font-size: 11px;
+          padding: 3px 8px;
+          border-radius: 6px;
+          display: inline-flex;
+          align-items: center;
+          gap: 4px;
+          white-space: nowrap;
         }
-        .entry-stat-chip.text-success { color: ${THEME.success}; }
-        .entry-stat-chip.text-danger { color: ${THEME.danger}; }
-        .entry-stat-label { display: none; }
+        .entry-stat-chip.text-success { 
+          color: #16a34a; 
+          background: rgba(22, 163, 74, 0.08); 
+          border: 1px solid rgba(22, 163, 74, 0.2); 
+        }
+        .entry-stat-chip.text-danger { 
+          color: #ef4444; 
+          background: rgba(239, 68, 68, 0.08); 
+          border: 1px solid rgba(239, 68, 68, 0.2); 
+        }
+        .entry-stat-label { 
+          display: inline; 
+          font-size: 10px; 
+          opacity: 0.8; 
+          font-weight: 700;
+        }
 
         .mobile-summary-strip { display: none; }
         .mobile-accounts-toolbar { display: none; }
@@ -1214,47 +1244,62 @@ export default function HierarchicalLedgerPage() {
 
           /* 7. Transactions (entry-line) on Mobile */
           .entry-line {
-            margin: 4px 0 6px 6px !important;
+            margin: 4px 4px 6px 4px !important;
             padding: 8px 10px !important;
             display: flex !important;
             flex-direction: column !important;
             gap: 6px !important;
-            border-radius: 10px !important;
-            background: rgba(255, 255, 255, 0.85) !important;
+            border-radius: 8px !important;
+            background: rgba(255, 255, 255, 0.9) !important;
             font-size: 11px !important;
+            max-width: 100% !important;
+            box-sizing: border-box !important;
+            overflow: hidden !important;
           }
 
           .entry-line-top {
             display: flex !important;
             justify-content: space-between !important;
             align-items: center !important;
-            gap: 8px !important;
+            gap: 6px !important;
+            width: 100% !important;
+            min-width: 0 !important;
           }
 
           .entry-line-desc {
             white-space: nowrap !important;
             overflow: hidden !important;
             text-overflow: ellipsis !important;
-            max-width: 65% !important;
+            flex: 1 !important;
+            min-width: 0 !important;
+            font-size: 11px !important;
+          }
+
+          .entry-line-date {
+            font-size: 10px !important;
+            padding: 2px 5px !important;
+            width: auto !important;
           }
 
           .entry-line-values {
             display: flex !important;
             justify-content: flex-end !important;
-            gap: 12px !important;
+            gap: 6px !important;
             border-top: 1px dashed rgba(0,0,0,0.06) !important;
             padding-top: 4px !important;
+            width: 100% !important;
           }
 
           .entry-stat-label {
             display: inline !important;
             font-size: 9px !important;
             color: #64748b !important;
-            margin-left: 3px !important;
+            margin-left: 2px !important;
           }
 
           .entry-stat-chip {
-            font-size: 11px !important;
+            font-size: 10px !important;
+            padding: 2px 6px !important;
           }
         }
       `}</style>
@@ -1330,25 +1375,33 @@ function AccountNode({ node, expandedIds, toggleExpand, selectedIds, toggleSelec
           {node.children?.map((child: any) => (
             <AccountNode key={child.id} node={child} expandedIds={expandedIds} toggleExpand={toggleExpand} selectedIds={selectedIds} toggleSelection={toggleSelection} depth={depth + 1} />
           ))}
-          {/* 🚀 عرض القيود تحت الحسابات الفرعية */}
+          {/* 🚀 عرض القيود تحت الحسابات الفرعية بحجم متناسق ومريح */}
           {node.transactions?.map((t: any, idx: number) => (
             <div key={idx} className="entry-line">
               <div className="entry-line-top">
                 <span className="entry-line-date">{t.date}</span>
-                <span className="entry-line-desc">{t.notes || t.description || 'بدون بيان'}</span>
+                <span className="entry-line-desc" title={t.notes || t.description || 'بدون بيان'}>
+                  {t.notes || t.description || 'بدون بيان'}
+                </span>
               </div>
               <div className="entry-line-values">
-                <div className="entry-stat-chip text-success">
-                  <span className="entry-stat-label">مدين:</span>
-                  <span>{t.debit ? formatCurrency(t.debit) : '-'}</span>
-                </div>
-                <div className="entry-stat-chip text-danger">
-                  <span className="entry-stat-label">دائن:</span>
-                  <span>{t.credit ? formatCurrency(t.credit) : '-'}</span>
-                </div>
-                <div className="entry-stat-chip desktop-only" style={{ color: '#94a3b8' }}>
-                  <span>-</span>
-                </div>
+                {Number(t.debit) > 0 && (
+                  <div className="entry-stat-chip text-success">
+                    <span className="entry-stat-label">مدين:</span>
+                    <span>{formatCurrency(t.debit)}</span>
+                  </div>
+                )}
+                {Number(t.credit) > 0 && (
+                  <div className="entry-stat-chip text-danger">
+                    <span className="entry-stat-label">دائن:</span>
+                    <span>{formatCurrency(t.credit)}</span>
+                  </div>
+                )}
+                {!Number(t.debit) && !Number(t.credit) && (
+                  <div className="entry-stat-chip" style={{ color: '#94a3b8' }}>
+                    <span>0.00 ر.س</span>
+                  </div>
+                )}
               </div>
             </div>
           ))}
