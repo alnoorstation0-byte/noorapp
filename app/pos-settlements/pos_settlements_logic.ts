@@ -170,7 +170,7 @@ export function usePosSettlementsLogic() {
                 .from('receipt_vouchers')
                 .select(`
                     id, receipt_number, date, amount, payment_method, 
-                    shift_id, warehouse_id, delegate_id, status, notes, safe_bank_acc_id
+                    shift_id, delegate_id, status, notes, safe_bank_acc_id
                 `)
                 .in('status', ['معتمد', 'مرحل', 'posted', 'approved']);
 
@@ -191,7 +191,7 @@ export function usePosSettlementsLogic() {
             let q = supabase
                 .from('expenses')
                 .select(`
-                    id, exp_date, total_price, paid_amount, warehouse_id, 
+                    id, exp_date, total_price, paid_amount, 
                     shift_id, description, main_category
                 `);
 
@@ -618,9 +618,8 @@ export function usePosSettlementsLogic() {
                         partner_id: cashierId || null,
                         delegate_id: cashierId || null,
                         shift_id: shiftId,
-                        warehouse_id: warehouseId,
                         safe_bank_acc_id: targetSafeAcc,
-                        partner_acc_id: ACC.EMPLOYEE_CUSTODY, // 125 عهدة موظفين/مناديب
+                        partner_acc_id: ACC.EMPLOYEE_CUSTODY, // 125 ذمة موظف/مندوب
                         status: 'معتمد',
                         notes: voucherNotes
                     }])

@@ -1,1 +1,0 @@
-const { createClient } = require("@supabase/supabase-js"); require("dotenv").config({path: ".env.local"}); const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY); supabase.rpc("query_sql", { query: "SELECT pg_get_functiondef(oid) FROM pg_proc WHERE proname = 'approve_inventory_transaction'" }).then(console.log);
