@@ -133,15 +133,46 @@ export async function syncAllWarehouseBalances() {
 /**
  * 🟢 اعتماد حركة مخزنية واحدة وتحديث أرصدة المستودع المعني ومستودع الوجهة وتوليد القيود المحاسبية فوراً
  */
-export async function executeApproveTransaction(transactionId: string) {
-  // 1. جلب بيانات الحركة
+export async function executeApproveTransaction(transactionId: string, options?: { skipSync?: boolean }) {
+  // 1. جلب بيانات الحركة الأساسية أولاً بأمان لتفادي أي تعارض في العلاقات (PGRST201 Foreign Key Ambiguity)
   const { data: txn, error: getErr } = await supabase
     .from('inventory_transactions')
-    .select('*, inventory_items(name), partners(name, account_id), fleet_operations(operation_number, vehicle_id, driver_id)')
+    .select('*')
     .eq('id', transactionId)
     .single();
 
   if (getErr || !txn) throw new Error(getErr?.message || 'الحركة غير موجودة');
+
+  // جلب البيانات المرتبطة بأمان تام بدون المخاطرة بفشل الاستعلام الرئيسي
+  let itemName = 'صنف';
+  if (txn.item_id) {
+    try {
+      const { data: itm } = await supabase.from('inventory_items').select('name').eq('id', txn.item_id).maybeSingle();
+      if (itm?.name) itemName = itm.name;
+    } catch {}
+  }
+
+  let partnerAccountId: string | null = null;
+  if (txn.partner_id) {
+    try {
+      const { data: p } = await supabase.from('partners').select('name, account_id').eq('id', txn.partner_id).maybeSingle();
+      if (p?.account_id) partnerAccountId = p.account_id;
+    } catch {}
+  }
+
+  let fleetOpNumber = '';
+  let fleetDriverId = '';
+  let fleetVehicleId = '';
+  if (txn.fleet_operation_id) {
+    try {
+      const { data: fo } = await supabase.from('fleet_operations').select('operation_number, driver_id, vehicle_id').eq('id', txn.fleet_operation_id).maybeSingle();
+      if (fo) {
+        fleetOpNumber = fo.operation_number || '';
+        fleetDriverId = fo.driver_id || '';
+        fleetVehicleId = fo.vehicle_id || '';
+      }
+    } catch {}
+  }
 
   const qty = Number(txn.quantity) || 0;
   const unitPrice = Number(txn.unit_price) || 0;
@@ -150,20 +181,21 @@ export async function executeApproveTransaction(transactionId: string) {
   let destWh = txn.destination_warehouse_id;
 
   // إذا كانت الحركة مربوطة بأمر تشغيل رحلة ولم يُحدد مستودع وجهة، نحدد مستودع السيارة تلقائياً
-  if (!destWh && txn.fleet_operations?.vehicle_id) {
-    const { data: vWh } = await supabase
-      .from('warehouses')
-      .select('id')
-      .eq('vehicle_id', txn.fleet_operations.vehicle_id)
-      .eq('is_active', true)
-      .maybeSingle();
-    if (vWh) destWh = vWh.id;
+  if (!destWh && fleetVehicleId) {
+    try {
+      const { data: vWh } = await supabase
+        .from('warehouses')
+        .select('id')
+        .eq('vehicle_id', fleetVehicleId)
+        .eq('is_active', true)
+        .maybeSingle();
+      if (vWh) destWh = vWh.id;
+    } catch {}
   }
 
   // 2. توليد القيد المحاسبي المزدوج لحركة المخزون (إن لم يكن موجوداً)
   let journalId = txn.journal_id;
   if (!journalId && totalAmount > 0) {
-    const itemName = (txn.inventory_items as any)?.name || 'صنف';
     const date = txn.transaction_date || new Date().toISOString().split('T')[0];
 
     let headerDesc = '';
@@ -177,7 +209,7 @@ export async function executeApproveTransaction(transactionId: string) {
       // توريد مخزني / شراء: من حـ/ 126 مخزون البضائع (مدين) إلى حـ/ 219 فواتير قيد الاستلام أو المورد (دائن)
       headerDesc = `توريد مخزني #${txn.transaction_number || ''} - صنف: ${itemName} (كمية: ${qty})`;
       debitAcc = ACC.INVENTORY;
-      creditAcc = (txn.partners as any)?.account_id || ACC.PENDING_INVOICES;
+      creditAcc = partnerAccountId || ACC.PENDING_INVOICES;
       debitNotes = 'إضافة لمخزون البضائع (مدين)';
       creditNotes = 'استحقاق قيد الاستلام / مورد (دائن)';
       partnerIdForLine = txn.partner_id || null;
@@ -190,16 +222,16 @@ export async function executeApproveTransaction(transactionId: string) {
       creditNotes = 'تخفيض مخزون البضائع (دائن)';
     } else if (txn.fleet_operation_id) {
       // تحميل عهدة أسطول ومندوب
-      headerDesc = `تحميل عهدة أسطول #${(txn.fleet_operations as any)?.operation_number || ''} - صنف: ${itemName} (كمية: ${qty})`;
+      headerDesc = `تحميل عهدة أسطول #${fleetOpNumber || ''} - صنف: ${itemName} (كمية: ${qty})`;
       debitAcc = ACC.INVENTORY_CUSTODY;
       creditAcc = ACC.INVENTORY;
       debitNotes = 'تحميل عهدة سيارة/مندوب (مدين)';
       creditNotes = 'صرف من المستودع للعهدة (دائن)';
-      partnerIdForLine = (txn.fleet_operations as any)?.driver_id || txn.partner_id || null;
+      partnerIdForLine = fleetDriverId || txn.partner_id || null;
     } else {
       // صرف مخزني عادي
       headerDesc = `صرف مخزني #${txn.transaction_number || ''} - صنف: ${itemName} (كمية: ${qty})`;
-      debitAcc = (txn.partners as any)?.account_id || ACC.CUSTOMERS_AR;
+      debitAcc = partnerAccountId || ACC.CUSTOMERS_AR;
       creditAcc = ACC.INVENTORY;
       debitNotes = 'استحقاق مدين (ذمة)';
       creditNotes = 'صرف من مخزون البضائع (دائن)';
@@ -276,13 +308,15 @@ export async function executeApproveTransaction(transactionId: string) {
     console.warn('RPC approve warning (handled):', rpcErr);
   }
 
-  // 5. 🚀 إعادة مزامنة وتحديث أرصدة كافة المستودعات وسيارات التوزيع فوراً
-  await syncAllWarehouseBalances();
+  if (!options?.skipSync) {
+    // 5. 🚀 إعادة مزامنة وتحديث أرصدة كافة المستودعات وسيارات التوزيع فوراً
+    await syncAllWarehouseBalances();
 
-  // 6. بث التحديث اللحظي لجميع الشاشات
-  emitTableChange('inventory_transactions');
-  emitTableChange('journal_headers');
-  emitTableChange('journal_lines');
+    // 6. بث التحديث اللحظي لجميع الشاشات
+    emitTableChange('inventory_transactions');
+    emitTableChange('journal_headers');
+    emitTableChange('journal_lines');
+  }
 
   return { success: true };
 }

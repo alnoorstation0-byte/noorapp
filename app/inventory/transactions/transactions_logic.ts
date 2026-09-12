@@ -1,8 +1,8 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { supabase } from '@/lib/supabase';
 import { showGlobalToast } from '@/lib/toast-context';
-import { useRealtimeListener } from '@/lib/useRealtimeSync';
-import { executeApproveTransaction, executeUnapproveTransaction } from '@/lib/inventory_engine';
+import { useRealtimeListener, emitTableChange } from '@/lib/useRealtimeSync';
+import { executeApproveTransaction, executeUnapproveTransaction, syncAllWarehouseBalances } from '@/lib/inventory_engine';
 
 export function useInventoryTransactionsLogic() {
   const [rawRecords, setRawRecords] = useState<any[]>([]);
@@ -86,14 +86,6 @@ export function useInventoryTransactionsLogic() {
   };
 
   const handleApproveTransaction = async (transaction: any) => {
-    // Hardcoded known account IDs based on user input
-    const INVENTORY_ACCOUNT_ID = 'c5efa035-c8d5-4d13-bf33-7c7cd854f393'; // مخزون الخامات والمواد
-    const TREASURY_ACCOUNT_ID = '21b8a1db-bc9f-4cf8-b741-1efeded0963c';  // الخزينة الرئيسية
-    
-    // Determine Partner Account ID. Fallbacks: 211 for suppliers (IN), 123 for customers (OUT)
-    const PARTNER_ACCOUNT_ID = transaction.partner_account_id || 
-      (transaction.type === 'in' ? '2ca6f54c-5f37-49a0-8c41-e37f94b09752' : '4f828d0d-a1f4-4762-83e3-c17dafae802d');
-
     const isSupply = transaction.type === 'in' || transaction.type === 'transfer_in'; 
     const totalAmount = transaction.quantity * transaction.unit_price;
 
@@ -102,16 +94,25 @@ export function useInventoryTransactionsLogic() {
       return;
     }
 
+    // ⚡ تحديث تفاؤلي فوري في الواجهة ليظهر التغيير بـ 0 ثانية تأخير
+    setRawRecords(prev => prev.map(r => r.id === transaction.id ? { ...r, status: 'approved' } : r));
+
     try {
       setIsLoading(true);
 
       await executeApproveTransaction(transaction.id);
 
-      showGlobalToast("✅ تم الاعتماد وتوليد القيود المحاسبية وتحديث المستودع بنجاح.", 'warning');
-      fetchTransactions();
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('pending_counts_refresh'));
+        window.dispatchEvent(new CustomEvent('unread_counts_refresh'));
+      }
+
+      showGlobalToast("✅ تم الاعتماد وتوليد القيود المحاسبية وتحديث المستودع بنجاح.", 'success');
+      await fetchTransactions();
     } catch (error: any) {
       console.error("خطأ في الاعتماد:", error);
-      showGlobalToast(`❌ حدث خطأ أثناء الاعتماد: ${error.message || ''}`, 'warning');
+      showGlobalToast(`❌ حدث خطأ أثناء الاعتماد: ${error.message || ''}`, 'error');
+      await fetchTransactions();
     } finally {
       setIsLoading(false);
     }
@@ -126,22 +127,46 @@ export function useInventoryTransactionsLogic() {
     const confirmApprove = confirm(`هل أنت متأكد من اعتماد جميع الحركات المخزنية المعلقة (${pendingList.length}) دفعة واحدة وتحديث أرصدة المستودعات وترحيل القيود؟`);
     if (!confirmApprove) return;
 
+    // ⚡ تحديث تفاؤلي فوري في الـ State ليختفي الإشعار وتتغير الحالة على الفور بدون ريفرش
+    const pendingIds = new Set(pendingList.map(t => t.id));
+    setRawRecords(prev => prev.map(row => 
+      pendingIds.has(row.id) ? { ...row, status: 'approved' } : row
+    ));
+
     try {
       setIsLoading(true);
       let success = 0;
       for (const t of pendingList) {
         try {
-          await executeApproveTransaction(t.id);
+          await executeApproveTransaction(t.id, { skipSync: true });
           success++;
         } catch (subErr) {
           console.error(`Failed to approve ${t.id}:`, subErr);
         }
       }
-      showGlobalToast(`✅ تم اعتماد ${success} حركة مخزنية وتحديث القيود بنجاح!`, 'warning');
-      fetchTransactions();
+
+      // مزامنة الأرصدة وبث التحديثات مرة واحدة لجميع الشاشات
+      await syncAllWarehouseBalances();
+      emitTableChange('inventory_transactions');
+      emitTableChange('journal_headers');
+      emitTableChange('journal_lines');
+
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('pending_counts_refresh'));
+        window.dispatchEvent(new CustomEvent('unread_counts_refresh'));
+      }
+
+      if (success === pendingList.length) {
+        showGlobalToast(`✅ تم اعتماد جميع الحركات المخزنية (${success}) وتحديث القيود بنجاح!`, 'success');
+      } else {
+        showGlobalToast(`⚠️ تم اعتماد ${success} من أصل ${pendingList.length} حركة مخزنية.`, 'warning');
+      }
+
+      await fetchTransactions();
     } catch (err: any) {
       console.error(err);
-      showGlobalToast(`❌ حدث خطأ أثناء الاعتماد الجماعي: ${err.message}`, 'warning');
+      showGlobalToast(`❌ حدث خطأ أثناء الاعتماد الجماعي: ${err.message}`, 'error');
+      await fetchTransactions();
     } finally {
       setIsLoading(false);
     }
@@ -151,16 +176,51 @@ export function useInventoryTransactionsLogic() {
     const confirmUnpost = confirm("⚠️ تحذير: سيتم فك اعتماد الحركة وإرجاع كمية المستودع (ومسح القيود إن وجدت). هل أنت متأكد؟");
     if (!confirmUnpost) return;
 
+    // ⚡ تحديث تفاؤلي فوري
+    setRawRecords(prev => prev.map(r => r.id === transaction.id ? { ...r, status: 'pending' } : r));
+
     try {
       setIsLoading(true);
 
       await executeUnapproveTransaction(transaction.id);
 
-      showGlobalToast("✅ تم فك الاعتماد ومسح القيد المحاسبي وعكس أرصدة المستودع بنجاح.", 'warning');
-      fetchTransactions();
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('pending_counts_refresh'));
+        window.dispatchEvent(new CustomEvent('unread_counts_refresh'));
+      }
+
+      showGlobalToast("✅ تم فك الاعتماد ومسح القيد المحاسبي وعكس أرصدة المستودع بنجاح.", 'success');
+      await fetchTransactions();
     } catch (error: any) {
       console.error("خطأ في فك الاعتماد:", error);
-      showGlobalToast(`❌ حدث خطأ أثناء فك الاعتماد: ${error.message || ''}`, 'warning');
+      showGlobalToast(`❌ حدث خطأ أثناء فك الاعتماد: ${error.message || ''}`, 'error');
+      await fetchTransactions();
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleDeleteTransaction = async (id: string) => {
+    if (!confirm('هل أنت متأكد من حذف هذه الحركة نهائياً؟')) return;
+
+    // ⚡ تحديث تفاؤلي فوري
+    setRawRecords(prev => prev.filter(r => r.id !== id));
+
+    try {
+      setIsLoading(true);
+      await supabase.from('inventory_transactions').delete().eq('id', id);
+      await syncAllWarehouseBalances();
+      emitTableChange('inventory_transactions');
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('pending_counts_refresh'));
+        window.dispatchEvent(new CustomEvent('unread_counts_refresh'));
+      }
+      showGlobalToast("🗑️ تم حذف الحركة وتحديث الأرصدة بنجاح.", 'success');
+      await fetchTransactions();
+    } catch (err: any) {
+      console.error("خطأ في الحذف:", err);
+      showGlobalToast(`❌ حدث خطأ أثناء الحذف: ${err.message || ''}`, 'error');
+      await fetchTransactions();
     } finally {
       setIsLoading(false);
     }
@@ -224,6 +284,7 @@ export function useInventoryTransactionsLogic() {
     fetchTransactions,
     handleApproveTransaction,
     handleUnapproveTransaction,
-    handleBulkApprove
+    handleBulkApprove,
+    handleDeleteTransaction
   };
 }

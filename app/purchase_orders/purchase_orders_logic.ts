@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { showGlobalToast } from '@/lib/toast-context';
-import { useRealtimeListener } from '@/lib/useRealtimeSync';
-import { executeApproveTransaction, executeUnapproveTransaction } from '@/lib/inventory_engine';
+import { useRealtimeListener, emitTableChange } from '@/lib/useRealtimeSync';
+import { executeApproveTransaction, executeUnapproveTransaction, syncAllWarehouseBalances } from '@/lib/inventory_engine';
 
 import { useAuth } from '@/components/authGuard';
 
@@ -85,19 +85,33 @@ export function usePurchaseOrdersLogic() {
   useRealtimeListener('inventory_transactions', () => fetchTransactions());
 
   const handleApproveTransaction = async (transaction: any) => {
+    // ⚡ تحديث تفاؤلي فوري في الواجهة
+    setTransactions(prev => prev.map(t => t.id === transaction.id ? { ...t, status: 'approved' } : t));
+
     try {
       setIsLoading(true);
       for (const id of transaction.ids) {
-          await executeApproveTransaction(id);
+        await executeApproveTransaction(id, { skipSync: true });
       }
 
-      showGlobalToast('تم اعتماد أمر الشراء واستلامه بالمستودع بنجاح', 'success');
-      fetchTransactions();
+      await syncAllWarehouseBalances();
+      emitTableChange('inventory_transactions');
+      emitTableChange('journal_headers');
+      emitTableChange('journal_lines');
+
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('pending_counts_refresh'));
+        window.dispatchEvent(new CustomEvent('unread_counts_refresh'));
+      }
+
+      showGlobalToast('تم اعتماد أمر الشراء واستلامه بالمستودع بنجاح ✅', 'success');
+      await fetchTransactions();
     } catch (error: any) {
       console.error('Error approving PO:', error);
       showGlobalToast('حدث خطأ في الاعتماد: ' + error.message, 'error');
+      await fetchTransactions();
     } finally {
-        setIsLoading(false);
+      setIsLoading(false);
     }
   };
 
@@ -105,22 +119,32 @@ export function usePurchaseOrdersLogic() {
     const confirmUnpost = confirm('هل أنت متأكد من إلغاء الاستلام؟ سيتم خصم الكمية من المستودع وعكس القيد المحاسبي.');
     if (!confirmUnpost) return;
 
+    // ⚡ تحديث تفاؤلي فوري
+    setTransactions(prev => prev.map(t => t.id === transaction.id ? { ...t, status: 'pending' } : t));
+
     try {
       setIsLoading(true);
       for (const id of transaction.ids) {
-          await executeUnapproveTransaction(id);
+        await executeUnapproveTransaction(id);
       }
 
       // Clean up entitlement vouchers if any from expenses
       await supabase.from('expenses').delete().eq('expense_number', `PO-${transaction.transaction_number}`);
 
-      showGlobalToast('تم إلغاء الاستلام بنجاح', 'warning');
-      fetchTransactions();
+      emitTableChange('inventory_transactions');
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('pending_counts_refresh'));
+        window.dispatchEvent(new CustomEvent('unread_counts_refresh'));
+      }
+
+      showGlobalToast('تم إلغاء الاستلام بنجاح', 'success');
+      await fetchTransactions();
     } catch (error: any) {
       console.error('Error unapproving PO:', error);
       showGlobalToast('حدث خطأ في إلغاء الاعتماد: ' + error.message, 'error');
+      await fetchTransactions();
     } finally {
-        setIsLoading(false);
+      setIsLoading(false);
     }
   };
 

@@ -123,13 +123,7 @@ export default function InventoryTransactionsPage() {
                 ☑ الاستلام والتوريد للمخزون
               </button>
               <button 
-                onClick={async () => {
-                  if(confirm('هل أنت متأكد من حذف هذه الحركة نهائياً؟')) {
-                    await supabase.from('inventory_transactions').delete().eq('id', row.id);
-                    await syncAllWarehouseBalances();
-                    logic.fetchTransactions();
-                  }
-                }}
+                onClick={() => logic.handleDeleteTransaction(row.id)}
                 className="btn-main-glass red"
                 style={{ width: 'auto', padding: '5px 12px', fontSize: '11px', margin: 0 }}
               >
