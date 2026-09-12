@@ -52,44 +52,72 @@ export async function GET(request: Request) {
         const { data: shifts = [], error: shiftErr } = await query;
         if (shiftErr) throw shiftErr;
 
-        // جلب عدد الفواتير لكل وردية
+        // جلب عدد الفواتير والمبيعات الحية لكل وردية
         const shiftIds = (shifts || []).map((s: any) => s.id);
         const invoiceCounts: Record<string, number> = {};
+        const liveSalesByShift: Record<string, { cash: number; card: number; credit: number; total: number }> = {};
+
         if (shiftIds.length > 0) {
             const { data: invRows } = await supabaseAdmin
                 .from('invoices')
-                .select('shift_id')
+                .select('shift_id, total_amount, payment_method')
                 .in('shift_id', shiftIds);
+
             (invRows || []).forEach((r: any) => {
                 if (r.shift_id) {
                     invoiceCounts[r.shift_id] = (invoiceCounts[r.shift_id] || 0) + 1;
+                    if (!liveSalesByShift[r.shift_id]) {
+                        liveSalesByShift[r.shift_id] = { cash: 0, card: 0, credit: 0, total: 0 };
+                    }
+                    const amt = Number(r.total_amount || 0);
+                    const m = (r.payment_method || '').toLowerCase().trim();
+                    if (m.includes('آجل') || m.includes('اجل') || m.includes('أجل') || m.includes('ذمم') || m.includes('حساب') || m === 'credit') {
+                        liveSalesByShift[r.shift_id].credit += amt;
+                    } else if (m.includes('شبك') || m.includes('مدى') || m.includes('بطاق') || m.includes('بنك') || m.includes('تحويل') || m === 'card' || m === 'bank') {
+                        liveSalesByShift[r.shift_id].card += amt;
+                    } else {
+                        liveSalesByShift[r.shift_id].cash += amt;
+                    }
+                    liveSalesByShift[r.shift_id].total += amt;
                 }
             });
         }
 
-        const formatted = (shifts || []).map((s: any) => ({
-            id: s.id,
-            status: s.status,
-            opened_at: s.opened_at,
-            closed_at: s.closed_at,
-            warehouse_id: s.warehouse_id,
-            warehouse_name: s.warehouse?.name || 'مستودع غير محدد',
-            warehouse_type: s.warehouse?.type || 'main',
-            delegate_id: s.delegate_id,
-            delegate_name: s.delegate?.name || 'مبيعات مباشرة (بدون مندوب)',
-            starting_cash: Number(s.starting_cash || 0),
-            expected_cash: Number(s.expected_cash || 0),
-            actual_cash: Number(s.actual_cash || 0),
-            shortage_overage: Number(s.shortage_overage || 0),
-            total_sales: Number(s.total_sales || 0),
-            total_cash_sales: Number(s.total_cash_sales || 0),
-            total_card_sales: Number(s.total_card_sales || 0),
-            total_credit_sales: Number(s.total_credit_sales || 0),
-            bottles_sold: Number(s.bottles_sold || 0),
-            bottles_returned: Number(s.bottles_returned || 0),
-            bottles_shortage: Number(s.bottles_shortage || 0),
-            invoices_count: invoiceCounts[s.id] || 0
-        }));
+        const formatted = (shifts || []).map((s: any) => {
+            const isClosed = s.status === 'closed' && (Number(s.total_sales || 0) > 0 || (invoiceCounts[s.id] || 0) === 0);
+            const live = liveSalesByShift[s.id] || { cash: 0, card: 0, credit: 0, total: 0 };
+            const starting = Number(s.starting_cash || 0);
+
+            const totalSales = isClosed ? Number(s.total_sales || 0) : live.total;
+            const totalCash = isClosed ? Number(s.total_cash_sales || 0) : live.cash;
+            const totalCard = isClosed ? Number(s.total_card_sales || 0) : live.card;
+            const totalCredit = isClosed ? Number(s.total_credit_sales || 0) : live.credit;
+            const expectedCash = isClosed ? Number(s.expected_cash || 0) : (starting + live.cash);
+
+            return {
+                id: s.id,
+                status: s.status,
+                opened_at: s.opened_at,
+                closed_at: s.closed_at,
+                warehouse_id: s.warehouse_id,
+                warehouse_name: s.warehouse?.name || 'مستودع غير محدد',
+                warehouse_type: s.warehouse?.type || 'main',
+                delegate_id: s.delegate_id,
+                delegate_name: s.delegate?.name || 'مبيعات مباشرة (بدون مندوب)',
+                starting_cash: starting,
+                expected_cash: expectedCash,
+                actual_cash: Number(s.actual_cash || 0),
+                shortage_overage: isClosed ? Number(s.shortage_overage || 0) : (Number(s.actual_cash || 0) - expectedCash),
+                total_sales: totalSales,
+                total_cash_sales: totalCash,
+                total_card_sales: totalCard,
+                total_credit_sales: totalCredit,
+                bottles_sold: Number(s.bottles_sold || 0),
+                bottles_returned: Number(s.bottles_returned || 0),
+                bottles_shortage: Number(s.bottles_shortage || 0),
+                invoices_count: invoiceCounts[s.id] || 0
+            };
+        });
 
         return NextResponse.json({ success: true, source: 'direct_computed', data: formatted });
     } catch (error: any) {

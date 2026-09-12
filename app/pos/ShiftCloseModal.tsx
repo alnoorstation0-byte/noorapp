@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/lib/toast-context';
+import { classifyPaymentMethod } from '@/lib/helpers';
 
 export default function ShiftCloseModal({ 
     isOpen, 
@@ -35,13 +36,19 @@ export default function ShiftCloseModal({
             // Fetch invoices created during this shift
             const { data: invoices } = await supabase
                 .from('invoices')
-                .select('total_amount, payment_method, lines_data')
+                .select('id, total_amount, payment_method, lines_data')
                 .eq('shift_id', activeShift.id);
 
             // Fetch expenses created during this shift
             const { data: expenses } = await supabase
                 .from('expenses')
                 .select('paid_amount, payment_method')
+                .eq('shift_id', activeShift.id);
+
+            // Fetch any standalone receipts collected during this shift (e.g. debt payments)
+            const { data: shiftReceipts } = await supabase
+                .from('receipt_vouchers')
+                .select('amount, payment_method, invoice_id')
                 .eq('shift_id', activeShift.id);
 
             let cash = 0, card = 0, credit = 0;
@@ -55,11 +62,14 @@ export default function ShiftCloseModal({
                 .eq('is_returnable_bottle', true);
             const retItemSet = new Set((retItems || []).map(r => r.id));
 
+            const shiftInvoiceIdSet = new Set((invoices || []).map(i => i.id));
+
             (invoices || []).forEach(inv => {
                 const amt = Number(inv.total_amount || 0);
-                if (inv.payment_method === 'نقدي' || inv.payment_method === 'نقدي (كاش)' || inv.payment_method === 'كاش') cash += amt;
-                else if (inv.payment_method === 'آجل') credit += amt;
-                else card += amt; // شبكة، تحويل بنكي الخ
+                const paymentCat = classifyPaymentMethod(inv.payment_method);
+                if (paymentCat === 'cash') cash += amt;
+                else if (paymentCat === 'card') card += amt;
+                else if (paymentCat === 'credit') credit += amt;
 
                 if (Array.isArray(inv.lines_data)) {
                     inv.lines_data.forEach((line: any) => {
@@ -71,10 +81,21 @@ export default function ShiftCloseModal({
                 }
             });
 
+            // Add standalone receipts collected during shift (not already in this shift's invoices)
+            (shiftReceipts || []).forEach((rc: any) => {
+                if (!rc.invoice_id || !shiftInvoiceIdSet.has(rc.invoice_id)) {
+                    const rcAmt = Number(rc.amount || 0);
+                    const rcCat = classifyPaymentMethod(rc.payment_method);
+                    if (rcCat === 'cash') cash += rcAmt;
+                    else if (rcCat === 'card') card += rcAmt;
+                }
+            });
+
             (expenses || []).forEach(exp => {
                 const amt = Number(exp.paid_amount || 0);
                 totalExpenses += amt;
-                if (exp.payment_method === 'كاش' || exp.payment_method === 'نقدي') {
+                const expCat = classifyPaymentMethod(exp.payment_method);
+                if (expCat === 'cash') {
                     cashExpenses += amt;
                 }
             });

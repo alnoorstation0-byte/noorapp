@@ -566,6 +566,11 @@ export function usePosLogic() {
 
                 // 🧾 إنشاء وترحيل سند القبض تلقائياً للمبيعات النقدية والشبكة (كل ما هو غير آجل)
                 if (paymentMethod !== 'آجل' && cartTotal.total > 0) {
+                    const isCardPayment = paymentMethod === 'شبكة (مدى)' || paymentMethod.includes('شبك') || paymentMethod.includes('مدى') || paymentMethod.includes('بطاق') || paymentMethod.includes('بنك');
+                    const appropriateSafeAcc = isCardPayment 
+                        ? CASH_ACCOUNTS.BANKS 
+                        : (delegateId ? ACC.EMPLOYEE_CUSTODY : CASH_ACCOUNTS.CASH_BOX);
+
                     try {
                         const { error: rpcReceiptErr } = await supabase.rpc('auto_create_pos_receipt', {
                             p_invoice_id: insertedInv.id
@@ -583,11 +588,19 @@ export function usePosLogic() {
                                 partner_id: partnerId || null,
                                 delegate_id: delegateId || null,
                                 status: 'مرحل',
-                                shift_id: activeShift?.id,
-                                fleet_operation_id: fleetOpId,
-                                safe_bank_acc_id: paymentMethod === 'شبكة (مدى)' ? CASH_ACCOUNTS.BANKS : CASH_ACCOUNTS.CASH_BOX,
+                                shift_id: activeShift?.id || null,
+                                fleet_operation_id: fleetOpId || null,
+                                safe_bank_acc_id: appropriateSafeAcc,
                                 partner_acc_id: SALES_ACCOUNTS.AR
                             }]);
+                        } else {
+                            // ضمان تثبيت shift_id والحساب المالي الصحيح (البنك للشبكة / الخزينة أو العهدة للكاش)
+                            await supabase.from('receipt_vouchers').update({
+                                shift_id: activeShift?.id || null,
+                                fleet_operation_id: fleetOpId || null,
+                                delegate_id: delegateId || null,
+                                safe_bank_acc_id: appropriateSafeAcc
+                            }).eq('invoice_id', insertedInv.id);
                         }
                     } catch (receiptErr) {
                         console.error('Error auto-creating receipt voucher for POS sale:', receiptErr);

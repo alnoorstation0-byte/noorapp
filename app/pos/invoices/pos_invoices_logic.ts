@@ -272,6 +272,11 @@ export function usePosInvoicesLogic() {
                 }
             }
 
+            const totalAmount = Number(record.total_amount) || 0;
+            const isCredit = !record.payment_method || record.payment_method === 'آجل' || record.payment_method.includes('آجل') || record.payment_method.includes('اجل');
+            const paidAmount = isCredit ? (Number(record.paid_amount) || 0) : (Number(record.paid_amount) || totalAmount);
+            const paymentStatus = isCredit ? (paidAmount > 0 ? (paidAmount >= totalAmount ? 'paid' : 'partial') : 'unpaid') : 'paid';
+
             const invoiceHeader = {
                 invoice_number: (record.invoice_number || '').startsWith('INV-POS-') ? record.invoice_number : `INV-POS-${record.invoice_number || Date.now().toString().slice(-6)}`, 
                 date: record.date, 
@@ -283,7 +288,7 @@ export function usePosInvoicesLogic() {
                 tax_amount: Number(record.tax_amount) || 0, 
                 guarantee_percent: Number(record.guarantee_percent) || 0,
                 guarantee_amount: Number(record.guarantee_amount) || 0, 
-                total_amount: Number(record.total_amount) || 0,
+                total_amount: totalAmount,
                 debit_account_id: cleanId(record.debit_account_id), 
                 credit_account_id: cleanId(record.credit_account_id),
                 materials_acc_id: cleanId(record.materials_acc_id), 
@@ -292,7 +297,8 @@ export function usePosInvoicesLogic() {
                 status: record.status || 'معلق', 
                 due_in_days: Number(record.due_in_days) || 0,
                 due_date: record.due_date, 
-                paid_amount: Number(record.paid_amount) || 0, 
+                paid_amount: paidAmount, 
+                payment_status: paymentStatus,
                 skip_zatca: record.skip_zatca || false,
                 fleet_operation_id: cleanId(record.fleet_operation_id),
                 warehouse_id: cleanId(record.warehouse_id),
@@ -312,8 +318,8 @@ export function usePosInvoicesLogic() {
                 if (invoiceHeader.warehouse_id && inserted) {
                      await supabase.rpc('post_invoices_bulk', { p_ids: [inserted.id] });
 
-                     // 🧾 إنشاء وترحيل سند القبض تلقائياً للمبيعات النقدية
-                     if (invoiceHeader.payment_method !== 'آجل' && Number(invoiceHeader.paid_amount || 0) > 0) {
+                     // 🧾 إنشاء وترحيل سند القبض تلقائياً للمبيعات النقدية والشبكة
+                     if (!isCredit && paidAmount > 0) {
                          try {
                              await supabase.rpc('auto_create_pos_receipt', { p_invoice_id: inserted.id });
                          } catch (e) {

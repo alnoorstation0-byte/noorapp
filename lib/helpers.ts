@@ -500,7 +500,41 @@ export const canUser = (profile: any, module: string, action: string): boolean =
 
   // 3. التأكد إن الصلاحية مصفوفة (Array) وبتحتوي على الفعل المطلوب
   return Array.isArray(moduleActions) && moduleActions.includes(action);
-};
+};/**
+ * 💳 تصنيف موحد لطريقة السداد (نقدي، شبكة/بطاقة/بنك، آجل)
+ * يتعامل بمرونة مع كافة التهجئات العربية والأخطاء الإملائية
+ */
+export function classifyPaymentMethod(method?: string | null): 'cash' | 'card' | 'credit' {
+  if (!method) return 'cash';
+  const clean = method.trim().toLowerCase();
+  
+  // 1. آجل (على الحساب، ذمم)
+  if (
+    clean.includes('آجل') ||
+    clean.includes('اجل') ||
+    clean.includes('أجل') ||
+    clean.includes('ذمم') ||
+    clean.includes('حساب') ||
+    clean === 'credit'
+  ) {
+    return 'credit';
+  }
 
+  // 2. شبكة (مدى، بطاقة، بنك، تحويل)
+  if (
+    clean.includes('شبك') ||
+    clean.includes('مدى') ||
+    clean.includes('بطاق') ||
+    clean.includes('بنك') ||
+    clean.includes('تحويل') ||
+    clean === 'card' ||
+    clean === 'mada' ||
+    clean === 'pos' ||
+    clean === 'bank'
+  ) {
+    return 'card';
+  }
 
-
+  // 3. نقدي (كاش، نقد)
+  return 'cash';
+}

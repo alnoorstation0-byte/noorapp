@@ -70,6 +70,42 @@ export default function PosDashboardPage() {
             render: (r: any) => formatCurrency(r.starting_cash || 0)
         },
         {
+            key: 'total_sales',
+            header: 'إجمالي المبيعات',
+            render: (r: any) => (
+                <span style={{ fontWeight: 900, color: '#0f172a' }}>
+                    {formatCurrency(r.total_sales || 0)}
+                </span>
+            )
+        },
+        {
+            key: 'total_cash_sales',
+            header: 'نقدي (كاش)',
+            render: (r: any) => (
+                <span style={{ fontWeight: 800, color: '#16a34a' }}>
+                    {formatCurrency(r.total_cash_sales || 0)}
+                </span>
+            )
+        },
+        {
+            key: 'total_card_sales',
+            header: 'شبكة (مدى)',
+            render: (r: any) => (
+                <span style={{ fontWeight: 800, color: '#2891C8' }}>
+                    {formatCurrency(r.total_card_sales || 0)}
+                </span>
+            )
+        },
+        {
+            key: 'total_credit_sales',
+            header: 'آجل (ذمم)',
+            render: (r: any) => (
+                <span style={{ fontWeight: 800, color: '#d97706' }}>
+                    {formatCurrency(r.total_credit_sales || 0)}
+                </span>
+            )
+        },
+        {
             key: 'status',
             header: 'الحالة',
             render: (r: any) => {
@@ -90,11 +126,11 @@ export default function PosDashboardPage() {
             }
         },
         {
-            key: 'shortage_overage_amount',
+            key: 'shortage_overage',
             header: 'عجز / زيادة',
             render: (r: any) => {
                 if (r.status === 'open') return <span style={{ color: '#94a3b8' }}>-</span>;
-                const diff = Number(r.shortage_overage_amount || 0);
+                const diff = Number(r.shortage_overage ?? r.shortage_overage_amount ?? 0);
                 if (diff === 0) return <span style={{ color: '#16a34a', fontWeight: 800 }}>متطابق ✓</span>;
                 if (diff > 0) return <span style={{ color: '#0284c7', fontWeight: 800 }}>+{formatCurrency(diff)} (زيادة)</span>;
                 return <span style={{ color: '#ef4444', fontWeight: 800 }}>{formatCurrency(diff)} (عجز)</span>;

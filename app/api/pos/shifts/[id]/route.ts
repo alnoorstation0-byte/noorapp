@@ -101,6 +101,28 @@ export async function GET(
             ? Math.round((new Date(shift.closed_at).getTime() - new Date(shift.opened_at).getTime()) / 60000)
             : Math.round((Date.now() - new Date(shift.opened_at).getTime()) / 60000);
 
+        // حساب إجماليات المبيعات الحية بدقة (نقدي، شبكة، آجل)
+        let liveCash = 0, liveCard = 0, liveCredit = 0;
+        (invoices || []).forEach((inv: any) => {
+            const amt = Number(inv.total_amount || 0);
+            const m = (inv.payment_method || '').toLowerCase().trim();
+            if (m.includes('آجل') || m.includes('اجل') || m.includes('أجل') || m.includes('ذمم') || m.includes('حساب') || m === 'credit') {
+                liveCredit += amt;
+            } else if (m.includes('شبك') || m.includes('مدى') || m.includes('بطاق') || m.includes('بنك') || m.includes('تحويل') || m === 'card' || m === 'bank') {
+                liveCard += amt;
+            } else {
+                liveCash += amt;
+            }
+        });
+
+        const isShiftClosed = shift.status === 'closed' && (Number(shift.total_sales || 0) > 0 || (invoices || []).length === 0);
+        const finalTotalCash = isShiftClosed ? Number(shift.total_cash_sales || 0) : liveCash;
+        const finalTotalCard = isShiftClosed ? Number(shift.total_card_sales || 0) : liveCard;
+        const finalTotalCredit = isShiftClosed ? Number(shift.total_credit_sales || 0) : liveCredit;
+        const finalTotalSales = isShiftClosed ? Number(shift.total_sales || 0) : (liveCash + liveCard + liveCredit);
+        const startingCash = Number(shift.starting_cash || 0);
+        const finalExpectedCash = isShiftClosed ? Number(shift.expected_cash || 0) : (startingCash + liveCash);
+
         const fullDossier = {
             shift_id: shift.id,
             status: shift.status,
@@ -124,14 +146,14 @@ export async function GET(
                 name: cashierName
             },
             financials: {
-                starting_cash: Number(shift.starting_cash || 0),
-                expected_cash: Number(shift.expected_cash || 0),
+                starting_cash: startingCash,
+                expected_cash: finalExpectedCash,
                 actual_cash: Number(shift.actual_cash || 0),
-                shortage_overage: Number(shift.shortage_overage || 0),
-                total_sales: Number(shift.total_sales || 0),
-                total_cash_sales: Number(shift.total_cash_sales || 0),
-                total_card_sales: Number(shift.total_card_sales || 0),
-                total_credit_sales: Number(shift.total_credit_sales || 0)
+                shortage_overage: shift.status === 'closed' ? Number(shift.shortage_overage || 0) : (Number(shift.actual_cash || 0) - finalExpectedCash),
+                total_sales: finalTotalSales,
+                total_cash_sales: finalTotalCash,
+                total_card_sales: finalTotalCard,
+                total_credit_sales: finalTotalCredit
             },
             bottles: {
                 sold: Number(shift.bottles_sold || 0),
