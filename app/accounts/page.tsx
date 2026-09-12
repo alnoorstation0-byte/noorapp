@@ -15,7 +15,7 @@ export default function HierarchicalLedgerPage() {
     paginatedTree, totalPages, currentPage, setCurrentPage,
     allAccounts,
     isLoading, isDeleting, searchTerm, setSearchTerm, expandedIds, toggleExpand, expandAll, collapseAll, 
-    selectedIds, toggleSelection, handleDelete, handleAdd, handleEdit, handleSave,
+    selectedIds, setSelectedIds, toggleSelection, handleDelete, handleAdd, handleEdit, handleSave,
     startDate, setStartDate, endDate, setEndDate,
     isModalOpen, setIsModalOpen, currentRecord, setCurrentRecord,
     exportToExcel // 🚀 جلب دالة تصدير الإكسل من اللوجيك
@@ -275,33 +275,54 @@ export default function HierarchicalLedgerPage() {
                   <button type="button" className="mobile-action-pill" onClick={collapseAll}>
                     🔼 طي الكل
                   </button>
-
-                  {selectedIds.length > 0 && (
-                    <>
-                      <SecureAction module="accounts" action="edit">
-                        <button 
-                          type="button"
-                          className="mobile-action-pill edit-btn" 
-                          onClick={() => handleEdit(selectedIds)} 
-                          disabled={selectedIds.length !== 1 || isDeleting}
-                        >
-                          ✏️ تعديل
-                        </button>
-                      </SecureAction>
-                      <SecureAction module="accounts" action="delete">
-                        <button 
-                          type="button"
-                          className="mobile-action-pill delete-btn" 
-                          onClick={() => handleDelete(selectedIds)} 
-                          disabled={isDeleting}
-                        >
-                          {isDeleting ? '⏳ حذف...' : `🗑️ حذف (${selectedIds.length})`}
-                        </button>
-                      </SecureAction>
-                    </>
-                  )}
                 </div>
               </div>
+
+              {/* 🎯 شريط الإجراءات الموحد عند التحديد (داخل الإطار ومناسب 100% للجوال والكمبيوتر) */}
+              {selectedIds.length > 0 && (
+                <div className="accounts-selection-bar">
+                  <div className="selection-bar-info">
+                    <span className="selection-badge">
+                      🎯 تم تحديد {selectedIds.length === 1 ? 'حساب' : `${selectedIds.length} حسابات`}
+                    </span>
+                    {selectedIds.length === 1 && (
+                      <span className="selection-account-name">
+                        {allAccounts?.find((a: any) => String(a.id) === String(selectedIds[0]))?.name || ''}
+                      </span>
+                    )}
+                  </div>
+                  <div className="selection-bar-actions">
+                    <SecureAction module="accounts" action="edit">
+                      <button 
+                        type="button"
+                        className="selection-action-btn edit" 
+                        onClick={() => handleEdit(selectedIds)} 
+                        disabled={selectedIds.length !== 1 || isDeleting}
+                      >
+                        ✏️ تعديل
+                      </button>
+                    </SecureAction>
+                    <SecureAction module="accounts" action="delete">
+                      <button 
+                        type="button"
+                        className="selection-action-btn delete" 
+                        onClick={() => handleDelete(selectedIds)} 
+                        disabled={isDeleting}
+                      >
+                        {isDeleting ? '⏳ حذف...' : `🗑️ حذف (${selectedIds.length})`}
+                      </button>
+                    </SecureAction>
+                    <button 
+                      type="button"
+                      className="selection-action-btn clear" 
+                      onClick={() => setSelectedIds([])}
+                      title="إلغاء التحديد"
+                    >
+                      ✕
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="table-inner-scroll cinematic-scroll">
@@ -692,6 +713,121 @@ export default function HierarchicalLedgerPage() {
         .cinematic-scroll::-webkit-scrollbar-track { background: transparent; }
         .cinematic-scroll::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
 
+        /* 🎯 Dedicated Selection Action Bar (Desktop & Mobile) */
+        .accounts-selection-bar {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          background: linear-gradient(135deg, rgba(40, 145, 200, 0.12), rgba(28, 115, 171, 0.18));
+          border: 1.5px solid rgba(40, 145, 200, 0.35);
+          border-radius: 14px;
+          padding: 10px 16px;
+          margin-top: 14px;
+          backdrop-filter: blur(10px);
+          -webkit-backdrop-filter: blur(10px);
+          box-shadow: 0 4px 15px rgba(28, 115, 171, 0.08);
+          animation: selectionSlideDown 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+          width: 100%;
+          box-sizing: border-box;
+          gap: 12px;
+        }
+
+        @keyframes selectionSlideDown {
+          from { opacity: 0; transform: translateY(-8px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+
+        .selection-bar-info {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          min-width: 0;
+          flex-shrink: 1;
+        }
+
+        .selection-badge {
+          font-size: 12px;
+          font-weight: 900;
+          color: #1C73AB;
+          background: rgba(255, 255, 255, 0.85);
+          padding: 4px 10px;
+          border-radius: 8px;
+          border: 1px solid rgba(28, 115, 171, 0.2);
+          white-space: nowrap;
+        }
+
+        .selection-account-name {
+          font-size: 13px;
+          font-weight: 800;
+          color: #122946;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          max-width: 300px;
+        }
+
+        .selection-bar-actions {
+          display: flex;
+          align-items: center;
+          gap: 8px;
+          flex-shrink: 0;
+        }
+
+        .selection-action-btn {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          gap: 6px;
+          padding: 7px 16px;
+          border-radius: 10px;
+          font-size: 13px;
+          font-weight: 800;
+          white-space: nowrap;
+          cursor: pointer;
+          min-height: 38px;
+          touch-action: manipulation;
+          transition: all 0.2s ease;
+          border: none;
+          box-sizing: border-box;
+        }
+
+        .selection-action-btn.edit {
+          background: linear-gradient(135deg, #2563eb, #1d4ed8);
+          color: white;
+          box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+        }
+        .selection-action-btn.edit:hover:not(:disabled) {
+          transform: translateY(-1px);
+          box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
+        }
+        .selection-action-btn.edit:disabled {
+          opacity: 0.5;
+          cursor: not-allowed;
+        }
+
+        .selection-action-btn.delete {
+          background: rgba(239, 68, 68, 0.12);
+          color: #ef4444;
+          border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+        .selection-action-btn.delete:hover:not(:disabled) {
+          background: #ef4444;
+          color: white;
+          transform: translateY(-1px);
+          box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .selection-action-btn.clear {
+          background: rgba(100, 116, 139, 0.12);
+          color: #475569;
+          border: 1px solid rgba(100, 116, 139, 0.25);
+          padding: 7px 12px;
+        }
+        .selection-action-btn.clear:hover {
+          background: rgba(100, 116, 139, 0.2);
+          color: #1e293b;
+        }
+
         @keyframes cardFadeUp { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: translateY(0); } }
 
         /* =======================================================
@@ -708,7 +844,9 @@ export default function HierarchicalLedgerPage() {
           }
 
           .card-header {
-            padding: 14px 12px !important;
+            padding: 12px 10px !important;
+            overflow: hidden !important;
+            box-sizing: border-box !important;
           }
 
           .desktop-quick-count {
@@ -815,12 +953,11 @@ export default function HierarchicalLedgerPage() {
 
           .mobile-btn-group {
             display: flex !important;
+            flex-wrap: wrap !important;
             gap: 6px !important;
-            overflow-x: auto !important;
-            padding-bottom: 2px !important;
-            -webkit-overflow-scrolling: touch !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
           }
-          .mobile-btn-group::-webkit-scrollbar { display: none; }
 
           .mobile-action-pill {
             display: inline-flex !important;
@@ -846,15 +983,49 @@ export default function HierarchicalLedgerPage() {
             border: none !important;
             box-shadow: 0 4px 10px rgba(28, 115, 171, 0.25) !important;
           }
-          .mobile-action-pill.edit-btn {
-            background: rgba(59, 130, 246, 0.1) !important;
-            color: #2563eb !important;
-            border-color: rgba(59, 130, 246, 0.3) !important;
+
+          /* 🎯 Dedicated Selection Bar (Mobile Layout) */
+          .accounts-selection-bar {
+            padding: 10px 10px !important;
+            margin-top: 10px !important;
+            border-radius: 12px !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            box-sizing: border-box !important;
+            overflow: hidden !important;
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 8px !important;
           }
-          .mobile-action-pill.delete-btn {
-            background: rgba(239, 68, 68, 0.1) !important;
-            color: #ef4444 !important;
-            border-color: rgba(239, 68, 68, 0.3) !important;
+          .selection-bar-info {
+            width: 100% !important;
+            justify-content: space-between !important;
+            align-items: center !important;
+            display: flex !important;
+          }
+          .selection-account-name {
+            max-width: 160px !important;
+            font-size: 12px !important;
+          }
+          .selection-bar-actions {
+            width: 100% !important;
+            display: grid !important;
+            grid-template-columns: 1fr 1fr 42px !important;
+            gap: 6px !important;
+            align-items: center !important;
+          }
+          .selection-action-btn {
+            width: 100% !important;
+            min-height: 42px !important;
+            font-size: 13px !important;
+            padding: 8px 6px !important;
+            justify-content: center !important;
+          }
+          .selection-action-btn.clear {
+            width: 42px !important;
+            min-height: 42px !important;
+            padding: 0 !important;
+            font-size: 14px !important;
           }
 
           .mobile-only { display: inline-flex !important; }
