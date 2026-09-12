@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WaterApp - الدليل التقني الشامل</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;700;800&display=swap');
+        
+        :root {
+            --primary: #1C73AB;
+            --accent: #2891C8;
+            --bg-color: #F4F1EE;
+            --text-main: #333333;
+            --text-muted: #666666;
+        }
+
+        body {
+            font-family: 'Tajawal', Tahoma, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.8;
+            padding: 40px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .cover {
+            text-align: center;
+            padding: 100px 20px;
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: white;
+            border-radius: 20px;
+            margin-bottom: 50px;
+            box-shadow: 0 10px 30px rgba(28, 115, 171, 0.3);
+        }
+
+        .cover h1 {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            font-weight: 800;
+        }
+
+        .cover p {
+            font-size: 1.5rem;
+            opacity: 0.9;
+        }
+
+        h2 {
+            color: var(--primary);
+            border-bottom: 3px solid var(--accent);
+            padding-bottom: 10px;
+            margin-top: 50px;
+            font-weight: 700;
+        }
+
+        h3 {
+            color: var(--accent);
+            margin-top: 30px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(20px);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 25px;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.05);
+            break-inside: avoid;
+        }
+
+        ul {
+            list-style-type: none;
+            padding-right: 0;
+        }
+
+        ul li {
+            position: relative;
+            padding-right: 25px;
+            margin-bottom: 10px;
+        }
+
+        ul li::before {
+            content: '💧';
+            position: absolute;
+            right: 0;
+            top: 2px;
+            font-size: 0.9rem;
+        }
+
+        code {
+            background: rgba(28, 115, 171, 0.1);
+            color: var(--primary);
+            padding: 3px 8px;
+            border-radius: 5px;
+            font-family: monospace;
+            font-size: 0.9rem;
+            direction: ltr;
+            display: inline-block;
+        }
+
+        .workflow {
+            background: #fff;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            border: 2px dashed var(--accent);
+        }
+
+        .step {
+            display: inline-block;
+            background: var(--primary);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 30px;
+            margin: 10px;
+            font-weight: bold;
+        }
+
+        .arrow {
+            display: inline-block;
+            color: var(--accent);
+            font-size: 1.5rem;
+            vertical-align: middle;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .cover {
+                background: var(--primary);
+                color: white !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                height: 100vh;
+                display: flex;
+                flex-direction: column;
+                justify-content: center;
+                border-radius: 0;
+                margin-bottom: 0;
+            }
+            .card {
+                box-shadow: none;
+                border: 1px solid #ddd;
+                break-inside: avoid;
+            }
+            .page-break {
+                page-break-before: always;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="cover">
+        <h1>💧 WaterApp ERP</h1>
+        <p>الدليل التقني والتعليمي الشامل للنظام</p>
+        <p style="font-size: 1rem; margin-top: 50px;">الإصدار 1.0 - التوثيق الرسمي لدورة العمل وهيكلة البيانات</p>
+    </div>
+
+    <div class="page-break"></div>
+
+    <h2>1. نظرة عامة على النظام (System Overview)</h2>
+    <div class="card">
+        <p>نظام <strong>WaterApp</strong> هو نظام تخطيط موارد المؤسسات (ERP) متكامل ومخصص حصرياً لإدارة مصانع وشركات توزيع المياه. يدمج النظام بين عمليات الكاشير السريعة (POS)، إدارة حركة الأسطول، والمحاسبة المالية المزدوجة.</p>
+        <ul>
+            <li><strong>واجهة المستخدم (Frontend):</strong> مطورة بتقنية Next.js و React لضمان سرعة التصفح.</li>
+            <li><strong>قاعدة البيانات (Backend):</strong> تعتمد على Supabase (PostgreSQL) لضمان موثوقية وأمان البيانات.</li>
+            <li><strong>التصميم (Theme):</strong> يعتمد هوية "Aqua Glassmorphism" الزجاجية المائية.</li>
+        </ul>
+    </div>
+
+    <h2>2. هيكلة الواجهات الأمامية (Frontend Architecture)</h2>
+    <div class="card">
+        <p>يتكون النظام من عدة وحدات برمجية (Modules) تعمل بشكل مستقل ومترابط:</p>
+        <ul>
+            <li><code>app/pos</code>: شاشة الكاشير السريعة وإدارة الورديات (Shifts) وحساب العجز والزيادة.</li>
+            <li><code>app/invoices</code>: لوحة إدارة مبيعات الجملة والمشتريات.</li>
+            <li><code>app/inventory</code>: متابعة حركة المخزون وتكلفة البضاعة المباعة (COGS).</li>
+            <li><code>app/fleet_operations</code>: إدارة أسطول التوزيع ورحلات المناديب والمصروفات الخاصة بكل سيارة.</li>
+            <li><code>app/journal</code>: القيود المحاسبية الآلية واليدوية لدفتر الأستاذ.</li>
+        </ul>
+    </div>
+
+    <div class="page-break"></div>
+
+    <h2>3. هيكل قاعدة البيانات (Backend Schema)</h2>
+    <div class="card">
+        <h3>أ. مجموعة الحسابات والموارد</h3>
+        <ul>
+            <li><code>accounts</code>: الدليل المحاسبي الشجري لجميع أصول وخصوم وإيرادات الشركة.</li>
+            <li><code>partners</code>: سجل العملاء، الموردين، والمناديب.</li>
+        </ul>
+        
+        <h3>ب. مجموعة المبيعات والعمليات</h3>
+        <ul>
+            <li><code>pos_shifts</code>: الورديات المفتوحة والمغلقة للكاشير والمناديب.</li>
+            <li><code>invoices</code>: الفواتير (نقدية/آجلة) المرتبطة بضريبة القيمة المضافة ZATCA.</li>
+            <li><code>receipt_vouchers</code> و <code>payment_vouchers</code>: سندات القبض والصرف وتوجيهها المحاسبي.</li>
+        </ul>
+
+        <h3>ج. مجموعة المخزون (Inventory)</h3>
+        <ul>
+            <li><code>inventory_transactions</code>: السجل التاريخي لكل حبة تخرج أو تدخل (بمثابة كارت الصنف).</li>
+            <li><code>warehouse_inventory</code>: الرصيد التراكمي المحدث لحظياً لكل مستودع وسيارة.</li>
+        </ul>
+    </div>
+
+    <div class="page-break"></div>
+
+    <h2>4. الدورات المستندية (Documentary Workflows)</h2>
+
+    <div class="card">
+        <h3>📊 أولاً: دورة المبيعات ونقاط البيع (POS)</h3>
+        <p>مسار العمل اليومي للمندوب أو البائع:</p>
+        <div class="workflow" style="margin: 20px 0;">
+            <div class="step">1. فتح وردية الكاشير</div>
+            <div class="arrow">➔</div>
+            <div class="step">2. استلام العهدة (نقد/فوارغ)</div>
+            <div class="arrow">➔</div>
+            <div class="step">3. إصدار فواتير البيع</div>
+            <br><br>
+            <div class="step">4. توليد سندات القبض الآلية</div>
+            <div class="arrow">➔</div>
+            <div class="step">5. خصم المخزون اللحظي</div>
+            <div class="arrow">➔</div>
+            <div class="step">6. إغلاق الوردية وحساب العجز</div>
+        </div>
+        <p><strong>قواعد النظام:</strong> يمنع النظام تماماً أي عملية بيع دون وجود وردية مفتوحة. كما يولد النظام قيداً محاسبياً فورياً عند الدفع لترحيل المبيعات.</p>
+    </div>
+
+    <div class="card">
+        <h3>💧 ثانياً: دورة عهدة الفوارغ (Returnable Bottles)</h3>
+        <ul>
+            <li>الأصناف المعلمة كفوارغ <code>is_returnable_bottle = true</code> تخضع لجرد صارم.</li>
+            <li>عند البيع، يجب على النظام تسجيل عدد الفوارغ المستلمة من العميل.</li>
+            <li>عند الإغلاق، يطابق النظام بين (عدد العبوات المباعة) و (عدد الفوارغ المسترجعة) ويحسب العجز فوراً.</li>
+        </ul>
+    </div>
+
+    <div class="page-break"></div>
+
+    <h2>5. الدوال المحاسبية والإجراءات المخزنة (RPCs)</h2>
+    <div class="card">
+        <p>قاعدة البيانات مزودة بـ "عقل محاسبي" يعمل في الخلفية لمعالجة الأرقام:</p>
+        <ul>
+            <li><code>post_invoices_bulk()</code>: دالة تقوم بتحويل أي فاتورة يتم حفظها إلى قيود مزدوجة (Debit/Credit) لتسميعها في المركز المالي وحساب ضريبة القيمة المضافة تلقائياً.</li>
+            <li><code>auto_create_pos_receipt()</code>: دالة تولد سندات القبض فوراً عند قيام العميل بالدفع في شاشة الكاشير لمنع نسيان تحصيل المبالغ.</li>
+            <li><code>approve_inventory_transaction()</code>: دالة تسجل خروج البضاعة من المخزن، وتقوم بإنشاء قيد محاسبي يخصم (تكلفة البضاعة المباعة COGS) ويرحلها.</li>
+        </ul>
+    </div>
+
+    <h2>6. المحفزات الآلية (Database Triggers)</h2>
+    <div class="card">
+        <ul>
+            <li><code>update_partner_balance_on_journal</code>: محفز آلي يراقب القيود المحاسبية، وبمجرد إدراج أي مديونية أو دفعة، يقوم بتحديث رصيد العميل <code>current_balance</code> لضمان أن كشف الحساب دائماً محدث بالهللة.</li>
+            <li><code>set_invoice_payment_status</code>: يراقب سندات القبض ويقوم بتحويل حالة الفاتورة من (غير مدفوعة) إلى (مدفوعة) فور تغطية المبلغ بالكامل.</li>
+        </ul>
+    </div>
+
+    <div style="text-align: center; margin-top: 50px; color: var(--text-muted);">
+        <p>تم استخراج هذا الدليل آلياً - WaterApp ERP System © 2026</p>
+        <p>لتحويل هذا الدليل إلى PDF، اضغط (Ctrl + P) أو (Cmd + P) واختر حفظ كـ PDF (Save as PDF).</p>
+    </div>
+
+</body>
+</html>
