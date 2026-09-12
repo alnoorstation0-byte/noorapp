@@ -1,8 +1,9 @@
 "use client";
 import React from 'react';
-import { THEME } from '@/lib/theme';
 import { formatCurrency, formatDate } from '@/lib/helpers';
 import { useDelegateSettlementsLogic } from './delegate_settlements_logic';
+import SettlementActionModal from './SettlementActionModal';
+import SettlementPrintModal from './SettlementPrintModal';
 
 export default function DelegateSettlementsPage() {
     const {
@@ -13,246 +14,667 @@ export default function DelegateSettlementsPage() {
         setDateFrom,
         dateTo,
         setDateTo,
+        statusFilter,
+        setStatusFilter,
         totals,
         isLoading,
-        exportToExcel
+        exportToExcel,
+        // Supporting data
+        inventoryItems,
+        accounts,
+        warehouses,
+        // Modals
+        selectedTripForSettlement,
+        setSelectedTripForSettlement,
+        isSettlementModalOpen,
+        setIsSettlementModalOpen,
+        selectedTripForPrint,
+        setSelectedTripForPrint,
+        isPrintModalOpen,
+        setIsPrintModalOpen,
+        // Mutations
+        executeSettlement,
+        isSettling
     } = useDelegateSettlementsLogic();
 
     return (
-        <div className="settlements-container" style={{ padding: '30px', minHeight: '100vh', direction: 'rtl', maxWidth: '100vw', overflowX: 'hidden', boxSizing: 'border-box' }}>
+        <div style={{
+            background: '#F4F1EE',
+            minHeight: '100vh',
+            padding: '30px 24px',
+            direction: 'rtl',
+            maxWidth: '100vw',
+            overflowX: 'hidden',
+            boxSizing: 'border-box'
+        }}>
             <style>{`
+                /* Aqua Glassmorphism Theme Styles */
+                .aqua-glass-card {
+                    background: rgba(255, 255, 255, 0.7) !important;
+                    backdrop-filter: blur(40px) saturate(200%) !important;
+                    -webkit-backdrop-filter: blur(40px) saturate(200%) !important;
+                    border: 1px solid rgba(255, 255, 255, 0.8) !important;
+                    border-radius: 26px !important;
+                    box-shadow: 0 10px 30px rgba(28, 115, 171, 0.08), inset 0 2px 2px rgba(255, 255, 255, 1) !important;
+                    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1) !important;
+                }
+                .aqua-glass-card:hover {
+                    transform: translateY(-4px) !important;
+                    box-shadow: 0 16px 36px rgba(28, 115, 171, 0.14), inset 0 2px 2px rgba(255, 255, 255, 1) !important;
+                }
+                .aqua-btn-primary {
+                    background: linear-gradient(135deg, #1C73AB 0%, #2891C8 100%) !important;
+                    color: #FFFFFF !important;
+                    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+                    border-radius: 50px !important;
+                    font-weight: 900 !important;
+                    cursor: pointer !important;
+                    box-shadow: 0 6px 20px rgba(28, 115, 171, 0.25) !important;
+                    transition: all 0.3s ease !important;
+                    display: inline-flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    gap: 8px !important;
+                    text-decoration: none !important;
+                }
+                .aqua-btn-primary:hover {
+                    transform: translateY(-2px) !important;
+                    box-shadow: 0 10px 25px rgba(28, 115, 171, 0.35) !important;
+                    filter: brightness(1.06) !important;
+                }
+                .aqua-btn-outline {
+                    background: rgba(255, 255, 255, 0.6) !important;
+                    color: #1C73AB !important;
+                    border: 1.5px solid rgba(28, 115, 171, 0.3) !important;
+                    border-radius: 50px !important;
+                    font-weight: 800 !important;
+                    cursor: pointer !important;
+                    transition: all 0.2s !important;
+                    display: inline-flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    gap: 6px !important;
+                }
+                .aqua-btn-outline:hover {
+                    background: rgba(28, 115, 171, 0.1) !important;
+                    border-color: #1C73AB !important;
+                    transform: translateY(-2px) !important;
+                }
+                .aqua-table-row {
+                    transition: all 0.2s ease !important;
+                    border-bottom: 1px solid rgba(28, 115, 171, 0.08) !important;
+                }
+                .aqua-table-row:hover {
+                    background: rgba(28, 115, 171, 0.05) !important;
+                }
+                .aqua-filter-tab {
+                    padding: 10px 20px !important;
+                    border-radius: 50px !important;
+                    font-weight: 800 !important;
+                    font-size: 13px !important;
+                    cursor: pointer !important;
+                    border: 1px solid transparent !important;
+                    transition: all 0.25s ease !important;
+                }
+                .aqua-filter-tab.active {
+                    background: #1C73AB !important;
+                    color: #FFFFFF !important;
+                    box-shadow: 0 4px 15px rgba(28, 115, 171, 0.3) !important;
+                }
+                .aqua-filter-tab:not(.active) {
+                    background: rgba(255, 255, 255, 0.6) !important;
+                    color: #1C73AB !important;
+                    border-color: rgba(28, 115, 171, 0.15) !important;
+                }
+                .aqua-filter-tab:not(.active):hover {
+                    background: rgba(255, 255, 255, 0.9) !important;
+                }
+
                 @media (max-width: 768px) {
-                    .settlements-container { padding: 10px 8px !important; }
-                    .settlements-header { padding: 15px !important; border-radius: 16px !important; }
-                    .settlements-header h1 { font-size: 20px !important; }
-                    .settlements-btn { width: 100% !important; justify-content: center !important; min-height: 44px !important; }
-                    .settlements-filters { flex-direction: column !important; gap: 10px !important; }
-                    .settlements-filters > div { flex: 1 1 100% !important; width: 100% !important; }
-                    .settlements-kpi-grid { grid-template-columns: 1fr !important; gap: 12px !important; }
-                    .settlements-kpi-card { padding: 15px !important; border-radius: 16px !important; }
-                    .settlements-table-card { border-radius: 16px !important; }
-                    .settlements-table { min-width: 750px !important; }
-                    .settlements-table th, .settlements-table td { padding: 8px 10px !important; font-size: 11px !important; }
+                    .settle-page-header { padding: 20px 15px !important; border-radius: 20px !important; }
+                    .settle-kpi-grid { grid-template-columns: 1fr !important; gap: 12px !important; }
+                    .settle-filters-row { flex-direction: column !important; gap: 12px !important; }
+                    .settle-filters-row > div { width: 100% !important; }
+                    .settle-filter-tabs { width: 100% !important; overflow-x: auto !important; padding-bottom: 4px !important; }
+                    .aqua-btn-primary, .aqua-btn-outline { min-height: 44px !important; width: 100% !important; }
+                    .settle-table th, .settle-table td { padding: 10px 8px !important; font-size: 11px !important; }
                 }
             `}</style>
-            {/* Header */}
-            <div className="aqua-glass-panel settlements-header" style={{ 
-                background: 'rgba(255, 255, 255, 0.4)', 
-                backdropFilter: 'blur(30px)', 
-                borderRadius: '40px', 
-                padding: '35px', 
-                marginBottom: '35px', 
-                border: '1px solid rgba(255, 255, 255, 0.6)', 
-                boxShadow: '-10px -10px 30px rgba(255,255,255,0.8), 10px 10px 30px rgba(28, 115, 171, 0.15), inset 0 2px 2px rgba(255,255,255,1)' 
+
+            {/* Top Hero Banner */}
+            <div className="settle-page-header" style={{
+                background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.85) 0%, rgba(240, 248, 255, 0.8) 100%)',
+                backdropFilter: 'blur(40px) saturate(200%)',
+                WebkitBackdropFilter: 'blur(40px) saturate(200%)',
+                borderRadius: '30px',
+                padding: '30px 35px',
+                border: '1px solid rgba(255, 255, 255, 0.9)',
+                boxShadow: '0 12px 35px rgba(28, 115, 171, 0.12), inset 0 2px 3px rgba(255, 255, 255, 1)',
+                marginBottom: '30px'
             }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
-                    <div>
-                        <h1 style={{ color: '#122946', margin: '0 0 10px 0', fontSize: '32px', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '15px' }}>
-                            <span style={{ textShadow: '0 4px 10px rgba(28, 115, 171, 0.2)' }}>تسوية عهد المناديب</span>
-                            <span style={{ fontSize: '28px', filter: 'drop-shadow(0 4px 8px rgba(28, 115, 171, 0.3))' }}>💧</span>
-                        </h1>
-                        <p style={{ color: '#1C73AB', margin: 0, fontSize: '15px', fontWeight: 700, letterSpacing: '0.5px' }}>
-                            المطابقة اليومية للمبيعات والنقدية المسلمة لكل مندوب / رحلة، لمعرفة العهد المتبقية في ذمتهم.
-                        </p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '18px' }}>
+                        <div style={{
+                            width: '64px',
+                            height: '64px',
+                            borderRadius: '22px',
+                            background: 'linear-gradient(135deg, #1C73AB 0%, #2891C8 100%)',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '32px',
+                            boxShadow: '0 10px 25px rgba(28, 115, 171, 0.35)',
+                            color: '#fff'
+                        }}>
+                            🚚
+                        </div>
+                        <div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                                <h1 style={{ margin: 0, fontSize: '28px', fontWeight: 900, color: '#122946', letterSpacing: '-0.5px' }}>
+                                    تسوية عهد المناديب وإرجاع المخزون
+                                </h1>
+                                <span style={{
+                                    background: 'rgba(28, 115, 171, 0.12)',
+                                    color: '#1C73AB',
+                                    padding: '4px 12px',
+                                    borderRadius: '50px',
+                                    fontSize: '12px',
+                                    fontWeight: 900
+                                }}>
+                                    Aqua Glassmorphism 💎
+                                </span>
+                            </div>
+                            <p style={{ margin: '6px 0 0 0', fontSize: '14px', color: '#1C73AB', fontWeight: 700 }}>
+                                المطابقة المالية اليومية، توريد النقدية للخزينة، إرجاع فائض البضاعة للمستودع الرئيسي، وتوليد القيود وسندات القبض آلياً.
+                            </p>
+                        </div>
                     </div>
-                    
-                    <div style={{ display: 'flex', gap: '15px' }} style-responsive="true">
-                        <button onClick={exportToExcel} disabled={filteredSettlements.length === 0} style={{ 
-                            background: filteredSettlements.length === 0 ? 'rgba(28, 115, 171, 0.1)' : '#1C73AB', 
-                            color: filteredSettlements.length === 0 ? '#122946' : '#FFFFFF', 
-                            border: '1px solid',
-                            borderColor: filteredSettlements.length === 0 ? 'rgba(28, 115, 171, 0.1)' : 'rgba(255, 255, 255, 0.3)',
-                            padding: '14px 30px', 
-                            borderRadius: '50px', 
-                            fontWeight: 900, 
-                            cursor: filteredSettlements.length === 0 ? 'not-allowed' : 'pointer', 
-                            display: 'flex', 
-                            alignItems: 'center', 
-                            gap: '12px', 
-                            boxShadow: filteredSettlements.length === 0 ? 'none' : '-5px -5px 15px rgba(255,255,255,0.8), 5px 5px 20px rgba(28, 115, 171, 0.3), inset 0 2px 2px rgba(255,255,255,0.4)', 
-                            transition: 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)' 
-                        }} className="aqua-button settlements-btn">
-                            <span>تصدير Excel</span>
-                            <span style={{ fontSize: '18px', filter: 'brightness(10)' }}>📑</span>
+
+                    <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap' }}>
+                        <button
+                            onClick={exportToExcel}
+                            disabled={filteredSettlements.length === 0}
+                            className="aqua-btn-primary"
+                            style={{ padding: '12px 26px', fontSize: '14px' }}
+                        >
+                            <span>تصدير إكسيل</span>
+                            <span style={{ fontSize: '16px' }}>📑</span>
                         </button>
                     </div>
                 </div>
 
-                {/* Filters */}
-                <div className="settlements-filters" style={{ display: 'flex', gap: '20px', marginTop: '35px', flexWrap: 'wrap' }}>
-                    <div style={{ flex: '1 1 250px', position: 'relative' }}>
-                        <div style={{ color: '#1C73AB', fontSize: '13px', fontWeight: 800, marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <span>بحث باسم المندوب أو الرحلة</span>
-                            <span>🔍</span>
-                        </div>
-                        <div style={{ 
-                            background: 'rgba(255, 255, 255, 0.6)', 
-                            borderRadius: '50px', 
-                            padding: '4px 10px',
-                            border: '1px solid rgba(255, 255, 255, 0.8)',
-                            boxShadow: 'inset 4px 4px 10px rgba(28, 115, 171, 0.1), inset -4px -4px 10px rgba(255,255,255,1)'
-                        }} className="aqua-input-wrapper">
-                            <input 
-                                type="text" 
-                                placeholder="ابحث..." 
-                                value={globalSearch}
-                                onChange={(e) => setGlobalSearch(e.target.value)}
-                                style={{ width: '100%', padding: '12px 15px', borderRadius: '50px', background: 'transparent', border: 'none', color: '#122946', outline: 'none', fontSize: '15px', fontWeight: 700 }}
-                            />
-                        </div>
+                {/* Filters Row */}
+                <div className="settle-filters-row" style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '15px',
+                    marginTop: '25px',
+                    flexWrap: 'wrap',
+                    paddingTop: '20px',
+                    borderTop: '1px solid rgba(28, 115, 171, 0.1)'
+                }}>
+                    {/* Search Input */}
+                    <div style={{ flex: '1 1 260px', position: 'relative' }}>
+                        <input
+                            type="text"
+                            placeholder="بحث باسم المندوب، رقم الرحلة، رقم الجوال، أو لوحة السيارة..."
+                            value={globalSearch}
+                            onChange={(e) => setGlobalSearch(e.target.value)}
+                            style={{
+                                width: '100%',
+                                padding: '12px 20px 12px 40px',
+                                borderRadius: '50px',
+                                border: '1px solid rgba(28, 115, 171, 0.25)',
+                                background: 'rgba(255, 255, 255, 0.85)',
+                                fontSize: '14px',
+                                fontWeight: 700,
+                                color: '#122946',
+                                outline: 'none',
+                                boxShadow: 'inset 2px 2px 6px rgba(28, 115, 171, 0.05)'
+                            }}
+                        />
+                        <span style={{ position: 'absolute', left: '16px', top: '12px', fontSize: '16px', color: '#1C73AB' }}>🔍</span>
                     </div>
-                    <div style={{ flex: '1 1 180px' }}>
-                        <div style={{ color: '#1C73AB', fontSize: '13px', fontWeight: 800, marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <span>من تاريخ</span>
-                            <span>📅</span>
-                        </div>
-                        <div style={{ 
-                            background: 'rgba(255, 255, 255, 0.6)', 
-                            borderRadius: '50px', 
-                            padding: '4px 10px',
-                            border: '1px solid rgba(255, 255, 255, 0.8)',
-                            boxShadow: 'inset 4px 4px 10px rgba(28, 115, 171, 0.1), inset -4px -4px 10px rgba(255,255,255,1)'
-                        }} className="aqua-input-wrapper">
-                            <input 
-                                type="date" 
-                                value={dateFrom}
-                                onChange={(e) => setDateFrom(e.target.value)}
-                                style={{ width: '100%', padding: '12px 15px', borderRadius: '50px', background: 'transparent', border: 'none', color: '#122946', outline: 'none', fontSize: '15px', fontWeight: 700 }}
-                                className="date-input-aqua-light"
-                            />
-                        </div>
+
+                    {/* Date From */}
+                    <div style={{ flex: '0 1 170px' }}>
+                        <input
+                            type="date"
+                            value={dateFrom}
+                            onChange={(e) => setDateFrom(e.target.value)}
+                            style={{
+                                width: '100%',
+                                padding: '11px 16px',
+                                borderRadius: '50px',
+                                border: '1px solid rgba(28, 115, 171, 0.25)',
+                                background: 'rgba(255, 255, 255, 0.85)',
+                                fontSize: '13px',
+                                fontWeight: 700,
+                                color: '#122946',
+                                outline: 'none'
+                            }}
+                        />
                     </div>
-                    <div style={{ flex: '1 1 180px' }}>
-                        <div style={{ color: '#1C73AB', fontSize: '13px', fontWeight: 800, marginBottom: '10px', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <span>إلى تاريخ</span>
-                            <span>📅</span>
-                        </div>
-                        <div style={{ 
-                            background: 'rgba(255, 255, 255, 0.6)', 
-                            borderRadius: '50px', 
-                            padding: '4px 10px',
-                            border: '1px solid rgba(255, 255, 255, 0.8)',
-                            boxShadow: 'inset 4px 4px 10px rgba(28, 115, 171, 0.1), inset -4px -4px 10px rgba(255,255,255,1)'
-                        }} className="aqua-input-wrapper">
-                            <input 
-                                type="date" 
-                                value={dateTo}
-                                onChange={(e) => setDateTo(e.target.value)}
-                                style={{ width: '100%', padding: '12px 15px', borderRadius: '50px', background: 'transparent', border: 'none', color: '#122946', outline: 'none', fontSize: '15px', fontWeight: 700 }}
-                                className="date-input-aqua-light"
-                            />
-                        </div>
+
+                    {/* Date To */}
+                    <div style={{ flex: '0 1 170px' }}>
+                        <input
+                            type="date"
+                            value={dateTo}
+                            onChange={(e) => setDateTo(e.target.value)}
+                            style={{
+                                width: '100%',
+                                padding: '11px 16px',
+                                borderRadius: '50px',
+                                border: '1px solid rgba(28, 115, 171, 0.25)',
+                                background: 'rgba(255, 255, 255, 0.85)',
+                                fontSize: '13px',
+                                fontWeight: 700,
+                                color: '#122946',
+                                outline: 'none'
+                            }}
+                        />
+                    </div>
+
+                    {/* Status Tabs */}
+                    <div className="settle-filter-tabs" style={{ display: 'flex', gap: '8px', flexWrap: 'nowrap' }}>
+                        <button
+                            type="button"
+                            className={`aqua-filter-tab ${statusFilter === 'all' ? 'active' : ''}`}
+                            onClick={() => setStatusFilter('all')}
+                        >
+                            الكل ({totals.totalTrips})
+                        </button>
+                        <button
+                            type="button"
+                            className={`aqua-filter-tab ${statusFilter === 'pending' ? 'active' : ''}`}
+                            onClick={() => setStatusFilter('pending')}
+                        >
+                            ⏳ بانتظار التسوية ({totals.pendingTrips})
+                        </button>
+                        <button
+                            type="button"
+                            className={`aqua-filter-tab ${statusFilter === 'settled' ? 'active' : ''}`}
+                            onClick={() => setStatusFilter('settled')}
+                        >
+                            ✅ تمت التسوية ({totals.settledTrips})
+                        </button>
+                        <button
+                            type="button"
+                            className={`aqua-filter-tab ${statusFilter === 'shortage' ? 'active' : ''}`}
+                            onClick={() => setStatusFilter('shortage')}
+                        >
+                            ⚠️ عهد معلقة
+                        </button>
                     </div>
                 </div>
             </div>
 
-            {isLoading ? (
-                <div style={{ padding: '50px', textAlign: 'center', color: 'white', fontWeight: 900, fontSize: '20px' }}>جاري مطابقة العهد...</div>
-            ) : (
-                <>
-                    {/* Global KPIs */}
-                    <div className="settlements-kpi-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '30px', marginBottom: '40px' }}>
-                        <div className="aqua-float-card settlements-kpi-card" style={{ 
-                            background: 'rgba(255, 255, 255, 0.5)', backdropFilter: 'blur(30px)', 
-                            border: '1px solid rgba(255, 255, 255, 0.7)', padding: '30px', borderRadius: '35px', 
-                            textAlign: 'center', boxShadow: '-10px -10px 30px rgba(255,255,255,0.8), 10px 10px 30px rgba(28, 115, 171, 0.15), inset 0 2px 2px rgba(255,255,255,1)',
-                            position: 'relative', overflow: 'hidden'
-                        }}>
-                            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '6px', background: '#1C73AB' }}></div>
-                            <div style={{ color: '#122946', fontSize: '16px', fontWeight: 900, marginBottom: '15px', letterSpacing: '0.5px' }}>إجمالي المبيعات 📦</div>
-                            <div style={{ color: '#1C73AB', fontSize: '42px', fontWeight: 900, textShadow: '0 4px 15px rgba(28, 115, 171, 0.3)' }}>{formatCurrency(totals.totalSales)}</div>
-                            <div style={{ display: 'flex', justifyContent: 'center', gap: '15px', marginTop: '20px', padding: '15px', background: 'rgba(255,255,255,0.6)', borderRadius: '25px', boxShadow: 'inset 2px 2px 10px rgba(28,115,171,0.1), inset -2px -2px 10px rgba(255,255,255,1)' }}>
-                                <span style={{ color: '#122946', fontSize: '13px', fontWeight: 800 }}>كاش: <span style={{ color: '#F2C94C', marginLeft: '4px', textShadow: '0 2px 4px rgba(242,201,76,0.3)' }}>{formatCurrency(totals.cashSales)}</span></span>
-                                <span style={{ width: '1px', background: 'rgba(28,115,171,0.2)' }}></span>
-                                <span style={{ color: '#122946', fontSize: '13px', fontWeight: 800 }}>آجل: <span style={{ color: '#1C73AB', marginLeft: '4px' }}>{formatCurrency(totals.creditSales)}</span></span>
-                            </div>
-                        </div>
-                        <div className="aqua-float-card settlements-kpi-card" style={{ 
-                            background: 'rgba(255, 255, 255, 0.5)', backdropFilter: 'blur(30px)', 
-                            border: '1px solid rgba(255, 255, 255, 0.7)', padding: '30px', borderRadius: '35px', 
-                            textAlign: 'center', boxShadow: '-10px -10px 30px rgba(255,255,255,0.8), 10px 10px 30px rgba(28, 115, 171, 0.15), inset 0 2px 2px rgba(255,255,255,1)',
-                            position: 'relative', overflow: 'hidden', animationDelay: '0.2s'
-                        }}>
-                            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '6px', background: '#2ECC71' }}></div>
-                            <div style={{ color: '#122946', fontSize: '16px', fontWeight: 900, marginBottom: '15px', letterSpacing: '0.5px' }}>النقدية المستلمة (السدادات) 💵</div>
-                            <div style={{ color: '#2ECC71', fontSize: '42px', fontWeight: 900, textShadow: '0 4px 15px rgba(46, 204, 113, 0.3)' }}>{formatCurrency(totals.totalCash)}</div>
-                        </div>
-                        <div className="aqua-float-card settlements-kpi-card" style={{ 
-                            background: 'rgba(255, 255, 255, 0.5)', backdropFilter: 'blur(30px)', 
-                            border: '1px solid rgba(255, 255, 255, 0.7)', padding: '30px', borderRadius: '35px', 
-                            textAlign: 'center', boxShadow: '-10px -10px 30px rgba(255,255,255,0.8), 10px 10px 30px rgba(28, 115, 171, 0.15), inset 0 2px 2px rgba(255,255,255,1)',
-                            position: 'relative', overflow: 'hidden', animationDelay: '0.4s'
-                        }}>
-                            <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '6px', background: '#F2C94C' }}></div>
-                            <div style={{ color: '#122946', fontSize: '16px', fontWeight: 900, marginBottom: '15px', letterSpacing: '0.5px' }}>العهد المتبقية للشركة ⚠️</div>
-                            <div style={{ color: '#F2C94C', fontSize: '42px', fontWeight: 900, textShadow: '0 4px 15px rgba(242, 201, 76, 0.4)' }}>{formatCurrency(totals.totalDifference)}</div>
-                        </div>
+            {/* Global KPI Metrics Grid */}
+            <div className="settle-kpi-grid" style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+                gap: '20px',
+                marginBottom: '30px'
+            }}>
+                {/* KPI 1: Active Trips */}
+                <div className="aqua-glass-card" style={{ padding: '22px 24px', position: 'relative', overflow: 'hidden' }}>
+                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: '#1C73AB' }}></div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '13px', fontWeight: 800, color: '#1C73AB' }}>رحلات الأسطول 🚚</span>
+                        <span style={{ fontSize: '20px' }}>📦</span>
                     </div>
+                    <div style={{ fontSize: '32px', fontWeight: 900, color: '#122946', margin: '10px 0 6px 0' }}>
+                        {totals.totalTrips}
+                    </div>
+                    <div style={{ fontSize: '12px', fontWeight: 700, color: '#64748b' }}>
+                        <span style={{ color: '#f59e0b' }}>{totals.pendingTrips} نشطة</span> | <span style={{ color: '#16a34a' }}>{totals.settledTrips} مغلقة</span>
+                    </div>
+                </div>
 
-                    {/* Data Table */}
-                    <div className="settlements-table-card" style={{ 
-                        background: 'rgba(255, 255, 255, 0.4)', 
-                        backdropFilter: 'blur(30px)', 
-                        borderRadius: '35px', 
-                        border: '1px solid rgba(255, 255, 255, 0.6)', 
-                        boxShadow: '-10px -10px 30px rgba(255,255,255,0.8), 10px 10px 30px rgba(28, 115, 171, 0.15)',
-                        overflow: 'hidden' 
-                    }}>
-                        <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-                            <table className="settlements-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right', color: '#122946' }}>
-                                <thead style={{ background: 'rgba(28, 115, 171, 0.05)', borderBottom: '1px solid rgba(28, 115, 171, 0.1)' }}>
-                                    <tr>
-                                        <th style={{ padding: '20px', fontSize: '14px', color: '#1C73AB', fontWeight: 900 }}>رقم الرحلة 🚚</th>
-                                        <th style={{ padding: '20px', fontSize: '14px', color: '#1C73AB', fontWeight: 900 }}>تاريخ الرحلة 📅</th>
-                                        <th style={{ padding: '20px', fontSize: '14px', color: '#1C73AB', fontWeight: 900 }}>اسم المندوب 👤</th>
-                                        <th style={{ padding: '20px', fontSize: '14px', color: '#122946', fontWeight: 900 }}>إجمالي المبيعات 📦</th>
-                                        <th style={{ padding: '20px', fontSize: '14px', color: '#122946', fontWeight: 900 }}>الآجل ⏳</th>
-                                        <th style={{ padding: '20px', fontSize: '14px', color: '#F2C94C', fontWeight: 900 }}>المطالبة النقدية 💰</th>
-                                        <th style={{ padding: '20px', fontSize: '14px', color: '#2ECC71', fontWeight: 900 }}>النقدية المُسلمة 💵</th>
-                                        <th style={{ padding: '20px', fontSize: '14px', color: '#122946', fontWeight: 900 }}>الفرق (عهدة متبقية) ⚠️</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {filteredSettlements.length > 0 ? filteredSettlements.map((item, idx) => {
-                                        const isSettled = item.difference <= 0;
-                                        return (
-                                            <tr key={item.id || idx} style={{ 
-                                                borderBottom: '1px solid rgba(255, 255, 255, 0.4)', 
-                                                background: isSettled ? 'rgba(46, 204, 113, 0.05)' : (idx % 2 === 0 ? 'rgba(255,255,255,0.2)' : 'transparent'), 
-                                                transition: 'all 0.2s ease',
-                                            }}
-                                            onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(28, 115, 171, 0.08)'}
-                                            onMouseLeave={(e) => e.currentTarget.style.background = isSettled ? 'rgba(46, 204, 113, 0.05)' : (idx % 2 === 0 ? 'rgba(255,255,255,0.2)' : 'transparent')}
-                                            >
-                                                <td style={{ padding: '20px', fontWeight: 800, color: '#1C73AB' }}>
-                                                    <div style={{ background: 'rgba(255,255,255,0.6)', padding: '6px 12px', borderRadius: '8px', display: 'inline-block', boxShadow: 'inset 1px 1px 3px rgba(255,255,255,1)' }}>{item.operationNumber}</div>
-                                                </td>
-                                                <td style={{ padding: '20px', fontWeight: 800 }}>{formatDate(item.date)}</td>
-                                                <td style={{ padding: '20px', fontWeight: 900 }}>{item.delegateName}</td>
-                                                <td style={{ padding: '20px', fontWeight: 900, color: '#1C73AB', fontSize: '16px' }}>{formatCurrency(item.totalSales)}</td>
-                                                <td style={{ padding: '20px', fontWeight: 900, fontSize: '16px' }}>{formatCurrency(item.creditSales)}</td>
-                                                <td style={{ padding: '20px', fontWeight: 900, color: '#F2C94C', fontSize: '16px', textShadow: '0 1px 2px rgba(242,201,76,0.3)' }}>{formatCurrency(item.cashSales)}</td>
-                                                <td style={{ padding: '20px', fontWeight: 900, color: '#2ECC71', fontSize: '16px' }}>{formatCurrency(item.totalCash)}</td>
-                                                <td style={{ padding: '20px', fontWeight: 900, color: isSettled ? '#2ECC71' : '#F2C94C', fontSize: '18px' }}>
-                                                    {formatCurrency(item.difference)}
-                                                    {isSettled && <span style={{ marginLeft: '10px', fontSize: '14px', background: 'rgba(46, 204, 113, 0.2)', padding: '4px 8px', borderRadius: '20px', color: '#122946' }}>✅ مسددة</span>}
-                                                </td>
-                                            </tr>
-                                        )
-                                    }) : (
-                                        <tr>
-                                            <td colSpan={8} style={{ padding: '80px 20px', textAlign: 'center', color: '#1C73AB', fontWeight: 900, fontSize: '18px' }}>
-                                                <div style={{ fontSize: '48px', marginBottom: '15px', opacity: 0.8, filter: 'drop-shadow(0 4px 10px rgba(28, 115, 171, 0.2))' }}>💧</div>
-                                                لا توجد رحلات مطابقة للبحث
+                {/* KPI 2: Total Sales */}
+                <div className="aqua-glass-card" style={{ padding: '22px 24px', position: 'relative', overflow: 'hidden' }}>
+                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: '#2891C8' }}></div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '13px', fontWeight: 800, color: '#1C73AB' }}>إجمالي المبيعات 📈</span>
+                        <span style={{ fontSize: '20px' }}>💰</span>
+                    </div>
+                    <div style={{ fontSize: '28px', fontWeight: 900, color: '#1C73AB', margin: '10px 0 6px 0' }}>
+                        {formatCurrency(totals.totalSales)}
+                    </div>
+                    <div style={{ fontSize: '12px', fontWeight: 700, color: '#64748b' }}>
+                        كاش: <b style={{ color: '#122946' }}>{formatCurrency(totals.cashSales)}</b> | آجل: <b>{formatCurrency(totals.creditSales)}</b>
+                    </div>
+                </div>
+
+                {/* KPI 3: Net Cash Due */}
+                <div className="aqua-glass-card" style={{ padding: '22px 24px', position: 'relative', overflow: 'hidden' }}>
+                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: '#f59e0b' }}></div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '13px', fontWeight: 800, color: '#b45309' }}>المطالبة النقدية للعهد 💵</span>
+                        <span style={{ fontSize: '20px' }}>⚖️</span>
+                    </div>
+                    <div style={{ fontSize: '28px', fontWeight: 900, color: '#b45309', margin: '10px 0 6px 0' }}>
+                        {formatCurrency(totals.totalNetCashDue)}
+                    </div>
+                    <div style={{ fontSize: '12px', fontWeight: 700, color: '#64748b' }}>
+                        (مبيعات كاش + تحصيلات) - مصروفات
+                    </div>
+                </div>
+
+                {/* KPI 4: Handed Over Cash */}
+                <div className="aqua-glass-card" style={{ padding: '22px 24px', position: 'relative', overflow: 'hidden' }}>
+                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: '#16a34a' }}></div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '13px', fontWeight: 800, color: '#16a34a' }}>المورد للخزينة ✅</span>
+                        <span style={{ fontSize: '20px' }}>🏦</span>
+                    </div>
+                    <div style={{ fontSize: '28px', fontWeight: 900, color: '#16a34a', margin: '10px 0 6px 0' }}>
+                        {formatCurrency(totals.totalHandedOverCash)}
+                    </div>
+                    <div style={{ fontSize: '12px', fontWeight: 700, color: '#64748b' }}>
+                        سندات قبض مقيدة بالخزينة
+                    </div>
+                </div>
+
+                {/* KPI 5: Remaining Cash Custody */}
+                <div className="aqua-glass-card" style={{ padding: '22px 24px', position: 'relative', overflow: 'hidden' }}>
+                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: '#ef4444' }}></div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '13px', fontWeight: 800, color: '#ef4444' }}>العهد المعلقة / العجز ⚠️</span>
+                        <span style={{ fontSize: '20px' }}>⏳</span>
+                    </div>
+                    <div style={{ fontSize: '28px', fontWeight: 900, color: totals.totalRemainingCash > 0 ? '#ef4444' : '#16a34a', margin: '10px 0 6px 0' }}>
+                        {formatCurrency(totals.totalRemainingCash)}
+                    </div>
+                    <div style={{ fontSize: '12px', fontWeight: 700, color: '#64748b' }}>
+                        صافي المبالغ بذمة المناديب
+                    </div>
+                </div>
+
+                {/* KPI 6: Remaining Stock in Vehicles */}
+                <div className="aqua-glass-card" style={{ padding: '22px 24px', position: 'relative', overflow: 'hidden' }}>
+                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: '#7FD4E3' }}></div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <span style={{ fontSize: '13px', fontWeight: 800, color: '#1C73AB' }}>بضائع بانتظار الإرجاع 🔄</span>
+                        <span style={{ fontSize: '20px' }}>💧</span>
+                    </div>
+                    <div style={{ fontSize: '28px', fontWeight: 900, color: '#122946', margin: '10px 0 6px 0' }}>
+                        {totals.totalRemainingItems} <span style={{ fontSize: '16px', fontWeight: 700, color: '#64748b' }}>حبة</span>
+                    </div>
+                    <div style={{ fontSize: '12px', fontWeight: 700, color: '#64748b' }}>
+                        متبقية في سيارات التوزيع
+                    </div>
+                </div>
+            </div>
+
+            {/* Settlements Table Card */}
+            <div className="aqua-glass-card" style={{ overflow: 'hidden', padding: 0 }}>
+                {isLoading ? (
+                    <div style={{ padding: '80px', textAlign: 'center', color: '#1C73AB', fontWeight: 800, fontSize: '18px' }}>
+                        <div style={{ fontSize: '40px', marginBottom: '15px', animation: 'spin 1.5s infinite linear' }}>⏳</div>
+                        جاري تحميل ومطابقة عهد المناديب والأسطول...
+                    </div>
+                ) : (
+                    <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+                        <table className="settle-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right', fontSize: '13px', color: '#122946' }}>
+                            <thead style={{ background: 'rgba(28, 115, 171, 0.08)', borderBottom: '1.5px solid rgba(28, 115, 171, 0.15)' }}>
+                                <tr>
+                                    <th style={{ padding: '18px 20px', color: '#1C73AB', fontWeight: 900 }}>الرحلة والسيارة 🚚</th>
+                                    <th style={{ padding: '18px 20px', color: '#1C73AB', fontWeight: 900 }}>التاريخ 📅</th>
+                                    <th style={{ padding: '18px 20px', color: '#1C73AB', fontWeight: 900 }}>المندوب / السائق 👤</th>
+                                    <th style={{ padding: '18px 20px', color: '#122946', fontWeight: 900, textAlign: 'center' }}>المبيعات 📦</th>
+                                    <th style={{ padding: '18px 20px', color: '#ef4444', fontWeight: 900, textAlign: 'center' }}>المصروفات (-)</th>
+                                    <th style={{ padding: '18px 20px', color: '#b45309', fontWeight: 900, textAlign: 'center' }}>المطالبة النقدية 💰</th>
+                                    <th style={{ padding: '18px 20px', color: '#16a34a', fontWeight: 900, textAlign: 'center' }}>المورد للخزينة 💵</th>
+                                    <th style={{ padding: '18px 20px', color: '#122946', fontWeight: 900, textAlign: 'center' }}>متبقي العهدة ⚠️</th>
+                                    <th style={{ padding: '18px 20px', color: '#1C73AB', fontWeight: 900, textAlign: 'center' }}>بضاعة السيارة 🔄</th>
+                                    <th style={{ padding: '18px 20px', color: '#122946', fontWeight: 900, textAlign: 'center' }}>حالة التسوية</th>
+                                    <th style={{ padding: '18px 20px', color: '#1C73AB', fontWeight: 900, textAlign: 'center' }}>الإجراءات</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {filteredSettlements.length > 0 ? filteredSettlements.map((item, idx) => {
+                                    const isSettled = item.settlementStatus === 'settled';
+                                    const isPartial = item.settlementStatus === 'partial';
+
+                                    return (
+                                        <tr key={item.id || idx} className="aqua-table-row">
+                                            {/* Trip & Vehicle */}
+                                            <td style={{ padding: '18px 20px' }}>
+                                                <div style={{
+                                                    background: 'rgba(28, 115, 171, 0.1)',
+                                                    color: '#1C73AB',
+                                                    padding: '4px 10px',
+                                                    borderRadius: '8px',
+                                                    display: 'inline-block',
+                                                    fontWeight: 900,
+                                                    fontSize: '13px'
+                                                }}>
+                                                    #{item.operationNumber}
+                                                </div>
+                                                <div style={{ fontSize: '11px', color: '#64748b', marginTop: '4px', fontWeight: 700 }}>
+                                                    🚗 {item.vehiclePlate}
+                                                </div>
+                                            </td>
+
+                                            {/* Date */}
+                                            <td style={{ padding: '18px 20px', fontWeight: 700, whiteSpace: 'nowrap' }}>
+                                                {formatDate(item.date)}
+                                            </td>
+
+                                            {/* Delegate Name & Partner ID */}
+                                            <td style={{ padding: '18px 20px' }}>
+                                                <div style={{ fontWeight: 900, color: '#122946', fontSize: '14px' }}>
+                                                    {item.driverName}
+                                                </div>
+                                                <div style={{ fontSize: '11px', color: '#1C73AB', marginTop: '3px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                                                    {item.driverPhone && <span>📞 {item.driverPhone}</span>}
+                                                    {item.driverId && (
+                                                        <span title={item.driverId} style={{ background: 'rgba(28, 115, 171, 0.08)', padding: '1px 6px', borderRadius: '4px' }}>
+                                                            ID: {item.driverId.slice(0, 6)}..
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            </td>
+
+                                            {/* Sales */}
+                                            <td style={{ padding: '18px 20px', textAlign: 'center' }}>
+                                                <div style={{ fontWeight: 900, color: '#1C73AB', fontSize: '15px' }}>
+                                                    {formatCurrency(item.totalSales)}
+                                                </div>
+                                                <div style={{ fontSize: '11px', color: '#64748b', marginTop: '3px' }}>
+                                                    كاش: {formatCurrency(item.cashSales)} | آجل: {formatCurrency(item.creditSales)}
+                                                </div>
+                                            </td>
+
+                                            {/* Expenses */}
+                                            <td style={{ padding: '18px 20px', textAlign: 'center', fontWeight: 800, color: '#ef4444' }}>
+                                                {item.totalExpenses > 0 ? formatCurrency(item.totalExpenses) : '---'}
+                                            </td>
+
+                                            {/* Net Cash Due */}
+                                            <td style={{ padding: '18px 20px', textAlign: 'center', fontWeight: 900, color: '#b45309', fontSize: '15px' }}>
+                                                {formatCurrency(item.netCashDue)}
+                                            </td>
+
+                                            {/* Handed Over Cash */}
+                                            <td style={{ padding: '18px 20px', textAlign: 'center', fontWeight: 900, color: '#16a34a', fontSize: '15px' }}>
+                                                {formatCurrency(item.handedOverCash)}
+                                            </td>
+
+                                            {/* Remaining Cash */}
+                                            <td style={{ padding: '18px 20px', textAlign: 'center' }}>
+                                                <div style={{
+                                                    fontWeight: 900,
+                                                    fontSize: '15px',
+                                                    color: item.remainingCashCustody <= 0 ? '#16a34a' : '#ef4444'
+                                                }}>
+                                                    {item.remainingCashCustody <= 0 ? '0.00 ر.س' : formatCurrency(item.remainingCashCustody)}
+                                                </div>
+                                            </td>
+
+                                            {/* Remaining Items */}
+                                            <td style={{ padding: '18px 20px', textAlign: 'center' }}>
+                                                {item.totalRemainingQty > 0 ? (
+                                                    <span style={{
+                                                        background: 'rgba(245, 158, 11, 0.15)',
+                                                        color: '#b45309',
+                                                        padding: '4px 10px',
+                                                        borderRadius: '20px',
+                                                        fontWeight: 900,
+                                                        fontSize: '12px'
+                                                    }}>
+                                                        {item.totalRemainingQty} حبة بالسيارة
+                                                    </span>
+                                                ) : (
+                                                    <span style={{ color: '#16a34a', fontWeight: 800 }}>تم الإرجاع بالكامل ✔️</span>
+                                                )}
+                                            </td>
+
+                                            {/* Status Badge */}
+                                            <td style={{ padding: '18px 20px', textAlign: 'center' }}>
+                                                {isSettled ? (
+                                                    <span style={{
+                                                        background: 'rgba(22, 163, 74, 0.15)',
+                                                        color: '#16a34a',
+                                                        padding: '6px 14px',
+                                                        borderRadius: '50px',
+                                                        fontWeight: 900,
+                                                        fontSize: '12px',
+                                                        border: '1px solid rgba(22, 163, 74, 0.3)'
+                                                    }}>
+                                                        تمت التسوية ✅
+                                                    </span>
+                                                ) : isPartial ? (
+                                                    <span style={{
+                                                        background: 'rgba(40, 145, 200, 0.15)',
+                                                        color: '#1C73AB',
+                                                        padding: '6px 14px',
+                                                        borderRadius: '50px',
+                                                        fontWeight: 900,
+                                                        fontSize: '12px',
+                                                        border: '1px solid rgba(40, 145, 200, 0.3)'
+                                                    }}>
+                                                        تسوية جزئية 🔄
+                                                    </span>
+                                                ) : (
+                                                    <span style={{
+                                                        background: 'rgba(245, 158, 11, 0.15)',
+                                                        color: '#b45309',
+                                                        padding: '6px 14px',
+                                                        borderRadius: '50px',
+                                                        fontWeight: 900,
+                                                        fontSize: '12px',
+                                                        border: '1px solid rgba(245, 158, 11, 0.3)'
+                                                    }}>
+                                                        بانتظار التسوية ⏳
+                                                    </span>
+                                                )}
+                                            </td>
+
+                                            {/* Actions */}
+                                            <td style={{ padding: '18px 20px', textAlign: 'center' }}>
+                                                <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                                                    {/* Settle button */}
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setSelectedTripForSettlement(item);
+                                                            setIsSettlementModalOpen(true);
+                                                        }}
+                                                        style={{
+                                                            padding: '7px 14px',
+                                                            borderRadius: '12px',
+                                                            border: 'none',
+                                                            background: isSettled ? 'rgba(28, 115, 171, 0.12)' : 'linear-gradient(135deg, #1C73AB 0%, #2891C8 100%)',
+                                                            color: isSettled ? '#1C73AB' : '#FFFFFF',
+                                                            fontWeight: 800,
+                                                            fontSize: '12px',
+                                                            cursor: 'pointer',
+                                                            boxShadow: isSettled ? 'none' : '0 4px 12px rgba(28, 115, 171, 0.25)',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            gap: '6px',
+                                                            transition: 'all 0.2s'
+                                                        }}
+                                                        title="تسوية العهدة النقدية وإرجاع البضاعة"
+                                                    >
+                                                        <span>{isSettled ? 'تعديل التسوية' : '🤝 تسوية العهدة'}</span>
+                                                    </button>
+
+                                                    {/* Print clearance button */}
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setSelectedTripForPrint(item);
+                                                            setIsPrintModalOpen(true);
+                                                        }}
+                                                        style={{
+                                                            padding: '7px 12px',
+                                                            borderRadius: '12px',
+                                                            border: '1px solid rgba(28, 115, 171, 0.25)',
+                                                            background: 'rgba(255, 255, 255, 0.8)',
+                                                            color: '#1C73AB',
+                                                            fontWeight: 800,
+                                                            fontSize: '12px',
+                                                            cursor: 'pointer',
+                                                            display: 'flex',
+                                                            alignItems: 'center',
+                                                            gap: '4px'
+                                                        }}
+                                                        title="طباعة سند تسوية ومخالصة عهدة رسمية"
+                                                    >
+                                                        <span>🖨️</span>
+                                                        <span>سند</span>
+                                                    </button>
+                                                </div>
                                             </td>
                                         </tr>
-                                    )}
-                                </tbody>
-                            </table>
-                        </div>
+                                    );
+                                }) : (
+                                    <tr>
+                                        <td colSpan={11} style={{ padding: '80px 20px', textAlign: 'center', color: '#1C73AB' }}>
+                                            <div style={{ fontSize: '48px', marginBottom: '12px' }}>💧</div>
+                                            <div style={{ fontSize: '18px', fontWeight: 900, color: '#122946' }}>
+                                                لا توجد رحلات أو عهد مطابقة لخيارات البحث المحددة
+                                            </div>
+                                            <p style={{ fontSize: '13px', color: '#64748b', marginTop: '6px' }}>
+                                                جرب تغيير فترة التاريخ أو مسح شريط البحث لعرض كافة الرحلات.
+                                            </p>
+                                        </td>
+                                    </tr>
+                                )}
+                            </tbody>
+                        </table>
                     </div>
-                </>
-            )}
+                )}
+            </div>
+
+            {/* Settlement Action Modal */}
+            <SettlementActionModal
+                isOpen={isSettlementModalOpen}
+                onClose={() => {
+                    setIsSettlementModalOpen(false);
+                    setSelectedTripForSettlement(null);
+                }}
+                trip={selectedTripForSettlement}
+                inventoryItems={inventoryItems}
+                accounts={accounts}
+                warehouses={warehouses}
+                onExecuteSettlement={executeSettlement}
+                isSubmitting={isSettling}
+            />
+
+            {/* Official Print Modal */}
+            <SettlementPrintModal
+                isOpen={isPrintModalOpen}
+                onClose={() => {
+                    setIsPrintModalOpen(false);
+                    setSelectedTripForPrint(null);
+                }}
+                trip={selectedTripForPrint}
+            />
         </div>
     );
 }

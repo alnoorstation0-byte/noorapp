@@ -152,7 +152,8 @@ const TABLE_QUERY_KEY_MAP: Record<string, string[][]> = {
   fleet_operations: [
     ['fleet_operations'], 
     ['fleet_operations_open'], 
-    ['operations_for_vehicles']
+    ['operations_for_vehicles'],
+    ['delegate_settlements_trips']
   ],
   fleet_vehicles: [
     ['fleet_vehicles'], 

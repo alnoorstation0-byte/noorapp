@@ -23,7 +23,7 @@ export const TABLE_SCHEMAS: Record<string, string[]> = {
   "payment_vouchers": ["id", "voucher_number", "date", "amount", "partner_id", "credit_account_id", "payment_method", "reference_no", "description", "notes", "status", "is_posted", "created_at", "updated_at", "created_by", "debit_account_id", "site_ref", "related_expense_id", "sub_claim_id", "fleet_operation_id", "shift_id"],
   "payroll_slips": ["id", "emp_id", "month", "basic_salary", "total_advances", "total_deductions", "net_salary", "is_posted", "created_at", "amount_to_pay", "allowances", "status"],
   "profiles": ["id", "username", "role", "permissions", "signature_url", "linked_partner_id", "avatar_url", "nickname", "phone_number", "full_name", "email", "created_at", "is_admin", "is_active", "quick_links"],
-  "receipt_vouchers": ["id", "date", "amount", "payment_method", "notes", "partner_id", "invoice_id", "created_at", "updated_at", "receipt_number", "status", "safe_bank_acc_id", "partner_acc_id", "reference_number", "attachment_url", "job_order_id", "delegate_id", "shift_id"],
+  "receipt_vouchers": ["id", "date", "amount", "payment_method", "notes", "partner_id", "invoice_id", "created_at", "updated_at", "receipt_number", "status", "safe_bank_acc_id", "partner_acc_id", "reference_number", "attachment_url", "job_order_id", "delegate_id", "shift_id", "fleet_operation_id"],
   "sys_financial_reports": ["report_name", "report_data", "updated_at"],
   "system_settings": ["id", "theme_config", "privacy_settings", "notifications", "updated_at"],
   "user_requests": ["id", "user_id", "type", "category", "subject", "details", "status", "admin_note", "created_at"],
