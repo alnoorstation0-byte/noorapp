@@ -9,7 +9,7 @@ import { useUnreadCounts } from '@/hooks/useUnreadCounts';
 import { useRealtimeListener } from '@/lib/useRealtimeSync';
 import { useRouter, usePathname } from 'next/navigation';
 
-export default function MasterPage({ title, subtitle, children, headerContent, icon }: any) {
+export default function MasterPage({ title, subtitle, children, headerContent, icon, className }: any) {
   const router = useRouter();
   const pathname = usePathname();
   const [userProfile, setUserProfile] = useState<any>(null);
@@ -198,7 +198,7 @@ export default function MasterPage({ title, subtitle, children, headerContent, i
   };
 
   return (
-    <div className="clean-page">
+    <div className={`clean-page ${className || ''}`.trim()}>
       <style>{`
 /* 🚀 🛠️ Prevent horizontal scroll */
 html, body { 
