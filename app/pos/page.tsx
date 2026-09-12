@@ -35,11 +35,25 @@ function PosItemNumpadModal({
 }: PosItemNumpadModalProps) {
     const [activeField, setActiveField] = React.useState<'qty' | 'price'>('qty');
     const [isFirstPress, setIsFirstPress] = React.useState(true);
+    const [pressedKey, setPressedKey] = React.useState<string | null>(null);
 
-    const handleNumpad = (key: string) => {
-        const currentVal = activeField === 'qty'
-            ? String(item.selected_qty ?? '')
-            : String(item.selected_price ?? '');
+    const itemRef = React.useRef(item);
+    itemRef.current = item;
+
+    const activeFieldRef = React.useRef(activeField);
+    activeFieldRef.current = activeField;
+
+    const isFirstPressRef = React.useRef(isFirstPress);
+    isFirstPressRef.current = isFirstPress;
+
+    const handleNumpad = React.useCallback((key: string) => {
+        const curItem = itemRef.current;
+        const curField = activeFieldRef.current;
+        const curFirstPress = isFirstPressRef.current;
+
+        const currentVal = curField === 'qty'
+            ? String(curItem.selected_qty ?? '')
+            : String(curItem.selected_price ?? '');
 
         let newVal: string;
 
@@ -47,29 +61,162 @@ function PosItemNumpadModal({
             newVal = currentVal.slice(0, -1);
             if (!newVal || newVal === '') newVal = '0';
         } else if (key === '.') {
-            if (isFirstPress) {
+            if (curFirstPress) {
                 newVal = '0.';
             } else {
                 newVal = currentVal.includes('.') ? currentVal : currentVal + '.';
             }
         } else {
-            newVal = (isFirstPress || currentVal === '0') ? key : currentVal + key;
+            newVal = (curFirstPress || currentVal === '0') ? key : currentVal + key;
         }
 
         setIsFirstPress(false);
+        isFirstPressRef.current = false;
         const num = parseFloat(newVal) || 0;
 
-        if (activeField === 'qty') {
-            onUpdateItem({ ...item, selected_qty: key === '⌫' ? (Number(newVal) || 0) : num });
+        let updatedItem: any;
+        if (curField === 'qty') {
+            updatedItem = { ...curItem, selected_qty: key === '⌫' ? (Number(newVal) || 0) : num };
         } else {
-            onUpdateItem({ ...item, selected_price: key === '⌫' ? (Number(newVal) || 0) : (parseFloat(newVal) || 0) });
+            updatedItem = { ...curItem, selected_price: key === '⌫' ? (Number(newVal) || 0) : (parseFloat(newVal) || 0) };
         }
-    };
 
-    const switchField = (field: 'qty' | 'price') => {
+        itemRef.current = updatedItem;
+        onUpdateItem(updatedItem);
+    }, [onUpdateItem]);
+
+    const switchField = React.useCallback((field: 'qty' | 'price') => {
         setActiveField(field);
+        activeFieldRef.current = field;
         setIsFirstPress(true);
-    };
+        isFirstPressRef.current = true;
+    }, []);
+
+    // ⌨️ Physical keyboard support for desktop without triggering mobile virtual keyboard
+    React.useEffect(() => {
+        // Blur any previously active background inputs (like search)
+        if (typeof document !== 'undefined' && document.activeElement instanceof HTMLElement) {
+            document.activeElement.blur();
+        }
+
+        const arabicIndicDigits: Record<string, string> = {
+            '٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4',
+            '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9'
+        };
+
+        const handleKeyDown = (e: KeyboardEvent) => {
+            // Ignore if modifier keys are active
+            if (e.ctrlKey || e.metaKey || e.altKey) return;
+
+            // Enter key -> confirm and add to cart
+            if (e.key === 'Enter' || e.code === 'NumpadEnter') {
+                e.preventDefault();
+                e.stopPropagation();
+                setPressedKey('Enter');
+                const curItem = itemRef.current;
+                const exceeded = (curItem.selected_qty || 0) > (curItem.available_qty || 0);
+                if (!exceeded && (curItem.selected_qty || 0) > 0) {
+                    onConfirm();
+                }
+                return;
+            }
+
+            // Escape key -> close modal
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                e.stopPropagation();
+                onClose();
+                return;
+            }
+
+            // Backspace / Delete -> remove last digit
+            if (e.key === 'Backspace' || e.key === 'Delete') {
+                e.preventDefault();
+                e.stopPropagation();
+                setPressedKey('⌫');
+                handleNumpad('⌫');
+                return;
+            }
+
+            // Tab or Arrow keys -> toggle between qty and price
+            if (e.key === 'Tab' || e.key.startsWith('Arrow')) {
+                e.preventDefault();
+                e.stopPropagation();
+                switchField(activeFieldRef.current === 'qty' ? 'price' : 'qty');
+                return;
+            }
+
+            // Plus / Increment
+            if (e.key === '+' || e.code === 'NumpadAdd' || (e.key === '=' && !e.shiftKey)) {
+                e.preventDefault();
+                e.stopPropagation();
+                const curItem = itemRef.current;
+                const next = (curItem.selected_qty || 1) + 1;
+                if (next <= (curItem.available_qty || 999999)) {
+                    const updated = { ...curItem, selected_qty: next };
+                    itemRef.current = updated;
+                    onUpdateItem(updated);
+                    setIsFirstPress(false);
+                    isFirstPressRef.current = false;
+                }
+                return;
+            }
+
+            // Minus / Decrement
+            if (e.key === '-' || e.code === 'NumpadSubtract' || e.key === '_') {
+                e.preventDefault();
+                e.stopPropagation();
+                const curItem = itemRef.current;
+                const updated = { ...curItem, selected_qty: Math.max(1, (curItem.selected_qty || 1) - 1) };
+                itemRef.current = updated;
+                onUpdateItem(updated);
+                setIsFirstPress(false);
+                isFirstPressRef.current = false;
+                return;
+            }
+
+            // Decimal point
+            if (e.key === '.' || e.key === ',' || e.key === '٫' || e.key === '،' || e.code === 'NumpadDecimal') {
+                e.preventDefault();
+                e.stopPropagation();
+                setPressedKey('.');
+                handleNumpad('.');
+                return;
+            }
+
+            // Digits 0-9
+            let digit: string | null = null;
+            if (e.key >= '0' && e.key <= '9') {
+                digit = e.key;
+            } else if (arabicIndicDigits[e.key]) {
+                digit = arabicIndicDigits[e.key];
+            } else if (e.code && e.code.startsWith('Numpad') && e.code.length === 7) {
+                const num = e.code.slice(6);
+                if (num >= '0' && num <= '9') {
+                    digit = num;
+                }
+            }
+
+            if (digit !== null) {
+                e.preventDefault();
+                e.stopPropagation();
+                setPressedKey(digit);
+                handleNumpad(digit);
+            }
+        };
+
+        const handleKeyUp = () => {
+            setPressedKey(null);
+        };
+
+        window.addEventListener('keydown', handleKeyDown);
+        window.addEventListener('keyup', handleKeyUp);
+
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown);
+            window.removeEventListener('keyup', handleKeyUp);
+        };
+    }, [handleNumpad, onConfirm, onClose, onUpdateItem, switchField]);
 
     // 📱 Phone dialer layout: 1, 2, 3 at top
     const numpadKeys = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '.', '0', '⌫'];
@@ -160,15 +307,46 @@ function PosItemNumpadModal({
                     font-weight: 900;
                     cursor: pointer;
                     box-shadow: 0 2px 4px rgba(0,0,0,0.04);
-                    transition: transform 0.08s, background 0.12s;
+                    transition: transform 0.08s, background 0.12s, box-shadow 0.12s, border-color 0.12s;
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     user-select: none;
                     -webkit-tap-highlight-color: transparent;
                 }
-                .pos-key-btn:active {
+                .pos-key-btn:active, .pos-key-btn.pos-key-active {
                     transform: scale(0.92) !important;
+                    background: #2891C8 !important;
+                    color: white !important;
+                    border-color: #1C73AB !important;
+                    box-shadow: 0 0 12px rgba(40, 145, 200, 0.5) !important;
+                }
+                @media (hover: hover) and (pointer: fine) {
+                    .pos-key-btn:hover:not(:active):not(.pos-key-active) {
+                        background: #f0f9ff !important;
+                        border-color: #38bdf8 !important;
+                        transform: translateY(-2px);
+                        box-shadow: 0 4px 8px rgba(28, 115, 171, 0.12);
+                    }
+                }
+                .pos-desktop-kbd-hint {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    padding: 6px 10px;
+                    background: #f8fafc;
+                    border: 1px dashed #cbd5e1;
+                    border-radius: 10px;
+                    font-size: 11px;
+                    font-weight: 700;
+                    color: #64748b;
+                    margin-top: 4px;
+                    text-align: center;
+                }
+                .pos-action-btn-main.pos-btn-active {
+                    transform: scale(0.96) !important;
+                    filter: brightness(1.15) !important;
+                    box-shadow: 0 0 18px rgba(40, 145, 200, 0.8) !important;
                 }
                 .pos-quick-btn {
                     width: 32px;
@@ -325,6 +503,9 @@ function PosItemNumpadModal({
                         font-size: 13px !important;
                         border-radius: 11px !important;
                     }
+                    .pos-desktop-kbd-hint {
+                        display: none !important;
+                    }
                 }
             `}</style>
 
@@ -437,20 +618,23 @@ function PosItemNumpadModal({
 
                     {/* 📱 Phone Dialer Numpad: 1 2 3 at top */}
                     <div className="pos-numpad-grid">
-                        {numpadKeys.map(key => (
-                            <button
-                                key={key}
-                                type="button"
-                                onClick={() => handleNumpad(key)}
-                                className="pos-key-btn"
-                                style={{
-                                    background: key === '⌫' ? '#fee2e2' : key === '.' ? '#f0f9ff' : 'linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%)',
-                                    color: key === '⌫' ? '#dc2626' : key === '.' ? '#0284c7' : '#0f172a',
-                                }}
-                            >
-                                {key}
-                            </button>
-                        ))}
+                        {numpadKeys.map(key => {
+                            const isPressed = pressedKey === key;
+                            return (
+                                <button
+                                    key={key}
+                                    type="button"
+                                    onClick={() => handleNumpad(key)}
+                                    className={`pos-key-btn ${isPressed ? 'pos-key-active' : ''}`}
+                                    style={{
+                                        background: key === '⌫' ? '#fee2e2' : key === '.' ? '#f0f9ff' : 'linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%)',
+                                        color: key === '⌫' ? '#dc2626' : key === '.' ? '#0284c7' : '#0f172a',
+                                    }}
+                                >
+                                    {key}
+                                </button>
+                            );
+                        })}
                     </div>
 
                     {/* Action Buttons with Integrated Total */}
@@ -476,7 +660,7 @@ function PosItemNumpadModal({
                             type="button"
                             onClick={onConfirm}
                             disabled={!item.selected_qty || item.selected_qty <= 0 || isExceeded}
-                            className="pos-action-btn-main"
+                            className={`pos-action-btn-main ${pressedKey === 'Enter' ? 'pos-btn-active' : ''}`}
                             style={{ 
                                 height: '44px', 
                                 background: isExceeded
@@ -508,6 +692,11 @@ function PosItemNumpadModal({
                                 </>
                             )}
                         </button>
+                    </div>
+
+                    {/* Desktop Keyboard Shortcuts Hint (hidden on mobile) */}
+                    <div className="pos-desktop-kbd-hint">
+                        <span>⌨️ لوحة المفاتيح: الأرقام للكمية | <strong style={{ color: '#1C73AB' }}>Enter</strong> للإضافة | <strong style={{ color: '#1C73AB' }}>Tab</strong> للتبديل | <strong style={{ color: '#1C73AB' }}>Esc</strong> للإلغاء</span>
                     </div>
 
                 </div>
@@ -1470,9 +1659,15 @@ export default function PosPage() {
                             <input 
                                 type="text" 
                                 className="glass-input-field" 
-                                placeholder="ابحث عن صنف بالاسم..." 
+                                placeholder="ابحث عن صنف بالاسم... (اضغط Enter للاختيار السريع)" 
                                 value={logic.searchQuery}
                                 onChange={(e) => logic.setSearchQuery(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if ((e.key === 'Enter' || e.code === 'NumpadEnter') && logic.inventoryItems && logic.inventoryItems.length > 0) {
+                                        e.preventDefault();
+                                        logic.handleItemClick(logic.inventoryItems[0]);
+                                    }
+                                }}
                                 style={{ flex: 1 }}
                             />
                         </div>
