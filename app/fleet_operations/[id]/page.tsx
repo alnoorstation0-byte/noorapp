@@ -67,18 +67,42 @@ export default function FleetOperationDetails() {
         enabled: !!id
     });
 
+    const { data: shifts = [] } = useQuery({
+        queryKey: ['fleet_operation_shifts', id],
+        queryFn: async () => {
+            const { data } = await supabase
+                .from('pos_shifts')
+                .select('*')
+                .eq('fleet_operation_id', id);
+            return data || [];
+        },
+        enabled: !!id
+    });
+
     if (isLoading) return <MasterPage title="جاري التحميل..."><div style={{padding: '50px', textAlign: 'center'}}>جاري تحميل تفاصيل الرحلة...</div></MasterPage>;
     if (!operation) return <MasterPage title="خطأ"><div style={{padding: '50px', textAlign: 'center'}}>الرحلة غير موجودة!</div></MasterPage>;
 
+    // ⚡ حساب الأرقام اللحظية الحية بدقة تامة
+    const invoiceSales = invoices.reduce((s: number, i: any) => s + Number(i.total_amount || 0), 0);
+    const shiftSales = shifts.reduce((s: number, sh: any) => s + Number(sh.total_sales || 0), 0);
+    const liveTotalSales = Math.max(invoiceSales, shiftSales, Number(operation?.total_sales || 0));
+
+    const liveTotalExpenses = expenses.reduce((s: number, e: any) => s + Number(e.total_price || 0), 0) || Number(operation?.total_expenses || 0);
+    const liveTotalCost = inventory
+        .filter((t: any) => t.type === 'out' || t.type === 'sales_deduction')
+        .reduce((s: number, t: any) => s + Number(t.total_price || (t.quantity * t.unit_price) || 0), 0) || Number(operation?.total_cost || 0);
+    const liveNetProfit = liveTotalSales - (liveTotalCost + liveTotalExpenses);
+
     const LBL = {
-        back: String.fromCharCode(0x0631,0x062c,0x0648,0x0639,0x0020,0x0644,0x0644,0x0642,0x0627,0x0626,0x0645,0x0629),
-        sales: String.fromCharCode(0x0627,0x0644,0x0645,0x0628,0x064a,0x0639,0x0627,0x062a),
-        expenses: String.fromCharCode(0x0627,0x0644,0x0645,0x0635,0x0631,0x0648,0x0641,0x0627,0x062a),
-        inv: String.fromCharCode(0x062d,0x0631,0x0643,0x0629,0x0020,0x0627,0x0644,0x0628,0x0636,0x0627,0x0639,0x0629),
+        back: 'رجوع للقائمة',
+        sales: 'المبيعات',
+        expenses: 'المصروفات',
+        inv: 'حركة البضاعة',
+        shifts: 'ورديات البيع',
         invType: {
-            'out': String.fromCharCode(0x0635,0x0631,0x0641,0x0020,0x0644,0x0644,0x0633,0x064a,0x0627,0x0631,0x0629),
-            'in': String.fromCharCode(0x0625,0x0631,0x062c,0x0627,0x0639,0x0020,0x0645,0x0646,0x0020,0x0627,0x0644,0x0633,0x064a,0x0627,0x0631,0x0629),
-            'sales_deduction': String.fromCharCode(0x0645,0x0628,0x064a,0x0639,0x0627,0x062a)
+            'out': 'صرف للسيارة',
+            'in': 'إرجاع من السيارة',
+            'sales_deduction': 'مبيعات'
         }
     };
 
@@ -103,6 +127,15 @@ export default function FleetOperationDetails() {
         { header: 'الصنف', accessor: 'item.name', render: (r: any) => r.item?.name },
         { header: 'الكمية', accessor: 'quantity', render: (r: any) => <b>{r.quantity} {r.item?.unit}</b> },
         { header: 'التكلفة الإجمالية', accessor: 'total_price', render: (r: any) => <span>{formatCurrency(r.total_price)}</span> },
+    ];
+
+    const shiftCols = [
+        { header: 'وقت الفتح', accessor: 'opened_at', render: (r: any) => r.opened_at ? new Date(r.opened_at).toLocaleString('ar-SA') : '---' },
+        { header: 'وقت الإغلاق', accessor: 'closed_at', render: (r: any) => r.closed_at ? new Date(r.closed_at).toLocaleString('ar-SA') : 'مفتوحة' },
+        { header: 'مبيعات الكاش', accessor: 'total_cash_sales', render: (r: any) => <span>{formatCurrency(r.total_cash_sales)}</span> },
+        { header: 'مبيعات الآجل', accessor: 'total_credit_sales', render: (r: any) => <span>{formatCurrency(r.total_credit_sales)}</span> },
+        { header: 'إجمالي المبيعات', accessor: 'total_sales', render: (r: any) => <span style={{fontWeight: 900, color: '#059669'}}>{formatCurrency(r.total_sales)}</span> },
+        { header: 'الحالة', accessor: 'status', render: (r: any) => <span style={{padding: '3px 8px', borderRadius: '6px', fontSize: '11px', fontWeight: 800, background: r.status === 'open' ? '#fef3c7' : '#dcfce7', color: r.status === 'open' ? '#b45309' : '#166534'}}>{r.status === 'open' ? 'مفتوحة' : 'مغلقة'}</span> },
     ];
 
     return (
@@ -162,19 +195,19 @@ export default function FleetOperationDetails() {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', marginBottom: '30px' }}>
                 <div className="glass-card" style={{ padding: '20px', textAlign: 'center' }}>
                     <div style={{ fontSize: '12px', color: '#64748b', fontWeight: 800 }}>المبيعات (إيرادات)</div>
-                    <div style={{ fontSize: '24px', fontWeight: 900, color: '#059669', marginTop: '10px' }}>{formatCurrency(operation.total_sales)}</div>
+                    <div style={{ fontSize: '24px', fontWeight: 900, color: '#059669', marginTop: '10px' }}>{formatCurrency(liveTotalSales)}</div>
                 </div>
                 <div className="glass-card" style={{ padding: '20px', textAlign: 'center' }}>
                     <div style={{ fontSize: '12px', color: '#64748b', fontWeight: 800 }}>المصروفات</div>
-                    <div style={{ fontSize: '24px', fontWeight: 900, color: '#dc2626', marginTop: '10px' }}>{formatCurrency(operation.total_expenses)}</div>
+                    <div style={{ fontSize: '24px', fontWeight: 900, color: '#dc2626', marginTop: '10px' }}>{formatCurrency(liveTotalExpenses)}</div>
                 </div>
                 <div className="glass-card" style={{ padding: '20px', textAlign: 'center' }}>
                     <div style={{ fontSize: '12px', color: '#64748b', fontWeight: 800 }}>تكلفة البضاعة</div>
-                    <div style={{ fontSize: '24px', fontWeight: 900, color: '#d97706', marginTop: '10px' }}>{formatCurrency(operation.total_cost)}</div>
+                    <div style={{ fontSize: '24px', fontWeight: 900, color: '#d97706', marginTop: '10px' }}>{formatCurrency(liveTotalCost)}</div>
                 </div>
-                <div className="glass-card" style={{ padding: '20px', textAlign: 'center', background: operation.net_profit >= 0 ? 'rgba(16, 185, 129, 0.1)' : 'rgba(220, 38, 38, 0.1)' }}>
+                <div className="glass-card" style={{ padding: '20px', textAlign: 'center', background: liveNetProfit >= 0 ? 'rgba(16, 185, 129, 0.1)' : 'rgba(220, 38, 38, 0.1)' }}>
                     <div style={{ fontSize: '12px', color: '#64748b', fontWeight: 800 }}>صافي الربح</div>
-                    <div style={{ fontSize: '24px', fontWeight: 900, color: operation.net_profit >= 0 ? '#10b981' : '#dc2626', marginTop: '10px' }}>{formatCurrency(operation.net_profit)}</div>
+                    <div style={{ fontSize: '24px', fontWeight: 900, color: liveNetProfit >= 0 ? '#10b981' : '#dc2626', marginTop: '10px' }}>{formatCurrency(liveNetProfit)}</div>
                 </div>
             </div>
 
@@ -186,6 +219,14 @@ export default function FleetOperationDetails() {
                 >
                     🧾 {LBL.sales} ({invoices.length})
                 </button>
+                {shifts.length > 0 && (
+                    <button 
+                        onClick={() => setActiveTab('shifts')}
+                        style={{ flex: 1, padding: '10px', borderRadius: '8px', border: 'none', background: activeTab === 'shifts' ? '#1C73AB' : 'transparent', color: activeTab === 'shifts' ? 'white' : '#475569', fontWeight: 800, cursor: 'pointer', transition: 'all 0.3s' }}
+                    >
+                        🏪 {LBL.shifts} ({shifts.length})
+                    </button>
+                )}
                 <button 
                     onClick={() => setActiveTab('expenses')}
                     style={{ flex: 1, padding: '10px', borderRadius: '8px', border: 'none', background: activeTab === 'expenses' ? '#1C73AB' : 'transparent', color: activeTab === 'expenses' ? 'white' : '#475569', fontWeight: 800, cursor: 'pointer', transition: 'all 0.3s' }}
@@ -204,6 +245,9 @@ export default function FleetOperationDetails() {
             <div className="table-card">
                 {activeTab === 'invoices' && (
                     <RawasiSmartTable columns={invoiceCols} data={invoices} />
+                )}
+                {activeTab === 'shifts' && (
+                    <RawasiSmartTable columns={shiftCols} data={shifts} />
                 )}
                 {activeTab === 'expenses' && (
                     <RawasiSmartTable columns={expenseCols} data={expenses} />

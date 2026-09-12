@@ -43,7 +43,35 @@ export function useFleetLogic() {
 
             const { data, error } = await q;
             if (error) throw error;
-            return data;
+
+            const opIds = (data || []).map(o => o.id);
+            if (opIds.length === 0) return [];
+
+            // جلب البيانات المرتبطة بكل أمر تشغيل لحساب الإجماليات بدقة حية لحظية
+            const [invRes, shiftRes, costRes, expRes] = await Promise.all([
+                supabase.from('invoices').select('fleet_operation_id, total_amount').in('fleet_operation_id', opIds),
+                supabase.from('pos_shifts').select('fleet_operation_id, total_sales').in('fleet_operation_id', opIds),
+                supabase.from('inventory_transactions').select('fleet_operation_id, quantity, unit_price, total_price, type').in('fleet_operation_id', opIds),
+                supabase.from('expenses').select('fleet_operation_id, total_price').in('fleet_operation_id', opIds)
+            ]);
+
+            return (data || []).map(op => {
+                const invSales = (invRes.data || []).filter(i => i.fleet_operation_id === op.id).reduce((s, i) => s + Number(i.total_amount || 0), 0);
+                const shiftSales = (shiftRes.data || []).filter(s => s.fleet_operation_id === op.id).reduce((s, sh) => s + Number(sh.total_sales || 0), 0);
+                const totalSales = Math.max(invSales, shiftSales, Number(op.total_sales || 0));
+
+                const totalCost = (costRes.data || []).filter(c => c.fleet_operation_id === op.id && (c.type === 'out' || c.type === 'sales_deduction')).reduce((s, c) => s + Number(c.total_price || (c.quantity * c.unit_price) || 0), 0) || Number(op.total_cost || 0);
+                const totalExpenses = (expRes.data || []).filter(e => e.fleet_operation_id === op.id).reduce((s, e) => s + Number(e.total_price || 0), 0) || Number(op.total_expenses || 0);
+                const netProfit = totalSales - (totalCost + totalExpenses);
+
+                return {
+                    ...op,
+                    total_sales: totalSales,
+                    total_cost: totalCost,
+                    total_expenses: totalExpenses,
+                    net_profit: netProfit
+                };
+            });
         },
         enabled: !!profile
     });
