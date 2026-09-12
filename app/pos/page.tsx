@@ -1079,16 +1079,35 @@ export default function PosPage() {
                     }
                     .cart-item-controls-row {
                         gap: 6px !important;
+                        justify-content: space-between !important;
+                    }
+                    .cart-qty-pill {
+                        height: 32px !important;
+                        padding: 2px !important;
+                    }
+                    .cart-qty-btn {
+                        width: 26px !important;
+                        height: 26px !important;
+                        font-size: 15px !important;
+                    }
+                    .cart-qty-input {
+                        width: 46px !important;
+                        min-width: 40px !important;
+                        font-size: 14.5px !important;
+                        font-weight: 900 !important;
                     }
                     .cart-unit-price-box {
-                        padding: 2px 6px !important;
+                        height: 32px !important;
+                        padding: 0 7px !important;
+                        gap: 3px !important;
                     }
                     .cart-price-input {
-                        width: 55px !important;
-                        font-size: 13px !important;
+                        width: 42px !important;
+                        font-size: 14px !important;
+                        font-weight: 900 !important;
                     }
                     .cart-total-value {
-                        font-size: 14px !important;
+                        font-size: 14.5px !important;
                     }
                     .checkout-panel {
                         padding: 14px 12px !important;
@@ -1211,105 +1230,151 @@ export default function PosPage() {
                     justify-content: space-between;
                     flex-wrap: wrap;
                     gap: 8px;
-                    padding-top: 8px;
-                    border-top: 1px dashed rgba(28, 115, 171, 0.14);
+                    padding-top: 10px;
+                    border-top: 1px dashed rgba(28, 115, 171, 0.16);
                 }
 
                 .cart-qty-pill {
-                    display: flex;
+                    display: inline-flex;
                     align-items: center;
-                    background: #f8fafc;
-                    border: 1.5px solid rgba(28, 115, 171, 0.2);
-                    border-radius: 10px;
-                    padding: 2px;
-                    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+                    direction: ltr;
+                    background: #f1f5f9;
+                    border: 1.5px solid rgba(28, 115, 171, 0.25);
+                    border-radius: 11px;
+                    padding: 2px 3px;
+                    height: 36px;
+                    box-sizing: border-box;
+                    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+                    transition: all 0.2s ease;
+                }
+                .cart-qty-pill:focus-within {
+                    border-color: #2891C8;
+                    background: #ffffff;
+                    box-shadow: 0 0 0 3px rgba(40, 145, 200, 0.15);
                 }
                 .cart-qty-btn {
-                    width: 26px;
-                    height: 26px;
-                    border-radius: 7px;
+                    width: 28px;
+                    height: 28px;
+                    border-radius: 8px;
                     border: none;
-                    font-size: 14px;
+                    font-size: 16px;
                     font-weight: 900;
                     cursor: pointer;
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    transition: 0.12s;
+                    transition: all 0.15s ease;
                     user-select: none;
                     -webkit-tap-highlight-color: transparent;
+                    line-height: 1;
                 }
                 .cart-qty-btn.minus {
-                    background: white;
+                    background: #ffffff;
                     color: #ef4444;
-                    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+                    box-shadow: 0 1px 3px rgba(239, 68, 68, 0.15);
+                }
+                .cart-qty-btn.minus:hover {
+                    background: #fee2e2;
+                    color: #dc2626;
                 }
                 .cart-qty-btn.plus {
-                    background: white;
+                    background: #ffffff;
                     color: #1C73AB;
-                    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+                    box-shadow: 0 1px 3px rgba(28, 115, 171, 0.15);
+                }
+                .cart-qty-btn.plus:hover {
+                    background: #e0f2fe;
+                    color: #0284c7;
                 }
                 .cart-qty-btn:active {
                     transform: scale(0.9);
                 }
                 .cart-qty-input {
-                    width: 34px;
+                    width: 52px;
+                    min-width: 44px;
                     text-align: center;
                     font-weight: 900;
-                    font-size: 13px;
+                    font-size: 15.5px;
                     color: #122946;
                     border: none;
                     background: transparent;
                     outline: none;
                     padding: 0 2px;
+                    letter-spacing: 0.3px;
+                }
+                .cart-qty-input::-webkit-outer-spin-button,
+                .cart-qty-input::-webkit-inner-spin-button,
+                .cart-price-input::-webkit-outer-spin-button,
+                .cart-price-input::-webkit-inner-spin-button {
+                    -webkit-appearance: none !important;
+                    margin: 0 !important;
+                }
+                .cart-qty-input,
+                .cart-price-input {
+                    -moz-appearance: textfield !important;
                 }
 
                 .cart-unit-price-box {
-                    display: flex;
+                    display: inline-flex;
                     align-items: center;
-                    gap: 4px;
-                    background: rgba(28, 115, 171, 0.05);
-                    border: 1px solid rgba(28, 115, 171, 0.2);
-                    border-radius: 10px;
-                    padding: 3px 8px;
+                    justify-content: center;
+                    gap: 3px;
+                    background: rgba(28, 115, 171, 0.06);
+                    border: 1.5px solid rgba(28, 115, 171, 0.25);
+                    border-radius: 11px;
+                    padding: 0 8px;
+                    height: 36px;
+                    box-sizing: border-box;
+                    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+                    transition: all 0.2s ease;
+                }
+                .cart-unit-price-box:focus-within {
+                    border-color: #2891C8;
+                    background: #ffffff;
+                    box-shadow: 0 0 0 3px rgba(40, 145, 200, 0.15);
                 }
                 .cart-price-label {
-                    font-size: 11px;
-                    font-weight: 700;
-                    color: #64748b;
+                    font-size: 12px;
+                    font-weight: 800;
+                    color: #475569;
+                    white-space: nowrap;
                 }
                 .cart-price-input {
-                    width: 60px;
-                    font-size: 13.5px;
+                    width: 46px;
+                    min-width: 38px;
+                    font-size: 15px;
                     font-weight: 900;
                     color: #1C73AB;
                     border: none;
                     background: transparent;
                     outline: none;
                     text-align: center;
+                    padding: 0 2px;
                 }
                 .cart-currency-badge {
-                    font-size: 11px;
+                    font-size: 11.5px;
                     font-weight: 800;
                     color: #64748b;
+                    white-space: nowrap;
                 }
 
                 .cart-line-total-box {
-                    display: flex;
+                    display: inline-flex;
                     align-items: center;
                     gap: 4px;
                     margin-right: auto;
+                    white-space: nowrap;
                 }
                 .cart-total-label {
-                    font-size: 11px;
-                    font-weight: 700;
+                    font-size: 12px;
+                    font-weight: 800;
                     color: #64748b;
                 }
                 .cart-total-value {
-                    font-size: 15px;
+                    font-size: 16px;
                     font-weight: 900;
                     color: #16a34a;
-                    letter-spacing: -0.3px;
+                    letter-spacing: -0.2px;
                 }
 
                 /* 💳 لوحة السداد وتفاصيل الفاتورة */
@@ -1888,6 +1953,7 @@ export default function PosPage() {
                                                     onChange={(e) => logic.updateCartItemQty(item.id, Math.max(1, Number(e.target.value) || 1))}
                                                     onFocus={(e) => e.target.select()}
                                                     min={1}
+                                                    inputMode="numeric"
                                                 />
                                                 <button
                                                     type="button"
@@ -1910,6 +1976,7 @@ export default function PosPage() {
                                                     onFocus={(e) => e.target.select()}
                                                     min={0}
                                                     step="any"
+                                                    inputMode="decimal"
                                                 />
                                                 <span className="cart-currency-badge">ر.س</span>
                                             </div>
