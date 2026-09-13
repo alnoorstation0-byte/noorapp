@@ -249,7 +249,7 @@ export default function ThermalReceiptModal({ isOpen, onClose, record, onOpenA4 
                     transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.15);
                 }
                 .btn-print-thermal { 
-                    background: linear-gradient(135deg, #1C73AB, #2891C8); 
+                    background: linear-gradient(135deg, #C29B62, #A8573C); 
                     color: white; 
                 }
                 .btn-whatsapp { 

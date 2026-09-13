@@ -374,7 +374,7 @@ export default function InvoicePrintModal({
                     display: grid; 
                     grid-template-columns: 100px 1fr 110px; 
                     align-items: center; 
-                    border-bottom: 3px solid #2891C8; 
+                    border-bottom: 3px solid #C29B62; 
                     padding-bottom: 10px; 
                     margin-bottom: 15px; 
                     width: 100%; 
@@ -394,20 +394,20 @@ export default function InvoicePrintModal({
                     align-items: center !important; 
                     padding: 3px !important; 
                     background: #fff !important; 
-                    border: 1.5px solid rgba(40, 145, 200, 0.2) !important; 
+                    border: 1.5px solid rgba(194, 155, 98, 0.3) !important; 
                     border-radius: 8px !important; 
-                    box-shadow: 0 2px 5px rgba(0,0,0,0.08) !important; 
+                    box-shadow: 0 2px 5px rgba(44, 26, 18, 0.08) !important; 
                 }
 
                 .inv-title-box { text-align: center; margin-bottom: 15px; }
                 .inv-title { 
                     font-size: 17px; 
                     font-weight: 900; 
-                    border: 2.5px solid #2891C8; 
+                    border: 2.5px solid #C29B62; 
                     padding: 5px 30px; 
                     display: inline-block; 
-                    background: linear-gradient(135deg, rgba(40, 145, 200, 0.08), rgba(127, 212, 227, 0.08)); 
-                    color: #122946; 
+                    background: linear-gradient(135deg, rgba(194, 155, 98, 0.12), rgba(168, 87, 60, 0.08)); 
+                    color: #2C1A12; 
                     letter-spacing: 0.5px; 
                     border-radius: 12px; 
                 }
@@ -415,7 +415,7 @@ export default function InvoicePrintModal({
                 .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
                 
                 .info-box { 
-                    border: 1.5px solid rgba(40, 145, 200, 0.25); 
+                    border: 1.5px solid rgba(194, 155, 98, 0.3); 
                     border-radius: 14px !important; 
                     padding: 14px 14px 10px 14px; 
                     display: flex; flex-direction: column; justify-content: center;
@@ -423,32 +423,32 @@ export default function InvoicePrintModal({
                 }
                 .box-label { 
                     position: absolute; top: -10px; right: 16px; background: white; 
-                    padding: 0 8px; font-size: 11px; font-weight: 900; color: #1C73AB; 
-                    border-radius: 12px; border: 1px solid rgba(40, 145, 200, 0.2);
+                    padding: 0 8px; font-size: 11px; font-weight: 900; color: #C29B62; 
+                    border-radius: 12px; border: 1px solid rgba(194, 155, 98, 0.3);
                 }
 
                 .inner-table { width: 100%; border-collapse: collapse; }
                 .inner-table td { padding: 3px 0; font-size: 12px; vertical-align: middle; }
-                .label-cell { text-align: right; font-weight: 800; color: #64748b; width: 32%; }
-                .value-cell { text-align: left; font-weight: 900; color: #0f172a; width: 68%; }
-                .value-highlight { color: #1C73AB; font-size: 14px; font-weight: 900; }
+                .label-cell { text-align: right; font-weight: 800; color: rgba(44, 26, 18, 0.6); width: 32%; }
+                .value-cell { text-align: left; font-weight: 900; color: #2C1A12; width: 68%; }
+                .value-highlight { color: #A8573C; font-size: 14px; font-weight: 900; }
 
                 .inv-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 11.5px; border-radius: 8px; overflow: hidden; }
                 .inv-table th { 
-                    background: linear-gradient(135deg, rgba(40, 145, 200, 0.12), rgba(127, 212, 227, 0.08)); 
+                    background: linear-gradient(135deg, rgba(194, 155, 98, 0.18), rgba(168, 87, 60, 0.1)); 
                     padding: 7px 5px; 
                     text-align: center; 
-                    border-bottom: 2px solid #2891C8; 
-                    border-top: 2px solid #2891C8; 
-                    color: #122946; 
+                    border-bottom: 2px solid #C29B62; 
+                    border-top: 2px solid #C29B62; 
+                    color: #2C1A12; 
                     font-weight: 900; 
                     font-size: 11.5px; 
                 }
                 .inv-table td { 
                     padding: 6px 5px; 
-                    border-bottom: 1px solid rgba(40, 145, 200, 0.15); 
+                    border-bottom: 1px solid rgba(194, 155, 98, 0.2); 
                     text-align: center; 
-                    color: #1e293b; 
+                    color: #2C1A12; 
                     font-weight: 700; 
                 }
                 .inv-table td.desc { text-align: right; font-weight: 900; font-size: 12px; line-height: 1.4; }
@@ -456,42 +456,42 @@ export default function InvoicePrintModal({
                 .inv-footer-flex { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 15px; flex-grow: 1; gap: 20px; }
                 .inv-amount-words { flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
                 .inv-amount-words .words-box { 
-                    background: rgba(248, 250, 252, 0.8); 
-                    border: 1px dashed rgba(40, 145, 200, 0.3); 
+                    background: rgba(253, 251, 247, 0.9); 
+                    border: 1px dashed rgba(194, 155, 98, 0.4); 
                     padding: 10px; 
                     border-radius: 10px; 
                     font-weight: 800; 
                     font-size: 12px; 
-                    color: #0f172a; 
+                    color: #2C1A12; 
                     line-height: 1.4; 
                 }
                 
                 .signature-area { margin-top: 15px; text-align: center; align-self: flex-start; }
-                .signature-title { font-weight: 900; font-size: 11px; color: #64748b; margin-bottom: 6px; border-bottom: 1px solid rgba(40, 145, 200, 0.15); padding-bottom: 4px; }
+                .signature-title { font-weight: 900; font-size: 11px; color: rgba(44, 26, 18, 0.6); margin-bottom: 6px; border-bottom: 1px solid rgba(194, 155, 98, 0.2); padding-bottom: 4px; }
 
                 .inv-totals-box { width: 380px; }
-                .inv-total-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 12px; font-weight: 800; color: #334155; align-items: center; }
-                .inv-total-row.tax { color: #0284c7; }
+                .inv-total-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 12px; font-weight: 800; color: #2C1A12; align-items: center; }
+                .inv-total-row.tax { color: #A8573C; }
                 .inv-total-row.discount { color: #dc2626; }
                 .inv-total-row.grand-total { 
-                    border-top: 2.5px solid #2891C8; 
+                    border-top: 2.5px solid #C29B62; 
                     padding-top: 8px; 
                     margin-top: 6px; 
                     font-size: 15px; 
                     font-weight: 900; 
-                    color: #122946; 
-                    background: linear-gradient(135deg, rgba(40, 145, 200, 0.08), rgba(127, 212, 227, 0.08)); 
+                    color: #2C1A12; 
+                    background: linear-gradient(135deg, rgba(194, 155, 98, 0.15), rgba(168, 87, 60, 0.08)); 
                     padding: 8px 10px; 
                     border-radius: 10px; 
                 }
 
                 .inv-footer-contact { 
                     margin-top: auto !important; 
-                    border-top: 1.5px solid rgba(40, 145, 200, 0.25); 
+                    border-top: 1.5px solid rgba(194, 155, 98, 0.3); 
                     padding-top: 10px; 
                     text-align: center; 
                     font-size: 11px; 
-                    color: #64748b; 
+                    color: rgba(44, 26, 18, 0.6); 
                     font-weight: 700; 
                 }
 
@@ -835,14 +835,14 @@ export default function InvoicePrintModal({
                     </div>
 
                     {/* 5️⃣ إقرار الاستلام والتعهد القانوني المعتمد */}
-                    <div style={{ marginTop: '10px', border: '1px solid rgba(40,145,200,0.3)', borderRadius: '10px', padding: '8px 12px', background: 'linear-gradient(135deg, rgba(40,145,200,0.03), rgba(127,212,227,0.03))' }}>
-                        <p style={{ fontSize: '9px', lineHeight: '1.5', color: '#334155', fontWeight: 600, margin: '0 0 6px 0' }}>
-                            <strong style={{color:'#122946', fontSize: '9.5px'}}>إقرار بالاستلام والسداد:</strong> أقرّ بأنني استلمت البضائع/الخدمات الواردة أعلاه كاملة بحالة سليمة، وأتعهد بسداد قيمتها البالغة <strong style={{color:'#2891C8'}}>{formatCurrencyEn(totalAmount)}</strong>. وفي حال التأخر يحق لصيدلية تاج المودة اتخاذ الإجراءات النظامية أمام المحاكم والجهات المختصة.
+                    <div style={{ marginTop: '10px', border: '1px solid rgba(194,155,98,0.35)', borderRadius: '10px', padding: '8px 12px', background: 'linear-gradient(135deg, rgba(194,155,98,0.06), rgba(168,87,60,0.04))' }}>
+                        <p style={{ fontSize: '9px', lineHeight: '1.5', color: '#2C1A12', fontWeight: 600, margin: '0 0 6px 0' }}>
+                            <strong style={{color:'#2C1A12', fontSize: '9.5px'}}>إقرار بالاستلام والسداد:</strong> أقرّ بأنني استلمت البضائع/الخدمات الواردة أعلاه كاملة بحالة سليمة، وأتعهد بسداد قيمتها البالغة <strong style={{color:'#A8573C'}}>{formatCurrencyEn(totalAmount)}</strong>. وفي حال التأخر يحق لصيدلية تاج المودة اتخاذ الإجراءات النظامية أمام المحاكم والجهات المختصة.
                         </p>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px' }}>
-                            <div style={{ textAlign: 'center' }}><div style={{ fontSize: '9px', fontWeight: 800, color: '#64748b' }}>الاسم والصفة</div><div style={{ borderBottom: '1px solid #2891C8', height: '18px' }}></div></div>
-                            <div style={{ textAlign: 'center' }}><div style={{ fontSize: '9px', fontWeight: 800, color: '#64748b' }}>رقم الهوية / الإقامة</div><div style={{ borderBottom: '1px solid #2891C8', height: '18px' }}></div></div>
-                            <div style={{ textAlign: 'center' }}><div style={{ fontSize: '9px', fontWeight: 800, color: '#64748b' }}>التوقيع / الختم</div><div style={{ borderBottom: '1px solid #2891C8', height: '18px' }}></div></div>
+                            <div style={{ textAlign: 'center' }}><div style={{ fontSize: '9px', fontWeight: 800, color: 'rgba(44,26,18,0.6)' }}>الاسم والصفة</div><div style={{ borderBottom: '1px solid #C29B62', height: '18px' }}></div></div>
+                            <div style={{ textAlign: 'center' }}><div style={{ fontSize: '9px', fontWeight: 800, color: 'rgba(44,26,18,0.6)' }}>رقم الهوية / الإقامة</div><div style={{ borderBottom: '1px solid #C29B62', height: '18px' }}></div></div>
+                            <div style={{ textAlign: 'center' }}><div style={{ fontSize: '9px', fontWeight: 800, color: 'rgba(44,26,18,0.6)' }}>التوقيع / الختم</div><div style={{ borderBottom: '1px solid #C29B62', height: '18px' }}></div></div>
                         </div>
                     </div>
 

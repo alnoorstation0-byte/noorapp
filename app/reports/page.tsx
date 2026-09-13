@@ -137,12 +137,13 @@ export default function ReportsPage() {
           .reports-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
           
           .report-link-card {
-            background: rgba(255,255,255,0.7);
-            backdrop-filter: blur(15px);
+            background: linear-gradient(135deg, rgba(255, 253, 250, 0.85) 0%, rgba(255, 253, 250, 0.55) 100%);
+            backdrop-filter: blur(24px) saturate(160%);
+            -webkit-backdrop-filter: blur(24px) saturate(160%);
             padding: 24px;
             border-radius: 20px;
-            border: 1px solid rgba(255,255,255,0.9);
-            box-shadow: 0 4px 15px rgba(28, 115, 171, 0.05);
+            border: 1px solid rgba(194, 155, 98, 0.3);
+            box-shadow: 0 4px 15px rgba(44, 26, 18, 0.05);
             text-decoration: none;
             display: flex;
             flex-direction: column;
@@ -153,9 +154,9 @@ export default function ReportsPage() {
           }
           .report-link-card:not(.disabled):hover {
             transform: translateY(-5px);
-            background: rgba(255,255,255,0.95);
-            box-shadow: 0 15px 35px rgba(40,145,200,0.15);
-            border-color: rgba(40,145,200,0.4);
+            background: #FFFFFF;
+            box-shadow: 0 15px 35px rgba(168, 87, 60, 0.15);
+            border-color: #C29B62;
           }
           .report-link-card.disabled {
             opacity: 0.6;
@@ -173,16 +174,16 @@ export default function ReportsPage() {
             vertical-align: middle;
           }
           .report-link-icon { font-size: 36px; margin-bottom: 5px; }
-          .report-link-title { font-size: 15px; font-weight: 900; color: #122946; margin: 0; display: flex; align-items: center; }
-          .report-link-desc { font-size: 12px; color: #64748b; font-weight: 700; line-height: 1.6; margin: 0; }
-          .report-link-arrow { position: absolute; top: 24px; left: 24px; color: #2891C8; font-size: 18px; opacity: 0; transition: 0.3s; transform: translateX(10px); }
+          .report-link-title { font-size: 15px; font-weight: 900; color: #2C1A12; margin: 0; display: flex; align-items: center; }
+          .report-link-desc { font-size: 12px; color: rgba(44, 26, 18, 0.65); font-weight: 700; line-height: 1.6; margin: 0; }
+          .report-link-arrow { position: absolute; top: 24px; left: 24px; color: #C29B62; font-size: 18px; opacity: 0; transition: 0.3s; transform: translateX(10px); }
           .report-link-card:not(.disabled):hover .report-link-arrow { opacity: 1; transform: translateX(0); }
           
-          .btn-main-glass { width: 100%; padding: 14px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.8); backdrop-filter: blur(15px); font-weight: 900; cursor: pointer; transition: 0.2s; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 10px rgba(28, 115, 171, 0.05); }
-          .btn-main-glass.blue { background: #1C73AB; color: white; border-color: #1C73AB; }
-          .btn-main-glass.white { background: white; color: #122946; border: 1px solid rgba(28,115,171,0.2); }
-          .btn-main-glass:hover { transform: translateY(-3px); filter: brightness(1.1); box-shadow: 0 8px 15px rgba(28, 115, 171, 0.15); }
-          .summary-glass-card { background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(10px); padding: 20px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.9); margin-bottom: 25px; box-shadow: 0 4px 15px rgba(28, 115, 171, 0.05); }
+          .btn-main-glass { width: 100%; padding: 14px; border-radius: 16px; border: 1px solid rgba(194,155,98,0.3); backdrop-filter: blur(15px); font-weight: 900; cursor: pointer; transition: 0.2s; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 10px rgba(44, 26, 18, 0.05); }
+          .btn-main-glass.blue { background: linear-gradient(135deg, #C29B62, #A8573C); color: white; border: none; }
+          .btn-main-glass.white { background: white; color: #2C1A12; border: 1px solid rgba(194,155,98,0.3); }
+          .btn-main-glass:hover { transform: translateY(-3px); filter: brightness(1.05); box-shadow: 0 8px 18px rgba(168, 87, 60, 0.2); }
+          .summary-glass-card { background: rgba(255, 253, 250, 0.75); backdrop-filter: blur(10px); padding: 20px; border-radius: 20px; border: 1px solid rgba(194, 155, 98, 0.3); margin-bottom: 25px; box-shadow: 0 4px 15px rgba(44, 26, 18, 0.05); }
 
           @media (max-width: 768px) {
             .filter-bar { flex-direction: column !important; align-items: stretch !important; padding: 12px 10px !important; gap: 10px !important; }
