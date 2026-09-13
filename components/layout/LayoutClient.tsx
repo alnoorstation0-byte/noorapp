@@ -19,7 +19,8 @@ import {
   ShoppingBag, 
   FileText, 
   Package, 
-  ArrowUpRight
+  ArrowUpRight,
+  Zap
 } from 'lucide-react';
 
 export default function LayoutClient({ children }: { children: React.ReactNode }) {
@@ -44,6 +45,8 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
   const unreadCounts = useUnreadCounts();
   const { onlineUsers, onlineCount } = usePresence();
   const { t, language, dir, isRtl } = useLanguage();
+
+  const [lowGraphics, setLowGraphics] = useState(false);
 
   // تحديث ref الموقع عند تغييره لتفادي مشاكل الـ closure
   useEffect(() => {
@@ -103,6 +106,31 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [isOpen]);
+
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const isLow = localStorage.getItem('lowGraphicsMode') === 'true';
+      setLowGraphics(isLow);
+      if (isLow) {
+        document.body.classList.add('low-graphics-mode');
+      } else {
+        document.body.classList.remove('low-graphics-mode');
+      }
+    }
+  }, []);
+
+  const toggleLowGraphics = () => {
+    setLowGraphics(prev => {
+      const newVal = !prev;
+      localStorage.setItem('lowGraphicsMode', String(newVal));
+      if (newVal) {
+        document.body.classList.add('low-graphics-mode');
+      } else {
+        document.body.classList.remove('low-graphics-mode');
+      }
+      return newVal;
+    });
+  };
 
   // 📱 معالج سحب القائمة العائمة باللمس على الجوال (Touch Drag)
   const onTouchStart = (e: React.TouchEvent) => {
@@ -734,6 +762,22 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
                 <span className="online-dot-pulse"></span>
                 <span>{language === 'en' ? `${onlineCount} Online` : `${onlineCount} متصل`}</span>
               </div>
+
+              <button 
+                onClick={toggleLowGraphics}
+                className="btn-logout-header"
+                style={{ 
+                  color: lowGraphics ? '#C29B62' : '#2C1A12', 
+                  background: lowGraphics ? 'rgba(194, 155, 98, 0.15)' : 'rgba(44, 26, 18, 0.05)',
+                  borderColor: lowGraphics ? 'rgba(194, 155, 98, 0.4)' : 'rgba(44, 26, 18, 0.1)'
+                }}
+                title={language === 'en' ? 'Performance Mode' : 'وضع الأداء السريع (للجوالات القديمة)'}
+              >
+                <Zap size={15} />
+                <span style={{ display: typeof window !== 'undefined' && window.innerWidth <= 768 ? 'none' : 'inline' }}>
+                  {language === 'en' ? 'Performance' : 'وضع الأداء'}
+                </span>
+              </button>
 
               <button className="btn-logout-header" onClick={handleLogout} title="تسجيل الخروج">
                 <LogOut size={15} />
