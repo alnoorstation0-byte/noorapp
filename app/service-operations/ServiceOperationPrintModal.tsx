@@ -139,7 +139,7 @@ export default function ServiceOperationPrintModal({
                 }}>
                     <div>
                         <h1 style={{ margin: 0, fontSize: '24px', fontWeight: 900, color: '#1C73AB' }}>
-                            شركة مياه الغيم المحدودة
+                            صيدلية تاج المودة البيطرية
                         </h1>
                         <p style={{ margin: '4px 0 0', fontSize: '13px', color: '#64748b', fontWeight: 700 }}>
                             إدارة العمليات التشغيلية والإيرادات الخدمية

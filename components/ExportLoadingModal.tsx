@@ -32,7 +32,7 @@ export default function ExportLoadingModal({ isOpen, progressText }: ExportLoadi
             
             <div className="live-preview-header">
                 <div className="pulse-icon">🖨️</div>
-                <h2>نظام مياه غيام الماسي</h2>
+                <h2>نظام صيدلية تاج المودة</h2>
                 <p className="progress-text">{progressText || 'جاري تهيئة محرك الطباعة...'}</p>
                 
                 <div className="progress-bar-container">
@@ -60,18 +60,18 @@ export default function ExportLoadingModal({ isOpen, progressText }: ExportLoadi
                 .pulse-icon { font-size: 50px; animation: pulse 1.5s infinite; margin-bottom: 10px; }
                 @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.1); } 100% { transform: scale(1); } }
                 
-                .live-preview-header h2 { color: #2891C8; margin: 0 0 10px 0; font-size: 24px; font-weight: 900; }
-                .progress-text { color: #0ea5e9; font-size: 16px; font-weight: bold; background: rgba(14, 165, 233, 0.1); padding: 10px 20px; border-radius: 8px; border: 1px dashed rgba(14, 165, 233, 0.3); display: inline-block; margin: 0; }
+                .live-preview-header h2 { color: #C29B62; margin: 0 0 10px 0; font-size: 24px; font-weight: 900; }
+                .progress-text { color: #A8573C; font-size: 16px; font-weight: bold; background: rgba(168, 87, 60, 0.1); padding: 10px 20px; border-radius: 8px; border: 1px dashed rgba(168, 87, 60, 0.3); display: inline-block; margin: 0; }
                 
                 .progress-bar-container { width: 100%; height: 10px; background: rgba(255,255,255,0.1); border-radius: 10px; margin: 15px 0; overflow: hidden; }
-                .progress-bar-fill { height: 100%; background: linear-gradient(90deg, #2891C8, #fde08b); transition: width 0.3s ease; }
+                .progress-bar-fill { height: 100%; background: linear-gradient(90deg, #C29B62, #A8573C); transition: width 0.3s ease; }
                 
                 .warning { color: #8a7a6b; font-size: 13px; font-weight: bold; }
 
                 /* مساحة العمل التي سيرسم فيها الكشف (محاكاة شكل البرنامج) */
                 .live-preview-workspace {
                     background: #eaddcf; padding: 20px; border-radius: 12px; box-shadow: 0 20px 40px rgba(0,0,0,0.6);
-                    width: 840px; max-width: 100%; overflow-x: auto; border: 2px solid rgba(40, 145, 200, 0.3);
+                    width: 840px; max-width: 100%; overflow-x: auto; border: 2px solid rgba(194, 155, 98, 0.3);
                 }
                 .a4-render-area {
                     width: 800px; min-height: 1123px; background: white; margin: 0 auto; box-shadow: 0 5px 15px rgba(0,0,0,0.2);

@@ -31,7 +31,7 @@ export default function WarehousesPage() {
                 onClick={(e) => { e.stopPropagation(); logic.handleEdit(row); }} 
                 className="table-action-btn edit-btn" 
                 style={{
-                    background: 'linear-gradient(135deg, #1C73AB 0%, #2891C8 100%)',
+                    background: 'linear-gradient(135deg, #C29B62 0%, #A8573C 100%)',
                     color: 'white',
                     border: 'none',
                     borderRadius: '8px',

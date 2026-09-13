@@ -63,11 +63,11 @@ export default function JournalVoucherModal({
           {/* Header */}
           <div className="jv-header">
             <div className="jv-header-brand">
-              <div className="jv-logo-box">💧</div>
+              <div className="jv-logo-box">🩺</div>
               <div>
-                <h2 className="jv-company-name">مؤسسة غيام التجارية</h2>
+                <h2 className="jv-company-name">صيدلية تاج المودة البيطرية</h2>
                 <p className="jv-vat-number">الرقم الضريبي: 300000000000003</p>
-                <p className="jv-sub-info">لتجارة وتوزيع مياه الشرب النقية</p>
+                <p className="jv-sub-info">لتجارة الأدوية والمكملات ورعاية الخيول والإبل</p>
               </div>
             </div>
 
@@ -239,7 +239,7 @@ export default function JournalVoucherModal({
         }
 
         .jv-btn-print {
-          background: linear-gradient(135deg, #1C73AB, #2891C8);
+          background: linear-gradient(135deg, #C29B62, #A8573C);
           color: white;
           border: none;
           padding: 8px 18px;
@@ -251,7 +251,7 @@ export default function JournalVoucherModal({
           align-items: center;
           gap: 6px;
           transition: 0.2s;
-          box-shadow: 0 4px 12px rgba(28, 115, 171, 0.25);
+          box-shadow: 0 4px 12px rgba(168, 87, 60, 0.25);
         }
         .jv-btn-print:hover {
           filter: brightness(1.1);
@@ -300,20 +300,20 @@ export default function JournalVoucherModal({
           width: 50px;
           height: 50px;
           border-radius: 12px;
-          background: linear-gradient(135deg, #1C73AB, #2891C8);
+          background: linear-gradient(135deg, #C29B62, #A8573C);
           display: flex;
           align-items: center;
           justify-content: center;
           font-size: 26px;
           color: white;
-          box-shadow: 0 4px 12px rgba(28, 115, 171, 0.2);
+          box-shadow: 0 4px 12px rgba(168, 87, 60, 0.2);
         }
 
         .jv-company-name {
           margin: 0;
           font-size: 20px;
           font-weight: 900;
-          color: #122946;
+          color: #2C1A12;
         }
 
         .jv-vat-number {
@@ -337,7 +337,7 @@ export default function JournalVoucherModal({
           margin: 0;
           font-size: 22px;
           font-weight: 900;
-          color: #1C73AB;
+          color: #C29B62;
         }
 
         .jv-badge-status {
@@ -360,7 +360,7 @@ export default function JournalVoucherModal({
 
         .jv-divider-thick {
           height: 2px;
-          background: linear-gradient(90deg, #1C73AB, rgba(28, 115, 171, 0.2));
+          background: linear-gradient(90deg, #C29B62, rgba(194, 155, 98, 0.2));
           margin-bottom: 16px;
         }
 
@@ -420,7 +420,7 @@ export default function JournalVoucherModal({
 
         .jv-total-row td {
           background: #f8fafc !important;
-          border-top: 2px solid #1C73AB !important;
+          border-top: 2px solid #C29B62 !important;
           padding: 10px !important;
         }
 

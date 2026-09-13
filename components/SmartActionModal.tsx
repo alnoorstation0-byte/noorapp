@@ -32,7 +32,7 @@ export default function SmartActionModal({ isOpen, onClose, siteData }: SmartAct
         {/* 📑 شريط التبويبات (Tabs) */}
         <div style={styles.tabsContainer}>
           <button 
-            style={{...styles.tab, borderBottom: activeTab === 'financial' ? '3px solid #2891C8' : 'none', color: activeTab === 'financial' ? '#2891C8' : '#888'}}
+            style={{...styles.tab, borderBottom: activeTab === 'financial' ? '3px solid #C29B62' : 'none', color: activeTab === 'financial' ? '#C29B62' : '#888'}}
             onClick={() => setActiveTab('financial')}
           >
             💰 الخامات والماليات
@@ -91,7 +91,7 @@ export default function SmartActionModal({ isOpen, onClose, siteData }: SmartAct
                   </div>
                   <div style={styles.totalBox}>
                     <span style={{fontSize: '11px', color: '#666'}}>الإجمالي التلقائي</span>
-                    <strong style={{fontSize: '18px', color: '#2891C8'}}>{(qty * unitPrice).toLocaleString()} ج.م</strong>
+                    <strong style={{fontSize: '18px', color: '#A8573C'}}>{(qty * unitPrice).toLocaleString()} ر.س</strong>
                   </div>
                 </div>
               </div>
@@ -190,18 +190,18 @@ const styles: { [key: string]: React.CSSProperties } = {
   label: { fontSize: '13px', color: '#555', fontWeight: 'bold' },
   input: { padding: '12px 15px', borderRadius: '8px', border: '1px solid #ddd', outline: 'none', backgroundColor: '#fcfaf7', fontSize: '14px' },
   
-  totalBox: { flex: 1, minWidth: '150px', backgroundColor: '#fdfbf7', border: '1px dashed #2891C8', borderRadius: '8px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '10px' },
+  totalBox: { flex: 1, minWidth: '150px', backgroundColor: '#fdfbf7', border: '1px dashed #C29B62', borderRadius: '8px', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center', padding: '10px' },
   
   divider: { height: '1px', backgroundColor: '#eee', margin: '20px 0' },
   
   autoField: { flex: 1, padding: '15px', background: '#f0f9f1', borderRadius: '8px', border: '1px solid #d4edda', textAlign: 'center' },
-  autoLabel: { display: 'inline-block', padding: '4px 10px', background: '#27ae60', color: '#fff', borderRadius: '20px', fontSize: '11px', marginBottom: '10px' },
-  autoText: { margin: 0, fontSize: '15px', color: '#333' },
+  autoLabel: { display: 'inline-block', padding: '4px 10px', background: '#4E734F', color: '#fff', borderRadius: '20px', fontSize: '11px', marginBottom: '10px' },
+  autoText: { margin: 0, fontSize: '15px', color: '#2C1A12' },
   
   uploadArea: { border: '2px dashed #ccc', borderRadius: '10px', padding: '30px', textAlign: 'center', backgroundColor: '#fafafa', position: 'relative', cursor: 'pointer' },
   fileInput: { position: 'absolute', inset: 0, opacity: 0, cursor: 'pointer' },
   textarea: { width: '100%', height: '100px', padding: '15px', borderRadius: '8px', border: '1px solid #ddd', outline: 'none', resize: 'none', boxSizing: 'border-box', backgroundColor: '#fcfaf7' },
   
   footer: { padding: '20px 25px', backgroundColor: '#fff', borderTop: '1px solid #eee' },
-  saveBtn: { width: '100%', padding: '16px', backgroundColor: '#4a3e35', color: '#2891C8', border: 'none', borderRadius: '10px', cursor: 'pointer', fontWeight: 'bold', fontSize: '16px', transition: '0.3s' }
+  saveBtn: { width: '100%', padding: '16px', backgroundColor: '#2C1A12', color: '#C29B62', border: 'none', borderRadius: '12px', cursor: 'pointer', fontWeight: 'bold', fontSize: '16px', transition: '0.3s' }
 };

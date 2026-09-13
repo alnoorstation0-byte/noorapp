@@ -421,10 +421,10 @@ export default function ShiftDetailsModal({
                                     );
                                 })()}
 
-                                {/* مطابقة عهدة فوارغ المياه */}
+                                {/* مطابقة عهدة العبوات والمستلزمات المستردة */}
                                 <div style={{ background: 'rgba(240, 249, 255, 0.9)', border: '1.5px solid rgba(40, 145, 200, 0.3)', borderRadius: '16px', padding: '16px' }}>
                                     <h4 style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#1C73AB', fontWeight: 900 }}>
-                                        🔄 {isEn ? 'Returnables Custody Inventory' : 'جرد عهدة فوارغ المياه والعبوات'}
+                                        🔄 {isEn ? 'Returnables Custody Inventory' : 'جرد عهدة العبوات والمستلزمات المستردة'}
                                     </h4>
                                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '12px' }}>
                                         <div>

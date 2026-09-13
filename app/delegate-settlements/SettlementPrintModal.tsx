@@ -28,7 +28,7 @@ export default function SettlementPrintModal({
     const creationTime = new Date().toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
 
     // QR Verification Text
-    const qrData = `شركة مياه غيام\nسند تسوية عهدة رقم: ${trip.operationNumber}\nالمندوب: ${trip.driverName}\nالتاريخ: ${creationDate}\nصافي النقدية: ${trip.netCashDue} ر.س\nالمورد: ${trip.handedOverCash} ر.س`;
+    const qrData = `صيدلية تاج المودة البيطرية\nسند تسوية عهدة رقم: ${trip.operationNumber}\nالمندوب: ${trip.driverName}\nالتاريخ: ${creationDate}\nصافي النقدية: ${trip.netCashDue} ر.س\nالمورد: ${trip.handedOverCash} ر.س`;
 
     const totalReturnQty = (trip.inventoryItems || []).reduce((s: number, i: any) => s + Number(i.returnedQty || 0), 0);
     const totalWasteQty = (trip.inventoryItems || []).reduce((s: number, i: any) => s + Number(i.wasteQty || 0), 0);
@@ -89,7 +89,7 @@ export default function SettlementPrintModal({
                     gap: '12px'
                 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <span style={{ fontWeight: 900, fontSize: '15px', color: '#1C73AB' }}>
+                        <span style={{ fontWeight: 900, fontSize: '15px', color: '#2C1A12' }}>
                             🖨️ طباعة سند تسوية ومخالصة عهدة
                         </span>
                     </div>
@@ -102,7 +102,7 @@ export default function SettlementPrintModal({
                                 padding: '10px 24px',
                                 borderRadius: '50px',
                                 border: 'none',
-                                background: '#1C73AB',
+                                background: 'linear-gradient(135deg, #C29B62, #A8573C)',
                                 color: '#FFFFFF',
                                 fontWeight: 900,
                                 fontSize: '14px',
@@ -110,7 +110,7 @@ export default function SettlementPrintModal({
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '8px',
-                                boxShadow: '0 4px 12px rgba(28, 115, 171, 0.3)'
+                                boxShadow: '0 4px 12px rgba(168, 87, 60, 0.25)'
                             }}
                         >
                             <span>طباعة فورية</span>
@@ -148,16 +148,16 @@ export default function SettlementPrintModal({
                         display: 'flex',
                         justifyContent: 'space-between',
                         alignItems: 'center',
-                        borderBottom: '2px solid #1C73AB',
+                        borderBottom: '2px solid #C29B62',
                         paddingBottom: '20px',
                         marginBottom: '25px'
                     }}>
                         <div>
-                            <h1 style={{ margin: '0 0 5px 0', fontSize: '24px', fontWeight: 900, color: '#122946' }}>
-                                شركة مياه غيام المحدودة
+                            <h1 style={{ margin: '0 0 5px 0', fontSize: '24px', fontWeight: 900, color: '#2C1A12' }}>
+                                صيدلية تاج المودة البيطرية
                             </h1>
                             <p style={{ margin: '0 0 3px 0', fontSize: '12px', color: '#64748b', fontWeight: 700 }}>
-                                El-Ghayam Water Co. | قسم التوزيع والخدمات اللوجستية
+                                El-Taj Al-Mawadah Pharmacy Co. | قسم التوزيع والخدمات اللوجستية
                             </p>
                             <p style={{ margin: 0, fontSize: '12px', color: '#64748b' }}>
                                 س.ت: 1010892341 | الرقم الضريبي: 31089234100003
@@ -166,19 +166,19 @@ export default function SettlementPrintModal({
 
                         <div style={{ textAlign: 'center' }}>
                             <div style={{
-                                border: '2px dashed #1C73AB',
+                                border: '2px dashed #C29B62',
                                 padding: '8px 18px',
                                 borderRadius: '12px',
-                                background: 'rgba(28, 115, 171, 0.04)'
+                                background: 'rgba(194, 155, 98, 0.08)'
                             }}>
-                                <h2 style={{ margin: 0, fontSize: '16px', fontWeight: 900, color: '#1C73AB' }}>
+                                <h2 style={{ margin: '0', fontSize: '16px', fontWeight: 900, color: '#2C1A12' }}>
                                     سند تسوية ومخالصة عهدة
                                 </h2>
-                                <span style={{ fontSize: '12px', fontWeight: 800, color: '#122946' }}>
+                                <span style={{ fontSize: '12px', fontWeight: 800, color: '#2C1A12' }}>
                                     SETTLEMENT CLEARANCE
                                 </span>
                             </div>
-                            <div style={{ fontSize: '11px', color: '#16a34a', fontWeight: 800, marginTop: '6px' }}>
+                            <div style={{ fontSize: '11px', color: '#4E734F', fontWeight: 800, marginTop: '6px' }}>
                                 معتمد ومقفل رسمياً ✅
                             </div>
                         </div>
@@ -202,7 +202,7 @@ export default function SettlementPrintModal({
                     }}>
                         <div>
                             <span style={{ color: '#64748b', fontWeight: 700 }}>رقم أمر التشغيل: </span>
-                            <b style={{ color: '#1C73AB' }}>{trip.operationNumber}</b>
+                            <b style={{ color: '#C29B62' }}>{trip.operationNumber}</b>
                         </div>
                         <div>
                             <span style={{ color: '#64748b', fontWeight: 700 }}>تاريخ الرحلة: </span>
@@ -213,8 +213,8 @@ export default function SettlementPrintModal({
                             <b>{creationTime}</b>
                         </div>
                         <div>
-                            <span style={{ color: '#64748b', fontWeight: 700 }}>اسم المندوب: </span>
-                            <b style={{ color: '#122946' }}>{trip.driverName}</b>
+                            <span style={{ color: '#64748b', fontWeight: 700 }}>اسم السائق / المندوب: </span>
+                            <b style={{ color: '#2C1A12' }}>{trip.driverName}</b>
                         </div>
                         <div>
                             <span style={{ color: '#64748b', fontWeight: 700 }}>رقم لوحة السيارة: </span>
@@ -222,7 +222,7 @@ export default function SettlementPrintModal({
                         </div>
                         <div>
                             <span style={{ color: '#64748b', fontWeight: 700 }}>معرف الشريك (ID): </span>
-                            <code style={{ fontSize: '11px', color: '#1C73AB' }}>{trip.driverId || '---'}</code>
+                            <code style={{ fontSize: '11px', color: '#C29B62' }}>{trip.driverId || '---'}</code>
                         </div>
                     </div>
 
@@ -232,12 +232,12 @@ export default function SettlementPrintModal({
                             display: 'flex',
                             alignItems: 'center',
                             gap: '8px',
-                            borderBottom: '1.5px solid #1C73AB',
+                            borderBottom: '1.5px solid #C29B62',
                             paddingBottom: '6px',
                             marginBottom: '12px'
                         }}>
                             <span style={{ fontSize: '16px' }}>📦</span>
-                            <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 900, color: '#1C73AB' }}>
+                            <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 900, color: '#2C1A12' }}>
                                 أولاً: كشف تسوية حركة البضائع وإرجاع الفائض للمستودع الرئيسي
                             </h3>
                         </div>
@@ -245,10 +245,10 @@ export default function SettlementPrintModal({
                         <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right', fontSize: '12px', border: '1px solid #e2e8f0' }}>
                             <thead style={{ background: '#f1f5f9', borderBottom: '1px solid #cbd5e1' }}>
                                 <tr>
-                                    <th style={{ padding: '8px 12px', color: '#122946' }}>الصنف</th>
+                                    <th style={{ padding: '8px 12px', color: '#2C1A12' }}>الصنف</th>
                                     <th style={{ padding: '8px 12px', textAlign: 'center' }}>الكمية المحملة</th>
                                     <th style={{ padding: '8px 12px', textAlign: 'center' }}>المبيعات</th>
-                                    <th style={{ padding: '8px 12px', textAlign: 'center', color: '#16a34a' }}>المرتجع للمستودع الرئيسي 🔄</th>
+                                    <th style={{ padding: '8px 12px', textAlign: 'center', color: '#4E734F' }}>المرتجع للمستودع الرئيسي 🔄</th>
                                     <th style={{ padding: '8px 12px', textAlign: 'center', color: '#ef4444' }}>التوالف / الهدر ⚠️</th>
                                     <th style={{ padding: '8px 12px', textAlign: 'center' }}>المتبقي في السيارة</th>
                                 </tr>
@@ -259,7 +259,7 @@ export default function SettlementPrintModal({
                                         <td style={{ padding: '8px 12px', fontWeight: 800 }}>{item.itemName}</td>
                                         <td style={{ padding: '8px 12px', textAlign: 'center' }}>{item.loadedQty}</td>
                                         <td style={{ padding: '8px 12px', textAlign: 'center' }}>{item.soldQty}</td>
-                                        <td style={{ padding: '8px 12px', textAlign: 'center', fontWeight: 900, color: '#16a34a' }}>
+                                        <td style={{ padding: '8px 12px', textAlign: 'center', fontWeight: 900, color: '#4E734F' }}>
                                             {item.returnedQty || item.remainingQty || 0}
                                         </td>
                                         <td style={{ padding: '8px 12px', textAlign: 'center', color: '#ef4444' }}>{item.wasteQty || 0}</td>
@@ -282,12 +282,12 @@ export default function SettlementPrintModal({
                             display: 'flex',
                             alignItems: 'center',
                             gap: '8px',
-                            borderBottom: '1.5px solid #1C73AB',
+                            borderBottom: '1.5px solid #C29B62',
                             paddingBottom: '6px',
                             marginBottom: '12px'
                         }}>
                             <span style={{ fontSize: '16px' }}>💵</span>
-                            <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 900, color: '#1C73AB' }}>
+                            <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 900, color: '#2C1A12' }}>
                                 ثانياً: كشف تسوية النقدية وتوريد الصندوق
                             </h3>
                         </div>
@@ -304,7 +304,7 @@ export default function SettlementPrintModal({
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', fontSize: '13px' }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                                     <span style={{ color: '#64748b' }}>إجمالي مبيعات الرحلة:</span>
-                                    <b style={{ color: '#122946' }}>{formatCurrency(trip.totalSales)}</b>
+                                    <b style={{ color: '#2C1A12' }}>{formatCurrency(trip.totalSales)}</b>
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                                     <span style={{ color: '#64748b' }}>مبيعات الكاش (+):</span>
@@ -333,20 +333,20 @@ export default function SettlementPrintModal({
                                 paddingRight: '20px'
                             }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <span style={{ fontSize: '13px', fontWeight: 800, color: '#1C73AB' }}>صافي النقدية المستحقة:</span>
-                                    <span style={{ fontSize: '17px', fontWeight: 900, color: '#1C73AB' }}>{formatCurrency(trip.netCashDue)}</span>
+                                    <span style={{ fontSize: '13px', fontWeight: 800, color: '#2C1A12' }}>صافي النقدية المستحقة:</span>
+                                    <span style={{ fontSize: '17px', fontWeight: 900, color: '#A8573C' }}>{formatCurrency(trip.netCashDue)}</span>
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                                    <span style={{ fontSize: '13px', fontWeight: 800, color: '#16a34a' }}>النقدية الموردة للخزينة:</span>
-                                    <span style={{ fontSize: '17px', fontWeight: 900, color: '#16a34a' }}>
+                                    <span style={{ fontSize: '13px', fontWeight: 800, color: '#4E734F' }}>النقدية الموردة للخزينة:</span>
+                                    <span style={{ fontSize: '17px', fontWeight: 900, color: '#4E734F' }}>
                                         {formatCurrency(trip.handedOverCash || trip.netCashDue)}
                                     </span>
                                 </div>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingTop: '8px', borderTop: '1px dashed #cbd5e1' }}>
-                                    <span style={{ fontSize: '13px', fontWeight: 800, color: trip.remainingCashCustody <= 0 ? '#16a34a' : '#ef4444' }}>
+                                    <span style={{ fontSize: '13px', fontWeight: 800, color: trip.remainingCashCustody <= 0 ? '#4E734F' : '#ef4444' }}>
                                         فارق العهدة المتبقية:
                                     </span>
-                                    <span style={{ fontSize: '16px', fontWeight: 900, color: trip.remainingCashCustody <= 0 ? '#16a34a' : '#ef4444' }}>
+                                    <span style={{ fontSize: '16px', fontWeight: 900, color: trip.remainingCashCustody <= 0 ? '#4E734F' : '#ef4444' }}>
                                         {trip.remainingCashCustody <= 0 ? '0.00 ر.س (مطابقة ✅)' : formatCurrency(trip.remainingCashCustody)}
                                     </span>
                                 </div>
@@ -361,7 +361,7 @@ export default function SettlementPrintModal({
                     <div style={{
                         marginTop: '40px',
                         paddingTop: '20px',
-                        borderTop: '2px solid #1C73AB'
+                        borderTop: '2px solid #C29B62'
                     }}>
                         <div style={{ textAlign: 'center', marginBottom: '15px', fontSize: '12px', color: '#64748b', fontWeight: 700 }}>
                             إقرار واعتماد تسوية العهدة وإخلاء الطرف النهائي
@@ -420,7 +420,7 @@ export default function SettlementPrintModal({
                         borderTop: '1px solid #f1f5f9',
                         paddingTop: '10px'
                     }}>
-                        تم إنشاء هذا السند آلياً عبر نظام مياه غيام السحابي ويعد وثيقة رسمية معتمدة لإخلاء عهدة التوزيع والتشغيل.
+                        تم إنشاء هذا السند آلياً عبر نظام صيدلية تاج المودة السحابي ويعد وثيقة رسمية معتمدة لإخلاء عهدة التوزيع والتشغيل.
                     </div>
                 </div>
             </div>

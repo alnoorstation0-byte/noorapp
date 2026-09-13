@@ -11,7 +11,7 @@ async function printBarcodeLabel(barcode: string, itemName: string, price?: numb
   const win = window.open('', '_blank', 'width=420,height=320');
   if (!win) return;
   win.document.write(`<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8"><title>ملصق</title>
-<style>@page{size:58mm 40mm;margin:1.5mm}*{box-sizing:border-box;margin:0;padding:0}body{width:58mm;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:Arial,sans-serif;background:white;padding:2mm;min-height:35mm}.name{font-size:9pt;font-weight:bold;text-align:center;margin-bottom:1.5mm;max-width:54mm;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.price{font-size:8pt;color:#1C73AB;font-weight:bold;margin-top:1.5mm}svg{max-width:54mm}</style>
+<style>@page{size:58mm 40mm;margin:1.5mm}*{box-sizing:border-box;margin:0;padding:0}body{width:58mm;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:Arial,sans-serif;background:white;padding:2mm;min-height:35mm}.name{font-size:9pt;font-weight:bold;text-align:center;margin-bottom:1.5mm;max-width:54mm;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.price{font-size:8pt;color:#2C1A12;font-weight:bold;margin-top:1.5mm}svg{max-width:54mm}</style>
 </head><body>
 <div class="name">${itemName || 'صنف'}</div>
 <svg id="bc"></svg>
@@ -89,8 +89,8 @@ export default function InventoryItemModal({ isOpen, onClose, currentRecord, set
       >
         <style>{`
           .item-modal-section {
-            background: rgba(255, 255, 255, 0.5);
-            border: 1px solid rgba(40, 145, 200, 0.2);
+            background: rgba(255, 253, 250, 0.7);
+            border: 1px solid rgba(194, 155, 98, 0.25);
             border-radius: 16px;
             padding: 14px 16px;
             margin-bottom: 12px;
@@ -99,12 +99,12 @@ export default function InventoryItemModal({ isOpen, onClose, currentRecord, set
           .item-modal-sec-title {
             font-size: 13px;
             font-weight: 900;
-            color: #1C73AB;
+            color: #2C1A12;
             margin-bottom: 12px;
             display: flex;
             align-items: center;
             gap: 6px;
-            border-bottom: 1px dashed rgba(40, 145, 200, 0.2);
+            border-bottom: 1px dashed rgba(194, 155, 98, 0.25);
             padding-bottom: 6px;
           }
 
@@ -123,7 +123,7 @@ export default function InventoryItemModal({ isOpen, onClose, currentRecord, set
           .item-modal-label {
             font-size: 12px;
             font-weight: 900;
-            color: #1C73AB;
+            color: #2C1A12;
             margin-bottom: 5px;
             display: block;
           }
@@ -151,9 +151,9 @@ export default function InventoryItemModal({ isOpen, onClose, currentRecord, set
           }
 
           .item-bottle-toggle.active {
-            background: linear-gradient(135deg, rgba(40, 145, 200, 0.12) 0%, rgba(127, 212, 227, 0.2) 100%);
-            border-color: #2891C8;
-            box-shadow: 0 4px 12px rgba(40, 145, 200, 0.1);
+            background: linear-gradient(135deg, rgba(194, 155, 98, 0.15) 0%, rgba(168, 87, 60, 0.15) 100%);
+            border-color: #C29B62;
+            box-shadow: 0 4px 12px rgba(194, 155, 98, 0.15);
           }
 
           .item-footer-actions {
@@ -219,7 +219,7 @@ export default function InventoryItemModal({ isOpen, onClose, currentRecord, set
             <TranslatableInput
               label="اسم الصنف / المنتج"
               required
-              placeholder="مثال: مياه غيام كرتون 330 مل (40 عبوة)..."
+              placeholder="مثال: أدوية ومكملات وفيتامينات للخيول والإبل..."
               value={formData.name || ''} 
               onChange={val => updateField('name', val)} 
               inputClassName="item-modal-input"
@@ -265,7 +265,7 @@ export default function InventoryItemModal({ isOpen, onClose, currentRecord, set
                   </button>
                 </div>
                 {hasBarcode && (
-                  <div style={{ marginTop: '5px', padding: '3px 8px', background: 'rgba(40,145,200,0.08)', borderRadius: '6px', fontSize: '11px', color: '#1C73AB', fontFamily: 'monospace', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <div style={{ marginTop: '5px', padding: '3px 8px', background: 'rgba(194,155,98,0.12)', borderRadius: '6px', fontSize: '11px', color: '#A8573C', fontFamily: 'monospace', display: 'flex', alignItems: 'center', gap: '4px' }}>
                     <span>✅</span><span style={{ fontWeight: 800 }}>{formData.code}</span>
                   </div>
                 )}
@@ -354,7 +354,7 @@ export default function InventoryItemModal({ isOpen, onClose, currentRecord, set
               <span>خيارات إضافية ومواصفات</span>
             </div>
 
-            {/* عهدة فوارغ المياه */}
+            {/* عهدة العبوات والمستلزمات */}
             <div 
               onClick={() => updateField('is_returnable_bottle', !formData.is_returnable_bottle)}
               className={`item-bottle-toggle ${formData.is_returnable_bottle ? 'active' : ''}`}
@@ -363,16 +363,16 @@ export default function InventoryItemModal({ isOpen, onClose, currentRecord, set
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <div style={{
                   width: '36px', height: '36px', borderRadius: '10px',
-                  background: formData.is_returnable_bottle ? 'linear-gradient(135deg, #1C73AB 0%, #2891C8 100%)' : '#e2e8f0',
+                  background: formData.is_returnable_bottle ? 'linear-gradient(135deg, #C29B62 0%, #A8573C 100%)' : '#e2e8f0',
                   color: formData.is_returnable_bottle ? 'white' : '#64748b',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px',
-                  boxShadow: formData.is_returnable_bottle ? '0 2px 8px rgba(28, 115, 171, 0.25)' : 'none'
+                  boxShadow: formData.is_returnable_bottle ? '0 2px 8px rgba(194, 155, 98, 0.35)' : 'none'
                 }}>
                   🔄
                 </div>
                 <div>
-                  <div style={{ fontSize: '13px', fontWeight: 900, color: formData.is_returnable_bottle ? '#1C73AB' : '#1e293b' }}>
-                    صنف خاضع لعهدة فوارغ المياه (جالون / عبوة مسترجعة)
+                  <div style={{ fontSize: '13px', fontWeight: 900, color: formData.is_returnable_bottle ? '#2C1A12' : '#1e293b' }}>
+                    صنف خاضع لعهدة العبوات والمستلزمات (جالون / عبوة مسترجعة)
                   </div>
                   <div style={{ fontSize: '11px', color: '#64748b', fontWeight: 700, marginTop: '2px' }}>
                     يتم احتساب الكميات المباعة تلقائياً كعهدة فوارغ لدى العميل أو المندوب
@@ -381,8 +381,8 @@ export default function InventoryItemModal({ isOpen, onClose, currentRecord, set
               </div>
               <div style={{
                 width: '24px', height: '24px', borderRadius: '7px',
-                border: formData.is_returnable_bottle ? '2px solid #2891C8' : '2px solid #94a3b8',
-                background: formData.is_returnable_bottle ? '#2891C8' : 'white',
+                border: formData.is_returnable_bottle ? '2px solid #C29B62' : '2px solid #94a3b8',
+                background: formData.is_returnable_bottle ? '#C29B62' : 'white',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
                 color: 'white', fontWeight: 900, fontSize: '14px',
                 transition: '0.2s', flexShrink: 0

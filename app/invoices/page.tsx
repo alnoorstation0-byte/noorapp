@@ -668,19 +668,19 @@ export default function InvoicesPage() {
           height: 38px;
           padding: 0 16px;
           border-radius: 12px;
-          background: linear-gradient(135deg, #1C73AB 0%, #2891C8 100%);
+          background: linear-gradient(135deg, #C29B62 0%, #A8573C 100%);
           color: white;
           font-size: 12.5px;
           font-weight: 800;
           border: 1px solid rgba(255, 255, 255, 0.3);
           cursor: pointer;
           transition: all 0.2s;
-          box-shadow: 0 4px 14px rgba(28, 115, 171, 0.25);
+          box-shadow: 0 4px 14px rgba(168, 87, 60, 0.25);
           white-space: nowrap;
         }
         .btn-create-invoice:hover {
           transform: translateY(-2px);
-          box-shadow: 0 6px 18px rgba(28, 115, 171, 0.35);
+          box-shadow: 0 6px 18px rgba(168, 87, 60, 0.35);
           filter: brightness(1.08);
         }
 
@@ -691,15 +691,15 @@ export default function InvoicesPage() {
           left: 50%;
           transform: translateX(-50%);
           z-index: 99999;
-          background: rgba(18, 41, 70, 0.94);
+          background: rgba(44, 26, 18, 0.94);
           backdrop-filter: blur(25px) saturate(180%);
-          border: 1px solid rgba(255, 255, 255, 0.25);
+          border: 1px solid rgba(194, 155, 98, 0.35);
           border-radius: 20px;
           padding: 8px 16px;
           display: flex;
           align-items: center;
           gap: 14px;
-          box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+          box-shadow: 0 20px 50px rgba(44, 26, 18, 0.35);
           animation: floatUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
           max-width: 95vw;
           flex-wrap: wrap;
@@ -715,7 +715,7 @@ export default function InvoicesPage() {
           color: white;
         }
         .batch-badge {
-          background: #2891C8;
+          background: #C29B62;
           color: white;
           padding: 3px 9px;
           border-radius: 12px;

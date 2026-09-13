@@ -212,14 +212,14 @@ export default function ShiftCloseModal({
                     border: '1px solid rgba(255, 255, 255, 0.8)'
                 }}>
                     <div style={{ fontSize: '55px', marginBottom: '12px' }}>ℹ️</div>
-                    <h3 style={{ color: '#1C73AB', marginBottom: '10px', fontWeight: 900, fontSize: '20px' }}>{isEn ? 'No active shift' : 'لا توجد وردية نشطة حالياً'}</h3>
+                    <h3 style={{ color: '#C29B62', marginBottom: '10px', fontWeight: 900, fontSize: '20px' }}>{isEn ? 'No active shift' : 'لا توجد وردية نشطة حالياً'}</h3>
                     <p style={{ color: '#64748b', fontSize: '14px', marginBottom: '25px', fontWeight: 700, lineHeight: '1.6' }}>
                         {isEn ? 'You do not have an active shift to close. You can open a new shift from the top control bar.' : 'لا توجد وردية مفتوحة حالياً لحسابك لإغلاقها. يمكنك فتح وردية جديدة من شريط التحكم بأعلى الشاشة.'}
                     </p>
                     <button
                         onClick={onClose}
                         style={{
-                            background: 'linear-gradient(135deg, #1C73AB, #2891C8)',
+                            background: 'linear-gradient(135deg, #C29B62, #A8573C)',
                             color: 'white',
                             border: 'none',
                             padding: '12px 30px',
@@ -227,7 +227,7 @@ export default function ShiftCloseModal({
                             fontWeight: 800,
                             cursor: 'pointer',
                             fontSize: '15px',
-                            boxShadow: '0 4px 15px rgba(28, 115, 171, 0.3)'
+                            boxShadow: '0 4px 15px rgba(168, 87, 60, 0.3)'
                         }}
                     >
                         {isEn ? 'Got it' : 'حسناً، فهمت'}
@@ -336,7 +336,7 @@ export default function ShiftCloseModal({
                                 <span>💰 {isEn ? 'Cash Sales:' : 'المبيعات النقدية (كاش):'}</span>
                                 <strong>+ {totals.cash.toFixed(2)} {isEn ? 'SAR' : 'ريال'}</strong>
                             </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', fontSize: '14px', fontWeight: 700, color: '#2891C8' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', fontSize: '14px', fontWeight: 700, color: '#C29B62' }}>
                                 <span>💳 {isEn ? 'Card / POS Sales:' : 'مبيعات الشبكة / مدى:'}</span>
                                 <strong>{totals.card.toFixed(2)} {isEn ? 'SAR' : 'ريال'}</strong>
                             </div>
@@ -345,9 +345,9 @@ export default function ShiftCloseModal({
                                 <strong>{totals.credit.toFixed(2)} {isEn ? 'SAR' : 'ريال'}</strong>
                             </div>
                             <hr style={{ borderColor: '#e2e8f0', margin: '10px 0' }} />
-                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '16px', fontWeight: 900, color: '#1C73AB' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '16px', fontWeight: 900, color: '#2C1A12' }}>
                                 <span>🏦 {isEn ? 'Expected Cash in Register:' : 'النقدية المتوقعة بالدرج:'}</span>
-                                <span style={{ fontSize: '20px', color: '#1C73AB' }}>{expectedCash.toFixed(2)} {isEn ? 'SAR' : 'ريال'}</span>
+                                <span style={{ fontSize: '20px', color: '#C29B62' }}>{expectedCash.toFixed(2)} {isEn ? 'SAR' : 'ريال'}</span>
                             </div>
                         </div>
 
@@ -389,7 +389,7 @@ export default function ShiftCloseModal({
                         {/* 🔄 مطابقة عهدة فوارغ الجالونات والعبوات */}
                         <div style={{ background: 'rgba(240, 249, 255, 0.9)', border: '1.5px solid rgba(40, 145, 200, 0.35)', padding: '15px', borderRadius: '16px' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                                <span style={{ fontSize: '13px', fontWeight: 900, color: '#1C73AB' }}>🔄 {isEn ? 'Sold Returnables Custody:' : 'عهدة فوارغ المياه المباعة:'}</span>
+                                <span style={{ fontSize: '13px', fontWeight: 900, color: '#1C73AB' }}>🔄 {isEn ? 'Sold Returnables Custody:' : 'عهدة العبوات والمستلزمات المستردة:'}</span>
                                 <span style={{ fontSize: '15px', fontWeight: 900, color: '#122946' }}>{bottlesSold} {isEn ? 'Bottles / Gallons' : 'عبوة / جالون'}</span>
                             </div>
 
@@ -402,7 +402,7 @@ export default function ShiftCloseModal({
                                     value={actualBottlesReturned}
                                     onChange={(e) => setActualBottlesReturned(e.target.value === '' ? '' : Number(e.target.value))}
                                     onFocus={(e) => e.target.select()}
-                                    style={{ fontSize: '18px', fontWeight: 'bold', textAlign: 'center', borderColor: '#2891C8', padding: '6px' }}
+                                    style={{ fontSize: '18px', fontWeight: 'bold', textAlign: 'center', borderColor: '#C29B62', padding: '6px' }}
                                     placeholder={isEn ? 'Returnables' : 'الفوارغ'}
                                 />
                             </div>

@@ -841,7 +841,7 @@ export function usePosSettlementsLogic() {
                         warehouse_id: warehouseId,
                         destination_warehouse_id: MAIN_WAREHOUSE_ID,
                         shift_id: shiftId,
-                        notes: `توريد فوارغ مياه مرتجعة (${bottlesReturned} قارورة) من منفذ ${warehouseName} للمستودع الرئيسي`
+                        notes: `توريد عبوات ومستلزمات مستردة (${bottlesReturned} قارورة) من منفذ ${warehouseName} للمستودع الرئيسي`
                     }]);
                 } catch (btlErr) {
                     console.warn("Bottle return insert error:", btlErr);

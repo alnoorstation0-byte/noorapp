@@ -192,10 +192,10 @@ export default function TrialBalancePage() {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: `4px solid ${THEME.primary}`, paddingBottom: '15px', marginBottom: '20px' }}>
             <div>
                 
-                <p style={{ margin: '8px 0 0 0', fontWeight: 700, fontSize: '14px', color: '#000000' }}>شركة مياه غيام</p>
+                <p style={{ margin: '8px 0 0 0', fontWeight: 700, fontSize: '14px', color: '#000000' }}>صيدلية تاج المودة البيطرية</p>
                 <p style={{ margin: '4px 0 0 0', fontWeight: 900, fontSize: '13px', color: '#000000' }}>عن الفترة من {logic.startDate} إلى {logic.endDate}</p>
             </div>
-            <img src="/ghayam_logo.png" alt="Company Logo" style={{ height: '50px', objectFit: 'contain' }} />
+            <img src="/taj_logo.png" alt="Company Logo" style={{ height: '50px', objectFit: 'contain' }} />
           </div>
 
           <table className="print-table">

@@ -241,7 +241,8 @@ export default function KeyboardShortcutsModal({ isOpen, onClose }: { isOpen: bo
                     to { opacity: 1; transform: scale(1); }
                 }
                 .shortcuts-header {
-                    background: linear-gradient(135deg, #1C73AB 0%, #2891C8 100%);
+                    background: linear-gradient(135deg, #2C1A12 0%, #1A0F0A 100%);
+                    border-bottom: 2px solid #C29B62;
                     padding: 18px 24px;
                     display: flex;
                     align-items: center;
@@ -251,8 +252,8 @@ export default function KeyboardShortcutsModal({ isOpen, onClose }: { isOpen: bo
                 }
                 .shortcuts-search-box {
                     padding: 14px 20px;
-                    background: #f8fafc;
-                    border-bottom: 1px solid #e2e8f0;
+                    background: #FDFBF7;
+                    border-bottom: 1px solid rgba(194, 155, 98, 0.2);
                     display: flex;
                     gap: 12px;
                     align-items: center;
@@ -263,33 +264,33 @@ export default function KeyboardShortcutsModal({ isOpen, onClose }: { isOpen: bo
                     min-width: 220px;
                     padding: 10px 14px;
                     border-radius: 12px;
-                    border: 1.5px solid #cbd5e1;
+                    border: 1.5px solid rgba(194, 155, 98, 0.3);
                     font-size: 13px;
                     font-weight: 700;
                     outline: none;
                     background: white;
-                    color: #122946;
+                    color: #2C1A12;
                     transition: 0.2s;
                 }
                 .shortcuts-input:focus {
-                    border-color: #2891C8;
-                    box-shadow: 0 0 0 3px rgba(40, 145, 200, 0.15);
+                    border-color: #C29B62;
+                    box-shadow: 0 0 0 3px rgba(194, 155, 98, 0.2);
                 }
                 .shortcuts-category-tab {
                     padding: 6px 12px;
                     border-radius: 10px;
-                    border: 1px solid #e2e8f0;
+                    border: 1px solid rgba(194, 155, 98, 0.25);
                     background: white;
                     font-size: 12px;
                     font-weight: 800;
-                    color: #64748b;
+                    color: rgba(44, 26, 18, 0.6);
                     cursor: pointer;
                     transition: 0.15s;
                 }
                 .shortcuts-category-tab.active {
-                    background: #1C73AB;
-                    color: white;
-                    border-color: #1C73AB;
+                    background: #2C1A12;
+                    color: #FDFBF7;
+                    border-color: #2C1A12;
                 }
                 .shortcuts-table-container {
                     padding: 10px 20px 20px 20px;
@@ -302,27 +303,27 @@ export default function KeyboardShortcutsModal({ isOpen, onClose }: { isOpen: bo
                     gap: 16px;
                     align-items: center;
                     padding: 12px 14px;
-                    border-bottom: 1px solid #f1f5f9;
+                    border-bottom: 1px solid rgba(194, 155, 98, 0.12);
                     border-radius: 12px;
                     transition: background 0.15s;
                 }
                 .shortcut-row:hover {
-                    background: #f8fafc;
+                    background: rgba(194, 155, 98, 0.08);
                 }
                 .shortcut-kbd {
                     display: inline-flex;
                     align-items: center;
                     padding: 6px 10px;
-                    background: #f1f5f9;
-                    border: 1px solid #cbd5e1;
-                    border-bottom: 2.5px solid #94a3b8;
+                    background: #FDFBF7;
+                    border: 1px solid rgba(194, 155, 98, 0.3);
+                    border-bottom: 2.5px solid #C29B62;
                     border-radius: 8px;
                     font-family: inherit;
                     font-size: 12px;
                     font-weight: 900;
-                    color: #1C73AB;
+                    color: #A8573C;
                     direction: ltr;
-                    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+                    box-shadow: 0 1px 3px rgba(44, 26, 18, 0.05);
                 }
                 @media (max-width: 768px) {
                     .shortcut-row {
@@ -392,12 +393,12 @@ export default function KeyboardShortcutsModal({ isOpen, onClose }: { isOpen: bo
                                 </div>
                                 <div>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '3px' }}>
-                                        <span style={{ fontWeight: 900, color: '#122946', fontSize: '14px' }}>{item.action}</span>
-                                        <span style={{ fontSize: '10.5px', background: 'rgba(40,145,200,0.1)', color: '#1C73AB', padding: '2px 8px', borderRadius: '6px', fontWeight: 800 }}>
+                                        <span style={{ fontWeight: 900, color: '#2C1A12', fontSize: '14px' }}>{item.action}</span>
+                                        <span style={{ fontSize: '10.5px', background: 'rgba(194, 155, 98, 0.15)', color: '#A8573C', padding: '2px 8px', borderRadius: '6px', fontWeight: 800 }}>
                                             {item.scope}
                                         </span>
                                     </div>
-                                    <div style={{ fontSize: '12px', color: '#64748b', fontWeight: 700, lineHeight: 1.4 }}>
+                                    <div style={{ fontSize: '12px', color: 'rgba(44, 26, 18, 0.6)', fontWeight: 700, lineHeight: 1.4 }}>
                                         {item.description}
                                     </div>
                                 </div>
@@ -407,11 +408,11 @@ export default function KeyboardShortcutsModal({ isOpen, onClose }: { isOpen: bo
                 </div>
 
                 {/* Footer */}
-                <div style={{ padding: '12px 20px', background: '#f8fafc', borderTop: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', color: '#64748b', fontWeight: 800 }}>
-                    <span>💡 يمكنك فتح هذا الدليل في أي وقت بالضغط على مفتاح <kbd style={{ background: '#e2e8f0', padding: '2px 6px', borderRadius: '4px', color: '#1C73AB' }}>F1</kbd></span>
+                <div style={{ padding: '12px 20px', background: '#FDFBF7', borderTop: '1px solid rgba(194, 155, 98, 0.2)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '12px', color: 'rgba(44, 26, 18, 0.7)', fontWeight: 800 }}>
+                    <span>💡 يمكنك فتح هذا الدليل في أي وقت بالضغط على مفتاح <kbd style={{ background: '#FDFBF7', border: '1px solid rgba(194, 155, 98, 0.3)', padding: '2px 6px', borderRadius: '4px', color: '#A8573C' }}>F1</kbd></span>
                     <button 
                         onClick={onClose} 
-                        style={{ background: '#1C73AB', color: 'white', border: 'none', borderRadius: '10px', padding: '6px 18px', fontWeight: 900, cursor: 'pointer', fontSize: '12px' }}
+                        style={{ background: '#2C1A12', color: '#FDFBF7', border: 'none', borderRadius: '10px', padding: '6px 18px', fontWeight: 900, cursor: 'pointer', fontSize: '12px' }}
                     >
                         حسناً، فهمت
                     </button>

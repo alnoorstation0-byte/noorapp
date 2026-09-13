@@ -1,6 +1,6 @@
 /**
  * دالات مساعدة لطباعة ومشاركة الفواتير (A4 والحرارية وواتساب)
- * Ghayam Water Company - Invoice Utilities
+ * Taj Al-Mawadah Vet Pharmacy - Invoice Utilities
  */
 
 export interface NormalizedInvoiceLine {
@@ -76,7 +76,7 @@ export function normalizeInvoiceLines(record: any): NormalizedInvoiceLine[] {
     if (result.length === 0) {
         const hasHeaderItem = record.description || Number(record.quantity || 0) > 0 || Number(record.unit_price || 0) > 0;
         if (hasHeaderItem) {
-            const name = record.description || 'مبيعات مياه وخدمات';
+            const name = record.description || 'مبيعات أدوية ومستلزمات بيطرية';
             const quantity = Number(record.quantity) > 0 ? Number(record.quantity) : 1;
             const unit = record.unit || 'حبة';
             const unit_price = Number(record.unit_price) > 0 
@@ -134,7 +134,7 @@ export function generateInvoiceWhatsAppMessage(record: any, customer: any, lines
     });
 
     const msg = 
-`💧 *شركة مياه غيام | Ghayam Water*
+`💧 *صيدلية تاج المودة البيطرية | Taj Al-Mawadah Pharmacy*
 ---------------------------------------
 مرحباً بك عزيزنا: *${clientName}*
 يسعدنا تزويدكم بتفاصيل فاتورتكم:
@@ -151,8 +151,8 @@ ${itemsList || '- تفاصيل المبيعات\n'}
 🧾 *ضريبة القيمة المضافة (15%):* ${taxAmount} ر.س
 💎 *الإجمالي النهائي:* ${totalAmount} ر.س
 
-شكراً لتعاملكم مع مياه غيام 💧
-خدمة العملاء: info@ghayamwater.com`;
+شكراً لتعاملكم مع صيدلية تاج المودة 🐎🐪
+خدمة العملاء: info@taj-mawadah.com`;
 
     return msg;
 }

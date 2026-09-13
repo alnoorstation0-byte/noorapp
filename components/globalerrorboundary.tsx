@@ -20,9 +20,9 @@ function ErrorFallback({ error, resetErrorBoundary }: any) {
 
             <button 
                 onClick={resetErrorBoundary} 
-                style={{ background: '#2891C8', color: 'white', border: 'none', padding: '15px 30px', borderRadius: '15px', fontWeight: 900, cursor: 'pointer', fontSize: '16px', width: '100%', transition: '0.3s' }}
-                onMouseOver={(e) => e.currentTarget.style.background = '#8C6A5D'}
-                onMouseOut={(e) => e.currentTarget.style.background = '#2891C8'}
+                style={{ background: '#C29B62', color: 'white', border: 'none', padding: '15px 30px', borderRadius: '15px', fontWeight: 900, cursor: 'pointer', fontSize: '16px', width: '100%', transition: '0.3s' }}
+                onMouseOver={(e) => e.currentTarget.style.background = '#A8573C'}
+                onMouseOut={(e) => e.currentTarget.style.background = '#C29B62'}
             >
                 🔄 إعادة تحميل الصفحة
             </button>

@@ -471,7 +471,7 @@ export async function exportToProfessionalExcel(
             const sheetRows: any[][] = [];
 
             // سطر 1: البانر الرئيسي للشعار والشركة
-            sheetRows.push([`💧 شركة مياه غيام | Ghayam Water Company - تقرير: ${tableMeta.name}`]);
+            sheetRows.push([`💧 صيدلية تاج المودة البيطرية | Taj Al-Mawadah Vet Pharmacy - تقرير: ${tableMeta.name}`]);
             // سطر 2: الميتا داتا والتاريخ
             sheetRows.push([`تاريخ التصدير: ${exportTimestamp} | إجمالي السجلات: ${data?.length || 0} | كود الجدول البرمجي: ${tableId}`]);
             // سطر 3: فاصل فارغ
@@ -560,7 +560,7 @@ export async function exportToProfessionalExcel(
             XLSX.utils.book_append_sheet(workbook, worksheet, safeSheetName);
         }
 
-        const fileName = `Ghayam_ERP_Report_${new Date().toISOString().split('T')[0]}.xlsx`;
+        const fileName = `Taj Al-Mawadah_ERP_Report_${new Date().toISOString().split('T')[0]}.xlsx`;
         XLSX.writeFile(workbook, fileName);
         onProgress?.('✅ تم تصدير ملف الإكسل الشامل بنجاح!');
         return { success: true };
@@ -593,9 +593,9 @@ export async function exportToSQL(
 
         let sqlContent = 
 `-- =========================================================================
--- Ghayam Water ERP Database Backup (PostgreSQL Format)
+-- Taj Al-Mawadah Pharmacy ERP Database Backup (PostgreSQL Format)
 -- Generated at: ${new Date().toISOString()}
--- Company: شركة مياه غيام | Ghayam Water Company
+-- Company: صيدلية تاج المودة البيطرية | Taj Al-Mawadah Vet Pharmacy
 -- =========================================================================
 
 SET client_encoding = 'UTF8';
@@ -662,7 +662,7 @@ COMMIT;
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `Ghayam_Backup_${new Date().toISOString().split('T')[0]}.sql`;
+        link.download = `Taj Al-Mawadah_Backup_${new Date().toISOString().split('T')[0]}.sql`;
         link.click();
         URL.revokeObjectURL(url);
 

@@ -25,9 +25,9 @@ export default function RawasiFilterSidebar({
   extraFilters,
   extraActions,
   summarySlot,
-  accentColor = '#1C73AB',
-  textColor = '#122946',
-  logoPath = '/ghayam_logo.png',
+  accentColor = '#C29B62',
+  textColor = '#2C1A12',
+  logoPath = '/taj_logo.png',
   isOpenStatus,
   setIsOpenStatus
 }: RawasiSidebarProps) {
@@ -167,11 +167,11 @@ export default function RawasiFilterSidebar({
           width: 44px;
           height: 5px;
           border-radius: 99px;
-          background: rgba(28, 115, 171, 0.25);
+          background: rgba(194, 155, 98, 0.35);
           transition: background 0.2s;
         }
         .mobile-sheet-handle-container:hover .mobile-sheet-drag-handle {
-          background: #1C73AB;
+          background: ${accentColor};
         }
 
         /* 👑 Header Bar - Sleek, Uncluttered, No Overlapping */
@@ -180,8 +180,8 @@ export default function RawasiFilterSidebar({
           align-items: center !important;
           justify-content: space-between !important;
           padding: 12px 16px !important;
-          border-bottom: 1.5px solid rgba(28, 115, 171, 0.12) !important;
-          background: rgba(255, 255, 255, 0.75) !important;
+          border-bottom: 1.5px solid rgba(194, 155, 98, 0.2) !important;
+          background: rgba(255, 253, 250, 0.85) !important;
           flex-shrink: 0 !important;
           gap: 10px !important;
           width: 100% !important;
@@ -198,10 +198,10 @@ export default function RawasiFilterSidebar({
           height: 36px !important;
           border-radius: 10px !important;
           object-fit: contain !important;
-          border: 1px solid rgba(28, 115, 171, 0.2) !important;
+          border: 1px solid rgba(194, 155, 98, 0.3) !important;
           padding: 2px !important;
-          background: white !important;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+          background: #FDFBF7 !important;
+          box-shadow: 0 2px 8px rgba(44, 26, 18, 0.06);
           flex-shrink: 0 !important;
         }
         .sidebar-header-titles {
@@ -213,7 +213,7 @@ export default function RawasiFilterSidebar({
         .sidebar-main-title {
           font-size: 14.5px !important;
           font-weight: 900 !important;
-          color: #122946 !important;
+          color: ${textColor} !important;
           margin: 0 !important;
           white-space: nowrap !important;
           overflow: hidden !important;
@@ -223,7 +223,7 @@ export default function RawasiFilterSidebar({
         .sidebar-sub-badge {
           font-size: 10.5px !important;
           font-weight: 700 !important;
-          color: #1C73AB !important;
+          color: ${accentColor} !important;
           margin-top: 2px !important;
           white-space: nowrap !important;
         }
@@ -242,9 +242,9 @@ export default function RawasiFilterSidebar({
           min-height: 32px !important;
           max-height: 32px !important;
           border-radius: 10px !important;
-          border: 1px solid rgba(28, 115, 171, 0.18) !important;
-          background: rgba(255, 255, 255, 0.85) !important;
-          color: #1C73AB !important;
+          border: 1px solid rgba(194, 155, 98, 0.25) !important;
+          background: rgba(255, 253, 250, 0.9) !important;
+          color: ${accentColor} !important;
           cursor: pointer !important;
           display: inline-flex !important;
           align-items: center !important;
@@ -254,18 +254,18 @@ export default function RawasiFilterSidebar({
           padding: 0 !important;
           margin: 0 !important;
           transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
-          box-shadow: 0 2px 5px rgba(0,0,0,0.03) !important;
+          box-shadow: 0 2px 5px rgba(44, 26, 18, 0.04) !important;
         }
         .sidebar-header-action-btn:hover {
           background: #ffffff !important;
           transform: translateY(-1px) !important;
-          box-shadow: 0 4px 10px rgba(28, 115, 171, 0.15) !important;
-          border-color: #1C73AB !important;
+          box-shadow: 0 4px 10px rgba(194, 155, 98, 0.2) !important;
+          border-color: ${accentColor} !important;
         }
         .sidebar-header-action-btn.pin.is-pinned {
-          background: rgba(28, 115, 171, 0.15) !important;
-          border-color: #1C73AB !important;
-          color: #1C73AB !important;
+          background: rgba(194, 155, 98, 0.2) !important;
+          border-color: ${accentColor} !important;
+          color: ${accentColor} !important;
         }
         .sidebar-header-action-btn.close {
           color: #ef4444 !important;
@@ -293,8 +293,8 @@ export default function RawasiFilterSidebar({
         }
         .filter-content::-webkit-scrollbar { width: 5px; }
         .filter-content::-webkit-scrollbar-track { background: transparent; }
-        .filter-content::-webkit-scrollbar-thumb { background: rgba(28, 115, 171, 0.25); border-radius: 10px; }
-        .filter-content::-webkit-scrollbar-thumb:hover { background: #1C73AB; }
+        .filter-content::-webkit-scrollbar-thumb { background: rgba(194, 155, 98, 0.35); border-radius: 10px; }
+        .filter-content::-webkit-scrollbar-thumb:hover { background: ${accentColor}; }
 
         /* 📦 Sections */
         .sidebar-section {
@@ -310,8 +310,8 @@ export default function RawasiFilterSidebar({
           gap: 6px;
           font-size: 12px;
           font-weight: 900;
-          color: #1C73AB;
-          border-bottom: 1px solid rgba(28, 115, 171, 0.12);
+          color: ${accentColor};
+          border-bottom: 1px solid rgba(194, 155, 98, 0.2);
           padding-bottom: 5px;
           margin-bottom: 2px;
         }
@@ -326,24 +326,24 @@ export default function RawasiFilterSidebar({
           gap: 8px;
         }
         .sidebar-empty-summary-card {
-          background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(240, 249, 255, 0.9) 100%);
-          border: 1.5px solid rgba(28, 115, 171, 0.18);
+          background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(255, 253, 250, 0.75) 100%);
+          border: 1.5px solid rgba(194, 155, 98, 0.25);
           border-radius: 14px;
           padding: 12px 14px;
           text-align: center;
-          box-shadow: 0 4px 12px rgba(28, 115, 171, 0.04);
+          box-shadow: 0 4px 12px rgba(44, 26, 18, 0.04);
         }
 
         /* Enforce theme rules on all summary cards */
         .summary-glass-card {
-          background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(240, 249, 255, 0.9) 100%) !important;
-          border: 1.5px solid rgba(28, 115, 171, 0.18) !important;
+          background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(255, 253, 250, 0.75) 100%) !important;
+          border: 1.5px solid rgba(194, 155, 98, 0.25) !important;
           border-radius: 16px !important;
           padding: 12px 16px !important;
           margin-bottom: 8px !important;
           width: 100% !important;
           box-sizing: border-box !important;
-          box-shadow: 0 4px 16px rgba(28, 115, 171, 0.06) !important;
+          box-shadow: 0 4px 16px rgba(44, 26, 18, 0.06) !important;
           text-align: ${isRtl ? 'right' : 'left'} !important;
           direction: ${isRtl ? 'rtl' : 'ltr'} !important;
         }
@@ -351,7 +351,7 @@ export default function RawasiFilterSidebar({
         .summary-glass-card [class*="val"] {
           font-size: 22px !important;
           font-weight: 900 !important;
-          color: #1C73AB !important;
+          color: ${accentColor} !important;
           margin-top: 4px !important;
           letter-spacing: -0.3px !important;
           display: block !important;
@@ -361,7 +361,7 @@ export default function RawasiFilterSidebar({
         .summary-glass-card label {
           font-size: 11.5px !important;
           font-weight: 800 !important;
-          color: #64748b !important;
+          color: rgba(44, 26, 18, 0.6) !important;
           display: block !important;
         }
 
@@ -387,13 +387,13 @@ export default function RawasiFilterSidebar({
           cursor: pointer !important;
           transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
           border: 1px solid rgba(255, 255, 255, 0.5) !important;
-          box-shadow: 0 4px 14px rgba(28, 115, 171, 0.15) !important;
+          box-shadow: 0 4px 14px rgba(194, 155, 98, 0.25) !important;
         }
         .sidebar-actions-grid button:hover,
         .sidebar-actions-grid .btn-main-glass:hover {
           transform: translateY(-2px) !important;
-          box-shadow: 0 6px 18px rgba(28, 115, 171, 0.25) !important;
-          filter: brightness(1.08) !important;
+          box-shadow: 0 6px 18px rgba(168, 87, 60, 0.25) !important;
+          filter: brightness(1.05) !important;
         }
 
         /* 🔍 Search Box */
@@ -407,22 +407,22 @@ export default function RawasiFilterSidebar({
           width: 100% !important;
           height: 40px !important;
           min-height: 40px !important;
-          background: rgba(255, 255, 255, 0.95) !important;
-          border: 1.5px solid rgba(28, 115, 171, 0.22) !important;
+          background: rgba(255, 253, 250, 0.95) !important;
+          border: 1.5px solid rgba(194, 155, 98, 0.3) !important;
           border-radius: 12px !important;
           padding: 0 12px 0 34px !important;
-          color: #122946 !important;
+          color: ${textColor} !important;
           font-weight: 700 !important;
           font-size: 13px !important;
           direction: rtl !important;
           text-align: right !important;
           outline: none !important;
           transition: all 0.2s ease !important;
-          box-shadow: 0 2px 6px rgba(28, 115, 171, 0.04) !important;
+          box-shadow: 0 2px 6px rgba(44, 26, 18, 0.04) !important;
         }
         .sidebar-search-input:focus {
-          border-color: #1C73AB !important;
-          box-shadow: 0 0 0 3px rgba(28, 115, 171, 0.15) !important;
+          border-color: ${accentColor} !important;
+          box-shadow: 0 0 0 3px rgba(194, 155, 98, 0.2) !important;
           background: #ffffff !important;
         }
         .search-icon-box {
@@ -463,13 +463,13 @@ export default function RawasiFilterSidebar({
           margin-bottom: 6px;
         }
         .date-preset-pill {
-          background: rgba(255, 255, 255, 0.75) !important;
-          border: 1px solid rgba(28, 115, 171, 0.2) !important;
+          background: rgba(255, 253, 250, 0.85) !important;
+          border: 1px solid rgba(194, 155, 98, 0.3) !important;
           border-radius: 8px !important;
           padding: 3px 9px !important;
           font-size: 11px !important;
           font-weight: 800 !important;
-          color: #475569 !important;
+          color: #2C1A12 !important;
           cursor: pointer !important;
           transition: all 0.2s ease !important;
           display: inline-flex !important;
@@ -477,19 +477,19 @@ export default function RawasiFilterSidebar({
           justify-content: center !important;
           height: 26px !important;
           min-height: 26px !important;
-          box-shadow: 0 1px 3px rgba(0,0,0,0.02) !important;
+          box-shadow: 0 1px 3px rgba(44, 26, 18, 0.02) !important;
         }
         .date-preset-pill:hover {
-          background: rgba(28, 115, 171, 0.1) !important;
-          color: #1C73AB !important;
-          border-color: #1C73AB !important;
+          background: rgba(194, 155, 98, 0.15) !important;
+          color: ${accentColor} !important;
+          border-color: ${accentColor} !important;
           transform: translateY(-1px) !important;
         }
         .date-preset-pill.active {
-          background: #1C73AB !important;
+          background: ${accentColor} !important;
           color: white !important;
-          border-color: #1C73AB !important;
-          box-shadow: 0 2px 8px rgba(28, 115, 171, 0.25) !important;
+          border-color: ${accentColor} !important;
+          box-shadow: 0 2px 8px rgba(194, 155, 98, 0.35) !important;
         }
         .date-clear-pill {
           margin-inline-start: auto;
@@ -529,9 +529,9 @@ export default function RawasiFilterSidebar({
           justify-content: center;
           font-size: 11.5px;
           font-weight: 800;
-          color: #1C73AB;
-          background: rgba(28, 115, 171, 0.08);
-          border: 1px solid rgba(28, 115, 171, 0.18);
+          color: #C29B62;
+          background: rgba(194, 155, 98, 0.1);
+          border: 1px solid rgba(194, 155, 98, 0.25);
           border-radius: 10px;
           flex-shrink: 0;
         }
@@ -541,27 +541,27 @@ export default function RawasiFilterSidebar({
           height: 38px !important;
           min-height: 38px !important;
           background: rgba(255, 255, 255, 0.95) !important;
-          border: 1.5px solid rgba(28, 115, 171, 0.2) !important;
+          border: 1.5px solid rgba(194, 155, 98, 0.25) !important;
           border-radius: 10px !important;
           padding: 0 10px !important;
-          color: #122946 !important;
+          color: #2C1A12 !important;
           font-weight: 700 !important;
           font-size: 12px !important;
           direction: rtl !important;
           outline: none !important;
           transition: all 0.2s !important;
-          box-shadow: 0 2px 5px rgba(28, 115, 171, 0.03) !important;
+          box-shadow: 0 2px 5px rgba(44, 26, 18, 0.04) !important;
         }
         .sidebar-date-input:focus {
-          border-color: #1C73AB !important;
+          border-color: #C29B62 !important;
           background: white !important;
-          box-shadow: 0 0 0 3px rgba(28, 115, 171, 0.15) !important;
+          box-shadow: 0 0 0 3px rgba(194, 155, 98, 0.2) !important;
         }
 
         .sidebar-custom-filters-wrap {
           margin-top: 10px;
           padding-top: 10px;
-          border-top: 1px dashed rgba(28, 115, 171, 0.15);
+          border-top: 1px dashed rgba(194, 155, 98, 0.25);
           width: 100%;
         }
         .sidebar-section-subhead {
@@ -592,15 +592,15 @@ export default function RawasiFilterSidebar({
             width: 24px;
             background: rgba(255, 255, 255, 0.65);
             backdrop-filter: blur(10px);
-            color: #1C73AB;
+            color: #C29B62;
             padding: 0 4px;
             cursor: pointer;
             z-index: 998;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: -2px 0 10px rgba(0,0,0,0.1);
-            border-left: 1px solid rgba(255,255,255,0.8);
+            box-shadow: -2px 0 10px rgba(44, 26, 18, 0.08);
+            border-left: 1px solid rgba(194, 155, 98, 0.25);
             transition: all 0.3s ease;
             opacity: ${isOpen ? 0 : 1};
             pointer-events: ${isOpen ? 'none' : 'auto'};
@@ -622,9 +622,9 @@ export default function RawasiFilterSidebar({
             max-width: 100% !important;
             max-height: 82vh !important;
             border-radius: 24px 24px 0 0 !important;
-            border: 1.5px solid rgba(255, 255, 255, 0.95) !important;
+            border: 1.5px solid rgba(194, 155, 98, 0.3) !important;
             border-bottom: none !important;
-            box-shadow: 0 -10px 40px rgba(18, 41, 70, 0.25) !important;
+            box-shadow: 0 -10px 40px rgba(44, 26, 18, 0.25) !important;
             z-index: 9999 !important;
             transition: bottom 0.38s cubic-bezier(0.165, 0.84, 0.44, 1) !important;
           }
@@ -646,10 +646,10 @@ export default function RawasiFilterSidebar({
             width: 220px !important;
             height: 38px !important;
             border-radius: 18px 18px 0 0 !important;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(240, 249, 255, 0.95) 100%) !important;
-            border: 1.5px solid rgba(28, 115, 171, 0.3) !important;
+            background: linear-gradient(135deg, rgba(255, 253, 250, 0.98) 0%, rgba(253, 246, 237, 0.95) 100%) !important;
+            border: 1.5px solid rgba(194, 155, 98, 0.3) !important;
             border-bottom: none !important;
-            box-shadow: 0 -4px 20px rgba(28, 115, 171, 0.18) !important;
+            box-shadow: 0 -4px 20px rgba(44, 26, 18, 0.12) !important;
             backdrop-filter: blur(20px) !important;
             -webkit-backdrop-filter: blur(20px) !important;
             z-index: 998 !important;
@@ -658,7 +658,7 @@ export default function RawasiFilterSidebar({
             justify-content: center !important;
             gap: 8px !important;
             cursor: pointer !important;
-            color: #1C73AB !important;
+            color: #C29B62 !important;
             font-weight: 900 !important;
             font-size: 12.5px !important;
             padding: 0 16px !important;
@@ -889,7 +889,7 @@ export default function RawasiFilterSidebar({
           </div>
 
           <div className="sidebar-footer-brand">
-            نظام الغيام المائي الموحد v2.0
+            نظام صيدلية تاج المودة الموحد v2.0
           </div>
         </div>
       </aside>

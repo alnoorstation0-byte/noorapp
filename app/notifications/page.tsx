@@ -110,7 +110,7 @@ export default function NotificationsPage() {
                 <button
                   onClick={handleRequestPush}
                   style={{
-                    background: 'linear-gradient(135deg, #1C73AB, #2891C8)',
+                    background: 'linear-gradient(135deg, #C29B62, #A8573C)',
                     color: 'white',
                     border: 'none',
                     padding: '8px 16px',
@@ -217,9 +217,9 @@ export default function NotificationsPage() {
                 font-weight: 900 !important;
                 cursor: pointer !important;
                 transition: 0.2s !important;
-                border: 1px solid rgba(40, 145, 200, 0.2) !important;
+                border: 1px solid rgba(194, 155, 98, 0.25) !important;
                 background: white !important;
-                color: #475569 !important;
+                color: #2C1A12 !important;
                 height: 38px !important;
                 min-height: 38px !important;
                 max-height: 38px !important;
@@ -227,10 +227,10 @@ export default function NotificationsPage() {
                 width: auto !important;
               }
               .notif-tab-btn.active {
-                background: linear-gradient(135deg, #1C73AB, #2891C8) !important;
+                background: linear-gradient(135deg, #C29B62, #A8573C) !important;
                 color: white !important;
-                border-color: #1C73AB !important;
-                box-shadow: 0 4px 12px rgba(28, 115, 171, 0.25) !important;
+                border-color: #C29B62 !important;
+                box-shadow: 0 4px 12px rgba(168, 87, 60, 0.25) !important;
               }
               .notif-tab-btn span {
                 white-space: nowrap !important;
@@ -389,7 +389,7 @@ export default function NotificationsPage() {
                         <button
                           onClick={() => handleActionClick(notif)}
                           style={{
-                            background: 'linear-gradient(135deg, #1C73AB, #2891C8)',
+                            background: 'linear-gradient(135deg, #C29B62, #A8573C)',
                             color: 'white',
                             border: 'none',
                             padding: '6px 14px',

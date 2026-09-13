@@ -43,16 +43,16 @@ export default function OpenShiftsModal({
                 }
                 .shift-card-item:hover {
                     transform: translateY(-3px);
-                    border-color: #2891C8;
-                    box-shadow: 0 8px 25px rgba(28, 115, 171, 0.15);
+                    border-color: #C29B62;
+                    box-shadow: 0 8px 25px rgba(168, 87, 60, 0.15);
                     background: rgba(255, 255, 255, 0.98);
                 }
                 .shift-card-item.active {
-                    border: 2px solid #16a34a;
+                    border: 2px solid #4E734F;
                     background: rgba(240, 253, 244, 0.95);
                 }
                 .btn-switch-shift {
-                    background: linear-gradient(135deg, #1C73AB 0%, #2891C8 100%);
+                    background: linear-gradient(135deg, #C29B62 0%, #A8573C 100%);
                     color: white;
                     border: none;
                     border-radius: 12px;
@@ -62,11 +62,11 @@ export default function OpenShiftsModal({
                     cursor: pointer;
                     transition: all 0.2s ease;
                     white-space: nowrap;
-                    box-shadow: 0 4px 12px rgba(28, 115, 171, 0.25);
+                    box-shadow: 0 4px 12px rgba(168, 87, 60, 0.25);
                 }
                 .btn-switch-shift:hover {
                     transform: scale(1.03);
-                    background: linear-gradient(135deg, #2891C8 0%, #7FD4E3 100%);
+                    background: linear-gradient(135deg, #A8573C 0%, #C29B62 100%);
                 }
             `}</style>
 

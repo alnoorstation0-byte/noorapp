@@ -1,12 +1,13 @@
 import { NextResponse } from 'next/server';
 
-// قاموس محلي سريع لمصطلحات نشاط المياه والمحاسبة كخط دفاع أول
+// قاموس محلي سريع لمصطلحات الصيدلة البيطرية والمحاسبة كخط دفاع أول
 const LOCAL_DICTIONARY: Record<string, { en: string; ar: string }> = {
-    'مياه': { en: 'Water', ar: 'مياه' },
+    'بيطري': { en: 'Veterinary', ar: 'بيطري' },
+    'أدوية': { en: 'Medicines', ar: 'أدوية' },
     'كرتون': { en: 'Carton', ar: 'كرتون' },
     'قارورة': { en: 'Bottle', ar: 'قارورة' },
     'جالون': { en: 'Gallon', ar: 'جالون' },
-    'مياه غيام': { en: 'Ghayam Water', ar: 'مياه غيام' },
+    'صيدلية تاج المودة': { en: 'Taj Al-Mawadah Pharmacy', ar: 'صيدلية تاج المودة' },
     'مؤسسة': { en: 'Establishment', ar: 'مؤسسة' },
     'شركة': { en: 'Company', ar: 'شركة' },
     'عميل': { en: 'Customer', ar: 'عميل' },

@@ -316,22 +316,23 @@ export default function VATReturnPage() {
             border-spacing: 0;
           }
           .aqua-table th {
-            background: rgba(18, 41, 70, 0.05);
-            color: #122946;
+            background: rgba(194, 155, 98, 0.12);
+            color: #2C1A12;
             font-weight: 900;
             padding: 18px 20px;
             text-align: right;
             font-size: 13px;
-            border-bottom: 2px solid rgba(18, 41, 70, 0.1);
+            border-bottom: 2px solid rgba(194, 155, 98, 0.3);
           }
           .aqua-table td {
             padding: 16px 20px;
-            border-bottom: 1px solid rgba(0,0,0,0.03);
+            border-bottom: 1px solid rgba(194, 155, 98, 0.12);
             font-size: 14px;
             vertical-align: middle;
+            color: #2C1A12;
           }
           .aqua-table tbody tr:hover {
-            background: rgba(255,255,255,0.8);
+            background: rgba(194, 155, 98, 0.08);
           }
           
           .badge {

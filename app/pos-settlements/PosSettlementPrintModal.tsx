@@ -142,7 +142,7 @@ export default function PosSettlementPrintModal({
                     }}>
                         <div>
                             <h1 style={{ margin: '0 0 4px 0', fontSize: '22px', fontWeight: 900, color: '#1C73AB' }}>
-                                مؤسسة غيام التجارية لتوزيع المياه
+                                صيدلية تاج المودة البيطرية
                             </h1>
                             <div style={{ fontSize: '12px', color: '#64748b', fontWeight: 700 }}>
                                 مبيعات الجملة والتجزئة ومنافذ التوزيع المعتمدة
@@ -277,7 +277,7 @@ export default function PosSettlementPrintModal({
                     {/* Section 3: Bottles Custody */}
                     <div style={{ marginBottom: '20px' }}>
                         <h4 style={{ margin: '0 0 8px 0', fontSize: '13px', fontWeight: 900, color: '#1C73AB', borderRight: '3px solid #1C73AB', paddingRight: '8px' }}>
-                            ثالثاً: عهدة فوارغ المياه
+                            ثالثاً: عهدة العبوات والمستلزمات
                         </h4>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px', textAlign: 'center', fontSize: '11px', background: '#f8fafc', padding: '10px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
                             <div>

@@ -21,7 +21,7 @@ export default function FleetPage() {
     { key: 'actions', label: 'إجراءات', type: 'actions', render: (row: any) => (
         <div className="table-actions-container" style={{ display: 'flex', flexDirection: 'row', flexWrap: 'nowrap', gap: '6px', justifyContent: 'center', alignItems: 'center', minWidth: '125px' }}>
             <SecureAction module="fleet" action="edit">
-                <button onClick={() => logic.handleEdit(row)} className="table-action-btn edit-btn" style={{ padding: '5px 9px', borderRadius: '8px', border: 'none', background: 'linear-gradient(135deg, #1C73AB 0%, #2891C8 100%)', color: 'white', cursor: 'pointer', fontWeight: 800, fontSize: '11px', whiteSpace: 'nowrap', flexShrink: 0 }}>✏️ تعديل</button>
+                <button onClick={() => logic.handleEdit(row)} className="table-action-btn edit-btn" style={{ padding: '5px 9px', borderRadius: '8px', border: 'none', background: 'linear-gradient(135deg, #C29B62 0%, #A8573C 100%)', color: 'white', cursor: 'pointer', fontWeight: 800, fontSize: '11px', whiteSpace: 'nowrap', flexShrink: 0 }}>✏️ تعديل</button>
             </SecureAction>
             <SecureAction module="fleet" action="delete">
                 <button onClick={() => logic.handleDelete(row.id)} className="table-action-btn delete-btn" style={{ padding: '5px 9px', borderRadius: '8px', border: 'none', background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)', color: 'white', cursor: 'pointer', fontWeight: 800, fontSize: '11px', whiteSpace: 'nowrap', flexShrink: 0 }}>🗑️ حذف</button>
@@ -41,7 +41,7 @@ export default function FleetPage() {
           <button 
             onClick={logic.handleAddNew} 
             className="btn-main-glass" 
-            style={{ background: 'linear-gradient(135deg, #1C73AB 0%, #2891C8 100%)', color: 'white', padding: '12px 24px', borderRadius: '14px', fontWeight: 900, border: 'none', cursor: 'pointer', boxShadow: '0 4px 15px rgba(28, 115, 171, 0.3)' }}
+            style={{ background: 'linear-gradient(135deg, #C29B62 0%, #A8573C 100%)', color: 'white', padding: '12px 24px', borderRadius: '14px', fontWeight: 900, border: 'none', cursor: 'pointer', boxShadow: '0 4px 15px rgba(194, 155, 98, 0.35)' }}
           >
             ➕ إضافة سيارة جديدة
           </button>
@@ -63,9 +63,9 @@ export default function FleetPage() {
 
     {/* Modal rendered outside MasterPage to prevent z-index/stacking context issues */}
     {logic.isModalOpen && (
-      <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(18, 41, 70, 0.6)', backdropFilter: 'blur(15px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 99999 }}>
-          <div className="apple-card" style={{ padding: '30px', width: '500px', maxWidth: '95vw', maxHeight: '90vh', overflowY: 'auto', margin: 'auto', borderRadius: '20px', background: 'rgba(255, 255, 255, 0.85)', backdropFilter: 'blur(20px)', border: '1px solid rgba(255, 255, 255, 0.6)' }}>
-            <h2 style={{ margin: '0 0 25px 0', color: '#1C73AB', fontWeight: 900, borderBottom: '2px solid rgba(40, 145, 200, 0.2)', paddingBottom: '10px', textAlign: 'center' }}>
+      <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(44, 26, 18, 0.45)', backdropFilter: 'blur(15px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 99999 }}>
+          <div className="apple-card" style={{ padding: '30px', width: '500px', maxWidth: '95vw', maxHeight: '90vh', overflowY: 'auto', margin: 'auto', borderRadius: '24px', background: 'linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(255, 253, 250, 0.85) 100%)', backdropFilter: 'blur(24px)', border: '1px solid rgba(194, 155, 98, 0.35)', boxShadow: '0 20px 40px rgba(44, 26, 18, 0.15)' }}>
+            <h2 style={{ margin: '0 0 25px 0', color: '#2C1A12', fontWeight: 900, borderBottom: '2px solid rgba(194, 155, 98, 0.25)', paddingBottom: '10px', textAlign: 'center' }}>
                 {logic.currentRecord.id ? 'تعديل سيارة 🚗' : 'إضافة سيارة جديدة 🚗'}
             </h2>
 

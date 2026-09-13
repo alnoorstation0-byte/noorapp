@@ -89,15 +89,15 @@ export default function MasterDashboard() {
                 display: 'flex',
                 padding: '25px 35px',
                 justifyContent: 'space-between',
-                borderBottom: '4px solid #1C73AB'
+                borderBottom: '4px solid #C29B62'
             }}>
-                <div className="gs-header-col" style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1, borderLeft: '1px solid rgba(28, 115, 171, 0.2)' }}>
+                <div className="gs-header-col" style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1, borderLeft: '1px solid rgba(194, 155, 98, 0.25)' }}>
                     <span style={{ color: '#475569', fontSize: '14px', fontWeight: 700 }}>صافي السيولة النقدية</span>
                     <span style={{ color: '#10b981', fontSize: '28px', fontWeight: 900, textShadow: '0 0 20px rgba(16,185,129,0.4)' }}>
                         {formatCurrency(summary.finance.liquidity)}
                     </span>
                 </div>
-                <div className="gs-header-col" style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1, borderLeft: '1px solid rgba(28, 115, 171, 0.2)', paddingRight: '35px' }}>
+                <div className="gs-header-col" style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1, borderLeft: '1px solid rgba(194, 155, 98, 0.25)', paddingRight: '35px' }}>
                     <span style={{ color: '#475569', fontSize: '14px', fontWeight: 700 }}>رحلات التوزيع النشطة</span>
                     <span style={{ color: '#1e293b', fontSize: '28px', fontWeight: 900 }}>
                         {summary.operations.activeTrips} <span style={{ fontSize: '16px', fontWeight: 500, color: '#475569' }}>رحلة</span>

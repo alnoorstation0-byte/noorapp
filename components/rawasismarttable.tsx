@@ -64,7 +64,7 @@ const COLUMN_TRANSLATIONS: Record<string, string> = {
 };
 
 const THEME = {
-    coffeeDark: '#122946', goldAccent: '#2891C8', sandLight: '#F4F1EE', sandDark: '#E6D5C3', success: '#166534', danger: '#be123c', border: '#eef2f6'
+    coffeeDark: '#2C1A12', goldAccent: '#C29B62', sandLight: '#FDFBF7', sandDark: '#E6D5C3', success: '#4E734F', danger: '#be123c', border: 'rgba(194, 155, 98, 0.2)'
 };
 
 // 🟢 التعديل الأهم: تغيير النوع ليقبل React.ReactNode (مثل الـ Checkbox) بالإضافة للنصوص

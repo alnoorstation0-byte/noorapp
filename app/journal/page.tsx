@@ -676,42 +676,42 @@ export default function JournalPage() {
             .btn-main-glass.red { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); }
             .btn-main-glass:hover { transform: translateY(-3px); filter: brightness(1.1); box-shadow: 0 4px 10px rgba(239, 68, 68, 0.1); }
             
-            .summary-glass-card { background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(10px); padding: 20px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.9); margin-bottom: 25px; box-shadow: 0 4px 15px rgba(28, 115, 171, 0.05); }
+            .summary-glass-card { background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(10px); padding: 20px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.9); margin-bottom: 25px; box-shadow: 0 4px 15px rgba(44, 26, 18, 0.05); }
             
-            .filter-label { color: #122946; fontSize: 11px; font-weight: 900; display: block; margin-bottom: 8px; }
-            .filter-input-glass { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid rgba(28, 115, 171, 0.2); background: white; color: #122946; outline: none; font-family: inherit; font-weight: 800; font-size: 13px; transition: 0.3s; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
-            .filter-input-glass:focus { border-color: #1C73AB; box-shadow: 0 0 0 3px rgba(28, 115, 171, 0.1); }
+            .filter-label { color: #2C1A12; font-size: 11px; font-weight: 900; display: block; margin-bottom: 8px; }
+            .filter-input-glass { width: 100%; padding: 12px; border-radius: 12px; border: 1.5px solid rgba(194, 155, 98, 0.25); background: white; color: #2C1A12; outline: none; font-family: inherit; font-weight: 800; font-size: 13px; transition: 0.3s; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
+            .filter-input-glass:focus { border-color: #C29B62; box-shadow: 0 0 0 3px rgba(194, 155, 98, 0.2); }
             .filter-input-glass::-webkit-calendar-picker-indicator { cursor: pointer; opacity: 0.6; }
             .filter-input-glass::-webkit-calendar-picker-indicator:hover { opacity: 1; }
             
             .custom-select { appearance: auto; cursor: pointer; }
-            .custom-select option { background: white; color: #122946; font-weight: 900; }
+            .custom-select option { background: white; color: #2C1A12; font-weight: 900; }
 
-            .filter-btn { flex: 1; padding: 10px; border-radius: 10px; background: white; color: #1C73AB; border: 1px solid rgba(28, 115, 171, 0.2); font-weight: 900; cursor: pointer; font-size: 11px; transition: 0.3s; }
-            .filter-btn.active { background: #1C73AB; color: white; box-shadow: 0 4px 10px rgba(28, 115, 171, 0.2); border-color: #1C73AB; }
+            .filter-btn { flex: 1; padding: 10px; border-radius: 10px; background: white; color: #C29B62; border: 1px solid rgba(194, 155, 98, 0.3); font-weight: 900; cursor: pointer; font-size: 11px; transition: 0.3s; }
+            .filter-btn.active { background: #C29B62; color: white; box-shadow: 0 4px 10px rgba(194, 155, 98, 0.25); border-color: #C29B62; }
             
             .badge-glass { padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 900; display: inline-block; }
-            .badge-glass.green { background: #ecfdf5; color: #059669; border: 1px solid #a7f3d0; }
+            .badge-glass.green { background: #ecfdf5; color: #4E734F; border: 1px solid #a7f3d0; }
             .badge-glass.yellow { background: #fff7ed; color: #d97706; border: 1px solid #fde68a; }
             
-            .pagination-container { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 15px; background: rgba(255, 255, 255, 0.6); border-radius: 16px; border: 1px solid white; box-shadow: 0 4px 15px rgba(28, 115, 171, 0.05); }
-            .btn-pagination { background: white; color: #1C73AB; border: 1px solid rgba(28, 115, 171, 0.2); padding: 10px 20px; border-radius: 12px; font-weight: 900; cursor: pointer; transition: 0.3s; }
-            .btn-pagination:hover:not(:disabled) { background: #1C73AB; color: white; border-color: #1C73AB; }
+            .pagination-container { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 15px; background: rgba(255, 255, 255, 0.6); border-radius: 16px; border: 1px solid white; box-shadow: 0 4px 15px rgba(44, 26, 18, 0.05); }
+            .btn-pagination { background: white; color: #C29B62; border: 1px solid rgba(194, 155, 98, 0.3); padding: 10px 20px; border-radius: 12px; font-weight: 900; cursor: pointer; transition: 0.3s; }
+            .btn-pagination:hover:not(:disabled) { background: #C29B62; color: white; border-color: #C29B62; }
             .btn-pagination:disabled { opacity: 0.5; cursor: not-allowed; background: #f1f5f9; color: #94a3b8; border-color: #e2e8f0; }
 
-            /* 🎯 Journal Selection Bar (Aqua Glassmorphism) */
+            /* 🎯 Journal Selection Bar (Desert Glassmorphism) */
             .journal-selection-bar {
               display: flex;
               align-items: center;
               justify-content: space-between;
-              background: linear-gradient(135deg, rgba(40, 145, 200, 0.12), rgba(28, 115, 171, 0.18));
-              border: 1.5px solid rgba(40, 145, 200, 0.35);
+              background: linear-gradient(135deg, rgba(255, 253, 250, 0.9), rgba(253, 246, 237, 0.8));
+              border: 1.5px solid rgba(194, 155, 98, 0.35);
               border-radius: 14px;
               padding: 10px 16px;
               margin-top: 14px;
               backdrop-filter: blur(10px);
               -webkit-backdrop-filter: blur(10px);
-              box-shadow: 0 4px 15px rgba(28, 115, 171, 0.08);
+              box-shadow: 0 4px 15px rgba(44, 26, 18, 0.08);
               animation: journalSelectionSlideDown 0.25s cubic-bezier(0.16, 1, 0.3, 1);
               width: 100%;
               box-sizing: border-box;
@@ -734,11 +734,11 @@ export default function JournalPage() {
             .selection-badge {
               font-size: 12px;
               font-weight: 900;
-              color: #1C73AB;
+              color: #C29B62;
               background: rgba(255, 255, 255, 0.85);
               padding: 5px 12px;
               border-radius: 8px;
-              border: 1px solid rgba(28, 115, 171, 0.2);
+              border: 1px solid rgba(194, 155, 98, 0.25);
               white-space: nowrap;
             }
 
@@ -799,9 +799,9 @@ export default function JournalPage() {
             }
 
             .selection-action-btn.print {
-              background: linear-gradient(135deg, #1C73AB, #2891C8);
+              background: linear-gradient(135deg, #C29B62, #A8573C);
               color: white;
-              box-shadow: 0 4px 12px rgba(28, 115, 171, 0.25);
+              box-shadow: 0 4px 12px rgba(168, 87, 60, 0.25);
             }
             .selection-action-btn.print:hover:not(:disabled) {
               filter: brightness(1.1);
@@ -867,12 +867,12 @@ export default function JournalPage() {
               border: 1px solid rgba(245, 158, 11, 0.4);
             }
             .btn-row-action.print {
-              background: linear-gradient(135deg, rgba(28, 115, 171, 0.12) 0%, rgba(40, 145, 200, 0.18) 100%);
-              color: #1C73AB;
-              border: 1px solid rgba(28, 115, 171, 0.3);
+              background: linear-gradient(135deg, rgba(194, 155, 98, 0.15) 0%, rgba(168, 87, 60, 0.15) 100%);
+              color: #C29B62;
+              border: 1px solid rgba(194, 155, 98, 0.3);
             }
             .btn-row-action.print:hover:not(:disabled) {
-              background: #1C73AB;
+              background: #C29B62;
               color: white;
             }
             .btn-row-action.delete {

@@ -305,20 +305,20 @@ export default function CashFlowsPage() {
                     .summary-card { background: rgba(255,255,255,0.8); backdrop-filter: blur(20px); border-radius: 20px; padding: 25px; flex: 1; border: 1px solid rgba(255,255,255,0.9); position: relative; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.03); transition: all 0.3s ease; }
                     .summary-card:hover { transform: translateY(-5px); box-shadow: 0 15px 40px rgba(0,0,0,0.06); }
                     .summary-card::after { content: ''; position: absolute; top: 0; right: 0; width: 100%; height: 5px; }
-                    .summary-card.inflow::after { background: linear-gradient(90deg, #10b981, #34d399); }
+                    .summary-card.inflow::after { background: linear-gradient(90deg, #4E734F, #10b981); }
                     .summary-card.outflow::after { background: linear-gradient(90deg, #ef4444, #f87171); }
-                    .summary-card.net::after { background: linear-gradient(90deg, #2891C8, #fcd34d); }
+                    .summary-card.net::after { background: linear-gradient(90deg, #C29B62, #A8573C); }
                     
-                    .summary-label { font-size: 14px; font-weight: 900; color: #64748b; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
-                    .summary-val { font-size: 32px; font-weight: 900; color: #0f172a; text-shadow: 0 2px 10px rgba(0,0,0,0.02); }
+                    .summary-label { font-size: 14px; font-weight: 900; color: rgba(44, 26, 18, 0.6); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+                    .summary-val { font-size: 32px; font-weight: 900; color: #2C1A12; text-shadow: 0 2px 10px rgba(0,0,0,0.02); }
 
-                    .source-breakdown-card { background: rgba(255,255,255,0.8); backdrop-filter: blur(10px); padding: 20px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.9); display: flex; align-items: center; justify-content: space-between; flex: 1; min-width: 220px; box-shadow: 0 5px 20px rgba(0,0,0,0.02); transition: all 0.3s ease; }
+                    .source-breakdown-card { background: rgba(255,255,255,0.8); backdrop-filter: blur(10px); padding: 20px; border-radius: 16px; border: 1px solid rgba(194, 155, 98, 0.3); display: flex; align-items: center; justify-content: space-between; flex: 1; min-width: 220px; box-shadow: 0 5px 20px rgba(44, 26, 18, 0.04); transition: all 0.3s ease; }
                     .source-breakdown-card:hover { transform: translateY(-3px); }
-                    .source-breakdown-title { font-size: 12px; font-weight: 900; color: #64748b; margin-bottom: 8px; }
+                    .source-breakdown-title { font-size: 12px; font-weight: 900; color: rgba(44, 26, 18, 0.6); margin-bottom: 8px; }
                     .source-breakdown-val { font-size: 20px; font-weight: 900; }
                     
-                    .filter-input { width: 100%; padding: 12px 15px; border-radius: 12px; border: 1px solid rgba(40, 145, 200, 0.15); outline: none; font-weight: 800; color: #334155; transition: 0.2s; height: 50px; background: rgba(255,255,255,0.9); }
-                    .filter-input:focus { border-color: #2891C8; box-shadow: 0 0 0 3px rgba(40, 145, 200, 0.1); }
+                    .filter-input { width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid rgba(194, 155, 98, 0.25); outline: none; font-weight: 800; color: #2C1A12; transition: 0.2s; height: 50px; background: rgba(255,255,255,0.9); }
+                    .filter-input:focus { border-color: #C29B62; box-shadow: 0 0 0 3px rgba(194, 155, 98, 0.15); }
 
                     .tree-table { width: 100%; border-collapse: separate; border-spacing: 0; text-align: center; background: transparent; }
                     .tree-thead { background: ${THEME.gradients.primary}; color: ${THEME.white}; border-radius: 16px 16px 0 0; }
@@ -333,16 +333,16 @@ export default function CashFlowsPage() {
                     .child-tree-container { background: rgba(248, 250, 252, 0.9); padding: 20px 40px; border-bottom: 2px solid ${THEME.border}; backdrop-filter: blur(5px); }
                     .child-table { width: 100%; border-collapse: collapse; background: #ffffff; border-radius: 14px; border: 1px solid ${THEME.border}; overflow: hidden; box-shadow: 0 5px 25px rgba(0,0,0,0.03); }
                     .child-table th { background: linear-gradient(135deg, #fdfbf7, #f3eedf); color: ${THEME.brand.coffee}; padding: 15px; font-size: 13px; font-weight: 900; border-bottom: 2px solid ${THEME.brand.goldLight}; }
-                    .child-table td { padding: 15px 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.4); font-size: 13px; font-weight: 800; color: #334155; transition: 0.2s; }
-                    .child-table tr:hover td { background: rgba(40, 145, 200, 0.02); }
+                    .child-table td { padding: 15px 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.4); font-size: 13px; font-weight: 800; color: #2C1A12; transition: 0.2s; }
+                    .child-table tr:hover td { background: rgba(194, 155, 98, 0.05); }
                     
-                    .arrow-icon { display: inline-block; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); margin-left: 12px; color: #2891C8; font-size: 16px; background: rgba(40, 145, 200, 0.1); width: 28px; height: 28px; line-height: 28px; text-align: center; border-radius: 50%; }
-                    .arrow-expanded { transform: rotate(90deg); background: #2891C8; color: white; }
+                    .arrow-icon { display: inline-block; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); margin-left: 12px; color: #C29B62; font-size: 16px; background: rgba(194, 155, 98, 0.12); width: 28px; height: 28px; line-height: 28px; text-align: center; border-radius: 50%; }
+                    .arrow-expanded { transform: rotate(90deg); background: #C29B62; color: white; }
 
                     .view-toggle-btn { flex: 1; padding: 12px; font-size: 14px; font-weight: 900; border: none; cursor: pointer; transition: 0.3s; }
-                    .view-toggle-btn.active { background: #2891C8; color: white; }
-                    .view-toggle-btn:not(.active) { background: transparent; color: #64748b; }
-                    .view-toggle-btn:not(.active):hover { background: rgba(40, 145, 200, 0.05); color: #1e293b; }
+                    .view-toggle-btn.active { background: #C29B62; color: white; }
+                    .view-toggle-btn:not(.active) { background: transparent; color: rgba(44, 26, 18, 0.6); }
+                    .view-toggle-btn:not(.active):hover { background: rgba(194, 155, 98, 0.08); color: #2C1A12; }
 
                     @media (max-width: 768px) {
                         .summary-card { flex: 1 1 100% !important; padding: 15px !important; margin-bottom: 8px !important; border-radius: 14px !important; }
@@ -578,7 +578,7 @@ export default function CashFlowsPage() {
                                                                                 {item.description && <div style={{ fontSize: '11px', color: '#475569', marginTop: '4px' }}>📝 {item.description}</div>}
                                                                             </td>
                                                                             <td>
-                                                                                <span style={{ fontSize: '12px', fontWeight: 900, color: '#2891C8' }}>
+                                                                                <span style={{ fontSize: '12px', fontWeight: 900, color: '#C29B62' }}>
                                                                                     🏦 {item.account?.name || 'حساب عام'}
                                                                                 </span>
                                                                             </td>
@@ -596,11 +596,11 @@ export default function CashFlowsPage() {
                             })}
                             
                             {treeGroupedData.length > 0 && (
-                                <tr style={{ background: 'rgba(40, 145, 200, 0.1)', backdropFilter: 'blur(5px)' }}>
-                                    <td style={{ padding: '25px', fontWeight: 900, color: '#1e293b', textAlign: 'left' }}>الإجمالي الكلي للصفحة والفلتر:</td>
-                                    <td style={{ fontWeight: 900, color: '#059669', fontSize: '18px' }}>{formatCurrency(summaryStats.totalIn)}</td>
+                                <tr style={{ background: 'rgba(194, 155, 98, 0.12)', backdropFilter: 'blur(5px)' }}>
+                                    <td style={{ padding: '25px', fontWeight: 900, color: '#2C1A12', textAlign: 'left' }}>الإجمالي الكلي للصفحة والفلتر:</td>
+                                    <td style={{ fontWeight: 900, color: '#4E734F', fontSize: '18px' }}>{formatCurrency(summaryStats.totalIn)}</td>
                                     <td style={{ fontWeight: 900, color: '#dc2626', fontSize: '18px' }}>{formatCurrency(summaryStats.totalOut)}</td>
-                                    <td style={{ fontWeight: 900, color: summaryStats.netCash >= 0 ? '#059669' : '#dc2626', fontSize: '18px' }}>{formatCurrency(summaryStats.netCash)}</td>
+                                    <td style={{ fontWeight: 900, color: summaryStats.netCash >= 0 ? '#4E734F' : '#dc2626', fontSize: '18px' }}>{formatCurrency(summaryStats.netCash)}</td>
                                     <td></td>
                                 </tr>
                             )}
@@ -617,16 +617,16 @@ export default function CashFlowsPage() {
 
                 {/* 🔢 تقسيم الصفحات */}
                 {!logic.isLoading && treeGroupedData.length > 0 && (
-                    <div className="cashflows-pagination" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '20px', padding: '20px', background: 'rgba(255,255,255,0.8)', borderRadius: '16px', border: `1px solid rgba(255,255,255,0.9)`, backdropFilter: 'blur(10px)', boxShadow: '0 5px 20px rgba(0,0,0,0.02)' }}>
-                        <div style={{ fontSize: '14px', color: '#334155', fontWeight: 900 }}>
-                            إجمالي الـ {groupBy === 'partner' ? 'الشركاء' : 'أيام الحركة'}: <b style={{ color: '#2891C8', fontSize: '18px' }}>{treeGroupedData.length}</b>
+                    <div className="cashflows-pagination" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '20px', padding: '20px', background: 'rgba(255,255,255,0.8)', borderRadius: '16px', border: `1px solid rgba(194, 155, 98, 0.25)`, backdropFilter: 'blur(10px)', boxShadow: '0 5px 20px rgba(44, 26, 18, 0.04)' }}>
+                        <div style={{ fontSize: '14px', color: '#2C1A12', fontWeight: 900 }}>
+                            إجمالي الـ {groupBy === 'partner' ? 'الشركاء' : 'أيام الحركة'}: <b style={{ color: '#C29B62', fontSize: '18px' }}>{treeGroupedData.length}</b>
                         </div>
                         
                         <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
                             <select 
                                 value={rowsPerPage} 
                                 onChange={(e) => {setRowsPerPage(Number(e.target.value)); setCurrentPage(1);}} 
-                                style={{ padding: '10px 15px', borderRadius: '10px', border: `1px solid rgba(40, 145, 200, 0.15)`, outline: 'none', fontWeight: 900, cursor: 'pointer', background: 'white' }}
+                                style={{ padding: '10px 15px', borderRadius: '10px', border: `1px solid rgba(194, 155, 98, 0.25)`, outline: 'none', fontWeight: 900, cursor: 'pointer', background: 'white', color: '#2C1A12' }}
                             >
                                 <option value={10}>عرض 10 عناصر</option>
                                 <option value={50}>عرض 50 عنصر</option>

@@ -612,7 +612,7 @@ export default function EmployeeProfilePage() {
                             <div className="policy-paper">
                                 <div style={{ textAlign: 'center', marginBottom: '40px', borderBottom: `3px double ${THEME.accent}`, paddingBottom: '25px' }}>
                                     <h2 style={{ margin: '0 0 5px 0', fontWeight: 900, fontSize: '28px', color: THEME.primary }}>لائحة تنظيم العمل والمبيعات</h2>
-                                    <h4 style={{ margin: 0, color: THEME.accent, fontSize: '18px' }}>شركة مياه غيام</h4>
+                                    <h4 style={{ margin: 0, color: THEME.accent, fontSize: '18px' }}>صيدلية تاج المودة البيطرية</h4>
                                     <p style={{ fontSize: '13px', marginTop: '10px', color: '#475569', fontWeight: 700 }}>مُصاغة وفقاً لنظام العمل السعودي</p>
                                 </div>
                                 <div style={{ display: 'grid', gap: '30px', position: 'relative', zIndex: 1 }}>

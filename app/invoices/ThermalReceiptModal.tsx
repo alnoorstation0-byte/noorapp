@@ -152,7 +152,7 @@ export default function ThermalReceiptModal({ isOpen, onClose, record, onOpenA4 
             const totalStr = totalAmount.toFixed(2);
             const vatStr = taxAmount.toFixed(2);
             
-            const qr = generateZatcaQR('شركة مياه غيام', '312487477800003', dateStr, totalStr, vatStr);
+            const qr = generateZatcaQR('صيدلية تاج المودة البيطرية', '312487477800003', dateStr, totalStr, vatStr);
             setQrData(qr);
         }
     }, [record, totalAmount, taxAmount]);
@@ -511,9 +511,9 @@ export default function ThermalReceiptModal({ isOpen, onClose, record, onOpenA4 
             <div className="thermal-receipt-container">
                 
                 {/* 1. الشعار والترويسة */}
-                <img src="/ghayam_logo.png" alt="Ghayam Logo" className="thermal-logo" />
-                <div style={{ fontSize: '16px', fontWeight: 900, color: '#000', margin: '2px 0' }}>شركة مياه غيام</div>
-                <div style={{ fontSize: '10.5px', fontWeight: 700, letterSpacing: '0.5px' }}>Ghayam Water Company</div>
+                <img src="/taj_logo.png" alt="Taj Al-Mawadah Logo" className="thermal-logo" />
+                <div style={{ fontSize: '16px', fontWeight: 900, color: '#000', margin: '2px 0' }}>صيدلية تاج المودة البيطرية</div>
+                <div style={{ fontSize: '10.5px', fontWeight: 700, letterSpacing: '0.5px' }}>Taj Al-Mawadah Vet Pharmacy</div>
                 <div style={{ fontSize: '10.5px', marginTop: '3px' }}>الرقم الضريبي: 312487477800003</div>
                 <div style={{ fontSize: '10px' }}>الرقم الموحد: 7051013519</div>
                 
@@ -666,9 +666,9 @@ export default function ThermalReceiptModal({ isOpen, onClose, record, onOpenA4 
                 {/* 6. التذييل والشروط */}
                 <div style={{ fontSize: '10px', marginTop: '6px', color: '#111', lineHeight: '1.4' }}>
                     البضاعة المباعة تستبدل أو ترد خلال 3 أيام بحالتها الأصلية.<br/>
-                    شكراً لتعاملكم مع <strong>مياه غيام</strong> 💧<br/>
-                    خدمة العملاء: info@ghayamwater.com<br/>
-                    <span style={{ fontSize: '8.5px', color: '#555' }}>تم الإصدار إلكترونياً عبر نظام غيام</span>
+                    شكراً لتعاملكم مع <strong>صيدلية تاج المودة</strong> 🐎🐪<br/>
+                    خدمة العملاء: info@taj-mawadah.com<br/>
+                    <span style={{ fontSize: '8.5px', color: '#555' }}>تم الإصدار إلكترونياً عبر نظام تاج المودة</span>
                 </div>
 
             </div>

@@ -212,30 +212,30 @@ export default function FleetOperationDetails() {
             </div>
 
             {/* Tabs */}
-            <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', background: 'rgba(255,255,255,0.4)', padding: '5px', borderRadius: '12px', backdropFilter: 'blur(10px)' }}>
+            <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', background: 'rgba(255,253,250,0.7)', padding: '5px', borderRadius: '14px', border: '1px solid rgba(194, 155, 98, 0.25)', backdropFilter: 'blur(20px)' }}>
                 <button 
                     onClick={() => setActiveTab('invoices')}
-                    style={{ flex: 1, padding: '10px', borderRadius: '8px', border: 'none', background: activeTab === 'invoices' ? '#1C73AB' : 'transparent', color: activeTab === 'invoices' ? 'white' : '#475569', fontWeight: 800, cursor: 'pointer', transition: 'all 0.3s' }}
+                    style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeTab === 'invoices' ? '#2C1A12' : 'transparent', color: activeTab === 'invoices' ? '#FDFBF7' : '#2C1A12', fontWeight: 800, cursor: 'pointer', transition: 'all 0.3s' }}
                 >
                     🧾 {LBL.sales} ({invoices.length})
                 </button>
                 {shifts.length > 0 && (
                     <button 
                         onClick={() => setActiveTab('shifts')}
-                        style={{ flex: 1, padding: '10px', borderRadius: '8px', border: 'none', background: activeTab === 'shifts' ? '#1C73AB' : 'transparent', color: activeTab === 'shifts' ? 'white' : '#475569', fontWeight: 800, cursor: 'pointer', transition: 'all 0.3s' }}
+                        style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeTab === 'shifts' ? '#2C1A12' : 'transparent', color: activeTab === 'shifts' ? '#FDFBF7' : '#2C1A12', fontWeight: 800, cursor: 'pointer', transition: 'all 0.3s' }}
                     >
                         🏪 {LBL.shifts} ({shifts.length})
                     </button>
                 )}
                 <button 
                     onClick={() => setActiveTab('expenses')}
-                    style={{ flex: 1, padding: '10px', borderRadius: '8px', border: 'none', background: activeTab === 'expenses' ? '#1C73AB' : 'transparent', color: activeTab === 'expenses' ? 'white' : '#475569', fontWeight: 800, cursor: 'pointer', transition: 'all 0.3s' }}
+                    style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeTab === 'expenses' ? '#2C1A12' : 'transparent', color: activeTab === 'expenses' ? '#FDFBF7' : '#2C1A12', fontWeight: 800, cursor: 'pointer', transition: 'all 0.3s' }}
                 >
                     📉 {LBL.expenses} ({expenses.length})
                 </button>
                 <button 
                     onClick={() => setActiveTab('inventory')}
-                    style={{ flex: 1, padding: '10px', borderRadius: '8px', border: 'none', background: activeTab === 'inventory' ? '#1C73AB' : 'transparent', color: activeTab === 'inventory' ? 'white' : '#475569', fontWeight: 800, cursor: 'pointer', transition: 'all 0.3s' }}
+                    style={{ flex: 1, padding: '10px', borderRadius: '10px', border: 'none', background: activeTab === 'inventory' ? '#2C1A12' : 'transparent', color: activeTab === 'inventory' ? '#FDFBF7' : '#2C1A12', fontWeight: 800, cursor: 'pointer', transition: 'all 0.3s' }}
                 >
                     📦 {LBL.inv} ({inventory.length})
                 </button>

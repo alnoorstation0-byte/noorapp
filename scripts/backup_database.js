@@ -57,7 +57,7 @@ async function runBackup() {
     metadata: {
       timestamp: new Date().toISOString(),
       source: supabaseUrl,
-      app: 'Elghayam Water ERP',
+      app: 'Taj Al-Mawadah Pharmacy ERP',
       total_tables: TABLES.length
     },
     tables: {}

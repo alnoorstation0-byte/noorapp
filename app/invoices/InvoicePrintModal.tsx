@@ -207,7 +207,7 @@ export default function InvoicePrintModal({
     const thermalZatcaQr = useMemo(() => {
         if (!record) return '';
         const dateStr = record.date ? `${record.date.split('T')[0]}T12:00:00Z` : new Date().toISOString();
-        return generateZatcaQR('شركة مياه غيام', '312487477800003', dateStr, totalAmount.toFixed(2), taxAmount.toFixed(2));
+        return generateZatcaQR('صيدلية تاج المودة البيطرية', '312487477800003', dateStr, totalAmount.toFixed(2), taxAmount.toFixed(2));
     }, [record, totalAmount, taxAmount]);
 
     // دالة الطباعة
@@ -324,7 +324,7 @@ export default function InvoicePrintModal({
                     transform: translateY(-2px); 
                     box-shadow: 0 5px 15px rgba(0,0,0,0.2); 
                 }
-                .action-btn.print { background: linear-gradient(135deg, #2891C8, #7FD4E3); color: #122946; }
+                .action-btn.print { background: linear-gradient(135deg, #C29B62, #A8573C); color: white; }
                 .action-btn.whatsapp { background: #25D366; color: white; box-shadow: 0 4px 12px rgba(37,211,102,0.3); }
                 .action-btn.whatsapp:hover { background: #20ba59; }
                 .action-btn.format-switch { background: #f59e0b; color: white; }
@@ -649,14 +649,14 @@ export default function InvoicePrintModal({
                         </div>
 
                         <div className="header-center">
-                            <h1 style={{ fontSize: '19px', fontWeight: 900, color: '#122946', margin: '0 0 4px 0' }}>شركة مياه غيام</h1>
-                            <h2 style={{ fontSize: '14px', fontWeight: 900, color: '#2891C8', margin: '0 0 6px 0', letterSpacing: '0.5px' }}>Ghayam Water Company</h2>
+                            <h1 style={{ fontSize: '19px', fontWeight: 900, color: '#122946', margin: '0 0 4px 0' }}>صيدلية تاج المودة البيطرية</h1>
+                            <h2 style={{ fontSize: '14px', fontWeight: 900, color: '#2891C8', margin: '0 0 6px 0', letterSpacing: '0.5px' }}>Taj Al-Mawadah Vet Pharmacy</h2>
                             <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#334155' }}>الرقم الضريبي (VAT No): 312487477800003</div>
                             <div style={{ fontSize: '12px', fontWeight: 700, color: '#334155', marginTop: '2px' }}>الرقم الموحد (Unified No): 7051013519</div>
                         </div>
 
                         <div className="header-logo">
-                            <img src="/ghayam_logo.png" alt="شعار مياه غيام" />
+                            <img src="/taj_logo.png" alt="شعار صيدلية تاج المودة" />
                         </div>
                     </div>
 
@@ -837,7 +837,7 @@ export default function InvoicePrintModal({
                     {/* 5️⃣ إقرار الاستلام والتعهد القانوني المعتمد */}
                     <div style={{ marginTop: '10px', border: '1px solid rgba(40,145,200,0.3)', borderRadius: '10px', padding: '8px 12px', background: 'linear-gradient(135deg, rgba(40,145,200,0.03), rgba(127,212,227,0.03))' }}>
                         <p style={{ fontSize: '9px', lineHeight: '1.5', color: '#334155', fontWeight: 600, margin: '0 0 6px 0' }}>
-                            <strong style={{color:'#122946', fontSize: '9.5px'}}>إقرار بالاستلام والسداد:</strong> أقرّ بأنني استلمت البضائع/الخدمات الواردة أعلاه كاملة بحالة سليمة، وأتعهد بسداد قيمتها البالغة <strong style={{color:'#2891C8'}}>{formatCurrencyEn(totalAmount)}</strong>. وفي حال التأخر يحق لمياه غيام اتخاذ الإجراءات النظامية أمام المحاكم والجهات المختصة.
+                            <strong style={{color:'#122946', fontSize: '9.5px'}}>إقرار بالاستلام والسداد:</strong> أقرّ بأنني استلمت البضائع/الخدمات الواردة أعلاه كاملة بحالة سليمة، وأتعهد بسداد قيمتها البالغة <strong style={{color:'#2891C8'}}>{formatCurrencyEn(totalAmount)}</strong>. وفي حال التأخر يحق لصيدلية تاج المودة اتخاذ الإجراءات النظامية أمام المحاكم والجهات المختصة.
                         </p>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px' }}>
                             <div style={{ textAlign: 'center' }}><div style={{ fontSize: '9px', fontWeight: 800, color: '#64748b' }}>الاسم والصفة</div><div style={{ borderBottom: '1px solid #2891C8', height: '18px' }}></div></div>
@@ -848,7 +848,7 @@ export default function InvoicePrintModal({
 
                     {/* 6️⃣ الفوتر الثابت أسفل الصفحة */}
                     <div className="inv-footer-contact">
-                        المملكة العربية السعودية &nbsp;|&nbsp; info@ghayamwater.com &nbsp;|&nbsp; شركة مياه غيام © {new Date().getFullYear()}
+                        المملكة العربية السعودية &nbsp;|&nbsp; info@taj-mawadah.com &nbsp;|&nbsp; صيدلية تاج المودة البيطرية © {new Date().getFullYear()}
                     </div>
 
                 </div>
@@ -857,9 +857,9 @@ export default function InvoicePrintModal({
                 /* المعاينة الثانية: الإيصال الحراري 80mm المتكامل بالشعار وباركود ZATCA      */
                 /* ========================================================================= */
                 <div className="thermal-preview-box">
-                    <img src="/ghayam_logo.png" alt="Ghayam Logo" className="thermal-logo" />
-                    <div style={{ fontSize: '16px', fontWeight: 900, color: '#000', margin: '2px 0' }}>شركة مياه غيام</div>
-                    <div style={{ fontSize: '10.5px', fontWeight: 700, letterSpacing: '0.5px' }}>Ghayam Water Company</div>
+                    <img src="/taj_logo.png" alt="Taj Al-Mawadah Logo" className="thermal-logo" />
+                    <div style={{ fontSize: '16px', fontWeight: 900, color: '#000', margin: '2px 0' }}>صيدلية تاج المودة البيطرية</div>
+                    <div style={{ fontSize: '10.5px', fontWeight: 700, letterSpacing: '0.5px' }}>Taj Al-Mawadah Vet Pharmacy</div>
                     <div style={{ fontSize: '10.5px', marginTop: '3px' }}>الرقم الضريبي: 312487477800003</div>
                     <div style={{ fontSize: '10px' }}>الرقم الموحد: 7051013519</div>
                     
@@ -990,9 +990,9 @@ export default function InvoicePrintModal({
 
                     <div style={{ fontSize: '10px', marginTop: '6px', color: '#111', lineHeight: '1.4' }}>
                         البضاعة المباعة تستبدل أو ترد خلال 3 أيام بحالتها الأصلية.<br/>
-                        شكراً لتعاملكم مع <strong>مياه غيام</strong> 💧<br/>
-                        خدمة العملاء: info@ghayamwater.com<br/>
-                        <span style={{ fontSize: '8.5px', color: '#555' }}>تم الإصدار إلكترونياً عبر نظام غيام</span>
+                        شكراً لتعاملكم مع <strong>صيدلية تاج المودة</strong> 🐎🐪<br/>
+                        خدمة العملاء: info@taj-mawadah.com<br/>
+                        <span style={{ fontSize: '8.5px', color: '#555' }}>تم الإصدار إلكترونياً عبر نظام تاج المودة</span>
                     </div>
                 </div>
             )}

@@ -72,21 +72,21 @@ self.addEventListener('push', (event) => {
   try {
     data = event.data ? event.data.json() : {};
   } catch (e) {
-    data = { title: 'مياه غيام', body: event.data ? event.data.text() : 'إشعار جديد' };
+    data = { title: 'صيدلية تاج المودة', body: event.data ? event.data.text() : 'إشعار جديد' };
   }
 
-  const title = data.title || 'إشعار جديد | مياه غيام';
+  const title = data.title || 'إشعار جديد | صيدلية تاج المودة';
   const options = {
     body: data.body || data.message || '',
-    icon: '/ghayam_logo.png',
-    badge: '/ghayam_logo.png',
+    icon: '/taj_logo.png',
+    badge: '/taj_logo.png',
     vibrate: [200, 100, 200],
     data: {
       url: data.url || data.actionUrl || '/notifications',
       id: data.id,
       timestamp: Date.now()
     },
-    tag: data.tag || 'ghayam-notification',
+    tag: data.tag || 'taj_mawadah-notification',
     renotify: true
   };
 

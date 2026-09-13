@@ -70,7 +70,7 @@ export default function StatementPrintModal({
                     
                     <div className="print-header">
                         <div className="company-info">
-                            <h1 style={{ color: '#122946' }}>شركة مياه غيام</h1>
+                            <h1 style={{ color: '#122946' }}>صيدلية تاج المودة البيطرية</h1>
                             <p>إدارة الحسابات العامة - تقرير أداء مالي</p>
                         </div>
                         <div className="report-title">
@@ -193,7 +193,7 @@ export default function StatementPrintModal({
                 </div>
                 ) : (
                 <div className="thermal-preview-box">
-                    <div style={{ fontSize: '18px', fontWeight: 900, marginBottom: '5px' }}>شركة مياه غيام</div>
+                    <div style={{ fontSize: '18px', fontWeight: 900, marginBottom: '5px' }}>صيدلية تاج المودة البيطرية</div>
                     <div>كشف حساب | Account Statement</div>
                     <div style={{ borderBottom: '1px dashed #000', margin: '10px 0' }}></div>
                     
@@ -242,7 +242,7 @@ export default function StatementPrintModal({
                     <div style={{ borderBottom: '1px dashed #000', margin: '10px 0' }}></div>
 
                     <div style={{ fontSize: '11px', marginTop: '10px', textAlign: 'center' }}>
-                        تم الإصدار عبر نظام غيام
+                        تم الإصدار عبر نظام تاج المودة
                     </div>
                 </div>
                 )}

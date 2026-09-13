@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * 📱🔔 خدمة إشعارات المتصفح والجوال الفورية لشركة مياه غيام
+ * 📱🔔 خدمة إشعارات المتصفح والجوال الفورية لصيدلية تاج المودة البيطرية
  * تدعم HTML5 Notifications API و Web Push Service Worker مع الاهتزاز والنغمات الصوتية
  */
 
@@ -31,7 +31,7 @@ export async function requestNotificationPermission(): Promise<boolean> {
     if (permission === 'granted') {
       // إرسال إشعار ترحيبي تجريبي للتأكيد
       showBrowserNotification(
-        '✅ تم تفعيل إشعارات مياه غيام',
+        '✅ تم تفعيل إشعارات صيدلية تاج المودة',
         'ستصلك الآن كافة التنبيهات والعمليات المهمة فور حدوثها على جوالك ومتصفحك!',
         { actionUrl: '/notifications' }
       );
@@ -53,13 +53,13 @@ export function isMobileDevice(): boolean {
 // التحقق هل الصوت مفعل
 export function isNotificationSoundEnabled(): boolean {
   if (typeof window === 'undefined') return true;
-  return localStorage.getItem('ghayam_notif_sound') !== 'false';
+  return localStorage.getItem('taj_mawadah_notif_sound') !== 'false';
 }
 
 // تبديل تفعيل/كتم الصوت
 export function setNotificationSoundEnabled(enabled: boolean): void {
   if (typeof window === 'undefined') return;
-  localStorage.setItem('ghayam_notif_sound', enabled ? 'true' : 'false');
+  localStorage.setItem('taj_mawadah_notif_sound', enabled ? 'true' : 'false');
 }
 
 /**
@@ -82,7 +82,7 @@ export function playNotificationSound(): void {
     const osc2 = ctx.createOscillator();
     const gain = ctx.createGain();
 
-    // نغمة كروية مزدوجة ناعمة (Aqua Water Chime)
+    // نغمة كروية مزدوجة ناعمة (Desert Golden Chime)
     osc1.type = 'sine';
     osc1.frequency.setValueAtTime(659.25, ctx.currentTime); // E5
     osc1.frequency.exponentialRampToValueAtTime(880.00, ctx.currentTime + 0.15); // A5
@@ -125,10 +125,10 @@ export async function showBrowserNotification(
 
   const notifOptions: any = {
     body,
-    icon: '/ghayam_logo.png',
-    badge: '/ghayam_logo.png',
+    icon: '/taj_logo.png',
+    badge: '/taj_logo.png',
     vibrate: [200, 100, 200],
-    tag: options?.tag || 'ghayam-system-alert',
+    tag: options?.tag || 'taj_mawadah-system-alert',
     renotify: true,
     data: {
       url: options?.actionUrl || '/notifications',

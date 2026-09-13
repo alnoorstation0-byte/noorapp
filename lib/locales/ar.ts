@@ -44,7 +44,7 @@ export const ar = {
     menu_settings: "إعدادات النظام",
 
     // Common Actions & UI
-    app_title: "مياه غيام - نظام الإدارة الموحد",
+    app_title: "صيدلية تاج المودة - نظام الإدارة الموحد",
     lang_switch: "English",
     current_lang: "العربية",
     search: "بحث...",

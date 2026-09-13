@@ -262,7 +262,7 @@ export default function ServiceOperationModal({
                             rows={2}
                             value={description}
                             onChange={(e) => setDescription(e.target.value)}
-                            placeholder="مثال: إدارة تشغيل موقع لمدة شهر، توصيل شحنة مياه خاصة، دور استشاري وإداري..."
+                            placeholder="مثال: إدارة تشغيل موقع لمدة شهر، توصيل أدوية ومستلزمات بيطرية، دور استشاري وإداري..."
                             required
                             style={{
                                 width: '100%',

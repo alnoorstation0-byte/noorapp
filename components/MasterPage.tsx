@@ -87,14 +87,14 @@ const PAGE_TITLES_EN: Record<string, string> = {
   "التواصل الداخلي": "Internal Communications",
   "مركز الإشعارات والتنبيهات المباشرة": "Notifications Center",
   "الصفحة الرئيسية": "Home Portal",
-  "نظام غيام لإدارة الموارد": "Taj Al-Mawadah Vet Pharmacy",
+  "صيدلية تاج المودة البيطرية": "Taj Al-Mawadah Vet Pharmacy",
   "صيدلية تاج المودة": "Taj Al-Mawadah Pharmacy",
   "صيدلية تاج المودة البيطرية": "Taj Al-Mawadah Vet Pharmacy",
   "نظام إدارة الموارد": "ERP Management System"
 };
 
 const SUBTITLES_EN: Record<string, string> = {
-  "نظام غيام لإدارة الموارد": "Taj Al-Mawadah Unified Vet System",
+  "صيدلية تاج المودة البيطرية": "Taj Al-Mawadah Unified Vet System",
   "بوابة الإدارة المركزية لصيدلية تاج المودة": "Taj Al-Mawadah Central Management Portal",
   "إدارة وتتبع بيانات العملاء والموردين والمناديب والوظائف": "Manage partners, clients, suppliers, delegates and job roles",
   "إدارة ومتابعة فواتير المبيعات وضريبة القيمة المضافة": "Track sales invoices and VAT compliance",
@@ -117,7 +117,7 @@ const SUBTITLES_EN: Record<string, string> = {
   "متابعة حركة المناديب والمبيعات والتكاليف الخاصة بكل رحلة": "Monitor delegate movements, sales, and trip expenses",
   "نظرة شاملة لعمليات البيع والتوزيع والمحاسبة": "Comprehensive overview of sales, distribution, and accounting",
   "الرسائل والمحادثات بين فرق العمل": "Team communication and messaging portal",
-  "بوابة الإدارة المركزية لمياه غيام": "Central Management Portal - El-Ghayam Water",
+  "بوابة الإدارة المركزية لصيدلية تاج المودة": "Central Management Portal - El-Taj Al-Mawadah Pharmacy",
   "تحديد الرتب وتوزيع صلاحيات الوصول للمنصة بأمان": "Roles definition and secure platform access distribution"
 };
 
@@ -133,7 +133,7 @@ function getTranslatedTitle(rawTitle: string, lang: 'ar' | 'en'): string {
 }
 
 function getTranslatedSubtitle(rawSub: string | undefined, lang: 'ar' | 'en'): string {
-  if (!rawSub) return lang === 'en' ? 'El-Ghayam ERP System' : 'نظام غيام لإدارة الموارد';
+  if (!rawSub) return lang === 'en' ? 'Taj Al-Mawadah Vet Pharmacy' : 'صيدلية تاج المودة البيطرية';
   if (lang !== 'en') return rawSub;
   if (SUBTITLES_EN[rawSub]) return SUBTITLES_EN[rawSub];
   for (const [k, v] of Object.entries(SUBTITLES_EN)) {
@@ -673,22 +673,22 @@ html, body {
         <div className="header-side" style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
           {headerContent}
           
-          <div className="header-actions" style={{ display: 'flex', flexDirection: 'row', gap: '8px', alignItems: 'center', borderRight: isRtl ? '2px solid rgba(28, 115, 171, 0.1)' : 'none', borderLeft: !isRtl ? '2px solid rgba(28, 115, 171, 0.1)' : 'none', paddingRight: isRtl ? '12px' : '0', paddingLeft: !isRtl ? '12px' : '0' }}>
+          <div className="header-actions" style={{ display: 'flex', flexDirection: 'row', gap: '8px', alignItems: 'center', borderRight: isRtl ? '2px solid rgba(194, 155, 98, 0.2)' : 'none', borderLeft: !isRtl ? '2px solid rgba(194, 155, 98, 0.2)' : 'none', paddingRight: isRtl ? '12px' : '0', paddingLeft: !isRtl ? '12px' : '0' }}>
              
              {/* Desktop Nav Arrows & Shortcuts Button */}
-             <div className="nav-group" style={{ display: 'flex', gap: '4px', margin: 0, border: 'none', background: 'rgba(255, 255, 255, 0.5)', borderRadius: '12px', padding: '3px' }}>
+             <div className="nav-group" style={{ display: 'flex', gap: '4px', margin: 0, border: 'none', background: 'rgba(255, 253, 250, 0.6)', borderRadius: '12px', padding: '3px' }}>
                 <button 
                   onClick={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'F1', bubbles: true }))} 
                   className="nav-btn-glass" 
                   title={language === 'en' ? 'Keyboard Shortcuts (F1)' : 'خريطة اختصارات الكيبورد (F1)'} 
-                  style={{ width: '36px', height: '36px', borderRadius: '10px', fontSize: '16px', background: 'rgba(255,255,255,0.7)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#1C73AB' }}
+                  style={{ width: '36px', height: '36px', borderRadius: '10px', fontSize: '16px', background: 'rgba(255, 253, 250, 0.85)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#C29B62' }}
                 >
                   ⌨️
                 </button>
-                <button onClick={() => router.forward()} className="nav-btn-glass" title={language === 'en' ? 'Forward' : 'تقدم للأمام'} style={{ width: '36px', height: '36px', borderRadius: '10px', fontSize: '18px', background: 'rgba(255,255,255,0.7)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#1C73AB' }}>
+                <button onClick={() => router.forward()} className="nav-btn-glass" title={language === 'en' ? 'Forward' : 'تقدم للأمام'} style={{ width: '36px', height: '36px', borderRadius: '10px', fontSize: '18px', background: 'rgba(255, 253, 250, 0.85)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#C29B62' }}>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
                 </button>
-                <button onClick={() => router.back()} className="nav-btn-glass" title={language === 'en' ? 'Back' : 'رجوع للخلف'} style={{ width: '36px', height: '36px', borderRadius: '10px', fontSize: '18px', background: 'rgba(255,255,255,0.7)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#1C73AB' }}>
+                <button onClick={() => router.back()} className="nav-btn-glass" title={language === 'en' ? 'Back' : 'رجوع للخلف'} style={{ width: '36px', height: '36px', borderRadius: '10px', fontSize: '18px', background: 'rgba(255, 253, 250, 0.85)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#C29B62' }}>
                   <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
                 </button>
              </div>
@@ -786,13 +786,13 @@ html, body {
           }} 
           onClick={(e) => e.stopPropagation()}
         >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px 10px', borderBottom: '1px solid rgba(28, 115, 171, 0.12)', marginBottom: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px 10px', borderBottom: '1px solid rgba(194, 155, 98, 0.2)', marginBottom: '8px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ fontSize: '14px', fontWeight: 900, color: '#1C73AB' }}>🔔 مركز التدقيق والمعلقات</span>
+              <span style={{ fontSize: '14px', fontWeight: 900, color: '#C29B62' }}>🔔 مركز التدقيق والمعلقات</span>
               <button 
                 onClick={(e) => { e.stopPropagation(); fetchPendingCount(); }}
                 title="تحديث لحظي"
-                style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '13px', padding: '2px 4px', color: '#1C73AB' }}
+                style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '13px', padding: '2px 4px', color: '#C29B62' }}
               >
                 🔄
               </button>

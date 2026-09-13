@@ -111,7 +111,7 @@ export default function TranslatableInput({
                 <label style={{
                     fontSize: '13px',
                     fontWeight: 800,
-                    color: '#1C73AB',
+                    color: '#2C1A12',
                     display: 'flex',
                     alignItems: 'center',
                     gap: '4px',
@@ -134,16 +134,16 @@ export default function TranslatableInput({
                             gap: '5px',
                             background: isTranslating 
                                 ? 'rgba(203, 213, 225, 0.5)' 
-                                : 'linear-gradient(135deg, rgba(40, 145, 200, 0.15) 0%, rgba(127, 212, 227, 0.25) 100%)',
-                            border: '1px solid rgba(40, 145, 200, 0.35)',
-                            color: '#1C73AB',
+                                : 'linear-gradient(135deg, rgba(194, 155, 98, 0.15) 0%, rgba(168, 87, 60, 0.1) 100%)',
+                            border: '1px solid rgba(194, 155, 98, 0.35)',
+                            color: '#A8573C',
                             padding: '4px 10px',
                             borderRadius: '12px',
                             fontSize: '11px',
                             fontWeight: 800,
                             cursor: (isTranslating || !value?.trim()) ? 'not-allowed' : 'pointer',
                             transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                            boxShadow: '0 2px 6px rgba(28, 115, 171, 0.08)',
+                            boxShadow: '0 2px 6px rgba(44, 26, 18, 0.08)',
                             opacity: (!value?.trim() && !isTranslating) ? 0.65 : 1
                         }}
                         onMouseEnter={(e) => {
@@ -234,14 +234,14 @@ export default function TranslatableInput({
                     gap: '8px',
                     marginTop: '6px',
                     padding: '6px 10px',
-                    background: 'rgba(40, 145, 200, 0.08)',
+                    background: 'rgba(194, 155, 98, 0.1)',
                     borderRadius: '10px',
-                    border: '1px dashed rgba(40, 145, 200, 0.3)',
+                    border: '1px dashed rgba(194, 155, 98, 0.35)',
                     fontSize: '11px',
                     animation: 'fadeIn 0.25s ease'
                 }}>
-                    <span style={{ color: '#1C73AB', fontWeight: 800 }}>✨ تمت الترجمة:</span>
-                    <span style={{ color: '#334155', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                    <span style={{ color: '#A8573C', fontWeight: 800 }}>✨ تمت الترجمة:</span>
+                    <span style={{ color: '#2C1A12', maxWidth: '200px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                         {lastTranslated}
                     </span>
 
@@ -251,7 +251,7 @@ export default function TranslatableInput({
                                 type="button"
                                 onClick={handleMergeBilingual}
                                 style={{
-                                    background: 'linear-gradient(135deg, #1C73AB, #2891C8)',
+                                    background: 'linear-gradient(135deg, #C29B62, #A8573C)',
                                     color: '#ffffff',
                                     border: 'none',
                                     padding: '2px 8px',
@@ -260,7 +260,7 @@ export default function TranslatableInput({
                                     fontWeight: 800,
                                     cursor: 'pointer'
                                 }}
-                                title="دمج الاسمين معاً مثل: مؤسسة الغيام - Al Ghayam Est"
+                                title="دمج الاسمين معاً مثل: صيدلية تاج المودة - Al Taj Al-Mawadah Est"
                             >
                                 ➕ دمج ثنائي (AR + EN)
                             </button>

@@ -218,43 +218,46 @@ export default function ShiftOpenModal({
                     font-weight: 900;
                     cursor: pointer;
                     transition: all 0.3s ease;
-                    box-shadow: 0 8px 25px rgba(28, 115, 171, 0.3);
+                    box-shadow: 0 4px 15px rgba(194, 155, 98, 0.35);
+                    border-radius: 14px;
+                    border: none;
+                    color: #fff;
                 }
                 .aqua-shift-btn:hover:not(:disabled) {
                     transform: translateY(-3px);
-                    box-shadow: 0 12px 30px rgba(28, 115, 171, 0.5);
-                    background: linear-gradient(135deg, #7FD4E3 0%, #2891C8 100%);
+                    box-shadow: 0 8px 20px rgba(168, 87, 60, 0.35);
+                    filter: brightness(1.05);
                 }
                 .aqua-shift-input {
                     width: 100%;
-                    background: rgba(255, 255, 255, 0.85);
-                    border: 2px solid rgba(28, 115, 171, 0.2);
+                    background: rgba(255, 253, 250, 0.9);
+                    border: 2px solid rgba(194, 155, 98, 0.3);
                     border-radius: 14px;
                     padding: 12px;
                     font-size: 24px;
                     font-weight: 900;
                     text-align: center;
-                    color: #1C73AB;
+                    color: #2C1A12;
                     transition: all 0.3s ease;
                     outline: none;
                     box-sizing: border-box;
                 }
                 .aqua-shift-input:focus {
-                    border-color: #2891C8;
-                    box-shadow: 0 0 15px rgba(40, 145, 200, 0.2);
+                    border-color: #C29B62;
+                    box-shadow: 0 0 15px rgba(194, 155, 98, 0.25);
                     background: #ffffff;
                 }
                 .aqua-glass-card {
-                    background: rgba(255, 255, 255, 0.96);
-                    backdrop-filter: blur(40px) saturate(200%);
-                    WebkitBackdropFilter: blur(40px) saturate(200%);
-                    border: 1px solid rgba(255, 255, 255, 0.8);
+                    background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(255, 253, 250, 0.85) 100%);
+                    backdrop-filter: blur(24px) saturate(160%);
+                    WebkitBackdropFilter: blur(24px) saturate(160%);
+                    border: 1px solid rgba(194, 155, 98, 0.3);
                     border-radius: 24px;
                     width: 95vw;
                     max-width: 480px;
                     padding: 30px 24px;
                     text-align: right;
-                    box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+                    box-shadow: 0 15px 40px rgba(44, 26, 18, 0.15);
                     animation: fadeUp 0.4s ease-out;
                     direction: rtl;
                 }
@@ -266,18 +269,18 @@ export default function ShiftOpenModal({
                     width: 100%;
                     padding: 10px 14px;
                     border-radius: 12px;
-                    border: 1.5px solid rgba(28, 115, 171, 0.2);
-                    background: rgba(255, 255, 255, 0.9);
+                    border: 1.5px solid rgba(194, 155, 98, 0.3);
+                    background: rgba(255, 253, 250, 0.9);
                     font-size: 13px;
                     font-weight: 700;
-                    color: #1e293b;
+                    color: #2C1A12;
                     outline: none;
                     transition: 0.2s;
                     box-sizing: border-box;
                 }
                 .shift-select-field:focus {
-                    border-color: #2891C8;
-                    box-shadow: 0 0 0 3px rgba(40, 145, 200, 0.15);
+                    border-color: #C29B62;
+                    box-shadow: 0 0 0 3px rgba(194, 155, 98, 0.15);
                 }
             `}</style>
             
@@ -300,16 +303,16 @@ export default function ShiftOpenModal({
                 )}
                 <div style={{ textAlign: 'center', marginBottom: '14px' }}>
                     <div style={{ fontSize: '42px', marginBottom: '4px' }}>💵</div>
-                    <h2 style={{ color: '#1C73AB', margin: 0, fontWeight: 900, fontSize: '21px' }}>{isEn ? 'Open New Shift' : 'فتح وردية جديدة'}</h2>
-                    <p style={{ color: '#64748b', margin: '4px 0 0 0', fontWeight: 700, fontSize: '12px' }}>
+                    <h2 style={{ color: '#2C1A12', margin: 0, fontWeight: 900, fontSize: '21px' }}>{isEn ? 'Open New Shift' : 'فتح وردية جديدة'}</h2>
+                    <p style={{ color: 'rgba(44, 26, 18, 0.6)', margin: '4px 0 0 0', fontWeight: 700, fontSize: '12px' }}>
                         {isEn ? 'Record opening cash and start register' : 'تسجيل العهدة الافتتاحية وبدء تشغيل الصندوق'}
                     </p>
                 </div>
 
                 {/* اختيار وتحديد منفذ البيع والمندوب */}
                 <div style={{
-                    background: 'rgba(28, 115, 171, 0.04)',
-                    border: '1px solid rgba(28, 115, 171, 0.15)',
+                    background: 'rgba(194, 155, 98, 0.08)',
+                    border: '1px solid rgba(194, 155, 98, 0.25)',
                     borderRadius: '16px',
                     padding: '14px',
                     marginBottom: '16px',
@@ -318,7 +321,7 @@ export default function ShiftOpenModal({
                     gap: '10px'
                 }}>
                     <div>
-                        <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#1C73AB', marginBottom: '5px' }}>
+                        <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#2C1A12', marginBottom: '5px' }}>
                             🏪 {isEn ? 'Branch / Warehouse to open shift for:' : 'منفذ البيع / المستودع المراد فتح ورديته:'}
                         </label>
                         <select 
@@ -339,7 +342,7 @@ export default function ShiftOpenModal({
                     </div>
 
                     <div>
-                        <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#1C73AB', marginBottom: '5px' }}>
+                        <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#2C1A12', marginBottom: '5px' }}>
                             👤 {isEn ? 'Cashier / Rep responsible for shift:' : 'المندوب / الكاشير المسؤول عن الوردية:'}
                         </label>
                         <select 
@@ -474,8 +477,8 @@ export default function ShiftOpenModal({
                             background: (existingWarehouseShift || isConflictWithOtherWarehouse)
                                 ? '#94a3b8'
                                 : todayClosedShift
-                                    ? 'linear-gradient(135deg, #10b981 0%, #1C73AB 100%)'
-                                    : 'linear-gradient(135deg, #2891C8 0%, #1C73AB 100%)'
+                                    ? 'linear-gradient(135deg, #4E734F 0%, #2C1A12 100%)'
+                                    : 'linear-gradient(135deg, #C29B62 0%, #A8573C 100%)'
                         }}
                     >
                         {openShiftMutation.isPending 

@@ -117,7 +117,7 @@ export default function PurchaseOrderPrintModal({ isOpen, onClose, record }: any
                             <p style={{ margin: '5px 0 0 0', fontSize: '14px' }}>التاريخ: {record.transaction_date}</p>
                         </div>
                         <div style={{ textAlign: 'left' }}>
-                            <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 'bold' }}>شركة مياه غيام</h2>
+                            <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 'bold' }}>صيدلية تاج المودة البيطرية</h2>
                         </div>
                     </div>
 
@@ -192,7 +192,7 @@ export default function PurchaseOrderPrintModal({ isOpen, onClose, record }: any
                 </div>
             ) : (
                 <div className="thermal-preview-box">
-                    <div style={{ fontSize: '18px', fontWeight: 900, marginBottom: '5px' }}>شركة مياه غيام</div>
+                    <div style={{ fontSize: '18px', fontWeight: 900, marginBottom: '5px' }}>صيدلية تاج المودة البيطرية</div>
                     <div>أمر شراء | Purchase Order</div>
                     <div style={{ borderBottom: '1px dashed #000', margin: '10px 0' }}></div>
                     
@@ -246,7 +246,7 @@ export default function PurchaseOrderPrintModal({ isOpen, onClose, record }: any
 
                     <div style={{ fontSize: '11px', marginTop: '10px', textAlign: 'center' }}>
                         المعتمد: أمين المستودع<br/>
-                        تم الإصدار عبر نظام غيام
+                        تم الإصدار عبر نظام تاج المودة
                     </div>
                 </div>
             )}

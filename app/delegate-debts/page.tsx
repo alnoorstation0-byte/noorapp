@@ -235,21 +235,23 @@ export default function DelegateDebtsPage() {
             border-spacing: 0;
           }
           .aqua-table th {
-            color: #475569;
+            color: #2C1A12;
             font-weight: 900;
             padding: 15px 20px;
             text-align: right;
             font-size: 12px;
-            border-bottom: 2px solid rgba(0, 0, 0, 0.05);
+            border-bottom: 2px solid rgba(194, 155, 98, 0.25);
+            background: rgba(194, 155, 98, 0.08);
           }
           .aqua-table td {
             padding: 12px 20px;
-            border-bottom: 1px solid rgba(0,0,0,0.03);
+            border-bottom: 1px solid rgba(194, 155, 98, 0.1);
             font-size: 13px;
             vertical-align: middle;
+            color: #2C1A12;
           }
           .aqua-table tbody tr:hover {
-            background: rgba(255,255,255,0.5);
+            background: rgba(194, 155, 98, 0.08);
           }
 
           @media (max-width: 768px) {

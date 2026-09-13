@@ -415,24 +415,24 @@ export default function SettlementActionModal({
                             width: '54px',
                             height: '54px',
                             borderRadius: '18px',
-                            background: 'linear-gradient(135deg, #1C73AB 0%, #2891C8 100%)',
+                            background: 'linear-gradient(135deg, #C29B62 0%, #A8573C 100%)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                             color: '#FFFFFF',
                             fontSize: '26px',
-                            boxShadow: '0 8px 20px rgba(28, 115, 171, 0.3)'
+                            boxShadow: '0 8px 20px rgba(168, 87, 60, 0.25)'
                         }}>
                             🤝
                         </div>
                         <div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                <h2 style={{ margin: 0, fontSize: '22px', fontWeight: 900, color: '#122946' }}>
+                                <h2 style={{ margin: 0, fontSize: '22px', fontWeight: 900, color: '#2C1A12' }}>
                                     تسوية عهدة الرحلة ومطابقة الأرصدة
                                 </h2>
                                 <span style={{
-                                    background: 'rgba(28, 115, 171, 0.15)',
-                                    color: '#1C73AB',
+                                    background: 'rgba(194, 155, 98, 0.15)',
+                                    color: '#C29B62',
                                     padding: '4px 12px',
                                     borderRadius: '50px',
                                     fontSize: '12px',
@@ -441,8 +441,8 @@ export default function SettlementActionModal({
                                     #{trip.operationNumber}
                                 </span>
                             </div>
-                            <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#1C73AB', fontWeight: 700 }}>
-                                المندوب: <b>{trip.driverName}</b> (معرف الشريك: <code style={{ color: '#122946' }}>{trip.driverId?.slice(0, 8)}...</code>) | السيارة: <b>{trip.vehiclePlate}</b>
+                            <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: 'rgba(44, 26, 18, 0.7)', fontWeight: 700 }}>
+                                المندوب: <b>{trip.driverName}</b> (معرف الشريك: <code style={{ color: '#2C1A12' }}>{trip.driverId?.slice(0, 8)}...</code>) | السيارة: <b>{trip.vehiclePlate}</b>
                             </p>
                         </div>
                     </div>
@@ -493,15 +493,15 @@ export default function SettlementActionModal({
                             display: 'flex',
                             alignItems: 'center',
                             gap: '8px',
-                            background: activeTab === 'inventory' ? '#1C73AB' : 'transparent',
-                            color: activeTab === 'inventory' ? '#FFFFFF' : '#1C73AB',
-                            boxShadow: activeTab === 'inventory' ? '0 4px 15px rgba(28, 115, 171, 0.3)' : 'none'
+                            background: activeTab === 'inventory' ? '#C29B62' : 'transparent',
+                            color: activeTab === 'inventory' ? '#FFFFFF' : '#C29B62',
+                            boxShadow: activeTab === 'inventory' ? '0 4px 15px rgba(168, 87, 60, 0.25)' : 'none'
                         }}
                     >
                         <span>📦 إرجاع البضائع للمستودع</span>
                         {totalReturnUnits > 0 && (
                             <span style={{
-                                background: activeTab === 'inventory' ? 'rgba(255,255,255,0.3)' : 'rgba(28, 115, 171, 0.15)',
+                                background: activeTab === 'inventory' ? 'rgba(255,255,255,0.3)' : 'rgba(194, 155, 98, 0.15)',
                                 padding: '2px 8px',
                                 borderRadius: '10px',
                                 fontSize: '11px'
@@ -525,14 +525,14 @@ export default function SettlementActionModal({
                             display: 'flex',
                             alignItems: 'center',
                             gap: '8px',
-                            background: activeTab === 'cash' ? '#1C73AB' : 'transparent',
-                            color: activeTab === 'cash' ? '#FFFFFF' : '#1C73AB',
-                            boxShadow: activeTab === 'cash' ? '0 4px 15px rgba(28, 115, 171, 0.3)' : 'none'
+                            background: activeTab === 'cash' ? '#C29B62' : 'transparent',
+                            color: activeTab === 'cash' ? '#FFFFFF' : '#C29B62',
+                            boxShadow: activeTab === 'cash' ? '0 4px 15px rgba(168, 87, 60, 0.25)' : 'none'
                         }}
                     >
                         <span>💵 توريد النقدية وتسوية الخزينة</span>
                         <span style={{
-                            background: activeTab === 'cash' ? 'rgba(255,255,255,0.3)' : 'rgba(28, 115, 171, 0.15)',
+                            background: activeTab === 'cash' ? 'rgba(255,255,255,0.3)' : 'rgba(194, 155, 98, 0.15)',
                             padding: '2px 8px',
                             borderRadius: '10px',
                             fontSize: '11px'
@@ -555,9 +555,9 @@ export default function SettlementActionModal({
                             display: 'flex',
                             alignItems: 'center',
                             gap: '8px',
-                            background: activeTab === 'journal' ? '#1C73AB' : 'transparent',
-                            color: activeTab === 'journal' ? '#FFFFFF' : '#1C73AB',
-                            boxShadow: activeTab === 'journal' ? '0 4px 15px rgba(28, 115, 171, 0.3)' : 'none'
+                            background: activeTab === 'journal' ? '#C29B62' : 'transparent',
+                            color: activeTab === 'journal' ? '#FFFFFF' : '#C29B62',
+                            boxShadow: activeTab === 'journal' ? '0 4px 15px rgba(168, 87, 60, 0.25)' : 'none'
                         }}
                     >
                         <span>⚖️ معاينة القيود المحاسبية</span>
@@ -587,27 +587,27 @@ export default function SettlementActionModal({
                                 gap: '15px'
                             }}>
                                 <div>
-                                    <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 900, color: '#122946' }}>
+                                    <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 900, color: '#2C1A12' }}>
                                         حصر بضاعة السيارة وإرجاع المتبقي للمستودع الرئيسي
                                     </h3>
-                                    <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#1C73AB', fontWeight: 600 }}>
+                                    <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: 'rgba(44, 26, 18, 0.7)', fontWeight: 600 }}>
                                         يتم تحويل الكميات المرتجعة مباشرة إلى المستودع الرئيسي وتوليد سند استلام وقيد مخزني مدين.
                                     </p>
                                 </div>
 
                                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                    <label style={{ fontSize: '13px', fontWeight: 800, color: '#1C73AB' }}>المستودع المستلم:</label>
+                                    <label style={{ fontSize: '13px', fontWeight: 800, color: '#2C1A12' }}>المستودع المستلم:</label>
                                     <select
                                         value={selectedMainWh}
                                         onChange={(e) => setSelectedMainWh(e.target.value)}
                                         style={{
                                             padding: '8px 14px',
                                             borderRadius: '12px',
-                                            border: '1px solid rgba(28, 115, 171, 0.3)',
+                                            border: '1px solid rgba(194, 155, 98, 0.3)',
                                             background: 'rgba(255, 255, 255, 0.8)',
                                             fontWeight: 800,
                                             fontSize: '13px',
-                                            color: '#122946',
+                                            color: '#2C1A12',
                                             outline: 'none'
                                         }}
                                     >
@@ -622,20 +622,20 @@ export default function SettlementActionModal({
                             <div style={{
                                 background: 'rgba(255, 255, 255, 0.7)',
                                 borderRadius: '20px',
-                                border: '1px solid rgba(28, 115, 171, 0.15)',
+                                border: '1px solid rgba(194, 155, 98, 0.25)',
                                 overflow: 'hidden',
-                                boxShadow: '0 4px 15px rgba(28, 115, 171, 0.05)',
+                                boxShadow: '0 4px 15px rgba(44, 26, 18, 0.05)',
                                 marginBottom: '20px'
                             }}>
                                 <div style={{ overflowX: 'auto' }}>
                                     <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right', fontSize: '13px' }}>
-                                        <thead style={{ background: 'rgba(28, 115, 171, 0.08)', borderBottom: '1px solid rgba(28, 115, 171, 0.15)' }}>
+                                        <thead style={{ background: 'rgba(194, 155, 98, 0.1)', borderBottom: '1px solid rgba(194, 155, 98, 0.2)' }}>
                                             <tr>
-                                                <th style={{ padding: '12px 16px', color: '#1C73AB', fontWeight: 900 }}>الصنف</th>
-                                                <th style={{ padding: '12px 16px', color: '#122946', fontWeight: 900, textAlign: 'center' }}>المحمل</th>
-                                                <th style={{ padding: '12px 16px', color: '#122946', fontWeight: 900, textAlign: 'center' }}>المباع</th>
+                                                <th style={{ padding: '12px 16px', color: '#2C1A12', fontWeight: 900 }}>الصنف</th>
+                                                <th style={{ padding: '12px 16px', color: '#2C1A12', fontWeight: 900, textAlign: 'center' }}>المحمل</th>
+                                                <th style={{ padding: '12px 16px', color: '#2C1A12', fontWeight: 900, textAlign: 'center' }}>المباع</th>
                                                 <th style={{ padding: '12px 16px', color: '#f59e0b', fontWeight: 900, textAlign: 'center' }}>المتبقي بالسيارة</th>
-                                                <th style={{ padding: '12px 16px', color: '#16a34a', fontWeight: 900, textAlign: 'center', width: '140px' }}>المرتجع للمستودع 🔄</th>
+                                                <th style={{ padding: '12px 16px', color: '#4E734F', fontWeight: 900, textAlign: 'center', width: '140px' }}>المرتجع للمستودع 🔄</th>
                                                 <th style={{ padding: '12px 16px', color: '#ef4444', fontWeight: 900, textAlign: 'center', width: '110px' }}>تالف / هدر ⚠️</th>
                                                 <th style={{ padding: '12px 16px', color: '#64748b', fontWeight: 900, textAlign: 'center', width: '110px' }}>عجز مفقود ❓</th>
                                                 <th style={{ padding: '12px 16px', textAlign: 'center' }}>إجراء</th>
@@ -643,13 +643,13 @@ export default function SettlementActionModal({
                                         </thead>
                                         <tbody>
                                             {returnRows.length > 0 ? returnRows.map((row, idx) => (
-                                                <tr key={row.itemId} style={{ borderBottom: '1px solid rgba(28, 115, 171, 0.08)' }}>
+                                                <tr key={row.itemId} style={{ borderBottom: '1px solid rgba(194, 155, 98, 0.1)' }}>
                                                     <td style={{ padding: '12px 16px', fontWeight: 800 }}>
-                                                        <div style={{ color: '#122946' }}>{row.itemName}</div>
-                                                        <div style={{ fontSize: '11px', color: '#1C73AB' }}>تكلفة: {formatCurrency(row.costPrice)} / {row.unit}</div>
+                                                        <div style={{ color: '#2C1A12' }}>{row.itemName}</div>
+                                                        <div style={{ fontSize: '11px', color: 'rgba(44, 26, 18, 0.6)' }}>تكلفة: {formatCurrency(row.costPrice)} / {row.unit}</div>
                                                     </td>
                                                     <td style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 800 }}>{row.loadedQty}</td>
-                                                    <td style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 800, color: '#1C73AB' }}>{row.soldQty}</td>
+                                                    <td style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 800, color: '#2C1A12' }}>{row.soldQty}</td>
                                                     <td style={{ padding: '12px 16px', textAlign: 'center', fontWeight: 900, color: '#f59e0b', fontSize: '14px' }}>
                                                         {row.remainingQty}
                                                     </td>
@@ -1243,12 +1243,12 @@ export default function SettlementActionModal({
                             padding: '14px 36px',
                             borderRadius: '50px',
                             border: 'none',
-                            background: isSubmitting ? '#94a3b8' : 'linear-gradient(135deg, #1C73AB 0%, #2891C8 100%)',
+                            background: isSubmitting ? '#94a3b8' : 'linear-gradient(135deg, #C29B62 0%, #A8573C 100%)',
                             color: '#FFFFFF',
                             fontWeight: 900,
                             fontSize: '15px',
                             cursor: isSubmitting ? 'not-allowed' : 'pointer',
-                            boxShadow: '0 8px 25px rgba(28, 115, 171, 0.35)',
+                            boxShadow: '0 8px 25px rgba(168, 87, 60, 0.35)',
                             display: 'flex',
                             alignItems: 'center',
                             gap: '10px',

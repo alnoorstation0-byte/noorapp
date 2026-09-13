@@ -531,7 +531,7 @@ export function usePosLogic() {
             }).catch(() => {});
 
 
-            // 🔄 التحديث التلقائي لعهدة فوارغ المياه (إن وُجدت أصناف فوارغ)
+            // 🔄 التحديث التلقائي لعهدة العبوات والمستلزمات (إن وُجدت أصناف فوارغ)
             const returnableBottlesCount = cart.reduce((acc, it) => acc + (it.is_returnable_bottle ? (Number(it.qty) || Number(it.quantity) || 0) : 0), 0);
             if (returnableBottlesCount > 0) {
                 // 1. تسجيل عهدة الفوارغ في حساب العميل المسجل

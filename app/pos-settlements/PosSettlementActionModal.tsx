@@ -313,7 +313,7 @@ export default function PosSettlementActionModal({
                         onClick={() => setActiveTab('bottles')}
                     >
                         <span>💧</span>
-                        <span>عهدة فوارغ المياه</span>
+                        <span>عهدة العبوات والمستلزمات</span>
                     </button>
                     <button
                         type="button"
@@ -496,7 +496,7 @@ export default function PosSettlementActionModal({
                                 marginBottom: '20px'
                             }}>
                                 <h3 style={{ margin: '0 0 16px 0', fontSize: '16px', fontWeight: 900, color: '#122946' }}>
-                                    💧 مطابقة وتسوية عهدة فوارغ المياه بالمنفذ
+                                    💧 مطابقة وتسوية عهدة العبوات والمستلزمات بالمنفذ
                                 </h3>
 
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '14px', marginBottom: '20px' }}>
@@ -507,7 +507,7 @@ export default function PosSettlementActionModal({
                                         </div>
                                     </div>
                                     <div style={{ background: 'rgba(28, 115, 171, 0.08)', padding: '14px 16px', borderRadius: '16px' }}>
-                                        <div style={{ fontSize: '11px', fontWeight: 800, color: '#1C73AB' }}>فوارغ مباعة مع المياه 🛒</div>
+                                        <div style={{ fontSize: '11px', fontWeight: 800, color: '#1C73AB' }}>عبوات ومستلزمات مباعة 🛒</div>
                                         <div style={{ fontSize: '18px', fontWeight: 900, color: '#1C73AB', marginTop: '4px' }}>
                                             {shift.bottlesSold} قارورة
                                         </div>

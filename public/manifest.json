@@ -1,18 +1,18 @@
 {
-  "name": "شركة مياه غيام للتوزيع",
-  "short_name": "مياه غيام",
+  "name": "صيدلية تاج المودة البيطرية",
+  "short_name": "صيدلية تاج المودة",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#F4F1EE",
-  "theme_color": "#1C73AB",
+  "background_color": "#FDFBF7",
+  "theme_color": "#2C1A12",
   "icons": [
     {
-      "src": "/ghayam_logo.png",
+      "src": "/taj_logo.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "/ghayam_logo.png",
+      "src": "/taj_logo.png",
       "sizes": "512x512",
       "type": "image/png"
     }

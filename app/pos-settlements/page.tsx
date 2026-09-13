@@ -49,28 +49,28 @@ export default function PosSettlementsPage() {
             boxSizing: 'border-box'
         }}>
             <style>{`
-                /* Aqua Glassmorphism Theme Styles */
+                /* Desert Glassmorphism Theme Styles */
                 .aqua-glass-card {
-                    background: rgba(255, 255, 255, 0.7) !important;
-                    backdrop-filter: blur(40px) saturate(200%) !important;
-                    -webkit-backdrop-filter: blur(40px) saturate(200%) !important;
-                    border: 1px solid rgba(255, 255, 255, 0.8) !important;
-                    border-radius: 26px !important;
-                    box-shadow: 0 10px 30px rgba(28, 115, 171, 0.08), inset 0 2px 2px rgba(255, 255, 255, 1) !important;
+                    background: linear-gradient(135deg, rgba(255, 253, 250, 0.85) 0%, rgba(255, 253, 250, 0.5) 100%) !important;
+                    backdrop-filter: blur(24px) saturate(160%) !important;
+                    -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
+                    border: 1px solid rgba(194, 155, 98, 0.3) !important;
+                    border-radius: 24px !important;
+                    box-shadow: 0 4px 15px rgba(44, 26, 18, 0.08) !important;
                     transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1) !important;
                 }
                 .aqua-glass-card:hover {
                     transform: translateY(-4px) !important;
-                    box-shadow: 0 16px 36px rgba(28, 115, 171, 0.14), inset 0 2px 2px rgba(255, 255, 255, 1) !important;
+                    box-shadow: 0 10px 20px rgba(168, 87, 60, 0.15) !important;
                 }
                 .aqua-btn-primary {
-                    background: linear-gradient(135deg, #1C73AB 0%, #2891C8 100%) !important;
+                    background: linear-gradient(135deg, #C29B62 0%, #A8573C 100%) !important;
                     color: #FFFFFF !important;
                     border: 1px solid rgba(255, 255, 255, 0.3) !important;
-                    border-radius: 50px !important;
-                    font-weight: 900 !important;
+                    border-radius: 12px !important;
+                    font-weight: 800 !important;
                     cursor: pointer !important;
-                    box-shadow: 0 6px 20px rgba(28, 115, 171, 0.25) !important;
+                    box-shadow: 0 4px 12px rgba(194, 155, 98, 0.35) !important;
                     transition: all 0.3s ease !important;
                     display: inline-flex !important;
                     align-items: center !important;
@@ -80,15 +80,15 @@ export default function PosSettlementsPage() {
                 }
                 .aqua-btn-primary:hover {
                     transform: translateY(-2px) !important;
-                    box-shadow: 0 10px 25px rgba(28, 115, 171, 0.35) !important;
-                    filter: brightness(1.06) !important;
+                    box-shadow: 0 8px 18px rgba(168, 87, 60, 0.3) !important;
+                    filter: brightness(1.05) !important;
                 }
                 .aqua-table-row {
                     transition: all 0.2s ease !important;
-                    border-bottom: 1px solid rgba(28, 115, 171, 0.08) !important;
+                    border-bottom: 1px solid rgba(194, 155, 98, 0.12) !important;
                 }
                 .aqua-table-row:hover {
-                    background: rgba(28, 115, 171, 0.05) !important;
+                    background: rgba(194, 155, 98, 0.08) !important;
                 }
                 .aqua-filter-tab {
                     padding: 9px 18px !important;
@@ -101,17 +101,18 @@ export default function PosSettlementsPage() {
                     white-space: nowrap !important;
                 }
                 .aqua-filter-tab.active {
-                    background: #1C73AB !important;
-                    color: #FFFFFF !important;
-                    box-shadow: 0 4px 15px rgba(28, 115, 171, 0.3) !important;
+                    background: #2C1A12 !important;
+                    color: #FDFBF7 !important;
+                    box-shadow: 0 4px 15px rgba(44, 26, 18, 0.2) !important;
                 }
                 .aqua-filter-tab:not(.active) {
-                    background: rgba(255, 255, 255, 0.6) !important;
-                    color: #1C73AB !important;
-                    border-color: rgba(28, 115, 171, 0.15) !important;
+                    background: rgba(255, 253, 250, 0.7) !important;
+                    color: #2C1A12 !important;
+                    border-color: rgba(194, 155, 98, 0.25) !important;
                 }
                 .aqua-filter-tab:not(.active):hover {
-                    background: rgba(255, 255, 255, 0.9) !important;
+                    background: rgba(255, 253, 250, 0.95) !important;
+                    border-color: #C29B62 !important;
                 }
 
                 @media (max-width: 768px) {
@@ -127,13 +128,13 @@ export default function PosSettlementsPage() {
 
             {/* Top Hero Banner */}
             <div className="settle-page-header" style={{
-                background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.88) 0%, rgba(240, 248, 255, 0.82) 100%)',
-                backdropFilter: 'blur(40px) saturate(200%)',
-                WebkitBackdropFilter: 'blur(40px) saturate(200%)',
-                borderRadius: '30px',
+                background: 'linear-gradient(135deg, rgba(255, 253, 250, 0.9) 0%, rgba(255, 253, 250, 0.6) 100%)',
+                backdropFilter: 'blur(24px) saturate(160%)',
+                WebkitBackdropFilter: 'blur(24px) saturate(160%)',
+                borderRadius: '24px',
                 padding: '30px 35px',
-                border: '1px solid rgba(255, 255, 255, 0.9)',
-                boxShadow: '0 12px 35px rgba(28, 115, 171, 0.12), inset 0 2px 3px rgba(255, 255, 255, 1)',
+                border: '1px solid rgba(194, 155, 98, 0.3)',
+                boxShadow: '0 8px 25px rgba(44, 26, 18, 0.08)',
                 marginBottom: '30px'
             }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
@@ -141,35 +142,35 @@ export default function PosSettlementsPage() {
                         <div style={{
                             width: '64px',
                             height: '64px',
-                            borderRadius: '22px',
-                            background: 'linear-gradient(135deg, #1C73AB 0%, #2891C8 100%)',
+                            borderRadius: '20px',
+                            background: 'linear-gradient(135deg, #C29B62 0%, #A8573C 100%)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                             fontSize: '32px',
-                            boxShadow: '0 10px 25px rgba(28, 115, 171, 0.35)',
+                            boxShadow: '0 8px 20px rgba(194, 155, 98, 0.35)',
                             color: '#fff'
                         }}>
                             🏪
                         </div>
                         <div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-                                <h1 style={{ margin: 0, fontSize: '28px', fontWeight: 900, color: '#122946', letterSpacing: '-0.5px' }}>
+                                <h1 style={{ margin: 0, fontSize: '28px', fontWeight: 900, color: '#2C1A12', letterSpacing: '-0.5px' }}>
                                     تسوية عهد منافذ البيع وإغلاق الورديات
                                 </h1>
                                 <span style={{
-                                    background: 'rgba(28, 115, 171, 0.12)',
-                                    color: '#1C73AB',
+                                    background: 'rgba(194, 155, 98, 0.15)',
+                                    color: '#A8573C',
                                     padding: '4px 12px',
                                     borderRadius: '50px',
                                     fontSize: '12px',
                                     fontWeight: 900
                                 }}>
-                                    Aqua Glassmorphism 💎
+                                    Desert Glassmorphism 🏜️
                                 </span>
                             </div>
-                            <p style={{ margin: '6px 0 0 0', fontSize: '14px', color: '#1C73AB', fontWeight: 700 }}>
-                                المطابقة النقدية لدرج الصناديق، توريد الإيرادات للخزينة، تسوية فوارغ المياه، جرد مخزون المنافذ، وإصدار سندات المخالصة الرسمية.
+                            <p style={{ margin: '6px 0 0 0', fontSize: '14px', color: 'rgba(44, 26, 18, 0.7)', fontWeight: 700 }}>
+                                المطابقة النقدية لدرج الصناديق، توريد الإيرادات للخزينة، تسوية العبوات والمستلزمات، جرد مخزون المنافذ، وإصدار سندات المخالصة الرسمية.
                             </p>
                         </div>
                     </div>
@@ -437,7 +438,7 @@ export default function PosSettlementsPage() {
                                     <th style={{ padding: '18px 20px', color: '#b45309', fontWeight: 900, textAlign: 'center' }}>المطالبة النقدية 💵</th>
                                     <th style={{ padding: '18px 20px', color: '#16a34a', fontWeight: 900, textAlign: 'center' }}>المورد للخزينة ✅</th>
                                     <th style={{ padding: '18px 20px', color: '#122946', fontWeight: 900, textAlign: 'center' }}>فروقات الصندوق ⚠️</th>
-                                    <th style={{ padding: '18px 20px', color: '#1C73AB', fontWeight: 900, textAlign: 'center' }}>فوارغ المياه 💧</th>
+                                    <th style={{ padding: '18px 20px', color: '#1C73AB', fontWeight: 900, textAlign: 'center' }}>العبوات والمستلزمات 📦</th>
                                     <th style={{ padding: '18px 20px', color: '#122946', fontWeight: 900, textAlign: 'center' }}>حالة التسوية</th>
                                     <th style={{ padding: '18px 20px', color: '#1C73AB', fontWeight: 900, textAlign: 'center' }}>الإجراءات</th>
                                 </tr>

@@ -129,21 +129,21 @@ export default function AquaModalWrapper({ isOpen, onClose, onConfirm, title, ic
                 }
                 
                 .btn-glass-save {
-                    background: linear-gradient(135deg, ${THEME.accent}, ${THEME.primary});
+                    background: linear-gradient(135deg, ${THEME.accent}, ${THEME.terracotta});
                     color: white; border: none; padding: 12px 20px; border-radius: 12px;
                     font-weight: 900; font-size: 14px; cursor: pointer; transition: 0.3s;
-                    box-shadow: 0 10px 25px rgba(40, 145, 200, 0.4);
+                    box-shadow: 0 4px 15px rgba(194, 155, 98, 0.35);
                 }
-                .btn-glass-save:hover:not(:disabled) { transform: translateY(-3px); filter: brightness(1.1); box-shadow: 0 15px 35px rgba(40, 145, 200, 0.5); }
+                .btn-glass-save:hover:not(:disabled) { transform: translateY(-3px); filter: brightness(1.05); box-shadow: 0 8px 20px rgba(168, 87, 60, 0.35); }
                 .btn-glass-save:active:not(:disabled) { transform: scale(0.98); }
                 .btn-glass-save:disabled { opacity: 0.7; cursor: not-allowed; }
 
                 .btn-glass-cancel {
-                    background: rgba(255, 255, 255, 0.6);
-                    color: #1e293b; border: 1px solid rgba(255, 255, 255, 0.8); padding: 12px 20px; border-radius: 12px;
+                    background: rgba(255, 253, 250, 0.7);
+                    color: #2C1A12; border: 1px solid rgba(194, 155, 98, 0.3); padding: 12px 20px; border-radius: 12px;
                     font-weight: 900; font-size: 14px; cursor: pointer; transition: 0.3s;
                 }
-                .btn-glass-cancel:hover { background: rgba(255, 255, 255, 0.9); transform: translateY(-2px); }
+                .btn-glass-cancel:hover { background: rgba(255, 253, 250, 0.95); transform: translateY(-2px); border-color: ${THEME.accent}; }
 
                 @keyframes modalScaleUp { 0% { transform: scale(0.95); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 
@@ -152,12 +152,12 @@ export default function AquaModalWrapper({ isOpen, onClose, onConfirm, title, ic
                     align-items: center;
                     gap: 6px;
                     padding: 4px 10px;
-                    background: rgba(40, 145, 200, 0.1);
-                    border: 1px solid rgba(40, 145, 200, 0.25);
+                    background: rgba(194, 155, 98, 0.12);
+                    border: 1px solid rgba(194, 155, 98, 0.3);
                     border-radius: 8px;
                     font-size: 11px;
                     font-weight: 800;
-                    color: #1C73AB;
+                    color: ${THEME.terracotta};
                     white-space: nowrap;
                 }
 
@@ -181,10 +181,10 @@ export default function AquaModalWrapper({ isOpen, onClose, onConfirm, title, ic
             `}</style>
 
             <div ref={containerRef} className="cinematic-scroll glass-modal-container" onClick={(e) => e.stopPropagation()} style={{ 
-                width: width, maxHeight: '95vh', background: 'rgba(248, 250, 252, 0.85)', 
-                backdropFilter: 'blur(12px)', borderRadius: '25px', padding: '15px 25px', 
-                boxShadow: '0 30px 60px rgba(0,0,0,0.25)', overflowY: 'auto', direction: 'rtl',
-                border: '1px solid rgba(255,255,255,0.7)',
+                width: width, maxHeight: '95vh', background: 'linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(255, 253, 250, 0.85) 100%)', 
+                backdropFilter: 'blur(24px) saturate(160%)', borderRadius: '24px', padding: '20px 25px', 
+                boxShadow: '0 20px 40px rgba(44, 26, 18, 0.15)', overflowY: 'auto', direction: 'rtl',
+                border: '1px solid rgba(194, 155, 98, 0.35)',
                 animation: 'modalScaleUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
             }}>
                 

@@ -169,7 +169,7 @@ export default function HierarchicalLedgerPage() {
   );
 
   return (
-    <MasterPage title="شجرة الحسابات والميزان" subtitle="إدارة المركز المالي ودليل الحسابات - مياه غيام">
+    <MasterPage title="شجرة الحسابات والميزان" subtitle="إدارة المركز المالي ودليل الحسابات - صيدلية تاج المودة">
       
       <div className="floating-stack-layout">
         <div className="warm-depth-glow" />
@@ -384,8 +384,8 @@ export default function HierarchicalLedgerPage() {
         .glass-input { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1); color: white; font-weight: 800; outline: none; transition: 0.3s; color-scheme: dark; box-sizing: border-box; }
         .glass-input:focus { background: rgba(255,255,255,0.2); border-color: ${THEME.goldAccent}; }
 
-        .btn-premium-gold { width: 100%; padding: 16px; border-radius: 16px; background: linear-gradient(135deg, #2891C8, #17A2D4); color: white; font-weight: 900; border: none; cursor: pointer; box-shadow: 0 10px 25px rgba(40, 145, 200, 0.3); transition: 0.3s; min-height: 44px; }
-        .btn-premium-gold:hover { transform: translateY(-3px); box-shadow: 0 15px 35px rgba(40, 145, 200, 0.4); filter: brightness(1.1); }
+        .btn-premium-gold { width: 100%; padding: 16px; border-radius: 16px; background: linear-gradient(135deg, #C29B62, #A8573C); color: white; font-weight: 900; border: none; cursor: pointer; box-shadow: 0 10px 25px rgba(168, 87, 60, 0.3); transition: 0.3s; min-height: 44px; }
+        .btn-premium-gold:hover { transform: translateY(-3px); box-shadow: 0 15px 35px rgba(168, 87, 60, 0.4); filter: brightness(1.1); }
 
         .btn-main-glass { width: 100%; padding: 12px; border-radius: 12px; border: none; font-weight: 900; cursor: pointer; transition: 0.3s; font-size: 13px; min-height: 44px; }
         .btn-main-glass.blue { background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.2); }
@@ -784,11 +784,11 @@ export default function HierarchicalLedgerPage() {
         .selection-badge {
           font-size: 12px;
           font-weight: 900;
-          color: #1C73AB;
+          color: #C29B62;
           background: rgba(255, 255, 255, 0.85);
           padding: 4px 10px;
           border-radius: 8px;
-          border: 1px solid rgba(28, 115, 171, 0.2);
+          border: 1px solid rgba(194, 155, 98, 0.25);
           white-space: nowrap;
         }
 
@@ -958,7 +958,7 @@ export default function HierarchicalLedgerPage() {
           }
           .mobile-search-input:focus {
             background: white !important;
-            border-color: #2891C8 !important;
+            border-color: #C29B62 !important;
           }
           .mobile-search-icon {
             position: absolute !important;
@@ -1005,19 +1005,19 @@ export default function HierarchicalLedgerPage() {
             font-size: 12px !important;
             font-weight: 800 !important;
             white-space: nowrap !important;
-            border: 1px solid rgba(28, 115, 171, 0.2) !important;
+            border: 1px solid rgba(194, 155, 98, 0.3) !important;
             background: rgba(255, 255, 255, 0.8) !important;
-            color: #1C73AB !important;
+            color: #2C1A12 !important;
             cursor: pointer !important;
             min-height: 40px !important;
             touch-action: manipulation !important;
             flex-shrink: 0 !important;
           }
           .mobile-action-pill.primary {
-            background: linear-gradient(135deg, #2891C8, #1C73AB) !important;
+            background: linear-gradient(135deg, #C29B62, #A8573C) !important;
             color: white !important;
             border: none !important;
-            box-shadow: 0 4px 10px rgba(28, 115, 171, 0.25) !important;
+            box-shadow: 0 4px 10px rgba(168, 87, 60, 0.25) !important;
           }
 
           /* 🎯 Dedicated Selection Bar (Mobile Layout) */
@@ -1180,8 +1180,8 @@ export default function HierarchicalLedgerPage() {
             width: 28px !important;
             height: 28px !important;
             border-radius: 50% !important;
-            background: rgba(28, 115, 171, 0.08) !important;
-            color: #1C73AB !important;
+            background: rgba(194, 155, 98, 0.12) !important;
+            color: #C29B62 !important;
             font-size: 10px !important;
             flex-shrink: 0 !important;
             cursor: pointer !important;

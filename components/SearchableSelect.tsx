@@ -159,13 +159,13 @@ export default function SearchableSelect({ options, value, onChange, placeholder
                     cursor: 'pointer',
                     fontWeight: isSelected ? 900 : 700,
                     fontSize: '13px',
-                    color: isSelected ? '#1C73AB' : '#1e293b',
-                    background: isSelected ? 'rgba(28, 115, 171, 0.1)' : 'transparent',
-                    borderBottom: index < filteredOptions.length - 1 ? '1px solid rgba(0,0,0,0.04)' : 'none',
+                    color: isSelected ? '#A8573C' : '#2C1A12',
+                    background: isSelected ? 'rgba(194, 155, 98, 0.15)' : 'transparent',
+                    borderBottom: index < filteredOptions.length - 1 ? '1px solid rgba(194, 155, 98, 0.1)' : 'none',
                     transition: 'all 0.15s'
                   }}
                   onMouseEnter={(e) => {
-                    if (!isSelected) e.currentTarget.style.background = 'rgba(40, 145, 200, 0.08)';
+                    if (!isSelected) e.currentTarget.style.background = 'rgba(194, 155, 98, 0.08)';
                   }}
                   onMouseLeave={(e) => {
                     if (!isSelected) e.currentTarget.style.background = 'transparent';

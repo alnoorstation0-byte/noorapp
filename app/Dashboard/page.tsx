@@ -10,7 +10,7 @@ import {
   PieChart, Pie, Cell
 } from 'recharts';
 
-const AQUA_COLORS = ['#2891C8', '#7FD4E3', '#1C355E', '#10b981', '#f59e0b', '#8b5cf6', '#d946ef'];
+const DESERT_COLORS = ['#C29B62', '#A8573C', '#2C1A12', '#4E734F', '#D4AF37', '#8C6239', '#5C4033'];
 
 export default function DashboardPage() {
   const [mounted, setMounted] = useState(false);
@@ -63,7 +63,7 @@ export default function DashboardPage() {
 
               <div className="premium-card" style={{ borderBottom: `4px solid ${THEME.primary}` }}>
                 <div className="card-header-flex">
-                  <div className="icon-wrapper" style={{ background: 'linear-gradient(135deg, #2891C820, #1C73AB20)', color: THEME.primary }}>🏦</div>
+                  <div className="icon-wrapper" style={{ background: 'linear-gradient(135deg, rgba(194, 155, 98, 0.2), rgba(168, 87, 60, 0.2))', color: THEME.primary }}>🏦</div>
                   <span className="trend-badge neutral">الرصيد النقدي والبنكي</span>
                 </div>
                 <div className="card-value">{logic.formatCurrency(logic.stats?.cashAndBankBalance || 0)}</div>
@@ -140,7 +140,7 @@ export default function DashboardPage() {
                         dataKey="value"
                       >
                         {(logic.stats?.expensesByCategory || []).map((entry: any, index: number) => (
-                          <Cell key={`cell-${index}`} fill={AQUA_COLORS[index % AQUA_COLORS.length]} />
+                          <Cell key={`cell-${index}`} fill={DESERT_COLORS[index % DESERT_COLORS.length]} />
                         ))}
                       </Pie>
                       <Tooltip formatter={(value: any) => logic.formatCurrency(value)} contentStyle={{ borderRadius: '15px', border: 'none', boxShadow: '0 10px 30px rgba(0,0,0,0.1)' }} />

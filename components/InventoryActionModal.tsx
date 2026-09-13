@@ -367,8 +367,8 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
                   onChange={e => setFormData({ ...formData, waste_reason: e.target.value })}
                   style={{ width: '100%', padding: '10px', border: '1.5px solid #f87171' }}
                 >
-                  <option value="كسر عبوة / جالون">كسر عبوة مياه أو جالون فارغ</option>
-                  <option value="تسريب كرتون مياه">تسريب كرتون مياه / تلف تغليف</option>
+                  <option value="كسر عبوة / قارورة">كسر عبوة دواء أو قارورة فارغة</option>
+                  <option value="تلف كرتون أو تسريب">تلف كرتون علاج أو تسريب عبوة</option>
                   <option value="عيب تصنيع أو غطاء غير محكم">عيب تصنيع أو غطاء غير محكم</option>
                   <option value="تلف أثناء النقل والتوزيع">تلف أثناء نقل وتوزيع البضاعة</option>
                   <option value="انتهاء صلاحية / سوء تخزين">انتهاء صلاحية أو سوء تخزين</option>

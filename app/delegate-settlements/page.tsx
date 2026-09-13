@@ -48,28 +48,28 @@ export default function DelegateSettlementsPage() {
             boxSizing: 'border-box'
         }}>
             <style>{`
-                /* Aqua Glassmorphism Theme Styles */
+                /* Desert Glassmorphism Theme Styles */
                 .aqua-glass-card {
-                    background: rgba(255, 255, 255, 0.7) !important;
-                    backdrop-filter: blur(40px) saturate(200%) !important;
-                    -webkit-backdrop-filter: blur(40px) saturate(200%) !important;
-                    border: 1px solid rgba(255, 255, 255, 0.8) !important;
-                    border-radius: 26px !important;
-                    box-shadow: 0 10px 30px rgba(28, 115, 171, 0.08), inset 0 2px 2px rgba(255, 255, 255, 1) !important;
+                    background: linear-gradient(135deg, rgba(255, 253, 250, 0.85) 0%, rgba(255, 253, 250, 0.5) 100%) !important;
+                    backdrop-filter: blur(24px) saturate(160%) !important;
+                    -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
+                    border: 1px solid rgba(194, 155, 98, 0.3) !important;
+                    border-radius: 24px !important;
+                    box-shadow: 0 4px 15px rgba(44, 26, 18, 0.08) !important;
                     transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1) !important;
                 }
                 .aqua-glass-card:hover {
                     transform: translateY(-4px) !important;
-                    box-shadow: 0 16px 36px rgba(28, 115, 171, 0.14), inset 0 2px 2px rgba(255, 255, 255, 1) !important;
+                    box-shadow: 0 10px 20px rgba(168, 87, 60, 0.15) !important;
                 }
                 .aqua-btn-primary {
-                    background: linear-gradient(135deg, #1C73AB 0%, #2891C8 100%) !important;
+                    background: linear-gradient(135deg, #C29B62 0%, #A8573C 100%) !important;
                     color: #FFFFFF !important;
                     border: 1px solid rgba(255, 255, 255, 0.3) !important;
-                    border-radius: 50px !important;
-                    font-weight: 900 !important;
+                    border-radius: 12px !important;
+                    font-weight: 800 !important;
                     cursor: pointer !important;
-                    box-shadow: 0 6px 20px rgba(28, 115, 171, 0.25) !important;
+                    box-shadow: 0 4px 12px rgba(194, 155, 98, 0.35) !important;
                     transition: all 0.3s ease !important;
                     display: inline-flex !important;
                     align-items: center !important;
@@ -79,14 +79,14 @@ export default function DelegateSettlementsPage() {
                 }
                 .aqua-btn-primary:hover {
                     transform: translateY(-2px) !important;
-                    box-shadow: 0 10px 25px rgba(28, 115, 171, 0.35) !important;
-                    filter: brightness(1.06) !important;
+                    box-shadow: 0 8px 18px rgba(168, 87, 60, 0.3) !important;
+                    filter: brightness(1.05) !important;
                 }
                 .aqua-btn-outline {
-                    background: rgba(255, 255, 255, 0.6) !important;
-                    color: #1C73AB !important;
-                    border: 1.5px solid rgba(28, 115, 171, 0.3) !important;
-                    border-radius: 50px !important;
+                    background: rgba(255, 253, 250, 0.7) !important;
+                    color: #2C1A12 !important;
+                    border: 1.5px solid rgba(194, 155, 98, 0.35) !important;
+                    border-radius: 12px !important;
                     font-weight: 800 !important;
                     cursor: pointer !important;
                     transition: all 0.2s !important;
@@ -96,16 +96,16 @@ export default function DelegateSettlementsPage() {
                     gap: 6px !important;
                 }
                 .aqua-btn-outline:hover {
-                    background: rgba(28, 115, 171, 0.1) !important;
-                    border-color: #1C73AB !important;
+                    background: rgba(194, 155, 98, 0.12) !important;
+                    border-color: #C29B62 !important;
                     transform: translateY(-2px) !important;
                 }
                 .aqua-table-row {
                     transition: all 0.2s ease !important;
-                    border-bottom: 1px solid rgba(28, 115, 171, 0.08) !important;
+                    border-bottom: 1px solid rgba(194, 155, 98, 0.12) !important;
                 }
                 .aqua-table-row:hover {
-                    background: rgba(28, 115, 171, 0.05) !important;
+                    background: rgba(194, 155, 98, 0.08) !important;
                 }
                 .aqua-filter-tab {
                     padding: 10px 20px !important;
@@ -119,17 +119,18 @@ export default function DelegateSettlementsPage() {
                     word-break: keep-all !important;
                 }
                 .aqua-filter-tab.active {
-                    background: #1C73AB !important;
-                    color: #FFFFFF !important;
-                    box-shadow: 0 4px 15px rgba(28, 115, 171, 0.3) !important;
+                    background: #2C1A12 !important;
+                    color: #FDFBF7 !important;
+                    box-shadow: 0 4px 15px rgba(44, 26, 18, 0.2) !important;
                 }
                 .aqua-filter-tab:not(.active) {
-                    background: rgba(255, 255, 255, 0.6) !important;
-                    color: #1C73AB !important;
-                    border-color: rgba(28, 115, 171, 0.15) !important;
+                    background: rgba(255, 253, 250, 0.7) !important;
+                    color: #2C1A12 !important;
+                    border-color: rgba(194, 155, 98, 0.25) !important;
                 }
                 .aqua-filter-tab:not(.active):hover {
-                    background: rgba(255, 255, 255, 0.9) !important;
+                    background: rgba(255, 253, 250, 0.95) !important;
+                    border-color: #C29B62 !important;
                 }
 
                 /* Spacious Status Badges */
@@ -201,12 +202,12 @@ export default function DelegateSettlementsPage() {
                             width: '64px',
                             height: '64px',
                             borderRadius: '22px',
-                            background: 'linear-gradient(135deg, #1C73AB 0%, #2891C8 100%)',
+                            background: 'linear-gradient(135deg, #C29B62 0%, #A8573C 100%)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                             fontSize: '32px',
-                            boxShadow: '0 10px 25px rgba(28, 115, 171, 0.35)',
+                            boxShadow: '0 10px 25px rgba(168, 87, 60, 0.35)',
                             color: '#fff'
                         }}>
                             🚚
@@ -217,17 +218,17 @@ export default function DelegateSettlementsPage() {
                                     تسوية عهد المناديب وإرجاع المخزون
                                 </h1>
                                 <span style={{
-                                    background: 'rgba(28, 115, 171, 0.12)',
-                                    color: '#1C73AB',
+                                    background: 'rgba(194, 155, 98, 0.15)',
+                                    color: '#A8573C',
                                     padding: '4px 12px',
                                     borderRadius: '50px',
                                     fontSize: '12px',
                                     fontWeight: 900
                                 }}>
-                                    Aqua Glassmorphism 💎
+                                    Desert Glassmorphism 🏜️
                                 </span>
                             </div>
-                            <p style={{ margin: '6px 0 0 0', fontSize: '14px', color: '#1C73AB', fontWeight: 700 }}>
+                            <p style={{ margin: '6px 0 0 0', fontSize: '14px', color: 'rgba(44, 26, 18, 0.7)', fontWeight: 700 }}>
                                 المطابقة المالية اليومية، توريد النقدية للخزينة، إرجاع فائض البضاعة للمستودع الرئيسي، وتوليد القيود وسندات القبض آلياً.
                             </p>
                         </div>
@@ -377,16 +378,16 @@ export default function DelegateSettlementsPage() {
 
                 {/* KPI 2: Total Sales */}
                 <div className="aqua-glass-card" style={{ padding: '22px 24px', position: 'relative', overflow: 'hidden' }}>
-                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: '#2891C8' }}></div>
+                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: '#C29B62' }}></div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontSize: '13px', fontWeight: 800, color: '#1C73AB' }}>إجمالي المبيعات 📈</span>
+                        <span style={{ fontSize: '13px', fontWeight: 800, color: '#C29B62' }}>إجمالي المبيعات 📈</span>
                         <span style={{ fontSize: '20px' }}>💰</span>
                     </div>
-                    <div style={{ fontSize: '28px', fontWeight: 900, color: '#1C73AB', margin: '10px 0 6px 0' }}>
+                    <div style={{ fontSize: '28px', fontWeight: 900, color: '#2C1A12', margin: '10px 0 6px 0' }}>
                         {formatCurrency(totals.totalSales)}
                     </div>
                     <div style={{ fontSize: '12px', fontWeight: 700, color: '#64748b' }}>
-                        كاش: <b style={{ color: '#122946' }}>{formatCurrency(totals.cashSales)}</b> | آجل: <b>{formatCurrency(totals.creditSales)}</b>
+                        كاش: <b style={{ color: '#2C1A12' }}>{formatCurrency(totals.cashSales)}</b> | آجل: <b>{formatCurrency(totals.creditSales)}</b>
                     </div>
                 </div>
 
@@ -627,12 +628,12 @@ export default function DelegateSettlementsPage() {
                                                             padding: '8px 16px',
                                                             borderRadius: '12px',
                                                             border: 'none',
-                                                            background: isSettled ? 'rgba(28, 115, 171, 0.12)' : 'linear-gradient(135deg, #1C73AB 0%, #2891C8 100%)',
-                                                            color: isSettled ? '#1C73AB' : '#FFFFFF',
+                                                            background: isSettled ? 'rgba(194, 155, 98, 0.15)' : 'linear-gradient(135deg, #C29B62 0%, #A8573C 100%)',
+                                                            color: isSettled ? '#C29B62' : '#FFFFFF',
                                                             fontWeight: 800,
                                                             fontSize: '12px',
                                                             cursor: 'pointer',
-                                                            boxShadow: isSettled ? 'none' : '0 4px 12px rgba(28, 115, 171, 0.25)',
+                                                            boxShadow: isSettled ? 'none' : '0 4px 12px rgba(168, 87, 60, 0.25)',
                                                             display: 'inline-flex',
                                                             alignItems: 'center',
                                                             gap: '6px',

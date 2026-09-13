@@ -221,7 +221,7 @@ export function emitTableChange(table: string, eventType: string = 'CHANGE', pay
 
     // بث التغيير عبر التبويبات المختلفة لنفس المتصفح
     try {
-      const bc = new BroadcastChannel('elghayam_sync');
+      const bc = new BroadcastChannel('eltaj_mawadah_sync');
       bc.postMessage({ type: 'TABLE_CHANGE', table, eventType, detail });
       bc.close();
     } catch {}
@@ -240,7 +240,7 @@ export function RealtimeSyncProvider({ children }: { children: React.ReactNode }
     // 1. الاستماع لـ BroadcastChannel لتبادل التحديثات الفورية بين كافة التبويبات
     let bc: BroadcastChannel | null = null;
     try {
-      bc = new BroadcastChannel('elghayam_sync');
+      bc = new BroadcastChannel('eltaj_mawadah_sync');
       bc.onmessage = (event) => {
         const { table, eventType, detail } = event.data || {};
         if (table) {

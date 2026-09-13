@@ -42,7 +42,7 @@ export async function recalculatePosShift(shiftId: string) {
       .eq('shift_id', shiftId)
       .neq('status', 'ملغي');
 
-    // 4. جلب الأصناف الخاضعة لعهدة فوارغ المياه
+    // 4. جلب الأصناف الخاضعة لعهدة العبوات والمستلزمات
     const { data: retItems } = await supabase
       .from('inventory_items')
       .select('id')
