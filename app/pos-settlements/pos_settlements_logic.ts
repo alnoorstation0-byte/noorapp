@@ -25,10 +25,13 @@ export interface PosOutletInventoryItem {
 
 export interface PosSettlementPayload {
     shiftId: string;
+    shiftNumber?: string;
     warehouseId: string;
     warehouseName: string;
+    warehouseLocation?: string;
     cashierId?: string | null;
     cashierName: string;
+    cashierPhone?: string;
     settlementDate: string;
     // Cash Settlement
     cashAmount: number;
@@ -36,6 +39,13 @@ export interface PosSettlementPayload {
     expectedCash: number;
     cashShortageOverage: number;
     shortageAction: 'debt_on_cashier' | 'shortage_expense' | 'rounding' | 'none';
+    totalSales?: number;
+    cashSales?: number;
+    cardSales?: number;
+    creditSales?: number;
+    totalExpenses?: number;
+    totalCollections?: number;
+    startingCash?: number;
     // Bottles Custody
     bottlesSold: number;
     bottlesReturned: number;
@@ -578,15 +588,25 @@ export function usePosSettlementsLogic() {
         mutationFn: async (payload: PosSettlementPayload) => {
             const {
                 shiftId,
+                shiftNumber,
                 warehouseId,
                 warehouseName,
+                warehouseLocation,
                 cashierId,
                 cashierName,
+                cashierPhone,
                 safeBankAccId,
                 cashAmount,
                 expectedCash,
                 cashShortageOverage,
                 shortageAction,
+                totalSales,
+                cashSales,
+                cardSales,
+                creditSales,
+                totalExpenses,
+                totalCollections,
+                startingCash,
                 inventoryReturns,
                 bottlesReturned,
                 returnBottlesToMain,
@@ -600,12 +620,25 @@ export function usePosSettlementsLogic() {
             let createdReceiptVoucherId: string | null = null;
             let createdJournalHeaderId: string | null = null;
 
+            // Details string formatters
+            const cashierInfo = `${cashierName}${cashierPhone ? ` (${cashierPhone})` : ''}`;
+            const shiftLabel = shiftNumber || `وردية #${shiftId.slice(0, 8)}`;
+            const locationInfo = warehouseLocation ? ` - ${warehouseLocation}` : '';
+            const salesStr = totalSales !== undefined 
+                ? ` | مبيعات: ${Number(totalSales).toFixed(2)} ر.س (كاش: ${Number(cashSales || 0).toFixed(2)} | شبكة: ${Number(cardSales || 0).toFixed(2)}${creditSales ? ` | آجل: ${Number(creditSales).toFixed(2)}` : ''})` 
+                : '';
+            const expStr = totalExpenses !== undefined && totalExpenses > 0 ? ` | مصاريف: ${Number(totalExpenses).toFixed(2)} ر.س` : '';
+            const shortageStr = cashShortageOverage < 0 
+                ? ` | عجز: ${Math.abs(cashShortageOverage).toFixed(2)} ر.س (${shortageAction === 'debt_on_cashier' ? 'ذمة على الكاشير' : 'فروق تسوية'})` 
+                : (cashShortageOverage > 0 ? ` | زيادة: ${Number(cashShortageOverage).toFixed(2)} ر.س` : '');
+            const extraNotes = notes ? ` | ملاحظات: ${notes}` : '';
+
             // ─────────────────────────────────────────────────────────────
             // 1. CASH SETTLEMENT: Insert Receipt Voucher & Journal
             // ─────────────────────────────────────────────────────────────
             if (cashAmount > 0) {
                 const receiptNumber = `RV-SETTLE-POS-${Date.now().toString().slice(-6)}`;
-                const voucherNotes = `توريد نقدية تسوية عهدة منفذ [${warehouseName}] - الكاشير: ${cashierName}${notes ? ` (${notes})` : ''}`;
+                const voucherNotes = `توريد نقدية تسوية عهدة منفذ [${warehouseName}${locationInfo}] | ${shiftLabel} | المسئول: ${cashierInfo}${salesStr}${expStr} | المبلغ المورد للخزينة: ${cashAmount.toFixed(2)} ر.س${shortageStr}${extraNotes}`;
 
                 // A. Insert into receipt_vouchers
                 const { data: rvData, error: rvErr } = await supabase
@@ -633,11 +666,13 @@ export function usePosSettlementsLogic() {
                 createdReceiptVoucherId = rvData?.id || null;
 
                 // B. Insert Journal Header
+                const journalHeaderDesc = `إخلاء وتوريد نقدية عهدة منفذ [${warehouseName}${locationInfo}] | ${shiftLabel} | المسئول: ${cashierInfo}${salesStr}${expStr} | المبلغ المورد للخزينة: ${cashAmount.toFixed(2)} ر.س${shortageStr}${extraNotes}`;
+
                 const { data: jhData, error: jhErr } = await supabase
                     .from('journal_headers')
                     .insert([{
                         entry_date: date,
-                        description: `قيد تسوية عهدة منفذ بيع ${warehouseName} - الكاشير ${cashierName}`,
+                        description: journalHeaderDesc,
                         status: 'posted',
                         v_type: 'تسوية عهدة منفذ',
                         reference_id: createdReceiptVoucherId || shiftId
@@ -661,7 +696,7 @@ export function usePosSettlementsLogic() {
                         delegate_id: cashierId || null,
                         debit: cashAmount,
                         credit: 0,
-                        notes: `توريد نقدية للخزينة من عهدة منفذ ${warehouseName}`
+                        notes: `توريد نقدية للخزينة من عهدة منفذ [${warehouseName}] | ${shiftLabel} | المسئول: ${cashierInfo}`
                     },
                     // Credit: Cashier Custody (125)
                     {
@@ -671,22 +706,22 @@ export function usePosSettlementsLogic() {
                         delegate_id: cashierId || null,
                         debit: 0,
                         credit: cashAmount,
-                        notes: `إخلاء عهدة كاشير منفذ ${warehouseName} بموجب التوريد للخزينة`
+                        notes: `إخلاء عهدة كاشير منفذ [${warehouseName}] بالتوريد للخزينة | ${shiftLabel} | المسئول: ${cashierInfo} | المبلغ: ${cashAmount.toFixed(2)} ر.س`
                     }
                 ];
 
-                // Shortage handling in accounting
+                // Shortage handling in accounting (Double Entry)
                 if (cashShortageOverage < 0 && shortageAction !== 'none') {
                     const absShortage = Math.abs(cashShortageOverage);
                     if (shortageAction === 'debt_on_cashier') {
                         journalLinesToInsert.push({
                             header_id: createdJournalHeaderId,
-                            account_id: ACC.EMPLOYEE_ADVANCES || ACC.EMPLOYEE_CUSTODY,
+                            account_id: ACC.EMPLOYEE_ADVANCES || '128',
                             partner_id: cashierId || null,
                             delegate_id: cashierId || null,
                             debit: absShortage,
                             credit: 0,
-                            notes: `عجز عهدة صندوق منفذ ${warehouseName} محمل كذمة على الكاشير ${cashierName}`
+                            notes: `إثبات عجز عهدة صندوق منفذ [${warehouseName}] كذمة مستحقة على الكاشير ${cashierInfo} | ${shiftLabel}`
                         });
                         journalLinesToInsert.push({
                             header_id: createdJournalHeaderId,
@@ -695,24 +730,26 @@ export function usePosSettlementsLogic() {
                             delegate_id: cashierId || null,
                             debit: 0,
                             credit: absShortage,
-                            notes: `تسوية عجز العهدة النقدية للوردية`
+                            notes: `إقفال عجز عهدة منفذ [${warehouseName}] بذمة الكاشير ${cashierInfo} | ${shiftLabel}`
                         });
-                    } else if (shortageAction === 'shortage_expense') {
+                    } else if (shortageAction === 'shortage_expense' || shortageAction === 'rounding') {
                         journalLinesToInsert.push({
                             header_id: createdJournalHeaderId,
-                            account_id: ACC.OTHER_REVENUE,
+                            account_id: ACC.ROUNDING_DIFF || 'd5e827b1-4f1a-4c2f-8a03-8d6e7f123456',
                             partner_id: null,
+                            delegate_id: cashierId || null,
                             debit: absShortage,
                             credit: 0,
-                            notes: `عجز تسوية صندوق منفذ ${warehouseName}`
+                            notes: `تسجيل فروقات/عجز تسوية صندوق منفذ [${warehouseName}] كمصروف | ${shiftLabel} | المسئول: ${cashierInfo}`
                         });
                         journalLinesToInsert.push({
                             header_id: createdJournalHeaderId,
                             account_id: ACC.EMPLOYEE_CUSTODY,
                             partner_id: cashierId || null,
+                            delegate_id: cashierId || null,
                             debit: 0,
                             credit: absShortage,
-                            notes: `تسوية عجز العهدة النقدية للوردية`
+                            notes: `إقفال فرق تسوية عهدة منفذ [${warehouseName}] | ${shiftLabel} | المسئول: ${cashierInfo}`
                         });
                     }
                 }
@@ -747,7 +784,7 @@ export function usePosSettlementsLogic() {
                         warehouse_id: warehouseId,
                         destination_warehouse_id: MAIN_WAREHOUSE_ID,
                         shift_id: shiftId,
-                        notes: `إرجاع فائض بضاعة من منفذ ${warehouseName} إلى المستودع الرئيسي (${ret.notes || ''})`
+                        notes: `إرجاع فائض بضاعة من منفذ ${warehouseName} إلى المستودع الرئيسي | ${shiftLabel} | الكاشير: ${cashierInfo} (${ret.notes || ''})`
                     }]);
                 }
 
@@ -765,7 +802,7 @@ export function usePosSettlementsLogic() {
                         status: 'approved',
                         warehouse_id: warehouseId,
                         shift_id: shiftId,
-                        notes: `تسجيل تالف/هالك بضاعة أثناء تشغيل منفذ ${warehouseName}`
+                        notes: `تسجيل تالف/هالك بضاعة أثناء تشغيل منفذ ${warehouseName} | ${shiftLabel} | الكاشير: ${cashierInfo}`
                     }]);
                 }
 
@@ -783,7 +820,7 @@ export function usePosSettlementsLogic() {
                         status: 'approved',
                         warehouse_id: warehouseId,
                         shift_id: shiftId,
-                        notes: `تسجيل عجز جرد مخزني في منفذ ${warehouseName}`
+                        notes: `تسجيل عجز جرد مخزني في منفذ ${warehouseName} | ${shiftLabel} | الكاشير: ${cashierInfo}`
                     }]);
                 }
             }

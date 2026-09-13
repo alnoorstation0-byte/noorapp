@@ -111,16 +111,26 @@ export default function PosSettlementActionModal({
 
         const payload = {
             shiftId: shift.id,
+            shiftNumber: shift.shiftNumber,
             warehouseId: shift.warehouseId,
             warehouseName: shift.warehouseName,
+            warehouseLocation: shift.warehouseLocation,
             cashierId: shift.cashierId,
             cashierName: shift.cashierName,
+            cashierPhone: shift.cashierPhone,
             settlementDate,
             cashAmount: actualCashHandedOver,
             safeBankAccId: selectedSafeAcc,
             expectedCash: netCashDue,
             cashShortageOverage: cashVariance,
             shortageAction,
+            totalSales: shift.totalSales,
+            cashSales: shift.cashSales,
+            cardSales: shift.cardSales,
+            creditSales: shift.creditSales,
+            totalExpenses: shift.totalExpenses,
+            totalCollections: shift.totalCollections,
+            startingCash: shift.startingCash,
             bottlesSold: shift.bottlesSold,
             bottlesReturned,
             bottlesShortage,
@@ -684,8 +694,8 @@ export default function PosSettlementActionModal({
                                                 <td style={{ padding: '12px 14px', fontWeight: 800, color: '#122946' }}>
                                                     حـ/ الخزينة الرئيسية أو البنك ({accounts.find(a => a.id === selectedSafeAcc)?.code || '122'})
                                                 </td>
-                                                <td style={{ padding: '12px 14px', color: '#64748b' }}>
-                                                    توريد نقدية من عهدة منفذ {shift.warehouseName}
+                                                <td style={{ padding: '12px 14px', color: '#1e293b', fontSize: '12px' }}>
+                                                    توريد نقدية للخزينة من عهدة منفذ [{shift.warehouseName}] | {shift.shiftNumber} | المسئول: {shift.cashierName}{shift.cashierPhone ? ` (${shift.cashierPhone})` : ''}
                                                 </td>
                                                 <td style={{ padding: '12px 14px', textAlign: 'center', fontWeight: 900, color: '#16a34a' }}>
                                                     {formatCurrency(actualCashHandedOver)}
@@ -698,8 +708,8 @@ export default function PosSettlementActionModal({
                                                 <td style={{ padding: '12px 14px', fontWeight: 800, color: '#122946' }}>
                                                     حـ/ عهدة موظفين ونقاط بيع (125) - {shift.cashierName}
                                                 </td>
-                                                <td style={{ padding: '12px 14px', color: '#64748b' }}>
-                                                    إخلاء عهدة كاشير المنفذ بالتوريد للخزينة
+                                                <td style={{ padding: '12px 14px', color: '#1e293b', fontSize: '12px' }}>
+                                                    إخلاء عهدة كاشير منفذ [{shift.warehouseName}] بالتوريد للخزينة | {shift.shiftNumber} | المسئول: {shift.cashierName}
                                                 </td>
                                                 <td style={{ padding: '12px 14px', textAlign: 'center', color: '#64748b' }}>0.00 ر.س</td>
                                                 <td style={{ padding: '12px 14px', textAlign: 'center', fontWeight: 900, color: '#ef4444' }}>
@@ -707,22 +717,40 @@ export default function PosSettlementActionModal({
                                                 </td>
                                             </tr>
 
-                                            {/* Shortage row if applicable */}
+                                            {/* Shortage row if applicable (Balanced Double Entry) */}
                                             {isShortage && shortageAction !== 'none' && (
-                                                <tr style={{ borderBottom: '1px solid rgba(28, 115, 171, 0.08)', background: 'rgba(239, 68, 68, 0.04)' }}>
-                                                    <td style={{ padding: '12px 14px', fontWeight: 800, color: '#ef4444' }}>
-                                                        {shortageAction === 'debt_on_cashier' ? `حـ/ ذمم موظفين (125) - ${shift.cashierName}` : 'حـ/ مصروف فروقات تسوية الصندوق (53)'}
-                                                    </td>
-                                                    <td style={{ padding: '12px 14px', color: '#ef4444' }}>
-                                                        عجز عهدة صندوق منفذ {shift.warehouseName}
-                                                    </td>
-                                                    <td style={{ padding: '12px 14px', textAlign: 'center', fontWeight: 900, color: '#16a34a' }}>
-                                                        {formatCurrency(Math.abs(cashVariance))}
-                                                    </td>
-                                                    <td style={{ padding: '12px 14px', textAlign: 'center', fontWeight: 900, color: '#ef4444' }}>
-                                                        0.00 ر.س
-                                                    </td>
-                                                </tr>
+                                                <>
+                                                    <tr style={{ borderBottom: '1px solid rgba(28, 115, 171, 0.08)', background: 'rgba(239, 68, 68, 0.04)' }}>
+                                                        <td style={{ padding: '12px 14px', fontWeight: 800, color: '#ef4444' }}>
+                                                            {shortageAction === 'debt_on_cashier' ? `حـ/ سلف وذمم موظفين ومناديب (128) - ${shift.cashierName}` : 'حـ/ تسويات وفروق هللات ومصروف عجز الصندوق (527)'}
+                                                        </td>
+                                                        <td style={{ padding: '12px 14px', color: '#ef4444', fontSize: '12px' }}>
+                                                            {shortageAction === 'debt_on_cashier' 
+                                                                ? `إثبات عجز عهدة صندوق منفذ [${shift.warehouseName}] كذمة مستحقة على الكاشير ${shift.cashierName}` 
+                                                                : `تسجيل فروقات/عجز تسوية صندوق منفذ [${shift.warehouseName}] كمصروف`}
+                                                        </td>
+                                                        <td style={{ padding: '12px 14px', textAlign: 'center', fontWeight: 900, color: '#16a34a' }}>
+                                                            {formatCurrency(Math.abs(cashVariance))}
+                                                        </td>
+                                                        <td style={{ padding: '12px 14px', textAlign: 'center', color: '#64748b' }}>
+                                                            0.00 ر.س
+                                                        </td>
+                                                    </tr>
+                                                    <tr style={{ borderBottom: '1px solid rgba(28, 115, 171, 0.08)', background: 'rgba(239, 68, 68, 0.04)' }}>
+                                                        <td style={{ padding: '12px 14px', fontWeight: 800, color: '#ef4444' }}>
+                                                            حـ/ عهدة موظفين ونقاط بيع (125) - {shift.cashierName}
+                                                        </td>
+                                                        <td style={{ padding: '12px 14px', color: '#ef4444', fontSize: '12px' }}>
+                                                            إقفال عجز عهدة صندوق منفذ [{shift.warehouseName}] {shortageAction === 'debt_on_cashier' ? `بذمة الكاشير ${shift.cashierName}` : 'كمصروف تسوية'}
+                                                        </td>
+                                                        <td style={{ padding: '12px 14px', textAlign: 'center', color: '#64748b' }}>
+                                                            0.00 ر.س
+                                                        </td>
+                                                        <td style={{ padding: '12px 14px', textAlign: 'center', fontWeight: 900, color: '#ef4444' }}>
+                                                            {formatCurrency(Math.abs(cashVariance))}
+                                                        </td>
+                                                    </tr>
+                                                </>
                                             )}
                                         </tbody>
                                         <tfoot>

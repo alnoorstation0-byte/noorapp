@@ -654,65 +654,71 @@ export default function HierarchicalLedgerPage() {
 
         /* 📜 Entry lines (Transactions) on Desktop */
         .entry-line { 
-          background: rgba(255, 255, 255, 0.75);
+          background: rgba(255, 255, 255, 0.85);
           margin: 4px 6px 6px 6px;
-          padding: 6px 14px; 
-          border-radius: 10px;
+          padding: 8px 12px; 
+          border-radius: 9px;
           border-right: 3px solid ${THEME.goldAccent};
           display: flex;
-          align-items: center;
+          align-items: flex-start;
           justify-content: space-between;
           gap: 12px;
           font-size: 11px;
           border: 1px solid rgba(28, 115, 171, 0.15);
           box-sizing: border-box;
           max-width: 100%;
-          overflow: hidden;
-          box-shadow: 0 2px 6px rgba(0, 0, 0, 0.02);
+          box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+          transition: all 0.2s ease;
+        }
+        .entry-line:hover {
+          background: rgba(255, 255, 255, 0.98);
+          border-color: rgba(28, 115, 171, 0.3);
+          box-shadow: 0 2px 8px rgba(28, 115, 171, 0.08);
         }
         .entry-line-top {
           display: flex;
-          align-items: center;
-          gap: 10px;
+          align-items: flex-start;
+          gap: 8px;
           flex: 1;
           min-width: 0;
-          overflow: hidden;
         }
         .entry-line-date {
-          font-weight: 800;
+          font-weight: 700;
           color: #475569;
           font-family: monospace;
-          font-size: 11px;
-          width: 82px;
+          font-size: 10.5px;
+          width: 78px;
           flex-shrink: 0;
           background: rgba(0, 0, 0, 0.04);
           padding: 2px 6px;
           border-radius: 5px;
           text-align: center;
           letter-spacing: -0.2px;
+          margin-top: 1px;
         }
         .entry-line-desc {
-          color: ${THEME.primary};
-          font-weight: 700;
-          font-size: 12px;
+          color: #1e293b;
+          font-weight: 600;
+          font-size: 11px;
+          line-height: 1.45;
           flex: 1;
           min-width: 0;
-          white-space: nowrap;
-          overflow: hidden;
-          text-overflow: ellipsis;
+          white-space: normal; /* 🚀 إظهار كامل النص دون بتر */
+          word-break: break-word;
         }
         .entry-line-values {
           display: flex;
           align-items: center;
-          gap: 8px;
+          gap: 6px;
           flex-shrink: 0;
+          margin-top: 1px;
         }
         .entry-stat-chip {
           text-align: center;
           font-weight: 800;
           font-family: monospace;
-          font-size: 11px;
-          padding: 3px 8px;
+          font-size: 10.5px;
+          padding: 2px 7px;
           border-radius: 6px;
           display: inline-flex;
           align-items: center;
@@ -1250,35 +1256,36 @@ export default function HierarchicalLedgerPage() {
             flex-direction: column !important;
             gap: 6px !important;
             border-radius: 8px !important;
-            background: rgba(255, 255, 255, 0.9) !important;
-            font-size: 11px !important;
+            background: rgba(255, 255, 255, 0.92) !important;
+            font-size: 10.5px !important;
             max-width: 100% !important;
             box-sizing: border-box !important;
-            overflow: hidden !important;
           }
 
           .entry-line-top {
             display: flex !important;
-            justify-content: space-between !important;
-            align-items: center !important;
+            align-items: flex-start !important;
             gap: 6px !important;
             width: 100% !important;
             min-width: 0 !important;
           }
 
           .entry-line-desc {
-            white-space: nowrap !important;
-            overflow: hidden !important;
-            text-overflow: ellipsis !important;
+            white-space: normal !important;
+            word-break: break-word !important;
             flex: 1 !important;
             min-width: 0 !important;
-            font-size: 11px !important;
+            font-size: 10.5px !important;
+            line-height: 1.4 !important;
+            color: #1e293b !important;
           }
 
           .entry-line-date {
-            font-size: 10px !important;
+            font-size: 9.5px !important;
             padding: 2px 5px !important;
+            flex-shrink: 0 !important;
             width: auto !important;
+            margin-top: 1px !important;
           }
 
           .entry-line-values {

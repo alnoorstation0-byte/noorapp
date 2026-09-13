@@ -29,8 +29,12 @@ export interface SettlementPayload {
     operationNumber: string;
     driverId: string;
     driverName: string;
+    driverPhone?: string;
+    driverCode?: string;
     vehicleId?: string | null;
+    vehiclePlate?: string;
     warehouseId?: string | null;
+    warehouseName?: string;
     mainWarehouseId: string;
     settlementDate: string;
     // Cash Settlement
@@ -39,6 +43,11 @@ export interface SettlementPayload {
     netCashDue: number;
     cashShortage: number;
     shortageAction: 'debt_on_delegate' | 'rounding' | 'none';
+    totalSales?: number;
+    cashSales?: number;
+    creditSales?: number;
+    totalCollections?: number;
+    totalExpenses?: number;
     // Inventory Settlement
     inventoryReturns: Array<{
         itemId: string;
@@ -590,11 +599,22 @@ export function useDelegateSettlementsLogic() {
                 operationNumber,
                 driverId,
                 driverName,
+                driverPhone,
+                driverCode,
+                vehicleId,
+                vehiclePlate,
+                warehouseId,
+                warehouseName,
                 safeBankAccId,
                 cashAmount,
                 netCashDue,
                 cashShortage,
                 shortageAction,
+                totalSales,
+                cashSales,
+                creditSales,
+                totalCollections,
+                totalExpenses,
                 inventoryReturns,
                 closeTrip,
                 settlementDate,
@@ -609,12 +629,22 @@ export function useDelegateSettlementsLogic() {
             let createdReceiptVoucherId: string | null = null;
             let createdJournalHeaderId: string | null = null;
 
+            // Details string formatters
+            const driverInfo = `${driverName}${driverPhone ? ` (${driverPhone})` : ''}`;
+            const vehicleInfo = vehiclePlate ? ` | مركبة: ${vehiclePlate}` : '';
+            const salesSummary = totalSales !== undefined ? ` | المبيعات: ${Number(totalSales).toFixed(2)} ر.س` : '';
+            const expSummary = totalExpenses !== undefined && totalExpenses > 0 ? ` | المصروفات: ${Number(totalExpenses).toFixed(2)} ر.س` : '';
+            const shortageSummary = cashShortage > 0 
+                ? ` | العجز: ${cashShortage.toFixed(2)} ر.س (${shortageAction === 'debt_on_delegate' ? 'تسجيل ذمة' : 'فرق تسوية'})` 
+                : '';
+            const extraNotes = notes ? ` | ملاحظات: ${notes}` : '';
+
             // ─────────────────────────────────────────────────────────────
             // 1. CASH SETTLEMENT: Insert Receipt Voucher & Cash Journal
             // ─────────────────────────────────────────────────────────────
             if (cashAmount > 0) {
                 const receiptNumber = `RV-SETTLE-${operationNumber}-${Date.now().toString().slice(-4)}`;
-                const voucherNotes = `تسوية عهدة نقدية لرحلة #${operationNumber} - المندوب: ${driverName}${notes ? ` (${notes})` : ''}`;
+                const voucherNotes = `توريد نقدية تسوية عهدة رحلة #${operationNumber} | المندوب المسؤول: ${driverInfo}${vehicleInfo}${salesSummary}${expSummary} | المبلغ المورد: ${cashAmount.toFixed(2)} ر.س${shortageSummary}${extraNotes}`;
 
                 // A. Insert into receipt_vouchers
                 const { data: rvData, error: rvErr } = await supabase
@@ -642,11 +672,13 @@ export function useDelegateSettlementsLogic() {
                 createdReceiptVoucherId = rvData?.id || null;
 
                 // B. Insert Journal Header for Cash Handover
+                const cashHeaderDesc = `إخلاء وتوريد نقدية عهدة رحلة #${operationNumber} | المندوب المسؤول: ${driverInfo}${vehicleInfo}${salesSummary}${expSummary} | المبلغ المورد: ${cashAmount.toFixed(2)} ر.س${shortageSummary}${extraNotes}`;
+
                 const { data: jhData, error: jhErr } = await supabase
                     .from('journal_headers')
                     .insert([{
                         entry_date: date,
-                        description: `توريد نقدية تسوية عهدة رحلة #${operationNumber} للمندوب ${driverName}`,
+                        description: cashHeaderDesc,
                         status: 'posted',
                         v_type: 'تسوية عهدة',
                         reference_id: createdReceiptVoucherId || tripId,
@@ -673,7 +705,7 @@ export function useDelegateSettlementsLogic() {
                         fleet_operation_id: tripId,
                         debit: cashAmount,
                         credit: 0,
-                        notes: `توريد نقدية للخزينة من عهدة رحلة #${operationNumber}`
+                        notes: `توريد نقدية للخزينة من عهدة رحلة #${operationNumber} | المندوب المسؤول: ${driverInfo}${vehicleInfo}`
                     },
                     {
                         header_id: createdJournalHeaderId,
@@ -683,7 +715,7 @@ export function useDelegateSettlementsLogic() {
                         fleet_operation_id: tripId,
                         debit: 0,
                         credit: cashAmount,
-                        notes: `إخلاء عهدة نقدية للمندوب ${driverName}`
+                        notes: `إخلاء عهدة نقدية للمندوب ${driverInfo} | رحلة #${operationNumber} | المبلغ المورد: ${cashAmount.toFixed(2)} ر.س`
                     }
                 ];
 
@@ -701,7 +733,7 @@ export function useDelegateSettlementsLogic() {
                                 fleet_operation_id: tripId,
                                 debit: cashShortage,
                                 credit: 0,
-                                notes: `عجز عهدة نقدية مسجل كذمة على المندوب رحلة #${operationNumber}`
+                                notes: `إثبات عجز عهدة نقدية كذمة مستحقة على المندوب ${driverInfo} | رحلة #${operationNumber}`
                             },
                             {
                                 header_id: createdJournalHeaderId,
@@ -711,7 +743,7 @@ export function useDelegateSettlementsLogic() {
                                 fleet_operation_id: tripId,
                                 debit: 0,
                                 credit: cashShortage,
-                                notes: `تسوية عجز عهدة رحلة #${operationNumber}`
+                                notes: `إقفال عجز عهدة رحلة #${operationNumber} بذمة المندوب ${driverInfo}`
                             }
                         );
                     } else if (shortageAction === 'rounding') {
@@ -726,7 +758,7 @@ export function useDelegateSettlementsLogic() {
                                 fleet_operation_id: tripId,
                                 debit: cashShortage,
                                 credit: 0,
-                                notes: `فرق تسوية عهدة رحلة #${operationNumber}`
+                                notes: `فروق وهللات تسوية عهدة رحلة #${operationNumber} | المندوب: ${driverInfo}`
                             },
                             {
                                 header_id: createdJournalHeaderId,
@@ -736,7 +768,7 @@ export function useDelegateSettlementsLogic() {
                                 fleet_operation_id: tripId,
                                 debit: 0,
                                 credit: cashShortage,
-                                notes: `إقفال فرق تسوية رحلة #${operationNumber}`
+                                notes: `إقفال فرق هللات تسوية عهدة رحلة #${operationNumber} للمندوب ${driverInfo}`
                             }
                         );
                     }
@@ -852,11 +884,26 @@ export function useDelegateSettlementsLogic() {
                 const totalInvJournalValue = totalReturnInventoryValue + totalWasteInventoryValue + totalShortageInventoryValue;
                 if (totalInvJournalValue > 0) {
                     try {
+                        const returnedItemsSummary = (inventoryReturns || [])
+                            .filter(r => r.returnQty > 0)
+                            .map(r => `${r.itemName} (${r.returnQty})`)
+                            .join('، ');
+                        const wasteItemsSummary = (inventoryReturns || [])
+                            .filter(r => r.wasteQty > 0)
+                            .map(r => `${r.itemName} (${r.wasteQty})`)
+                            .join('، ');
+                        const shortageItemsSummary = (inventoryReturns || [])
+                            .filter(r => r.shortageQty > 0)
+                            .map(r => `${r.itemName} (${r.shortageQty})`)
+                            .join('، ');
+
+                        const invHeaderDesc = `إرجاع وتسوية مخزون بضاعة رحلة #${operationNumber} | المندوب المسؤول: ${driverInfo}${vehicleInfo}${returnedItemsSummary ? ` | المرتجع: [${returnedItemsSummary}]` : ''}${wasteItemsSummary ? ` | التوالف: [${wasteItemsSummary}]` : ''}${shortageItemsSummary ? ` | العجز: [${shortageItemsSummary}]` : ''}`;
+
                         const { data: invJh, error: invJhErr } = await supabase
                             .from('journal_headers')
                             .insert([{
                                 entry_date: date,
-                                description: `إرجاع وتسوية مخزون بضاعة رحلة #${operationNumber} للمندوب ${driverName}`,
+                                description: invHeaderDesc,
                                 status: 'posted',
                                 v_type: 'تسوية مخزون',
                                 reference_id: tripId,
@@ -881,7 +928,7 @@ export function useDelegateSettlementsLogic() {
                                         fleet_operation_id: tripId,
                                         debit: totalReturnInventoryValue,
                                         credit: 0,
-                                        notes: `إرجاع بضاعة للمستودع الرئيسي من عهدة رحلة #${operationNumber}`
+                                        notes: `إرجاع بضاعة للمستودع الرئيسي من عهدة رحلة #${operationNumber} | المندوب: ${driverInfo}${returnedItemsSummary ? ` [${returnedItemsSummary}]` : ''}`
                                     },
                                     {
                                         header_id: invJh.id,
@@ -891,7 +938,7 @@ export function useDelegateSettlementsLogic() {
                                         fleet_operation_id: tripId,
                                         debit: 0,
                                         credit: totalReturnInventoryValue,
-                                        notes: `إخلاء عهدة مخزون مرتجع لرحلة #${operationNumber}`
+                                        notes: `إخلاء عهدة مخزون بضاعة مرتجعة للمندوب ${driverInfo} | رحلة #${operationNumber}`
                                     }
                                 );
                             }
@@ -909,7 +956,7 @@ export function useDelegateSettlementsLogic() {
                                         fleet_operation_id: tripId,
                                         debit: totalWasteInventoryValue,
                                         credit: 0,
-                                        notes: `إثبات توالف وهدر بضاعة رحلة #${operationNumber}`
+                                        notes: `إثبات توالف وهدر بضاعة رحلة #${operationNumber} | المندوب: ${driverInfo}${wasteItemsSummary ? ` [${wasteItemsSummary}]` : ''}`
                                     },
                                     {
                                         header_id: invJh.id,
@@ -919,7 +966,7 @@ export function useDelegateSettlementsLogic() {
                                         fleet_operation_id: tripId,
                                         debit: 0,
                                         credit: totalWasteInventoryValue,
-                                        notes: `تخفيض عهدة المخزون بالتوالف رحلة #${operationNumber}`
+                                        notes: `تخفيض عهدة المخزون بالتوالف للمندوب ${driverInfo} | رحلة #${operationNumber}`
                                     }
                                 );
                             }
@@ -937,7 +984,7 @@ export function useDelegateSettlementsLogic() {
                                         fleet_operation_id: tripId,
                                         debit: totalShortageInventoryValue,
                                         credit: 0,
-                                        notes: `عجز بضاعة مفقودة محملة كذمة على المندوب رحلة #${operationNumber}`
+                                        notes: `عجز بضاعة مفقودة محمل كذمة على المندوب ${driverInfo} | رحلة #${operationNumber}${shortageItemsSummary ? ` [${shortageItemsSummary}]` : ''}`
                                     },
                                     {
                                         header_id: invJh.id,
@@ -947,7 +994,7 @@ export function useDelegateSettlementsLogic() {
                                         fleet_operation_id: tripId,
                                         debit: 0,
                                         credit: totalShortageInventoryValue,
-                                        notes: `إقفال عهدة المخزون بالعجز رحلة #${operationNumber}`
+                                        notes: `إقفال عهدة المخزون بالعجز المحمل على المندوب ${driverInfo} | رحلة #${operationNumber}`
                                     }
                                 );
                             }

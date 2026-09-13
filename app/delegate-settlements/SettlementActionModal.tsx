@@ -162,6 +162,8 @@ export default function SettlementActionModal({
     // Journal Preview Lines
     const journalPreviewLines = useMemo(() => {
         const lines: Array<{ accountName: string; code: string; debit: number; credit: number; notes: string; partnerName?: string }> = [];
+        const driverInfo = `${trip?.driverName || ''}${trip?.driverPhone ? ` (${trip.driverPhone})` : ''}`;
+        const vehicleInfo = trip?.vehiclePlate ? ` | مركبة: ${trip.vehiclePlate}` : '';
 
         // 1. Cash settlement lines
         if (actualCashHandedOver > 0) {
@@ -171,7 +173,7 @@ export default function SettlementActionModal({
                 code: safeAccObj?.code || '122',
                 debit: actualCashHandedOver,
                 credit: 0,
-                notes: `توريد نقدية للخزينة من عهدة رحلة #${trip?.operationNumber || ''}`
+                notes: `توريد نقدية للخزينة من عهدة رحلة #${trip?.operationNumber || ''} | المندوب المسؤول: ${driverInfo}${vehicleInfo}`
             });
 
             lines.push({
@@ -179,8 +181,8 @@ export default function SettlementActionModal({
                 code: '125',
                 debit: 0,
                 credit: actualCashHandedOver,
-                partnerName: trip?.driverName,
-                notes: `إخلاء عهدة نقدية للمندوب ${trip?.driverName || ''}`
+                partnerName: driverInfo,
+                notes: `إخلاء عهدة نقدية للمندوب ${driverInfo} | رحلة #${trip?.operationNumber || ''} | المورد: ${formatCurrency(actualCashHandedOver)}`
             });
 
             if (cashShortage > 0) {
@@ -190,16 +192,16 @@ export default function SettlementActionModal({
                         code: '128',
                         debit: cashShortage,
                         credit: 0,
-                        partnerName: trip?.driverName,
-                        notes: `تسجيل عجز نقدية عهدة كذمة على المندوب`
+                        partnerName: driverInfo,
+                        notes: `إثبات عجز عهدة نقدية كذمة مستحقة على المندوب ${driverInfo} | رحلة #${trip?.operationNumber || ''}`
                     });
                     lines.push({
                         accountName: 'عهدة موظفين ومناديب',
                         code: '125',
                         debit: 0,
                         credit: cashShortage,
-                        partnerName: trip?.driverName,
-                        notes: `تسوية عجز عهدة رحلة #${trip?.operationNumber || ''}`
+                        partnerName: driverInfo,
+                        notes: `إقفال عجز عهدة رحلة #${trip?.operationNumber || ''} بذمة المندوب ${driverInfo}`
                     });
                 } else if (shortageAction === 'rounding') {
                     lines.push({
@@ -207,36 +209,49 @@ export default function SettlementActionModal({
                         code: '527',
                         debit: cashShortage,
                         credit: 0,
-                        notes: `فرق تسوية عهدة`
+                        notes: `فروق وهللات تسوية عهدة رحلة #${trip?.operationNumber || ''} | المندوب: ${driverInfo}`
                     });
                     lines.push({
                         accountName: 'عهدة موظفين ومناديب',
                         code: '125',
                         debit: 0,
                         credit: cashShortage,
-                        partnerName: trip?.driverName,
-                        notes: `إقفال فرق تسوية رحلة #${trip?.operationNumber || ''}`
+                        partnerName: driverInfo,
+                        notes: `إقفال فرق هللات تسوية عهدة رحلة #${trip?.operationNumber || ''} للمندوب ${driverInfo}`
                     });
                 }
             }
         }
 
         // 2. Inventory return lines
+        const returnedSummary = returnRows
+            .filter(r => r.returnQty > 0)
+            .map(r => `${r.itemName} (${r.returnQty})`)
+            .join('، ');
+        const wasteSummary = returnRows
+            .filter(r => r.wasteQty > 0)
+            .map(r => `${r.itemName} (${r.wasteQty})`)
+            .join('، ');
+        const shortageSummary = returnRows
+            .filter(r => r.shortageQty > 0)
+            .map(r => `${r.itemName} (${r.shortageQty})`)
+            .join('، ');
+
         if (totalReturnValue > 0) {
             lines.push({
                 accountName: 'مخزون البضائع بالمستودع الرئيسي',
                 code: '126',
                 debit: totalReturnValue,
                 credit: 0,
-                notes: `إرجاع بضاعة للمستودع الرئيسي من رحلة #${trip?.operationNumber || ''}`
+                notes: `إرجاع بضاعة للمستودع الرئيسي من عهدة رحلة #${trip?.operationNumber || ''} | المندوب: ${driverInfo}${returnedSummary ? ` [${returnedSummary}]` : ''}`
             });
             lines.push({
                 accountName: 'عهدة مخزون (سيارة/مندوب)',
                 code: '130',
                 debit: 0,
                 credit: totalReturnValue,
-                partnerName: trip?.driverName,
-                notes: `إخلاء عهدة مخزون مرتجع لرحلة #${trip?.operationNumber || ''}`
+                partnerName: driverInfo,
+                notes: `إخلاء عهدة مخزون بضاعة مرتجعة للمندوب ${driverInfo} | رحلة #${trip?.operationNumber || ''}`
             });
         }
 
@@ -246,15 +261,15 @@ export default function SettlementActionModal({
                 code: '528',
                 debit: totalWasteValue,
                 credit: 0,
-                notes: `إثبات توالف وهدر بضاعة رحلة #${trip?.operationNumber || ''}`
+                notes: `إثبات توالف وهدر بضاعة رحلة #${trip?.operationNumber || ''} | المندوب: ${driverInfo}${wasteSummary ? ` [${wasteSummary}]` : ''}`
             });
             lines.push({
                 accountName: 'عهدة مخزون (سيارة/مندوب)',
                 code: '130',
                 debit: 0,
                 credit: totalWasteValue,
-                partnerName: trip?.driverName,
-                notes: `تخفيض عهدة المخزون بالتوالف`
+                partnerName: driverInfo,
+                notes: `تخفيض عهدة المخزون بالتوالف للمندوب ${driverInfo} | رحلة #${trip?.operationNumber || ''}`
             });
         }
 
@@ -264,21 +279,21 @@ export default function SettlementActionModal({
                 code: '128',
                 debit: totalShortageValue,
                 credit: 0,
-                partnerName: trip?.driverName,
-                notes: `عجز بضاعة مفقودة محمل كذمة على المندوب`
+                partnerName: driverInfo,
+                notes: `عجز بضاعة مفقودة محمل كذمة على المندوب ${driverInfo} | رحلة #${trip?.operationNumber || ''}${shortageSummary ? ` [${shortageSummary}]` : ''}`
             });
             lines.push({
                 accountName: 'عهدة مخزون (سيارة/مندوب)',
                 code: '130',
                 debit: 0,
                 credit: totalShortageValue,
-                partnerName: trip?.driverName,
-                notes: `إقفال عهدة المخزون بالعجز`
+                partnerName: driverInfo,
+                notes: `إقفال عهدة المخزون بالعجز المحمل على المندوب ${driverInfo} | رحلة #${trip?.operationNumber || ''}`
             });
         }
 
         return lines;
-    }, [actualCashHandedOver, cashShortage, shortageAction, totalReturnValue, totalWasteValue, totalShortageValue, trip, selectedSafeAcc, accounts]);
+    }, [actualCashHandedOver, cashShortage, shortageAction, totalReturnValue, totalWasteValue, totalShortageValue, returnRows, trip, selectedSafeAcc, accounts]);
 
     const totalDebit = journalPreviewLines.reduce((s, l) => s + l.debit, 0);
     const totalCredit = journalPreviewLines.reduce((s, l) => s + l.credit, 0);
@@ -303,8 +318,12 @@ export default function SettlementActionModal({
             operationNumber: trip.operationNumber,
             driverId: trip.driverId,
             driverName: trip.driverName,
+            driverPhone: trip.driverPhone,
+            driverCode: trip.driverCode,
             vehicleId: trip.vehicleId,
+            vehiclePlate: trip.vehiclePlate,
             warehouseId: trip.warehouseId,
+            warehouseName: trip.warehouseName,
             mainWarehouseId: selectedMainWh,
             settlementDate,
             cashAmount: Number(actualCashHandedOver || 0),
@@ -312,6 +331,11 @@ export default function SettlementActionModal({
             netCashDue,
             cashShortage,
             shortageAction,
+            totalSales: trip.totalSales,
+            cashSales: trip.cashSales,
+            creditSales: trip.creditSales,
+            totalCollections: trip.totalCollections,
+            totalExpenses: trip.totalExpenses,
             inventoryReturns: returnRows.map(r => ({
                 itemId: r.itemId,
                 itemName: r.itemName,
