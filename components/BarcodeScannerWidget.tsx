@@ -8,7 +8,7 @@ interface BarcodeScannerWidgetProps {
 }
 
 // 🔊 High-pitch POS feedback confirmation beep using Web Audio API
-const playPosBeep = () => {
+export const playPosBeep = () => {
   try {
     const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
     if (!AudioCtx) return;
@@ -17,16 +17,26 @@ const playPosBeep = () => {
     const gain = ctx.createGain();
 
     osc.type = 'sine';
-    osc.frequency.setValueAtTime(1200, ctx.currentTime);
-    gain.gain.setValueAtTime(0.25, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.12);
+    // Authentic POS high tone (1760Hz - A6) with fast decay
+    osc.frequency.setValueAtTime(1760, ctx.currentTime);
+    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.09);
 
     osc.connect(gain);
     gain.connect(ctx.destination);
     osc.start();
-    osc.stop(ctx.currentTime + 0.12);
+    osc.stop(ctx.currentTime + 0.09);
   } catch (e) {
     // AudioContext blocked or not supported - safe to ignore
+  }
+};
+
+// 📳 Haptic vibration feedback for mobile devices
+export const triggerHaptic = (duration = 80) => {
+  if (typeof navigator !== 'undefined' && navigator.vibrate) {
+    try {
+      navigator.vibrate([duration]);
+    } catch (e) {}
   }
 };
 
@@ -144,10 +154,6 @@ export default function BarcodeScannerWidget({
       {isCameraOpen && (
         <ProfessionalBarcodeModal 
           onDetected={(code) => {
-            playPosBeep();
-            if (navigator.vibrate) {
-              try { navigator.vibrate([80]); } catch (e) {}
-            }
             setIsCameraOpen(false);
             onScan(code);
           }}
@@ -155,6 +161,87 @@ export default function BarcodeScannerWidget({
         />
       )}
     </div>
+  );
+}
+
+export interface BarcodeCameraButtonProps {
+  onScan: (barcode: string) => void;
+  title?: string;
+  size?: 'sm' | 'md' | 'lg';
+  label?: string;
+  className?: string;
+  style?: React.CSSProperties;
+}
+
+// 📸 Reusable standalone Camera Barcode button (styled exactly like the POS Cashier button)
+export function BarcodeCameraButton({
+  onScan,
+  title = "مسح الباركود بالكاميرا",
+  size = 'md',
+  label,
+  className,
+  style
+}: BarcodeCameraButtonProps) {
+  const [isOpen, setIsOpen] = useState(false);
+
+  const sizeStyles = {
+    sm: { height: '36px', minWidth: '36px', padding: label ? '0 10px' : '0 8px', fontSize: '12px' },
+    md: { height: '42px', minWidth: '44px', padding: label ? '0 14px' : '0 12px', fontSize: '13px' },
+    lg: { height: '48px', minWidth: '48px', padding: label ? '0 18px' : '0 14px', fontSize: '14px' },
+  }[size];
+
+  return (
+    <>
+      <button
+        type="button"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setIsOpen(true);
+        }}
+        className={className}
+        title={title}
+        style={{
+          background: 'linear-gradient(135deg, #1C73AB 0%, #2891C8 100%)',
+          color: 'white',
+          borderRadius: '12px',
+          border: '1px solid rgba(255, 255, 255, 0.4)',
+          display: 'inline-flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          gap: '6px',
+          cursor: 'pointer',
+          boxShadow: '0 4px 12px rgba(28, 115, 171, 0.25)',
+          transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
+          fontWeight: 800,
+          whiteSpace: 'nowrap',
+          flexShrink: 0,
+          ...sizeStyles,
+          ...style
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.transform = 'translateY(-2px)';
+          e.currentTarget.style.boxShadow = '0 6px 18px rgba(28, 115, 171, 0.38)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.transform = 'none';
+          e.currentTarget.style.boxShadow = '0 4px 12px rgba(28, 115, 171, 0.25)';
+        }}
+      >
+        <span style={{ fontSize: size === 'sm' ? '15px' : '18px' }}>📷</span>
+        {label && <span>{label}</span>}
+      </button>
+
+      {isOpen && (
+        <ProfessionalBarcodeModal
+          onDetected={(code) => {
+            setIsOpen(false);
+            onScan(code);
+          }}
+          onClose={() => setIsOpen(false)}
+        />
+      )}
+    </>
   );
 }
 
@@ -245,6 +332,8 @@ export function ProfessionalBarcodeModal({
         (decodedText: string) => {
           if (!isStoppedRef.current) {
             isStoppedRef.current = true;
+            playPosBeep();
+            triggerHaptic(80);
             scanner.stop()
               .then(() => scanner.clear())
               .catch(() => {})
@@ -608,6 +697,8 @@ export function ProfessionalBarcodeModal({
             onKeyDown={(e) => {
               if (e.key === 'Enter' && manualCode.trim()) {
                 e.preventDefault();
+                playPosBeep();
+                triggerHaptic(80);
                 onDetected(manualCode.trim());
               }
             }}
@@ -626,6 +717,8 @@ export function ProfessionalBarcodeModal({
             type="button"
             onClick={() => {
               if (manualCode.trim()) {
+                playPosBeep();
+                triggerHaptic(80);
                 onDetected(manualCode.trim());
               }
             }}

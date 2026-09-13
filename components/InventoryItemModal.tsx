@@ -4,7 +4,7 @@ import AquaModalWrapper from '@/components/AquaModalWrapper';
 import SearchableSelect from './SearchableSelect';
 import TranslatableInput from './TranslatableInput';
 import { THEME } from '@/lib/theme';
-import { ProfessionalBarcodeModal } from './BarcodeScannerWidget';
+import { BarcodeCameraButton } from './BarcodeScannerWidget';
 
 async function printBarcodeLabel(barcode: string, itemName: string, price?: number) {
   if (!barcode?.trim()) return;
@@ -24,7 +24,6 @@ ${price ? `<div class="price">السعر: ${price} ر.س</div>` : ''}
 
 export default function InventoryItemModal({ isOpen, onClose, currentRecord, setCurrentRecord, handleSave, isSaving }: any) {
   const [mounted, setMounted] = useState(false);
-  const [showScanner, setShowScanner] = useState(false);
 
   // حالة محلية مستقلة لمنع إعادة رسم الصفحة بالكامل عند كتابة كل حرف
   const [formData, setFormData] = useState<any>({
@@ -61,7 +60,6 @@ export default function InventoryItemModal({ isOpen, onClose, currentRecord, set
   const handleBarcodeDetected = useCallback((code: string) => {
     setFormData((prev: any) => ({ ...prev, code }));
     if (setCurrentRecord) setCurrentRecord((prev: any) => ({ ...prev, code }));
-    setShowScanner(false);
   }, [setCurrentRecord]);
 
   const updateField = (field: string, value: any) => {
@@ -82,7 +80,6 @@ export default function InventoryItemModal({ isOpen, onClose, currentRecord, set
 
   return (
     <>
-      {showScanner && <ProfessionalBarcodeModal onDetected={handleBarcodeDetected} onClose={() => setShowScanner(false)} />}
       <AquaModalWrapper 
         isOpen={isOpen} 
         onClose={onClose}
@@ -243,21 +240,12 @@ export default function InventoryItemModal({ isOpen, onClose, currentRecord, set
                     onChange={e => updateField('code', e.target.value)}
                     style={{ flex: 1, fontFamily: 'monospace', letterSpacing: '0.5px' }}
                   />
-                  <button 
-                    type="button" 
-                    onClick={() => setShowScanner(true)} 
-                    title="مسح الباركود بالكاميرا"
-                    style={{ 
-                      width: '38px', height: '38px', flexShrink: 0, 
-                      background: 'linear-gradient(135deg, #2891C8, #7FD4E3)', 
-                      border: 'none', borderRadius: '10px', cursor: 'pointer', 
-                      display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                      fontSize: '17px', boxShadow: '0 3px 10px rgba(40,145,200,0.3)', 
-                      transition: 'transform 0.15s' 
-                    }}
-                  >
-                    📷
-                  </button>
+                  <BarcodeCameraButton 
+                    onScan={handleBarcodeDetected}
+                    size="sm"
+                    title="مسح الباركود بكاميرا الكاشير الذكية"
+                    style={{ width: '38px', height: '38px', borderRadius: '10px' }}
+                  />
                   <button 
                     type="button"
                     onClick={() => printBarcodeLabel(formData.code, formData.name, formData.suggested_price)}

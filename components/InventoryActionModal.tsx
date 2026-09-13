@@ -6,6 +6,7 @@ import { useMutation, useQueryClient, useQuery } from '@tanstack/react-query';
 import { useToast } from '@/lib/toast-context';
 import { THEME } from '@/lib/theme';
 import SearchableSelect from './SearchableSelect';
+import { BarcodeCameraButton } from './BarcodeScannerWidget';
 import { executeApproveTransaction, syncAllWarehouseBalances } from '@/lib/inventory_engine';
 
 interface InventoryActionModalProps {
@@ -379,19 +380,41 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
 
             <div>
               <label style={{ fontSize: '13px', fontWeight: 900, color: THEME.primary, marginBottom: '8px', display: 'block' }}>📦 الصنف *</label>
-              <SearchableSelect
-                options={(items || []).map(item => ({
-                  label: `${item.name} (${item.available_qty} متاح)`,
-                  value: item.id
-                }))}
-                value={formData.item_id}
-                onChange={val => {
-                   const selected = (items || []).find(i => i.id === val);
-                   const cost = selected ? (selected.last_purchase_price || selected.default_price || 0) : 0;
-                   setFormData(prev => ({ ...prev, item_id: val, unit_price: (actionType === 'out' || actionType === 'waste') ? cost : prev.unit_price }));
-                }}
-                placeholder="-- ابحث عن الصنف --"
-              />
+              <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                <div style={{ flex: 1 }}>
+                  <SearchableSelect
+                    options={(items || []).map(item => ({
+                      label: `${item.name} (${item.available_qty} متاح)`,
+                      value: item.id
+                    }))}
+                    value={formData.item_id}
+                    onChange={val => {
+                       const selected = (items || []).find(i => i.id === val);
+                       const cost = selected ? (selected.last_purchase_price || selected.default_price || 0) : 0;
+                       setFormData(prev => ({ ...prev, item_id: val, unit_price: (actionType === 'out' || actionType === 'waste') ? cost : prev.unit_price }));
+                    }}
+                    placeholder="-- ابحث عن الصنف --"
+                  />
+                </div>
+                <BarcodeCameraButton
+                  onScan={(barcode) => {
+                    const selected = (items || []).find(i => String(i.code) === barcode || String(i.id) === barcode);
+                    if (selected) {
+                      const cost = selected.last_purchase_price || selected.default_price || 0;
+                      setFormData(prev => ({
+                        ...prev,
+                        item_id: selected.id,
+                        unit_price: (actionType === 'out' || actionType === 'waste') ? cost : prev.unit_price
+                      }));
+                      showToast(`تم اختيار الصنف: ${selected.name}`, 'success');
+                    } else {
+                      showToast(`لم يتم العثور على صنف بالباركود: ${barcode}`, 'error');
+                    }
+                  }}
+                  title="مسح باركود الصنف بالكاميرا"
+                  style={{ height: '42px', minWidth: '44px', borderRadius: '12px' }}
+                />
+              </div>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '15px' }}>

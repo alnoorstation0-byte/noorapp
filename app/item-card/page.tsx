@@ -3,8 +3,7 @@ import React from 'react';
 import { THEME } from '@/lib/theme';
 import { formatCurrency } from '@/lib/helpers';
 import { useItemCardLogic } from './item_card_logic';
-import SmartCombo from '@/components/SmartCombo'; // Need to import this safely if it supports standard arrays, or just use native select for simplicity since we have itemsList.
-// Actually, a native select with search is best if we don't want to rely on SmartCombo specifics. I'll use a native select with a wrapper or simple select.
+import { BarcodeCameraButton } from '@/components/BarcodeScannerWidget';
 
 export default function ItemCardPage() {
     const {
@@ -63,18 +62,30 @@ export default function ItemCardPage() {
                 <div className="itemcard-filters" style={{ display: 'flex', gap: '15px', marginTop: '30px', flexWrap: 'wrap', alignItems: 'flex-end' }}>
                     <div style={{ flex: '2 1 300px' }}>
                         <div style={{ color: THEME.accentLight, fontSize: '13px', fontWeight: 800, marginBottom: '8px' }}>اختيار الصنف 📦</div>
-                        <select 
-                            value={selectedItemId}
-                            onChange={(e) => setSelectedItemId(e.target.value)}
-                            style={{ width: '100%', padding: '14px 20px', borderRadius: '14px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', outline: 'none', cursor: 'pointer', appearance: 'none', fontWeight: 800 }}
-                        >
-                            <option value="" style={{ color: 'black' }}>-- اختر صنفاً للبحث --</option>
-                            {itemsList.map((item: any) => (
-                                <option key={item.id} value={item.id} style={{ color: 'black' }}>
-                                    {item.code ? `[${item.code}] ` : ''} {item.name}
-                                </option>
-                            ))}
-                        </select>
+                        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                            <select 
+                                value={selectedItemId}
+                                onChange={(e) => setSelectedItemId(e.target.value)}
+                                style={{ flex: 1, padding: '14px 20px', borderRadius: '14px', background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.1)', color: 'white', outline: 'none', cursor: 'pointer', appearance: 'none', fontWeight: 800 }}
+                            >
+                                <option value="" style={{ color: 'black' }}>-- اختر صنفاً للبحث --</option>
+                                {itemsList.map((item: any) => (
+                                    <option key={item.id} value={item.id} style={{ color: 'black' }}>
+                                        {item.code ? `[${item.code}] ` : ''} {item.name}
+                                    </option>
+                                ))}
+                            </select>
+                            <BarcodeCameraButton 
+                                onScan={(scannedBarcode) => {
+                                    const match = itemsList.find((i: any) => String(i.code) === scannedBarcode || String(i.id) === scannedBarcode);
+                                    if (match) {
+                                        setSelectedItemId(match.id);
+                                    }
+                                }}
+                                title="مسح باركود الصنف بكاميرا الكاشير"
+                                style={{ height: '48px', borderRadius: '14px', minWidth: '48px' }}
+                            />
+                        </div>
                     </div>
                     <div style={{ flex: '1 1 200px' }}>
                         <div style={{ color: THEME.accentLight, fontSize: '13px', fontWeight: 800, marginBottom: '8px' }}>من تاريخ</div>
