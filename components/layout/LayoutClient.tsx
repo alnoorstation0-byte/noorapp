@@ -12,23 +12,13 @@ import { usePresence } from '@/hooks/usePresence';
 import LoadingScreen from '@/components/LoadingScreen';
 import { useLanguage } from '@/lib/LanguageContext';
 import { 
-  Search, 
   Menu, 
   X, 
-  Bell, 
-  User, 
   LogOut, 
-  Filter, 
   Home, 
   ShoppingBag, 
   FileText, 
   Package, 
-  Layers, 
-  Sparkles, 
-  Compass, 
-  ChevronRight, 
-  ChevronLeft,
-  Command,
   ArrowUpRight
 } from 'lucide-react';
 
@@ -36,20 +26,17 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
   const router = useRouter();
   const pathname = usePathname();
   const [isOpen, setIsOpen] = useState(false);
-  const [hubSearch, setHubSearch] = useState('');
-  const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [customPosition, setCustomPosition] = useState<{ x: number, y: number } | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false); 
   const currentPosRef = useRef<{ x: number, y: number } | null>(null);
   const lastTouchTime = useRef(0);
   const dragStartPos = useRef({ x: 0, y: 0, startX: 0, startY: 0, hasMoved: false });
-  const searchInputRef = useRef<HTMLInputElement>(null);
 
   // لمنع مشاكل Hydration
   const [mounted, setMounted] = useState(false);
 
-  // السايد بار الجديد للفلترة
+  // السايد بار للفلترة
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
 
   const { actions, summary, customFilters } = useSidebar(); 
@@ -106,30 +93,15 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // اختصار لوحة المفاتيح لفتح وإغلاق مركز القيادة (Ctrl + K أو Esc)
+  // إغلاق القائمة بالضغط على Escape
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'k') {
-        e.preventDefault();
-        setIsOpen(prev => !prev);
-      } else if (e.key === 'Escape' && isOpen) {
+      if (e.key === 'Escape' && isOpen) {
         setIsOpen(false);
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen]);
-
-  // التركيز التلقائي على خانة البحث عند فتح مركز القيادة
-  useEffect(() => {
-    if (isOpen) {
-      setTimeout(() => {
-        searchInputRef.current?.focus();
-      }, 150);
-    } else {
-      setHubSearch('');
-      setSelectedCategory('all');
-    }
   }, [isOpen]);
 
   // 📱 معالج سحب القائمة العائمة باللمس على الجوال (Touch Drag)
@@ -318,21 +290,11 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
   // إجمالي الإشعارات غير المقروءة
   const totalUnread = (unreadCounts?.invoices || 0) + (unreadCounts?.orders || 0);
 
-  // فلترة عناصر القائمة في مركز القيادة حسب البحث والتصنيف
-  const filteredMenuGroups = menuGroups.map(group => {
-    if (selectedCategory !== 'all' && group.group !== selectedCategory) {
-      return { ...group, items: [] };
-    }
-    const matchingItems = group.items.filter(item => {
-      if (!canView(item.id)) return false;
-      if (!hubSearch.trim()) return true;
-      const term = hubSearch.toLowerCase().trim();
-      const title = (t('menu_' + item.id) || item.title).toLowerCase();
-      const path = item.path.toLowerCase();
-      return title.includes(term) || path.includes(term);
-    });
-    return { ...group, items: matchingItems };
-  }).filter(group => group.items.length > 0);
+  // فلترة عناصر القائمة حسب الصلاحيات
+  const authorizedMenuGroups = menuGroups.map(group => ({
+    ...group,
+    items: group.items.filter(item => canView(item.id))
+  })).filter(group => group.items.length > 0);
 
   let animationDelayCounter = 0;
 
@@ -347,237 +309,6 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
           --desert-clay: #A8573C;
           --desert-pearl: #FDFBF7;
           --desert-oasis: #4E734F;
-        }
-
-        /* =================== الشريط العلوي الفاخر (Top Glass Bar) =================== */
-        .desert-top-bar {
-          position: sticky;
-          top: 0;
-          z-index: 1000;
-          height: 66px;
-          background: linear-gradient(135deg, rgba(255, 253, 250, 0.88) 0%, rgba(255, 253, 250, 0.68) 100%);
-          backdrop-filter: blur(24px) saturate(160%);
-          -webkit-backdrop-filter: blur(24px) saturate(160%);
-          border-bottom: 1px solid rgba(194, 155, 98, 0.28);
-          box-shadow: 0 4px 20px rgba(44, 26, 18, 0.05), inset 0 1px 0 rgba(255, 255, 255, 0.8);
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          padding: 0 20px;
-          gap: 15px;
-          box-sizing: border-box;
-          transition: all 0.3s ease;
-        }
-
-        .brand-section {
-          display: flex;
-          align-items: center;
-          gap: 12px;
-          text-decoration: none;
-          user-select: none;
-        }
-        .brand-logo-wrap {
-          width: 44px;
-          height: 44px;
-          border-radius: 12px;
-          background: linear-gradient(135deg, rgba(255, 253, 250, 0.95), rgba(194, 155, 98, 0.2));
-          border: 1px solid rgba(194, 155, 98, 0.45);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 3px;
-          box-shadow: 0 4px 10px rgba(44, 26, 18, 0.08);
-          transition: transform 0.2s ease;
-        }
-        .brand-logo-wrap:hover {
-          transform: scale(1.05);
-        }
-        .brand-logo-img {
-          width: 100%;
-          height: 100%;
-          object-fit: contain;
-        }
-        .brand-text-block {
-          display: flex;
-          flex-direction: column;
-        }
-        .brand-title {
-          font-size: 15px;
-          font-weight: 900;
-          color: #2C1A12;
-          line-height: 1.2;
-          letter-spacing: -0.2px;
-        }
-        .brand-subtitle {
-          font-size: 10.5px;
-          font-weight: 700;
-          color: #C29B62;
-          letter-spacing: 0.3px;
-        }
-
-        .current-page-badge {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          background: rgba(194, 155, 98, 0.12);
-          border: 1px solid rgba(194, 155, 98, 0.3);
-          padding: 6px 14px;
-          border-radius: 20px;
-          font-size: 13px;
-          font-weight: 800;
-          color: #2C1A12;
-        }
-
-        /* زر البحث الذكي / اختصار مركز القيادة */
-        .top-search-trigger {
-          flex: 1;
-          max-width: 420px;
-          height: 42px;
-          background: rgba(255, 253, 250, 0.75);
-          border: 1px solid rgba(194, 155, 98, 0.35);
-          border-radius: 24px;
-          padding: 0 16px;
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          color: rgba(44, 26, 18, 0.6);
-          cursor: pointer;
-          font-size: 13px;
-          font-weight: 700;
-          transition: all 0.25s ease;
-          box-shadow: inset 0 1px 3px rgba(44, 26, 18, 0.03);
-        }
-        .top-search-trigger:hover {
-          background: #FFFFFF;
-          border-color: #C29B62;
-          box-shadow: 0 4px 14px rgba(194, 155, 98, 0.2);
-          color: #2C1A12;
-        }
-        .search-shortcut-tag {
-          font-size: 11px;
-          font-family: monospace;
-          background: rgba(44, 26, 18, 0.08);
-          color: #2C1A12;
-          padding: 2px 7px;
-          border-radius: 6px;
-          border: 1px solid rgba(44, 26, 18, 0.12);
-        }
-
-        .top-actions-group {
-          display: flex;
-          align-items: center;
-          gap: 10px;
-        }
-
-        .top-icon-btn {
-          width: 42px;
-          height: 42px;
-          border-radius: 12px;
-          background: linear-gradient(135deg, rgba(255, 253, 250, 0.9), rgba(255, 253, 250, 0.6));
-          border: 1px solid rgba(194, 155, 98, 0.35);
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          color: #2C1A12;
-          cursor: pointer;
-          position: relative;
-          transition: all 0.2s ease;
-          box-shadow: 0 2px 6px rgba(44, 26, 18, 0.04);
-        }
-        .top-icon-btn:hover {
-          background: #FFFFFF;
-          border-color: #C29B62;
-          color: #A8573C;
-          transform: translateY(-2px);
-          box-shadow: 0 5px 12px rgba(168, 87, 60, 0.15);
-        }
-        .top-icon-btn.active {
-          background: #C29B62;
-          color: #FFFFFF;
-          border-color: #C29B62;
-          box-shadow: 0 4px 12px rgba(194, 155, 98, 0.35);
-        }
-
-        .top-badge {
-          position: absolute;
-          top: -4px;
-          right: -4px;
-          background: #A8573C;
-          color: #FFFFFF;
-          font-size: 10px;
-          font-weight: 900;
-          min-width: 18px;
-          height: 18px;
-          border-radius: 9px;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          padding: 0 4px;
-          box-shadow: 0 2px 6px rgba(168, 87, 60, 0.4);
-          border: 1.5px solid #FFFFFF;
-        }
-
-        .online-status-chip {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          background: rgba(78, 115, 79, 0.12);
-          border: 1px solid rgba(78, 115, 79, 0.35);
-          color: #4E734F;
-          padding: 5px 12px;
-          border-radius: 20px;
-          font-size: 12px;
-          font-weight: 800;
-        }
-        .online-dot-pulse {
-          width: 8px;
-          height: 8px;
-          background: #4E734F;
-          border-radius: 50%;
-          box-shadow: 0 0 10px #4E734F;
-          animation: pulseGreen 2s infinite ease-in-out;
-        }
-        @keyframes pulseGreen {
-          0%, 100% { opacity: 1; transform: scale(1); }
-          50% { opacity: 0.6; transform: scale(1.25); }
-        }
-
-        .btn-hub-launcher {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-          background: linear-gradient(135deg, #C29B62 0%, #A8573C 100%);
-          color: #FFFFFF;
-          border: none;
-          padding: 8px 16px;
-          border-radius: 12px;
-          font-size: 13px;
-          font-weight: 800;
-          cursor: pointer;
-          box-shadow: 0 4px 12px rgba(168, 87, 60, 0.25);
-          transition: all 0.25s ease;
-        }
-        .btn-hub-launcher:hover {
-          transform: translateY(-2px);
-          box-shadow: 0 6px 18px rgba(168, 87, 60, 0.35);
-        }
-
-        .btn-logout-header {
-          display: flex;
-          align-items: center;
-          gap: 6px;
-          background: rgba(220, 38, 38, 0.08);
-          color: #dc2626;
-          border: 1px solid rgba(220, 38, 38, 0.2);
-          padding: 6px 12px;
-          border-radius: 10px;
-          font-size: 12px;
-          font-weight: 800;
-          cursor: pointer;
-          transition: all 0.2s ease;
-        }
-        .btn-logout-header:hover {
-          background: #fee2e2;
         }
 
         /* =================== الزر العائم القابل للسحب (Draggable FAB) =================== */
@@ -645,82 +376,132 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
 
         .command-center {
           width: 95vw; max-width: 1280px;
-          display: flex; flex-direction: column; gap: 22px;
+          display: flex; flex-direction: column; gap: 20px;
           margin-top: ${isOpen ? '0' : '40px'};
           opacity: ${isOpen ? 1 : 0};
           transform: ${isOpen ? 'scale(1) translateY(0)' : 'scale(0.96) translateY(20px)'};
           transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
         }
 
-        /* شريط رأس مركز القيادة مع محرك البحث */
-        .hub-search-box {
-          background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(255, 253, 250, 0.85) 100%);
-          border: 1px solid rgba(194, 155, 98, 0.45);
-          border-radius: 24px;
+        /* ترويسة القائمة الفاخرة */
+        .admin-header-glass {
+          background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(255, 253, 250, 0.8) 100%);
+          border: 1px solid rgba(194, 155, 98, 0.4);
+          border-radius: 22px;
           padding: 16px 24px;
-          box-shadow: 0 15px 40px rgba(44, 26, 18, 0.12), inset 0 0 20px rgba(255, 255, 255, 0.7);
-          display: flex;
-          flex-direction: column;
-          gap: 14px;
-        }
-        .hub-search-input-wrap {
           display: flex;
           align-items: center;
-          gap: 12px;
-          background: #FFFFFF;
-          border: 1.5px solid rgba(194, 155, 98, 0.35);
-          border-radius: 16px;
-          padding: 8px 18px;
-          transition: all 0.2s ease;
-        }
-        .hub-search-input-wrap:focus-within {
-          border-color: #C29B62;
-          box-shadow: 0 0 0 4px rgba(194, 155, 98, 0.15);
-        }
-        .hub-search-input {
-          flex: 1;
-          border: none;
-          outline: none;
-          font-size: 15px;
-          font-weight: 700;
-          color: #2C1A12;
-          background: transparent;
-        }
-        .hub-search-input::placeholder {
-          color: rgba(44, 26, 18, 0.45);
+          justify-content: space-between;
+          backdrop-filter: blur(24px) saturate(160%);
+          -webkit-backdrop-filter: blur(24px) saturate(160%);
+          box-shadow: 0 10px 30px rgba(44, 26, 18, 0.08);
+          gap: 15px;
+          flex-wrap: wrap;
         }
 
-        .hub-category-chips {
+        .brand-section {
           display: flex;
           align-items: center;
-          gap: 8px;
-          overflow-x: auto;
-          padding-bottom: 4px;
-          scrollbar-width: none;
+          gap: 14px;
+          text-decoration: none;
+          user-select: none;
         }
-        .hub-category-chips::-webkit-scrollbar { display: none; }
-        .category-chip {
+        .brand-logo-wrap {
+          width: 48px;
+          height: 48px;
+          border-radius: 14px;
+          background: linear-gradient(135deg, rgba(255, 253, 250, 0.95), rgba(194, 155, 98, 0.25));
+          border: 1.5px solid rgba(194, 155, 98, 0.45);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          padding: 4px;
+          box-shadow: 0 4px 12px rgba(44, 26, 18, 0.08);
+        }
+        .brand-logo-img {
+          width: 100%;
+          height: 100%;
+          object-fit: contain;
+        }
+        .brand-text-block {
+          display: flex;
+          flex-direction: column;
+        }
+        .brand-title {
+          font-size: 17px;
+          font-weight: 900;
+          color: #2C1A12;
+          line-height: 1.2;
+        }
+        .brand-subtitle {
+          font-size: 12px;
+          font-weight: 700;
+          color: #C29B62;
+          letter-spacing: 0.3px;
+        }
+
+        .online-status-chip {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          background: rgba(78, 115, 79, 0.12);
+          border: 1px solid rgba(78, 115, 79, 0.35);
+          color: #4E734F;
           padding: 6px 14px;
           border-radius: 20px;
-          border: 1px solid rgba(194, 155, 98, 0.25);
-          background: rgba(255, 253, 250, 0.8);
-          color: rgba(44, 26, 18, 0.75);
+          font-size: 12px;
+          font-weight: 800;
+        }
+        .online-dot-pulse {
+          width: 8px;
+          height: 8px;
+          background: #4E734F;
+          border-radius: 50%;
+          box-shadow: 0 0 10px #4E734F;
+          animation: pulseGreen 2s infinite ease-in-out;
+        }
+        @keyframes pulseGreen {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.6; transform: scale(1.25); }
+        }
+
+        .btn-logout-header {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+          background: rgba(220, 38, 38, 0.08);
+          color: #dc2626;
+          border: 1px solid rgba(220, 38, 38, 0.25);
+          padding: 8px 16px;
+          border-radius: 12px;
           font-size: 12.5px;
           font-weight: 800;
           cursor: pointer;
-          white-space: nowrap;
           transition: all 0.2s ease;
         }
-        .category-chip:hover {
-          background: #FFFFFF;
-          color: #2C1A12;
-          border-color: #C29B62;
+        .btn-logout-header:hover {
+          background: #fee2e2;
+          border-color: #dc2626;
         }
-        .category-chip.active {
-          background: #C29B62;
+
+        .btn-close-modal {
+          width: 42px;
+          height: 42px;
+          border-radius: 12px;
+          background: rgba(44, 26, 18, 0.06);
+          border: 1px solid rgba(194, 155, 98, 0.25);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          color: #2C1A12;
+          transition: all 0.2s ease;
+        }
+        .btn-close-modal:hover {
+          background: #A8573C;
           color: #FFFFFF;
-          border-color: #C29B62;
-          box-shadow: 0 4px 12px rgba(194, 155, 98, 0.3);
+          border-color: #A8573C;
+          transform: translateY(-2px);
         }
 
         .group-section {
@@ -820,21 +601,8 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
         }
 
         @media (max-width: 768px) {
-          .desert-top-bar {
-            padding: 0 12px;
-            height: 60px;
-          }
-          .brand-subtitle, .current-page-badge, .search-shortcut-tag, .online-status-chip {
-            display: none !important;
-          }
-          .top-search-trigger {
-            max-width: none;
-            height: 38px;
-            padding: 0 12px;
-            font-size: 12px;
-          }
           .fab-main {
-            display: none !important; /* نستبدل الزر العائم بالشريط السفلي الذكي على الجوال لتجربة فائقة السلاسة */
+            display: none !important; /* استخدام الشريط السفلي الذكي على الجوال */
           }
           .command-center { margin-top: 10px; gap: 14px; }
           .group-section { padding: 16px; border-radius: 20px; }
@@ -844,7 +612,7 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
           .main-content {
             margin-right: 0 !important;
             margin-left: 0 !important;
-            padding-bottom: 85px !important; /* مساحة للشريط السفلي للجوال */
+            padding-bottom: 85px !important;
           }
 
           /* الشريط السفلي للجوال */
@@ -903,74 +671,7 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
         }
       `}} />
 
-      {/* 1️⃣ الشريط العلوي الزجاجي الفاخر (Top Navigation Bar) */}
-      <header className="desert-top-bar no-print">
-        {/* الشعار واسم الصيدلية وزر الصفحة الحالية */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-          <Link href="/Dashboard" className="brand-section">
-            <div className="brand-logo-wrap">
-              <img src="/taj_logo.png" alt="شعار صيدلية تاج المودة" className="brand-logo-img" />
-            </div>
-            <div className="brand-text-block">
-              <span className="brand-title">تاج المودة</span>
-              <span className="brand-subtitle">صيدلية بيطرية</span>
-            </div>
-          </Link>
-
-          {/* اسم الشاشة الحالية */}
-          <div className="current-page-badge">
-            <span style={{ fontSize: '15px' }}>{currentMenuItem?.icon || '🩺'}</span>
-            <span>{currentPageTitle}</span>
-          </div>
-        </div>
-
-        {/* خانة البحث السريع واختصار مركز القيادة */}
-        <div className="top-search-trigger" onClick={() => setIsOpen(true)}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-            <Search size={16} color="#C29B62" />
-            <span>البحث والتنقل السريع بين الشاشات...</span>
-          </div>
-          <span className="search-shortcut-tag">Ctrl + K</span>
-        </div>
-
-        {/* الأزرار العلوية وحالة الاتصال */}
-        <div className="top-actions-group">
-          {/* حالة المتواجدين الآن */}
-          <div className="online-status-chip">
-            <span className="online-dot-pulse"></span>
-            <span>{language === 'en' ? `${onlineCount} Online` : `${onlineCount} متصل`}</span>
-          </div>
-
-          {/* زر الفلترة الجانبي */}
-          <button 
-            className={`top-icon-btn ${isSidebarOpen ? 'active' : ''}`}
-            onClick={() => setIsSidebarOpen(prev => !prev)}
-            title="شريط الفلترة والأوامر المتقدمة"
-          >
-            <Filter size={18} />
-          </button>
-
-          {/* زر الإشعارات */}
-          <Link href="/notifications" className="top-icon-btn" title="مركز الإشعارات">
-            <Bell size={18} />
-            {totalUnread > 0 && <span className="top-badge">{totalUnread}</span>}
-          </Link>
-
-          {/* زر مركز القيادة الكامل */}
-          <button className="btn-hub-launcher" onClick={() => setIsOpen(true)}>
-            <Compass size={18} />
-            <span>المركز الشامل</span>
-          </button>
-
-          {/* زر تسجيل الخروج السريع */}
-          <button className="btn-logout-header" onClick={handleLogout} title="تسجيل الخروج">
-            <LogOut size={15} />
-            <span>خروج</span>
-          </button>
-        </div>
-      </header>
-
-      {/* 2️⃣ السايد بار المتقدم للفلترة والعمليات */}
+      {/* 1️⃣ السايد بار المتقدم للفلترة والعمليات */}
       <RawasiFilterSidebar 
         title={currentPageTitle}
         extraActions={actions}
@@ -982,7 +683,7 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
         onDateChange={(start, end) => window.dispatchEvent(new CustomEvent('globalDateFilter', { detail: { start, end } }))}
       />
 
-      {/* 3️⃣ الزر العائم الذكي القابل للسحب (Draggable FAB) */}
+      {/* 2️⃣ الزر العائم الذكي القابل للسحب (Draggable FAB) */}
       <div 
         className={`fab-main no-print ${customPosition ? 'fab-has-custom-pos' : ''} ${isDragging ? 'fab-dragging' : ''}`} 
         style={customPosition ? { 
@@ -1004,7 +705,7 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
         <img src="/taj_logo.png" alt="شعار صيدلية تاج المودة" className="fab-logo" draggable="false" />
       </div>
 
-      {/* 4️⃣ مركز القيادة الشامل (Command Hub Modal) */}
+      {/* 3️⃣ مركز القيادة الشامل (Command Hub Modal) */}
       <div className="overlay-backdrop no-print"></div>
       <nav 
         className="overlay-screen no-print" 
@@ -1014,126 +715,81 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
       >
         <div className="command-center" onClick={(e) => e.stopPropagation()}>
           
-          {/* محرك البحث والتصنيفات في رأس مركز القيادة */}
-          <div className="hub-search-box">
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid rgba(194, 155, 98, 0.25)', paddingBottom: '12px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div style={{ width: '38px', height: '38px', borderRadius: '10px', background: 'linear-gradient(135deg, #C29B62, #A8573C)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#fff' }}>
-                  <Sparkles size={20} />
-                </div>
-                <div>
-                  <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 900, color: '#2C1A12' }}>مركز قيادة صيدلية تاج المودة</h2>
-                  <p style={{ margin: 0, fontSize: '12px', color: 'rgba(44, 26, 18, 0.6)', fontWeight: 700 }}>
-                    {language === 'en' ? `Role: ${role === 'super_admin' ? 'Super Admin' : 'Staff'}` : `المستخدم: ${role === 'super_admin' ? 'مدير النظام المعتمد' : 'موظف مصرح'}`}
-                  </p>
-                </div>
+          {/* ترويسة مركز القيادة والقائمة */}
+          <div className="admin-header-glass">
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+              <div className="brand-logo-wrap">
+                <img src="/taj_logo.png" alt="شعار صيدلية تاج المودة" className="brand-logo-img" />
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <button 
-                  onClick={() => setIsOpen(false)}
-                  style={{ width: '36px', height: '36px', borderRadius: '50%', background: 'rgba(44,26,18,0.06)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#2C1A12' }}
-                  title="إغلاق (Esc)"
-                >
-                  <X size={18} />
-                </button>
+              <div className="brand-text-block">
+                <span className="brand-title">صيدلية تاج المودة البيطرية</span>
+                <span className="brand-subtitle">
+                  {language === 'en' ? `Management Portal | ${role === 'super_admin' ? 'Super Admin' : 'Staff'}` : `بوابة الإدارة الشاملة | ${role === 'super_admin' ? 'مدير النظام' : 'صلاحيات مستخدم'}`}
+                </span>
               </div>
             </div>
 
-            {/* حقل البحث الفوري */}
-            <div className="hub-search-input-wrap">
-              <Search size={20} color="#C29B62" />
-              <input 
-                ref={searchInputRef}
-                type="text" 
-                placeholder="ابحث عن أي شاشة أو وظيفة (مثال: فواتير، كاشير، أستاذ، مستودع، قيود)..." 
-                value={hubSearch}
-                onChange={(e) => setHubSearch(e.target.value)}
-                className="hub-search-input"
-              />
-              {hubSearch && (
-                <button 
-                  onClick={() => setHubSearch('')} 
-                  style={{ background: 'transparent', border: 'none', cursor: 'pointer', color: '#94a3b8' }}
-                >
-                  <X size={16} />
-                </button>
-              )}
-            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+              <div className="online-status-chip">
+                <span className="online-dot-pulse"></span>
+                <span>{language === 'en' ? `${onlineCount} Online` : `${onlineCount} متصل`}</span>
+              </div>
 
-            {/* تصنيفات سريعة */}
-            <div className="hub-category-chips">
-              <button 
-                className={`category-chip ${selectedCategory === 'all' ? 'active' : ''}`}
-                onClick={() => setSelectedCategory('all')}
-              >
-                🌟 كل الشاشات
+              <button className="btn-logout-header" onClick={handleLogout} title="تسجيل الخروج">
+                <LogOut size={15} />
+                <span>{language === 'en' ? 'Logout' : 'تسجيل الخروج'}</span>
               </button>
-              {menuGroups.map((g, idx) => (
-                <button 
-                  key={idx}
-                  className={`category-chip ${selectedCategory === g.group ? 'active' : ''}`}
-                  onClick={() => setSelectedCategory(g.group)}
-                >
-                  {groupKeyMap[g.group] ? t(groupKeyMap[g.group]) : g.group}
-                </button>
-              ))}
+
+              <button 
+                onClick={() => setIsOpen(false)} 
+                className="btn-close-modal"
+                title="إغلاق القائمة (Esc)"
+              >
+                <X size={20} />
+              </button>
             </div>
           </div>
 
-          {/* شبكة البطاقات المقسمة حسب الأقسام */}
-          {filteredMenuGroups.length === 0 ? (
-            <div className="group-section" style={{ textAlign: 'center', padding: '40px 20px' }}>
-              <p style={{ fontSize: '16px', fontWeight: 800, color: 'rgba(44, 26, 18, 0.7)' }}>
-                لا توجد شاشات مطابقة للبحث "{hubSearch}"
-              </p>
-              <button 
-                onClick={() => { setHubSearch(''); setSelectedCategory('all'); }}
-                style={{ marginTop: '10px', background: '#C29B62', color: '#fff', border: 'none', padding: '8px 20px', borderRadius: '12px', fontWeight: 800, cursor: 'pointer' }}
-              >
-                إظهار جميع الشاشات
-              </button>
-            </div>
-          ) : (
-            filteredMenuGroups.map((group, gIdx) => {
-              const groupTitle = groupKeyMap[group.group] ? t(groupKeyMap[group.group]) : group.group;
+          {/* شبكة البطاقات المقسمة حسب الأقسام مباشرة دون بحث */}
+          {authorizedMenuGroups.map((group, gIdx) => {
+            const groupTitle = groupKeyMap[group.group] ? t(groupKeyMap[group.group]) : group.group;
 
-              return (
-                <div key={gIdx} className="group-section">
-                  <div className="group-header">
-                    <span>{groupTitle}</span>
-                    <span style={{ fontSize: '11px', color: '#C29B62', background: 'rgba(194, 155, 98, 0.15)', padding: '2px 8px', borderRadius: '10px' }}>
-                      {group.items.length} {language === 'en' ? 'Screens' : 'شاشات'}
-                    </span>
-                  </div>
-                  <div className="items-grid">
-                    {group.items.map((item, iIdx) => {
-                      const delay = (animationDelayCounter++) * 0.03;
-                      const isActive = pathname === item.path;
-                      const itemTitle = t('menu_' + item.id) || item.title;
-                      return (
-                        <Link key={iIdx} href={item.path} onClick={() => setIsOpen(false)}>
-                          <div className={`nav-card ${isActive ? 'active' : ''}`} style={{ animationDelay: isOpen ? `${delay}s` : '0s' }}>
-                            <div className="nav-card-left">
-                              <div className="icon-wrapper">{item.icon}</div>
-                              <div className="nav-title-block">
-                                <span className="nav-title">{itemTitle}</span>
-                                <span style={{ fontSize: '11px', color: 'rgba(44, 26, 18, 0.5)', fontWeight: 600 }}>{item.path}</span>
-                              </div>
-                            </div>
-                            {isActive ? (
-                              <div className="nav-card-active-dot" title="الشاشة المفتوحة حالياً"></div>
-                            ) : (
-                              <ArrowUpRight size={16} color="rgba(44, 26, 18, 0.35)" />
-                            )}
-                          </div>
-                        </Link>
-                      );
-                    })}
-                  </div>
+            return (
+              <div key={gIdx} className="group-section">
+                <div className="group-header">
+                  <span>{groupTitle}</span>
+                  <span style={{ fontSize: '11px', color: '#C29B62', background: 'rgba(194, 155, 98, 0.15)', padding: '2px 8px', borderRadius: '10px' }}>
+                    {group.items.length} {language === 'en' ? 'Screens' : 'شاشات'}
+                  </span>
                 </div>
-              );
-            })
-          )}
+                <div className="items-grid">
+                  {group.items.map((item, iIdx) => {
+                    const delay = (animationDelayCounter++) * 0.03;
+                    const isActive = pathname === item.path;
+                    const itemTitle = t('menu_' + item.id) || item.title;
+                    return (
+                      <Link key={iIdx} href={item.path} onClick={() => setIsOpen(false)}>
+                        <div className={`nav-card ${isActive ? 'active' : ''}`} style={{ animationDelay: isOpen ? `${delay}s` : '0s' }}>
+                          <div className="nav-card-left">
+                            <div className="icon-wrapper">{item.icon}</div>
+                            <div className="nav-title-block">
+                              <span className="nav-title">{itemTitle}</span>
+                              <span style={{ fontSize: '11px', color: 'rgba(44, 26, 18, 0.5)', fontWeight: 600 }}>{item.path}</span>
+                            </div>
+                          </div>
+                          {isActive ? (
+                            <div className="nav-card-active-dot" title="الشاشة المفتوحة حالياً"></div>
+                          ) : (
+                            <ArrowUpRight size={16} color="rgba(44, 26, 18, 0.35)" />
+                          )}
+                        </div>
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
 
           {/* المتصلين حالياً بالنظام */}
           {onlineUsers.length > 0 && (
@@ -1165,7 +821,7 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
         </div>
       </nav>
 
-      {/* 5️⃣ شريط التنقل السفلي الذكي للجوال (Mobile Bottom Dock) */}
+      {/* 4️⃣ شريط التنقل السفلي الذكي للجوال (Mobile Bottom Dock) */}
       <div className="desert-bottom-dock no-print">
         <Link href="/Dashboard" className={`dock-item ${pathname === '/Dashboard' ? 'active' : ''}`}>
           <Home />
@@ -1193,7 +849,7 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
         </button>
       </div>
 
-      {/* 6️⃣ المحتوى الرئيسي للصفحة */}
+      {/* 5️⃣ المحتوى الرئيسي للصفحة */}
       <main className="main-content" style={{ 
           flex: 1, 
           boxSizing: 'border-box',
@@ -1202,7 +858,7 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
           paddingRight: '15px', 
           paddingLeft: '15px',
           paddingTop: '15px',
-          minHeight: 'calc(100vh - 66px)', 
+          minHeight: '100vh', 
           position: 'relative', 
           zIndex: 1,
           overflowX: 'hidden',

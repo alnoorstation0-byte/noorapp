@@ -78,43 +78,127 @@ body {
   border-color: rgba(194, 155, 98, 0.5) !important;
 }
 
-/* 🔘 أزرار الزجاج الصحراوي */
+/* 🔘 حزمة الأزرار الصحراوية الموحدة (Desert Glassmorphism Button Suite) */
+.btn-main-glass, .desert-btn, button.btn-main-glass {
+  min-height: 44px;
+  border-radius: 12px !important;
+  font-family: 'Cairo', sans-serif !important;
+  font-weight: 800 !important;
+  font-size: 13px !important;
+  padding: 10px 18px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 8px !important;
+  cursor: pointer !important;
+  border: 1px solid rgba(194, 155, 98, 0.35) !important;
+  backdrop-filter: blur(15px) !important;
+  -webkit-backdrop-filter: blur(15px) !important;
+  box-shadow: 0 4px 10px rgba(44, 26, 18, 0.06) !important;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1) !important;
+  text-decoration: none !important;
+  box-sizing: border-box !important;
+}
+
+.btn-main-glass:hover, .desert-btn:hover {
+  transform: translateY(-2px) !important;
+  box-shadow: 0 8px 18px rgba(168, 87, 60, 0.2) !important;
+  filter: brightness(1.04) !important;
+}
+
+.btn-main-glass:active, .desert-btn:active {
+  transform: scale(0.98) !important;
+}
+
+/* 🌟 الأزرار الذهبية والرئيسية (Primary / Gold) */
+.btn-main-glass.gold, 
+.btn-main-glass.primary,
 .desert-btn-primary {
-  background: linear-gradient(135deg, #C29B62 0%, #A8573C 100%);
-  color: #FFFFFF;
-  border: none;
-  border-radius: var(--radius-md);
-  padding: 10px 20px;
-  font-weight: 800;
-  box-shadow: 0 4px 12px rgba(194, 155, 98, 0.35);
-  cursor: pointer;
-  transition: var(--apple-transition);
+  background: linear-gradient(135deg, #C29B62 0%, #A8573C 100%) !important;
+  color: #FFFFFF !important;
+  border: 1px solid rgba(194, 155, 98, 0.5) !important;
+  box-shadow: 0 4px 14px rgba(194, 155, 98, 0.35) !important;
 }
-
+.btn-main-glass.gold:hover,
+.btn-main-glass.primary:hover,
 .desert-btn-primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 18px rgba(168, 87, 60, 0.35);
+  box-shadow: 0 8px 22px rgba(168, 87, 60, 0.35) !important;
 }
 
+/* ⚪ أزرار الزجاج الأبيض الثانوية (Secondary / White) */
+.btn-main-glass.white,
+.btn-main-glass.secondary,
 .desert-btn-glass {
-  background: var(--glass-surface);
-  backdrop-filter: var(--glass-blur);
-  border: var(--glass-border);
-  color: var(--primary);
-  border-radius: var(--radius-md);
-  padding: 8px 16px;
-  font-weight: 700;
-  box-shadow: var(--card-shadow);
-  cursor: pointer;
-  transition: var(--apple-transition);
+  background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(255, 253, 250, 0.75) 100%) !important;
+  color: #2C1A12 !important;
+  border: 1px solid rgba(194, 155, 98, 0.35) !important;
+  box-shadow: 0 3px 8px rgba(44, 26, 18, 0.05) !important;
+}
+.btn-main-glass.white:hover,
+.btn-main-glass.secondary:hover,
+.desert-btn-glass:hover {
+  background: #FFFFFF !important;
+  border-color: #C29B62 !important;
+  color: #A8573C !important;
 }
 
-.desert-btn-glass:hover {
-  background: #FFFFFF;
-  border-color: var(--accent);
-  color: var(--terracotta);
-  transform: translateY(-2px);
-  box-shadow: var(--hover-shadow);
+/* 🌿 أزرار النجاح والاعتماد والترحيل (Success / Green) */
+.btn-main-glass.green,
+.btn-main-glass.success {
+  background: linear-gradient(135deg, #4E734F 0%, #3D5C3E 100%) !important;
+  color: #FFFFFF !important;
+  border: 1px solid rgba(78, 115, 79, 0.5) !important;
+  box-shadow: 0 4px 14px rgba(78, 115, 79, 0.3) !important;
+}
+.btn-main-glass.green:hover,
+.btn-main-glass.success:hover {
+  box-shadow: 0 8px 20px rgba(78, 115, 79, 0.4) !important;
+}
+
+/* 🔵 أزرار العمليات والقيود (Blue / Deep Brown) */
+.btn-main-glass.blue {
+  background: linear-gradient(135deg, #2C1A12 0%, #4A2E20 100%) !important;
+  color: #FFFFFF !important;
+  border: 1px solid rgba(194, 155, 98, 0.4) !important;
+  box-shadow: 0 4px 14px rgba(44, 26, 18, 0.25) !important;
+}
+
+/* ⚠️ أزرار التحذير والتأجيل (Warning / Yellow) */
+.btn-main-glass.yellow,
+.btn-main-glass.warning {
+  background: linear-gradient(135deg, #D97706 0%, #B45309 100%) !important;
+  color: #FFFFFF !important;
+  border: 1px solid rgba(217, 119, 6, 0.5) !important;
+  box-shadow: 0 4px 14px rgba(217, 119, 6, 0.3) !important;
+}
+
+/* 🔴 أزرار الحذف والرفض (Danger / Red) */
+.btn-main-glass.red,
+.btn-main-glass.danger {
+  background: linear-gradient(135deg, #A8573C 0%, #DC2626 100%) !important;
+  color: #FFFFFF !important;
+  border: 1px solid rgba(220, 38, 38, 0.4) !important;
+  box-shadow: 0 4px 14px rgba(220, 38, 38, 0.25) !important;
+}
+
+/* 📊 أزرار إجراءات الجداول (Table Action Buttons) */
+.table-action-btn {
+  min-height: 34px;
+  border-radius: 8px !important;
+  padding: 5px 10px !important;
+  font-size: 11.5px !important;
+  font-weight: 800 !important;
+  cursor: pointer !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: 4px !important;
+  transition: all 0.2s ease !important;
+  border: 1px solid transparent !important;
+}
+.table-action-btn:hover {
+  transform: translateY(-1.5px) !important;
+  filter: brightness(1.08) !important;
 }
 
 /* ✏️ حقول الإدخال */
