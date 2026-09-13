@@ -101,6 +101,13 @@ export default function ShiftOpenModal({
         }
     });
 
+    // 👑 صلاحية الإدارة العليا للإشراف على عدة فروع
+    const isManagerOrAdmin = Boolean(
+        userProfile?.role === 'super_admin' || 
+        userProfile?.role === 'admin' || 
+        userProfile?.role === 'manager'
+    );
+
     // 1. هل المستودع المختار لديه وردية مفتوحة بالفعل؟
     const existingWarehouseShift = (allActiveShifts || []).find(
         (s: any) => s.warehouse_id === targetWarehouseId
@@ -114,7 +121,8 @@ export default function ShiftOpenModal({
                     (s.user_id && selectedDelegate.userId && s.user_id === selectedDelegate.userId)
     ) : null;
 
-    const isConflictWithOtherWarehouse = existingDelegateShift && existingDelegateShift.id !== existingWarehouseShift?.id;
+    // يُستثنى المدير / المشرف من المنع عند فتح ورديات لفروع ومستودعات مختلفة لضمان استقلالية كل فرع
+    const isConflictWithOtherWarehouse = !isManagerOrAdmin && Boolean(existingDelegateShift && existingDelegateShift.id !== existingWarehouseShift?.id);
 
     const selectedWarehouse = warehouses?.find((w: any) => w.id === targetWarehouseId);
 
@@ -431,6 +439,28 @@ export default function ShiftOpenModal({
                             {isEn ? 'Rep ' : 'المندوب '}<strong>{selectedDelegate?.name}</strong>{isEn ? ' is currently managing an active shift in ' : ' يدير حالياً وردية نشطة في '}<strong>{(Array.isArray(existingDelegateShift?.warehouse) ? existingDelegateShift?.warehouse[0]?.name : (existingDelegateShift?.warehouse as any)?.name) || (isEn ? 'another branch' : 'منفذ آخر')}</strong>.
                             <br />
                             {isEn ? 'A rep cannot manage two shifts simultaneously.' : 'المسؤول شخص واحد ولا يمكن الجمع بين ورديتين لنفس الشخص في نفس الوقت.'}
+                        </p>
+                    </div>
+                )}
+
+                {/* 👑 إشعار الإدارة: إمكانية فتح وإشراف ورديات متعددة للفروع المستقلة */}
+                {isManagerOrAdmin && existingDelegateShift && existingDelegateShift.id !== existingWarehouseShift?.id && !existingWarehouseShift && (
+                    <div style={{
+                        background: 'linear-gradient(135deg, rgba(194, 155, 98, 0.15) 0%, rgba(168, 87, 60, 0.08) 100%)',
+                        border: '1.5px solid rgba(194, 155, 98, 0.45)',
+                        borderRadius: '16px',
+                        padding: '12px 14px',
+                        marginBottom: '16px',
+                        textAlign: 'right'
+                    }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#A8573C', fontWeight: 900, fontSize: '13px', marginBottom: '4px' }}>
+                            <span style={{ fontSize: '16px' }}>👑</span>
+                            <span>{isEn ? 'Management Mode: Multi-Branch Shifts Permitted' : 'وضع الإدارة: فتح وإدارة ورديات مستقلة للفروع متاح'}</span>
+                        </div>
+                        <p style={{ color: '#2C1A12', fontSize: '12px', margin: 0, lineHeight: 1.5, fontWeight: 700 }}>
+                            {isEn 
+                                ? 'As an administrator, you can open and supervise independent shifts across different branches simultaneously.' 
+                                : 'بصفتك مديراً / مسؤول نظام، يمكنك فتح وردية مستقلة تماماً لهذا الفرع مع بقاء ورديات الفروع الأخرى نشطة ومستقلة بمبيعاتها وخزينتها.'}
                         </p>
                     </div>
                 )}

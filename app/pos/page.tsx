@@ -1302,31 +1302,31 @@ export default function PosPage() {
                 /* 🛍️ شبكة الأصناف التفاعلية المتناسقة تماماً */
                 .items-grid {
                     display: grid;
-                    grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
-                    gap: 12px;
+                    grid-template-columns: repeat(auto-fill, minmax(122px, 1fr));
+                    gap: 8px;
                     overflow-y: auto;
                     -webkit-overflow-scrolling: touch;
                     padding-right: 4px;
-                    margin-top: 12px;
+                    margin-top: 10px;
                 }
 
                 /* أحجام شبكة الأصناف حسب مقاسات الشاشة لضمان تناسق 100% */
                 @media (max-width: 540px) {
                     .items-grid {
                         grid-template-columns: repeat(2, 1fr) !important;
-                        gap: 9px !important;
+                        gap: 8px !important;
                     }
                 }
                 @media (min-width: 541px) and (max-width: 820px) {
                     .items-grid {
                         grid-template-columns: repeat(3, 1fr) !important;
-                        gap: 11px !important;
+                        gap: 8px !important;
                     }
                 }
                 @media (min-width: 821px) and (max-width: 1024px) {
                     .items-grid {
-                        grid-template-columns: repeat(3, 1fr) !important;
-                        gap: 13px !important;
+                        grid-template-columns: repeat(4, 1fr) !important;
+                        gap: 8px !important;
                     }
                 }
 
@@ -1336,16 +1336,16 @@ export default function PosPage() {
                     backdrop-filter: blur(20px) saturate(160%);
                     -webkit-backdrop-filter: blur(20px);
                     border: 1.5px solid rgba(194, 155, 98, 0.3);
-                    border-radius: 16px;
-                    padding: 11px 10px;
+                    border-radius: 13px;
+                    padding: 7px 8px;
                     cursor: pointer;
-                    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+                    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
                     display: flex;
                     flex-direction: column;
                     justify-content: space-between;
                     position: relative;
-                    box-shadow: 0 4px 10px rgba(44, 26, 18, 0.05);
-                    min-height: 195px;
+                    box-shadow: 0 3px 8px rgba(44, 26, 18, 0.05);
+                    min-height: 140px;
                     height: 100%;
                     box-sizing: border-box;
                     user-select: none;
@@ -1353,9 +1353,9 @@ export default function PosPage() {
                 }
 
                 .pos-item-card:hover {
-                    transform: translateY(-4px);
+                    transform: translateY(-3px);
                     border-color: #C29B62;
-                    box-shadow: 0 10px 22px rgba(168, 87, 60, 0.15);
+                    box-shadow: 0 8px 18px rgba(168, 87, 60, 0.15);
                 }
                 .pos-item-card:active {
                     transform: scale(0.97);
@@ -1364,12 +1364,12 @@ export default function PosPage() {
                 .pos-item-card.critical {
                     border: 1.5px solid #ef4444;
                     background: linear-gradient(135deg, rgba(254, 242, 242, 0.95) 0%, rgba(255, 253, 250, 0.85) 100%);
-                    box-shadow: 0 4px 14px rgba(239, 68, 68, 0.15);
+                    box-shadow: 0 3px 10px rgba(239, 68, 68, 0.12);
                 }
                 .pos-item-card.near-low {
                     border: 1.5px solid #f59e0b;
                     background: linear-gradient(135deg, rgba(255, 251, 235, 0.95) 0%, rgba(255, 253, 250, 0.85) 100%);
-                    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.12);
+                    box-shadow: 0 3px 10px rgba(245, 158, 11, 0.1);
                 }
 
                 /* الصف العلوي لحالة الصنف (محدد بارتفاع ثابت لضمان عدم اهتزاز البطاقات) */
@@ -1377,21 +1377,21 @@ export default function PosPage() {
                     display: flex;
                     align-items: center;
                     justify-content: space-between;
-                    gap: 4px;
-                    height: 22px;
+                    gap: 3px;
+                    height: 18px;
                     width: 100%;
                     flex-shrink: 0;
                 }
                 .pos-badge-status {
-                    font-size: 9.5px;
+                    font-size: 8.5px;
                     font-weight: 800;
-                    padding: 2px 6px;
-                    border-radius: 6px;
+                    padding: 1.5px 5px;
+                    border-radius: 5px;
                     white-space: nowrap;
-                    line-height: 1.3;
+                    line-height: 1.2;
                     display: inline-flex;
                     align-items: center;
-                    gap: 3px;
+                    gap: 2px;
                 }
                 .pos-badge-status.critical {
                     background: #fee2e2;
@@ -1417,21 +1417,21 @@ export default function PosPage() {
                 .pos-card-unit-pill {
                     display: inline-flex;
                     align-items: center;
-                    gap: 4px;
-                    font-size: 10px;
+                    gap: 3px;
+                    font-size: 9px;
                     font-weight: 800;
                     color: rgba(44, 26, 18, 0.6);
                 }
                 .in-stock-dot {
-                    width: 6px;
-                    height: 6px;
+                    width: 5px;
+                    height: 5px;
                     border-radius: 50%;
                     background: #4E734F;
-                    box-shadow: 0 0 5px rgba(78, 115, 79, 0.5);
+                    box-shadow: 0 0 4px rgba(78, 115, 79, 0.5);
                 }
                 .out-stock-dot {
-                    width: 6px;
-                    height: 6px;
+                    width: 5px;
+                    height: 5px;
                     border-radius: 50%;
                     background: #ef4444;
                 }
@@ -1442,22 +1442,22 @@ export default function PosPage() {
                     flex-direction: column;
                     align-items: center;
                     text-align: center;
-                    margin: 4px 0 6px 0;
+                    margin: 2px 0 4px 0;
                     flex: 1;
                     justify-content: center;
                 }
                 .pos-item-avatar {
-                    width: 42px;
-                    height: 42px;
-                    border-radius: 12px;
+                    width: 28px;
+                    height: 28px;
+                    border-radius: 8px;
                     background: rgba(194, 155, 98, 0.14);
                     border: 1px solid rgba(194, 155, 98, 0.28);
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    font-size: 20px;
+                    font-size: 14px;
                     color: #C29B62;
-                    margin: 0 auto 5px auto;
+                    margin: 0 auto 3px auto;
                     transition: transform 0.2s ease;
                     flex-shrink: 0;
                 }
@@ -1469,15 +1469,15 @@ export default function PosPage() {
                 .pos-item-name {
                     font-weight: 800;
                     color: #2C1A12;
-                    font-size: 12.5px;
-                    line-height: 1.35;
+                    font-size: 11.5px;
+                    line-height: 1.25;
                     text-align: center;
                     display: -webkit-box;
                     -webkit-line-clamp: 2;
                     -webkit-box-orient: vertical;
                     overflow: hidden;
-                    min-height: 34px;
-                    max-height: 34px;
+                    min-height: 28px;
+                    max-height: 28px;
                     word-break: break-word;
                 }
 
@@ -1485,7 +1485,7 @@ export default function PosPage() {
                 .pos-item-footer {
                     display: flex;
                     flex-direction: column;
-                    gap: 5px;
+                    gap: 3px;
                     margin-top: auto;
                     width: 100%;
                     flex-shrink: 0;
@@ -1495,9 +1495,9 @@ export default function PosPage() {
                     align-items: center;
                     justify-content: space-between;
                     background: rgba(44, 26, 18, 0.04);
-                    padding: 2px 6px;
-                    border-radius: 6px;
-                    font-size: 10px;
+                    padding: 1.5px 5px;
+                    border-radius: 5px;
+                    font-size: 9.5px;
                     font-weight: 800;
                 }
                 .pos-item-stock-info .stock-label {
@@ -1511,18 +1511,18 @@ export default function PosPage() {
                     display: flex;
                     align-items: center;
                     justify-content: space-between;
-                    gap: 4px;
+                    gap: 3px;
                 }
                 .pos-item-price-tag .price-num {
                     font-weight: 900;
                     color: #2C1A12;
-                    font-size: 14.5px;
+                    font-size: 13px;
                     letter-spacing: -0.2px;
                 }
                 .pos-quick-add-btn {
-                    width: 30px;
-                    height: 30px;
-                    border-radius: 8px;
+                    width: 26px;
+                    height: 26px;
+                    border-radius: 7px;
                     border: none;
                     background: linear-gradient(135deg, #C29B62 0%, #A8573C 100%);
                     color: #ffffff;
@@ -1530,16 +1530,16 @@ export default function PosPage() {
                     align-items: center;
                     justify-content: center;
                     font-weight: 900;
-                    font-size: 16px;
+                    font-size: 15px;
                     cursor: pointer;
-                    box-shadow: 0 2px 6px rgba(168, 87, 60, 0.3);
+                    box-shadow: 0 2px 5px rgba(168, 87, 60, 0.28);
                     transition: all 0.15s ease;
                     flex-shrink: 0;
                     line-height: 1;
                 }
                 .pos-quick-add-btn:hover {
                     transform: scale(1.08);
-                    box-shadow: 0 4px 10px rgba(168, 87, 60, 0.45);
+                    box-shadow: 0 3px 8px rgba(168, 87, 60, 0.4);
                 }
                 .pos-quick-add-btn:active {
                     transform: scale(0.92);
@@ -1782,11 +1782,11 @@ export default function PosPage() {
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
-                    background: linear-gradient(135deg, rgba(22, 163, 74, 0.09) 0%, rgba(16, 185, 129, 0.16) 100%);
-                    border: 1.5px solid rgba(22, 163, 74, 0.35);
-                    border-radius: 12px;
-                    padding: 8px 12px;
-                    box-shadow: 0 3px 10px rgba(22, 163, 74, 0.08);
+                    background: linear-gradient(135deg, #2C1A12 0%, #3D2419 100%);
+                    border: 1.5px solid rgba(194, 155, 98, 0.45);
+                    border-radius: 13px;
+                    padding: 9px 14px;
+                    box-shadow: 0 4px 14px rgba(44, 26, 18, 0.2);
                 }
             `}</style>
 
@@ -1801,15 +1801,29 @@ export default function PosPage() {
                         <select 
                             className="pos-glass-select" 
                             value={logic.selectedWarehouseId}
-                            onChange={(e) => logic.setSelectedWarehouseId(e.target.value)}
+                            onChange={(e) => logic.handleWarehouseChange(e.target.value)}
                             style={{ minWidth: '190px' }}
-                            disabled={logic.isDelegateLocked}
+                            disabled={!logic.isManagerOrAdmin && logic.isDelegateLocked}
                         >
                             <option value="" disabled>{isEn ? '-- Select Branch --' : '-- اختر منفذ البيع --'}</option>
                             {logic.warehouses.map((w: any) => (
                                 <option key={w.id} value={w.id}>{w.name}</option>
                             ))}
                         </select>
+                        {logic.isManagerOrAdmin && (
+                            <span style={{
+                                background: 'linear-gradient(135deg, rgba(194, 155, 98, 0.2) 0%, rgba(168, 87, 60, 0.15) 100%)',
+                                color: '#A8573C',
+                                border: '1px solid rgba(194, 155, 98, 0.4)',
+                                borderRadius: '6px',
+                                padding: '2px 7px',
+                                fontSize: '10px',
+                                fontWeight: 800,
+                                whiteSpace: 'nowrap'
+                            }} title={isEn ? 'Management Mode: Warehouse switching permitted' : 'وضع الإدارة: متاح تبديل الفروع في أي وقت مع استقلالية كل وردية'}>
+                                👑 {isEn ? 'Admin Mode' : 'وضع الإدارة'}
+                            </span>
+                        )}
                     </div>
 
                     {/* المندوب */}
@@ -2037,7 +2051,7 @@ export default function PosPage() {
                                     type="button"
                                     onClick={() => logic.setIsShiftOpenModalOpen(true)}
                                     style={{
-                                        background: 'linear-gradient(135deg, #1C73AB 0%, #2891C8 100%)',
+                                        background: 'linear-gradient(135deg, #A8573C 0%, #8C3D26 100%)',
                                         color: 'white',
                                         border: 'none',
                                         borderRadius: '12px',
@@ -2045,7 +2059,7 @@ export default function PosPage() {
                                         fontSize: '13px',
                                         fontWeight: 900,
                                         cursor: 'pointer',
-                                        boxShadow: '0 4px 12px rgba(28, 115, 171, 0.3)',
+                                        boxShadow: '0 4px 14px rgba(168, 87, 60, 0.35)',
                                         display: 'flex',
                                         alignItems: 'center',
                                         gap: '6px'
@@ -2216,7 +2230,7 @@ export default function PosPage() {
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'space-between',
-                            borderBottom: '1.5px solid rgba(28, 115, 171, 0.12)',
+                            borderBottom: '1.5px solid rgba(194, 155, 98, 0.25)',
                             paddingBottom: '12px',
                             marginBottom: '6px'
                         }}>
@@ -2227,8 +2241,8 @@ export default function PosPage() {
                                 </h3>
                                 {logic.cart.length > 0 && (
                                     <span style={{
-                                        background: 'rgba(28, 115, 171, 0.12)',
-                                        color: '#1C73AB',
+                                        background: 'rgba(194, 155, 98, 0.18)',
+                                        color: '#A8573C',
                                         fontSize: '11px',
                                         fontWeight: 800,
                                         padding: '2px 8px',
@@ -2422,7 +2436,7 @@ export default function PosPage() {
                             {/* Customer & Payment Method (Side by Side) */}
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                                 <div>
-                                    <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, color: '#1C73AB', marginBottom: '3px' }}>
+                                    <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, color: '#2C1A12', marginBottom: '3px' }}>
                                         👤 {isEn ? 'Customer:' : 'العميل:'}
                                     </label>
                                     <select 
@@ -2432,10 +2446,10 @@ export default function PosPage() {
                                             height: '35px', 
                                             padding: '4px 8px', 
                                             fontSize: '12px', 
-                                            background: 'rgba(255, 255, 255, 0.9)', 
-                                            color: '#122946', 
+                                            background: 'rgba(255, 253, 250, 0.95)', 
+                                            color: '#2C1A12', 
                                             fontWeight: 700, 
-                                            border: '1.5px solid rgba(28, 115, 171, 0.2)',
+                                            border: '1.5px solid rgba(194, 155, 98, 0.35)',
                                             borderRadius: '10px'
                                         }}
                                         value={logic.partnerId}
@@ -2449,7 +2463,7 @@ export default function PosPage() {
                                 </div>
 
                                 <div>
-                                    <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, color: '#1C73AB', marginBottom: '3px' }}>
+                                    <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, color: '#2C1A12', marginBottom: '3px' }}>
                                         💳 {isEn ? 'Payment Method:' : 'طريقة الدفع:'}
                                     </label>
                                     <select 
@@ -2459,10 +2473,10 @@ export default function PosPage() {
                                             height: '35px', 
                                             padding: '4px 8px', 
                                             fontSize: '12px', 
-                                            background: 'rgba(255, 255, 255, 0.9)', 
-                                            color: '#122946', 
+                                            background: 'rgba(255, 253, 250, 0.95)', 
+                                            color: '#2C1A12', 
                                             fontWeight: 700, 
-                                            border: '1.5px solid rgba(28, 115, 171, 0.2)',
+                                            border: '1.5px solid rgba(194, 155, 98, 0.35)',
                                             borderRadius: '10px'
                                         }}
                                         value={logic.paymentMethod}
@@ -2480,12 +2494,12 @@ export default function PosPage() {
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'space-between',
-                                background: 'rgba(239, 68, 68, 0.05)',
+                                background: 'rgba(168, 87, 60, 0.05)',
                                 padding: '5px 10px',
                                 borderRadius: '10px',
-                                border: '1px solid rgba(239, 68, 68, 0.12)'
+                                border: '1px solid rgba(168, 87, 60, 0.15)'
                             }}>
-                                <span style={{ fontWeight: 800, color: '#ef4444', fontSize: '11.5px' }}>{isEn ? 'Extra Discount:' : 'خصم إضافي:'}</span>
+                                <span style={{ fontWeight: 800, color: '#A8573C', fontSize: '11.5px' }}>{isEn ? 'Extra Discount:' : 'خصم إضافي:'}</span>
                                 <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
                                     <input 
                                         type="number"
@@ -2500,10 +2514,11 @@ export default function PosPage() {
                                             padding: '0 4px',
                                             textAlign: 'center',
                                             borderRadius: '6px',
-                                            border: '1px solid rgba(239, 68, 68, 0.2)',
+                                            border: '1px solid rgba(168, 87, 60, 0.25)',
                                             outline: 'none',
                                             fontWeight: 'bold',
-                                            color: '#ef4444'
+                                            color: '#A8573C',
+                                            background: '#fff'
                                         }}
                                     />
                                     <select 
@@ -2512,13 +2527,13 @@ export default function PosPage() {
                                         style={{
                                             height: '26px',
                                             borderRadius: '6px',
-                                            border: '1px solid rgba(239, 68, 68, 0.2)',
+                                            border: '1px solid rgba(168, 87, 60, 0.25)',
                                             outline: 'none',
                                             fontWeight: 'bold',
                                             fontSize: '11px',
                                             padding: '0 4px',
                                             background: '#fff',
-                                            color: '#ef4444'
+                                            color: '#A8573C'
                                         }}
                                     >
                                         <option value="amount">{isEn ? 'SAR' : 'ر.س'}</option>
@@ -2527,31 +2542,31 @@ export default function PosPage() {
                                 </div>
                             </div>
 
-                            {/* طريقة الحساب (شامل / غير {isEn ? 'Tax Inclusive' : 'شامل الضريبة'}) */}
+                            {/* طريقة الحساب (شامل / غير شامل الضريبة) */}
                             <div style={{
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'space-between',
-                                background: 'rgba(28, 115, 171, 0.05)',
+                                background: 'rgba(44, 26, 18, 0.04)',
                                 padding: '5px 10px',
                                 borderRadius: '10px',
-                                border: '1px solid rgba(28, 115, 171, 0.12)'
+                                border: '1px solid rgba(194, 155, 98, 0.22)'
                             }}>
-                                <span style={{ fontWeight: 800, color: '#122946', fontSize: '11.5px' }}>{isEn ? 'Calc Method:' : 'طريقة الحساب:'}</span>
-                                <div style={{ display: 'flex', background: 'rgba(255, 255, 255, 0.85)', padding: '2px', borderRadius: '8px', border: '1px solid rgba(28, 115, 171, 0.15)' }}>
+                                <span style={{ fontWeight: 800, color: '#2C1A12', fontSize: '11.5px' }}>{isEn ? 'Calc Method:' : 'طريقة الحساب:'}</span>
+                                <div style={{ display: 'flex', background: 'rgba(255, 253, 250, 0.95)', padding: '2px', borderRadius: '8px', border: '1px solid rgba(194, 155, 98, 0.25)' }}>
                                     <button 
                                         type="button"
                                         onClick={() => logic.setIsTaxInclusive(true)}
                                         style={{
                                             border: 'none',
-                                            padding: '3px 8px',
+                                            padding: '4px 9px',
                                             fontSize: '11px',
                                             fontWeight: 800,
                                             borderRadius: '6px',
                                             cursor: 'pointer',
-                                            background: logic.isTaxInclusive ? 'linear-gradient(135deg, #16a34a 0%, #10b981 100%)' : 'transparent',
-                                            color: logic.isTaxInclusive ? 'white' : '#64748b',
-                                            boxShadow: logic.isTaxInclusive ? '0 2px 6px rgba(22, 163, 74, 0.3)' : 'none',
+                                            background: logic.isTaxInclusive ? 'linear-gradient(135deg, #C29B62 0%, #A8573C 100%)' : 'transparent',
+                                            color: logic.isTaxInclusive ? 'white' : 'rgba(44, 26, 18, 0.65)',
+                                            boxShadow: logic.isTaxInclusive ? '0 2px 6px rgba(168, 87, 60, 0.3)' : 'none',
                                             transition: '0.2s'
                                         }}
                                     >
@@ -2562,14 +2577,14 @@ export default function PosPage() {
                                         onClick={() => logic.setIsTaxInclusive(false)}
                                         style={{
                                             border: 'none',
-                                            padding: '3px 8px',
+                                            padding: '4px 9px',
                                             fontSize: '11px',
                                             fontWeight: 800,
                                             borderRadius: '6px',
                                             cursor: 'pointer',
-                                            background: !logic.isTaxInclusive ? 'linear-gradient(135deg, #1C73AB 0%, #2891C8 100%)' : 'transparent',
-                                            color: !logic.isTaxInclusive ? 'white' : '#64748b',
-                                            boxShadow: !logic.isTaxInclusive ? '0 2px 6px rgba(28, 115, 171, 0.3)' : 'none',
+                                            background: !logic.isTaxInclusive ? 'linear-gradient(135deg, #2C1A12 0%, #442A1C 100%)' : 'transparent',
+                                            color: !logic.isTaxInclusive ? 'white' : 'rgba(44, 26, 18, 0.65)',
+                                            boxShadow: !logic.isTaxInclusive ? '0 2px 6px rgba(44, 26, 18, 0.25)' : 'none',
                                             transition: '0.2s'
                                         }}
                                     >
@@ -2583,15 +2598,15 @@ export default function PosPage() {
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'space-between',
-                                padding: '4px 8px',
-                                background: 'rgba(255, 255, 255, 0.65)',
-                                borderRadius: '8px',
-                                border: '1px solid rgba(28, 115, 171, 0.1)',
+                                padding: '5px 10px',
+                                background: 'rgba(255, 253, 250, 0.85)',
+                                borderRadius: '9px',
+                                border: '1px solid rgba(194, 155, 98, 0.25)',
                                 fontSize: '11.5px'
                             }}>
                                 <div>
-                                    <span style={{ color: '#64748b', fontWeight: 700 }}>{isEn ? 'Subtotal:' : 'المجموع:'} </span>
-                                    <span style={{ fontWeight: 900, color: '#122946' }}>{formatCurrency(logic.cartTotal.subtotal)}</span>
+                                    <span style={{ color: 'rgba(44, 26, 18, 0.6)', fontWeight: 700 }}>{isEn ? 'Subtotal:' : 'المجموع:'} </span>
+                                    <span style={{ fontWeight: 900, color: '#2C1A12' }}>{formatCurrency(logic.cartTotal.subtotal)}</span>
                                 </div>
                                 {logic.cartTotal.exemptSubtotal > 0 && (
                                     <>
@@ -2602,17 +2617,17 @@ export default function PosPage() {
                                         </div>
                                     </>
                                 )}
-                                <div style={{ width: '1px', height: '14px', background: 'rgba(28, 115, 171, 0.2)' }}></div>
+                                <div style={{ width: '1px', height: '14px', background: 'rgba(194, 155, 98, 0.3)' }}></div>
                                 <div>
-                                    <span style={{ color: '#64748b', fontWeight: 700 }}>{isEn ? 'VAT:' : 'الضريبة:'} </span>
-                                    <span style={{ fontWeight: 900, color: '#122946' }}>{formatCurrency(logic.cartTotal.tax)}</span>
+                                    <span style={{ color: 'rgba(44, 26, 18, 0.6)', fontWeight: 700 }}>{isEn ? 'VAT:' : 'الضريبة:'} </span>
+                                    <span style={{ fontWeight: 900, color: '#2C1A12' }}>{formatCurrency(logic.cartTotal.tax)}</span>
                                 </div>
                             </div>
 
-                            {/* الإجمالي المطلوب الماسي */}
+                            {/* الإجمالي المطلوب - Desert Glassmorphism Banner */}
                             <div className="pos-total-banner">
-                                <span style={{ fontSize: '13px', fontWeight: 900, color: '#166534' }}>{isEn ? 'Grand Total:' : 'الإجمالي المطلوب:'}</span>
-                                <span style={{ fontSize: '19px', fontWeight: 900, color: '#16a34a', letterSpacing: '-0.3px' }}>
+                                <span style={{ fontSize: '13.5px', fontWeight: 900, color: '#FDFBF7' }}>{isEn ? 'Grand Total:' : 'الإجمالي المطلوب:'}</span>
+                                <span style={{ fontSize: '20px', fontWeight: 900, color: '#F5DDA4', letterSpacing: '-0.3px', textShadow: '0 0 10px rgba(245, 221, 164, 0.3)' }}>
                                     {formatCurrency(logic.cartTotal.total)}
                                 </span>
                             </div>
@@ -2624,19 +2639,19 @@ export default function PosPage() {
                                 return (
                                     <div style={{
                                         padding: '6px 12px',
-                                        background: 'linear-gradient(135deg, rgba(40, 145, 200, 0.12) 0%, rgba(127, 212, 227, 0.2) 100%)',
-                                        border: '1px solid rgba(40, 145, 200, 0.35)',
+                                        background: 'linear-gradient(135deg, rgba(194, 155, 98, 0.14) 0%, rgba(168, 87, 60, 0.08) 100%)',
+                                        border: '1px solid rgba(194, 155, 98, 0.35)',
                                         borderRadius: '10px',
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'space-between',
-                                        boxShadow: '0 2px 8px rgba(40, 145, 200, 0.06)'
+                                        boxShadow: '0 2px 8px rgba(168, 87, 60, 0.08)'
                                     }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                                             <span style={{ fontSize: '16px' }}>🔄</span>
-                                            <span style={{ fontSize: '11px', fontWeight: 900, color: '#1C73AB' }}>{isEn ? 'Returnables Custody:' : 'عهدة فوارغ مستحقة:'}</span>
+                                            <span style={{ fontSize: '11px', fontWeight: 900, color: '#A8573C' }}>{isEn ? 'Returnables Custody:' : 'عهدة فوارغ مستحقة:'}</span>
                                         </div>
-                                        <span style={{ fontSize: '12px', fontWeight: 900, color: '#122946', background: 'white', padding: '2px 8px', borderRadius: '6px', border: '1px solid rgba(40, 145, 200, 0.3)' }}>
+                                        <span style={{ fontSize: '12px', fontWeight: 900, color: '#2C1A12', background: 'white', padding: '2px 8px', borderRadius: '6px', border: '1px solid rgba(194, 155, 98, 0.35)' }}>
                                             {totalReturnable} {isEn ? 'Bottles' : 'عبوة'}
                                         </span>
                                     </div>
@@ -2650,13 +2665,14 @@ export default function PosPage() {
                                     className="btn-main-glass"
                                     style={{ 
                                         width: '100%', marginTop: '3px', 
-                                        background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)', 
-                                        color: 'white', fontSize: '13.5px', fontWeight: 900, padding: '10px 14px',
-                                        boxShadow: '0 4px 15px rgba(217, 119, 6, 0.35)',
+                                        background: 'linear-gradient(135deg, #A8573C 0%, #8C3D26 100%)', 
+                                        color: 'white', fontSize: '14px', fontWeight: 900, padding: '12px 16px',
+                                        boxShadow: '0 4px 16px rgba(168, 87, 60, 0.35)',
                                         cursor: 'pointer',
                                         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                                        borderRadius: '12px',
-                                        minHeight: '44px'
+                                        borderRadius: '13px',
+                                        minHeight: '46px',
+                                        border: '1px solid rgba(255, 255, 255, 0.2)'
                                     }}
                                 >
                                     <span>🔒</span>
@@ -2670,17 +2686,21 @@ export default function PosPage() {
                                     className="btn-main-glass"
                                     style={{ 
                                         width: '100%', marginTop: '3px', 
-                                        background: logic.cart.length > 0 ? 'linear-gradient(135deg, #16a34a 0%, #10b981 100%)' : 'rgba(203, 213, 225, 0.6)', 
-                                        color: logic.cart.length > 0 ? 'white' : '#64748b', 
-                                        fontSize: '15px', fontWeight: 900, padding: '11px 16px',
-                                        boxShadow: logic.cart.length > 0 ? '0 4px 16px rgba(22, 163, 74, 0.35)' : 'none',
+                                        background: logic.cart.length > 0 
+                                            ? 'linear-gradient(135deg, #C29B62 0%, #A8573C 100%)' 
+                                            : 'rgba(44, 26, 18, 0.12)', 
+                                        color: logic.cart.length > 0 ? '#ffffff' : 'rgba(44, 26, 18, 0.4)', 
+                                        fontSize: '15.5px', fontWeight: 900, padding: '12px 18px',
+                                        boxShadow: logic.cart.length > 0 ? '0 5px 20px rgba(168, 87, 60, 0.38)' : 'none',
                                         cursor: logic.cart.length > 0 && !logic.isCheckingOut ? 'pointer' : 'not-allowed',
                                         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                                        borderRadius: '12px',
-                                        minHeight: '44px'
+                                        borderRadius: '13px',
+                                        minHeight: '48px',
+                                        border: logic.cart.length > 0 ? '1px solid rgba(255, 255, 255, 0.25)' : 'none',
+                                        transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
                                     }}
                                 >
-                                    <span>{logic.isCheckingOut ? '⏳' : '✅'}</span>
+                                    <span>{logic.isCheckingOut ? '⏳' : '✨'}</span>
                                     <span>{logic.isCheckingOut ? (isEn ? 'Issuing Invoice...' : 'جاري إصدار الفاتورة...') : (isEn ? 'Checkout & Print' : 'الدفع وإصدار الفاتورة')}</span>
                                 </button>
                             )}

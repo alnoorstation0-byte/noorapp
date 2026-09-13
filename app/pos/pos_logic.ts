@@ -27,6 +27,26 @@ export function usePosLogic() {
     const [manualDiscountAmount, setManualDiscountAmount] = useState<number>(0);
     const [discountType, setDiscountType] = useState<'amount' | 'percentage'>('amount');
 
+    // 👑 التحقق من صلاحيات الإدارة العليا أو المشرف (التبديل الحر بين الفروع والمستودعات)
+    const isManagerOrAdmin = Boolean(
+        userProfile?.role === 'super_admin' || 
+        userProfile?.role === 'admin' || 
+        userProfile?.role === 'manager'
+    );
+
+    // 🏢 التبديل الآمن بين المستودعات مع إفراغ السلة لمنع تداخل أرصدة الفروع
+    const handleWarehouseChange = (newWarehouseId: string) => {
+        if (!newWarehouseId || newWarehouseId === selectedWarehouseId) return;
+        if (cart.length > 0) {
+            const confirmMsg = "تنبيه: التبديل إلى فرع أو مستودع آخر سيقوم بإفراغ سلة المشتريات الحالية لضمان استقلالية المخزون والوردية لكل فرع.\n\nهل تريد المتابعة وتغيير الفرع؟";
+            if (typeof window !== 'undefined' && !window.confirm(confirmMsg)) {
+                return;
+            }
+            setCart([]);
+        }
+        setSelectedWarehouseId(newWarehouseId);
+    };
+
     // Fetch current user and profile
     const { data: userProfile, isLoading: loadingProfile } = useQuery({
         queryKey: ['pos_user_profile'],
@@ -250,7 +270,7 @@ export function usePosLogic() {
 
             if (targetId) {
                 setDelegateId(targetId);
-                if (profile.role !== 'admin' && profile.role !== 'super_admin') {
+                if (profile.role !== 'admin' && profile.role !== 'super_admin' && profile.role !== 'manager') {
                     setIsDelegateLocked(true);
                 }
                 
@@ -304,11 +324,12 @@ export function usePosLogic() {
 
             return (catalog || []).map((item: any) => {
                 const whRow = whMap.get(item.id);
-                let availableQty = whRow ? Number(whRow.quantity || 0) : 0;
+                // 🛡️ حماية صارمة لمنع احتساب وعرض أي كمية سالبة نهائياً
+                let availableQty = whRow ? Math.max(0, Number(whRow.quantity || 0)) : 0;
                 
                 // Fallback for main warehouse if not yet recorded in warehouse_inventory
                 if (!whRow && selectedWarehouseId === '11111111-1111-1111-1111-111111111111') {
-                    availableQty = Number(item.current_quantity || 0);
+                    availableQty = Math.max(0, Number(item.current_quantity || 0));
                 }
 
                 const reorderLvl = Number(item.reorder_level) || 5;
@@ -677,19 +698,20 @@ export function usePosLogic() {
                     fleet_operation_id: fleetOpId
                 }]);
 
-                // 2. Direct quantity deduction
+                // 2. Direct quantity deduction with zero floor protection
                 const { data: invItem } = await supabase.from('warehouse_inventory')
                     .select('quantity, id').eq('item_id', line.item_id).eq('warehouse_id', line.warehouse_id).maybeSingle();
                 if (invItem) {
+                    const newQty = Math.max(0, (Number(invItem.quantity) || 0) - line.quantity);
                     await supabase.from('warehouse_inventory')
-                        .update({ quantity: (Number(invItem.quantity) || 0) - line.quantity })
+                        .update({ quantity: newQty })
                         .eq('id', invItem.id);
                 } else {
                     await supabase.from('warehouse_inventory')
                         .insert([{
                             warehouse_id: line.warehouse_id,
                             item_id: line.item_id,
-                            quantity: -line.quantity
+                            quantity: 0
                         }]);
                 }
 
@@ -698,8 +720,9 @@ export function usePosLogic() {
                     const { data: catItem } = await supabase.from('inventory_items')
                         .select('current_quantity').eq('id', line.item_id).single();
                     if (catItem) {
+                        const newCatQty = Math.max(0, (Number(catItem.current_quantity) || 0) - line.quantity);
                         await supabase.from('inventory_items')
-                            .update({ current_quantity: (Number(catItem.current_quantity) || 0) - line.quantity })
+                            .update({ current_quantity: newCatQty })
                             .eq('id', line.item_id);
                     }
                 }
@@ -778,7 +801,8 @@ export function usePosLogic() {
     });
 
     return {
-        selectedWarehouseId, setSelectedWarehouseId, warehouses,
+        selectedWarehouseId, setSelectedWarehouseId, handleWarehouseChange, warehouses,
+        isManagerOrAdmin,
         searchQuery, setSearchQuery, inventoryItems: filteredItems, filteredItems,
         selectedItemForCart, setSelectedItemForCart, confirmAddToCart, handleItemClick,
         cart, addToCart, removeFromCart, updateCartItemQty, updateCartItemPrice,
@@ -791,14 +815,15 @@ export function usePosLogic() {
         activeShift, loadingShift, userProfile,
         allOpenShifts, loadingAllShifts,
         switchToShift: (shift: any) => {
-            if (shift.warehouse_id) setSelectedWarehouseId(shift.warehouse_id);
+            if (shift.warehouse_id) handleWarehouseChange(shift.warehouse_id);
             if (shift.delegate_id) setDelegateId(shift.delegate_id);
             else setDelegateId('');
         },
         cartTotal, isTaxInclusive, setIsTaxInclusive,
         paymentMethod, setPaymentMethod,
         customers, partnerId, setPartnerId,
-        delegates, delegateId, setDelegateId, isDelegateLocked: isDelegateLocked || !!activeShift,
+        delegates, delegateId, setDelegateId, 
+        isDelegateLocked: isManagerOrAdmin ? false : (isDelegateLocked || !!activeShift),
         activeFleetOperation,
         onlyLowStock, setOnlyLowStock, lowStockCount,
         handleCheckout: () => checkoutMutation.mutate(),

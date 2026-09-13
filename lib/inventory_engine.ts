@@ -93,7 +93,7 @@ export async function syncAllWarehouseBalances() {
 
     for (const whId of Object.keys(whBalances)) {
       for (const itemId of Object.keys(whBalances[whId])) {
-        const qty = whBalances[whId][itemId];
+        const qty = Math.max(0, whBalances[whId][itemId] || 0);
         const key = `${whId}_${itemId}`;
         const existing = existingMap.get(key);
 

@@ -242,7 +242,16 @@ export async function POST(request: Request) {
         }
 
         // 🔒 2. فحص المندوب: هل المندوب / الموظف لديه وردية مفتوحة بالفعل في أي مستودع آخر؟
-        if (resolvedDelegateId) {
+        // 👑 يُستثنى من ذلك المدراء والمشرفون (super_admin, admin, manager) لتمكينهم من إدارة وفتح ورديات مستقلة لعدة فروع
+        let isManagerOrAdminUser = false;
+        if (resolvedUserId) {
+            const { data: userProf } = await supabaseAdmin.from('profiles').select('role').eq('id', resolvedUserId).maybeSingle();
+            if (userProf && ['super_admin', 'admin', 'manager'].includes(userProf.role)) {
+                isManagerOrAdminUser = true;
+            }
+        }
+
+        if (resolvedDelegateId && !isManagerOrAdminUser) {
             const { data: existingDelegateShifts, error: delCheckErr } = await supabaseAdmin
                 .from('pos_shifts')
                 .select('id, status, opened_at, warehouse_id')
