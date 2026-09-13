@@ -7,6 +7,7 @@ import { THEME } from '@/lib/theme';
 import { createPortal } from 'react-dom';
 import RawasiSmartTable from '@/components/rawasismarttable';
 import AquaModalWrapper from '@/components/AquaModalWrapper';
+import RawasiSidebarManager from '@/components/RawasiSidebarManager';
 
 export default function WarehousesPage() {
   const logic = useWarehousesLogic();
@@ -77,35 +78,131 @@ export default function WarehousesPage() {
 
   return (
     <>
-      <MasterPage 
-        title="إدارة المستودعات (Multi-Warehouse)" 
-        subtitle="إدارة المستودعات الرئيسية، الفرعية، وسيارات التوزيع"
-      >
-        <div style={{ marginBottom: '20px', display: 'flex', justifyContent: 'flex-end', gap: '10px' }}>
-            {selectedIds.length > 0 && (
-                <button className="btn-main-glass red" style={{ width: 'auto' }} onClick={() => {
-                    if (window.confirm('هل أنت متأكد من حذف المستودعات المحددة؟')) {
-                        selectedIds.forEach(id => {
-                            const row = logic.warehouses.find((w: any) => w.id === id);
-                            if (row && row.type !== 'main' && row.type !== 'vehicle') {
-                                logic.handleDelete(id);
-                            }
-                        });
-                        setSelectedIds([]);
-                    }
-                }}>
-                    🗑️ حذف المحدد
-                </button>
-            )}
-            <button className="btn-main-glass blue" style={{ width: 'auto' }} onClick={logic.handleAddNew}>
-                ➕ إضافة مستودع / منفذ جديد
-            </button>
-        </div>
+      <RawasiSidebarManager 
+        summary={
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div className="summary-glass-card" style={{ padding: '16px', textAlign: 'center' }}>
+              <span style={{ fontSize: '11px', fontWeight: 800, color: '#64748b' }}>إجمالي المستودعات والمنافذ 🏢</span>
+              <div className="val" style={{ fontSize: '22px', fontWeight: 900, color: '#2C1A12', marginTop: '4px' }}>
+                {logic.warehouses?.length || 0} مستودع
+              </div>
+            </div>
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+              <div className="summary-glass-card" style={{ padding: '10px', textAlign: 'center' }}>
+                <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#4E734F' }}>النشطة ✅</span>
+                <div className="val" style={{ fontSize: '17px', fontWeight: 900, color: '#4E734F' }}>
+                  {logic.warehouses?.filter((w: any) => w.is_active).length || 0}
+                </div>
+              </div>
+              <div className="summary-glass-card" style={{ padding: '10px', textAlign: 'center' }}>
+                <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#C29B62' }}>منافذ البيع 🛍️</span>
+                <div className="val" style={{ fontSize: '17px', fontWeight: 900, color: '#C29B62' }}>
+                  {logic.warehouses?.filter((w: any) => w.type === 'pos').length || 0}
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+        actions={
+          <button 
+            type="button" 
+            className="btn-main-glass gold desert-btn-primary"
+            onClick={logic.handleAddNew}
+            style={{ width: '100%', minHeight: '44px', fontWeight: 900 }}
+          >
+            <span>➕</span>
+            <span>إضافة مستودع / منفذ جديد</span>
+          </button>
+        }
+        watchDeps={[logic.warehouses?.length]}
+      />
 
-        <div className="clickable-rows cinematic-scroll">
-            <RawasiSmartTable columns={columns} data={logic.warehouses} selectable={true} selectedIds={selectedIds} onSelectionChange={setSelectedIds} />
-        </div>
-      </MasterPage>
+      <div className="clean-page">
+        <MasterPage 
+          icon="🏢"
+          title="إدارة المستودعات (Multi-Warehouse)" 
+          subtitle="إدارة المستودعات الرئيسية، الفرعية، وسيارات التوزيع"
+        >
+          {/* 🌟 شريط التحكم والعمليات الرئيسي بتصميم الزجاج الصحراوي */}
+          <div className="desert-glass" style={{
+              padding: '16px 20px',
+              marginBottom: '20px',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexWrap: 'wrap',
+              gap: '15px'
+          }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{
+                      width: '46px',
+                      height: '46px',
+                      borderRadius: '14px',
+                      background: 'linear-gradient(135deg, rgba(194, 155, 98, 0.2), rgba(168, 87, 60, 0.1))',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '24px',
+                      border: '1px solid rgba(194, 155, 98, 0.3)'
+                  }}>
+                      🏢
+                  </div>
+                  <div>
+                      <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 900, color: '#2C1A12' }}>
+                          المستودعات ومنافذ البيع
+                      </h3>
+                      <span style={{ fontSize: '12px', color: 'rgba(44, 26, 18, 0.65)', fontWeight: 700 }}>
+                          {logic.warehouses.length} مستودع ومنفذ مسجل في النظام
+                      </span>
+                  </div>
+              </div>
+
+              <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexWrap: 'wrap' }}>
+                  {selectedIds.length > 0 && (
+                      <button 
+                          className="btn-main-glass red" 
+                          onClick={() => {
+                              if (window.confirm(`هل أنت متأكد من حذف ${selectedIds.length} مستودع؟`)) {
+                                  selectedIds.forEach(id => {
+                                      const row = logic.warehouses.find((w: any) => w.id === id);
+                                      if (row && row.type !== 'main' && row.type !== 'vehicle') {
+                                          logic.handleDelete(id);
+                                      }
+                                  });
+                                  setSelectedIds([]);
+                              }
+                          }}
+                      >
+                          🗑️ حذف المحدد ({selectedIds.length})
+                      </button>
+                  )}
+                  <button 
+                      type="button"
+                      className="btn-main-glass gold desert-btn-primary" 
+                      onClick={logic.handleAddNew}
+                      style={{
+                          minHeight: '46px',
+                          padding: '10px 24px',
+                          fontSize: '14px',
+                          fontWeight: 900,
+                          boxShadow: '0 8px 20px rgba(194, 155, 98, 0.35)',
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          cursor: 'pointer'
+                      }}
+                  >
+                      <span style={{ fontSize: '18px' }}>➕</span>
+                      <span>إضافة مستودع / منفذ جديد</span>
+                  </button>
+              </div>
+          </div>
+
+          <div className="clickable-rows cinematic-scroll">
+              <RawasiSmartTable columns={columns} data={logic.warehouses} selectable={true} selectedIds={selectedIds} onSelectionChange={setSelectedIds} />
+          </div>
+        </MasterPage>
+      </div>
 
       {logic.isModalOpen && (
         <AquaModalWrapper

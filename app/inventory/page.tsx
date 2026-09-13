@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useInventoryLogic } from './inventory_logic';
 import { THEME } from '@/lib/theme';
 import MasterPage from '@/components/MasterPage';
+import Link from 'next/link';
 import RawasiSidebarManager from '@/components/RawasiSidebarManager';
 import RawasiSmartTable from '@/components/rawasismarttable';
 import LoadingScreen from '@/components/LoadingScreen';
@@ -207,6 +208,16 @@ export default function InventoryPage() {
               <span>🔄</span>
               <span>حركات المخزون</span>
             </button>
+            <Link href="/inventory/warehouses" style={{ textDecoration: 'none', width: '100%' }}>
+              <button 
+                type="button" 
+                className="btn-main-glass"
+                style={{ width: '100%', marginTop: '4px' }}
+              >
+                <span>🏢</span>
+                <span>إدارة المستودعات</span>
+              </button>
+            </Link>
           </>
         }
         watchDeps={[logic.items?.length]}
