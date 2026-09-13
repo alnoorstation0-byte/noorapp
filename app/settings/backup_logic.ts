@@ -34,7 +34,8 @@ export const TABLE_SCHEMAS: Record<string, string[]> = {
   "fleet_operations": ["id", "operation_number", "operation_date", "vehicle_id", "driver_id", "status", "total_sales", "total_expenses", "inventory_cost", "net_profit", "notes", "created_at", "total_cost", "warehouse_id", "description", "start_km", "end_km"],
   "pos_shifts": ["id", "user_id", "delegate_id", "warehouse_id", "opened_at", "closed_at", "starting_cash", "expected_cash", "actual_cash", "total_sales", "total_cash_sales", "total_card_sales", "total_credit_sales", "shortage_overage", "status", "created_at", "bottles_sold", "bottles_returned", "bottles_shortage", "starting_bottles", "expected_bottles", "total_expenses", "fleet_operation_id", "closing_notes", "actual_bottles"],
   "cash_flows": ["id", "transaction_date", "flow_type", "amount", "category", "sub_category", "payment_method", "reference_number", "description", "account_id", "partner_id", "is_reconciled", "reconciled_date", "created_by", "created_at", "source_id", "source_type"],
-  "manual_journals": ["id", "voucher_number", "entry_date", "description", "debit_account_id", "credit_account_id", "partner_id", "project_id", "job_order_id", "amount", "status", "is_posted", "created_at"]
+  "manual_journals": ["id", "voucher_number", "entry_date", "description", "debit_account_id", "credit_account_id", "partner_id", "project_id", "job_order_id", "amount", "status", "is_posted", "created_at"],
+  "service_operations": ["id", "operation_date", "operation_type", "description", "client_id", "employee_id", "total_amount", "commission_percentage", "commission_amount", "net_profit", "debit_account_id", "revenue_account_id", "commission_expense_account_id", "journal_id", "status", "created_by", "created_at"]
 };
 
 export const useBackupLogic = () => {
