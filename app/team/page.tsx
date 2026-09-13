@@ -7,40 +7,35 @@ import MasterPage from '@/components/MasterPage';
 import ProfileEditorModal from './profileeditormodal';
 import { useRouter } from 'next/navigation';
 import PrintHeader from '@/components/PrintHeader';
+import { showGlobalToast } from '@/lib/toast-context';
 
 export default function TeamPage() {
-    // ==========================================
-    // 1. States & Context
-    // ==========================================
-    const router = useRouter(); // 👈 تفعيل الراوتر
+    const router = useRouter();
     const { setSidebarContent } = useSidebar();
     const [profiles, setProfiles] = useState<any[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [selectedProfile, setSelectedProfile] = useState<any>(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
+    const [roleFilter, setRoleFilter] = useState<string>('all');
 
-    // ==========================================
-    // 🛡️ 1.5 Security Guard (حارس الأمان)
-    // ==========================================
+    // 🛡️ Security Check
     useEffect(() => {
         const checkAccess = async () => {
-            // 1. التأكد من تسجيل الدخول
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) {
-                router.push('/login'); // طرد لصفحة الدخول
+                router.push('/login');
                 return;
             }
 
-            // 2. التأكد من الصلاحيات الإدارية
             const { data: profile } = await supabase
                 .from('profiles')
                 .select('role, is_admin')
                 .eq('id', user.id)
                 .single();
 
-            // لو مش أدمن، اطرده للصفحة الرئيسية
-            if (profile?.role !== 'admin' && profile?.is_admin !== true) {
+            if (profile?.role !== 'admin' && profile?.role !== 'super_admin' && profile?.is_admin !== true) {
                 showGlobalToast("⛔ غير مصرح لك بالدخول! هذه الصفحة مخصصة لمديري النظام فقط.", 'warning');
                 router.push('/'); 
             }
@@ -49,13 +44,10 @@ export default function TeamPage() {
         checkAccess();
     }, [router]);
 
-    // ==========================================
-    // 2. Data Fetching (With Crash Protection)
-    // ==========================================
+    // Data Fetching
     const fetchProfiles = async () => {
         setIsLoading(true);
         try {
-            // 1. محاولة الجلب والمزامنة التلقائية مع Auth عبر API الإدارة
             const apiRes = await fetch('/api/admin/users').then(r => r.json()).catch(() => null);
             if (apiRes?.success && Array.isArray(apiRes.profiles)) {
                 setProfiles(apiRes.profiles);
@@ -63,7 +55,6 @@ export default function TeamPage() {
                 return;
             }
 
-            // 2. المحاولة الاحتياطية: جلب البيانات وربط أسماء الشركاء بأمان تام دون أخطاء علاقات
             const { data: profData, error: profError } = await supabase
                 .from('profiles')
                 .select('*')
@@ -95,28 +86,26 @@ export default function TeamPage() {
         fetchProfiles(); 
     }, []);
 
-    // ==========================================
-    // 3. Search & Filters
-    // ==========================================
+    // Filtered data
     const filteredProfiles = useMemo(() => {
-        if (!searchTerm) return profiles;
-        const lowerTerm = searchTerm.toLowerCase();
-        return profiles.filter(p => 
-            p.full_name?.toLowerCase().includes(lowerTerm) || 
-            p.email?.toLowerCase().includes(lowerTerm) ||
-            p.username?.toLowerCase().includes(lowerTerm) ||
-            p.nickname?.toLowerCase().includes(lowerTerm) ||
-            p.partners?.name?.toLowerCase().includes(lowerTerm) 
-        );
-    }, [profiles, searchTerm]);
+        return profiles.filter(p => {
+            const matchesSearch = !searchTerm || 
+                p.full_name?.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                p.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                p.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                p.nickname?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                p.partners?.name?.toLowerCase().includes(searchTerm.toLowerCase());
 
-    // ==========================================
-    // 4. Handlers
-    // ==========================================
+            const matchesRole = roleFilter === 'all' || p.role === roleFilter;
+
+            return matchesSearch && matchesRole;
+        });
+    }, [profiles, searchTerm, roleFilter]);
+
     const handleCopyInvite = () => {
         const signupLink = `${window.location.origin}/signup`;
         navigator.clipboard.writeText(signupLink);
-        showGlobalToast("✅ تم نسخ رابط الدعوة الرقمية!\nأرسله الآن للموظف أو العميل للتسجيل.", 'warning');
+        showGlobalToast("✅ تم نسخ رابط الدعوة الرقمية!\nأرسله الآن للموظف أو العميل للتسجيل.", 'success');
     };
 
     const handleBulkToggle = async (action: 'activate_all' | 'suspend_all') => {
@@ -132,7 +121,7 @@ export default function TeamPage() {
             });
             const result = await res.json();
             if (!res.ok) throw new Error(result.error);
-            showGlobalToast(result.message, 'warning');
+            showGlobalToast(result.message, 'success');
             fetchProfiles();
         } catch (error: any) {
             showGlobalToast(`❌ فشل التحديث: ${error.message}`, 'warning');
@@ -140,27 +129,35 @@ export default function TeamPage() {
         }
     };
 
-    // ==========================================
-    // 5. Sidebar Integration
-    // ==========================================
+    // Sidebar integration
     useEffect(() => {
         setSidebarContent({
             actions: (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%' }}>
-                    <button onClick={() => { setSelectedProfile(null); setIsModalOpen(true); }} className="btn-main-glass gold" style={{ background: THEME.brand.gold, color: THEME.brand.coffee, border: 'none', fontWeight: 900, padding: '15px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '10px', width: '100%' }}>
+                    <button 
+                        onClick={() => { setSelectedProfile(null); setIsModalOpen(true); }} 
+                        className="btn-main-glass gold" 
+                        style={{ background: '#C29B62', color: '#2C1A12', border: 'none', fontWeight: 900, padding: '14px', borderRadius: '12px' }}
+                    >
                         ➕ إضافة مستخدم جديد
                     </button>
                     <button onClick={handleCopyInvite} className="btn-main-glass white">
                         🔗 نسخ رابط دعوة للتسجيل
                     </button>
                     <button onClick={() => window.print()} className="btn-main-glass white">
-                        🖨️ طباعة الصلاحيات
+                        🖨️ طباعة سجل الفريق
                     </button>
-                    <div style={{ display: 'flex', gap: '10px' }}>
-                        <button onClick={() => handleBulkToggle('suspend_all')} style={{ flex: 1, padding: '10px', background: '#fee2e2', color: '#ef4444', border: '1px solid #fecaca', borderRadius: '12px', fontWeight: 900, cursor: 'pointer' }}>
+                    <div style={{ display: 'flex', gap: '8px' }}>
+                        <button 
+                            onClick={() => handleBulkToggle('suspend_all')} 
+                            style={{ flex: 1, padding: '10px 6px', background: 'rgba(168, 87, 60, 0.12)', color: '#A8573C', border: '1px solid rgba(168, 87, 60, 0.3)', borderRadius: '10px', fontWeight: 800, cursor: 'pointer', fontSize: '12px' }}
+                        >
                             🚫 إيقاف الكل
                         </button>
-                        <button onClick={() => handleBulkToggle('activate_all')} style={{ flex: 1, padding: '10px', background: '#dcfce7', color: '#22c55e', border: '1px solid #bbf7d0', borderRadius: '12px', fontWeight: 900, cursor: 'pointer' }}>
+                        <button 
+                            onClick={() => handleBulkToggle('activate_all')} 
+                            style={{ flex: 1, padding: '10px 6px', background: 'rgba(78, 115, 79, 0.12)', color: '#4E734F', border: '1px solid rgba(78, 115, 79, 0.3)', borderRadius: '10px', fontWeight: 800, cursor: 'pointer', fontSize: '12px' }}
+                        >
                             ✅ تنشيط الكل
                         </button>
                     </div>
@@ -170,190 +167,427 @@ export default function TeamPage() {
                 </div>
             ),
             summary: (
-                <div className="summary-glass-card" style={{ borderColor: THEME.brand.gold }}>
-                    <span style={{fontSize:'12px', fontWeight:800, color:'#64748b'}}>إجمالي الفريق 👥</span>
-                    <div style={{fontSize:'28px', fontWeight:900, color: THEME.brand.gold}}>{profiles.length}</div>
+                <div className="summary-glass-card" style={{ borderColor: '#C29B62' }}>
+                    <span style={{ fontSize: '12px', fontWeight: 800, color: 'rgba(44, 26, 18, 0.7)' }}>إجمالي أعضاء الفريق 👥</span>
+                    <div style={{ fontSize: '28px', fontWeight: 900, color: '#C29B62' }}>{profiles.length}</div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '8px', fontSize: '11px', fontWeight: 700 }}>
+                        <span style={{ color: '#4E734F' }}>نشط: {profiles.filter(p => p.is_active !== false).length}</span>
+                        <span style={{ color: '#A8573C' }}>موقوف: {profiles.filter(p => p.is_active === false).length}</span>
+                    </div>
                 </div>
             ),
             customFilters: (
-                <div style={{ marginTop: '10px' }}>
+                <div style={{ marginTop: '10px', display: 'flex', flexDirection: 'column', gap: '10px' }}>
                     <input 
                         type="text"
                         placeholder="ابحث بالاسم، الإيميل، أو الشريك..."
                         value={searchTerm}
                         onChange={(e) => setSearchTerm(e.target.value)}
-                        style={{ width: '100%', padding: '14px', borderRadius: '12px', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', color: 'white', fontWeight: 700, outline: 'none', transition: '0.3s' }}
-                        onFocus={(e) => e.target.style.borderColor = THEME.brand.gold}
-                        onBlur={(e) => e.target.style.borderColor = 'rgba(255,255,255,0.2)'}
+                        style={{ width: '100%', padding: '12px', borderRadius: '10px', background: 'rgba(255,255,255,0.85)', border: '1px solid rgba(194, 155, 98, 0.3)', color: '#2C1A12', fontWeight: 700, outline: 'none' }}
                     />
+                    <select
+                        value={roleFilter}
+                        onChange={(e) => setRoleFilter(e.target.value)}
+                        style={{ width: '100%', padding: '10px', borderRadius: '10px', background: 'rgba(255,255,255,0.85)', border: '1px solid rgba(194, 155, 98, 0.3)', color: '#2C1A12', fontWeight: 700, outline: 'none' }}
+                    >
+                        <option value="all">كل الرتب والأدوار</option>
+                        <option value="admin">مدير نظام (Admin)</option>
+                        <option value="manager">مدير قسم (Manager)</option>
+                        <option value="accountant">محاسب (Accountant)</option>
+                        <option value="storekeeper">أمين مستودع (Storekeeper)</option>
+                        <option value="delegate">مندوب مبيعات (Delegate)</option>
+                        <option value="client">مستخدم عادي (Client)</option>
+                    </select>
                 </div>
             )
         });
         return () => setSidebarContent({ actions: null, summary: null, customFilters: null });
-    }, [profiles.length, searchTerm, setSidebarContent]);
+    }, [profiles.length, searchTerm, roleFilter, setSidebarContent]);
 
-    // ==========================================
-    // 6. UI Render
-    // ==========================================
+    const getRoleBadge = (role: string) => {
+        switch (role) {
+            case 'admin':
+            case 'super_admin':
+                return { label: '👑 مدير نظام', bg: 'rgba(194, 155, 98, 0.2)', color: '#2C1A12', border: 'rgba(194, 155, 98, 0.45)' };
+            case 'manager':
+                return { label: '💼 مدير فرع', bg: 'rgba(168, 87, 60, 0.15)', color: '#A8573C', border: 'rgba(168, 87, 60, 0.35)' };
+            case 'accountant':
+                return { label: '💰 محاسب مالي', bg: 'rgba(78, 115, 79, 0.15)', color: '#4E734F', border: 'rgba(78, 115, 79, 0.35)' };
+            case 'storekeeper':
+                return { label: '📦 أمين مستودع', bg: 'rgba(194, 155, 98, 0.15)', color: '#8C6830', border: 'rgba(194, 155, 98, 0.3)' };
+            case 'delegate':
+                return { label: '🚚 مندوب مبيعات', bg: 'rgba(44, 26, 18, 0.08)', color: '#2C1A12', border: 'rgba(44, 26, 18, 0.2)' };
+            default:
+                return { label: '👤 مستخدم عادي', bg: 'rgba(44, 26, 18, 0.05)', color: 'rgba(44, 26, 18, 0.65)', border: 'rgba(44, 26, 18, 0.15)' };
+        }
+    };
+
     return (
-        <MasterPage icon="👥" title="إدارة الفريق والشركاء" subtitle="تحديد الرتب وتوزيع صلاحيات الوصول للمنصة بأمان">
+        <MasterPage icon="👥" title="إدارة الفريق والشركاء" subtitle="توزيع الصلاحيات وضبط الرتب وفق هوية Desert Glassmorphism">
             
-            {/* 🎨 Clean CSS Styles */}
             <style>{`
+                .desert-view-toggle {
+                    display: flex;
+                    align-items: center;
+                    background: rgba(255, 253, 250, 0.7);
+                    border: 1px solid rgba(194, 155, 98, 0.3);
+                    border-radius: 12px;
+                    padding: 4px;
+                    gap: 4px;
+                }
+                .desert-view-btn {
+                    padding: 7px 16px;
+                    border-radius: 9px;
+                    border: none;
+                    font-size: 13px;
+                    font-weight: 800;
+                    cursor: pointer;
+                    background: transparent;
+                    color: rgba(44, 26, 18, 0.65);
+                    transition: 0.2s;
+                }
+                .desert-view-btn.active {
+                    background: #C29B62;
+                    color: #2C1A12;
+                    box-shadow: 0 2px 8px rgba(194, 155, 98, 0.35);
+                }
+                .desert-table-card {
+                    background: linear-gradient(135deg, rgba(255, 253, 250, 0.88) 0%, rgba(255, 253, 250, 0.55) 100%);
+                    backdrop-filter: blur(24px) saturate(160%);
+                    border: 1px solid rgba(194, 155, 98, 0.3);
+                    border-radius: 16px;
+                    box-shadow: 0 4px 15px rgba(44, 26, 18, 0.06);
+                    overflow: hidden;
+                    width: 100%;
+                }
+                .desert-team-table {
+                    width: 100%;
+                    border-collapse: separate;
+                    border-spacing: 0;
+                    text-align: right;
+                    direction: rtl;
+                }
+                .desert-team-table th {
+                    background: rgba(44, 26, 18, 0.05);
+                    color: #2C1A12;
+                    padding: 14px 18px;
+                    font-size: 13.5px;
+                    font-weight: 900;
+                    border-bottom: 2px solid rgba(194, 155, 98, 0.3);
+                    white-space: nowrap;
+                }
+                .desert-team-table td {
+                    padding: 13px 18px;
+                    font-size: 13px;
+                    color: #2C1A12;
+                    border-bottom: 1px solid rgba(194, 155, 98, 0.15);
+                    vertical-align: middle;
+                }
+                .desert-team-table tbody tr {
+                    transition: all 0.2s ease;
+                }
+                .desert-team-table tbody tr:hover {
+                    background: rgba(194, 155, 98, 0.09);
+                    transform: translateY(-1px);
+                }
+                .desert-badge {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 5px;
+                    padding: 4px 12px;
+                    border-radius: 10px;
+                    font-size: 12px;
+                    font-weight: 800;
+                }
                 .users-grid {
                     display: grid;
                     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-                    gap: 25px;
-                    padding: 15px 0;
+                    gap: 20px;
+                    padding: 5px 0;
                 }
-                .user-card {
-                    background: rgba(255, 255, 255, 0.6);
-                    backdrop-filter: blur(20px);
-                    border: 1px solid rgba(255, 255, 255, 0.9);
-                    border-radius: 30px;
-                    padding: 35px 25px;
+                .user-desert-card {
+                    background: linear-gradient(135deg, rgba(255, 253, 250, 0.85) 0%, rgba(255, 253, 250, 0.5) 100%);
+                    backdrop-filter: blur(24px) saturate(160%);
+                    border: 1px solid rgba(194, 155, 98, 0.3);
+                    border-radius: 18px;
+                    padding: 24px 20px;
                     text-align: center;
                     cursor: pointer;
-                    transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+                    box-shadow: 0 4px 8px rgba(44, 26, 18, 0.06);
+                    transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
                     position: relative;
                     overflow: hidden;
                 }
-                .user-card:hover {
-                    transform: translateY(-8px);
-                    background: #ffffff;
-                    border-color: ${THEME.brand.gold};
-                    box-shadow: 0 25px 50px rgba(0,0,0,0.06);
+                .user-desert-card:hover {
+                    transform: translateY(-5px);
+                    border-color: #C29B62;
+                    box-shadow: 0 12px 24px rgba(168, 87, 60, 0.15);
                 }
-                .user-card::before {
-                    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 4px;
-                    background: linear-gradient(90deg, transparent, ${THEME.brand.gold}, transparent);
-                    opacity: 0; transition: 0.4s;
+                .card-avatar {
+                    width: 72px;
+                    height: 72px;
+                    border-radius: 50%;
+                    border: 3px solid #C29B62;
+                    box-shadow: 0 6px 16px rgba(44, 26, 18, 0.1);
+                    margin-bottom: 12px;
+                    object-fit: cover;
+                    background: white;
                 }
-                .user-card:hover::before { opacity: 1; }
-                
-                .avatar {
-                    width: 85px; height: 85px; border-radius: 50%;
-                    border: 4px solid white; box-shadow: 0 10px 25px rgba(0,0,0,0.08);
-                    margin-bottom: 18px; object-fit: cover; background: white;
+                .action-edit-btn {
+                    padding: 6px 14px;
+                    border-radius: 10px;
+                    border: 1px solid rgba(194, 155, 98, 0.3);
+                    background: rgba(255, 253, 250, 0.85);
+                    color: #2C1A12;
+                    font-size: 12px;
+                    font-weight: 800;
+                    cursor: pointer;
+                    transition: 0.2s;
                 }
-                .role-tag {
-                    font-size: 11px; font-weight: 900; padding: 6px 16px;
-                    border-radius: 12px; display: inline-block; margin-top: 15px;
-                    letter-spacing: 0.3px;
+                .action-edit-btn:hover {
+                    background: #C29B62;
+                    color: #2C1A12;
+                    border-color: #C29B62;
                 }
-                .empty-state {
-                    text-align: center; padding: 80px 20px;
-                    background: rgba(255,255,255,0.4); border-radius: 40px;
-                    border: 2px dashed ${THEME.brand.gold}40;
-                    backdrop-filter: blur(10px);
-                }
-                
                 @media print {
-                    .users-grid { display: none !important; }
-                    .print-table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 13px; text-align: center; direction: rtl; }
-                    .print-table th, .print-table td { border: 1px solid #475569; padding: 10px; color: #000; }
-                    .print-table th { background-color: #f1f5f9 !important; font-weight: bold; }
-                    @page { size: A4 portrait; margin: 1cm; }
+                    .no-print { display: none !important; }
+                    .desert-table-card { box-shadow: none; border: 1px solid #000; background: white; }
+                    .desert-team-table th, .desert-team-table td { border: 1px solid #000; color: #000; }
                 }
             `}</style>
 
             <PrintHeader title="إدارة الفريق والشركاء" subtitle="سجل الصلاحيات والرتب" />
 
-            {/* 🔄 Loading State */}
-            {isLoading ? (
-                <div style={{ textAlign: 'center', padding: '100px', fontWeight: 900, color: THEME.brand.coffee, fontSize: '18px' }}>
-                    <span style={{ display: 'block', fontSize: '30px', marginBottom: '15px' }}>⏳</span>
-                    جاري تحميل هويات الكوادر...
+            {/* Top Bar with View Mode & Counters */}
+            <div className="no-print" style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                flexWrap: 'wrap',
+                gap: '12px',
+                marginBottom: '18px'
+            }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <div className="desert-view-toggle">
+                        <button 
+                            className={`desert-view-btn ${viewMode === 'table' ? 'active' : ''}`}
+                            onClick={() => setViewMode('table')}
+                        >
+                            📋 عرض كجدول
+                        </button>
+                        <button 
+                            className={`desert-view-btn ${viewMode === 'cards' ? 'active' : ''}`}
+                            onClick={() => setViewMode('cards')}
+                        >
+                            🎴 عرض كبطاقات
+                        </button>
+                    </div>
+                    <span style={{ fontSize: '13px', fontWeight: 800, color: 'rgba(44, 26, 18, 0.65)' }}>
+                        المعروض: {filteredProfiles.length} من {profiles.length} مستخدم
+                    </span>
                 </div>
-            
-            /* 📭 Empty State */
-            ) : profiles.length === 0 ? (
-                <div className="empty-state">
-                    <div style={{ fontSize: '60px', marginBottom: '20px' }}>✨</div>
-                    <h2 style={{ fontWeight: 900, color: THEME.brand.coffee, fontSize: '26px' }}>ابدأ ببناء فريقك الرقمي</h2>
-                    <p style={{ color: '#64748b', fontWeight: 600, fontSize: '15px', marginBottom: '30px' }}>لم يسجل أي مستخدم في النظام حتى الآن. شارك رابط الدعوة للبدء.</p>
-                    <button onClick={handleCopyInvite} style={{ background: THEME.brand.gold, color: THEME.brand.coffee, border: 'none', padding: '18px 40px', borderRadius: '20px', fontSize: '16px', fontWeight: 900, cursor: 'pointer', boxShadow: `0 15px 30px ${THEME.brand.gold}30`, transition: '0.3s' }} onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-3px)'} onMouseLeave={e => e.currentTarget.style.transform = 'none'}>
-                        🔗 انسخ رابط الدعوة وانطلق
+
+                <div style={{ display: 'flex', gap: '8px' }}>
+                    <button 
+                        onClick={() => { setSelectedProfile(null); setIsModalOpen(true); }}
+                        style={{
+                            padding: '8px 18px',
+                            borderRadius: '12px',
+                            border: 'none',
+                            background: '#C29B62',
+                            color: '#2C1A12',
+                            fontSize: '13px',
+                            fontWeight: 900,
+                            cursor: 'pointer',
+                            boxShadow: '0 4px 10px rgba(194, 155, 98, 0.35)'
+                        }}
+                    >
+                        ➕ مستخدم جديد
                     </button>
                 </div>
-            
-            /* 👥 Data State (Cards) */
-            ) : (
-                <div className="users-grid">
-                    {filteredProfiles.length > 0 ? filteredProfiles.map((user) => (
-                        <div key={user.id} className="user-card" onClick={() => { setSelectedProfile(user); setIsModalOpen(true); }}>
-                            <img 
-                                src={user.avatar_url || `https://ui-avatars.com/api/?name=${user.full_name || user.username || 'U'}&background=random&color=fff&bold=true`} 
-                                className="avatar" 
-                                alt="User Avatar" 
-                            />
-                            <h3 style={{ margin: 0, fontSize: '19px', fontWeight: 900, color: THEME.brand.coffee }}>{user.full_name || user.nickname || 'مستخدم غير مسمى'}</h3>
-                            <p style={{ margin: '6px 0 0 0', fontSize: '12px', color: '#475569', fontWeight: 700 }}>{user.email || user.username}</p>
-                            
-                            <div className="role-tag" style={{ 
-                                background: user.role === 'admin' ? '#fef3c7' : user.role === 'staff' ? '#dcfce7' : user.role === 'contractor' ? '#e0f2fe' : 'rgba(255, 255, 255, 0.4)',
-                                color: user.role === 'admin' ? '#d97706' : user.role === 'staff' ? '#16a34a' : user.role === 'contractor' ? '#0369a1' : '#475569'
-                            }}>
-                                {user.role === 'admin' ? '👑 مدير نظام' : user.role === 'staff' ? '💼 موظف' : user.role === 'contractor' ? '👷 مورد' : '👤 عميل'}
-                            </div>
+            </div>
 
-                            {/* مؤشر حالة الحساب */}
-                            <div style={{ position: 'absolute', top: 15, right: 15, width: 12, height: 12, borderRadius: '50%', background: user.is_active === false ? '#ef4444' : '#22c55e', boxShadow: `0 0 10px ${user.is_active === false ? '#ef4444' : '#22c55e'}`, border: '2px solid white' }} title={user.is_active === false ? 'حساب موقوف' : 'حساب نشط'} />
-
-                            {user.partners?.name && (
-                                <div style={{ marginTop: '18px', fontSize: '11px', fontWeight: 900, color: THEME.brand.gold, background: `${THEME.brand.gold}15`, padding: '8px 12px', borderRadius: '10px' }}>
-                                    🔗 شريك: {user.partners.name}
-                                </div>
+            {/* Loading */}
+            {isLoading ? (
+                <div style={{ textAlign: 'center', padding: '90px', fontWeight: 900, color: '#2C1A12', fontSize: '16px' }}>
+                    <span style={{ display: 'block', fontSize: '36px', marginBottom: '12px' }}>⏳</span>
+                    جاري تحميل بيانات الفريق والصلاحيات...
+                </div>
+            ) : profiles.length === 0 ? (
+                <div style={{
+                    textAlign: 'center',
+                    padding: '70px 20px',
+                    background: 'linear-gradient(135deg, rgba(255, 253, 250, 0.7) 0%, rgba(255, 253, 250, 0.4) 100%)',
+                    borderRadius: '20px',
+                    border: '2px dashed rgba(194, 155, 98, 0.4)'
+                }}>
+                    <div style={{ fontSize: '50px', marginBottom: '15px' }}>👥</div>
+                    <h3 style={{ fontWeight: 900, color: '#2C1A12', fontSize: '22px', margin: '0 0 10px 0' }}>لا يوجد مستخدمون حالياً</h3>
+                    <p style={{ color: 'rgba(44, 26, 18, 0.65)', fontWeight: 700, fontSize: '14px', marginBottom: '20px' }}>قم بإضافة أول عضو في الفريق أو مشاركة رابط التسجيل.</p>
+                    <button 
+                        onClick={handleCopyInvite} 
+                        style={{ background: '#C29B62', color: '#2C1A12', border: 'none', padding: '12px 30px', borderRadius: '14px', fontSize: '14px', fontWeight: 900, cursor: 'pointer' }}
+                    >
+                        🔗 نسخ رابط التسجيل
+                    </button>
+                </div>
+            ) : viewMode === 'table' ? (
+                /* 📋 Desert Glass Table View */
+                <div className="desert-table-card" style={{ overflowX: 'auto' }}>
+                    <table className="desert-team-table">
+                        <thead>
+                            <tr>
+                                <th style={{ width: '50px', textAlign: 'center' }}>#</th>
+                                <th>المستخدم / الموظف</th>
+                                <th>البريد الإلكتروني</th>
+                                <th>رقم الجوال</th>
+                                <th>الرتبة الوظيفية</th>
+                                <th>الشريك المرتبط</th>
+                                <th>حالة الحساب</th>
+                                <th style={{ textAlign: 'center', width: '130px' }} className="no-print">إجراءات</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {filteredProfiles.length > 0 ? filteredProfiles.map((user, idx) => {
+                                const badge = getRoleBadge(user.role);
+                                return (
+                                    <tr key={user.id}>
+                                        <td style={{ textAlign: 'center', fontWeight: 800, color: 'rgba(44, 26, 18, 0.5)' }}>{idx + 1}</td>
+                                        <td>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                                <img 
+                                                    src={user.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.full_name || user.username || 'U')}&background=C29B62&color=2C1A12&bold=true`}
+                                                    style={{ width: '36px', height: '36px', borderRadius: '50%', border: '1.5px solid #C29B62', objectFit: 'cover' }}
+                                                    alt="Avatar"
+                                                />
+                                                <div>
+                                                    <div style={{ fontWeight: 900, color: '#2C1A12', fontSize: '13.5px' }}>
+                                                        {user.full_name || user.nickname || user.username || 'مستخدم بدون اسم'}
+                                                    </div>
+                                                    {user.username && user.username !== user.full_name && (
+                                                        <span style={{ fontSize: '11px', color: 'rgba(44, 26, 18, 0.5)', fontWeight: 600 }}>@{user.username}</span>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td style={{ fontWeight: 700, color: 'rgba(44, 26, 18, 0.75)', direction: 'ltr', textAlign: 'right' }}>
+                                            {user.email || '—'}
+                                        </td>
+                                        <td style={{ fontWeight: 700, color: 'rgba(44, 26, 18, 0.75)', direction: 'ltr', textAlign: 'right' }}>
+                                            {user.phone_number || user.phone || '—'}
+                                        </td>
+                                        <td>
+                                            <span 
+                                                className="desert-badge" 
+                                                style={{ background: badge.bg, color: badge.color, border: `1px solid ${badge.border}` }}
+                                            >
+                                                {badge.label}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            {user.partners?.name ? (
+                                                <span style={{ fontSize: '12px', fontWeight: 800, color: '#C29B62', background: 'rgba(194, 155, 98, 0.12)', padding: '3px 8px', borderRadius: '8px', border: '1px solid rgba(194, 155, 98, 0.25)' }}>
+                                                    🔗 {user.partners.name}
+                                                </span>
+                                            ) : (
+                                                <span style={{ color: 'rgba(44, 26, 18, 0.4)', fontSize: '12px' }}>غير مرتبط</span>
+                                            )}
+                                        </td>
+                                        <td>
+                                            {user.is_active === false ? (
+                                                <span className="desert-badge" style={{ background: 'rgba(168, 87, 60, 0.12)', color: '#A8573C', border: '1px solid rgba(168, 87, 60, 0.3)' }}>
+                                                    🚫 موقوف
+                                                </span>
+                                            ) : (
+                                                <span className="desert-badge" style={{ background: 'rgba(78, 115, 79, 0.12)', color: '#4E734F', border: '1px solid rgba(78, 115, 79, 0.3)' }}>
+                                                    ✅ نشط
+                                                </span>
+                                            )}
+                                        </td>
+                                        <td style={{ textAlign: 'center' }} className="no-print">
+                                            <button 
+                                                className="action-edit-btn"
+                                                onClick={() => { setSelectedProfile(user); setIsModalOpen(true); }}
+                                                title="تعديل البيانات والصلاحيات"
+                                            >
+                                                ✏️ تعديل
+                                            </button>
+                                        </td>
+                                    </tr>
+                                );
+                            }) : (
+                                <tr>
+                                    <td colSpan={8} style={{ textAlign: 'center', padding: '40px', color: 'rgba(44, 26, 18, 0.6)', fontWeight: 800 }}>
+                                        لا توجد نتائج مطابقة لمعايير البحث 🔍
+                                    </td>
+                                </tr>
                             )}
-                        </div>
-                    )) : (
-                        <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '50px', color: '#475569', fontWeight: 800 }}>
-                            لا توجد نتائج مطابقة لبحثك 🔍
+                        </tbody>
+                    </table>
+                </div>
+            ) : (
+                /* 🎴 Desert Glass Cards View */
+                <div className="users-grid">
+                    {filteredProfiles.length > 0 ? filteredProfiles.map((user) => {
+                        const badge = getRoleBadge(user.role);
+                        return (
+                            <div 
+                                key={user.id} 
+                                className="user-desert-card" 
+                                onClick={() => { setSelectedProfile(user); setIsModalOpen(true); }}
+                            >
+                                <img 
+                                    src={user.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(user.full_name || user.username || 'U')}&background=C29B62&color=2C1A12&bold=true`} 
+                                    className="card-avatar" 
+                                    alt="User Avatar" 
+                                />
+                                <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 900, color: '#2C1A12' }}>
+                                    {user.full_name || user.nickname || 'مستخدم غير مسمى'}
+                                </h3>
+                                <p style={{ margin: '5px 0 0 0', fontSize: '12px', color: 'rgba(44, 26, 18, 0.65)', fontWeight: 700 }}>
+                                    {user.email || user.username}
+                                </p>
+                                
+                                <div style={{ marginTop: '12px' }}>
+                                    <span 
+                                        className="desert-badge" 
+                                        style={{ background: badge.bg, color: badge.color, border: `1px solid ${badge.border}` }}
+                                    >
+                                        {badge.label}
+                                    </span>
+                                </div>
+
+                                <div 
+                                    style={{ 
+                                        position: 'absolute', 
+                                        top: 14, 
+                                        right: 14, 
+                                        width: 12, 
+                                        height: 12, 
+                                        borderRadius: '50%', 
+                                        background: user.is_active === false ? '#A8573C' : '#4E734F', 
+                                        boxShadow: `0 0 8px ${user.is_active === false ? '#A8573C' : '#4E734F'}`, 
+                                        border: '2px solid white' 
+                                    }} 
+                                    title={user.is_active === false ? 'حساب موقوف' : 'حساب نشط'} 
+                                />
+
+                                {user.partners?.name && (
+                                    <div style={{ marginTop: '14px', fontSize: '11px', fontWeight: 800, color: '#2C1A12', background: 'rgba(194, 155, 98, 0.15)', padding: '6px 10px', borderRadius: '10px', border: '1px solid rgba(194, 155, 98, 0.25)' }}>
+                                        🔗 شريك: {user.partners.name}
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    }) : (
+                        <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '50px', color: 'rgba(44, 26, 18, 0.6)', fontWeight: 800 }}>
+                            لا توجد نتائج مطابقة لمعايير البحث 🔍
                         </div>
                     )}
                 </div>
             )}
 
-            {/* 🖨️ جدول الطباعة الاحترافي المخفي في العرض العادي */}
-            {!isLoading && filteredProfiles.length > 0 && (
-                <div className="print-only">
-                    <table className="print-table">
-                        <thead>
-                            <tr>
-                                <th>م</th>
-                                <th>الاسم الكامل</th>
-                                <th>البريد الإلكتروني / اسم المستخدم</th>
-                                <th>الرتبة الصلاحية</th>
-                                <th>اسم الشريك المرتبط</th>
-                                <th>حالة الحساب</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filteredProfiles.map((user, index) => (
-                                <tr 
-                                    key={user.id} 
-                                    onClick={() => { setSelectedProfile(user); setIsModalOpen(true); }} 
-                                    style={{ cursor: 'pointer' }} 
-                                    title="انقر لتعديل بيانات وصلاحيات هذا المستخدم"
-                                >
-                                    <td>{index + 1}</td>
-                                    <td>{user.full_name || user.nickname || 'مستخدم غير مسمى'}</td>
-                                    <td>{user.email || user.username}</td>
-                                    <td>
-                                        {user.role === 'admin' ? '👑 مدير نظام' : 
-                                         user.role === 'staff' ? '💼 موظف' : 
-                                         user.role === 'contractor' ? '👷 مورد' : '👤 عميل'}
-                                    </td>
-                                    <td>{user.partners?.name || '---'}</td>
-                                    <td>{user.is_active === false ? '❌ موقوف' : '✅ نشط'}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            )}
-
-            {/* 🛡️ Editor Modal */}
+            {/* Modal */}
             {isModalOpen && (
                 <ProfileEditorModal 
                     isOpen={isModalOpen} 

@@ -51,6 +51,9 @@ export default function RootLayout({
                 // Glassmorphism is default; only apply low-graphics if explicitly enabled
                 if (saved === 'true') {
                   document.documentElement.classList.add('low-graphics-mode');
+                  window.addEventListener('DOMContentLoaded', function() {
+                    if (document.body) document.body.classList.add('low-graphics-mode');
+                  });
                 }
               } catch(e) {}
             })();

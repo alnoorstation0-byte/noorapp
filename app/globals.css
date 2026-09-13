@@ -270,15 +270,39 @@ input:focus, select:focus, textarea:focus {
   }
 }
 
-/* 🚀 وضع الأداء السريع (Low Graphics Mode) للجوالات القديمة أو التفعيل اليدوي */
-.low-graphics-mode * {
+/* 🚀 وضع الأداء السريع الشامل (Ultra-Fast Performance Mode) للجوالات القديمة وتوفير المعالج والذاكرة */
+.low-graphics-mode {
+  --glass-blur: none !important;
+  --glass-bg: #FFFFFF !important;
+  --glass-surface: #FFFFFF !important;
+  --glass-border: 1px solid rgba(194, 155, 98, 0.35) !important;
+  --card-shadow: none !important;
+  --hover-shadow: none !important;
+  --glow-accent: none !important;
+  --apple-transition: none !important;
+}
+
+/* 1. إلغاء كافة تأثيرات التغبيش والبلور الثقيلة والظلال والانتقالات الحركية نهائياً */
+.low-graphics-mode *,
+.low-graphics-mode *::before,
+.low-graphics-mode *::after {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
   box-shadow: none !important;
+  text-shadow: none !important;
   animation: none !important;
   transition: none !important;
+  filter: none !important;
+  -webkit-filter: none !important;
 }
 
+/* 2. إلغاء أي تحويم أو إزاحة تسبب إعادة رسم الشاشة (Repaint/Reflow) */
+.low-graphics-mode *:hover {
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+/* 3. تحويل كافة تدرجات الخلفيات والشفافيات إلى ألوان مسطحة خفيفة وسريعة */
 .low-graphics-mode .desert-glass, 
 .low-graphics-mode .glass-card, 
 .low-graphics-mode .glass-panel,
@@ -286,44 +310,145 @@ input:focus, select:focus, textarea:focus {
 .low-graphics-mode .nav-card,
 .low-graphics-mode .fab-main,
 .low-graphics-mode .admin-header-glass,
-.low-graphics-mode .desert-bottom-dock {
+.low-graphics-mode .desert-bottom-dock,
+.low-graphics-mode .master-header,
+.low-graphics-mode .glass-container,
+.low-graphics-mode .clean-page,
+.low-graphics-mode .command-center,
+.low-graphics-mode .mobile-top-nav,
+.low-graphics-mode [class*="glass"],
+.low-graphics-mode [class*="card"] {
+  background-image: none !important;
   background: #FFFFFF !important;
-  border: 1px solid rgba(194, 155, 98, 0.4) !important;
+  border: 1px solid rgba(194, 155, 98, 0.3) !important;
+  box-shadow: none !important;
+  transform: none !important;
 }
 
 .low-graphics-mode .overlay-backdrop {
-  background: rgba(44, 26, 18, 0.9) !important; /* تغميق الخلفية لتعويض غياب التغبيش */
+  background: rgba(30, 20, 15, 0.75) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
 
-.low-graphics-mode .bg-glass-tint {
+.low-graphics-mode .bg-glass-tint,
+.low-graphics-mode .glass-reflection,
+.low-graphics-mode .online-dot-pulse,
+.low-graphics-mode [class*="glow"],
+.low-graphics-mode [class*="gradient-orb"] {
   display: none !important;
 }
 
-.low-graphics-mode .bg-master-container {
+.low-graphics-mode .bg-master-container,
+.low-graphics-mode body,
+.low-graphics-mode .main-content {
   background: #FDFBF7 !important;
+  background-image: none !important;
 }
 
-.low-graphics-mode .btn-main-glass, 
-.low-graphics-mode .desert-btn {
+/* 4. جداول وسطور البيانات في وضع الأداء */
+.low-graphics-mode table,
+.low-graphics-mode thead,
+.low-graphics-mode tbody,
+.low-graphics-mode tr,
+.low-graphics-mode td,
+.low-graphics-mode th {
+  background-image: none !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.low-graphics-mode thead th {
+  background: #F5EFE6 !important;
+  color: #2C1A12 !important;
+  border-bottom: 1px solid rgba(194, 155, 98, 0.4) !important;
+}
+
+.low-graphics-mode tbody tr {
   background: #FFFFFF !important;
-  border: 1px solid rgba(194, 155, 98, 0.5) !important;
+}
+
+.low-graphics-mode tbody tr:nth-child(even) {
+  background: #FAF7F2 !important;
+}
+
+.low-graphics-mode tbody tr:hover {
+  background: #F0E8DC !important;
+  transform: none !important;
+}
+
+/* 5. النوافذ والمودالات والقوائم */
+.low-graphics-mode .aqua-modal,
+.low-graphics-mode .glass-modal,
+.low-graphics-mode .modal-content,
+.low-graphics-mode .supreme-dropdown,
+.low-graphics-mode [role="dialog"] {
+  background: #FFFFFF !important;
+  background-image: none !important;
+  border: 1px solid #C29B62 !important;
+  box-shadow: 0 4px 12px rgba(44, 26, 18, 0.12) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* 6. الأزرار المسطحة فائقة السرعة */
+.low-graphics-mode .btn-main-glass, 
+.low-graphics-mode .desert-btn,
+.low-graphics-mode button.btn-main-glass,
+.low-graphics-mode .header-action-btn,
+.low-graphics-mode .lang-switcher-pill,
+.low-graphics-mode .perf-switcher-pill,
+.low-graphics-mode .nav-btn-glass {
+  background-image: none !important;
+  background: #FFFFFF !important;
+  border: 1px solid rgba(194, 155, 98, 0.4) !important;
+  box-shadow: none !important;
+  color: #2C1A12 !important;
 }
 
 .low-graphics-mode .btn-main-glass.gold, 
 .low-graphics-mode .btn-main-glass.primary,
 .low-graphics-mode .desert-btn-primary {
+  background-image: none !important;
   background: #C29B62 !important;
   color: #FFFFFF !important;
+  border: 1px solid #A87E47 !important;
 }
 
 .low-graphics-mode .btn-main-glass.green,
 .low-graphics-mode .btn-main-glass.success {
+  background-image: none !important;
   background: #4E734F !important;
   color: #FFFFFF !important;
+  border: 1px solid #3B573C !important;
 }
 
 .low-graphics-mode .btn-main-glass.red,
 .low-graphics-mode .btn-main-glass.danger {
+  background-image: none !important;
   background: #DC2626 !important;
   color: #FFFFFF !important;
+  border: 1px solid #B91C1C !important;
+}
+
+.low-graphics-mode .btn-main-glass.yellow,
+.low-graphics-mode .btn-main-glass.warning {
+  background-image: none !important;
+  background: #D97706 !important;
+  color: #FFFFFF !important;
+  border: 1px solid #B45309 !important;
+}
+
+/* 7. حقول الإدخال */
+.low-graphics-mode input,
+.low-graphics-mode select,
+.low-graphics-mode textarea {
+  background: #FFFFFF !important;
+  border: 1px solid rgba(194, 155, 98, 0.4) !important;
+  box-shadow: none !important;
+}
+
+/* 8. تحسين التمرير السلس على الجوالات */
+.low-graphics-mode * {
+  -webkit-overflow-scrolling: touch;
 }

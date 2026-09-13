@@ -65,8 +65,12 @@ const ROUTE_MODULE_MAP: Record<string, string> = {
   '/audit': 'audit',
   '/payroll': 'payroll',
   '/settings': 'settings',
+  '/settings/permissions': 'team',
   '/team': 'team',
   '/messages': 'messages',
+  '/promotions': 'invoices',
+  '/service-operations': 'fleet_operations',
+  '/pos-settlements': 'pos',
 };
 
 function getInitialAuthUser() {
@@ -257,17 +261,18 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
     // 🛡️ السماح دائماً للملف الشخصي والتنبيهات
     if (pathname === '/profile' || pathname === '/notifications') return true;
 
-    // Check for exact match first
-    let requiredModule = ROUTE_MODULE_MAP[pathname];
+    // Check for exact match first (case-insensitive)
+    const lowerPath = pathname.toLowerCase();
+    let requiredModule = Object.entries(ROUTE_MODULE_MAP).find(([k]) => k.toLowerCase() === lowerPath)?.[1];
     
     // If no exact match, check for matching prefixes for sub-routes
     if (!requiredModule) {
-      const matchingPrefix = Object.keys(ROUTE_MODULE_MAP)
-        .sort((a, b) => b.length - a.length)
-        .find(prefix => pathname.startsWith(prefix + '/'));
+      const matching = Object.entries(ROUTE_MODULE_MAP)
+        .sort((a, b) => b[0].length - a[0].length)
+        .find(([k]) => lowerPath.startsWith(k.toLowerCase() + '/'));
       
-      if (matchingPrefix) {
-        requiredModule = ROUTE_MODULE_MAP[matchingPrefix];
+      if (matching) {
+        requiredModule = matching[1];
       }
     }
 

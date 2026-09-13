@@ -35,6 +35,11 @@ export default function EmployeeProfilePage() {
     useEffect(() => {
         if (typeof window !== 'undefined') {
             setIsLowGraphics(localStorage.getItem('lowGraphicsMode') === 'true');
+            const handleModeChange = (e: any) => {
+                setIsLowGraphics(Boolean(e.detail));
+            };
+            window.addEventListener('lowGraphicsModeChanged', handleModeChange);
+            return () => window.removeEventListener('lowGraphicsModeChanged', handleModeChange);
         }
     }, []);
 
@@ -45,12 +50,15 @@ export default function EmployeeProfilePage() {
         if (nextVal) {
             document.documentElement.classList.add('low-graphics-mode');
             document.body.classList.add('low-graphics-mode');
-            toast.success('⚡️ تم تفعيل وضع الأداء الفائق وحفظه في بروفايلك');
+            toast.success('⚡️ تم تفعيل وضع الأداء السريع (تخفيف الجرافيك للجوالات)');
         } else {
             document.documentElement.classList.remove('low-graphics-mode');
             document.body.classList.remove('low-graphics-mode');
-            toast.success('✨ تم تفعيل المظهر الزجاجي الفاخر');
+            toast.success('✨ تم استعادة المظهر الزجاجي الفاخر');
         }
+
+        window.dispatchEvent(new CustomEvent('lowGraphicsModeChanged', { detail: nextVal }));
+
         try {
             await supabase.auth.updateUser({
                 data: { low_graphics_mode: nextVal }

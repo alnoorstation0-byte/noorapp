@@ -9,6 +9,7 @@ import { useUnreadCounts } from '@/hooks/useUnreadCounts';
 import { useRealtimeListener } from '@/lib/useRealtimeSync';
 import { useRouter, usePathname } from 'next/navigation';
 import { useLanguage } from '@/lib/LanguageContext';
+import { toast } from 'react-hot-toast';
 
 const PAGE_TITLES_EN: Record<string, string> = {
   // Common Titles
@@ -170,7 +171,50 @@ export default function MasterPage({ title, subtitle, children, headerContent, i
   const triggerRef = useRef<HTMLDivElement>(null);
 
   const [mounted, setMounted] = useState(false);
-  useEffect(() => { setMounted(true); }, []);
+  const [lowGraphics, setLowGraphics] = useState(false);
+
+  useEffect(() => { 
+    setMounted(true); 
+    if (typeof window !== 'undefined') {
+      const isLow = localStorage.getItem('lowGraphicsMode') === 'true';
+      setLowGraphics(isLow);
+    }
+  }, []);
+
+  // المزامنة اللحظية لوضع الأداء السريع مع جميع أجزاء النظام
+  useEffect(() => {
+    const handleModeChange = (e: any) => {
+      setLowGraphics(Boolean(e.detail));
+    };
+    window.addEventListener('lowGraphicsModeChanged', handleModeChange);
+    return () => window.removeEventListener('lowGraphicsModeChanged', handleModeChange);
+  }, []);
+
+  const toggleLowGraphics = async () => {
+    const nextVal = !lowGraphics;
+    setLowGraphics(nextVal);
+    localStorage.setItem('lowGraphicsMode', String(nextVal));
+
+    if (nextVal) {
+      document.documentElement.classList.add('low-graphics-mode');
+      document.body.classList.add('low-graphics-mode');
+      toast.success('⚡️ تم تفعيل وضع الأداء السريع (تخفيف الجرافيك للجوالات)');
+    } else {
+      document.documentElement.classList.remove('low-graphics-mode');
+      document.body.classList.remove('low-graphics-mode');
+      toast.success('✨ تم استعادة المظهر الزجاجي الفاخر');
+    }
+
+    window.dispatchEvent(new CustomEvent('lowGraphicsModeChanged', { detail: nextVal }));
+
+    try {
+      await supabase.auth.updateUser({
+        data: { low_graphics_mode: nextVal }
+      });
+    } catch (e) {
+      console.error('Failed to sync performance mode:', e);
+    }
+  };
 
   useEffect(() => {
     if (pathname && pathname !== '/' && !pathname.includes('login')) {
@@ -422,17 +466,18 @@ html, body {
 .nav-group { display: flex; gap: 6px; margin-right: 12px; border-right: 1px solid rgba(194, 155, 98, 0.2); padding-right: 12px; }
 
 /* 🌐 زر تبديل اللغة الحصين (Unbreakable Language Switcher) */
-.lang-switcher-pill {
+.lang-switcher-pill,
+.perf-switcher-pill {
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
-    gap: 6px !important;
+    gap: 5px !important;
     min-width: fit-content !important;
     width: auto !important;
-    height: 40px !important;
-    padding: 0 14px !important;
-    border-radius: 14px !important;
-    font-size: 13px !important;
+    height: 38px !important;
+    padding: 0 12px !important;
+    border-radius: 12px !important;
+    font-size: 12px !important;
     font-weight: 900 !important;
     white-space: nowrap !important;
     word-break: keep-all !important;
@@ -443,28 +488,34 @@ html, body {
     color: #2C1A12 !important;
     cursor: pointer !important;
     transition: all 0.25s cubic-bezier(0.165, 0.84, 0.44, 1) !important;
-    box-shadow: 0 4px 6px rgba(44, 26, 18, 0.08) !important;
+    box-shadow: 0 4px 6px rgba(44, 26, 18, 0.06) !important;
     flex-shrink: 0 !important;
 }
-.lang-switcher-pill:hover {
+.lang-switcher-pill:hover,
+.perf-switcher-pill:hover {
     background: white !important;
     border-color: #C29B62 !important;
     color: #A8573C !important;
-    transform: translateY(-2px) !important;
-    box-shadow: 0 10px 15px rgba(168, 87, 60, 0.15) !important;
+    transform: translateY(-1.5px) !important;
+    box-shadow: 0 8px 15px rgba(168, 87, 60, 0.15) !important;
+}
+.perf-switcher-pill.active {
+    background: linear-gradient(135deg, rgba(194, 155, 98, 0.25) 0%, rgba(168, 87, 60, 0.15) 100%) !important;
+    border-color: #C29B62 !important;
+    color: #A8573C !important;
 }
 
 .header-action-btn {
-    width: 42px !important; height: 42px !important;
-    border-radius: 13px !important;
+    width: 38px !important; height: 38px !important;
+    border-radius: 12px !important;
     background: linear-gradient(135deg, rgba(255, 253, 250, 0.85) 0%, rgba(255, 253, 250, 0.55) 100%) !important;
     backdrop-filter: blur(24px) saturate(160%) !important;
     -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
     border: 1px solid rgba(194, 155, 98, 0.3) !important;
     display: flex !important; align-items: center !important; justify-content: center !important;
     cursor: pointer !important; transition: 0.25s !important;
-    box-shadow: 0 4px 6px rgba(44, 26, 18, 0.08) !important;
-    color: #2C1A12 !important; font-size: 20px !important;
+    box-shadow: 0 4px 6px rgba(44, 26, 18, 0.06) !important;
+    color: #2C1A12 !important; font-size: 18px !important;
     position: relative !important; flex-shrink: 0 !important;
     text-decoration: none !important;
 }
@@ -472,8 +523,8 @@ html, body {
     background: white !important;
     color: #A8573C !important;
     border-color: #C29B62 !important;
-    transform: translateY(-2px) !important;
-    box-shadow: 0 10px 15px rgba(168, 87, 60, 0.15) !important;
+    transform: translateY(-1.5px) !important;
+    box-shadow: 0 8px 15px rgba(168, 87, 60, 0.15) !important;
 }
 
 .badge-counter {
@@ -497,8 +548,8 @@ html, body {
     font-size: 12px !important;
     font-weight: 900 !important;
     padding: 0 12px !important;
-    height: 40px !important;
-    border-radius: 14px !important;
+    height: 38px !important;
+    border-radius: 12px !important;
     display: flex !important;
     align-items: center !important;
     gap: 6px !important;
@@ -508,7 +559,7 @@ html, body {
     cursor: pointer !important;
     flex-shrink: 0 !important;
 }
-.pending-alert-btn:hover { transform: translateY(-2px) !important; }
+.pending-alert-btn:hover { transform: translateY(-1.5px) !important; }
 
 .glass-container {
     background: transparent;
@@ -516,6 +567,110 @@ html, body {
     padding: 20px 15px;
     border: none !important;
     box-shadow: none !important;
+}
+
+/* 🏷️ الترويسة الرئيسية وعنوان الصفحة المتجاوب */
+.master-header {
+  padding: 10px 16px !important;
+  margin-bottom: 14px !important;
+  border-radius: 18px !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  background: linear-gradient(135deg, rgba(255, 253, 250, 0.88) 0%, rgba(255, 253, 250, 0.6) 100%) !important;
+  backdrop-filter: blur(24px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
+  border: 1px solid rgba(194, 155, 98, 0.3) !important;
+  box-shadow: 0 4px 14px rgba(44, 26, 18, 0.05) !important;
+  box-sizing: border-box !important;
+  width: 100% !important;
+  flex-wrap: nowrap !important;
+}
+
+.title-area {
+  display: flex !important;
+  align-items: center !important;
+  gap: 10px !important;
+  min-width: 0 !important;
+  flex: 0 1 auto !important;
+  max-width: 50% !important;
+  overflow: hidden !important;
+}
+
+.title-text-box {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 1px !important;
+  min-width: 0 !important;
+  overflow: hidden !important;
+}
+
+.master-page-heading {
+  margin: 0 !important;
+  font-size: 15.5px !important;
+  font-weight: 800 !important;
+  color: #2C1A12 !important;
+  letter-spacing: -0.2px !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  line-height: 1.25 !important;
+  max-width: 100% !important;
+}
+
+.master-page-subheading {
+  margin: 0 !important;
+  font-size: 11px !important;
+  color: rgba(44, 26, 18, 0.6) !important;
+  font-weight: 600 !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  line-height: 1.2 !important;
+  max-width: 100% !important;
+}
+
+.header-icon {
+  width: 36px !important;
+  height: 36px !important;
+  min-width: 36px !important;
+  border-radius: 10px !important;
+  background: linear-gradient(135deg, rgba(255, 253, 250, 0.95), rgba(194, 155, 98, 0.2)) !important;
+  border: 1px solid rgba(194, 155, 98, 0.3) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 2px 8px rgba(44, 26, 18, 0.06) !important;
+  flex-shrink: 0 !important;
+}
+.header-icon span {
+  font-size: 18px !important;
+}
+
+@media (max-width: 1024px) {
+  .master-header {
+    padding: 8px 12px !important;
+    gap: 8px !important;
+  }
+  .title-area {
+    max-width: 45% !important;
+  }
+  .master-page-heading {
+    font-size: 14px !important;
+  }
+  .master-page-subheading {
+    font-size: 10.5px !important;
+  }
+  .header-icon {
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+    border-radius: 9px !important;
+  }
+  .header-icon span {
+    font-size: 16px !important;
+  }
 }
 
 /* 📱 MOBILE STYLES ≤768px */
@@ -532,76 +687,83 @@ html, body {
   }
   
   .master-header { 
-    padding: 10px 12px !important; 
-    margin-bottom: 10px !important; 
-    border-radius: 0 0 20px 20px !important;
-    flex-wrap: wrap !important;
-    gap: 8px !important;
+    padding: 8px 10px !important; 
+    margin-bottom: 8px !important; 
+    border-radius: 0 0 16px 16px !important;
+    flex-wrap: nowrap !important;
+    gap: 6px !important;
     width: 100% !important;
     box-sizing: border-box !important;
   }
   
   .title-area { 
-    gap: 8px !important; 
+    gap: 6px !important; 
     flex: 1 1 auto !important; 
     min-width: 0 !important;
+    max-width: calc(100vw - 165px) !important;
   }
   
-  .title-area h1 { 
-    font-size: 15px !important; 
+  .master-page-heading { 
+    font-size: 13px !important; 
     white-space: nowrap !important; 
     overflow: hidden !important; 
     text-overflow: ellipsis !important; 
+    max-width: 100% !important;
   }
-  .title-area p { display: none !important; }
+  .master-page-subheading { display: none !important; }
   
   .header-icon { 
-    width: 38px !important; 
-    height: 38px !important; 
-    min-width: 38px !important; 
-    border-radius: 10px !important; 
+    width: 28px !important; 
+    height: 28px !important; 
+    min-width: 28px !important; 
+    border-radius: 8px !important; 
   }
-  .header-icon span { font-size: 20px !important; }
+  .header-icon span { font-size: 14px !important; }
   
   .header-side { 
-    gap: 6px !important; 
+    gap: 4px !important; 
     flex-shrink: 0 !important; 
   }
   .header-actions { 
     border: none !important; 
     padding: 0 !important; 
     flex-direction: row !important; 
-    gap: 6px !important; 
+    gap: 4px !important; 
     align-items: center !important;
   }
   
-  .lang-switcher-pill {
-    height: 36px !important;
-    padding: 0 10px !important;
-    font-size: 12px !important;
-    border-radius: 10px !important;
+  .lang-switcher-pill,
+  .perf-switcher-pill {
+    height: 34px !important;
+    padding: 0 8px !important;
+    font-size: 11px !important;
+    border-radius: 9px !important;
     white-space: nowrap !important;
     word-break: keep-all !important;
     min-width: fit-content !important;
     width: auto !important;
   }
   
+  .perf-switcher-pill .perf-text {
+    display: none !important;
+  }
+  
   .header-action-btn {
-    width: 36px !important;
-    height: 36px !important;
-    font-size: 18px !important;
-    border-radius: 10px !important;
+    width: 34px !important;
+    height: 34px !important;
+    font-size: 16px !important;
+    border-radius: 9px !important;
   }
   
   .header-action-btn.msg-btn {
-    display: none !important; /* Hide messages icon on mobile header to ensure ample space for language pill */
+    display: none !important;
   }
   
   .pending-alert-btn {
-    height: 36px !important;
-    padding: 0 8px !important;
-    font-size: 11px !important;
-    border-radius: 10px !important;
+    height: 34px !important;
+    padding: 0 6px !important;
+    font-size: 10px !important;
+    border-radius: 9px !important;
   }
   .pending-text-full { display: none !important; }
   
@@ -629,51 +791,40 @@ html, body {
   }
   
   .avatar-frame { 
-    width: 38px !important; 
-    height: 38px !important; 
+    width: 34px !important; 
+    height: 34px !important; 
   }
 }`}</style>
 
-      <header className="master-header no-print" style={{
-            padding: '12px 18px', 
-            background: 'rgba(255, 255, 255, 0.45)',
-            backdropFilter: 'blur(30px)',
-            borderRadius: '24px',
-            border: '1px solid rgba(255, 255, 255, 0.6)',
-            boxShadow: '0 8px 32px rgba(28, 115, 171, 0.08)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            gap: '10px',
-            flexWrap: 'wrap'
-      }}>
+      <header className="master-header no-print">
         {/* Right side: Icon and Title */}
-        <div className="title-area" style={{ display: 'flex', alignItems: 'center', gap: '14px', minWidth: 0, flex: '1 1 auto' }}>
-          <div className="header-icon" style={{ 
-            width: '48px', height: '48px', borderRadius: '14px', minWidth: '48px',
-            background: 'rgba(255, 255, 255, 0.75)',
-            backdropFilter: 'blur(10px)',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 4px 15px rgba(28, 115, 171, 0.1)',
-            border: '1px solid rgba(255, 255, 255, 1)'
-          }}>
-            <span style={{ fontSize: '26px', filter: 'drop-shadow(0 2px 4px rgba(28,115,171,0.2))' }}>{icon || '✨'}</span>
+        <div className="title-area">
+          <div className="header-icon">
+            <span>{icon || '✨'}</span>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '2px', minWidth: 0 }}>
-              <h1 style={{ margin: 0, fontSize: '20px', fontWeight: 900, color: '#122946', letterSpacing: '-0.3px', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+          <div className="title-text-box">
+              <h1 
+                className="master-page-heading"
+                title={getTranslatedTitle(title, language)}
+              >
                 {getTranslatedTitle(title, language)}
               </h1>
-              <p style={{ margin: 0, fontSize: '13px', color: '#64748b', fontWeight: 700, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
-                {getTranslatedSubtitle(subtitle, language)}
-              </p>
+              {subtitle && (
+                <p 
+                  className="master-page-subheading"
+                  title={getTranslatedSubtitle(subtitle, language)}
+                >
+                  {getTranslatedSubtitle(subtitle, language)}
+                </p>
+              )}
           </div>
         </div>
 
         {/* Left side: Header Content, Actions, Avatar */}
-        <div className="header-side" style={{ display: 'flex', alignItems: 'center', gap: '10px', flexShrink: 0 }}>
+        <div className="header-side" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
           {headerContent}
           
-          <div className="header-actions" style={{ display: 'flex', flexDirection: 'row', gap: '8px', alignItems: 'center', borderRight: isRtl ? '2px solid rgba(194, 155, 98, 0.2)' : 'none', borderLeft: !isRtl ? '2px solid rgba(194, 155, 98, 0.2)' : 'none', paddingRight: isRtl ? '12px' : '0', paddingLeft: !isRtl ? '12px' : '0' }}>
+          <div className="header-actions" style={{ display: 'flex', flexDirection: 'row', gap: '6px', alignItems: 'center', borderRight: isRtl ? '2px solid rgba(194, 155, 98, 0.2)' : 'none', borderLeft: !isRtl ? '2px solid rgba(194, 155, 98, 0.2)' : 'none', paddingRight: isRtl ? '10px' : '0', paddingLeft: !isRtl ? '10px' : '0' }}>
              
              {/* Desktop Nav Arrows & Shortcuts Button */}
              <div className="nav-group" style={{ display: 'flex', gap: '4px', margin: 0, border: 'none', background: 'rgba(255, 253, 250, 0.6)', borderRadius: '12px', padding: '3px' }}>
@@ -681,27 +832,38 @@ html, body {
                   onClick={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'F1', bubbles: true }))} 
                   className="nav-btn-glass" 
                   title={language === 'en' ? 'Keyboard Shortcuts (F1)' : 'خريطة اختصارات الكيبورد (F1)'} 
-                  style={{ width: '36px', height: '36px', borderRadius: '10px', fontSize: '16px', background: 'rgba(255, 253, 250, 0.85)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#C29B62' }}
+                  style={{ width: '34px', height: '34px', borderRadius: '9px', fontSize: '15px', background: 'rgba(255, 253, 250, 0.85)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#C29B62' }}
                 >
                   ⌨️
                 </button>
-                <button onClick={() => router.forward()} className="nav-btn-glass" title={language === 'en' ? 'Forward' : 'تقدم للأمام'} style={{ width: '36px', height: '36px', borderRadius: '10px', fontSize: '18px', background: 'rgba(255, 253, 250, 0.85)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#C29B62' }}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
+                <button onClick={() => router.forward()} className="nav-btn-glass" title={language === 'en' ? 'Forward' : 'تقدم للأمام'} style={{ width: '34px', height: '34px', borderRadius: '9px', fontSize: '16px', background: 'rgba(255, 253, 250, 0.85)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#C29B62' }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
                 </button>
-                <button onClick={() => router.back()} className="nav-btn-glass" title={language === 'en' ? 'Back' : 'رجوع للخلف'} style={{ width: '36px', height: '36px', borderRadius: '10px', fontSize: '18px', background: 'rgba(255, 253, 250, 0.85)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#C29B62' }}>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+                <button onClick={() => router.back()} className="nav-btn-glass" title={language === 'en' ? 'Back' : 'رجوع للخلف'} style={{ width: '34px', height: '34px', borderRadius: '9px', fontSize: '16px', background: 'rgba(255, 253, 250, 0.85)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#C29B62' }}>
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
                 </button>
              </div>
 
-             {/* 🌐 زر تبديل اللغة الأنيق وغير القابل للكسر إطلاقاً */}
+             {/* 🌐 زر تبديل اللغة الأنيق */}
              <button
                 type="button"
                 onClick={toggleLanguage}
                 className="lang-switcher-pill"
                 title={language === 'ar' ? 'Switch to English' : 'التحويل إلى العربية'}
              >
-                <span style={{ fontSize: '15px', lineHeight: 1 }}>🌐</span>
+                <span style={{ fontSize: '14px', lineHeight: 1 }}>🌐</span>
                 <span>{language === 'ar' ? 'English' : 'عربي'}</span>
+             </button>
+
+             {/* ⚡️ زر وضع الأداء السريع المباشر (Direct Performance Switcher) */}
+             <button
+                type="button"
+                onClick={toggleLowGraphics}
+                className={`perf-switcher-pill ${lowGraphics ? 'active' : ''}`}
+                title={lowGraphics ? (language === 'en' ? 'Switch to Glassmorphism Mode' : 'التبديل إلى المظهر الزجاجي الفاخر') : (language === 'en' ? 'Fast Performance Mode (for older phones)' : 'وضع الأداء السريع (تخفيف الجرافيك للجوالات القديمة)')}
+             >
+                <span style={{ fontSize: '13px', lineHeight: 1 }}>{lowGraphics ? '⚡️' : '✨'}</span>
+                <span className="perf-text">{lowGraphics ? (language === 'en' ? 'Fast' : 'أداء سريع') : (language === 'en' ? 'Glass' : 'زجاجي')}</span>
              </button>
 
               {/* Notifications & Pending Alert */}
@@ -760,6 +922,12 @@ html, body {
         <div className="supreme-dropdown" style={{ top: coords.top, left: coords.left }} onClick={(e) => e.stopPropagation()}>
 
             <div className="drop-item" onClick={() => router.push('/profile')}><span>👤</span> {language === 'en' ? 'My Profile' : 'بروفيلي'}</div>
+            <div className="drop-item" onClick={() => { setIsMenuOpen(false); toggleLowGraphics(); }}>
+              <span>{lowGraphics ? '✨' : '⚡️'}</span> 
+              {lowGraphics 
+                ? (language === 'en' ? 'Switch to Glass Mode' : 'التحويل للمظهر الزجاجي الفاخر') 
+                : (language === 'en' ? 'Fast Performance Mode' : 'وضع الأداء السريع (تخفيف الجرافيك)')}
+            </div>
             <div className="drop-item" onClick={() => router.push('/settings')}><span>⚙️</span> {language === 'en' ? 'System Settings' : 'الإعدادات'}</div>
             <div className="drop-item logout" onClick={handleLogout}><span>🚪</span> {language === 'en' ? 'Logout' : 'خروج'}</div>
         </div>,

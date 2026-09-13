@@ -209,23 +209,29 @@ export default function RawasiFilterSidebar({
           flex-direction: column !important;
           min-width: 0 !important;
           flex: 1 !important;
+          max-width: calc(100% - 75px) !important;
+          overflow: hidden !important;
         }
         .sidebar-main-title {
-          font-size: 14.5px !important;
-          font-weight: 900 !important;
+          font-size: 13.5px !important;
+          font-weight: 800 !important;
           color: ${textColor} !important;
           margin: 0 !important;
           white-space: nowrap !important;
           overflow: hidden !important;
           text-overflow: ellipsis !important;
-          line-height: 1.2 !important;
+          line-height: 1.25 !important;
+          max-width: 100% !important;
         }
         .sidebar-sub-badge {
-          font-size: 10.5px !important;
+          font-size: 10px !important;
           font-weight: 700 !important;
           color: ${accentColor} !important;
-          margin-top: 2px !important;
+          margin-top: 1px !important;
           white-space: nowrap !important;
+          overflow: hidden !important;
+          text-overflow: ellipsis !important;
+          max-width: 100% !important;
         }
         
         .sidebar-header-actions {

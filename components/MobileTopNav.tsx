@@ -25,40 +25,44 @@ export default function MobileTopNav({ title, subtitle }: MobileTopNavProps) {
                         display: flex;
                         align-items: center;
                         justify-content: space-between;
-                        padding: 15px 20px;
-                        background: rgba(255, 255, 255, 0.75);
-                        backdrop-filter: blur(25px);
-                        border-bottom: 1px solid rgba(255,255,255,0.6);
+                        gap: 10px;
+                        padding: 10px 14px;
+                        background: linear-gradient(135deg, rgba(255, 253, 250, 0.9) 0%, rgba(255, 253, 250, 0.7) 100%);
+                        backdrop-filter: blur(20px);
+                        border-bottom: 1px solid rgba(194, 155, 98, 0.3);
                         position: sticky;
                         top: 0;
                         z-index: 1000;
-                        border-radius: 0 0 24px 24px;
-                        margin: -10px -10px 20px -10px; /* لتغطية الحواف */
-                        box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+                        border-radius: 0 0 16px 16px;
+                        margin: -10px -10px 14px -10px;
+                        box-shadow: 0 4px 14px rgba(44, 26, 18, 0.06);
+                        box-sizing: border-box;
                     }
                     .mobile-menu-btn {
-                        background: linear-gradient(135deg, ${THEME.primary}, #0f172a);
+                        background: linear-gradient(135deg, #C29B62 0%, #A8573C 100%);
                         border: none;
-                        border-radius: 12px;
-                        width: 40px;
-                        height: 40px;
+                        border-radius: 9px;
+                        width: 34px;
+                        height: 34px;
+                        min-width: 34px;
                         display: flex;
                         align-items: center;
                         justify-content: center;
                         color: white;
-                        font-size: 20px;
-                        box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+                        font-size: 16px;
+                        box-shadow: 0 3px 8px rgba(168, 87, 60, 0.25);
                         cursor: pointer;
                         transition: 0.2s;
+                        flex-shrink: 0;
                     }
-                    .mobile-menu-btn:active { transform: scale(0.9); }
+                    .mobile-menu-btn:active { transform: scale(0.92); }
                 }
             `}</style>
 
             <div className="mobile-top-nav">
-                <div>
-                    <h1 style={{ margin: 0, fontSize: '20px', fontWeight: 900, color: THEME.primary }}>{title}</h1>
-                    {subtitle && <p style={{ margin: 0, fontSize: '11px', color: '#64748b', fontWeight: 800 }}>{subtitle}</p>}
+                <div style={{ minWidth: 0, flex: '1 1 auto', overflow: 'hidden' }}>
+                    <h1 title={title} style={{ margin: 0, fontSize: '14.5px', fontWeight: 800, color: '#2C1A12', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', lineHeight: 1.25 }}>{title}</h1>
+                    {subtitle && <p title={subtitle} style={{ margin: 0, fontSize: '10.5px', color: 'rgba(44, 26, 18, 0.6)', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', lineHeight: 1.2 }}>{subtitle}</p>}
                 </div>
                 <button className="mobile-menu-btn" onClick={handleToggleSidebar}>
                     ☰

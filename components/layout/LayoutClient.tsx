@@ -143,6 +143,14 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
     }).catch(() => {});
   }, []);
 
+  useEffect(() => {
+    const handleModeChange = (e: any) => {
+      setLowGraphics(Boolean(e.detail));
+    };
+    window.addEventListener('lowGraphicsModeChanged', handleModeChange);
+    return () => window.removeEventListener('lowGraphicsModeChanged', handleModeChange);
+  }, []);
+
   const toggleLowGraphics = async () => {
     const newVal = !lowGraphics;
     setLowGraphics(newVal);
@@ -151,12 +159,14 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
     if (newVal) {
       document.documentElement.classList.add('low-graphics-mode');
       document.body.classList.add('low-graphics-mode');
-      toast.success('⚡️ تم تفعيل وضع الأداء الفائق وحفظه في بروفايلك');
+      toast.success('⚡️ تم تفعيل وضع الأداء السريع (تخفيف الجرافيك للجوالات)');
     } else {
       document.documentElement.classList.remove('low-graphics-mode');
       document.body.classList.remove('low-graphics-mode');
       toast.success('✨ تم استعادة المظهر الزجاجي الفاخر');
     }
+
+    window.dispatchEvent(new CustomEvent('lowGraphicsModeChanged', { detail: newVal }));
 
     // حفظ التفضيل مباشرة في بروفايل المستخدم في سوبابيز ليبقى معه أينما فتح
     try {
@@ -642,14 +652,18 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
         .nav-card-left {
           display: flex;
           align-items: center;
-          gap: 14px;
+          gap: 12px;
+          min-width: 0;
+          flex: 1;
+          overflow: hidden;
         }
 
         .icon-wrapper {
-          width: 46px; height: 46px;
+          width: 40px; height: 40px;
+          min-width: 40px;
           background: linear-gradient(135deg, rgba(255, 253, 250, 0.95), rgba(194, 155, 98, 0.2));
-          border-radius: 14px; display: flex; align-items: center; justify-content: center;
-          font-size: 22px; box-shadow: 0 4px 10px rgba(44, 26, 18, 0.05);
+          border-radius: 12px; display: flex; align-items: center; justify-content: center;
+          font-size: 19px; box-shadow: 0 3px 8px rgba(44, 26, 18, 0.05);
           border: 1px solid rgba(194, 155, 98, 0.35);
           flex-shrink: 0;
         }
@@ -657,12 +671,18 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
         .nav-title-block {
           display: flex;
           flex-direction: column;
+          min-width: 0;
+          overflow: hidden;
         }
         .nav-title {
           font-weight: 800;
-          font-size: 14.5px;
+          font-size: 13.5px;
           color: #2C1A12;
-          line-height: 1.3;
+          line-height: 1.25;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          max-width: 100%;
         }
         .nav-card-active-dot {
           width: 8px;
