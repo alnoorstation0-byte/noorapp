@@ -63,32 +63,29 @@ export default function TeamPage() {
                 return;
             }
 
-            // 2. المحاولة الاحتياطية: جلب البيانات مباشرة مع اسم الشريك
-            const { data, error } = await supabase
+            // 2. المحاولة الاحتياطية: جلب البيانات وربط أسماء الشركاء بأمان تام دون أخطاء علاقات
+            const { data: profData, error: profError } = await supabase
                 .from('profiles')
-                .select('*, partners:partners!linked_partner_id(name)')
+                .select('*')
                 .order('created_at', { ascending: false });
             
-            if (error) throw error;
-            setProfiles(data || []);
+            if (profError) throw profError;
+
+            const { data: partnersData } = await supabase
+                .from('partners')
+                .select('id, name');
+
+            const pMap = new Map((partnersData || []).map((p: any) => [p.id, p.name]));
+            const enriched = (profData || []).map((p: any) => ({
+                ...p,
+                partners: p.linked_partner_id ? { name: pMap.get(p.linked_partner_id) || null } : null
+            }));
+            
+            setProfiles(enriched);
 
         } catch (err: any) {
-            console.warn("⚠️ فشل جلب العلاقات، جاري المحاولة بدون الشركاء...", err);
-            
-            // المحاولة الثالثة (Fallback): جلب الملفات فقط
-            try {
-                const { data: fallbackData, error: fallbackError } = await supabase
-                    .from('profiles')
-                    .select('*')
-                    .order('created_at', { ascending: false });
-                
-                if (fallbackError) throw fallbackError;
-                setProfiles(fallbackData || []);
-                console.log("✅ تم جلب البيانات الأساسية بنجاح كبديل.");
-            } catch (fatalErr: any) {
-                console.error("❌ Fatal Fetch Error:", fatalErr);
-                showGlobalToast("تعذر الاتصال بقاعدة البيانات. تأكد من اتصال الإنترنت.", 'warning');
-            }
+            console.error("❌ Fetch Error:", err);
+            showGlobalToast("تعذر الاتصال بقاعدة البيانات. تأكد من اتصال الإنترنت.", 'warning');
         } finally {
             setIsLoading(false);
         }
