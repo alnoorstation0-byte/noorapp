@@ -87,12 +87,15 @@ const PAGE_TITLES_EN: Record<string, string> = {
   "التواصل الداخلي": "Internal Communications",
   "مركز الإشعارات والتنبيهات المباشرة": "Notifications Center",
   "الصفحة الرئيسية": "Home Portal",
-  "نظام غيام لإدارة الموارد": "El-Ghayam ERP System",
+  "نظام غيام لإدارة الموارد": "Taj Al-Mawadah Vet Pharmacy",
+  "صيدلية تاج المودة": "Taj Al-Mawadah Pharmacy",
+  "صيدلية تاج المودة البيطرية": "Taj Al-Mawadah Vet Pharmacy",
   "نظام إدارة الموارد": "ERP Management System"
 };
 
 const SUBTITLES_EN: Record<string, string> = {
-  "نظام غيام لإدارة الموارد": "El-Ghayam Unified ERP System",
+  "نظام غيام لإدارة الموارد": "Taj Al-Mawadah Unified Vet System",
+  "بوابة الإدارة المركزية لصيدلية تاج المودة": "Taj Al-Mawadah Central Management Portal",
   "إدارة وتتبع بيانات العملاء والموردين والمناديب والوظائف": "Manage partners, clients, suppliers, delegates and job roles",
   "إدارة ومتابعة فواتير المبيعات وضريبة القيمة المضافة": "Track sales invoices and VAT compliance",
   "إدارة دليل الأصناف والباركود والتسعير ومستويات الأمان": "Manage item catalog, barcodes, pricing, and safety stock",
@@ -360,56 +363,63 @@ html, body {
 .imperial-trigger { 
     display: flex; align-items: center; gap: 12px; 
     padding: 10px 15px; border-radius: 22px; 
-    background: rgba(255, 255, 255, 0.5);
+    background: linear-gradient(135deg, rgba(255, 253, 250, 0.85) 0%, rgba(255, 253, 250, 0.55) 100%);
     cursor: pointer; transition: 0.3s; 
-    border: 1px solid rgba(255, 255, 255, 0.7); 
-    box-shadow: 0 4px 15px rgba(28, 115, 171, 0.05);
-    backdrop-filter: blur(10px);
+    border: 1px solid rgba(194, 155, 98, 0.35); 
+    box-shadow: 0 4px 6px rgba(44, 26, 18, 0.08);
+    backdrop-filter: blur(24px) saturate(160%);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
 }
 .imperial-trigger:hover { 
-    background: rgba(255, 255, 255, 0.8); 
+    background: rgba(255, 253, 250, 0.95); 
     transform: translateY(-2px); 
-    border-color: rgba(28, 115, 171, 0.3); 
-    box-shadow: 0 8px 25px rgba(28, 115, 171, 0.15); 
+    border-color: rgba(194, 155, 98, 0.6); 
+    box-shadow: 0 10px 15px rgba(168, 87, 60, 0.15); 
 }
 
 .u-info-text { display: flex; flex-direction: column; text-align: right; margin-right: 5px; }
-.u-name { font-size: 16px; font-weight: 800; color: #122946; letter-spacing: -0.3px; line-height: 1.2; }
-.u-role { font-size: 12px; font-weight: 700; color: #1C73AB; margin-top: 2px; }
+.u-name { font-size: 16px; font-weight: 800; color: #2C1A12; letter-spacing: -0.3px; line-height: 1.2; }
+.u-role { font-size: 12px; font-weight: 700; color: #C29B62; margin-top: 2px; }
 
 .avatar-frame { position: relative; width: 55px; height: 55px; }
-.avatar-frame img { width: 100%; height: 100%; border-radius: 50%; border: 2px solid rgba(28, 115, 171, 0.5); object-fit: cover; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-.active-dot { position: absolute; bottom: 3px; right: 3px; width: 12px; height: 12px; background: #10b981; border: 2px solid white; border-radius: 50%; box-shadow: 0 0 8px rgba(16, 185, 129, 0.3); }
+.avatar-frame img { width: 100%; height: 100%; border-radius: 50%; border: 2px solid rgba(194, 155, 98, 0.4); object-fit: cover; box-shadow: 0 4px 10px rgba(44,26,18,0.1); }
+.active-dot { position: absolute; bottom: 3px; right: 3px; width: 12px; height: 12px; background: #4E734F; border: 2px solid white; border-radius: 50%; box-shadow: 0 0 8px rgba(78, 115, 79, 0.4); }
 
 .supreme-dropdown {
-    position: fixed; width: 200px; background: rgba(255, 255, 255, 0.95); border-radius: 20px;
-    padding: 8px; box-shadow: 0 20px 50px rgba(28, 115, 171, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.8); z-index: 999999;
+    position: fixed; width: 200px; 
+    background: linear-gradient(135deg, rgba(255, 253, 250, 0.96) 0%, rgba(255, 253, 250, 0.85) 100%); 
+    border-radius: 20px;
+    padding: 8px; box-shadow: 0 20px 45px rgba(44, 26, 18, 0.14);
+    border: 1px solid rgba(194, 155, 98, 0.35); z-index: 999999;
     transform-origin: top left;
     animation: supremeShow 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    backdrop-filter: blur(15px);
+    backdrop-filter: blur(24px) saturate(160%);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
 }
 @keyframes supremeShow { from { opacity: 0; transform: translateY(-10px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
 
-.drop-item { display: flex; align-items: center; gap: 10px; padding: 10px 15px; border-radius: 12px; font-size: 13px; font-weight: 800; color: #122946; cursor: pointer; transition: 0.2s; direction: rtl; }
-.drop-item:hover { background: rgba(28, 115, 171, 0.1); color: #1C73AB; }
-.drop-item.logout { color: #ef4444; border-top: 1px solid rgba(28, 115, 171, 0.1); margin-top: 5px; border-radius: 0 0 12px 12px; }
-.drop-item.logout:hover { background: rgba(239, 68, 68, 0.1); }
+.drop-item { display: flex; align-items: center; gap: 10px; padding: 10px 15px; border-radius: 12px; font-size: 13px; font-weight: 800; color: #2C1A12; cursor: pointer; transition: 0.2s; direction: rtl; }
+.drop-item:hover { background: rgba(194, 155, 98, 0.15); color: #A8573C; }
+.drop-item.logout { color: #A8573C; border-top: 1px solid rgba(194, 155, 98, 0.2); margin-top: 5px; border-radius: 0 0 12px 12px; }
+.drop-item.logout:hover { background: rgba(168, 87, 60, 0.1); }
 
 .nav-btn-glass {
     width: 40px; height: 40px; border-radius: 12px;
-    background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(10px);
-    border: 1px solid rgba(255, 255, 255, 0.8);
+    background: linear-gradient(135deg, rgba(255, 253, 250, 0.85) 0%, rgba(255, 253, 250, 0.5) 100%); 
+    backdrop-filter: blur(24px) saturate(160%);
+    -webkit-backdrop-filter: blur(24px) saturate(160%);
+    border: 1px solid rgba(194, 155, 98, 0.3);
     display: flex; align-items: center; justify-content: center;
     cursor: pointer; transition: 0.3s;
-    box-shadow: 0 4px 10px rgba(28, 115, 171, 0.1);
-    color: #122946; font-size: 18px;
+    box-shadow: 0 4px 6px rgba(44, 26, 18, 0.08);
+    color: #2C1A12; font-size: 18px;
 }
 .nav-btn-glass:hover {
-    background: rgba(255, 255, 255, 1); transform: translateY(-2px);
-    border-color: #1C73AB; color: #1C73AB;
+    background: rgba(255, 253, 250, 1); transform: translateY(-2px);
+    border-color: #C29B62; color: #A8573C;
+    box-shadow: 0 10px 15px rgba(168, 87, 60, 0.15);
 }
-.nav-group { display: flex; gap: 6px; margin-right: 12px; border-right: 1px solid rgba(28, 115, 171, 0.1); padding-right: 12px; }
+.nav-group { display: flex; gap: 6px; margin-right: 12px; border-right: 1px solid rgba(194, 155, 98, 0.2); padding-right: 12px; }
 
 /* 🌐 زر تبديل اللغة الحصين (Unbreakable Language Switcher) */
 .lang-switcher-pill {
@@ -426,53 +436,58 @@ html, body {
     font-weight: 900 !important;
     white-space: nowrap !important;
     word-break: keep-all !important;
-    background: rgba(255, 255, 255, 0.75) !important;
-    backdrop-filter: blur(10px) !important;
-    border: 1.5px solid rgba(28, 115, 171, 0.25) !important;
-    color: #1C73AB !important;
+    background: linear-gradient(135deg, rgba(255, 253, 250, 0.85) 0%, rgba(255, 253, 250, 0.55) 100%) !important;
+    backdrop-filter: blur(24px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
+    border: 1.5px solid rgba(194, 155, 98, 0.3) !important;
+    color: #2C1A12 !important;
     cursor: pointer !important;
     transition: all 0.25s cubic-bezier(0.165, 0.84, 0.44, 1) !important;
-    box-shadow: 0 4px 12px rgba(28, 115, 171, 0.08) !important;
+    box-shadow: 0 4px 6px rgba(44, 26, 18, 0.08) !important;
     flex-shrink: 0 !important;
 }
 .lang-switcher-pill:hover {
     background: white !important;
-    border-color: #1C73AB !important;
+    border-color: #C29B62 !important;
+    color: #A8573C !important;
     transform: translateY(-2px) !important;
-    box-shadow: 0 6px 18px rgba(28, 115, 171, 0.18) !important;
+    box-shadow: 0 10px 15px rgba(168, 87, 60, 0.15) !important;
 }
 
 .header-action-btn {
     width: 42px !important; height: 42px !important;
     border-radius: 13px !important;
-    background: rgba(255, 255, 255, 0.7) !important;
-    backdrop-filter: blur(10px) !important;
-    border: 1px solid rgba(255, 255, 255, 0.9) !important;
+    background: linear-gradient(135deg, rgba(255, 253, 250, 0.85) 0%, rgba(255, 253, 250, 0.55) 100%) !important;
+    backdrop-filter: blur(24px) saturate(160%) !important;
+    -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
+    border: 1px solid rgba(194, 155, 98, 0.3) !important;
     display: flex !important; align-items: center !important; justify-content: center !important;
     cursor: pointer !important; transition: 0.25s !important;
-    box-shadow: 0 4px 10px rgba(28, 115, 171, 0.08) !important;
-    color: #1C73AB !important; font-size: 20px !important;
+    box-shadow: 0 4px 6px rgba(44, 26, 18, 0.08) !important;
+    color: #2C1A12 !important; font-size: 20px !important;
     position: relative !important; flex-shrink: 0 !important;
     text-decoration: none !important;
 }
 .header-action-btn:hover {
     background: white !important;
+    color: #A8573C !important;
+    border-color: #C29B62 !important;
     transform: translateY(-2px) !important;
-    box-shadow: 0 6px 16px rgba(28, 115, 171, 0.15) !important;
+    box-shadow: 0 10px 15px rgba(168, 87, 60, 0.15) !important;
 }
 
 .badge-counter {
     position: absolute !important;
     top: -5px !important; right: -5px !important;
-    background: #ef4444 !important; color: white !important;
+    background: #A8573C !important; color: white !important;
     font-size: 11px !important; font-weight: 900 !important;
     min-width: 19px !important; height: 19px !important;
     border-radius: 50% !important;
     display: flex !important; align-items: center !important; justify-content: center !important;
-    box-shadow: 0 2px 6px rgba(239, 68, 68, 0.4) !important;
+    box-shadow: 0 2px 6px rgba(168, 87, 60, 0.4) !important;
     border: 2px solid white !important;
 }
-.badge-counter.msg-badge { background: #3b82f6 !important; }
+.badge-counter.msg-badge { background: #C29B62 !important; }
 
 .pending-alert-btn {
     background: rgba(254, 243, 199, 0.95) !important;

@@ -277,11 +277,11 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
           bottom: 35px; left: 35px; right: auto;
           width: 75px; height: 75px;
           border-radius: 50%;
-          background: rgba(255, 255, 255, 0.4);
-          backdrop-filter: blur(25px) saturate(200%);
-          -webkit-backdrop-filter: blur(25px) saturate(200%);
-          border: 1px solid rgba(255,255,255,0.7);
-          box-shadow: 0 10px 30px rgba(0,0,0,0.1), inset 0 0 20px rgba(255,255,255,0.5);
+          background: linear-gradient(135deg, rgba(255, 253, 250, 0.9) 0%, rgba(255, 253, 250, 0.6) 100%);
+          backdrop-filter: blur(24px) saturate(160%);
+          -webkit-backdrop-filter: blur(24px) saturate(160%);
+          border: 1.5px solid rgba(194, 155, 98, 0.45);
+          box-shadow: 0 10px 30px rgba(44, 26, 18, 0.12), inset 0 0 15px rgba(255, 253, 250, 0.6);
           cursor: grab; z-index: 10000;
           display: flex; align-items: center; justify-content: center;
           transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
@@ -298,12 +298,12 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
           cursor: grabbing !important;
           transition: none !important;
           transform: scale(1.1) !important;
-          box-shadow: 0 15px 35px rgba(28, 115, 171, 0.4) !important;
-          opacity: 0.9 !important;
+          box-shadow: 0 15px 35px rgba(168, 87, 60, 0.35) !important;
+          opacity: 0.95 !important;
         }
-        .fab-main:hover { transform: scale(1.05) rotate(5deg); background: rgba(255, 255, 255, 0.6); }
+        .fab-main:hover { transform: scale(1.05) rotate(5deg); background: rgba(255, 253, 250, 0.95); border-color: rgba(194, 155, 98, 0.8); }
         .fab-main:active { transform: scale(0.95); }
-        .fab-logo { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5)); pointer-events: none; }
+        .fab-logo { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 4px 6px rgba(44,26,18,0.3)); pointer-events: none; }
 
         .overlay-screen {
           position: fixed; inset: 0; z-index: 9998;
@@ -315,9 +315,9 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
 
         .overlay-backdrop {
           position: fixed; inset: 0; z-index: 9997;
-          background: rgba(0, 0, 0, 0.45);
-          backdrop-filter: blur(30px) saturate(150%);
-          -webkit-backdrop-filter: blur(30px) saturate(150%);
+          background: rgba(44, 26, 18, 0.45);
+          backdrop-filter: blur(24px) saturate(160%);
+          -webkit-backdrop-filter: blur(24px) saturate(160%);
           opacity: ${isOpen ? 1 : 0};
           pointer-events: ${isOpen ? 'auto' : 'none'};
           transition: opacity 0.4s ease;
@@ -333,18 +333,18 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
         }
 
         .group-section {
-          background: rgba(255, 255, 255, 0.4);
-          backdrop-filter: blur(40px) saturate(200%);
-          -webkit-backdrop-filter: blur(40px) saturate(200%);
-          border: 1px solid rgba(255, 255, 255, 0.6);
+          background: linear-gradient(135deg, rgba(255, 253, 250, 0.85) 0%, rgba(255, 253, 250, 0.55) 100%);
+          backdrop-filter: blur(24px) saturate(160%);
+          -webkit-backdrop-filter: blur(24px) saturate(160%);
+          border: 1px solid rgba(194, 155, 98, 0.3);
           border-radius: 30px; padding: 25px;
-          box-shadow: 0 15px 35px rgba(0,0,0,0.05), inset 0 0 20px rgba(255,255,255,0.4);
+          box-shadow: 0 15px 35px rgba(44, 26, 18, 0.06), inset 0 0 20px rgba(255, 253, 250, 0.5);
           display: flex; flex-direction: column; gap: 15px;
         }
 
         .group-header {
-          font-size: 14px; font-weight: 900; color: #334155;
-          border-bottom: 2px solid rgba(255,255,255,0.5);
+          font-size: 14px; font-weight: 900; color: #2C1A12;
+          border-bottom: 2px solid rgba(194, 155, 98, 0.35);
           padding-bottom: 10px; margin-bottom: 10px;
           display: inline-block; align-self: flex-start;
           text-transform: uppercase; letter-spacing: 1px;
@@ -357,13 +357,15 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
         }
 
         .nav-card {
-          background: rgba(255, 255, 255, 0.5);
-          border: 1px solid rgba(255, 255, 255, 0.8);
+          background: linear-gradient(135deg, rgba(255, 253, 250, 0.8) 0%, rgba(255, 253, 250, 0.45) 100%);
+          border: 1px solid rgba(194, 155, 98, 0.3);
+          backdrop-filter: blur(24px) saturate(160%);
+          -webkit-backdrop-filter: blur(24px) saturate(160%);
           border-radius: 20px; padding: 15px 20px;
           display: flex; align-items: center; gap: 15px;
-          text-decoration: none; color: #0f172a;
+          text-decoration: none; color: #2C1A12;
           transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
-          box-shadow: 0 4px 15px rgba(0,0,0,0.02);
+          box-shadow: 0 4px 6px rgba(44, 26, 18, 0.08);
           position: relative; overflow: hidden;
           opacity: ${isOpen ? 1 : 0};
           transform: ${isOpen ? 'translateY(0)' : 'translateY(20px)'};
@@ -371,24 +373,24 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
         }
 
         .nav-card:hover {
-          background: rgba(255, 255, 255, 0.9);
-          transform: translateY(-5px) scale(1.02) !important;
-          box-shadow: 0 15px 30px rgba(0,0,0,0.08);
-          border-color: rgba(255,255,255,1);
+          background: rgba(255, 253, 250, 0.95);
+          transform: translateY(-5px) !important;
+          box-shadow: 0 10px 15px rgba(168, 87, 60, 0.15) !important;
+          border-color: rgba(194, 155, 98, 0.6);
         }
 
         .nav-card.active {
-          background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,255,255,0.85));
-          border: 2px solid #2891C8;
-          box-shadow: 0 10px 25px rgba(40, 145, 200, 0.15);
+          background: linear-gradient(135deg, rgba(255, 253, 250, 0.98), rgba(255, 253, 250, 0.85));
+          border: 2px solid #C29B62;
+          box-shadow: 0 10px 25px rgba(194, 155, 98, 0.25);
         }
 
         .icon-wrapper {
           width: 50px; height: 50px;
-          background: linear-gradient(135deg, rgba(255,255,255,0.8), rgba(255,255,255,0.4));
+          background: linear-gradient(135deg, rgba(255, 253, 250, 0.9), rgba(194, 155, 98, 0.2));
           border-radius: 15px; display: flex; align-items: center; justify-content: center;
-          font-size: 24px; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
-          border: 1px solid rgba(255,255,255,0.9);
+          font-size: 24px; box-shadow: 0 4px 10px rgba(44, 26, 18, 0.05);
+          border: 1px solid rgba(194, 155, 98, 0.35);
         }
 
         @keyframes slideUpFade {
@@ -461,7 +463,7 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
            onTouchEnd={onTouchEnd}
            onClick={handleClick}
            title="القائمة العائمة (يمكنك سحبها وتحريكها في أي مكان)">
-        <img src="/ghayam_logo.png" alt="لوجو" className="fab-logo" draggable="false" />
+        <img src="/taj_logo.png" alt="لوجو" className="fab-logo" draggable="false" />
       </div>
 
       <div className="overlay-backdrop no-print"></div>
@@ -469,7 +471,7 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
          if (e.target === e.currentTarget) setIsOpen(false); 
       }}>
           <div className="command-center" onClick={(e) => e.stopPropagation()}>
-            <div className="admin-header" style={{ background: 'rgba(255, 255, 255, 0.65)', border: '1px solid rgba(255, 255, 255, 0.9)', padding: '15px 30px', borderRadius: '20px', fontSize: '18px', textAlign: 'center', color: '#122946', marginBottom: '10px', fontWeight: 900, backdropFilter: 'blur(15px)', alignSelf: 'center', boxShadow: '0 8px 30px rgba(0,0,0,0.04)', display: 'flex', alignItems: 'center', gap: '20px' }}>
+            <div className="admin-header" style={{ background: 'linear-gradient(135deg, rgba(255, 253, 250, 0.9) 0%, rgba(255, 253, 250, 0.6) 100%)', border: '1px solid rgba(194, 155, 98, 0.35)', padding: '15px 30px', borderRadius: '20px', fontSize: '18px', textAlign: 'center', color: '#2C1A12', marginBottom: '10px', fontWeight: 900, backdropFilter: 'blur(24px) saturate(160%)', alignSelf: 'center', boxShadow: '0 8px 30px rgba(44, 26, 18, 0.08)', display: 'flex', alignItems: 'center', gap: '20px' }}>
                <span>{language === 'en' ? `Admin Portal | ${role === 'super_admin' ? 'Super Admin' : 'User Access'}` : `بوابة الإدارة | ${role === 'super_admin' ? 'مدير النظام' : 'صلاحيات مستخدم'}`}</span>
                <div style={{ display: 'flex', gap: '15px', borderRight: isRtl ? '2px solid rgba(0,0,0,0.1)' : 'none', borderLeft: !isRtl ? '2px solid rgba(0,0,0,0.1)' : 'none', paddingRight: isRtl ? '15px' : '0', paddingLeft: !isRtl ? '15px' : '0', alignItems: 'center' }}>
                    <div style={{ display: 'flex', alignItems: 'center', gap: '5px', background: '#dcfce7', color: '#166534', padding: '5px 12px', borderRadius: '20px', fontSize: '13px', fontWeight: 800 }}>

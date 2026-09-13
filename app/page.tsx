@@ -8,18 +8,17 @@ import MasterPage from '@/components/MasterPage';
 import { menuGroups } from '@/lib/menuData';
 import { supabase } from '@/lib/supabase';
 
-const MOTIVATIONAL_MESSAGES = [
-    "يوم جديد لنجاحات مبهرة، توكل على الله وانطلق! 🚀",
-    "النجاح يبدأ بخطوة، وأنت الآن في المسار الصحيح! 🌟",
-    "الأرقام لا تكذب، اجعل أرقام اليوم أفضل من الأمس! 📊",
-    "كل مجهود صغير يتراكم ليصنع إنجازاً عظيماً! 💪",
-    "مياه غيام تكبر بجهودكم، شكراً لعملكم الرائع! 💧",
-    "الدقة في العمل هي أساس الثقة، حافظ على تميزك! 💎",
-    "اجعل هدفك اليوم هو التميز، لا مجرد الإنجاز! ✨",
-    "لا حدود لما يمكنك تحقيقه اليوم، انطلق بثقة! 🎯",
+const VET_MOTIVATIONAL_MESSAGES = [
+    "أهلاً بك في صيدلية تاج المودة، رواد الرعاية الموثوقة لأصيل الخيل ونفائس الإبل! 🐎🐪",
+    "صحة المطيّة والخيل تبدأ من الدقة في الرعاية والعلاج، يومكم مبارك ومثمر! ✨",
+    "الجودة والأمانة في صرف الدواء البيطري تصنع الفارق في كل شوط وميدان! 🏆",
+    "نخدم ملاك الخيل وهواة الإبل بأعلى معايير الصيدلة البيطرية المعتمدة! 🌿",
+    "كل جرعة محسوبة وكل رعاية دقيقة ترسم مسار الفوز والبركة! 💎",
+    "نسعى دائماً لتوفير أفضل المكملات والأدوية البيطرية من خيرة المصادر العالمية! 🌟",
+    "الدقة في إدارة المخزون والمبيعات هي عنوان احترافية صيدلية تاج المودة! 📊",
 ];
 
-const DEFAULT_FAVORITES = ['global_summary', 'dashboard', 'journal', 'accounts', 'projects', 'inventory', 'fleet', 'reports'];
+const DEFAULT_FAVORITES = ['global_summary', 'dashboard', 'invoices', 'inventory', 'receipt_vouchers', 'partners', 'reports', 'payroll'];
 
 export default function WelcomeHomePage() {
     const { role, can, loading: permsLoading, profile } = usePermissions();
@@ -31,10 +30,10 @@ export default function WelcomeHomePage() {
 
     useEffect(() => {
         const hour = new Date().getHours();
-        if (hour < 12) setGreeting('صباح الخير ☀️');
-        else if (hour < 18) setGreeting('طاب مساؤك 🌤️');
-        else setGreeting('مساء الخير 🌙');
-        setQuote(MOTIVATIONAL_MESSAGES[Math.floor(Math.random() * MOTIVATIONAL_MESSAGES.length)]);
+        if (hour < 12) setGreeting('صباح الخير والبركة ☀️');
+        else if (hour < 18) setGreeting('طاب مساؤك بكل خير 🌤️');
+        else setGreeting('مساء الخير والمسرات 🌙');
+        setQuote(VET_MOTIVATIONAL_MESSAGES[Math.floor(Math.random() * VET_MOTIVATIONAL_MESSAGES.length)]);
     }, []);
 
     useEffect(() => {
@@ -78,11 +77,11 @@ export default function WelcomeHomePage() {
     const toggleFav = (id: string) =>
         setTempFavorites(prev => prev.includes(id) ? prev.filter(f => f !== id) : [...prev, id]);
 
-    if (permsLoading) return <LoadingScreen message="جاري تحضير مساحة العمل..." fullScreen={false} />;
+    if (permsLoading) return <LoadingScreen message="جاري تجهيز مساحة عمل تاج المودة..." fullScreen={false} />;
 
     const userName = profile?.full_name || 'زميلنا العزيز';
     const firstNameOnly = userName.split(' ')[0];
-    const roleTitle = role === 'super_admin' ? 'المدير العام 👑' : role === 'admin' ? 'مدير النظام 🛡️' : 'مستخدم النظام';
+    const roleTitle = role === 'super_admin' ? 'المدير العام 👑' : role === 'admin' ? 'مدير النظام 🛡️' : 'فريق صيدلية تاج المودة 🐎';
     const allItems = menuGroups.flatMap(g => g.items);
     const allowedItems = allItems.filter(item => {
         if (role === 'super_admin' || role === 'admin') return true;
@@ -92,406 +91,435 @@ export default function WelcomeHomePage() {
     const favItems = favorites.map(id => allowedItems.find(i => i.id === id)).filter(Boolean);
 
     return (
-        <MasterPage title="الصفحة الرئيسية" subtitle="بوابة الإدارة المركزية لمياه غيام" icon="🏠">
-        <div className="nm-page">
+        <MasterPage title="الصفحة الرئيسية" subtitle="بوابة الإدارة المركزية لصيدلية تاج المودة" icon="🐎">
+        <div className="desert-page">
         <style>{`
-            @import url('https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800;900&display=swap');
-
             /* ══════════════════════════════════════════════════
-               BASE – soft flat aqua (Neumorphism needs uniform bg)
+               🏜️ DESERT GLASSMORPHISM (سيم الزجاج الصحراوي)
                ══════════════════════════════════════════════════ */
             :global(body) {
-                background: #c2dff2 !important;
-                font-family: 'Tajawal', sans-serif !important;
+                background: #FDFBF7 !important; /* كثبان لؤلؤية */
+                color: #2C1A12 !important;     /* بني الخيام الداكن */
                 min-height: 100vh;
             }
-            :global(.clean-page)          { background: transparent !important; }
-            :global(.bg-glass-tint)       { display: none !important; }
-            :global(.bg-image-base)       { display: none !important; }
-            :global(.glass-container) {
-                background: transparent !important;
-                border: none !important;
-                box-shadow: none !important;
-                padding: 0 !important;
-            }
 
-            /* ── header pill: Neumorphic + Glass ── */
+            /* Master header styling integration */
             :global(.master-header) {
-                margin: 14px 20px 0 20px !important;
-                border-radius: 80px !important;
-                padding: 12px 28px !important;
-                background: rgba(210,236,250,0.55) !important;
-                backdrop-filter: blur(20px) saturate(1.3) !important;
-                -webkit-backdrop-filter: blur(20px) !important;
-                border: 1.5px solid rgba(255,255,255,0.70) !important;
-                box-shadow:
-                    -6px -6px 14px rgba(255,255,255,0.80),
-                    6px  6px  14px rgba(90,145,200,0.22),
-                    inset 0 1px 0 rgba(255,255,255,0.60) !important;
+                margin: 12px 16px 0 16px !important;
+                border-radius: 24px !important;
+                padding: 12px 24px !important;
+                background: linear-gradient(135deg, rgba(255, 253, 250, 0.85) 0%, rgba(255, 253, 250, 0.55) 100%) !important;
+                backdrop-filter: blur(24px) saturate(160%) !important;
+                -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
+                border: 1px solid rgba(194, 155, 98, 0.35) !important;
+                box-shadow: 0 4px 6px rgba(44, 26, 18, 0.08) !important;
             }
 
-            /* ══════════════════════════════════════════════════
-               PAGE WRAPPER
-               ══════════════════════════════════════════════════ */
-            .nm-page {
+            .desert-page {
                 direction: rtl;
-                font-family: 'Tajawal', sans-serif;
-                padding: 22px 26px 32px;
+                padding: 16px 20px 36px;
                 min-height: calc(100vh - 80px);
                 display: flex;
                 flex-direction: column;
-                gap: 28px;
+                gap: 26px;
+                box-sizing: border-box;
             }
 
-            /* ══════════════════════════════════════════════════
-               HERO PANEL  (Glassmorphism + Neumorphic shadow)
-               ══════════════════════════════════════════════════ */
-            .hero-panel {
+            /* ── Hero Panel ── */
+            .desert-hero {
                 text-align: center;
-                padding: 48px 44px 38px;
-                border-radius: 32px;
-
-                /* Glassmorphism base */
-                background: rgba(255,255,255,0.30);
-                backdrop-filter: blur(28px) saturate(1.5);
-                -webkit-backdrop-filter: blur(28px);
-                border: 1.5px solid rgba(255,255,255,0.72);
-
-                /* Neumorphic dual shadow */
-                box-shadow:
-                    -10px -10px 26px rgba(255,255,255,0.82),
-                     10px  10px 26px rgba(90,145,200,0.26),
-                    inset 0 1px 0 rgba(255,255,255,0.65);
-
-                animation: slideUp .7s cubic-bezier(.16,1,.3,1) both;
+                padding: 40px 32px 34px;
+                border-radius: 28px;
+                background: linear-gradient(135deg, rgba(255, 253, 250, 0.88) 0%, rgba(255, 253, 250, 0.55) 100%);
+                backdrop-filter: blur(24px) saturate(160%);
+                -webkit-backdrop-filter: blur(24px) saturate(160%);
+                border: 1px solid rgba(194, 155, 98, 0.35);
+                box-shadow: 0 4px 6px rgba(44, 26, 18, 0.08);
+                position: relative;
+                overflow: hidden;
+                transition: all 0.3s ease;
             }
 
-            @keyframes slideUp {
-                from { opacity:0; transform:translateY(28px); }
-                to   { opacity:1; transform:translateY(0); }
+            .desert-hero:hover {
+                box-shadow: 0 10px 15px rgba(168, 87, 60, 0.12);
             }
 
-            /* Role chip */
-            .role-chip {
+            .role-badge {
                 display: inline-flex;
                 align-items: center;
-                padding: 8px 24px;
+                gap: 8px;
+                padding: 6px 20px;
                 border-radius: 50px;
-                margin-bottom: 20px;
-
-                background: rgba(255,255,255,0.42);
-                backdrop-filter: blur(12px);
-                border: 1.5px solid rgba(255,255,255,0.80);
-                box-shadow:
-                    -4px -4px 10px rgba(255,255,255,0.75),
-                     4px  4px 10px rgba(90,145,200,0.20),
-                    inset 0 1px 0 rgba(255,255,255,0.60);
-
-                color: #1a4e7c;
-                font-weight: 900;
-                font-size: 14px;
+                margin-bottom: 16px;
+                background: linear-gradient(135deg, rgba(194, 155, 98, 0.2) 0%, rgba(168, 87, 60, 0.15) 100%);
+                border: 1px solid rgba(194, 155, 98, 0.4);
+                color: #2C1A12;
+                font-weight: 800;
+                font-size: 13.5px;
+                box-shadow: 0 2px 6px rgba(44, 26, 18, 0.04);
             }
 
             .hero-title {
-                font-size: 42px;
+                font-size: 34px;
                 font-weight: 900;
-                color: #0e3a62;
-                margin: 0 0 12px;
-                /* soft text shadow (Soft Contrast) */
-                text-shadow: 0 2px 8px rgba(255,255,255,0.70);
-            }
-            .hero-subtitle {
-                color: #1e5a90;
-                font-size: 17px;
-                font-weight: 700;
-                max-width: 540px;
-                margin: 0 auto;
-                line-height: 1.9;
-                opacity: .85;
+                color: #2C1A12;
+                margin: 0 0 10px;
+                letter-spacing: -0.5px;
             }
 
-            /* ══════════════════════════════════════════════════
-               SECTION LABEL
-               ══════════════════════════════════════════════════ */
-            .section-label {
+            .hero-subtitle {
+                color: rgba(44, 26, 18, 0.7);
+                font-size: 16px;
+                font-weight: 600;
+                max-width: 680px;
+                margin: 0 auto;
+                line-height: 1.8;
+            }
+
+            /* ── Section Label ── */
+            .section-header {
+                display: flex;
+                align-items: center;
+                justify-content: space-between;
+                margin-bottom: 12px;
+            }
+
+            .section-title {
                 display: flex;
                 align-items: center;
                 gap: 10px;
-                margin-bottom: 6px;
             }
-            .section-label h2 {
-                font-size: 20px;
+
+            .section-title h2 {
+                font-size: 19px;
                 font-weight: 900;
-                color: #0e3a62;
+                color: #2C1A12;
                 margin: 0;
-                text-shadow: 0 1px 4px rgba(255,255,255,0.65);
             }
 
-            /* ══════════════════════════════════════════════════
-               BUBBLE GRID
-               ══════════════════════════════════════════════════ */
-            .bubble-grid {
-                display: flex;
-                flex-wrap: wrap;
-                justify-content: center;
-                gap: 30px;
-                padding: 8px 0;
+            .section-subtitle {
+                font-size: 13px;
+                color: rgba(44, 26, 18, 0.6);
+                font-weight: 600;
             }
 
-            /* ══════════════════════════════════════════════════
-               BUBBLE CARD   ← THE STAR ★
-               Neumorphism outer shadows (convex)
-               + Glassmorphism inner fill
-               + Soft Contrast colours
-               ══════════════════════════════════════════════════ */
-            .bubble-card {
-                width: 148px;
-                height: 148px;
-                border-radius: 50%;
+            /* ── Cards Grid ── */
+            .desert-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
+                gap: 18px;
+            }
+
+            /* ── Desert Glass Card ── */
+            .desert-card-item {
+                background: linear-gradient(135deg, rgba(255, 253, 250, 0.8) 0%, rgba(255, 253, 250, 0.45) 100%);
+                backdrop-filter: blur(24px) saturate(160%);
+                -webkit-backdrop-filter: blur(24px) saturate(160%);
+                border: 1px solid rgba(194, 155, 98, 0.3);
+                border-radius: 20px;
+                padding: 22px 16px;
                 text-decoration: none;
                 cursor: pointer;
-                position: relative;
                 display: flex;
                 flex-direction: column;
                 align-items: center;
                 justify-content: center;
-                gap: 9px;
+                gap: 12px;
+                box-shadow: 0 4px 6px rgba(44, 26, 18, 0.08);
+                transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
+                position: relative;
                 overflow: hidden;
-
-                /* Glassmorphism fill */
-                background: rgba(255,255,255,0.38);
-                backdrop-filter: blur(18px) saturate(1.4);
-                -webkit-backdrop-filter: blur(18px);
-
-                /* Thin glass border */
-                border: 1.5px solid rgba(255,255,255,0.68);
-
-                /* Neumorphic convex shadow (light top-left / muted aqua bottom-right) */
-                box-shadow:
-                    -10px -10px 24px rgba(255,255,255,0.85),
-                     10px  10px 24px rgba(85,140,195,0.28),
-                    inset 0  1px 0 rgba(255,255,255,0.70),
-                    inset 0 -1px 0 rgba(90,145,200,0.15);
-
-                transition: transform .35s cubic-bezier(.34,1.56,.64,1),
-                            box-shadow .35s ease;
-                animation: popIn .5s cubic-bezier(.16,1,.3,1) both;
             }
 
-            /* Top-left gloss highlight (Glassmorphism glint) */
-            .bubble-card::before {
-                content: '';
-                position: absolute;
-                top: 9%; left: 14%;
-                width: 48%; height: 26%;
-                background: radial-gradient(ellipse,
-                    rgba(255,255,255,0.80) 0%,
-                    transparent 70%);
-                border-radius: 50%;
-                transform: rotate(-28deg);
-                pointer-events: none;
-                z-index: 2;
+            .desert-card-item:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 15px rgba(168, 87, 60, 0.15);
+                border-color: rgba(194, 155, 98, 0.65);
+                background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(255, 253, 250, 0.65) 100%);
             }
 
-            /* Bottom-right subtle depth (Neumorphic concave hint) */
-            .bubble-card::after {
-                content: '';
-                position: absolute;
-                bottom: 8%; right: 10%;
-                width: 38%; height: 20%;
-                background: radial-gradient(ellipse,
-                    rgba(85,140,195,0.18) 0%,
-                    transparent 70%);
-                border-radius: 50%;
-                transform: rotate(-28deg);
-                pointer-events: none;
-                z-index: 2;
+            .card-icon-box {
+                width: 58px;
+                height: 58px;
+                border-radius: 16px;
+                background: linear-gradient(135deg, rgba(194, 155, 98, 0.25) 0%, rgba(168, 87, 60, 0.12) 100%);
+                border: 1px solid rgba(194, 155, 98, 0.35);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 28px;
+                box-shadow: 0 4px 10px rgba(44, 26, 18, 0.05);
+                transition: transform 0.3s ease;
             }
 
-            .bubble-card:hover {
-                transform: translateY(-11px) scale(1.09);
-                box-shadow:
-                    -14px -14px 30px rgba(255,255,255,0.90),
-                     14px  14px 30px rgba(85,140,195,0.35),
-                    inset 0  1px 0 rgba(255,255,255,0.80),
-                    inset 0 -1px 0 rgba(90,145,200,0.20);
+            .desert-card-item:hover .card-icon-box {
+                transform: scale(1.1) rotate(4deg);
+                background: linear-gradient(135deg, rgba(194, 155, 98, 0.35) 0%, rgba(168, 87, 60, 0.2) 100%);
             }
 
-            /* Pressed / active state (Neumorphic inset) */
-            .bubble-card:active {
-                transform: scale(0.97);
-                box-shadow:
-                    inset  4px  4px 10px rgba(85,140,195,0.25),
-                    inset -4px -4px 10px rgba(255,255,255,0.75);
-            }
-
-            @keyframes popIn {
-                from { opacity:0; transform:scale(.6) translateY(16px); }
-                to   { opacity:1; transform:scale(1)  translateY(0); }
-            }
-
-            .bubble-card:nth-child(1) { animation-delay:.04s }
-            .bubble-card:nth-child(2) { animation-delay:.08s }
-            .bubble-card:nth-child(3) { animation-delay:.12s }
-            .bubble-card:nth-child(4) { animation-delay:.16s }
-            .bubble-card:nth-child(5) { animation-delay:.20s }
-            .bubble-card:nth-child(6) { animation-delay:.24s }
-            .bubble-card:nth-child(7) { animation-delay:.28s }
-            .bubble-card:nth-child(8) { animation-delay:.32s }
-
-            .bubble-icon {
-                font-size: 40px;
-                position: relative;
-                z-index: 3;
-                filter: drop-shadow(0 3px 5px rgba(0,50,120,0.18));
-                transition: transform .35s;
-            }
-            .bubble-card:hover .bubble-icon { transform: scale(1.14) rotate(4deg); }
-
-            .bubble-title {
-                font-size: 13.5px;
-                font-weight: 900;
-                color: #0d3560;
+            .card-title {
+                font-size: 14.5px;
+                font-weight: 800;
+                color: #2C1A12;
                 text-align: center;
-                line-height: 1.25;
-                padding: 0 12px;
-                position: relative;
-                z-index: 3;
-                /* Soft Contrast: white glow behind dark text */
-                text-shadow: 0 1px 6px rgba(255,255,255,0.90);
+                line-height: 1.3;
             }
 
-            /* ══════════════════════════════════════════════════
-               ADD-FAV BUBBLE (dashed outline, lighter fill)
-               ══════════════════════════════════════════════════ */
-            .add-bubble {
-                width: 148px; height: 148px;
-                border-radius: 50%;
+            .card-desc {
+                font-size: 11.5px;
+                color: rgba(44, 26, 18, 0.6);
+                font-weight: 600;
+                text-align: center;
+            }
+
+            /* Add Card Button */
+            .add-card-btn {
+                background: linear-gradient(135deg, rgba(255, 253, 250, 0.5) 0%, rgba(255, 253, 250, 0.25) 100%);
+                backdrop-filter: blur(24px) saturate(160%);
+                border: 1.5px dashed rgba(194, 155, 98, 0.55);
+                border-radius: 20px;
+                padding: 22px 16px;
                 cursor: pointer;
-                display: flex; flex-direction: column;
-                align-items: center; justify-content: center; gap: 9px;
-
-                background: rgba(255,255,255,0.18);
-                backdrop-filter: blur(14px);
-                -webkit-backdrop-filter: blur(14px);
-                border: 2.5px dashed rgba(255,255,255,0.60);
-                box-shadow:
-                    -8px -8px 20px rgba(255,255,255,0.75),
-                     8px  8px 20px rgba(85,140,195,0.20);
-
-                transition: .35s cubic-bezier(.34,1.56,.64,1);
-                animation: popIn .5s .36s cubic-bezier(.16,1,.3,1) both;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 12px;
+                box-shadow: 0 4px 6px rgba(44, 26, 18, 0.05);
+                transition: all 0.3s ease;
             }
-            .add-bubble:hover {
-                background: rgba(255,255,255,0.35);
-                border-color: rgba(255,255,255,0.90);
-                transform: translateY(-11px) scale(1.09);
-                box-shadow:
-                    -12px -12px 26px rgba(255,255,255,0.85),
-                     12px  12px 26px rgba(85,140,195,0.28);
-            }
-            .add-bubble:active {
-                transform: scale(.97);
-                box-shadow:
-                    inset  3px  3px 8px rgba(85,140,195,0.20),
-                    inset -3px -3px 8px rgba(255,255,255,0.70);
-            }
-            .add-icon  { font-size:40px; color:rgba(14,58,98,.50); transition:.3s; }
-            .add-label { font-size:13.5px; font-weight:900; color:#0e3a62; opacity:.75; text-align:center; }
-            .add-bubble:hover .add-icon  { color:#0e3a62; transform:scale(1.18); }
-            .add-bubble:hover .add-label { opacity:1; }
 
-            /* ══════════════════════════════════════════════════
-               FAV MODAL
-               ══════════════════════════════════════════════════ */
+            .add-card-btn:hover {
+                background: linear-gradient(135deg, rgba(255, 253, 250, 0.85) 0%, rgba(255, 253, 250, 0.5) 100%);
+                border-color: #C29B62;
+                transform: translateY(-5px);
+                box-shadow: 0 10px 15px rgba(168, 87, 60, 0.15);
+            }
+
+            .add-icon-box {
+                width: 58px;
+                height: 58px;
+                border-radius: 16px;
+                background: rgba(194, 155, 98, 0.15);
+                border: 1px dashed rgba(194, 155, 98, 0.4);
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 26px;
+                color: #C29B62;
+                transition: transform 0.3s ease;
+            }
+
+            .add-card-btn:hover .add-icon-box {
+                transform: scale(1.15) rotate(90deg);
+                color: #A8573C;
+            }
+
+            /* ── Quick Stats Section ── */
+            .stats-banner {
+                display: grid;
+                grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+                gap: 16px;
+            }
+
+            .stat-box {
+                background: linear-gradient(135deg, rgba(255, 253, 250, 0.85) 0%, rgba(255, 253, 250, 0.45) 100%);
+                backdrop-filter: blur(24px) saturate(160%);
+                border: 1px solid rgba(194, 155, 98, 0.3);
+                border-radius: 18px;
+                padding: 16px 20px;
+                display: flex;
+                align-items: center;
+                gap: 16px;
+                box-shadow: 0 4px 6px rgba(44, 26, 18, 0.06);
+            }
+
+            .stat-icon {
+                width: 46px;
+                height: 46px;
+                border-radius: 14px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                font-size: 22px;
+                background: rgba(194, 155, 98, 0.2);
+                border: 1px solid rgba(194, 155, 98, 0.35);
+            }
+
+            /* ── Custom Modal ── */
             .fav-overlay {
-                position:fixed; inset:0;
-                background:rgba(0,0,0,0.42);
-                backdrop-filter:blur(16px);
-                z-index:99999;
-                display:flex; align-items:center; justify-content:center;
-                animation:fadeIn .25s ease;
+                position: fixed; inset: 0;
+                background: rgba(44, 26, 18, 0.45);
+                backdrop-filter: blur(24px) saturate(160%);
+                z-index: 99999;
+                display: flex; align-items: center; justify-content: center;
+                padding: 20px;
+                animation: fadeIn .25s ease;
             }
+
             .fav-modal {
-                background:${THEME.primary};
-                border-radius:28px; width:90%; max-width:800px; max-height:85vh;
-                display:flex; flex-direction:column; overflow:hidden;
-                box-shadow:0 40px 80px rgba(0,0,0,0.55);
-                border:1px solid rgba(255,255,255,0.08);
-                animation:scaleUp .3s cubic-bezier(.175,.885,.32,1.275);
+                background: linear-gradient(135deg, #FDFBF7 0%, #F5EFE6 100%);
+                border-radius: 28px;
+                width: 95vw; max-width: 820px; max-height: 85vh;
+                display: flex; flex-direction: column; overflow: hidden;
+                box-shadow: 0 25px 60px rgba(44, 26, 18, 0.25);
+                border: 1px solid rgba(194, 155, 98, 0.4);
             }
-            .fav-modal-header { padding:24px 28px; border-bottom:1px solid rgba(255,255,255,0.08); display:flex; justify-content:space-between; align-items:center; }
-            .fav-modal-body   { padding:28px; overflow-y:auto; display:flex; flex-direction:column; gap:26px; }
-            .fav-modal-footer { padding:18px 28px; border-top:1px solid rgba(255,255,255,0.08); display:flex; justify-content:flex-end; gap:14px; }
-            .fav-group-title  { font-weight:900; color:#38bdf8; margin-bottom:12px; font-size:16px; border-bottom:1px solid rgba(255,255,255,0.08); padding-bottom:10px; }
-            .fav-items-grid   { display:grid; grid-template-columns:repeat(auto-fill,minmax(210px,1fr)); gap:12px; }
+
+            .fav-modal-header {
+                padding: 20px 28px;
+                border-bottom: 1px solid rgba(194, 155, 98, 0.25);
+                display: flex; justify-content: space-between; align-items: center;
+            }
+
+            .fav-modal-body {
+                padding: 24px 28px;
+                overflow-y: auto;
+                display: flex;
+                flex-direction: column;
+                gap: 22px;
+            }
+
+            .fav-group-title {
+                font-weight: 900;
+                color: #2C1A12;
+                margin-bottom: 12px;
+                font-size: 16px;
+                border-bottom: 2px solid rgba(194, 155, 98, 0.25);
+                padding-bottom: 8px;
+            }
+
+            .fav-items-grid {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+                gap: 12px;
+            }
+
             .fav-item {
-                display:flex; align-items:center; gap:12px; padding:13px;
-                border:1px solid rgba(255,255,255,0.08); border-radius:14px;
-                cursor:pointer; background:rgba(255,255,255,0.02); transition:.2s;
-            }
-            .fav-item:hover   { background:rgba(255,255,255,0.05); border-color:rgba(56,189,248,0.30); }
-            .fav-item.selected{ border-color:#38bdf8; background:rgba(56,189,248,0.10); }
-
-            @keyframes fadeIn  { from{opacity:0}  to{opacity:1} }
-            @keyframes scaleUp { from{opacity:0;transform:scale(.92)} to{opacity:1;transform:scale(1)} }
-
-            /* footer */
-            .nm-footer {
-                text-align:center;
-                color:rgba(14,58,98,0.50);
-                font-weight:700; font-size:12.5px;
-                padding-bottom:4px;
-                text-shadow:0 1px 4px rgba(255,255,255,0.60);
+                display: flex; align-items: center; gap: 12px; padding: 12px 14px;
+                border: 1px solid rgba(194, 155, 98, 0.3);
+                border-radius: 14px;
+                cursor: pointer;
+                background: rgba(255, 253, 250, 0.7);
+                transition: all 0.2s ease;
             }
 
-            @media(max-width:768px){
-                .hero-panel { padding:28px 16px 24px; border-radius:24px; }
-                .hero-title  { font-size:27px; }
-                .bubble-grid { gap:18px; }
-                .bubble-card,.add-bubble { width:116px; height:116px; }
-                .bubble-icon,.add-icon   { font-size:30px; }
-                .bubble-title,.add-label { font-size:12px; }
-                :global(.master-header)  { margin:8px 10px 0 !important; border-radius:50px !important; }
+            .fav-item:hover {
+                background: rgba(255, 253, 250, 0.95);
+                border-color: #C29B62;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 10px rgba(168, 87, 60, 0.1);
+            }
+
+            .fav-item.selected {
+                border-color: #C29B62;
+                background: linear-gradient(135deg, rgba(194, 155, 98, 0.25) 0%, rgba(255, 253, 250, 0.9) 100%);
+            }
+
+            .fav-modal-footer {
+                padding: 16px 28px;
+                border-top: 1px solid rgba(194, 155, 98, 0.25);
+                display: flex; justify-content: flex-end; gap: 12px;
+                background: rgba(255, 253, 250, 0.5);
+            }
+
+            .desert-footer {
+                text-align: center;
+                color: rgba(44, 26, 18, 0.6);
+                font-weight: 700;
+                font-size: 13px;
+                padding-top: 10px;
+            }
+
+            @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+            @media (max-width: 768px) {
+                .desert-hero { padding: 24px 18px 20px; border-radius: 20px; }
+                .hero-title { font-size: 24px; }
+                .desert-grid { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+                .desert-card-item, .add-card-btn { padding: 16px 10px; border-radius: 16px; }
+                .card-icon-box, .add-icon-box { width: 48px; height: 48px; font-size: 24px; }
+                .card-title { font-size: 13px; }
+                .stats-banner { grid-template-columns: 1fr; }
             }
         `}</style>
 
-            {/* ── Hero ── */}
-            <div className="hero-panel">
-                <div className="role-chip">{roleTitle}</div>
+            {/* ── لوحة الترحيب الصحراوية (Hero Panel) ── */}
+            <div className="desert-hero">
+                <div className="role-badge">{roleTitle}</div>
                 <h1 className="hero-title">{greeting}، {firstNameOnly}</h1>
-                <p className="hero-subtitle">✨ {quote}</p>
+                <p className="hero-subtitle">{quote}</p>
             </div>
 
-            {/* ── Bubbles ── */}
-            <div>
-                <div className="section-label">
-                    <span style={{fontSize:'22px'}}>⭐</span>
-                    <h2>مساحة العمل السريعة</h2>
+            {/* ── إحصائيات سريعة للخدمات البيطرية ── */}
+            <div className="stats-banner">
+                <div className="stat-box">
+                    <div className="stat-icon" style={{ color: '#C29B62' }}>🐎</div>
+                    <div>
+                        <div style={{ fontSize: '12px', color: 'rgba(44,26,18,0.6)', fontWeight: 700 }}>أدوية ومكملات الخيل</div>
+                        <div style={{ fontSize: '18px', fontWeight: 900, color: '#2C1A12' }}>متوفرة بالصيدلية</div>
+                    </div>
                 </div>
-
-                <div className="bubble-grid">
-                    {favItems.map((item:any, idx) => (
-                        <Link key={idx} href={item.path} className="bubble-card">
-                            <div className="bubble-icon">{item.icon}</div>
-                            <div className="bubble-title">{item.title}</div>
-                        </Link>
-                    ))}
-                    <div className="add-bubble" onClick={openFavModal}>
-                        <div className="add-icon">➕</div>
-                        <div className="add-label">تخصيص المفضلة</div>
+                <div className="stat-box">
+                    <div className="stat-icon" style={{ color: '#A8573C' }}>🐪</div>
+                    <div>
+                        <div style={{ fontSize: '12px', color: 'rgba(44,26,18,0.6)', fontWeight: 700 }}>فيتامينات ومضادات الإبل</div>
+                        <div style={{ fontSize: '18px', fontWeight: 900, color: '#2C1A12' }}>جاهزة للصرف</div>
+                    </div>
+                </div>
+                <div className="stat-box">
+                    <div className="stat-icon" style={{ color: '#4E734F' }}>🧾</div>
+                    <div>
+                        <div style={{ fontSize: '12px', color: 'rgba(44,26,18,0.6)', fontWeight: 700 }}>نظام الفواتير المعتمد</div>
+                        <div style={{ fontSize: '18px', fontWeight: 900, color: '#4E734F' }}>متطابق مع ZATCA</div>
                     </div>
                 </div>
             </div>
 
-            {/* ── Modal ── */}
+            {/* ── شبكة الوصول السريع للمفضلة (Desert Glass Favorites) ── */}
+            <div>
+                <div className="section-header">
+                    <div className="section-title">
+                        <span style={{ fontSize: '20px' }}>⭐</span>
+                        <h2>المفضلة ومساحة العمل السريعة</h2>
+                    </div>
+                    <span className="section-subtitle">الوصول السريع للشاشات الأكثر استخداماً</span>
+                </div>
+
+                <div className="desert-grid">
+                    {favItems.map((item: any, idx) => (
+                        <Link key={idx} href={item.path} className="desert-card-item">
+                            <div className="card-icon-box">{item.icon}</div>
+                            <div className="card-title">{item.title}</div>
+                            <div className="card-desc">انقر للفتح</div>
+                        </Link>
+                    ))}
+                    
+                    <div className="add-card-btn" onClick={openFavModal} title="تخصيص القائمة المفضلة">
+                        <div className="add-icon-box">➕</div>
+                        <div className="card-title" style={{ color: '#C29B62' }}>تخصيص المفضلة</div>
+                        <div className="card-desc">إضافة / حذف روابط</div>
+                    </div>
+                </div>
+            </div>
+
+            {/* ── نافذة تخصيص الروابط المفضلة (Desert Modal) ── */}
             {isFavModalOpen && (
                 <div className="fav-overlay" onClick={() => setIsFavModalOpen(false)}>
                     <div className="fav-modal" onClick={e => e.stopPropagation()}>
                         <div className="fav-modal-header">
-                            <h2 style={{margin:0,fontSize:'20px',fontWeight:900,color:'white'}}>تخصيص الصفحات المفضلة</h2>
-                            <button onClick={() => setIsFavModalOpen(false)} style={{background:'transparent',border:'none',color:'#94a3b8',fontSize:'24px',cursor:'pointer'}}>✖</button>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                                <span style={{ fontSize: '24px' }}>✨</span>
+                                <h2 style={{ margin: 0, fontSize: '19px', fontWeight: 900, color: '#2C1A12' }}>تخصيص شاشات مساحة العمل</h2>
+                            </div>
+                            <button 
+                                onClick={() => setIsFavModalOpen(false)} 
+                                style={{ background: 'transparent', border: 'none', color: '#A8573C', fontSize: '22px', cursor: 'pointer', fontWeight: 900 }}
+                            >
+                                ✕
+                            </button>
                         </div>
+                        
                         <div className="fav-modal-body">
                             {menuGroups.map((group, gIdx) => {
                                 const items = group.items.filter(item => allowedItems.some(ai => ai.id === item.id));
@@ -503,11 +531,25 @@ export default function WelcomeHomePage() {
                                             {items.map((item, iIdx) => {
                                                 const sel = tempFavorites.includes(item.id);
                                                 return (
-                                                    <div key={iIdx} className={`fav-item${sel?' selected':''}`} onClick={() => toggleFav(item.id)}>
-                                                        <div style={{fontSize:'22px'}}>{item.icon}</div>
-                                                        <div style={{fontWeight:800,color:sel?'white':'#cbd5e1',flex:1}}>{item.title}</div>
-                                                        <div style={{width:'20px',height:'20px',borderRadius:'6px',border:`2px solid ${sel?'#38bdf8':'rgba(255,255,255,0.2)'}`,background:sel?'#38bdf8':'transparent',display:'flex',alignItems:'center',justifyContent:'center'}}>
-                                                            {sel&&<span style={{color:'white',fontSize:'13px'}}>✔</span>}
+                                                    <div key={iIdx} className={`fav-item ${sel ? 'selected' : ''}`} onClick={() => toggleFav(item.id)}>
+                                                        <div style={{ fontSize: '22px' }}>{item.icon}</div>
+                                                        <div style={{ fontWeight: 800, color: sel ? '#2C1A12' : 'rgba(44,26,18,0.7)', flex: 1, fontSize: '13.5px' }}>
+                                                            {item.title}
+                                                        </div>
+                                                        <div style={{
+                                                            width: '22px', 
+                                                            height: '22px', 
+                                                            borderRadius: '8px', 
+                                                            border: `2px solid ${sel ? '#C29B62' : 'rgba(194, 155, 98, 0.35)'}`, 
+                                                            background: sel ? 'linear-gradient(135deg, #C29B62 0%, #A8573C 100%)' : 'transparent', 
+                                                            display: 'flex', 
+                                                            alignItems: 'center', 
+                                                            justifyContent: 'center',
+                                                            color: 'white',
+                                                            fontSize: '12px',
+                                                            fontWeight: 900
+                                                        }}>
+                                                            {sel && '✓'}
                                                         </div>
                                                     </div>
                                                 );
@@ -517,16 +559,28 @@ export default function WelcomeHomePage() {
                                 );
                             })}
                         </div>
+                        
                         <div className="fav-modal-footer">
-                            <button onClick={() => setIsFavModalOpen(false)} style={{padding:'10px 22px',borderRadius:'12px',border:'none',background:'rgba(255,255,255,0.05)',color:'#cbd5e1',fontWeight:900,cursor:'pointer'}}>إلغاء</button>
-                            <button onClick={saveFavorites} style={{padding:'10px 22px',borderRadius:'12px',border:'none',background:'#38bdf8',color:THEME.primary,fontWeight:900,cursor:'pointer',boxShadow:'0 8px 20px rgba(56,189,248,0.25)'}}>حفظ التغييرات</button>
+                            <button 
+                                onClick={() => setIsFavModalOpen(false)} 
+                                className="desert-btn-glass"
+                            >
+                                إلغاء
+                            </button>
+                            <button 
+                                onClick={saveFavorites} 
+                                className="desert-btn-primary"
+                            >
+                                حفظ التغييرات 💾
+                            </button>
                         </div>
                     </div>
                 </div>
             )}
 
-            <div className="nm-footer">
-                تم تأمين الجلسة الخاصة بك 🔒 | مياه غيام © {new Date().getFullYear()}
+            {/* ── فوتر النظام الصحراوي ── */}
+            <div className="desert-footer">
+                جلسة آمنة ومحمية 🔒 | صيدلية تاج المودة البيطرية (رعاية الخيول والإبل) © {new Date().getFullYear()}
             </div>
         </div>
         </MasterPage>

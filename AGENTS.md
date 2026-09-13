@@ -8,24 +8,26 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 
 <!-- END:nextjs-agent-rules -->
 
-## Aqua Glassmorphism Theme (UI/UX Guidelines)
-The official design language for this application is **"Aqua Glassmorphism"**. When creating or updating UI components, you MUST adhere to the following rules:
+## Desert Glassmorphism Theme (UI/UX Guidelines)
+The official design language for this application is **"Desert Glassmorphism"**, inspired by golden sands, warm clay, and the heritage of horse/camel care. When creating or updating UI components, you MUST adhere to the following rules:
 
-1. **Color Palette:**
-   - **Primary**: `#1C73AB` (Corporate Blue). Use for main text, primary layout structures.
-   - **Accent**: `#2891C8` to `#7FD4E3` (Cyan/Aqua). Use for gradients, glowing effects, and primary actions.
-   - **Background**: `#F4F1EE` (Soft Off-White). Do not use pure white backgrounds for the body.
-   - **Status Colors**: `#16a34a` (Success/Neon Green), `#ef4444` (Danger/Red), `#f59e0b` (Pending/Orange).
+1. **Desert Core Palette:**
+   - **Primary (Deep Tent Brown)**: `#2C1A12` - Used for main text, headings, and navbars.
+   - **Accent (Golden Sand)**: `#C29B62` - Used for primary buttons, active icons, and branding.
+   - **Highlight/Hover (Terracotta Clay)**: `#A8573C` - Used for alerts, hover states, and depth.
+   - **Background (Dune Pearl)**: `#FDFBF7` - Main app background.
+   - **Success (Oasis Green)**: `#4E734F` - Success states and stock availability.
 
-2. **Glassmorphism (The Core Identity):**
-   - Use semi-transparent white backgrounds for cards and containers: `background: rgba(255, 255, 255, 0.6)` (or similar opacity).
-   - Apply heavy backdrop filters to create a frosted glass effect: `backdrop-filter: blur(40px) saturate(200%)`.
-   - Add subtle white borders to glass elements to define edges: `border: 1px solid rgba(255, 255, 255, 0.4)`.
+2. **Desert Glass Effects (The Core Identity):**
+   - **Cards/Windows**: Gradient glass `background: linear-gradient(135deg, rgba(255, 253, 250, 0.8) 0%, rgba(255, 253, 250, 0.45) 100%)`.
+   - **Backdrop Filters**: `backdrop-filter: blur(24px) saturate(160%)`.
+   - **Borders**: Thin glowing borders `border: 1px solid rgba(194, 155, 98, 0.3)`.
+   - **Shadows**: Warm sandy shadows `box-shadow: 0 4px 6px rgba(44, 26, 18, 0.08)`.
+   - **Hover States**: Cards should lift on hover with intensified terracotta shadow `box-shadow: 0 10px 15px rgba(168, 87, 60, 0.15); transform: translateY(-5px);`.
 
-3. **Shapes & Animations:**
-   - **Curved Edges**: Use large border radii (e.g., `20px` for main cards, `border-radius: 0 0 20px 20px` for master headers). Avoid sharp 90-degree corners.
-   - **Micro-interactions**: Implement smooth transitions. Interactive elements should lift on hover (`transform: translateY(-5px)`) rather than just changing color.
-   - **Entry Animations**: Use smooth fade-in-up animations for page loads.
+3. **Typography & Spacing:**
+   - Use `rgba(44, 26, 18, 0.6)` for muted, secondary, or descriptive text.
+   - Maintain rounded corners (`border-radius: 16px` for cards, `12px` for buttons).
 
 4. **Mobile Responsiveness:**
    - Ensure all tables have horizontal scrolling (`overflow-x: auto`) on mobile.
@@ -34,4 +36,6 @@ The official design language for this application is **"Aqua Glassmorphism"**. W
    - Ensure modals take up `95vw` on mobile screens.
 
 5. **Aesthetics Over Basic MVP:**
-   - Always prioritize a premium, modern, and polished look over basic generic HTML/CSS. If a component looks "default" or plain, it violates the Aqua Theme.
+   - Always prioritize a premium, modern, and polished look over basic generic HTML/CSS. 
+
+</RULE>

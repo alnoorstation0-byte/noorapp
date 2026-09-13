@@ -6,14 +6,14 @@ import { THEME } from '@/lib/theme';
 
 const cairo = Cairo({ 
   subsets: ["arabic"],
-  weight: ["400", "500", "700", "900"], // أضف وزن 500 للعمليات
+  weight: ["400", "500", "700", "900"],
   display: 'swap',
-  variable: '--font-cairo', // تحويلها لـ CSS Variable لسهولة الاستخدام
+  variable: '--font-cairo',
 });
 
-// 📱 التعديل هنا : منع الـ Zoom وتغطية الشاشة بالكامل للموبايل
+// 📱 إعدادات الشاشة للجوال والشاشات المختلفة
 export const viewport = {
-  themeColor: THEME.coffeeDark,
+  themeColor: '#2C1A12', // بني الخيام الداكن
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
@@ -22,13 +22,13 @@ export const viewport = {
 };
 
 export const metadata = {
-  title: "رواسي - نظام الإدارة الموحد",
-  description: "نظام إدارة العملاء والموارد والمصروفات",
+  title: "صيدلية تاج المودة البيطرية - نظام الإدارة الموحد",
+  description: "نظام إدارة صيدلية تاج المودة المتخصصة في رعاية الخيول والإبل",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "رواسي",
+    title: "تاج المودة",
   },
   formatDetection: {
     telephone: false,
@@ -41,7 +41,6 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    // 💡 suppressHydrationWarning يمنع أخطاء التوافق في الكونسول
     <html lang="ar" dir="rtl" suppressHydrationWarning>
       <body 
         className={`${cairo.className} ${cairo.variable}`} 
@@ -49,51 +48,42 @@ export default function RootLayout({
           position: 'relative', 
           minHeight: '100vh', 
           margin: 0, 
-          backgroundColor: THEME.sandLight,
-          color: THEME.text 
+          backgroundColor: '#FDFBF7', // كثبان لؤلؤية
+          color: '#2C1A12',           // بني الخيام الداكن
         }}
       >
         
-        {/* 🎨 ستايل الهوية البصرية الأساسية (تحسين الإضاءة) */}
+        {/* 🏜️ ستايل الخلفية الصحراوية الزجاجية (Dune Pearl Glass Background) */}
         <style dangerouslySetInnerHTML={{__html: `
           .bg-master-container {
             position: fixed; inset: 0; z-index: -4; 
-            background: linear-gradient(135deg, var(--accent-light, #A1D6E2) 0%, var(--bg-main, #D4F0F7) 100%); 
+            background: radial-gradient(circle at 10% 20%, rgba(194, 155, 98, 0.08) 0%, rgba(253, 251, 247, 1) 90%); 
             overflow: hidden;
             pointer-events: none;
-          }
-          .bg-image-base {
-            position: absolute; inset: 0;
-            background-image: url('/ghayam_logo.png'); 
-            background-size: cover;
-            background-position: center;
-            filter: blur(60px); 
-            transform: scale(1.1); 
-            opacity: 0.15; 
           }
           .bg-glass-tint {
             position: absolute; inset: 0; z-index: -3;
             background: linear-gradient(
               135deg, 
-              rgba(255, 255, 255, 0.4) 0%, 
-              rgba(255, 255, 255, 0.1) 100% 
+              rgba(255, 253, 250, 0.6) 0%, 
+              rgba(253, 251, 247, 0.2) 100% 
             );
-            backdrop-filter: blur(20px);
+            backdrop-filter: blur(24px) saturate(160%);
+            -webkit-backdrop-filter: blur(24px);
           }
           .watermark-bg {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 50vw; max-width: 600px; opacity: 0.035; z-index: -2;
+            width: 45vw; max-width: 500px; opacity: 0.035; z-index: -2;
             pointer-events: none; user-select: none;
           }
           @media print { .no-print { display: none !important; } }
         `}} />
 
         <div className="bg-master-container no-print">
-            <div className="bg-image-base"></div>
             <div className="bg-glass-tint"></div>
         </div>
 
-        <img src="/ghayam_logo.png" alt="watermark" className="watermark-bg no-print" />
+        <img src="/taj_logo.png" alt="watermark" className="watermark-bg no-print" />
 
         <AppClientProviders>
             {children}
