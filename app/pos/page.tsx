@@ -709,6 +709,23 @@ function PosItemNumpadModal({
     );
 }
 
+function getItemIcon(name?: string, unit?: string) {
+    if (!name) return '📦';
+    const n = name.toLowerCase();
+    if (n.includes('حليب') || n.includes('لبن') || n.includes('milk') || n.includes('زبادي') || n.includes('قشطة')) return '🥛';
+    if (n.includes('ماء') || n.includes('مياه') || n.includes('water') || n.includes('شرب')) return '💧';
+    if (n.includes('عصير') || n.includes('juice') || n.includes('شراب')) return '🧃';
+    if (n.includes('علاج') || n.includes('دواء') || n.includes('مرهم') || n.includes('pharma') || n.includes('med') || n.includes('مضاد')) return '💊';
+    if (n.includes('شامبو') || n.includes('صابون') || n.includes('زيت') || n.includes('oil') || n.includes('shampoo') || n.includes('كريم')) return '🧴';
+    if (n.includes('علف') || n.includes('شعير') || n.includes('قمح') || n.includes('حبوب') || n.includes('feed') || n.includes('نخالة')) return '🌾';
+    if (n.includes('حقن') || n.includes('إبر') || n.includes('محقن')) return '💉';
+    if (n.includes('فيتامين') || n.includes('مكمل') || n.includes('املاح') || n.includes('بودرة') || n.includes('كالسيوم')) return '🧪';
+    if (n.includes('حذاء') || n.includes('سرج') || n.includes('لجام') || n.includes('حبل') || n.includes('طوق') || n.includes('خيل') || n.includes('حصان')) return '🐎';
+    if (n.includes('تمر') || n.includes('عسل') || n.includes('غذاء') || n.includes('سكر')) return '🍯';
+    if (unit && (unit.includes('كرتون') || unit.includes('شدة') || unit.includes('صندوق') || unit.includes('باكيت'))) return '📦';
+    return '🏷️';
+}
+
 export default function PosPage() {
     const { language } = useLanguage();
     const isEn = language === 'en';
@@ -951,23 +968,13 @@ export default function PosPage() {
 
                 .pos-grid {
                     display: grid;
-                    grid-template-columns: 1.85fr 1.15fr;
+                    grid-template-columns: 1.65fr 1.35fr;
                     gap: 16px;
-                    height: calc(100vh - 220px);
-                    min-height: 0;
+                    height: calc(100vh - 205px);
+                    min-height: 520px;
                 }
-                @media (max-width: 1024px) {
-                    .pos-grid { 
-                        grid-template-columns: 1fr; 
-                        height: auto; 
-                    }
-                    .pos-mobile-nav-tabs { 
-                        display: flex !important; 
-                    }
-                    .pos-section-hidden-mobile { 
-                        display: none !important; 
-                    }
-                }
+
+                /* 🖥️ تنسيق الشاشات الكبيرة والمكتبية */
                 @media (min-width: 1025px) {
                     .pos-mobile-nav-tabs { 
                         display: none !important; 
@@ -976,21 +983,31 @@ export default function PosPage() {
                         display: flex !important; 
                     }
 
-                    /* 🖥️ تنسيق احترافي لشاشات الكمبيوتر: تثبيت الشاشة ومنع السكرول لكامل الصفحة */
-                    html:has(.pos-master-page),
-                    body:has(.pos-master-page) {
-                        overflow: hidden !important;
-                        height: 100vh !important;
-                    }
                     .clean-page.pos-master-page {
                         padding: 10px 18px 10px 18px !important;
+                        min-height: 100vh !important;
                         height: 100vh !important;
                         max-height: 100vh !important;
-                        overflow: hidden !important;
                         display: flex !important;
                         flex-direction: column !important;
                         box-sizing: border-box !important;
+                        overflow: hidden !important;
                     }
+
+                    /* في حالة الشاشات المنخفضة الارتفاع أو الزوم العالي: تفعيل السكرول الطبيعي لمنع التجمد والقص */
+                    @media (max-height: 740px) {
+                        .clean-page.pos-master-page {
+                            height: auto !important;
+                            max-height: none !important;
+                            overflow-y: auto !important;
+                        }
+                        .clean-page.pos-master-page .pos-grid {
+                            height: auto !important;
+                            max-height: none !important;
+                            min-height: 600px !important;
+                        }
+                    }
+
                     .clean-page.pos-master-page .master-header {
                         margin-bottom: 8px !important;
                         padding: 8px 18px !important;
@@ -1027,13 +1044,15 @@ export default function PosPage() {
                         overflow: hidden !important;
                         display: flex !important;
                         flex-direction: column !important;
-                        padding: 10px 14px !important;
+                        padding: 12px 14px !important;
                     }
                     .clean-page.pos-master-page .items-grid {
                         flex: 1 1 0% !important;
                         min-height: 0 !important;
                         overflow-y: auto !important;
+                        -webkit-overflow-scrolling: touch !important;
                         margin-top: 8px !important;
+                        padding-right: 4px !important;
                     }
                     .clean-page.pos-master-page .cart-section {
                         height: 100% !important;
@@ -1042,13 +1061,14 @@ export default function PosPage() {
                         overflow: hidden !important;
                         display: flex !important;
                         flex-direction: column !important;
-                        padding: 10px 14px !important;
+                        padding: 12px 14px !important;
                     }
                     .clean-page.pos-master-page .cart-list {
                         flex: 1 1 0% !important;
-                        min-height: 0 !important;
+                        min-height: 120px !important;
                         max-height: 100% !important;
                         overflow-y: auto !important;
+                        -webkit-overflow-scrolling: touch !important;
                         margin-top: 4px !important;
                         margin-bottom: 4px !important;
                     }
@@ -1061,17 +1081,75 @@ export default function PosPage() {
                     }
                 }
 
+                /* 📱 تنسيق الشاشات الصغيرة والجوال والتابلت (انسيابية وسلاسة كاملة بدون أي تجميد) */
+                @media (max-width: 1024px) {
+                    .clean-page.pos-master-page {
+                        height: auto !important;
+                        min-height: 100vh !important;
+                        max-height: none !important;
+                        overflow: visible !important;
+                        padding: 8px 10px 105px 10px !important;
+                        display: block !important;
+                    }
+                    .clean-page.pos-master-page .glass-container {
+                        height: auto !important;
+                        min-height: auto !important;
+                        max-height: none !important;
+                        overflow: visible !important;
+                        display: block !important;
+                        padding: 0 !important;
+                    }
+                    .pos-grid { 
+                        display: block !important;
+                        grid-template-columns: 1fr !important; 
+                        height: auto !important; 
+                        max-height: none !important;
+                        overflow: visible !important;
+                        min-height: auto !important;
+                    }
+                    .pos-mobile-nav-tabs { 
+                        display: flex !important; 
+                        position: sticky;
+                        top: 8px;
+                        z-index: 50;
+                    }
+                    .pos-section-hidden-mobile { 
+                        display: none !important; 
+                    }
+                    .items-section, .cart-section {
+                        height: auto !important;
+                        max-height: none !important;
+                        overflow: visible !important;
+                        min-height: auto !important;
+                        padding: 12px 10px !important;
+                        border-radius: 18px !important;
+                    }
+                    .items-grid {
+                        height: auto !important;
+                        max-height: none !important;
+                        overflow: visible !important;
+                        min-height: auto !important;
+                        padding-bottom: 95px !important;
+                    }
+                    .cart-list {
+                        height: auto !important;
+                        max-height: none !important;
+                        overflow: visible !important;
+                        min-height: auto !important;
+                    }
+                }
+
                 .pos-mobile-nav-tabs {
                     display: none;
                     gap: 8px;
-                    background: rgba(255, 255, 255, 0.85);
-                    backdrop-filter: blur(20px);
-                    -webkit-backdrop-filter: blur(20px);
+                    background: rgba(255, 253, 250, 0.92);
+                    backdrop-filter: blur(20px) saturate(160%);
+                    -webkit-backdrop-filter: blur(20px) saturate(160%);
                     padding: 6px;
                     border-radius: 16px;
-                    border: 1px solid rgba(255, 255, 255, 0.9);
+                    border: 1px solid rgba(194, 155, 98, 0.35);
                     margin-bottom: 12px;
-                    box-shadow: 0 4px 15px rgba(28, 115, 171, 0.08);
+                    box-shadow: 0 4px 15px rgba(44, 26, 18, 0.06);
                 }
                 .pos-mobile-nav-tab {
                     flex: 1;
@@ -1086,23 +1164,23 @@ export default function PosPage() {
                     justify-content: center;
                     gap: 8px;
                     background: transparent;
-                    color: #64748b;
+                    color: rgba(44, 26, 18, 0.65);
                     transition: all 0.2s ease;
                     -webkit-tap-highlight-color: transparent;
                 }
                 .pos-mobile-nav-tab.active {
-                    background: linear-gradient(135deg, #1C73AB 0%, #2891C8 100%);
+                    background: linear-gradient(135deg, #C29B62 0%, #A8573C 100%);
                     color: white;
-                    box-shadow: 0 4px 14px rgba(28, 115, 171, 0.35);
+                    box-shadow: 0 4px 14px rgba(168, 87, 60, 0.35);
                 }
                 .pos-mobile-badge {
-                    background: #ef4444;
+                    background: #A8573C;
                     color: white;
                     font-size: 11px;
                     font-weight: 900;
                     padding: 2px 7px;
                     border-radius: 99px;
-                    box-shadow: 0 2px 6px rgba(239, 68, 68, 0.4);
+                    box-shadow: 0 2px 6px rgba(168, 87, 60, 0.4);
                 }
                 .pos-mobile-cart-float {
                     display: none;
@@ -1111,18 +1189,18 @@ export default function PosPage() {
                     .pos-mobile-cart-float {
                         position: fixed;
                         bottom: 16px;
-                        left: 16px;
-                        right: 16px;
+                        left: 14px;
+                        right: 14px;
                         z-index: 900;
-                        background: linear-gradient(135deg, #122946 0%, #1C73AB 100%);
+                        background: linear-gradient(135deg, #2C1A12 0%, #3D2418 100%);
                         color: white;
                         border-radius: 18px;
                         padding: 12px 18px;
                         display: flex;
                         align-items: center;
                         justify-content: space-between;
-                        box-shadow: 0 10px 30px rgba(18, 41, 70, 0.45);
-                        border: 1px solid rgba(255, 255, 255, 0.25);
+                        box-shadow: 0 10px 30px rgba(44, 26, 18, 0.5);
+                        border: 1.5px solid rgba(194, 155, 98, 0.45);
                         cursor: pointer;
                         animation: slideUpFloat 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
                     }
@@ -1131,6 +1209,7 @@ export default function PosPage() {
                     from { transform: translateY(30px); opacity: 0; }
                     to { transform: translateY(0); opacity: 1; }
                 }
+
                 @media (max-width: 768px) {
                     .pos-control-bar {
                         padding: 12px;
@@ -1162,7 +1241,7 @@ export default function PosPage() {
                         justify-content: center;
                     }
                     .items-section, .cart-section {
-                        padding: 14px 12px !important;
+                        padding: 12px 10px !important;
                         border-radius: 18px !important;
                     }
                     .cart-item {
@@ -1202,62 +1281,269 @@ export default function PosPage() {
                         font-size: 14.5px !important;
                     }
                     .checkout-panel {
-                        padding: 14px 12px !important;
+                        padding: 12px 10px !important;
                         border-radius: 16px !important;
                     }
                 }
+
                 .items-section, .cart-section {
-                    background: rgba(255, 255, 255, 0.65);
-                    backdrop-filter: blur(25px) saturate(180%);
-                    -webkit-backdrop-filter: blur(25px);
-                    border-radius: 24px;
-                    border: 1px solid rgba(255, 255, 255, 0.85);
-                    box-shadow: 0 10px 30px rgba(28, 115, 171, 0.06);
-                    padding: 20px;
+                    background: linear-gradient(135deg, rgba(255, 253, 250, 0.88) 0%, rgba(255, 253, 250, 0.6) 100%);
+                    backdrop-filter: blur(24px) saturate(160%);
+                    -webkit-backdrop-filter: blur(24px);
+                    border-radius: 22px;
+                    border: 1px solid rgba(194, 155, 98, 0.32);
+                    box-shadow: 0 8px 24px rgba(44, 26, 18, 0.05);
+                    padding: 18px;
                     display: flex;
                     flex-direction: column;
                     overflow: hidden;
                 }
+
+                /* 🛍️ شبكة الأصناف التفاعلية المتناسقة تماماً */
                 .items-grid {
                     display: grid;
-                    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-                    gap: 15px;
+                    grid-template-columns: repeat(auto-fill, minmax(148px, 1fr));
+                    gap: 12px;
                     overflow-y: auto;
-                    padding-right: 5px;
-                    margin-top: 15px;
+                    -webkit-overflow-scrolling: touch;
+                    padding-right: 4px;
+                    margin-top: 12px;
                 }
+
+                /* أحجام شبكة الأصناف حسب مقاسات الشاشة لضمان تناسق 100% */
+                @media (max-width: 540px) {
+                    .items-grid {
+                        grid-template-columns: repeat(2, 1fr) !important;
+                        gap: 9px !important;
+                    }
+                }
+                @media (min-width: 541px) and (max-width: 820px) {
+                    .items-grid {
+                        grid-template-columns: repeat(3, 1fr) !important;
+                        gap: 11px !important;
+                    }
+                }
+                @media (min-width: 821px) and (max-width: 1024px) {
+                    .items-grid {
+                        grid-template-columns: repeat(3, 1fr) !important;
+                        gap: 13px !important;
+                    }
+                }
+
+                /* 🌟 بطاقة الصنف الصحراوية الزجاجية المتناسقة والموحدة */
                 .pos-item-card {
-                    background: rgba(255, 255, 255, 0.9);
-                    border: 1px solid rgba(28, 115, 171, 0.1);
+                    background: linear-gradient(135deg, rgba(255, 253, 250, 0.96) 0%, rgba(255, 253, 250, 0.72) 100%);
+                    backdrop-filter: blur(20px) saturate(160%);
+                    -webkit-backdrop-filter: blur(20px);
+                    border: 1.5px solid rgba(194, 155, 98, 0.3);
                     border-radius: 16px;
-                    padding: 15px;
+                    padding: 11px 10px;
                     cursor: pointer;
-                    transition: 0.2s;
+                    transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+                    display: flex;
+                    flex-direction: column;
+                    justify-content: space-between;
+                    position: relative;
+                    box-shadow: 0 4px 10px rgba(44, 26, 18, 0.05);
+                    min-height: 195px;
+                    height: 100%;
+                    box-sizing: border-box;
+                    user-select: none;
+                    -webkit-tap-highlight-color: transparent;
+                }
+
+                .pos-item-card:hover {
+                    transform: translateY(-4px);
+                    border-color: #C29B62;
+                    box-shadow: 0 10px 22px rgba(168, 87, 60, 0.15);
+                }
+                .pos-item-card:active {
+                    transform: scale(0.97);
+                }
+
+                .pos-item-card.critical {
+                    border: 1.5px solid #ef4444;
+                    background: linear-gradient(135deg, rgba(254, 242, 242, 0.95) 0%, rgba(255, 253, 250, 0.85) 100%);
+                    box-shadow: 0 4px 14px rgba(239, 68, 68, 0.15);
+                }
+                .pos-item-card.near-low {
+                    border: 1.5px solid #f59e0b;
+                    background: linear-gradient(135deg, rgba(255, 251, 235, 0.95) 0%, rgba(255, 253, 250, 0.85) 100%);
+                    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.12);
+                }
+
+                /* الصف العلوي لحالة الصنف (محدد بارتفاع ثابت لضمان عدم اهتزاز البطاقات) */
+                .pos-item-top-row {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 4px;
+                    height: 22px;
+                    width: 100%;
+                    flex-shrink: 0;
+                }
+                .pos-badge-status {
+                    font-size: 9.5px;
+                    font-weight: 800;
+                    padding: 2px 6px;
+                    border-radius: 6px;
+                    white-space: nowrap;
+                    line-height: 1.3;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 3px;
+                }
+                .pos-badge-status.critical {
+                    background: #fee2e2;
+                    color: #b91c1c;
+                    border: 1px solid rgba(239, 68, 68, 0.35);
+                }
+                .pos-badge-status.near-low {
+                    background: #fef3c7;
+                    color: #b45309;
+                    border: 1px solid rgba(245, 158, 11, 0.35);
+                }
+                .pos-badge-status.returnable {
+                    background: rgba(194, 155, 98, 0.16);
+                    color: #A8573C;
+                    border: 1px solid rgba(194, 155, 98, 0.35);
+                }
+                .pos-badge-status.normal {
+                    background: rgba(44, 26, 18, 0.05);
+                    color: rgba(44, 26, 18, 0.65);
+                    border: 1px solid rgba(44, 26, 18, 0.12);
+                }
+
+                .pos-card-unit-pill {
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 4px;
+                    font-size: 10px;
+                    font-weight: 800;
+                    color: rgba(44, 26, 18, 0.6);
+                }
+                .in-stock-dot {
+                    width: 6px;
+                    height: 6px;
+                    border-radius: 50%;
+                    background: #4E734F;
+                    box-shadow: 0 0 5px rgba(78, 115, 79, 0.5);
+                }
+                .out-stock-dot {
+                    width: 6px;
+                    height: 6px;
+                    border-radius: 50%;
+                    background: #ef4444;
+                }
+
+                /* منتصف البطاقة: أيقونة الصنف واسم الصنف */
+                .pos-item-center {
                     display: flex;
                     flex-direction: column;
                     align-items: center;
                     text-align: center;
-                    gap: 10px;
-                    position: relative;
+                    margin: 4px 0 6px 0;
+                    flex: 1;
+                    justify-content: center;
                 }
-                .pos-item-card.critical {
-                    border: 1.5px solid #ef4444;
-                    box-shadow: 0 4px 15px rgba(239, 68, 68, 0.2);
-                    background: rgba(254, 242, 242, 0.85);
+                .pos-item-avatar {
+                    width: 42px;
+                    height: 42px;
+                    border-radius: 12px;
+                    background: rgba(194, 155, 98, 0.14);
+                    border: 1px solid rgba(194, 155, 98, 0.28);
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 20px;
+                    color: #C29B62;
+                    margin: 0 auto 5px auto;
+                    transition: transform 0.2s ease;
+                    flex-shrink: 0;
                 }
-                .pos-item-card.near-low {
-                    border: 1.5px solid #f59e0b;
-                    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.18);
-                    background: rgba(255, 251, 235, 0.85);
+                .pos-item-card:hover .pos-item-avatar {
+                    transform: scale(1.08);
+                    background: rgba(194, 155, 98, 0.24);
                 }
-                .pos-item-card:hover {
-                    transform: translateY(-5px);
-                    box-shadow: 0 8px 20px rgba(28, 115, 171, 0.15);
-                    border-color: ${THEME.goldAccent};
+
+                .pos-item-name {
+                    font-weight: 800;
+                    color: #2C1A12;
+                    font-size: 12.5px;
+                    line-height: 1.35;
+                    text-align: center;
+                    display: -webkit-box;
+                    -webkit-line-clamp: 2;
+                    -webkit-box-orient: vertical;
+                    overflow: hidden;
+                    min-height: 34px;
+                    max-height: 34px;
+                    word-break: break-word;
                 }
-                .pos-item-name { font-weight: 900; color: #122946; font-size: 14px; }
-                .pos-item-price { font-weight: 900; color: #16a34a; font-size: 16px; }
-                .pos-item-qty { font-size: 11px; color: #64748b; font-weight: bold; background: #f1f5f9; padding: 3px 8px; border-radius: 10px; }
+
+                /* أسفل البطاقة: الكمية المتاحة + السعر وزر الإضافة السريعة */
+                .pos-item-footer {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 5px;
+                    margin-top: auto;
+                    width: 100%;
+                    flex-shrink: 0;
+                }
+                .pos-item-stock-info {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    background: rgba(44, 26, 18, 0.04);
+                    padding: 2px 6px;
+                    border-radius: 6px;
+                    font-size: 10px;
+                    font-weight: 800;
+                }
+                .pos-item-stock-info .stock-label {
+                    color: rgba(44, 26, 18, 0.55);
+                }
+                .pos-item-stock-info .stock-val {
+                    font-weight: 900;
+                }
+
+                .pos-item-price-action {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    gap: 4px;
+                }
+                .pos-item-price-tag .price-num {
+                    font-weight: 900;
+                    color: #2C1A12;
+                    font-size: 14.5px;
+                    letter-spacing: -0.2px;
+                }
+                .pos-quick-add-btn {
+                    width: 30px;
+                    height: 30px;
+                    border-radius: 8px;
+                    border: none;
+                    background: linear-gradient(135deg, #C29B62 0%, #A8573C 100%);
+                    color: #ffffff;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-weight: 900;
+                    font-size: 16px;
+                    cursor: pointer;
+                    box-shadow: 0 2px 6px rgba(168, 87, 60, 0.3);
+                    transition: all 0.15s ease;
+                    flex-shrink: 0;
+                    line-height: 1;
+                }
+                .pos-quick-add-btn:hover {
+                    transform: scale(1.08);
+                    box-shadow: 0 4px 10px rgba(168, 87, 60, 0.45);
+                }
+                .pos-quick-add-btn:active {
+                    transform: scale(0.92);
+                }
                 
                 .cart-list {
                     flex: 1 1 0%;
@@ -1838,66 +2124,79 @@ export default function PosPage() {
                                 logic.inventoryItems.map((item: any) => {
                                     const cardClass = `pos-item-card ${item.isCriticalLow ? 'critical' : (item.isNearLow ? 'near-low' : '')}`;
                                     return (
-                                        <div key={item.id} className={cardClass} onClick={() => logic.handleItemClick(item)}>
-                                            {item.isCriticalLow ? (
-                                                <span style={{
-                                                    position: 'absolute',
-                                                    top: '8px',
-                                                    right: '8px',
-                                                    fontSize: '9px',
-                                                    fontWeight: 900,
-                                                    color: '#b91c1c',
-                                                    background: '#fee2e2',
-                                                    padding: '2px 6px',
-                                                    borderRadius: '6px',
-                                                    border: '1px solid rgba(239, 68, 68, 0.4)'
-                                                }}>
-                                                    ⚠️ {isEn ? 'Reorder Level' : 'حد الطلب'} ({item.reorder_level})
-                                                </span>
-                                            ) : item.isNearLow ? (
-                                                <span style={{
-                                                    position: 'absolute',
-                                                    top: '8px',
-                                                    right: '8px',
-                                                    fontSize: '9px',
-                                                    fontWeight: 800,
-                                                    color: '#b45309',
-                                                    background: '#fef3c7',
-                                                    padding: '2px 6px',
-                                                    borderRadius: '6px',
-                                                    border: '1px solid rgba(245, 158, 11, 0.4)'
-                                                }}>
-                                                    ⚡ {isEn ? 'Low Stock' : 'قارب على النفاد'}
-                                                </span>
-                                            ) : null}
-                                            <div className="pos-item-name" style={{ marginTop: (item.isCriticalLow || item.isNearLow) ? '16px' : '0' }}>{item.name}</div>
-                                            <div className="pos-item-price">{formatCurrency(item.suggested_price || item.price || 0)}</div>
-                                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '4px', width: '100%' }}>
-                                                <div className="pos-item-qty" style={{
-                                                    background: item.isCriticalLow ? '#fecaca' : (item.isNearLow ? '#fef08a' : '#f1f5f9'),
-                                                    color: item.isCriticalLow ? '#991b1b' : (item.isNearLow ? '#854d0e' : '#64748b'),
-                                                    fontWeight: 800,
-                                                    flex: 1
-                                                }}>
-                                                    {isEn ? 'Available:' : 'المتاح:'} {item.available_qty} {item.unit}
-                                                </div>
-                                                {item.is_returnable_bottle && (
-                                                    <span style={{
-                                                        background: 'rgba(40, 145, 200, 0.15)',
-                                                        border: '1px solid rgba(40, 145, 200, 0.35)',
-                                                        color: '#1C73AB',
-                                                        fontSize: '10px',
-                                                        fontWeight: 800,
-                                                        padding: '4px 6px',
-                                                        borderRadius: '8px',
-                                                        whiteSpace: 'nowrap',
-                                                        display: 'flex',
-                                                        alignItems: 'center',
-                                                        gap: '2px'
-                                                    }}>
-                                                        🔄 عهدة
+                                        <div 
+                                            key={item.id} 
+                                            className={cardClass} 
+                                            onClick={() => logic.handleItemClick(item)}
+                                            title={item.name}
+                                        >
+                                            {/* 1. الصف العلوي لحالة وتوفر الصنف */}
+                                            <div className="pos-item-top-row">
+                                                {item.isCriticalLow ? (
+                                                    <span className="pos-badge-status critical">
+                                                        ⚠️ {isEn ? 'Reorder' : 'حد الطلب'} ({item.reorder_level})
+                                                    </span>
+                                                ) : item.isNearLow ? (
+                                                    <span className="pos-badge-status near-low">
+                                                        ⚡ {isEn ? 'Low Stock' : 'وشك النفاذ'}
+                                                    </span>
+                                                ) : item.is_returnable_bottle ? (
+                                                    <span className="pos-badge-status returnable">
+                                                        🔄 {isEn ? 'Returnable' : 'عهدة فوارغ'}
+                                                    </span>
+                                                ) : (
+                                                    <span className="pos-badge-status normal">
+                                                        🏷️ {item.unit || (isEn ? 'Piece' : 'حبة')}
                                                     </span>
                                                 )}
+
+                                                <span className="pos-card-unit-pill">
+                                                    {item.available_qty > 0 ? (
+                                                        <span className="in-stock-dot" title={isEn ? 'In Stock' : 'متوفر'}></span>
+                                                    ) : (
+                                                        <span className="out-stock-dot" title={isEn ? 'Out of Stock' : 'نفذ'}></span>
+                                                    )}
+                                                    <span>{item.unit || 'حبة'}</span>
+                                                </span>
+                                            </div>
+
+                                            {/* 2. هوية الصنف: الأيقونة الذكية + اسم الصنف بنص محدد السطور */}
+                                            <div className="pos-item-center">
+                                                <div className="pos-item-avatar">
+                                                    {getItemIcon(item.name, item.unit)}
+                                                </div>
+                                                <div className="pos-item-name" title={item.name}>
+                                                    {item.name}
+                                                </div>
+                                            </div>
+
+                                            {/* 3. أسفل البطاقة: المخزون المتوفر + السعر وزر الإضافة السريع */}
+                                            <div className="pos-item-footer">
+                                                <div className="pos-item-stock-info">
+                                                    <span className="stock-label">{isEn ? 'Stock:' : 'المتاح:'}</span>
+                                                    <span className="stock-val" style={{
+                                                        color: item.isCriticalLow ? '#b91c1c' : (item.isNearLow ? '#b45309' : '#4E734F')
+                                                    }}>
+                                                        {item.available_qty} {item.unit || ''}
+                                                    </span>
+                                                </div>
+
+                                                <div className="pos-item-price-action">
+                                                    <div className="pos-item-price-tag">
+                                                        <span className="price-num">{formatCurrency(item.suggested_price || item.price || 0)}</span>
+                                                    </div>
+                                                    <button 
+                                                        type="button" 
+                                                        className="pos-quick-add-btn" 
+                                                        title={isEn ? 'Add to invoice' : 'إضافة للفاتورة'}
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            logic.handleItemClick(item);
+                                                        }}
+                                                    >
+                                                        +
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
                                     );
