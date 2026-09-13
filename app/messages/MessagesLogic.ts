@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { supabase } from '@/lib/supabase';
 import { usePresence } from '@/hooks/usePresence';
+import { showGlobalToast } from '@/lib/toast-context';
 
 export function useMessagesLogic() {
     const [users, setUsers] = useState<any[]>([]);

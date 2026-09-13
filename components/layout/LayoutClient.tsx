@@ -302,28 +302,46 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
 
   // فلترة القوائم حسب الصلاحيات
   const canView = (menuId: string) => {
-    if (role === 'super_admin') return true;
+    if (role === 'super_admin' || role === 'admin') return true;
     
     switch(menuId) {
       case 'dashboard': return can('dashboard', 'view');
-      case 'pos': return can('invoices', 'create');
-      case 'pos_dashboard': return can('reports', 'view') || can('invoices', 'view');
+      case 'global_summary': return can('dashboard', 'view') || can('reports', 'view');
+      case 'pos': return can('pos', 'view') || can('invoices', 'create') || can('invoices', 'view');
+      case 'pos_dashboard': return can('pos', 'view') || can('reports', 'view') || can('invoices', 'view');
+      case 'pos_settlements': return can('pos', 'view') || can('receipts', 'view');
+      case 'fleet_operations': return can('fleet_operations', 'view') || can('fleet', 'view');
+      case 'service_operations': return can('fleet_operations', 'view') || can('invoices', 'view');
       case 'invoices': return can('invoices', 'view');
       case 'inventory': return can('inventory', 'view');
-      case 'purchase_orders': return can('purchase_orders', 'view');
-      case 'receipt_vouchers': return can('receipt_vouchers', 'view');
-      case 'payment_vouchers': return can('payment_vouchers', 'view');
-      case 'fleet': return can('fleet', 'view');
-      case 'team': return can('team', 'view');
-      case 'reports': return can('reports', 'view');
-      case 'settings': return can('settings', 'view');
-      case 'manual_journals': return can('manual_journals', 'view');
-      case 'ledgers': return can('ledgers', 'view');
-      case 'trial_balance': return can('trial_balance', 'view');
-      case 'financial_statements': return can('financial_statements', 'view');
+      case 'purchase_orders': return can('inventory', 'view') || can('expenses', 'view');
+      case 'warehouses': return can('inventory', 'view');
+      case 'inventory_transactions': return can('inventory', 'view');
+      case 'receipts': case 'receipt_vouchers': return can('receipts', 'view');
+      case 'payments': case 'payment_vouchers': return can('payments', 'view');
       case 'expenses': return can('expenses', 'view');
+      case 'journal': return can('journal', 'view') || can('accounts', 'view');
+      case 'manual_journals': return can('journal', 'view') || can('accounts', 'view') || can('manual_journals', 'view');
+      case 'accounts': return can('accounts', 'view');
+      case 'ledger': case 'ledgers': return can('accounts', 'view') || can('journal', 'view');
+      case 'trialbalance': case 'trial_balance': return can('accounts', 'view') || can('reports', 'view');
+      case 'financial_center': return can('accounts', 'view') || can('reports', 'view');
+      case 'financial_statements': return can('accounts', 'view') || can('reports', 'view');
+      case 'cashflows': return can('accounts', 'view') || can('reports', 'view');
       case 'partners': return can('partners', 'view');
-      default: return false; 
+      case 'partner_balances': return can('partners', 'view') || can('reports', 'view');
+      case 'delegate_debts': return can('partners', 'view') || can('fleet_operations', 'view');
+      case 'delegate_settlements': return can('partners', 'view') || can('fleet_operations', 'view');
+      case 'statement': return can('partners', 'view') || can('accounts', 'view');
+      case 'reports': return can('reports', 'view');
+      case 'import': return can('settings', 'view');
+      case 'promotions': return can('invoices', 'view') || can('settings', 'view');
+      case 'audit': return can('settings', 'view') || can('reports', 'view');
+      case 'fleet': return can('fleet_operations', 'view') || can('fleet', 'view');
+      case 'payroll': return can('expenses', 'view') || can('settings', 'view');
+      case 'settings': return can('settings', 'view');
+      case 'team': return can('settings', 'view') || can('team', 'view');
+      default: return true; 
     }
   };
 

@@ -12,9 +12,17 @@ interface ToastContextType {
 const ToastContext = createContext<ToastContextType | undefined>(undefined);
 
 // دالة جلوبال عشان نقدر نستدعي الألرت من أي مكان بدون الحاجة للـ Hook
-export let showGlobalToast: (message: string, type?: ToastType) => void = () => {
-  console.warn("ToastProvider is not mounted yet");
+export let showGlobalToast: (message: string, type?: ToastType) => void = (message, type) => {
+  if (typeof window !== 'undefined' && (window as any)._activeShowToast) {
+    (window as any)._activeShowToast(message, type);
+  } else {
+    console.warn("ToastProvider is not mounted yet: " + message);
+  }
 };
+
+if (typeof globalThis !== 'undefined') {
+  (globalThis as any).showGlobalToast = (...args: any[]) => showGlobalToast(...args);
+}
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   // دمج حالة الظهور والرسالة والنوع في State واحد
@@ -36,6 +44,10 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
 
   React.useEffect(() => {
     showGlobalToast = showToast;
+    if (typeof window !== 'undefined') {
+      (window as any)._activeShowToast = showToast;
+      (window as any).showGlobalToast = showToast;
+    }
   }, [showToast]);
 
   return (

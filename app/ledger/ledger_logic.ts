@@ -16,21 +16,33 @@ export function useLedgerLogic() {
     }
   });
 
-  // 📥 2. جلب الحركات (Joining lines with headers) [cite: 48]
+  // 📥 2. جلب الحركات عبر العرض المحاسبي الموحد الآمن (journal_master_view)
   const { data: entries = [], isLoading } = useQuery({
     queryKey: ['ledger_entries', selectedAccountId],
     enabled: !!selectedAccountId,
     queryFn: async () => {
       const buildQuery = () => supabase
-        .from('journal_lines')
-        .select(`
-          id, debit, credit, item_name, notes,
-          journal_headers (entry_date, description),
-          partners!journal_lines_partner_id_fkey (name)
-        `)
+        .from('journal_master_view')
+        .select('*')
         .eq('account_id', selectedAccountId)
-        .order('id', { ascending: true }); // better for pagination stability
-      return await fetchPaginatedData(buildQuery, 'id');
+        .order('entry_date', { ascending: true })
+        .order('line_id', { ascending: true });
+      
+      const raw = await fetchPaginatedData(buildQuery, 'line_id');
+      return (raw || []).map((r: any) => ({
+        id: r.line_id,
+        debit: Number(r.debit || 0),
+        credit: Number(r.credit || 0),
+        item_name: r.item_name,
+        notes: r.line_notes,
+        journal_headers: {
+          entry_date: r.entry_date,
+          description: r.header_description
+        },
+        partners: {
+          name: r.partner_name
+        }
+      }));
     }
   });
 

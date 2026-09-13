@@ -2,6 +2,7 @@
 import { useState, useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
 import { useQuery } from '@tanstack/react-query';
+import { ACC } from '@/lib/account-ids';
 
 export function useKpisLogic() {
     const [dateFrom, setDateFrom] = useState('');
@@ -40,10 +41,18 @@ export function useKpisLogic() {
     const clientsQuery = useQuery({
         queryKey: ['kpis_clients'],
         queryFn: async () => {
-            // Outstanding debts = Debit - Credit on AR Account (4f828d0d-a1f4-4762-83e3-c17dafae802d)
+            // جلب الحسابات التابعة للعملاء ديناميكياً
+            const { data: arAccounts } = await supabase.from('accounts')
+                .select('id')
+                .or(`id.eq.${ACC.CUSTOMERS_AR},code.like.123%`);
+            
+            const arIds = (arAccounts && arAccounts.length > 0)
+                ? arAccounts.map(a => a.id)
+                : [ACC.CUSTOMERS_AR];
+
             const { data, error } = await supabase.from('journal_lines')
                 .select('debit, credit')
-                .eq('account_id', '4f828d0d-a1f4-4762-83e3-c17dafae802d');
+                .in('account_id', arIds);
             if (error) throw error;
             return data || [];
         }

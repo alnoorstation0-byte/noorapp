@@ -7,6 +7,7 @@ import { useRouter } from 'next/navigation';
 import { formatDate } from '@/lib/helpers';
 import { createPortal } from 'react-dom';
 import { useLanguage } from '@/lib/LanguageContext';
+import { showGlobalToast } from '@/lib/toast-context';
 
 export default function AuditLogs() {
     const router = useRouter();

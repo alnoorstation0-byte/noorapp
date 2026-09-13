@@ -11,6 +11,7 @@ import { formatCurrency } from '@/lib/helpers';
 import MasterPage from '@/components/MasterPage';
 import RawasiSmartTable from '@/components/rawasismarttable';
 import LoadingScreen from '@/components/LoadingScreen';
+import { showGlobalToast } from '@/lib/toast-context';
 
 export default function ManualJournalsPage() {
     const logic = useManualJournalsLogic();

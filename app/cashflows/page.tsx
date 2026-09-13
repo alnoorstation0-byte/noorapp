@@ -6,6 +6,7 @@ import { THEME } from '@/lib/theme';
 import { useCashFlowsLogic } from './cash_flows_logic';
 import * as XLSX from 'xlsx';
 import LoadingScreen from '@/components/LoadingScreen';
+import { showGlobalToast } from '@/lib/toast-context';
 
 // =========================================================================
 // 🧩 مكون ذكي للقائمة المنسدلة متعددة الاختيارات

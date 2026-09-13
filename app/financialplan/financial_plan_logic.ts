@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect, useRef, useMemo } from 'react';
 import { supabase } from '@/lib/supabase';
+import { showGlobalToast } from '@/lib/toast-context';
 
 // الأصناف الافتراضية لو الشهر ملوش خطة محفوظة
 const DEFAULT_ITEMS = [
