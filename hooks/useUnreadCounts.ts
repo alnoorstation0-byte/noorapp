@@ -12,27 +12,22 @@ export function useUnreadCounts() {
 
             const userId = session.user.id;
 
-            // استعلام مزدوج لضمان الدقة اللحظية 100%
-            const [vwRes, notifRes] = await Promise.all([
-                supabase
-                    .from('vw_unread_counts')
-                    .select('*')
-                    .eq('user_id', userId)
-                    .maybeSingle(),
+            const [notifRes, msgRes] = await Promise.all([
                 supabase
                     .from('notifications')
                     .select('id', { count: 'exact', head: true })
                     .eq('user_id', userId)
+                    .eq('is_read', false),
+                supabase
+                    .from('messages')
+                    .select('id', { count: 'exact', head: true })
+                    .eq('receiver_id', userId)
                     .eq('is_read', false)
             ]);
             
-            const unreadNotifs = typeof notifRes.count === 'number' 
-                ? notifRes.count 
-                : Number(vwRes.data?.unread_notifications || 0);
-
             setCounts({
-                unread_messages: Number(vwRes.data?.unread_messages || 0),
-                unread_notifications: unreadNotifs
+                unread_messages: Number(msgRes.count || 0),
+                unread_notifications: Number(notifRes.count || 0)
             });
         } catch {
             // تجاهل أي خطأ اتصال مؤقت

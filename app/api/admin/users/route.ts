@@ -5,8 +5,8 @@ export const dynamic = 'force-dynamic';
 
 // تهيئة عميل Supabase بصلاحيات الإدارة (Service Role)
 const getSupabaseAdmin = () => createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://placeholder.supabase.co',
-    process.env.SUPABASE_SERVICE_ROLE_KEY || 'placeholder',
+    process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://tvfxxonuxkskrthsnrhu.supabase.co',
+    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '',
     {
         auth: {
             autoRefreshToken: false,
@@ -62,12 +62,22 @@ export async function GET() {
         }
 
         // 4️⃣ جلب وعرض القائمة الكاملة مع بيانات الشركاء
-        const { data: allProfiles, error: fetchError } = await admin
+        let allProfiles: any[] = [];
+        const { data: profWithPartners, error: fetchError } = await admin
             .from('profiles')
             .select('*, partners(name)')
             .order('created_at', { ascending: false });
 
-        if (fetchError) return NextResponse.json({ error: fetchError.message }, { status: 400 });
+        if (fetchError) {
+            // خط دفاع احتياطي في حال عدم وجود علاقة مباشرة مع الشركاء
+            const { data: simpleProfiles } = await admin
+                .from('profiles')
+                .select('*')
+                .order('created_at', { ascending: false });
+            allProfiles = simpleProfiles || [];
+        } else {
+            allProfiles = profWithPartners || [];
+        }
 
         return NextResponse.json({ 
             success: true, 

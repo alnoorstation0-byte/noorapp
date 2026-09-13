@@ -15,7 +15,11 @@ export function usePresence() {
             const userId = session.user.id;
 
             // Fetch current user details to broadcast
-            const { data: profile } = await supabase.from('profiles').select('full_name, role').eq('id', userId).single();
+            let profile: any = null;
+            try {
+                const { data } = await supabase.from('profiles').select('full_name, role').eq('id', userId).maybeSingle();
+                profile = data;
+            } catch {}
 
             // Ensure no existing channel with the same topic exists due to React Strict Mode
             const existingChannel = supabase.getChannels().find(c => c.topic.includes('online-users'));

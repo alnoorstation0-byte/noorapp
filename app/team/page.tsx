@@ -66,7 +66,7 @@ export default function TeamPage() {
             // 2. المحاولة الاحتياطية: جلب البيانات مباشرة مع اسم الشريك
             const { data, error } = await supabase
                 .from('profiles')
-                .select('*, partners(name)')
+                .select('*, partners:partners!linked_partner_id(name)')
                 .order('created_at', { ascending: false });
             
             if (error) throw error;
