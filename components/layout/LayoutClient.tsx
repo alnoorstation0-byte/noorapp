@@ -109,7 +109,10 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const isLow = localStorage.getItem('lowGraphicsMode') === 'true';
+      const saved = localStorage.getItem('lowGraphicsMode');
+      // Default to true for maximum speed across all devices unless explicitly disabled
+      const isLow = saved !== null ? saved === 'true' : true;
+      
       setLowGraphics(isLow);
       if (isLow) {
         document.body.classList.add('low-graphics-mode');
