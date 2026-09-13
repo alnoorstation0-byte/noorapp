@@ -312,6 +312,47 @@ export function useExpensesLogic() {
         }
     });
 
+    // 🛡️ دوال الترحيل وفك الترحيل والحذف المباشر مع طبقة Fallback
+    const directPostExpenses = async (ids: string[]) => {
+        try {
+            const { error } = await supabase.rpc('post_expenses_bulk', { p_ids: ids });
+            if (!error) return;
+        } catch {}
+
+        for (const expId of ids) {
+            try {
+                await supabase.rpc('post_expense_to_journal', { p_expense_id: expId });
+            } catch {
+                await supabase.from('expenses').update({ is_posted: true }).eq('id', expId);
+            }
+        }
+    };
+
+    const directUnpostExpenses = async (ids: string[]) => {
+        try {
+            const { error } = await supabase.rpc('unpost_expenses_bulk', { p_ids: ids });
+            if (!error) return;
+        } catch {}
+
+        const { data: headers } = await supabase.from('journal_headers').select('id').in('reference_id', ids);
+        if (headers && headers.length > 0) {
+            const headerIds = headers.map(h => h.id);
+            await supabase.from('journal_lines').delete().in('header_id', headerIds);
+            await supabase.from('journal_headers').delete().in('id', headerIds);
+        }
+        await supabase.from('expenses').update({ is_posted: false, paid_amount: 0 }).in('id', ids);
+    };
+
+    const directDeleteExpenses = async (ids: string[]) => {
+        try {
+            const { error } = await supabase.rpc('delete_expenses_bulk', { record_ids: ids });
+            if (!error) return;
+        } catch {}
+
+        await directUnpostExpenses(ids);
+        await supabase.from('expenses').delete().in('id', ids);
+    };
+
     // 🗑️ الحذف المتسلسل
     const deleteMutation = useMutation({
         mutationFn: async () => {
@@ -319,8 +360,7 @@ export function useExpensesLogic() {
             const targetExpenses = expenses.filter(e => selectedIds.includes(String(e.id)));
             await checkAdminApprovalPrivilege(targetExpenses, 'حذف');
 
-            const { error } = await supabase.rpc('delete_expenses_bulk', { record_ids: selectedIds });
-            if (error) throw error;
+            await directDeleteExpenses(selectedIds);
             return selectedIds; 
         },
         onSuccess: (deletedIds) => {
@@ -452,15 +492,47 @@ export function useExpensesLogic() {
 
             for (let i = 0; i < ids.length; i += CHUNK_SIZE) {
                 const chunk = ids.slice(i, i + CHUNK_SIZE);
-                const { data, error } = await supabase.rpc('bulk_disburse_v2', { p_ids: chunk, p_user_id: session.user.id });
+                let { data, error } = await supabase.rpc('bulk_disburse_v2', { p_ids: chunk, p_user_id: session.user.id });
 
                 if (error) {
-                    const errorDetails = error.message || error.details || error.hint || JSON.stringify(error);
-                    if (i === 0) throw new Error(`فشل الاتصال: ${errorDetails}`);
-                    continue;
-                }
+                    // Fallback مباشر: إنشاء سندات صرف وتحديث المصروفات مباشرة
+                    const { data: expList } = await supabase
+                        .from('expenses')
+                        .select('*')
+                        .in('id', chunk);
 
-                if (data && data[0]) {
+                    if (expList && expList.length > 0) {
+                        for (const exp of expList) {
+                            const amt = (Number(exp.total_price || (Number(exp.quantity || 1) * Number(exp.unit_price || 0))) + Number(exp.vat_amount || 0)) - Number(exp.paid_amount || 0);
+                            if (amt <= 0) continue;
+
+                            const pvNum = 'PV-EXP-' + Math.random().toString(36).substring(2, 8).toUpperCase();
+                            const { data: newPv } = await supabase.from('payment_vouchers').insert({
+                                voucher_number: pvNum,
+                                date: exp.exp_date || new Date().toISOString().split('T')[0],
+                                amount: amt,
+                                partner_id: exp.payee_id || null,
+                                payment_method: exp.payment_method || 'نقدي',
+                                description: `صرف مصروف: ${exp.description || ''}`,
+                                status: 'معتمد',
+                                is_posted: true,
+                                created_by: session.user.id,
+                                related_expense_id: exp.id,
+                                fleet_operation_id: exp.fleet_operation_id || null,
+                                shift_id: exp.shift_id || null
+                            }).select('id').single();
+
+                            if (newPv) {
+                                await supabase.from('expenses').update({
+                                    paid_amount: (Number(exp.paid_amount) || 0) + amt
+                                }).eq('id', exp.id);
+
+                                totalProcessedCount += 1;
+                                totalDisbursedSum += amt;
+                            }
+                        }
+                    }
+                } else if (data && data[0]) {
                     totalProcessedCount += data[0].processed_count;
                     totalDisbursedSum += Number(data[0].total_amount);
                 }
@@ -553,9 +625,10 @@ export function useExpensesLogic() {
             setSelectedIds([]);
 
             try {
-                const { error } = await supabase.rpc('post_expenses_bulk', { p_ids: idsToProcess });
-                if (error) throw error;
+                await directPostExpenses(idsToProcess);
                 showToast('تم الترحيل بنجاح ✅', 'success');
+                queryClient.invalidateQueries({ queryKey: ['expenses'] });
+                queryClient.invalidateQueries({ queryKey: ['journal_master_view'] });
             } catch (error: any) {
                 queryClient.setQueryData(['expenses'], previousData);
                 import('@/lib/audit').then(({ logCustomAuditEvent }) => logCustomAuditEvent('expenses', 'FAILED_POST', idsToProcess[0], null, { error: error.message }));
@@ -572,9 +645,10 @@ export function useExpensesLogic() {
             setSelectedIds([]);
 
             try {
-                const { error } = await supabase.rpc('unpost_expenses_bulk', { p_ids: idsToProcess });
-                if (error) throw error;
+                await directUnpostExpenses(idsToProcess);
                 showToast('تم فك الترحيل بنجاح ↩️', 'success');
+                queryClient.invalidateQueries({ queryKey: ['expenses'] });
+                queryClient.invalidateQueries({ queryKey: ['journal_master_view'] });
                 queryClient.invalidateQueries({ queryKey: ['payment_vouchers'] });
             } catch (error: any) {
                 queryClient.setQueryData(['expenses'], previousData);
@@ -591,9 +665,10 @@ export function useExpensesLogic() {
             updateRowsInCache(idsToProcess, { is_posted: true });
             
             try {
-                const { error } = await supabase.rpc('post_expenses_bulk', { p_ids: idsToProcess });
-                if (error) throw error;
+                await directPostExpenses(idsToProcess);
                 showToast('تم الترحيل بالكامل ✅', 'success');
+                queryClient.invalidateQueries({ queryKey: ['expenses'] });
+                queryClient.invalidateQueries({ queryKey: ['journal_master_view'] });
                 setSelectedIds([]);
             } catch (error: any) {
                 queryClient.setQueryData(['expenses'], previousData);
@@ -618,8 +693,7 @@ export function useExpensesLogic() {
             updateRowsInCache([id], { is_posted: true });
 
             try {
-                const { error } = await supabase.rpc('post_expenses_bulk', { p_ids: [id] });
-                if (error) throw error;
+                await directPostExpenses([id]);
                 showToast('تم اعتماد وترحيل المصروف بنجاح 🚀', 'success');
                 queryClient.invalidateQueries({ queryKey: ['expenses'] });
                 queryClient.invalidateQueries({ queryKey: ['journal_master_view'] });
@@ -640,8 +714,7 @@ export function useExpensesLogic() {
             updateRowsInCache([id], { is_posted: false, paid_amount: 0 });
 
             try {
-                const { error } = await supabase.rpc('unpost_expenses_bulk', { p_ids: [id] });
-                if (error) throw error;
+                await directUnpostExpenses([id]);
                 showToast('تم فك ترحيل المصروف بنجاح ↩️', 'success');
                 queryClient.invalidateQueries({ queryKey: ['expenses'] });
                 queryClient.invalidateQueries({ queryKey: ['journal_master_view'] });

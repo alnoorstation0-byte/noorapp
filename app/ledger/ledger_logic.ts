@@ -16,31 +16,63 @@ export function useLedgerLogic() {
     }
   });
 
-  // 📥 2. جلب الحركات عبر العرض المحاسبي الموحد الآمن (journal_master_view)
+  // 📥 2. جلب الحركات عبر العرض المحاسبي الموحد أو الجداول الأساسية كـ Fallback
   const { data: entries = [], isLoading } = useQuery({
     queryKey: ['ledger_entries', selectedAccountId],
     enabled: !!selectedAccountId,
     queryFn: async () => {
-      const buildQuery = () => supabase
-        .from('journal_master_view')
-        .select('*')
+      try {
+        const buildQuery = () => supabase
+          .from('journal_master_view')
+          .select('*')
+          .eq('account_id', selectedAccountId)
+          .order('entry_date', { ascending: true })
+          .order('line_id', { ascending: true });
+        
+        const raw = await fetchPaginatedData(buildQuery, 'line_id');
+        if (raw && raw.length > 0) {
+          return raw.map((r: any) => ({
+            id: r.line_id,
+            debit: Number(r.debit || 0),
+            credit: Number(r.credit || 0),
+            item_name: r.item_name,
+            notes: r.line_notes,
+            journal_headers: {
+              entry_date: r.entry_date,
+              description: r.header_description
+            },
+            partners: {
+              name: r.partner_name
+            }
+          }));
+        }
+      } catch (viewErr) {
+        console.warn("journal_master_view query failed, using direct table fallback:", viewErr);
+      }
+
+      // 🛡️ Fallback المباشر: استعلام journal_lines مباشرة
+      const { data: rawLines } = await supabase
+        .from('journal_lines')
+        .select(`
+          id, debit, credit, item_name, notes,
+          journal_headers!inner (entry_date, description),
+          partners (name)
+        `)
         .eq('account_id', selectedAccountId)
-        .order('entry_date', { ascending: true })
-        .order('line_id', { ascending: true });
-      
-      const raw = await fetchPaginatedData(buildQuery, 'line_id');
-      return (raw || []).map((r: any) => ({
-        id: r.line_id,
+        .order('created_at', { ascending: true });
+
+      return (rawLines || []).map((r: any) => ({
+        id: r.id,
         debit: Number(r.debit || 0),
         credit: Number(r.credit || 0),
         item_name: r.item_name,
-        notes: r.line_notes,
+        notes: r.notes,
         journal_headers: {
-          entry_date: r.entry_date,
-          description: r.header_description
+          entry_date: r.journal_headers?.entry_date,
+          description: r.journal_headers?.description
         },
         partners: {
-          name: r.partner_name
+          name: r.partners?.name
         }
       }));
     }

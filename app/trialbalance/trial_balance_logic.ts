@@ -15,13 +15,75 @@ export function useTrialBalanceLogic() {
     const fetchTrialBalance = async () => {
         setIsLoading(true);
         try {
-            const { data, error } = await supabase.rpc('get_trial_balance', {
-                p_start_date: startDate,
-                p_end_date: endDate
-            });
+            let trialData: any[] | null = null;
+            try {
+                const { data, error } = await supabase.rpc('get_trial_balance', {
+                    p_start_date: startDate,
+                    p_end_date: endDate
+                });
+                if (!error && data) {
+                    trialData = data;
+                }
+            } catch (rpcErr) {
+                console.warn("Trial balance RPC not available, using direct calculation:", rpcErr);
+            }
 
-            if (error) throw error;
-            setRecords(data || []);
+            // 🛡️ Fallback المباشر: حساب ميزان المراجعة من الدفاتر مباشرة
+            if (!trialData) {
+                const [accountsRes, linesRes] = await Promise.all([
+                    supabase.from('accounts').select('id, code, name, is_transactional').order('code'),
+                    supabase.from('journal_lines').select(`
+                        account_id, debit, credit,
+                        journal_headers!inner (entry_date, status)
+                    `).lte('journal_headers.entry_date', endDate)
+                ]);
+
+                const accounts = accountsRes.data || [];
+                const lines = linesRes.data || [];
+
+                const accMap = new Map<string, any>();
+                accounts.forEach(a => {
+                    accMap.set(a.id, {
+                        account_id: a.id,
+                        account_code: a.code,
+                        account_name: a.name,
+                        opening_debit: 0,
+                        opening_credit: 0,
+                        period_debit: 0,
+                        period_credit: 0,
+                        ending_debit: 0,
+                        ending_credit: 0,
+                        has_activity: false
+                    });
+                });
+
+                lines.forEach((l: any) => {
+                    const row = accMap.get(l.account_id);
+                    if (!row) return;
+                    const date = l.journal_headers?.entry_date;
+                    const d = Number(l.debit || 0);
+                    const c = Number(l.credit || 0);
+                    if (d !== 0 || c !== 0) row.has_activity = true;
+
+                    if (date < startDate) {
+                        row.opening_debit += d;
+                        row.opening_credit += c;
+                    } else if (date >= startDate && date <= endDate) {
+                        row.period_debit += d;
+                        row.period_credit += c;
+                    }
+                });
+
+                trialData = Array.from(accMap.values())
+                    .map(r => ({
+                        ...r,
+                        ending_debit: r.opening_debit + r.period_debit,
+                        ending_credit: r.opening_credit + r.period_credit
+                    }))
+                    .filter(r => r.has_activity || accounts.find(a => a.id === r.account_id)?.is_transactional);
+            }
+
+            setRecords(trialData || []);
             
         } catch (err: any) {
             console.error("Error fetching Trial Balance:", err.message);

@@ -71,15 +71,50 @@ export function useStatementLogic() {
         queryKey: ['partner_statement_raw', effectivePartnerId],
         queryFn: async () => {
             if (!effectivePartnerId) return [];
-            const buildQuery = () => supabase.from('partner_statement_ledger') 
-                .select('*').eq('partner_id', effectivePartnerId)
-                .order('transaction_date', { ascending: true })
-                .order('debit', { ascending: true })
-                .order('credit', { ascending: true })
-                .order('main_description', { ascending: true });
-            
-            // استخدمنا دالة توليد ID لعدم وجود Primary Key في الـ View
-            return await fetchPaginatedData(buildQuery, (row, index) => `${row.transaction_date}-${row.debit}-${row.credit}-${row.main_description}-${index}`);
+            try {
+                const buildQuery = () => supabase.from('partner_statement_ledger') 
+                    .select('*').eq('partner_id', effectivePartnerId)
+                    .order('transaction_date', { ascending: true })
+                    .order('debit', { ascending: true })
+                    .order('credit', { ascending: true })
+                    .order('main_description', { ascending: true });
+                
+                const res = await fetchPaginatedData(buildQuery, (row, index) => `${row.transaction_date}-${row.debit}-${row.credit}-${row.main_description}-${index}`);
+                if (res && res.length >= 0) return res;
+            } catch (viewErr) {
+                console.warn("partner_statement_ledger query failed, using direct fallback:", viewErr);
+            }
+
+            // 🛡️ Fallback المباشر: استعلام journal_lines مباشرة للشريك
+            try {
+                const { data: lines } = await supabase
+                    .from('journal_lines')
+                    .select(`
+                        id, debit, credit, notes, item_name, quantity, partner_id,
+                        journal_headers!inner (entry_date, description, reference_id, v_type),
+                        partners (name, partner_type)
+                    `)
+                    .eq('partner_id', effectivePartnerId)
+                    .order('created_at', { ascending: true });
+
+                return (lines || []).map((l: any, index: number) => ({
+                    line_id: l.id || `line-${index}`,
+                    partner_id: l.partner_id,
+                    partner_name: l.partners?.name,
+                    partner_type: l.partners?.partner_type,
+                    transaction_date: l.journal_headers?.entry_date,
+                    debit: Number(l.debit || 0),
+                    credit: Number(l.credit || 0),
+                    main_description: l.journal_headers?.description,
+                    line_details: l.notes || l.item_name,
+                    v_type: l.journal_headers?.v_type,
+                    reference_id: l.journal_headers?.reference_id,
+                    attendance_value: l.quantity
+                }));
+            } catch (fallbackErr) {
+                console.error("Statement fallback error:", fallbackErr);
+                return [];
+            }
         },
         enabled: !!partnerId, staleTime: 1000 * 60 * 5, 
     });

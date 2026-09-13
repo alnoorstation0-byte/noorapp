@@ -251,8 +251,15 @@ export function useServiceOperationsLogic() {
             // الحصول على معرف المستخدم الحالي
             const { data: { user } } = await supabase.auth.getUser();
 
+            const commAmount = payload.commission_percentage > 0
+                ? Math.round(((payload.total_amount * payload.commission_percentage) / 100) * 100) / 100
+                : 0;
+            const netProfit = payload.total_amount - commAmount;
+
+            let operationId: string | null = null;
+
             // استدعاء دالة الـ RPC
-            const { data: operationId, error } = await supabase.rpc('create_service_operation_with_journal', {
+            const { data: rpcOpId, error: rpcErr } = await supabase.rpc('create_service_operation_with_journal', {
                 p_operation_date: payload.operation_date,
                 p_operation_type: payload.operation_type,
                 p_description: payload.description,
@@ -266,7 +273,114 @@ export function useServiceOperationsLogic() {
                 p_created_by: user?.id || null
             });
 
-            if (error) throw new Error(error.message);
+            if (!rpcErr && rpcOpId) {
+                operationId = rpcOpId;
+            } else {
+                // Fallback: Direct DB insertion for service operation and journal entries
+                const { data: newOp, error: opErr } = await supabase
+                    .from('service_operations')
+                    .insert({
+                        operation_date: payload.operation_date,
+                        operation_type: payload.operation_type,
+                        description: payload.description,
+                        client_id: payload.client_id || null,
+                        employee_id: payload.employee_id || null,
+                        total_amount: payload.total_amount,
+                        commission_percentage: payload.commission_percentage || 0,
+                        commission_amount: commAmount,
+                        net_profit: netProfit,
+                        debit_account_id: debitAccId,
+                        revenue_account_id: revAccId,
+                        commission_expense_account_id: commExpenseAccId,
+                        created_by: user?.id || null,
+                        status: 'posted'
+                    })
+                    .select('id')
+                    .single();
+
+                if (opErr) throw new Error(opErr.message);
+                operationId = newOp.id;
+
+                // إنشاء قيد اليومية
+                const { data: jh, error: jhErr } = await supabase
+                    .from('journal_headers')
+                    .insert({
+                        entry_date: payload.operation_date,
+                        description: `عملية خدمية: ${payload.description || payload.operation_type}`,
+                        reference_id: operationId,
+                        v_type: 'service_operation',
+                        status: 'posted',
+                        created_by: user?.id || null
+                    })
+                    .select('id')
+                    .single();
+
+                if (!jhErr && jh) {
+                    const lines: any[] = [];
+                    // طرف المدين (نقدية / بنك / عميل)
+                    if (payload.total_amount > 0 && debitAccId) {
+                        lines.push({
+                            header_id: jh.id,
+                            account_id: debitAccId,
+                            partner_id: payload.client_id || null,
+                            debit: payload.total_amount,
+                            credit: 0,
+                            notes: `استحقاق عملية خدمية ${payload.operation_type}`
+                        });
+                    }
+                    // طرف الدائن (الإيراد)
+                    if (payload.total_amount > 0 && revAccId) {
+                        lines.push({
+                            header_id: jh.id,
+                            account_id: revAccId,
+                            debit: 0,
+                            credit: payload.total_amount,
+                            notes: `إيراد عملية خدمية ${payload.operation_type}`
+                        });
+                    }
+                    // قيود العمولة (إن وجدت)
+                    if (commAmount > 0 && commExpenseAccId) {
+                        lines.push({
+                            header_id: jh.id,
+                            account_id: commExpenseAccId,
+                            debit: commAmount,
+                            credit: 0,
+                            notes: `مصروف عمولة فني: ${payload.description || ''}`
+                        });
+
+                        let empAccId: string | null = null;
+                        if (payload.employee_id) {
+                            const emp = partners.find(p => p.id === payload.employee_id);
+                            empAccId = emp?.account_id || null;
+                        }
+                        if (!empAccId) {
+                            const found = allAccounts.find(a => a.code === '2104' || a.name?.includes('رواتب') || a.name?.includes('عمولات'));
+                            empAccId = found?.id || null;
+                        }
+
+                        if (empAccId) {
+                            lines.push({
+                                header_id: jh.id,
+                                account_id: empAccId,
+                                partner_id: payload.employee_id || null,
+                                debit: 0,
+                                credit: commAmount,
+                                notes: 'استحقاق عمولة خدمة'
+                            });
+                        }
+                    }
+
+                    if (lines.length > 0) {
+                        await supabase.from('journal_lines').insert(lines);
+                    }
+
+                    await supabase
+                        .from('service_operations')
+                        .update({ journal_id: jh.id })
+                        .eq('id', operationId);
+                }
+            }
+
             return operationId;
         },
         onSuccess: () => {

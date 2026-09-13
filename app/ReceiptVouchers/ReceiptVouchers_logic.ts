@@ -194,14 +194,94 @@ export function useReceiptVouchersLogic() {
         onError: (err: any) => showToast(`خطأ أثناء الحفظ: ${err.message}`, "error")
     });
 
+    // 🛡️ دوال مساعدة للترحيل وفك الترحيل والحذف المباشر لسندات القبض
+    const directPostReceipts = async (ids: string[]) => {
+        try {
+            const { error } = await supabase.rpc('post_receipts_bulk', { p_ids: ids });
+            if (!error) return;
+        } catch {}
+
+        const { data: rvs } = await supabase.from('receipt_vouchers').select('*').in('id', ids);
+        for (const rv of (rvs || [])) {
+            if (rv.status === 'معتمد') continue;
+            const { data: jh } = await supabase.from('journal_headers').insert([{
+                entry_date: rv.date || new Date().toISOString().split('T')[0],
+                description: `سند قبض رقم ${rv.receipt_number || ''}`,
+                reference_id: rv.id,
+                v_type: 'receipt',
+                status: 'posted',
+                fleet_operation_id: rv.fleet_operation_id || null
+            }]).select().single();
+
+            if (jh) {
+                const amt = Number(rv.amount || 0);
+                const lines: any[] = [];
+                if (amt > 0 && rv.safe_bank_acc_id) {
+                    lines.push({
+                        header_id: jh.id,
+                        account_id: rv.safe_bank_acc_id,
+                        partner_id: rv.partner_id || null,
+                        debit: amt,
+                        credit: 0,
+                        notes: `تحصيل نقدية سند قبض #${rv.receipt_number || ''}`,
+                        fleet_operation_id: rv.fleet_operation_id || null,
+                        delegate_id: rv.delegate_id || null
+                    });
+                }
+                if (amt > 0 && rv.partner_acc_id) {
+                    lines.push({
+                        header_id: jh.id,
+                        account_id: rv.partner_acc_id,
+                        partner_id: rv.partner_id || null,
+                        debit: 0,
+                        credit: amt,
+                        notes: `سداد عميل سند قبض #${rv.receipt_number || ''}`,
+                        fleet_operation_id: rv.fleet_operation_id || null,
+                        delegate_id: rv.delegate_id || null
+                    });
+                }
+                if (lines.length > 0) {
+                    await supabase.from('journal_lines').insert(lines);
+                }
+            }
+            await supabase.from('receipt_vouchers').update({ status: 'معتمد' }).eq('id', rv.id);
+        }
+    };
+
+    const directUnpostReceipts = async (ids: string[]) => {
+        try {
+            const { error } = await supabase.rpc('unpost_receipts_bulk', { p_ids: ids });
+            if (!error) return;
+        } catch {}
+
+        const { data: headers } = await supabase.from('journal_headers').select('id').in('reference_id', ids);
+        if (headers && headers.length > 0) {
+            const headerIds = headers.map(h => h.id);
+            await supabase.from('journal_lines').delete().in('header_id', headerIds);
+            await supabase.from('journal_headers').delete().in('id', headerIds);
+        }
+        await supabase.from('receipt_vouchers').update({ status: 'مسودة' }).in('id', ids);
+    };
+
+    const directDeleteReceipts = async (ids: string[]) => {
+        try {
+            const { error } = await supabase.rpc('delete_receipts_bulk', { p_ids: ids });
+            if (!error) return;
+        } catch {}
+
+        await directUnpostReceipts(ids);
+        await supabase.from('receipt_vouchers').delete().in('id', ids);
+    };
+
     const postMutation = useMutation({
         mutationFn: async () => {
             if (!selectedIds.length) return;
             const previousData = queryClient.getQueryData(['receipt_vouchers']);
             updateRowsInCache(selectedIds, { status: 'معتمد' });
 
-            const { error } = await supabase.rpc('post_receipts_bulk', { p_ids: selectedIds });
-            if (error) {
+            try {
+                await directPostReceipts(selectedIds);
+            } catch (error) {
                 queryClient.setQueryData(['receipt_vouchers'], previousData);
                 throw error;
             }
@@ -209,6 +289,9 @@ export function useReceiptVouchersLogic() {
         onSuccess: () => {
             setSelectedIds([]);
             showToast("تم الاعتماد والترحيل بنجاح ✅", "success");
+            queryClient.invalidateQueries({ queryKey: ['receipt_vouchers'] });
+            queryClient.invalidateQueries({ queryKey: ['journal_master_view'] });
+            queryClient.invalidateQueries({ queryKey: ['accounts_report_with_lines'] });
         },
         onError: (err: any) => showToast(`خطأ أثناء الترحيل: ${err.message}`, "error")
     });
@@ -219,8 +302,9 @@ export function useReceiptVouchersLogic() {
             const previousData = queryClient.getQueryData(['receipt_vouchers']);
             updateRowsInCache(selectedIds, { status: 'مسودة' });
 
-            const { error } = await supabase.rpc('unpost_receipts_bulk', { p_ids: selectedIds });
-            if (error) {
+            try {
+                await directUnpostReceipts(selectedIds);
+            } catch (error) {
                 queryClient.setQueryData(['receipt_vouchers'], previousData);
                 throw error;
             }
@@ -228,6 +312,9 @@ export function useReceiptVouchersLogic() {
         onSuccess: () => {
             setSelectedIds([]);
             showToast("تم فك الترحيل بنجاح 🔴", "warning");
+            queryClient.invalidateQueries({ queryKey: ['receipt_vouchers'] });
+            queryClient.invalidateQueries({ queryKey: ['journal_master_view'] });
+            queryClient.invalidateQueries({ queryKey: ['accounts_report_with_lines'] });
         },
         onError: (err: any) => showToast(`خطأ أثناء الإلغاء: ${err.message}`, "error")
     });
@@ -238,8 +325,9 @@ export function useReceiptVouchersLogic() {
             const previousData = queryClient.getQueryData(['receipt_vouchers']);
             queryClient.setQueryData(['receipt_vouchers'], (old: any[]) => old?.filter(v => !selectedIds.includes(String(v.id))));
 
-            const { error } = await supabase.rpc('delete_receipts_bulk', { p_ids: selectedIds });
-            if (error) {
+            try {
+                await directDeleteReceipts(selectedIds);
+            } catch (error) {
                 queryClient.setQueryData(['receipt_vouchers'], previousData);
                 throw error;
             }
@@ -247,6 +335,8 @@ export function useReceiptVouchersLogic() {
         onSuccess: () => {
             setSelectedIds([]);
             showToast("تم الحذف بنجاح 🗑️", "success");
+            queryClient.invalidateQueries({ queryKey: ['receipt_vouchers'] });
+            queryClient.invalidateQueries({ queryKey: ['journal_master_view'] });
         },
         onError: (err: any) => showToast(`خطأ في الحذف: ${err.message}`, "error")
     });

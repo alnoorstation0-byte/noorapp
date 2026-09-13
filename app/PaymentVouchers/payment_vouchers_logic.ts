@@ -34,9 +34,14 @@ export function usePaymentVouchersLogic() {
         queryKey: ['partner_balance', currentPartnerId],
         queryFn: async () => {
             if (!currentPartnerId) return 0;
-            const { data, error } = await supabase.rpc('get_partner_balance', { p_partner_id: currentPartnerId });
-            if (error) return 0;
-            return data || 0;
+            try {
+                const { data, error } = await supabase.rpc('get_partner_balance', { p_partner_id: currentPartnerId });
+                if (!error && data !== null && data !== undefined) return data;
+            } catch {}
+
+            // 🛡️ Fallback المباشر: حساب رصيد الشريك من أسطر القيود
+            const { data: lines } = await supabase.from('journal_lines').select('debit, credit').eq('partner_id', currentPartnerId);
+            return (lines || []).reduce((sum: number, l: any) => sum + (Number(l.debit || 0) - Number(l.credit || 0)), 0);
         },
         enabled: !!currentPartnerId 
     });
@@ -44,9 +49,31 @@ export function usePaymentVouchersLogic() {
     const { data: serverTotals } = useQuery({
         queryKey: ['vouchers_server_totals'],
         queryFn: async () => {
-            const { data, error } = await supabase.rpc('get_dashboard_totals');
-            if (error) return null;
-            return data?.[0] || null;
+            try {
+                const { data, error } = await supabase.rpc('get_dashboard_totals');
+                if (!error && data?.[0]) return data[0];
+            } catch {}
+
+            // 🛡️ Fallback المباشر: حساب إجماليات السندات والمصروفات
+            const [pvsRes, expsRes] = await Promise.all([
+                supabase.from('payment_vouchers').select('amount, is_posted'),
+                supabase.from('expenses').select('total_price, quantity, unit_price, paid_amount, is_deleted')
+            ]);
+            const pvs = pvsRes.data || [];
+            const exps = (expsRes.data || []).filter((e: any) => e.is_deleted !== true);
+
+            const totalPosted = pvs.filter((v: any) => v.is_posted === true).reduce((sum: number, v: any) => sum + Number(v.amount || 0), 0);
+            const totalPending = pvs.filter((v: any) => v.is_posted !== true).reduce((sum: number, v: any) => sum + Number(v.amount || 0), 0);
+            const totalExpenses = exps.reduce((sum: number, e: any) => sum + Number(e.total_price || (e.quantity * e.unit_price) || 0), 0);
+            const totalPaid = exps.reduce((sum: number, e: any) => sum + Number(e.paid_amount || 0), 0);
+
+            return {
+                total_expenses: totalExpenses,
+                total_paid: totalPaid,
+                total_pending: totalExpenses - totalPaid,
+                total_posted_vouchers: totalPosted,
+                total_pending_vouchers: totalPending
+            };
         }
     });
 

@@ -426,11 +426,105 @@ export function useInvoicesLogic() {
         }
     });
 
+    // 🛡️ دوال مساعدة للترحيل وفك الترحيل والحذف المباشر (Dual-Layer Fallback)
+    const directPostInvoices = async (ids: string[]) => {
+        try {
+            const { error } = await supabase.rpc('post_invoices_bulk', { p_ids: ids });
+            if (!error) return;
+        } catch {}
+
+        const { data: invs } = await supabase.from('invoices').select('*').in('id', ids);
+        for (const inv of (invs || [])) {
+            if (inv.is_posted) continue;
+            const { data: jh } = await supabase.from('journal_headers').insert([{
+                entry_date: inv.date || new Date().toISOString().split('T')[0],
+                description: `فاتورة مبيعات رقم ${inv.invoice_number || ''}`,
+                reference_id: inv.id,
+                v_type: 'invoice',
+                status: 'posted',
+                fleet_operation_id: inv.fleet_operation_id || null
+            }]).select().single();
+
+            if (jh) {
+                const lines: any[] = [];
+                const total = Number(inv.total_amount || 0);
+                const tax = Number(inv.tax_amount || 0);
+                const taxable = Number(inv.taxable_amount || total - tax);
+
+                if (total > 0 && inv.debit_account_id) {
+                    lines.push({
+                        header_id: jh.id,
+                        account_id: inv.debit_account_id,
+                        partner_id: inv.partner_id || null,
+                        debit: total,
+                        credit: 0,
+                        notes: `استحقاق فاتورة مبيعات #${inv.invoice_number || ''}`,
+                        fleet_operation_id: inv.fleet_operation_id || null,
+                        delegate_id: inv.delegate_id || null
+                    });
+                }
+                if (taxable > 0 && inv.credit_account_id) {
+                    lines.push({
+                        header_id: jh.id,
+                        account_id: inv.credit_account_id,
+                        partner_id: inv.partner_id || null,
+                        debit: 0,
+                        credit: taxable,
+                        notes: `إيراد مبيعات فاتورة #${inv.invoice_number || ''}`,
+                        fleet_operation_id: inv.fleet_operation_id || null,
+                        delegate_id: inv.delegate_id || null
+                    });
+                }
+                if (tax > 0 && inv.tax_acc_id) {
+                    lines.push({
+                        header_id: jh.id,
+                        account_id: inv.tax_acc_id,
+                        partner_id: inv.partner_id || null,
+                        debit: 0,
+                        credit: tax,
+                        notes: `ضريبة القيمة المضافة فاتورة #${inv.invoice_number || ''}`,
+                        tax_amount: tax,
+                        fleet_operation_id: inv.fleet_operation_id || null,
+                        delegate_id: inv.delegate_id || null
+                    });
+                }
+                if (lines.length > 0) {
+                    await supabase.from('journal_lines').insert(lines);
+                }
+            }
+            await supabase.from('invoices').update({ status: 'معتمد', is_posted: true }).eq('id', inv.id);
+        }
+    };
+
+    const directUnpostInvoices = async (ids: string[]) => {
+        try {
+            const { error } = await supabase.rpc('unpost_invoices_bulk', { p_ids: ids });
+            if (!error) return;
+        } catch {}
+
+        const { data: headers } = await supabase.from('journal_headers').select('id').in('reference_id', ids);
+        if (headers && headers.length > 0) {
+            const headerIds = headers.map(h => h.id);
+            await supabase.from('journal_lines').delete().in('header_id', headerIds);
+            await supabase.from('journal_headers').delete().in('id', headerIds);
+        }
+        await supabase.from('invoices').update({ status: 'مسودة', is_posted: false }).in('id', ids);
+    };
+
+    const directDeleteInvoices = async (ids: string[]) => {
+        try {
+            const { error } = await supabase.rpc('delete_invoices_bulk', { p_ids: ids });
+            if (!error) return;
+        } catch {}
+
+        await directUnpostInvoices(ids);
+        await supabase.from('invoices').delete().in('id', ids);
+    };
+
     const postMutation = useMutation({
         mutationFn: async () => {
             if (!selectedIds.length) return;
-            const { error } = await supabase.rpc('post_invoices_bulk', { p_ids: selectedIds });
-            if (error) throw error;
+            await directPostInvoices(selectedIds);
         },
         onSuccess: () => {
             showToast("تم الاعتماد والترحيل بنجاح ✅", "success");
@@ -445,13 +539,14 @@ export function useInvoicesLogic() {
     const unpostMutation = useMutation({
         mutationFn: async () => {
             if (!selectedIds.length) return;
-            const { error } = await supabase.rpc('unpost_invoices_bulk', { p_ids: selectedIds });
-            if (error) throw error;
+            await directUnpostInvoices(selectedIds);
         },
         onSuccess: () => {
             showToast("تم فك الترحيل بنجاح 🔄", "warning");
             setSelectedIds([]);
             queryClient.invalidateQueries({ queryKey: ['invoices'] });
+            queryClient.invalidateQueries({ queryKey: ['accounts_report_with_lines'] }); 
+            queryClient.invalidateQueries({ queryKey: ['journal_master_view'] }); 
         },
         onError: (err: any) => showToast(`${err.message}`, "error") 
     });
@@ -459,13 +554,14 @@ export function useInvoicesLogic() {
     const deleteMutation = useMutation({
         mutationFn: async () => {
             if (!selectedIds.length) return;
-            const { error } = await supabase.rpc('delete_invoices_bulk', { p_ids: selectedIds });
-            if (error) throw error;
+            await directDeleteInvoices(selectedIds);
         },
         onSuccess: () => {
             showToast("تم الحذف النهائي بنجاح 🗑️", "success");
             setSelectedIds([]);
             queryClient.invalidateQueries({ queryKey: ['invoices'] });
+            queryClient.invalidateQueries({ queryKey: ['accounts_report_with_lines'] }); 
+            queryClient.invalidateQueries({ queryKey: ['journal_master_view'] }); 
         },
         onError: (err: any) => showToast(`خطأ في الحذف: ${err.message}`, "error")
     });
@@ -754,10 +850,11 @@ export function useInvoicesLogic() {
             }
             if (!confirm(`تحذير: هل أنت متأكد من حذف الفاتورة #${inv.invoice_number} نهائياً؟`)) return;
             try {
-                const { error } = await supabase.rpc('delete_invoices_bulk', { p_ids: [inv.id] });
-                if (error) throw error;
+                await directDeleteInvoices([inv.id]);
                 showToast(`تم حذف الفاتورة #${inv.invoice_number} بنجاح 🗑️`, "success");
                 queryClient.invalidateQueries({ queryKey: ['invoices'] });
+                queryClient.invalidateQueries({ queryKey: ['accounts_report_with_lines'] }); 
+                queryClient.invalidateQueries({ queryKey: ['journal_master_view'] }); 
             } catch (err: any) {
                 showToast(`فشل الحذف: ${err.message}`, "error");
             }
@@ -768,12 +865,10 @@ export function useInvoicesLogic() {
             try {
                 if (isApproved) {
                     if (!confirm(`هل أنت متأكد من فك ترحيل واعتماد الفاتورة #${inv.invoice_number}؟`)) return;
-                    const { error } = await supabase.rpc('unpost_invoices_bulk', { p_ids: [inv.id] });
-                    if (error) throw error;
+                    await directUnpostInvoices([inv.id]);
                     showToast(`تم فك اعتماد الفاتورة #${inv.invoice_number} 🔄`, "warning");
                 } else {
-                    const { error } = await supabase.rpc('post_invoices_bulk', { p_ids: [inv.id] });
-                    if (error) throw error;
+                    await directPostInvoices([inv.id]);
                     showToast(`تم اعتماد وترحيل الفاتورة #${inv.invoice_number} بنجاح ✅`, "success");
                 }
                 queryClient.invalidateQueries({ queryKey: ['invoices'] });

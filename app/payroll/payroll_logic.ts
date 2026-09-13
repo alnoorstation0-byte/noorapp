@@ -51,15 +51,61 @@ export function usePayrollLogic() {
                 
             if (empError) throw empError;
 
-            const { data: balData, error: balError } = await supabase.rpc('get_payroll_balances_with_cutoff', {
-                p_month: selectedMonth, p_year: selectedYear, p_cutoff_date: cutoffDate
-            });
-            if (balError) throw balError;
+            let balData: any[] = [];
+            try {
+                const { data, error } = await supabase.rpc('get_payroll_balances_with_cutoff', {
+                    p_month: selectedMonth, p_year: selectedYear, p_cutoff_date: cutoffDate
+                });
+                if (!error && data) balData = data;
+            } catch {}
 
-            const { data: syncData, error: syncError } = await supabase.rpc('pull_payroll_module_data', {
-                p_month: selectedMonth, p_year: selectedYear, p_cutoff_date: cutoffDate
-            });
-            if (syncError) throw syncError;
+            let syncData: any[] = [];
+            try {
+                const { data, error } = await supabase.rpc('pull_payroll_module_data', {
+                    p_month: selectedMonth, p_year: selectedYear, p_cutoff_date: cutoffDate
+                });
+                if (!error && data) syncData = data;
+            } catch {}
+
+            // 🛡️ Fallback المباشر: حساب بيانات الحضور والغياب والخصومات
+            if (!syncData || syncData.length === 0) {
+                const [logsRes, violRes, pvRes] = await Promise.all([
+                    supabase.from('labor_daily_logs').select('laborer_id, quantity, log_date').lte('log_date', cutoffDate),
+                    supabase.from('violations').select('partner_id, amount, violation_date').lte('violation_date', cutoffDate),
+                    supabase.from('payment_vouchers').select('partner_id, amount, date').lte('date', cutoffDate)
+                ]);
+
+                const logs = logsRes.data || [];
+                const viols = violRes.data || [];
+                const pvs = pvRes.data || [];
+
+                syncData = (empData || []).map(emp => {
+                    const empLogs = logs.filter((l: any) => l.laborer_id === emp.id && new Date(l.log_date).getMonth() + 1 === selectedMonth && new Date(l.log_date).getFullYear() === selectedYear);
+                    const daysWorked = empLogs.reduce((s: number, l: any) => s + Number(l.quantity || 0), 0);
+
+                    const empViols = viols.filter((v: any) => v.partner_id === emp.id && new Date(v.violation_date).getMonth() + 1 === selectedMonth && new Date(v.violation_date).getFullYear() === selectedYear);
+                    const deductions = empViols.reduce((s: number, v: any) => s + Number(v.amount || 0), 0);
+
+                    const empPvs = pvs.filter((p: any) => p.partner_id === emp.id && new Date(p.date).getMonth() + 1 === selectedMonth && new Date(p.date).getFullYear() === selectedYear);
+                    const advances = empPvs.reduce((s: number, p: any) => s + Number(p.amount || 0), 0);
+
+                    return { partner_id: emp.id, days_worked: daysWorked, deductions, advances };
+                });
+            }
+
+            // 🛡️ Fallback المباشر: حساب الرصيد السابق من القيود
+            if (!balData || balData.length === 0) {
+                const { data: lines } = await supabase.from('journal_lines').select(`
+                    partner_id, debit, credit,
+                    journal_headers!inner (entry_date)
+                `).lte('journal_headers.entry_date', cutoffDate);
+
+                balData = (empData || []).map(emp => {
+                    const empLines = (lines || []).filter((l: any) => l.partner_id === emp.id);
+                    const net = empLines.reduce((s: number, l: any) => s + (Number(l.credit || 0) - Number(l.debit || 0)), 0);
+                    return { partner_id: emp.id, previous_unpaid_balance: net };
+                });
+            }
 
             const { data: savedSlips, error: slipsError } = await supabase
                 .from('payroll_slips')

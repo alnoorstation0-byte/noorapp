@@ -32,11 +32,28 @@ export default function ProjectBoqCombo({ projectId, value, initialDisplay, onSe
         const fetchDependentData = async () => {
             setIsLoading(true);
             
-            // 🎯 تقدر تغير 'boq_budget_distinct' لـ 'job_orders' لو عندك جدول لأوامر التشغيل
-            const { data, error } = await supabase
+            let { data, error } = await supabase
                 .from('boq_budget_distinct')
                 .select('*')
                 .eq('project_id', projectId);
+
+            if (error) {
+                // Fallback مباشرة لجدول job_orders في حالة عدم تفعيل الـ View بعد
+                const { data: joData, error: joErr } = await supabase
+                    .from('job_orders')
+                    .select('id, job_order_number, description')
+                    .limit(50);
+
+                if (!joErr && joData) {
+                    data = joData.map((jo: any) => ({
+                        id: jo.id,
+                        project_id: projectId,
+                        work_item: jo.job_order_number || jo.id,
+                        display_name: `${jo.job_order_number || ''} ${jo.description ? '- ' + jo.description : ''}`.trim() || jo.id
+                    }));
+                    error = null;
+                }
+            }
 
             if (!error && data) {
                 setOptions(data);

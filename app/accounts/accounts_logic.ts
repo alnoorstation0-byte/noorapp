@@ -23,20 +23,70 @@ export function useHierarchicalAccountsLogic() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentRecord, setCurrentRecord] = useState<any>({});
 
-  // 🧠 1. جلب البيانات "المطبوخة" من الباك إند (الأرصدة + القيود معاً)
+  // 🧠 1. جلب البيانات "المطبوخة" من الباك إند مع Fallback ذكي للمحرك المباشر
   const { data: accountsReport = [], isLoading } = useQuery({
     queryKey: ['accounts_report_with_lines', startDate, endDate], 
     queryFn: async () => {
-      const { data, error } = await supabase.rpc('get_accounts_report_with_lines', {
-        p_date_from: startDate || '1900-01-01',
-        p_date_to: endDate || '2099-12-31'
-      });
-      
-      if (error) {
-        console.error("❌ خطأ في جلب تقرير الحسابات والقيود:", error);
-        throw error;
+      try {
+        const { data, error } = await supabase.rpc('get_accounts_report_with_lines', {
+          p_date_from: startDate || '1900-01-01',
+          p_date_to: endDate || '2099-12-31'
+        });
+        if (!error && data) return data;
+      } catch (rpcErr) {
+        console.warn("get_accounts_report_with_lines RPC not available, using direct calculation:", rpcErr);
       }
-      return data || [];
+
+      // 🛡️ Fallback المباشر: حساب أرصدة الحركات وتجميع الشجرة مباشرة
+      const [accRes, linesRes] = await Promise.all([
+        supabase.from('accounts').select('*').order('code'),
+        supabase.from('journal_lines').select(`
+          id, account_id, debit, credit, notes, item_name,
+          journal_headers!inner (entry_date, description),
+          partners (name)
+        `)
+      ]);
+
+      const accounts = accRes.data || [];
+      const lines = linesRes.data || [];
+      const dateFrom = startDate || '1900-01-01';
+      const dateTo = endDate || '2099-12-31';
+
+      return accounts.map(acc => {
+        const accLines = lines.filter((l: any) => {
+          if (l.account_id !== acc.id) return false;
+          const d = l.journal_headers?.entry_date;
+          return d >= dateFrom && d <= dateTo;
+        });
+
+        const totalDebit = accLines.reduce((sum: number, l: any) => sum + Number(l.debit || 0), 0);
+        const totalCredit = accLines.reduce((sum: number, l: any) => sum + Number(l.credit || 0), 0);
+        const isDebitNature = ['assets', 'expenses'].includes(String(acc.account_type || '').toLowerCase());
+        const balance = isDebitNature ? totalDebit - totalCredit : totalCredit - totalDebit;
+
+        const transactions = accLines.map((l: any) => ({
+          id: l.id,
+          entry_date: l.journal_headers?.entry_date,
+          description: l.journal_headers?.description,
+          debit: l.debit,
+          credit: l.credit,
+          notes: l.notes || l.item_name,
+          partner_name: l.partners?.name
+        }));
+
+        return {
+          id: acc.id,
+          code: acc.code,
+          name: acc.name,
+          account_type: acc.account_type,
+          parent_id: acc.parent_id,
+          is_transactional: acc.is_transactional,
+          total_debit: totalDebit,
+          total_credit: totalCredit,
+          balance: balance,
+          transactions: transactions
+        };
+      });
     }
   });
 
