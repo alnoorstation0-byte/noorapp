@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import puppeteer from 'puppeteer';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request: Request) {
     try {
         const { htmlContent } = await request.json();

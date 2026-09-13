@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 
+export const dynamic = 'force-dynamic';
+
 // قاموس محلي سريع لمصطلحات الصيدلة البيطرية والمحاسبة كخط دفاع أول
 const LOCAL_DICTIONARY: Record<string, { en: string; ar: string }> = {
     'بيطري': { en: 'Veterinary', ar: 'بيطري' },
