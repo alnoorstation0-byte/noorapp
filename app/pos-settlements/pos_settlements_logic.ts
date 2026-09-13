@@ -9,6 +9,7 @@ import { ACC } from '@/lib/account-ids';
 import { MAIN_WAREHOUSE_ID, syncAllWarehouseBalances } from '@/lib/inventory_engine';
 import { emitTableChange, useRealtimeListener } from '@/lib/useRealtimeSync';
 import { sendSystemNotification } from '@/lib/notificationService';
+import { classifyPaymentMethod } from '@/lib/helpers';
 
 export interface PosOutletInventoryItem {
     itemId: string;
@@ -172,9 +173,9 @@ export function usePosSettlementsLogic() {
                 .from('receipt_vouchers')
                 .select(`
                     id, receipt_number, date, amount, payment_method, 
-                    shift_id, delegate_id, status, notes, safe_bank_acc_id
+                    shift_id, delegate_id, status, notes, safe_bank_acc_id, invoice_id
                 `)
-                .in('status', ['معتمد', 'مرحل', 'posted', 'approved']);
+                .neq('status', 'ملغي');
 
             if (dateFrom) q = q.gte('date', dateFrom);
             if (dateTo) q = q.lte('date', dateTo);
@@ -347,45 +348,68 @@ export function usePosSettlementsLogic() {
             const shiftExpenses = expensesByShift.get(shift.id) || [];
             const whItems = inventoryByWh.get(shift.warehouse_id) || [];
 
-            // 1. Sales breakdown
-            let totalSales = Number(shift.total_sales || 0);
-            let cashSales = Number(shift.total_cash_sales || 0);
-            let cardSales = Number(shift.total_card_sales || 0);
-            let creditSales = Number(shift.total_credit_sales || 0);
+            // 1. Sales breakdown from invoices
+            let invTotal = 0;
+            let invCash = 0;
+            let invCard = 0;
+            let invCredit = 0;
+            const shiftCashInvoiceIds = new Set<string>();
 
-            // Recompute from invoices if shift totals were zero
-            if (totalSales === 0 && shiftInvoices.length > 0) {
-                let invTotal = 0;
-                let invCash = 0;
-                let invCard = 0;
-                let invCredit = 0;
+            shiftInvoices.forEach(inv => {
+                const amt = Number(inv.total_amount || 0);
+                invTotal += amt;
+                const cat = classifyPaymentMethod(inv.payment_method);
+                if (cat === 'card') {
+                    invCard += amt;
+                } else if (cat === 'credit') {
+                    invCredit += amt;
+                } else {
+                    invCash += amt;
+                    shiftCashInvoiceIds.add(inv.id);
+                }
+            });
 
-                shiftInvoices.forEach(inv => {
-                    const amt = Number(inv.total_amount || 0);
-                    invTotal += amt;
-                    if (isCardMethod(inv.payment_method)) invCard += amt;
-                    else if (isCreditMethod(inv.payment_method)) invCredit += amt;
-                    else invCash += amt;
-                });
-
-                totalSales = invTotal;
-                cashSales = invCash;
-                cardSales = invCard;
-                creditSales = invCredit;
-            }
+            // Use calculated invoice totals if invoices exist, otherwise fallback to recorded shift totals
+            const totalSales = shiftInvoices.length > 0 ? invTotal : Number(shift.total_sales || 0);
+            const cashSales = shiftInvoices.length > 0 ? invCash : Number(shift.total_cash_sales || 0);
+            const cardSales = shiftInvoices.length > 0 ? invCard : Number(shift.total_card_sales || 0);
+            const creditSales = shiftInvoices.length > 0 ? invCredit : Number(shift.total_credit_sales || 0);
 
             // 2. Collections (Customer payments made at the outlet)
-            const totalCollections = shiftReceipts.collections.reduce((sum, rc) => sum + Number(rc.amount || 0), 0);
+            // 🛡️ CRITICAL FIX: Exclude receipts that correspond to cash invoices of this shift to prevent DOUBLE COUNTING!
+            const standaloneReceipts = shiftReceipts.collections.filter(rc => {
+                if (rc.invoice_id && shiftCashInvoiceIds.has(rc.invoice_id)) {
+                    return false;
+                }
+                return true;
+            });
+
+            // Standalone cash collections that actually entered the drawer:
+            const standaloneCashCollections = standaloneReceipts.reduce((sum, rc) => {
+                if (classifyPaymentMethod(rc.payment_method) === 'cash') {
+                    return sum + Number(rc.amount || 0);
+                }
+                return sum;
+            }, 0);
+
+            // Total standalone collections (cash + card) for display
+            const totalCollections = standaloneReceipts.reduce((sum, rc) => sum + Number(rc.amount || 0), 0);
 
             // 3. Expenses paid from the cash drawer
             const totalExpenses = shiftExpenses.reduce((sum, exp) => sum + Number(exp.paid_amount || exp.total_price || 0), 0);
+            const cashExpenses = shiftExpenses.reduce((sum, exp) => {
+                if (classifyPaymentMethod(exp.payment_method) === 'cash') {
+                    return sum + Number(exp.paid_amount || exp.total_price || 0);
+                }
+                return sum;
+            }, 0);
 
             // 4. Starting Cash
             const startingCash = Number(shift.starting_cash || 0);
 
             // 5. Expected Cash in Drawer
-            // Formula: Starting Drawer Cash + Cash Sales + Customer Collections - Drawer Expenses
-            const netCashDue = startingCash + cashSales + totalCollections - totalExpenses;
+            // Formula: Starting Drawer Cash + Cash Invoices Sales + Standalone Cash Collections - Cash Drawer Expenses
+            const netCashDue = Math.max(0, startingCash + cashSales + standaloneCashCollections - cashExpenses);
 
             // 6. Actual Cash Counted & Handed Over to Treasury
             const handedOverCash = shiftReceipts.settlements.reduce((sum, rc) => sum + Number(rc.amount || 0), 0);
@@ -393,9 +417,9 @@ export function usePosSettlementsLogic() {
 
             // 7. Drawer Shortage / Overage
             // Positive = Overage (زيادة), Negative = Shortage (عجز)
-            const shortageOverage = Number(shift.shortage_overage !== null && shift.shortage_overage !== undefined 
-                ? shift.shortage_overage 
-                : (actualCash - netCashDue));
+            const shortageOverage = (shift.status === 'closed' || shift.status === 'settled' || actualCash > 0)
+                ? (actualCash - netCashDue)
+                : 0;
 
             // Remaining Cash Custody waiting to be remitted
             const remainingCashCustody = Math.max(0, netCashDue - handedOverCash);
@@ -459,6 +483,7 @@ export function usePosSettlementsLogic() {
             const profData = profileMap.get(shift.user_id) as any;
             const cashierName = delData?.name || profData?.full_name || whData?.manager_name || 'الكاشير';
             const cashierPhone = delData?.phone || profData?.phone_number || '';
+            const cashierPartnerId = shift.delegate_id || profData?.linked_partner_id || (partnerMap.has(shift.user_id) ? shift.user_id : null);
 
             return {
                 id: shift.id,
@@ -472,7 +497,7 @@ export function usePosSettlementsLogic() {
                 warehouseType: whData?.type || 'pos',
                 warehouseLocation: whData?.location || '',
                 warehousePhone: whData?.phone || '',
-                cashierId: shift.delegate_id || shift.user_id,
+                cashierId: cashierPartnerId || shift.delegate_id || shift.user_id,
                 cashierName,
                 cashierPhone,
                 startingCash,
@@ -481,7 +506,9 @@ export function usePosSettlementsLogic() {
                 cardSales,
                 creditSales,
                 totalCollections,
+                standaloneCashCollections,
                 totalExpenses,
+                cashExpenses,
                 netCashDue,
                 actualCash,
                 handedOverCash,
@@ -499,7 +526,7 @@ export function usePosSettlementsLogic() {
                 totalRemainingStock,
                 // Raw relations
                 invoices: shiftInvoices,
-                collections: shiftReceipts.collections,
+                collections: standaloneReceipts,
                 settlementReceipts: shiftReceipts.settlements,
                 expenses: shiftExpenses,
                 closingNotes: shift.closing_notes

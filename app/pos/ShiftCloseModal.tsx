@@ -63,10 +63,6 @@ export default function ShiftCloseModal({
                 .eq('shift_id', activeShift.id)
                 .neq('status', 'ملغي'); // Arabic status check remains in logic
 
-            let cash = 0, card = 0, credit = 0;
-            let cashExpenses = 0, totalExpenses = 0;
-            let soldUnits = 0;
-
             // Fetch returnable items to accurately count bottles
             const { data: retItems } = await supabase
                 .from('inventory_items')
@@ -76,12 +72,21 @@ export default function ShiftCloseModal({
 
             const shiftInvoiceIdSet = new Set((invoices || []).map(i => i.id));
 
+            let cashSales = 0;
+            let cardSales = 0;
+            let creditSales = 0;
+            let standaloneCashReceipts = 0;
+            let standaloneCardReceipts = 0;
+            let totalExpenses = 0;
+            let cashExpenses = 0;
+            let soldUnits = 0;
+
             (invoices || []).forEach(inv => {
                 const amt = Number(inv.total_amount || 0);
                 const paymentCat = classifyPaymentMethod(inv.payment_method);
-                if (paymentCat === 'cash') cash += amt;
-                else if (paymentCat === 'card') card += amt;
-                else if (paymentCat === 'credit') credit += amt;
+                if (paymentCat === 'cash') cashSales += amt;
+                else if (paymentCat === 'card') cardSales += amt;
+                else if (paymentCat === 'credit') creditSales += amt;
 
                 if (Array.isArray(inv.lines_data)) {
                     inv.lines_data.forEach((line: any) => {
@@ -98,8 +103,8 @@ export default function ShiftCloseModal({
                 if (!rc.invoice_id || !shiftInvoiceIdSet.has(rc.invoice_id)) {
                     const rcAmt = Number(rc.amount || 0);
                     const rcCat = classifyPaymentMethod(rc.payment_method);
-                    if (rcCat === 'cash') cash += rcAmt;
-                    else if (rcCat === 'card') card += rcAmt;
+                    if (rcCat === 'cash') standaloneCashReceipts += rcAmt;
+                    else if (rcCat === 'card') standaloneCardReceipts += rcAmt;
                 }
             });
 
@@ -112,7 +117,17 @@ export default function ShiftCloseModal({
                 }
             });
 
-            setTotals({ cash, card, credit, total: cash + card + credit, cashExpenses, totalExpenses } as any);
+            const totalSales = cashSales + cardSales + creditSales;
+            setTotals({ 
+                cash: cashSales, 
+                card: cardSales, 
+                credit: creditSales, 
+                total: totalSales, 
+                standaloneCash: standaloneCashReceipts,
+                standaloneCard: standaloneCardReceipts,
+                cashExpenses, 
+                totalExpenses 
+            } as any);
             setBottlesSold(soldUnits);
             setActualBottlesReturned(soldUnits);
         } catch (error) {
@@ -122,7 +137,7 @@ export default function ShiftCloseModal({
         }
     };
 
-    const expectedCash = Number(activeShift?.starting_cash || 0) + (totals.cash || 0) - ((totals as any).cashExpenses || 0);
+    const expectedCash = Number(activeShift?.starting_cash || 0) + (totals.cash || 0) + ((totals as any).standaloneCash || 0) - ((totals as any).cashExpenses || 0);
     const difference = actualCash === '' ? 0 : Number(actualCash) - expectedCash;
     const returnedCount = actualBottlesReturned === '' ? 0 : Number(actualBottlesReturned);
     const bottlesShortage = bottlesSold - returnedCount;
@@ -339,6 +354,12 @@ export default function ShiftCloseModal({
                                 <span>💰 {isEn ? 'Cash Sales:' : 'المبيعات النقدية (كاش):'}</span>
                                 <strong>+ {totals.cash.toFixed(2)} {isEn ? 'SAR' : 'ريال'}</strong>
                             </div>
+                            {Number((totals as any).standaloneCash || 0) > 0 && (
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', fontSize: '14px', fontWeight: 700, color: '#0284c7' }}>
+                                    <span>📥 {isEn ? 'Additional Collections:' : 'تحصيلات نقدية إضافية:'}</span>
+                                    <strong>+ {Number((totals as any).standaloneCash).toFixed(2)} {isEn ? 'SAR' : 'ريال'}</strong>
+                                </div>
+                            )}
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', fontSize: '14px', fontWeight: 700, color: '#C29B62' }}>
                                 <span>💳 {isEn ? 'Card / POS Sales:' : 'مبيعات الشبكة / مدى:'}</span>
                                 <strong>{totals.card.toFixed(2)} {isEn ? 'SAR' : 'ريال'}</strong>
@@ -347,6 +368,12 @@ export default function ShiftCloseModal({
                                 <span>📋 {isEn ? 'Credit Sales:' : 'المبيعات الآجلة:'}</span>
                                 <strong>{totals.credit.toFixed(2)} {isEn ? 'SAR' : 'ريال'}</strong>
                             </div>
+                            {Number((totals as any).cashExpenses || 0) > 0 && (
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', fontSize: '14px', fontWeight: 700, color: '#ef4444' }}>
+                                    <span>💸 {isEn ? 'Drawer Expenses:' : 'مصروفات الدرج (كاش):'}</span>
+                                    <strong>- {Number((totals as any).cashExpenses).toFixed(2)} {isEn ? 'SAR' : 'ريال'}</strong>
+                                </div>
+                            )}
                             <hr style={{ borderColor: '#e2e8f0', margin: '10px 0' }} />
                             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '16px', fontWeight: 900, color: '#2C1A12' }}>
                                 <span>🏦 {isEn ? 'Expected Cash in Register:' : 'النقدية المتوقعة بالدرج:'}</span>

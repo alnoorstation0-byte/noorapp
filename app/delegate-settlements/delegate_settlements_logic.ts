@@ -9,6 +9,7 @@ import { ACC } from '@/lib/account-ids';
 import { MAIN_WAREHOUSE_ID, syncAllWarehouseBalances } from '@/lib/inventory_engine';
 import { emitTableChange } from '@/lib/useRealtimeSync';
 import { sendSystemNotification } from '@/lib/notificationService';
+import { classifyPaymentMethod } from '@/lib/helpers';
 
 export interface TripInventoryItem {
     itemId: string;
@@ -161,7 +162,7 @@ export function useDelegateSettlementsLogic() {
         queryFn: async () => {
             const { data, error } = await supabase
                 .from('receipt_vouchers')
-                .select('id, receipt_number, date, amount, payment_method, fleet_operation_id, delegate_id, partner_id, status, notes, safe_bank_acc_id')
+                .select('id, receipt_number, date, amount, payment_method, fleet_operation_id, delegate_id, partner_id, status, notes, safe_bank_acc_id, invoice_id')
                 .not('fleet_operation_id', 'is', null)
                 .neq('status', 'ملغي');
             if (error) throw error;
@@ -351,32 +352,60 @@ export function useDelegateSettlementsLogic() {
             let totalSales = 0;
             let cashSales = 0;
             let creditSales = 0;
+            let cardSales = 0;
             let otherSales = 0;
+            const tripCashInvoiceIds = new Set<string>();
 
             tripInvoices.forEach(inv => {
                 const amt = Number(inv.total_amount || 0);
                 totalSales += amt;
-                if (isCashMethod(inv.payment_method)) {
+                const cat = classifyPaymentMethod(inv.payment_method);
+                if (cat === 'cash') {
                     cashSales += amt;
-                } else if (isCreditMethod(inv.payment_method)) {
+                    tripCashInvoiceIds.add(inv.id);
+                } else if (cat === 'credit') {
                     creditSales += amt;
+                } else if (cat === 'card') {
+                    cardSales += amt;
                 } else {
                     otherSales += amt;
                 }
             });
 
             // 2. Collections during trip
-            const totalCollections = tripReceipts.collections.reduce((s, r) => s + Number(r.amount || 0), 0);
+            // 🛡️ CRITICAL FIX: Exclude receipts that correspond to cash invoices of this trip to prevent DOUBLE COUNTING!
+            const standaloneReceipts = tripReceipts.collections.filter(rc => {
+                if (rc.invoice_id && tripCashInvoiceIds.has(rc.invoice_id)) {
+                    return false;
+                }
+                return true;
+            });
+
+            // Standalone cash collections that actually entered the driver's custody:
+            const standaloneCashCollections = standaloneReceipts.reduce((s, r) => {
+                if (classifyPaymentMethod(r.payment_method) === 'cash') {
+                    return s + Number(r.amount || 0);
+                }
+                return s;
+            }, 0);
+
+            const totalCollections = standaloneReceipts.reduce((s, r) => s + Number(r.amount || 0), 0);
 
             // 3. Expenses paid by delegate
             const totalExpenses = tripExpenses.reduce((s, e) => s + Number(e.paid_amount || e.total_price || 0), 0);
+            const cashExpenses = tripExpenses.reduce((s, e) => {
+                if (classifyPaymentMethod(e.payment_method) === 'cash') {
+                    return s + Number(e.paid_amount || e.total_price || 0);
+                }
+                return s;
+            }, 0);
 
             // 4. Cash settlements handed over to company safe
             const handedOverCash = tripReceipts.settlements.reduce((s, r) => s + Number(r.amount || 0), 0);
 
             // 5. Net cash custody due from delegate
-            // Net cash due = (Cash sales + Collections from clients) - Expenses paid by delegate
-            const netCashDue = Math.max(0, cashSales + totalCollections - totalExpenses);
+            // Formula: Cash sales + Standalone Cash Collections - Cash Expenses paid by delegate
+            const netCashDue = Math.max(0, cashSales + standaloneCashCollections - cashExpenses);
             const remainingCashCustody = Math.max(0, netCashDue - handedOverCash);
             const cashDifference = handedOverCash - netCashDue;
 
@@ -496,14 +525,18 @@ export function useDelegateSettlementsLogic() {
                 totalSales,
                 cashSales,
                 creditSales,
+                cardSales,
                 otherSales,
                 invoicesCount: tripInvoices.length,
                 // Receipts & Collections
                 totalCollections,
+                standaloneCashCollections,
                 handedOverCash,
+                collections: standaloneReceipts,
                 settlementReceipts: tripReceipts.settlements,
                 // Expenses
                 totalExpenses,
+                cashExpenses,
                 // Balances
                 netCashDue,
                 remainingCashCustody,

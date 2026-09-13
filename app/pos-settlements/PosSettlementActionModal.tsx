@@ -368,6 +368,14 @@ export default function PosSettlementActionModal({
                                         {formatCurrency(shift.cardSales)}
                                     </div>
                                 </div>
+                                {Number(shift.totalCollections || 0) > 0 && (
+                                    <div style={{ background: 'rgba(2, 132, 199, 0.08)', padding: '14px 18px', borderRadius: '18px', border: '1px solid rgba(2, 132, 199, 0.2)' }}>
+                                        <div style={{ fontSize: '11px', fontWeight: 800, color: '#0284c7' }}>تحصيلات إضافية (+) 📥</div>
+                                        <div style={{ fontSize: '18px', fontWeight: 900, color: '#0284c7', marginTop: '4px' }}>
+                                            {formatCurrency(shift.totalCollections)}
+                                        </div>
+                                    </div>
+                                )}
                                 <div style={{ background: 'rgba(239, 68, 68, 0.08)', padding: '14px 18px', borderRadius: '18px', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
                                     <div style={{ fontSize: '11px', fontWeight: 800, color: '#ef4444' }}>مصروفات الدرج (-) 💸</div>
                                     <div style={{ fontSize: '18px', fontWeight: 900, color: '#ef4444', marginTop: '4px' }}>
