@@ -10,6 +10,8 @@ import RawasiSidebarManager from '@/components/RawasiSidebarManager';
 import MasterPage from '@/components/MasterPage';
 import LoadingScreen from '@/components/LoadingScreen'; // 🖼️ استدعاء الغلاف الموحد
 import SmartCombo from '@/components/SmartCombo'; // 🧠 استدعاء السمارت كومبو
+import { supabase } from '@/lib/supabase';
+import { toast } from 'react-hot-toast';
 
 export default function EmployeeProfilePage() {
     const { 
@@ -28,6 +30,35 @@ export default function EmployeeProfilePage() {
     const [showRequestForm, setShowRequestForm] = useState(false);
     const [newRequest, setNewRequest] = useState({ type: 'objection', category: 'wage', subject: '', details: '' });
     const [tempPassword, setTempPassword] = useState("");
+    const [isLowGraphics, setIsLowGraphics] = useState(false);
+
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            setIsLowGraphics(localStorage.getItem('lowGraphicsMode') === 'true');
+        }
+    }, []);
+
+    const handleToggleLowGraphics = async () => {
+        const nextVal = !isLowGraphics;
+        setIsLowGraphics(nextVal);
+        localStorage.setItem('lowGraphicsMode', String(nextVal));
+        if (nextVal) {
+            document.documentElement.classList.add('low-graphics-mode');
+            document.body.classList.add('low-graphics-mode');
+            toast.success('⚡️ تم تفعيل وضع الأداء الفائق وحفظه في بروفايلك');
+        } else {
+            document.documentElement.classList.remove('low-graphics-mode');
+            document.body.classList.remove('low-graphics-mode');
+            toast.success('✨ تم تفعيل المظهر الزجاجي الفاخر');
+        }
+        try {
+            await supabase.auth.updateUser({
+                data: { low_graphics_mode: nextVal }
+            });
+        } catch (e) {
+            console.error('Failed to sync performance mode with profile:', e);
+        }
+    };
 
     // 🚀 المتغيرات الآمنة لحساب الملخصات
     const totalProd = monthlyKPIs?.totalProduction || 0;
@@ -704,6 +735,40 @@ export default function EmployeeProfilePage() {
                                 <h4 style={{ color: THEME.primary, fontWeight: 900, marginBottom: '20px', textAlign: 'center', fontSize: '16px' }}>✍️ تحديث التوقيع الرقمي المعتمد</h4>
                                 <div style={{ border: `2px solid rgba(40, 145, 200, 0.15)`, borderRadius: '20px', overflow: 'hidden', background: 'rgba(255, 255, 255, 0.6)' }}>
                                     <SignaturePad userId={userProfile?.id} currentSignature={userProfile?.signature_url} onSaved={refreshProfile} />
+                                </div>
+                            </div>
+                            
+                            <div style={{ borderTop: '2px dashed rgba(194, 155, 98, 0.25)', paddingTop: '20px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255, 253, 250, 0.85)', padding: '16px 20px', borderRadius: '16px', border: '1px solid rgba(194, 155, 98, 0.35)', gap: '15px', flexWrap: 'wrap' }}>
+                                    <div style={{ flex: 1, minWidth: '220px' }}>
+                                        <div style={{ fontWeight: 900, color: '#2C1A12', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                            <span>⚡️</span> وضع الأداء الفائق (للجوالات القديمة)
+                                        </div>
+                                        <div style={{ fontSize: '11.5px', color: 'rgba(44, 26, 18, 0.65)', marginTop: '4px', fontWeight: 700 }}>
+                                            إلغاء التأثيرات الزجاجية الثقيلة لتسريع فتح وتصفح النظام وحفظ هذا التفضيل في حسابك
+                                        </div>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={handleToggleLowGraphics}
+                                        style={{
+                                            padding: '10px 18px',
+                                            borderRadius: '12px',
+                                            fontWeight: 900,
+                                            fontSize: '13px',
+                                            cursor: 'pointer',
+                                            border: '1px solid',
+                                            background: isLowGraphics ? 'linear-gradient(135deg, #C29B62, #A8573C)' : 'rgba(44, 26, 18, 0.06)',
+                                            borderColor: isLowGraphics ? '#C29B62' : 'rgba(194, 155, 98, 0.3)',
+                                            color: isLowGraphics ? '#FFFFFF' : '#2C1A12',
+                                            transition: '0.2s',
+                                            display: 'inline-flex',
+                                            alignItems: 'center',
+                                            gap: '6px'
+                                        }}
+                                    >
+                                        <span>{isLowGraphics ? '⚡️ وضع الأداء: مفعّل' : '✨ مظهر زجاجي: مفعّل'}</span>
+                                    </button>
                                 </div>
                             </div>
                             

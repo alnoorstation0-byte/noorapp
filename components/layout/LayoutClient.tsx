@@ -22,6 +22,7 @@ import {
   ArrowUpRight,
   Zap
 } from 'lucide-react';
+import { toast } from 'react-hot-toast';
 
 export default function LayoutClient({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -108,35 +109,63 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
   }, [isOpen]);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      const saved = localStorage.getItem('lowGraphicsMode');
-      // Default to true for maximum speed across all devices unless explicitly disabled
-      const isLow = saved !== null ? saved === 'true' : true;
-      
-      setLowGraphics(isLow);
-      if (isLow) {
-        document.documentElement.classList.add('low-graphics-mode');
-        document.body.classList.add('low-graphics-mode');
-      } else {
-        document.documentElement.classList.remove('low-graphics-mode');
-        document.body.classList.remove('low-graphics-mode');
-      }
+    if (typeof window === 'undefined') return;
+
+    // 1. الافتراضي الأساسي هو المظهر الزجاجي الفاخر (Glassmorphism)
+    const saved = localStorage.getItem('lowGraphicsMode');
+    const isLow = saved === 'true'; // false افتراضياً
+    setLowGraphics(isLow);
+    if (isLow) {
+      document.documentElement.classList.add('low-graphics-mode');
+      document.body.classList.add('low-graphics-mode');
+    } else {
+      document.documentElement.classList.remove('low-graphics-mode');
+      document.body.classList.remove('low-graphics-mode');
     }
+
+    // 2. مزامنة التفضيل المحفوظ في بروفايل المستخدم (Supabase Auth / Profiles)
+    supabase.auth.getUser().then(({ data: { user } }) => {
+      if (user && user.user_metadata?.low_graphics_mode !== undefined) {
+        const profilePref = Boolean(user.user_metadata.low_graphics_mode);
+        // إذا لم يكن مخزناً محلياً بعد، نطبق تفضيل البروفايل
+        if (saved === null) {
+          localStorage.setItem('lowGraphicsMode', String(profilePref));
+          setLowGraphics(profilePref);
+          if (profilePref) {
+            document.documentElement.classList.add('low-graphics-mode');
+            document.body.classList.add('low-graphics-mode');
+          } else {
+            document.documentElement.classList.remove('low-graphics-mode');
+            document.body.classList.remove('low-graphics-mode');
+          }
+        }
+      }
+    }).catch(() => {});
   }, []);
 
-  const toggleLowGraphics = () => {
-    setLowGraphics(prev => {
-      const newVal = !prev;
-      localStorage.setItem('lowGraphicsMode', String(newVal));
-      if (newVal) {
-        document.documentElement.classList.add('low-graphics-mode');
-        document.body.classList.add('low-graphics-mode');
-      } else {
-        document.documentElement.classList.remove('low-graphics-mode');
-        document.body.classList.remove('low-graphics-mode');
-      }
-      return newVal;
-    });
+  const toggleLowGraphics = async () => {
+    const newVal = !lowGraphics;
+    setLowGraphics(newVal);
+    localStorage.setItem('lowGraphicsMode', String(newVal));
+    
+    if (newVal) {
+      document.documentElement.classList.add('low-graphics-mode');
+      document.body.classList.add('low-graphics-mode');
+      toast.success('⚡️ تم تفعيل وضع الأداء الفائق وحفظه في بروفايلك');
+    } else {
+      document.documentElement.classList.remove('low-graphics-mode');
+      document.body.classList.remove('low-graphics-mode');
+      toast.success('✨ تم استعادة المظهر الزجاجي الفاخر');
+    }
+
+    // حفظ التفضيل مباشرة في بروفايل المستخدم في سوبابيز ليبقى معه أينما فتح
+    try {
+      await supabase.auth.updateUser({
+        data: { low_graphics_mode: newVal }
+      });
+    } catch (err) {
+      console.error('Failed to sync performance mode with profile:', err);
+    }
   };
 
   // 📱 معالج سحب القائمة العائمة باللمس على الجوال (Touch Drag)
@@ -819,7 +848,7 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
                     const isActive = pathname === item.path;
                     const itemTitle = t('menu_' + item.id) || item.title;
                     return (
-                      <Link key={iIdx} href={item.path} onClick={() => setIsOpen(false)}>
+                      <Link key={iIdx} href={item.path} prefetch={false} onClick={() => setIsOpen(false)}>
                         <div className={`nav-card ${isActive ? 'active' : ''}`} style={{ animationDelay: isOpen ? `${delay}s` : '0s' }}>
                           <div className="nav-card-left">
                             <div className="icon-wrapper">{item.icon}</div>
@@ -874,19 +903,19 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
 
       {/* 4️⃣ شريط التنقل السفلي الذكي للجوال (Mobile Bottom Dock) */}
       <div className="desert-bottom-dock no-print">
-        <Link href="/Dashboard" className={`dock-item ${pathname === '/Dashboard' ? 'active' : ''}`}>
+        <Link href="/Dashboard" prefetch={false} className={`dock-item ${pathname === '/Dashboard' ? 'active' : ''}`}>
           <Home />
           <span>الرئيسية</span>
         </Link>
-        <Link href="/pos" className={`dock-item ${pathname === '/pos' ? 'active' : ''}`}>
+        <Link href="/pos" prefetch={false} className={`dock-item ${pathname === '/pos' ? 'active' : ''}`}>
           <ShoppingBag />
           <span>الكاشير</span>
         </Link>
-        <Link href="/invoices" className={`dock-item ${pathname === '/invoices' ? 'active' : ''}`}>
+        <Link href="/invoices" prefetch={false} className={`dock-item ${pathname === '/invoices' ? 'active' : ''}`}>
           <FileText />
           <span>الفواتير</span>
         </Link>
-        <Link href="/inventory" className={`dock-item ${pathname === '/inventory' ? 'active' : ''}`}>
+        <Link href="/inventory" prefetch={false} className={`dock-item ${pathname === '/inventory' ? 'active' : ''}`}>
           <Package />
           <span>الأصناف</span>
         </Link>
