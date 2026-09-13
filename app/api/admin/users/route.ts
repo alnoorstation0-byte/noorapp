@@ -65,7 +65,7 @@ export async function GET() {
             await admin.from('profiles').upsert(profilesToInsert, { onConflict: 'id' });
         }
 
-        // 4️⃣ جلب وعرض القائمة الكاملة وربط الشركاء بشكل منفصل لتفادي أخطاء PostgREST
+        // 4️⃣ جلب وعرض القائمة الكاملة وضمان ربط كافة الموظفين بسجلات شركاء
         const { data: simpleProfiles, error: fetchError } = await admin
             .from('profiles')
             .select('*')
@@ -77,9 +77,38 @@ export async function GET() {
 
         const { data: partners } = await admin
             .from('partners')
-            .select('id, name');
+            .select('id, name, partner_type');
 
         const partnersMap = new Map((partners || []).map((p: any) => [p.id, p.name]));
+        const partnerNameMap = new Map((partners || []).map((p: any) => [p.name.trim().toLowerCase(), p.id]));
+
+        // الربط التلقائي لأي بروفايل غير مربوط
+        for (const p of (simpleProfiles || [])) {
+            if (!p.linked_partner_id || !partnersMap.has(p.linked_partner_id)) {
+                const name = (p.full_name || p.email?.split('@')[0] || 'موظف').trim();
+                let matchedPartnerId = partnerNameMap.get(name.toLowerCase());
+                if (!matchedPartnerId) {
+                    const { data: newPart } = await admin.from('partners').insert([{
+                        code: String(Date.now()).slice(-4),
+                        name,
+                        partner_type: 'موظف',
+                        job_role: p.role || 'موظف',
+                        phone: p.phone_number || null,
+                        is_active: p.is_active !== false
+                    }]).select('id').single();
+                    if (newPart) {
+                        matchedPartnerId = newPart.id;
+                        partnersMap.set(newPart.id, name);
+                        partnerNameMap.set(name.toLowerCase(), newPart.id);
+                    }
+                }
+                if (matchedPartnerId) {
+                    p.linked_partner_id = matchedPartnerId;
+                    await admin.from('profiles').update({ linked_partner_id: matchedPartnerId }).eq('id', p.id);
+                }
+            }
+        }
+
         const allProfiles = (simpleProfiles || []).map((p: any) => ({
             ...p,
             partners: p.linked_partner_id ? { name: partnersMap.get(p.linked_partner_id) || null } : null
@@ -126,7 +155,36 @@ export async function POST(req: Request) {
         const safeRole = allowedRoles.includes(role) ? role : 'staff';
         const isAdminFlag = safeRole === 'super_admin' || safeRole === 'admin';
 
-        // 3️⃣ إنشاء أو تحديث بيانات الـ Profile فوراً ومباشرة عبر upsert (دون الاعتماد على Trigger)
+        // 2.5 ضمان إنشاء وربط سجل شريك (موظف) في جدول partners
+        let targetPartnerId = linked_partner_id || null;
+        if (!targetPartnerId && full_name) {
+            const trimmedName = full_name.trim();
+            const { data: existingPart } = await getSupabaseAdmin()
+                .from('partners')
+                .select('id')
+                .ilike('name', trimmedName)
+                .maybeSingle();
+
+            if (existingPart) {
+                targetPartnerId = existingPart.id;
+            } else {
+                const { data: newPart } = await getSupabaseAdmin()
+                    .from('partners')
+                    .insert([{
+                        code: String(Date.now()).slice(-4),
+                        name: trimmedName,
+                        partner_type: 'موظف',
+                        job_role: safeRole || 'موظف',
+                        phone: cleanedPhone,
+                        is_active: is_active ?? true
+                    }])
+                    .select('id')
+                    .single();
+                if (newPart) targetPartnerId = newPart.id;
+            }
+        }
+
+        // 3️⃣ إنشاء أو تحديث بيانات الـ Profile فوراً ومباشرة عبر upsert
         const { error: profileError } = await getSupabaseAdmin()
             .from('profiles')
             .upsert({
@@ -135,7 +193,7 @@ export async function POST(req: Request) {
                 email,
                 phone_number: cleanedPhone,
                 role: safeRole,
-                linked_partner_id: linked_partner_id || null,
+                linked_partner_id: targetPartnerId,
                 permissions: permissions || {},
                 is_admin: isAdminFlag,
                 is_active: is_active ?? true

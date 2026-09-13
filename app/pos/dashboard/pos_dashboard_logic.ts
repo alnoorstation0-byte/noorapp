@@ -103,17 +103,28 @@ export function usePosDashboardLogic() {
         }
     });
 
-    // 4. جلب الورديات (المفتوحة والنشطة + المغلقة السابقة)
+    // 3.5 جلب الموظفين والمناديب لربط الورديات
+    const { data: dashboardEmployees = { partners: [], profiles: [] } } = useQuery({
+        queryKey: ['pos_dashboard_employees'],
+        queryFn: async () => {
+            const [partRes, profRes] = await Promise.all([
+                supabase.from('partners').select('id, name, phone, code'),
+                supabase.from('profiles').select('id, full_name, email, role')
+            ]);
+            return {
+                partners: partRes.data || [],
+                profiles: profRes.data || []
+            };
+        }
+    });
+
+    // 4. جلب الورديات (المفتوحة والنشطة + المغلقة السابقة بأمان تام)
     const { data: rawShifts = [], isLoading: loadingShifts } = useQuery({
         queryKey: ['pos_dashboard_shifts_all', selectedWarehouseId, dateRange],
         queryFn: async () => {
             let query = supabase
                 .from('pos_shifts')
-                .select(`
-                    *,
-                    warehouse:warehouses(id, name, type),
-                    delegate:partners!delegate_id(id, name, phone, code)
-                `)
+                .select('*')
                 .order('opened_at', { ascending: false });
 
             if (selectedWarehouseId !== 'all') {
@@ -122,17 +133,10 @@ export function usePosDashboardLogic() {
             if (dateRange.start) query = query.gte('opened_at', `${dateRange.start}T00:00:00Z`);
             if (dateRange.end) query = query.lte('opened_at', `${dateRange.end}T23:59:59Z`);
 
-            let { data, error } = await query;
+            const { data, error } = await query;
             if (error) {
-                console.error('Error fetching pos shifts with joins:', error.message || error);
-                // Fallback query without joins in case foreign key relationship constraint is missing
-                let fb = supabase
-                    .from('pos_shifts')
-                    .select('*')
-                    .order('opened_at', { ascending: false });
-                if (selectedWarehouseId !== 'all') fb = fb.eq('warehouse_id', selectedWarehouseId);
-                const fbRes = await fb;
-                data = fbRes.data;
+                console.warn('Error fetching pos shifts:', error);
+                return [];
             }
             return data || [];
         }
@@ -184,12 +188,18 @@ export function usePosDashboardLogic() {
             margin: number;
         }>();
 
-        // خريطة المستودعات للربط الاحتياطي
+        // خريطة المستودعات والشركاء والموظفين للربط
         const whMap = new Map((warehouses || []).map((w: any) => [w.id, w]));
+        const partnerMap = new Map((dashboardEmployees.partners || []).map((p: any) => [p.id, p]));
+        const profileMap = new Map((dashboardEmployees.profiles || []).map((p: any) => [p.id, p]));
 
         // حساب ربحية كل وردية / منفذ
         const enrichedShifts = rawShifts.map((shift: any) => {
             const shiftWarehouse = shift.warehouse || whMap.get(shift.warehouse_id);
+            const delData = partnerMap.get(shift.delegate_id);
+            const profData = profileMap.get(shift.user_id);
+            const empName = delData?.name || profData?.full_name || 'كاشير النظام';
+            const shiftDelegate = delData || (profData ? { id: profData.id, name: empName, phone: profData.phone_number } : { name: empName });
             const shiftInvs = invoicesByShift[shift.id] || [];
             
             let shiftSales = 0;
@@ -273,6 +283,7 @@ export function usePosDashboardLogic() {
             return {
                 ...shift,
                 warehouse: shiftWarehouse,
+                delegate: shiftDelegate,
                 invoices_count: shiftInvs.length,
                 computed_sales: shiftSales,
                 computed_cash: shiftCashSales,

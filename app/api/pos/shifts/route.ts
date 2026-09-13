@@ -34,14 +34,10 @@ export async function GET(request: Request) {
             return NextResponse.json({ success: true, source: 'rpc', data: rpcShifts });
         }
 
-        // 2. خط الدفاع الثاني: استعلام مباشر متوافق تماماً مع السكيما
+        // 2. خط الدفاع الثاني: استعلام مباشر متوافق تماماً وبأمان تام دون الاعتماد على قيود العلاقات
         let query = supabaseAdmin
             .from('pos_shifts')
-            .select(`
-                *,
-                warehouse:warehouses(id, name, type),
-                delegate:partners!delegate_id(id, name, phone, code)
-            `)
+            .select('*')
             .order('opened_at', { ascending: false })
             .range(offset, offset + limit - 1);
 
@@ -53,6 +49,17 @@ export async function GET(request: Request) {
 
         const { data: shifts = [], error: shiftErr } = await query;
         if (shiftErr) throw shiftErr;
+
+        // جلب الجداول المرجعية لربط البيانات بأمان تام
+        const [whRes, partRes, profRes] = await Promise.all([
+            supabaseAdmin.from('warehouses').select('id, name, type'),
+            supabaseAdmin.from('partners').select('id, name, phone, code'),
+            supabaseAdmin.from('profiles').select('id, full_name, username, email, role')
+        ]);
+
+        const whMap = new Map((whRes.data || []).map((w: any) => [w.id, w]));
+        const partMap = new Map((partRes.data || []).map((p: any) => [p.id, p]));
+        const profMap = new Map((profRes.data || []).map((p: any) => [p.id, p]));
 
         // جلب عدد الفواتير والمبيعات الحية لكل وردية
         const shiftIds = (shifts || []).map((s: any) => s.id);
@@ -96,16 +103,24 @@ export async function GET(request: Request) {
             const totalCredit = isClosed ? Number(s.total_credit_sales || 0) : live.credit;
             const expectedCash = isClosed ? Number(s.expected_cash || 0) : (starting + live.cash);
 
+            const wh = whMap.get(s.warehouse_id);
+            const del = partMap.get(s.delegate_id);
+            const prof = profMap.get(s.user_id);
+            const cashierName = del?.name || prof?.full_name || prof?.username || prof?.email || 'كاشير النظام';
+
             return {
                 id: s.id,
                 status: s.status,
                 opened_at: s.opened_at,
                 closed_at: s.closed_at,
                 warehouse_id: s.warehouse_id,
-                warehouse_name: s.warehouse?.name || 'مستودع غير محدد',
-                warehouse_type: s.warehouse?.type || 'main',
+                warehouse_name: wh?.name || 'مستودع غير محدد',
+                warehouse_type: wh?.type || 'main',
                 delegate_id: s.delegate_id,
-                delegate_name: s.delegate?.name || 'مبيعات مباشرة (بدون مندوب)',
+                delegate_name: cashierName,
+                cashier_name: cashierName,
+                user_id: s.user_id,
+                user_name: prof?.full_name || prof?.email || '',
                 starting_cash: starting,
                 expected_cash: expectedCash,
                 actual_cash: Number(s.actual_cash || 0),
@@ -131,7 +146,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        const { warehouse_id, delegate_id, user_id, starting_cash } = body;
+        let { warehouse_id, delegate_id, user_id, starting_cash } = body;
 
         if (!warehouse_id) {
             return NextResponse.json(
@@ -140,17 +155,60 @@ export async function POST(request: Request) {
             );
         }
 
+        // 0. التحقق من المستخدم والمندوب والربط التلقائي بين profiles و partners
+        let resolvedUserId = user_id;
+        if (!resolvedUserId) {
+            const { data: { users } } = await supabaseAdmin.auth.admin.listUsers();
+            if (users && users.length > 0) resolvedUserId = users[0].id;
+        }
+
+        // إذا تم تمرير delegate_id لكنه في الحقيقة profile.id أو العكس
+        let resolvedDelegateId = delegate_id || null;
+
+        // فحص هل delegate_id موجود في partners
+        if (resolvedDelegateId) {
+            const { data: checkPart } = await supabaseAdmin.from('partners').select('id, name').eq('id', resolvedDelegateId).maybeSingle();
+            if (!checkPart) {
+                // ربما هذا هو معرف بروفايل في profiles
+                const { data: checkProf } = await supabaseAdmin.from('profiles').select('id, full_name, role, linked_partner_id').eq('id', resolvedDelegateId).maybeSingle();
+                if (checkProf) {
+                    resolvedUserId = checkProf.id;
+                    resolvedDelegateId = checkProf.linked_partner_id || null;
+                }
+            }
+        }
+
+        // إذا كان delegate_id لا يزال فارغاً لكن لدينا user_id: استخراج الشريك المربوط بالبروفايل
+        if (!resolvedDelegateId && resolvedUserId) {
+            const { data: prof } = await supabaseAdmin.from('profiles').select('id, full_name, role, linked_partner_id').eq('id', resolvedUserId).maybeSingle();
+            if (prof?.linked_partner_id) {
+                resolvedDelegateId = prof.linked_partner_id;
+            } else if (prof) {
+                // إنشاء أو إيجاد شريك موظف تلقائياً لربط كافة العمليات المحاسبية والعهد به
+                const empName = (prof.full_name || 'موظف').trim();
+                const { data: existingP } = await supabaseAdmin.from('partners').select('id').ilike('name', empName).maybeSingle();
+                if (existingP) {
+                    resolvedDelegateId = existingP.id;
+                } else {
+                    const { data: newP } = await supabaseAdmin.from('partners').insert([{
+                        code: String(Date.now()).slice(-4),
+                        name: empName,
+                        partner_type: 'موظف',
+                        job_role: prof.role || 'موظف',
+                        is_active: true
+                    }]).select('id').single();
+                    if (newP) resolvedDelegateId = newP.id;
+                }
+                if (resolvedDelegateId) {
+                    await supabaseAdmin.from('profiles').update({ linked_partner_id: resolvedDelegateId }).eq('id', prof.id);
+                }
+            }
+        }
+
         // 🔒 1. فحص المستودع: هل توجد أي وردية نشطة مفتوحة حالياً في هذا المستودع؟
         const { data: existingWarehouseShifts, error: whCheckErr } = await supabaseAdmin
             .from('pos_shifts')
-            .select(`
-                id,
-                status,
-                opened_at,
-                starting_cash,
-                warehouse:warehouses(id, name, type),
-                delegate:partners!delegate_id(id, name)
-            `)
+            .select('id, status, opened_at, starting_cash, warehouse_id, delegate_id, user_id')
             .eq('warehouse_id', warehouse_id)
             .eq('status', 'open')
             .limit(1);
@@ -162,10 +220,16 @@ export async function POST(request: Request) {
         const existingWarehouseShift = existingWarehouseShifts?.[0];
 
         if (existingWarehouseShift) {
-            const wh: any = existingWarehouseShift.warehouse;
-            const del: any = existingWarehouseShift.delegate;
-            const whName = (Array.isArray(wh) ? wh[0]?.name : wh?.name) || 'هذا المستودع';
-            const delegateName = (Array.isArray(del) ? del[0]?.name : del?.name) || 'مبيعات مباشرة';
+            const { data: wh } = await supabaseAdmin.from('warehouses').select('name').eq('id', warehouse_id).maybeSingle();
+            let delegateName = 'مبيعات مباشرة';
+            if (existingWarehouseShift.delegate_id) {
+                const { data: del } = await supabaseAdmin.from('partners').select('name').eq('id', existingWarehouseShift.delegate_id).maybeSingle();
+                if (del) delegateName = del.name;
+            } else if (existingWarehouseShift.user_id) {
+                const { data: usr } = await supabaseAdmin.from('profiles').select('full_name').eq('id', existingWarehouseShift.user_id).maybeSingle();
+                if (usr?.full_name) delegateName = usr.full_name;
+            }
+            const whName = wh?.name || 'هذا المستودع';
             return NextResponse.json(
                 {
                     success: false,
@@ -177,17 +241,12 @@ export async function POST(request: Request) {
             );
         }
 
-        // 🔒 2. فحص المندوب: هل المندوب المختار لديه وردية مفتوحة بالفعل في أي مستودع آخر؟
-        if (delegate_id) {
+        // 🔒 2. فحص المندوب: هل المندوب / الموظف لديه وردية مفتوحة بالفعل في أي مستودع آخر؟
+        if (resolvedDelegateId) {
             const { data: existingDelegateShifts, error: delCheckErr } = await supabaseAdmin
                 .from('pos_shifts')
-                .select(`
-                    id,
-                    status,
-                    opened_at,
-                    warehouse:warehouses(id, name)
-                `)
-                .eq('delegate_id', delegate_id)
+                .select('id, status, opened_at, warehouse_id')
+                .eq('delegate_id', resolvedDelegateId)
                 .eq('status', 'open')
                 .limit(1);
 
@@ -198,13 +257,13 @@ export async function POST(request: Request) {
             const existingDelegateShift = existingDelegateShifts?.[0];
 
             if (existingDelegateShift) {
-                const delWh: any = existingDelegateShift.warehouse;
-                const whName = (Array.isArray(delWh) ? delWh[0]?.name : delWh?.name) || 'منفذ آخر';
+                const { data: delWh } = await supabaseAdmin.from('warehouses').select('name').eq('id', existingDelegateShift.warehouse_id).maybeSingle();
+                const whName = delWh?.name || 'منفذ آخر';
                 return NextResponse.json(
                     {
                         success: false,
                         code: 'DELEGATE_HAS_OPEN_SHIFT',
-                        error: `⛔ لا يمكن فتح الوردية! هذا المندوب لديه بالفعل وردية نشطة مفتوحة حالياً في (${whName}). المسؤول شخص واحد ولا يمكن تشغيل ورديتين لنفس الشخص، يجب تقفيل ورديته السابقة أولاً.`,
+                        error: `⛔ لا يمكن فتح الوردية! هذا الموظف / المندوب لديه بالفعل وردية نشطة مفتوحة حالياً في (${whName}). المسؤول شخص واحد ولا يمكن تشغيل ورديتين لنفس الشخص، يجب تقفيل ورديته السابقة أولاً.`,
                         existing_shift: existingDelegateShift
                     },
                     { status: 409 }
@@ -212,34 +271,22 @@ export async function POST(request: Request) {
             }
         }
 
-        // 3. التحقق من المستخدم الحالي (Fallback إلى session/admin إذا لم يتم تمريره)
-        let resolvedUserId = user_id;
-        if (!resolvedUserId) {
-            const { data: { users } } = await supabaseAdmin.auth.admin.listUsers();
-            if (users && users.length > 0) resolvedUserId = users[0].id;
-        }
-
         // 🔄 3.5. فحص استئناف الوردية في نفس اليوم لنفس المندوب أو البائع
-        // إذا كان نفس المندوب لديه وردية مغلقة اليوم في نفس المستودع، يتم استئنافها وتكملة المبيعات عليها
         const now = new Date();
         const todayDateStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
         const todayStartIso = `${todayDateStr}T00:00:00.000Z`;
 
         let closedShiftQuery = supabaseAdmin
             .from('pos_shifts')
-            .select(`
-                *,
-                warehouse:warehouses(id, name, type),
-                delegate:partners!delegate_id(id, name, phone, code)
-            `)
+            .select('*')
             .eq('warehouse_id', warehouse_id)
             .eq('status', 'closed')
             .gte('opened_at', todayStartIso)
             .order('closed_at', { ascending: false })
             .limit(1);
 
-        if (delegate_id) {
-            closedShiftQuery = closedShiftQuery.eq('delegate_id', delegate_id);
+        if (resolvedDelegateId) {
+            closedShiftQuery = closedShiftQuery.eq('delegate_id', resolvedDelegateId);
         } else if (resolvedUserId) {
             closedShiftQuery = closedShiftQuery.is('delegate_id', null).eq('user_id', resolvedUserId);
         }
@@ -251,17 +298,15 @@ export async function POST(request: Request) {
 
         const existingClosedShift = closedShiftsToday?.[0];
 
-        // 🌟 إذا وُجدت وردية مغلقة اليوم لنفس المندوب والمنفذ: استئناف نفس الوردية!
+        // 🌟 إذا وُجدت وردية مغلقة اليوم لنفس الموظف والمنفذ: استئناف نفس الوردية!
         if (existingClosedShift) {
             const shiftNumberDisplay = existingClosedShift.shift_number ? `#${existingClosedShift.shift_number}` : (existingClosedShift.id ? `#${existingClosedShift.id.slice(0, 8)}` : '');
             
-            // تحديث الوردية لتصبح مفتوحة ومستأنفة
             const updatePayload: any = {
                 status: 'open',
                 closed_at: null
             };
 
-            // إذا أدخل الكاشير عهدة بداية وكانت السابقة 0
             if (Number(starting_cash) > 0 && (!existingClosedShift.starting_cash || existingClosedShift.starting_cash === 0)) {
                 updatePayload.starting_cash = Number(starting_cash);
             }
@@ -270,11 +315,7 @@ export async function POST(request: Request) {
                 .from('pos_shifts')
                 .update(updatePayload)
                 .eq('id', existingClosedShift.id)
-                .select(`
-                    *,
-                    warehouse:warehouses(id, name, type),
-                    delegate:partners!delegate_id(id, name, phone, code)
-                `)
+                .select('*')
                 .single();
 
             if (resumeErr) {
@@ -282,30 +323,38 @@ export async function POST(request: Request) {
                 throw resumeErr;
             }
 
+            // إرفاق بيانات المستودع والشريك
+            const [whR, delR] = await Promise.all([
+                supabaseAdmin.from('warehouses').select('id, name, type').eq('id', warehouse_id).maybeSingle(),
+                resolvedDelegateId ? supabaseAdmin.from('partners').select('id, name, phone, code').eq('id', resolvedDelegateId).maybeSingle() : Promise.resolve({ data: null })
+            ]);
+
+            const enrichedResumed = {
+                ...resumedShift,
+                warehouse: whR.data || null,
+                delegate: delR.data || null
+            };
+
             return NextResponse.json({
                 success: true,
                 is_resumed: true,
-                message: `تم استئناف وردية اليوم السابقة للمندوب بنجاح (${shiftNumberDisplay}) لتكملة مبيعات اليوم عليها دون ازدواجية 🔄`,
-                data: resumedShift
+                message: `تم استئناف وردية اليوم السابقة للموظف بنجاح (${shiftNumberDisplay}) لتكملة مبيعات اليوم عليها دون ازدواجية 🔄`,
+                data: enrichedResumed
             });
         }
 
-        // 4. إنشاء الوردية بأمان تام لمندوب جديد أو لبداية يوم جديد
+        // 4. إنشاء الوردية بأمان تام لموظف / مندوب جديد
         const { data: newShift, error: insertError } = await supabaseAdmin
             .from('pos_shifts')
             .insert([{
                 warehouse_id,
-                delegate_id: delegate_id || null,
+                delegate_id: resolvedDelegateId || null,
                 user_id: resolvedUserId,
                 starting_cash: Number(starting_cash) || 0,
                 status: 'open',
                 opened_at: new Date().toISOString()
             }])
-            .select(`
-                *,
-                warehouse:warehouses(id, name, type),
-                delegate:partners!delegate_id(id, name, phone, code)
-            `)
+            .select('*')
             .single();
 
         if (insertError) {
@@ -323,11 +372,23 @@ export async function POST(request: Request) {
             throw insertError;
         }
 
+        // إرفاق بيانات المستودع والشريك
+        const [whR, delR] = await Promise.all([
+            supabaseAdmin.from('warehouses').select('id, name, type').eq('id', warehouse_id).maybeSingle(),
+            resolvedDelegateId ? supabaseAdmin.from('partners').select('id, name, phone, code').eq('id', resolvedDelegateId).maybeSingle() : Promise.resolve({ data: null })
+        ]);
+
+        const enrichedNew = {
+            ...newShift,
+            warehouse: whR.data || null,
+            delegate: delR.data || null
+        };
+
         return NextResponse.json({
             success: true,
             is_resumed: false,
-            message: 'تم فتح الوردية بنجاح 🚀',
-            data: newShift
+            message: 'تم فتح الوردية وربط الموظف بها بنجاح 🚀',
+            data: enrichedNew
         });
 
     } catch (error: any) {
@@ -338,4 +399,5 @@ export async function POST(request: Request) {
         );
     }
 }
+
 

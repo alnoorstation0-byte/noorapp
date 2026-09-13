@@ -142,8 +142,11 @@ export default function OpenShiftsModal({
                 ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
                         {openShifts.map((shift: any) => {
-                            const wh = warehouses.find((w: any) => w.id === shift.warehouse_id);
-                            const del = delegates.find((d: any) => d.id === shift.delegate_id);
+                            const wh = shift.warehouse || warehouses.find((w: any) => w.id === shift.warehouse_id);
+                            const del = shift.delegate || delegates.find((d: any) => 
+                                (shift.delegate_id && (d.id === shift.delegate_id || d.partnerId === shift.delegate_id)) ||
+                                (shift.user_id && d.userId === shift.user_id)
+                            );
                             const isCurrent = currentShiftId === shift.id;
 
                             return (
@@ -181,7 +184,7 @@ export default function OpenShiftsModal({
                                         <div style={{ fontSize: '13px', color: '#475569', display: 'flex', gap: '15px', flexWrap: 'wrap', marginTop: '2px' }}>
                                             <span>
                                                 👤 <strong style={{ color: del ? '#16a34a' : '#64748b' }}>
-                                                    {del?.name || (isEn ? 'Direct Sales (No Rep)' : 'مبيعات مباشرة (بدون مندوب)')}
+                                                    {del?.name || (isEn ? 'Direct Sales' : 'مبيعات مباشرة')}
                                                 </strong>
                                             </span>
                                             <span>

@@ -35,33 +35,37 @@ export default function ShiftOpenModal({
         }
     }, [isOpen, warehouseId, delegateId]);
 
-    // 🔒 جلب كافة الورديات النشطة حالياً في النظام لفحص التعارضات فورياً
+    // 🔒 جلب كافة الورديات النشطة حالياً في النظام لفحص التعارضات فورياً وبأمان تام
     const { data: allActiveShifts = [], isLoading: checkingShifts } = useQuery({
-        queryKey: ['pos_open_shifts'],
+        queryKey: ['pos_open_shifts', isOpen],
         enabled: !!isOpen,
         queryFn: async () => {
             const { data, error } = await supabase
                 .from('pos_shifts')
-                .select(`
-                    id,
-                    warehouse_id,
-                    delegate_id,
-                    opened_at,
-                    starting_cash,
-                    warehouse:warehouses(id, name, type),
-                    delegate:partners!delegate_id(id, name)
-                `)
+                .select('id, warehouse_id, delegate_id, user_id, opened_at, starting_cash')
                 .eq('status', 'open');
 
             if (error) {
                 console.warn('Error fetching all active shifts:', error);
                 return [];
             }
-            return data || [];
+
+            return (data || []).map((s: any) => {
+                const wh = warehouses.find((w: any) => w.id === s.warehouse_id);
+                const del = delegates.find((d: any) => 
+                    (s.delegate_id && (d.id === s.delegate_id || d.partnerId === s.delegate_id)) ||
+                    (s.user_id && d.userId === s.user_id)
+                );
+                return {
+                    ...s,
+                    warehouse: wh || { name: 'المستودع' },
+                    delegate: del ? { name: del.name } : null
+                };
+            });
         }
     });
 
-    // 🔄 فحص هل نفس المندوب لديه وردية أُغلقت اليوم في هذا المنفذ؟
+    // 🔄 فحص هل نفس الموظف/المندوب لديه وردية أُغلقت اليوم في هذا المنفذ؟
     const { data: todayClosedShift = null } = useQuery({
         queryKey: ['pos_today_closed_shift', targetWarehouseId, targetDelegateId],
         enabled: !!isOpen && !!targetWarehouseId,
@@ -79,8 +83,11 @@ export default function ShiftOpenModal({
                 .order('closed_at', { ascending: false })
                 .limit(1);
 
-            if (targetDelegateId) {
-                q = q.eq('delegate_id', targetDelegateId);
+            const selectedEmp = delegates.find((d: any) => d.id === targetDelegateId || d.partnerId === targetDelegateId);
+            const partId = selectedEmp?.partnerId || selectedEmp?.id || targetDelegateId;
+
+            if (partId) {
+                q = q.eq('delegate_id', partId);
             } else {
                 q = q.is('delegate_id', null);
             }
@@ -99,15 +106,17 @@ export default function ShiftOpenModal({
         (s: any) => s.warehouse_id === targetWarehouseId
     );
 
-    // 2. هل المندوب المختار لديه وردية مفتوحة في مستودع آخر؟
-    const existingDelegateShift = targetDelegateId ? (allActiveShifts || []).find(
-        (s: any) => s.delegate_id === targetDelegateId
+    // 2. هل الموظف المختار لديه وردية مفتوحة في مستودع آخر؟
+    const selectedDelegate = delegates?.find((d: any) => d.id === targetDelegateId || d.partnerId === targetDelegateId);
+
+    const existingDelegateShift = selectedDelegate ? (allActiveShifts || []).find(
+        (s: any) => (s.delegate_id && (s.delegate_id === selectedDelegate.id || s.delegate_id === selectedDelegate.partnerId)) ||
+                    (s.user_id && selectedDelegate.userId && s.user_id === selectedDelegate.userId)
     ) : null;
 
     const isConflictWithOtherWarehouse = existingDelegateShift && existingDelegateShift.id !== existingWarehouseShift?.id;
 
     const selectedWarehouse = warehouses?.find((w: any) => w.id === targetWarehouseId);
-    const selectedDelegate = delegates?.find((d: any) => d.id === targetDelegateId);
 
     const openShiftMutation = useMutation({
         mutationFn: async () => {
@@ -125,14 +134,18 @@ export default function ShiftOpenModal({
                 currentUserId = user?.id;
             }
 
+            const chosenEmp = delegates.find((d: any) => d.id === targetDelegateId || d.partnerId === targetDelegateId);
+            const resolvedShiftUserId = chosenEmp?.userId || currentUserId;
+            const resolvedShiftDelegateId = chosenEmp?.partnerId || chosenEmp?.id || targetDelegateId;
+
             // استدعاء مسار الباك إند المحمي بالكامل
             const res = await fetch('/api/pos/shifts', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     warehouse_id: targetWarehouseId,
-                    delegate_id: targetDelegateId || null,
-                    user_id: currentUserId || null,
+                    delegate_id: resolvedShiftDelegateId || null,
+                    user_id: resolvedShiftUserId || null,
                     starting_cash: Number(startingCash) || 0
                 })
             });
@@ -343,19 +356,23 @@ export default function ShiftOpenModal({
 
                     <div>
                         <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#2C1A12', marginBottom: '5px' }}>
-                            👤 {isEn ? 'Cashier / Rep responsible for shift:' : 'المندوب / الكاشير المسؤول عن الوردية:'}
+                            👤 {isEn ? 'Responsible Employee / Cashier:' : 'الموظف / الكاشير المسؤول عن الوردية:'}
                         </label>
                         <select 
                             className="shift-select-field"
                             value={targetDelegateId}
                             onChange={(e) => setTargetDelegateId(e.target.value)}
                         >
-                            <option value="">{isEn ? 'Direct Sales (No Rep)' : 'مبيعات مباشرة (بدون مندوب)'}</option>
+                            <option value="">{isEn ? '-- Select Responsible Employee / Cashier --' : '-- اختر الموظف / الكاشير المسؤول --'}</option>
                             {delegates.map((d: any) => {
-                                const hasOpen = allActiveShifts.some((s: any) => s.delegate_id === d.id);
+                                const hasOpen = allActiveShifts.some((s: any) => 
+                                    (s.delegate_id && (s.delegate_id === d.id || s.delegate_id === d.partnerId)) ||
+                                    (s.user_id && d.userId && s.user_id === d.userId)
+                                );
+                                const roleLabel = d.role ? `(${d.role})` : '';
                                 return (
                                     <option key={d.id} value={d.id}>
-                                        {d.name} {hasOpen ? (isEn ? '🔴 (Has active shift)' : '🔴 (مسؤول عن وردية نشطة حالياً)') : (isEn ? '🟢 (Available)' : '🟢 (متاح)')}
+                                        {d.name} {roleLabel} {hasOpen ? (isEn ? '🔴 (Has active shift)' : '🔴 (لديه وردية نشطة حالياً)') : (isEn ? '🟢 (Available)' : '🟢 (متاح)')}
                                     </option>
                                 );
                             })}

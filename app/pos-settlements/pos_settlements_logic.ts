@@ -97,40 +97,29 @@ export function usePosSettlementsLogic() {
         staleTime: 1000 * 60 * 5
     });
 
-    // 2. Fetch POS Shifts
+    // 1.5. Fetch Partners & Profiles for Cashiers
+    const cashiersQuery = useQuery({
+        queryKey: ['pos_settlements_cashiers'],
+        queryFn: async () => {
+            const [partRes, profRes] = await Promise.all([
+                supabase.from('partners').select('id, name, phone, code'),
+                supabase.from('profiles').select('id, full_name, phone_number, role, linked_partner_id')
+            ]);
+            return {
+                partners: partRes.data || [],
+                profiles: profRes.data || []
+            };
+        },
+        staleTime: 1000 * 60 * 5
+    });
+
+    // 2. Fetch POS Shifts (بأمان تام دون أخطاء قيود العلاقات PGRST200)
     const shiftsQuery = useQuery({
         queryKey: ['pos_settlements_shifts', dateFrom, dateTo, selectedWarehouseId],
         queryFn: async () => {
             let q = supabase
                 .from('pos_shifts')
-                .select(`
-                    id, 
-                    user_id, 
-                    delegate_id, 
-                    warehouse_id, 
-                    opened_at, 
-                    closed_at, 
-                    starting_cash, 
-                    expected_cash, 
-                    actual_cash, 
-                    total_sales, 
-                    total_cash_sales, 
-                    total_card_sales, 
-                    total_credit_sales, 
-                    shortage_overage, 
-                    status, 
-                    created_at, 
-                    bottles_sold, 
-                    bottles_returned, 
-                    bottles_shortage, 
-                    starting_bottles, 
-                    expected_bottles, 
-                    total_expenses, 
-                    closing_notes, 
-                    actual_bottles,
-                    warehouse:warehouses!warehouse_id(id, name, type, location, phone, manager_name),
-                    cashier:partners!delegate_id(id, name, phone, code)
-                `)
+                .select('*')
                 .order('opened_at', { ascending: false });
 
             if (selectedWarehouseId !== 'all') {
@@ -144,7 +133,10 @@ export function usePosSettlementsLogic() {
             }
 
             const { data, error } = await q;
-            if (error) throw error;
+            if (error) {
+                console.warn('Error fetching pos settlements shifts:', error);
+                return [];
+            }
             return data || [];
         },
         staleTime: 0
@@ -300,6 +292,10 @@ export function usePosSettlementsLogic() {
 
     // Process & Aggregate All Data by Shift
     const processedSettlements = useMemo(() => {
+        const whMap = new Map((warehousesQuery.data || []).map((w: any) => [w.id, w]));
+        const partnerMap = new Map((cashiersQuery.data?.partners || []).map((p: any) => [p.id, p]));
+        const profileMap = new Map((cashiersQuery.data?.profiles || []).map((p: any) => [p.id, p]));
+
         // Group invoices by shift
         const invoicesByShift = new Map<string, any[]>();
         rawInvoices.forEach(inv => {
@@ -458,8 +454,11 @@ export function usePosSettlementsLogic() {
                 settlementStatus = 'pending';
             }
 
-            const whData = (Array.isArray(shift.warehouse) ? shift.warehouse[0] : shift.warehouse) as any;
-            const cashierData = (Array.isArray(shift.cashier) ? shift.cashier[0] : shift.cashier) as any;
+            const whData = whMap.get(shift.warehouse_id) as any;
+            const delData = partnerMap.get(shift.delegate_id) as any;
+            const profData = profileMap.get(shift.user_id) as any;
+            const cashierName = delData?.name || profData?.full_name || whData?.manager_name || 'الكاشير';
+            const cashierPhone = delData?.phone || profData?.phone_number || '';
 
             return {
                 id: shift.id,
@@ -474,8 +473,8 @@ export function usePosSettlementsLogic() {
                 warehouseLocation: whData?.location || '',
                 warehousePhone: whData?.phone || '',
                 cashierId: shift.delegate_id || shift.user_id,
-                cashierName: cashierData?.name || whData?.manager_name || 'الكاشير',
-                cashierPhone: cashierData?.phone || '',
+                cashierName,
+                cashierPhone,
                 startingCash,
                 totalSales,
                 cashSales,
@@ -506,7 +505,7 @@ export function usePosSettlementsLogic() {
                 closingNotes: shift.closing_notes
             };
         });
-    }, [rawShifts, rawInvoices, rawReceipts, rawExpenses, rawInventory]);
+    }, [rawShifts, rawInvoices, rawReceipts, rawExpenses, rawInventory, warehousesQuery.data, cashiersQuery.data]);
 
     // Filtered settlements based on UI controls
     const filteredSettlements = useMemo(() => {

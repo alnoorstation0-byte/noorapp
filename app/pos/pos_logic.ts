@@ -58,33 +58,69 @@ export function usePosLogic() {
         }
     });
 
-    // Fetch delegates (المناديب)
+    // Fetch delegates & employees (الموظفين والمناديب والكاشير)
     const { data: delegates = [] } = useQuery({
         queryKey: ['pos_delegates'],
         queryFn: async () => {
-            const { data } = await supabase
-                .from('partners')
-                .select('id, name')
-                .in('partner_type', ['مندوب', 'موظف', 'delegate', 'employee'])
-                .eq('is_active', true)
-                .order('name');
-            return data || [];
+            const [partnersRes, profilesRes] = await Promise.all([
+                supabase.from('partners').select('*').eq('is_active', true).order('name'),
+                supabase.from('profiles').select('*').eq('is_active', true).order('full_name')
+            ]);
+            const partners = partnersRes.data || [];
+            const profiles = profilesRes.data || [];
+            const pMap = new Map(partners.map((p: any) => [p.id, p]));
+            const nameMap = new Map(partners.map((p: any) => [p.name.trim().toLowerCase(), p]));
+
+            const list: any[] = [];
+            const seenPartnerIds = new Set<string>();
+
+            // 1. أولاً: إضافة كافة موظفي النظام من profiles
+            profiles.forEach((prof: any) => {
+                const pName = (prof.full_name || prof.email?.split('@')[0] || 'موظف').trim();
+                const partner = (prof.linked_partner_id && pMap.get(prof.linked_partner_id)) || nameMap.get(pName.toLowerCase());
+                if (partner) seenPartnerIds.add(partner.id);
+                list.push({
+                    id: partner?.id || prof.linked_partner_id || prof.id,
+                    name: pName,
+                    partnerId: partner?.id || prof.linked_partner_id || null,
+                    userId: prof.id,
+                    role: prof.role || partner?.job_role || 'كاشير / موظف',
+                    phone: prof.phone_number || partner?.phone || '',
+                    source: 'profile'
+                });
+            });
+
+            // 2. ثانياً: إضافة باقي الشركاء من نوع موظف أو مندوب أو كاشير أو سائق
+            partners.forEach((part: any) => {
+                if (!seenPartnerIds.has(part.id)) {
+                    const type = (part.partner_type || '').trim();
+                    if (['مندوب', 'موظف', 'كاشير', 'سائق', 'عامل', 'delegate', 'employee', 'driver'].includes(type) || part.job_role) {
+                        list.push({
+                            id: part.id,
+                            name: part.name,
+                            partnerId: part.id,
+                            userId: null,
+                            role: part.job_role || type || 'مندوب',
+                            phone: part.phone || '',
+                            source: 'partner'
+                        });
+                    }
+                }
+            });
+
+            return list;
         }
     });
 
-    // Fetch Active Shift (حماية أمنية: وردية واحدة فقط لكل مستودع في نفس الوقت)
+    // Fetch Active Shift (حماية أمنية وبأمان تام دون أخطاء PGRST200)
     const { data: activeShift, isLoading: loadingShift } = useQuery({
-        queryKey: ['active_pos_shift', selectedWarehouseId],
+        queryKey: ['active_pos_shift', selectedWarehouseId, delegates, warehouses],
         queryFn: async () => {
             if (!selectedWarehouseId) return null;
 
             const { data, error } = await supabase
                 .from('pos_shifts')
-                .select(`
-                    *,
-                    warehouse:warehouses(id, name, type),
-                    delegate:partners!delegate_id(id, name, phone, code)
-                `)
+                .select('*')
                 .eq('status', 'open')
                 .eq('warehouse_id', selectedWarehouseId)
                 .order('opened_at', { ascending: false })
@@ -94,7 +130,21 @@ export function usePosLogic() {
                 console.warn('Error fetching active pos shift:', error);
                 return null;
             }
-            return data?.[0] || null;
+
+            const rawShift = data?.[0];
+            if (!rawShift) return null;
+
+            const wh = warehouses.find((w: any) => w.id === rawShift.warehouse_id);
+            const del = delegates.find((d: any) => 
+                (rawShift.delegate_id && (d.id === rawShift.delegate_id || d.partnerId === rawShift.delegate_id)) ||
+                (rawShift.user_id && d.userId === rawShift.user_id)
+            );
+
+            return {
+                ...rawShift,
+                warehouse: wh || { id: rawShift.warehouse_id, name: 'منفذ البيع' },
+                delegate: del ? { id: del.partnerId || del.id, name: del.name, phone: del.phone } : null
+            };
         },
         enabled: !!selectedWarehouseId
     });
@@ -110,9 +160,9 @@ export function usePosLogic() {
         }
     }, [activeShift?.id, activeShift?.delegate_id, selectedWarehouseId]);
 
-    // Fetch all currently open shifts across the system (لاستعراض ورديات كل المناديب والمستودعات والتبديل السريع بينها)
+    // Fetch all currently open shifts across the system (استعراض ورديات كل الموظفين والمنافذ)
     const { data: allOpenShifts = [], isLoading: loadingAllShifts } = useQuery({
-        queryKey: ['pos_open_shifts'],
+        queryKey: ['pos_open_shifts', warehouses, delegates],
         queryFn: async () => {
             const { data, error } = await supabase
                 .from('pos_shifts')
@@ -124,7 +174,19 @@ export function usePosLogic() {
                 console.warn('Error fetching all open shifts:', error);
                 return [];
             }
-            return data || [];
+
+            return (data || []).map((s: any) => {
+                const wh = warehouses.find((w: any) => w.id === s.warehouse_id);
+                const del = delegates.find((d: any) => 
+                    (s.delegate_id && (d.id === s.delegate_id || d.partnerId === s.delegate_id)) ||
+                    (s.user_id && d.userId === s.user_id)
+                );
+                return {
+                    ...s,
+                    warehouse: wh || { id: s.warehouse_id, name: 'منفذ البيع' },
+                    delegate: del ? { id: del.partnerId || del.id, name: del.name, phone: del.phone } : null
+                };
+            });
         }
     });
 
@@ -178,17 +240,23 @@ export function usePosLogic() {
     useEffect(() => {
         const profile: any = userProfile;
         if (!loadingProfile && !loadingWarehouses) {
-            // إذا كان المستخدم مربوط بمندوب
-            if (profile?.linked_partner_id) {
-                setDelegateId(profile.linked_partner_id);
-                // فقط اقفل التعديل إذا لم يكن مدير أو أدمن (حسب دورك)
+            // البحث عن الموظف الحالي في قائمة الموظفين
+            const myEmp = delegates.find((d: any) => 
+                (profile?.id && d.userId === profile.id) ||
+                (profile?.linked_partner_id && (d.partnerId === profile.linked_partner_id || d.id === profile.linked_partner_id))
+            );
+
+            const targetId = myEmp?.partnerId || myEmp?.id || profile?.linked_partner_id;
+
+            if (targetId) {
+                setDelegateId(targetId);
                 if (profile.role !== 'admin' && profile.role !== 'super_admin') {
                     setIsDelegateLocked(true);
                 }
                 
-                // البحث عن مستودع المندوب
+                // البحث عن مستودع الموظف / المندوب
                 if (warehouses.length > 0) {
-                    const assignedWh = warehouses.find(w => w.delegate_id === profile.linked_partner_id);
+                    const assignedWh = warehouses.find((w: any) => w.delegate_id === targetId);
                     if (assignedWh) {
                         setSelectedWarehouseId(assignedWh.id);
                     } else if (!selectedWarehouseId) {
@@ -203,7 +271,7 @@ export function usePosLogic() {
                 }
             }
         }
-    }, [userProfile, warehouses, loadingProfile, loadingWarehouses]);
+    }, [userProfile, warehouses, loadingProfile, loadingWarehouses, delegates]);
 
     const [onlyLowStock, setOnlyLowStock] = useState(false);
 

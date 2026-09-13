@@ -27,8 +27,11 @@ export default function ShiftCloseModal({
     const { showToast } = useToast();
     const queryClient = useQueryClient();
 
-    const currentWarehouse = warehouses?.find((w: any) => w.id === activeShift?.warehouse_id);
-    const currentDelegate = delegates?.find((d: any) => d.id === activeShift?.delegate_id);
+    const currentWarehouse = activeShift?.warehouse || warehouses?.find((w: any) => w.id === activeShift?.warehouse_id);
+    const currentDelegate = activeShift?.delegate || delegates?.find((d: any) => 
+        (activeShift?.delegate_id && (d.id === activeShift?.delegate_id || d.partnerId === activeShift?.delegate_id)) ||
+        (activeShift?.user_id && d.userId === activeShift?.user_id)
+    );
 
     useEffect(() => {
         if (isOpen && activeShift) {
@@ -310,7 +313,7 @@ export default function ShiftCloseModal({
                     </div>
                     <div>
                         <span style={{ color: '#64748b', fontSize: '11px', display: 'block', fontWeight: 700 }}>👤 {isEn ? 'Cashier / Rep:' : 'المندوب / الكاشير:'}</span>
-                        <strong style={{ color: '#0f172a', fontSize: '13px' }}>{currentDelegate?.name || (isEn ? 'Direct Sales (No Rep)' : 'مبيعات مباشرة (بدون مندوب)')}</strong>
+                        <strong style={{ color: '#0f172a', fontSize: '13px' }}>{currentDelegate?.name || (isEn ? 'Direct Sales' : 'مبيعات مباشرة')}</strong>
                     </div>
                     <div>
                         <span style={{ color: '#64748b', fontSize: '11px', display: 'block', fontWeight: 700 }}>🕒 {isEn ? 'Open Time:' : 'وقت الفتح:'}</span>

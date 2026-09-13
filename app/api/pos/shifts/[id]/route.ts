@@ -19,32 +19,36 @@ export async function GET(
         }
 
         // 1. التجميع المباشر اللحظي من الجداول لضمان دقة الحسابات، تكلفة البضاعة المباعة (COGS)، وهوامش الربح الحقيقية
-        const { data: shift, error: shiftErr } = await supabaseAdmin
+        const { data: rawShift, error: shiftErr } = await supabaseAdmin
             .from('pos_shifts')
-            .select(`
-                *,
-                warehouse:warehouses(id, name, type, location, phone, vehicle_id),
-                delegate:partners!delegate_id(id, name, phone, code)
-            `)
+            .select('*')
             .eq('id', id)
             .maybeSingle();
 
-        if (shiftErr || !shift) {
+        if (shiftErr || !rawShift) {
             return NextResponse.json({ success: false, error: 'الوردية غير موجودة أو تم حذفها' }, { status: 404 });
         }
 
-        // جلب بيانات الكاشير / المستخدم
-        let cashierName = 'كاشير النظام';
-        if (shift.user_id) {
-            const { data: profile } = await supabaseAdmin
-                .from('profiles')
-                .select('id, full_name, username, email')
-                .eq('id', shift.user_id)
-                .maybeSingle();
-            if (profile) {
-                cashierName = profile.full_name || profile.username || profile.email || 'كاشير النظام';
-            }
-        }
+        // جلب بيانات المستودع والمندوب والكاشير بشكل آمن
+        const [whRes, delRes, profRes] = await Promise.all([
+            rawShift.warehouse_id ? supabaseAdmin.from('warehouses').select('id, name, type, location, phone, vehicle_id').eq('id', rawShift.warehouse_id).maybeSingle() : Promise.resolve({ data: null }),
+            rawShift.delegate_id ? supabaseAdmin.from('partners').select('id, name, phone, code').eq('id', rawShift.delegate_id).maybeSingle() : Promise.resolve({ data: null }),
+            rawShift.user_id ? supabaseAdmin.from('profiles').select('id, full_name, username, email').eq('id', rawShift.user_id).maybeSingle() : Promise.resolve({ data: null })
+        ]);
+
+        const warehouse = whRes.data || null;
+        const delegate = delRes.data || null;
+        const profile = profRes.data || null;
+
+        let cashierName = delegate?.name || profile?.full_name || profile?.username || profile?.email || 'كاشير النظام';
+
+        const shift = {
+            ...rawShift,
+            warehouse,
+            delegate: delegate || (profile ? { id: profile.id, name: profile.full_name || profile.username } : null),
+            cashier: { id: rawShift.user_id, name: cashierName }
+        };
+
 
         // جلب الفواتير التابعة للوردية (باستثناء الملغاة)
         const { data: invoices = [] } = await supabaseAdmin
