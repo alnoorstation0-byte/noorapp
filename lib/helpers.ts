@@ -463,7 +463,11 @@ export const fetchAllSupabaseData = async (
     const { data, error } = await query;
 
     if (error) {
-      console.error(`❌ خطأ في سحب [${tableName}]:`, error.message);
+      if (error.code === 'PGRST205' || error.message?.includes('schema cache')) {
+        console.warn(`⚠️ تنبيه: الجدول أو العرض [${tableName}] غير متواجد حالياً في قاعدة البيانات.`);
+      } else {
+        console.error(`❌ خطأ في سحب [${tableName}]:`, error.message);
+      }
       break; 
     }
 

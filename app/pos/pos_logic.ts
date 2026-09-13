@@ -468,13 +468,18 @@ export function usePosLogic() {
         }
     }, [loadingShift, loadingProfile, selectedWarehouseId, activeShift, hasAutoOpenedShift]);
 
-    // Fetch Active Promotions
+    // Fetch Active Promotions safely without client 404s
     const { data: promotions = [] } = useQuery({
         queryKey: ['active_promotions'],
         queryFn: async () => {
-            const { data, error } = await supabase.from('promotions').select('*').eq('status', 'active');
-            if (error) return [];
-            return data as Promotion[];
+            try {
+                const res = await fetch('/api/pos/promotions');
+                if (!res.ok) return [];
+                const json = await res.json();
+                return (json.data || []) as Promotion[];
+            } catch {
+                return [];
+            }
         }
     });
 

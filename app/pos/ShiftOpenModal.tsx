@@ -76,7 +76,7 @@ export default function ShiftOpenModal({
 
             let q = supabase
                 .from('pos_shifts')
-                .select('id, shift_number, starting_cash, opened_at, closed_at, total_sales')
+                .select('id, starting_cash, opened_at, closed_at, total_sales')
                 .eq('warehouse_id', targetWarehouseId)
                 .eq('status', 'closed')
                 .gte('opened_at', todayStartIso)

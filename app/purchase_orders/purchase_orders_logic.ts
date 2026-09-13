@@ -22,7 +22,7 @@ export function usePurchaseOrdersLogic() {
       setIsLoading(true);
       let query = supabase
         .from('inventory_transactions')
-        .select('id, transaction_number, transaction_date, type, quantity, unit_price, tax_amount, include_tax, notes, status, item_id, partner_id, inventory_items ( name, unit ), partners!inventory_transactions_partner_id_fkey ( name )')
+        .select('id, transaction_number, transaction_date, type, quantity, unit_price, tax_amount, include_tax, notes, status, item_id, partner_id')
         .eq('type', 'in')
         .order('transaction_date', { ascending: false });
 
@@ -34,10 +34,24 @@ export function usePurchaseOrdersLogic() {
           }
       }
 
-      const { data, error } = await query;
-      if (error) throw error;
+      const [txRes, itemsRes, partnersRes] = await Promise.all([
+        query,
+        supabase.from('inventory_items').select('id, name, unit'),
+        supabase.from('partners').select('id, name')
+      ]);
+
+      if (txRes.error) throw txRes.error;
+
+      const itemsMap = new Map((itemsRes.data || []).map((it: any) => [it.id, it]));
+      const partnersMap = new Map((partnersRes.data || []).map((p: any) => [p.id, p]));
+
+      const enrichedData = (txRes.data || []).map((curr: any) => ({
+        ...curr,
+        inventory_items: itemsMap.get(curr.item_id) || { name: 'صنف غير محدد', unit: '' },
+        partners: partnersMap.get(curr.partner_id) || { name: 'مورد غير محدد' }
+      }));
       
-      const grouped = (data || []).reduce((acc: any, curr: any) => {
+      const grouped = enrichedData.reduce((acc: any, curr: any) => {
           let baseNumber = curr.transaction_number;
           if (/-\d+$/.test(baseNumber)) {
               baseNumber = baseNumber.replace(/-\d+$/, '');

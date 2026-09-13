@@ -32,10 +32,25 @@ export default function SystemHealthRadar() {
 
         try {
             // 1. Negative Inventory
-            const { data: negInv } = await supabase
+            const { data: rawNegInv } = await supabase
                 .from('warehouse_inventory')
-                .select('id, quantity, warehouse:warehouses(name), item:inventory_items(name)')
+                .select('id, quantity, warehouse_id, item_id')
                 .lt('quantity', 0);
+            
+            let negInv: any[] = [];
+            if (rawNegInv && rawNegInv.length > 0) {
+                const [whRes, itemsRes] = await Promise.all([
+                    supabase.from('warehouses').select('id, name'),
+                    supabase.from('inventory_items').select('id, name')
+                ]);
+                const whMap = new Map((whRes.data || []).map((w: any) => [w.id, w]));
+                const itMap = new Map((itemsRes.data || []).map((i: any) => [i.id, i]));
+                negInv = rawNegInv.map((n: any) => ({
+                    ...n,
+                    warehouse: whMap.get(n.warehouse_id) || { name: 'مستودع' },
+                    item: itMap.get(n.item_id) || { name: 'صنف' }
+                }));
+            }
             
             if (negInv && negInv.length > 0) {
                 detectedIssues.push({

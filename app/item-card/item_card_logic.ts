@@ -27,24 +27,23 @@ export function useItemCardLogic() {
             
             let q = supabase
                 .from('inventory_transactions')
-                .select(`
-                    id, 
-                    transaction_date, 
-                    type, 
-                    quantity, 
-                    notes,
-                    warehouse:warehouses!inventory_transactions_warehouse_id_fkey(name)
-                `)
+                .select('id, transaction_date, type, quantity, notes, warehouse_id')
                 .eq('item_id', selectedItemId)
                 .order('transaction_date', { ascending: true })
                 .order('created_at', { ascending: true }); // Ensure proper chronological order if same date
 
-            const { data, error } = await q;
-            if (error) throw error;
+            const [txRes, whRes] = await Promise.all([
+                q,
+                supabase.from('warehouses').select('id, name')
+            ]);
 
-            // Apply date filtering post-query if we want to show a starting balance, 
-            // but for simplicity, let's filter in JS to calculate running balance correctly from the beginning of time.
-            return data || [];
+            if (txRes.error) throw txRes.error;
+            const whMap = new Map((whRes.data || []).map((w: any) => [w.id, w]));
+
+            return (txRes.data || []).map((t: any) => ({
+                ...t,
+                warehouse: whMap.get(t.warehouse_id) || { name: 'المستودع الرئيسي' }
+            }));
         },
         enabled: !!selectedItemId
     });

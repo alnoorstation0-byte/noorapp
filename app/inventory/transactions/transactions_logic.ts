@@ -31,10 +31,7 @@ export function useInventoryTransactionsLogic() {
           journal_id,
           item_id,
           partner_id,
-          fleet_operation_id,
-          inventory_items ( name, unit ),
-          partners!inventory_transactions_partner_id_fkey ( name, account_id, partner_type ),
-          fleet_operations ( operation_number, vehicle_id, driver_id, vehicle:fleet_vehicles(plate_number), driver:partners(name, account_id) )
+          fleet_operation_id
         `)
         .order('transaction_date', { ascending: false });
 
@@ -48,34 +45,54 @@ export function useInventoryTransactionsLogic() {
         query = query.lte('transaction_date', dateTo);
       }
 
-      const { data, error } = await query;
-      if (error) throw error;
+      const [txRes, itemsRes, partnersRes, opsRes, vehRes] = await Promise.all([
+        query,
+        supabase.from('inventory_items').select('id, name, unit'),
+        supabase.from('partners').select('id, name, account_id, partner_type'),
+        supabase.from('fleet_operations').select('id, operation_number, vehicle_id, driver_id'),
+        supabase.from('fleet_vehicles').select('id, plate_number')
+      ]);
 
-      const formattedData = (data || []).map((row: any) => ({
-        id: row.id,
-        transaction_number: row.transaction_number || '-',
-        transaction_date: row.transaction_date,
-        type: row.type,
-        quantity: row.quantity,
-        unit_price: row.unit_price,
-        notes: row.notes,
-        status: row.status || 'pending',
-        journal_id: row.journal_id,
-        item_id: row.item_id,
-        partner_id: row.partner_id,
-        item_name: row.inventory_items?.name || 'غير معروف',
-        unit: row.inventory_items?.unit || '',
-        partner: row.partners?.name || '',
-        partner_type: row.partners?.partner_type || '',
-        partner_account_id: row.partners?.account_id,
-        fleet_operation: row.fleet_operations ? `${row.fleet_operations.operation_number} - ${row.fleet_operations.vehicle?.plate_number}` : '',
-        vehicle_id: row.fleet_operations?.vehicle_id,
-        vehicle_plate: row.fleet_operations?.vehicle?.plate_number || 'بدون سيارة',
-        driver_id: row.fleet_operations?.driver_id,
-        driver_name: row.fleet_operations?.driver?.name || 'بدون مندوب',
-        driver_account_id: row.fleet_operations?.driver?.account_id,
-        fleet_operation_number: row.fleet_operations?.operation_number
-      }));
+      if (txRes.error) throw txRes.error;
+
+      const itemsMap = new Map((itemsRes.data || []).map((it: any) => [it.id, it]));
+      const partnersMap = new Map((partnersRes.data || []).map((p: any) => [p.id, p]));
+      const opsMap = new Map((opsRes.data || []).map((o: any) => [o.id, o]));
+      const vehMap = new Map((vehRes.data || []).map((v: any) => [v.id, v]));
+
+      const formattedData = (txRes.data || []).map((row: any) => {
+        const it = itemsMap.get(row.item_id);
+        const part = partnersMap.get(row.partner_id);
+        const op = opsMap.get(row.fleet_operation_id);
+        const veh = op ? vehMap.get(op.vehicle_id) : null;
+        const driver = op ? partnersMap.get(op.driver_id) : null;
+
+        return {
+          id: row.id,
+          transaction_number: row.transaction_number || '-',
+          transaction_date: row.transaction_date,
+          type: row.type,
+          quantity: row.quantity,
+          unit_price: row.unit_price,
+          notes: row.notes,
+          status: row.status || 'pending',
+          journal_id: row.journal_id,
+          item_id: row.item_id,
+          partner_id: row.partner_id,
+          item_name: it?.name || 'غير معروف',
+          unit: it?.unit || '',
+          partner: part?.name || '',
+          partner_type: part?.partner_type || '',
+          partner_account_id: part?.account_id,
+          fleet_operation: op ? `${op.operation_number} - ${veh?.plate_number || 'بدون سيارة'}` : '',
+          vehicle_id: op?.vehicle_id,
+          vehicle_plate: veh?.plate_number || 'بدون سيارة',
+          driver_id: op?.driver_id,
+          driver_name: driver?.name || 'بدون مندوب',
+          driver_account_id: driver?.account_id,
+          fleet_operation_number: op?.operation_number
+        };
+      });
 
       setRawRecords(formattedData);
     } catch (err: any) {

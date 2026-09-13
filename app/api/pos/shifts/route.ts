@@ -158,8 +158,8 @@ export async function POST(request: Request) {
         // 0. التحقق من المستخدم والمندوب والربط التلقائي بين profiles و partners
         let resolvedUserId = user_id;
         if (!resolvedUserId) {
-            const { data: { users } } = await supabaseAdmin.auth.admin.listUsers();
-            if (users && users.length > 0) resolvedUserId = users[0].id;
+            const { data: defProf } = await supabaseAdmin.from('profiles').select('id').limit(1).maybeSingle();
+            if (defProf) resolvedUserId = defProf.id;
         }
 
         // إذا تم تمرير delegate_id لكنه في الحقيقة profile.id أو العكس

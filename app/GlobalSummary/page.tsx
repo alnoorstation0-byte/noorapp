@@ -27,7 +27,7 @@ export default function MasterDashboard() {
                     fetchAllSupabaseData(supabase, 'fleet_operations'),
                     fetchAllSupabaseData(supabase, 'invoices'),
                     fetchAllSupabaseData(supabase, 'expenses'),
-                    fetchAllSupabaseData(supabase, 'vw_advanced_audit'),
+                    Promise.resolve([]),
                     fetchAllSupabaseData(supabase, 'accounts')
                 ]);
 

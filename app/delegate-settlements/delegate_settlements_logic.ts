@@ -87,24 +87,7 @@ export function useDelegateSettlementsLogic() {
         queryFn: async () => {
             let q = supabase
                 .from('fleet_operations')
-                .select(`
-                    id, 
-                    operation_number, 
-                    operation_date, 
-                    status, 
-                    vehicle_id, 
-                    driver_id, 
-                    warehouse_id, 
-                    total_sales, 
-                    total_expenses, 
-                    inventory_cost, 
-                    net_profit, 
-                    notes, 
-                    created_at,
-                    driver:partners!driver_id(id, name, phone, code, partner_type, account_id),
-                    vehicle:fleet_vehicles!vehicle_id(id, plate_number, vehicle_model),
-                    warehouse:warehouses!warehouse_id(id, name, type)
-                `)
+                .select('id, operation_number, operation_date, status, vehicle_id, driver_id, warehouse_id, total_sales, total_expenses, inventory_cost, net_profit, notes, created_at')
                 .order('operation_date', { ascending: false });
 
             if (dateFrom) q = q.gte('operation_date', dateFrom);
@@ -118,9 +101,25 @@ export function useDelegateSettlementsLogic() {
                 }
             }
 
-            const { data, error } = await q;
-            if (error) throw error;
-            return data || [];
+            const [opsRes, driversRes, vehRes, whRes] = await Promise.all([
+                q,
+                supabase.from('partners').select('id, name, phone, code, partner_type, account_id'),
+                supabase.from('fleet_vehicles').select('id, plate_number, vehicle_model'),
+                supabase.from('warehouses').select('id, name, type')
+            ]);
+
+            if (opsRes.error) throw opsRes.error;
+
+            const driverMap = new Map((driversRes.data || []).map((d: any) => [d.id, d]));
+            const vehMap = new Map((vehRes.data || []).map((v: any) => [v.id, v]));
+            const whMap = new Map((whRes.data || []).map((w: any) => [w.id, w]));
+
+            return (opsRes.data || []).map((op: any) => ({
+                ...op,
+                driver: driverMap.get(op.driver_id) || null,
+                vehicle: vehMap.get(op.vehicle_id) || null,
+                warehouse: whMap.get(op.warehouse_id) || null
+            }));
         },
         enabled: !!profile,
         staleTime: 0
@@ -175,29 +174,21 @@ export function useDelegateSettlementsLogic() {
     const inventoryTxnsQuery = useQuery({
         queryKey: ['delegate_settlements_inventory_txns', dateFrom, dateTo],
         queryFn: async () => {
-            const { data, error } = await supabase
-                .from('inventory_transactions')
-                .select(`
-                    id, 
-                    transaction_number, 
-                    transaction_date, 
-                    type, 
-                    quantity, 
-                    item_id, 
-                    unit_price, 
-                    total_price, 
-                    status, 
-                    fleet_operation_id, 
-                    warehouse_id, 
-                    destination_warehouse_id, 
-                    delegate_id, 
-                    partner_id,
-                    notes,
-                    item:inventory_items(id, name, unit, cost_price, default_price)
-                `)
-                .not('fleet_operation_id', 'is', null);
-            if (error) throw error;
-            return data || [];
+            const [txRes, itemsRes] = await Promise.all([
+                supabase
+                    .from('inventory_transactions')
+                    .select('id, transaction_number, transaction_date, type, quantity, item_id, unit_price, total_price, status, fleet_operation_id, warehouse_id, destination_warehouse_id, delegate_id, partner_id, notes')
+                    .not('fleet_operation_id', 'is', null),
+                supabase
+                    .from('inventory_items')
+                    .select('id, name, unit, cost_price, default_price')
+            ]);
+            if (txRes.error) throw txRes.error;
+            const itemsMap = new Map((itemsRes.data || []).map((i: any) => [i.id, i]));
+            return (txRes.data || []).map((t: any) => ({
+                ...t,
+                item: itemsMap.get(t.item_id) || null
+            }));
         },
         staleTime: 0
     });
@@ -206,22 +197,20 @@ export function useDelegateSettlementsLogic() {
     const vehicleInventoryQuery = useQuery({
         queryKey: ['delegate_settlements_vehicle_inv'],
         queryFn: async () => {
-            const { data, error } = await supabase
-                .from('vehicle_inventory')
-                .select(`
-                    id, 
-                    fleet_operation_id, 
-                    item_id, 
-                    quantity, 
-                    loaded_qty, 
-                    sold_qty, 
-                    returned_qty, 
-                    waste_qty, 
-                    shortage_qty,
-                    item:inventory_items(id, name, unit, cost_price, default_price)
-                `);
-            if (error) throw error;
-            return data || [];
+            const [vInvRes, itemsRes] = await Promise.all([
+                supabase
+                    .from('vehicle_inventory')
+                    .select('id, fleet_operation_id, item_id, quantity, loaded_qty, sold_qty, returned_qty, waste_qty, shortage_qty'),
+                supabase
+                    .from('inventory_items')
+                    .select('id, name, unit, cost_price, default_price')
+            ]);
+            if (vInvRes.error) throw vInvRes.error;
+            const itemsMap = new Map((itemsRes.data || []).map((i: any) => [i.id, i]));
+            return (vInvRes.data || []).map((v: any) => ({
+                ...v,
+                item: itemsMap.get(v.item_id) || null
+            }));
         },
         staleTime: 0
     });
