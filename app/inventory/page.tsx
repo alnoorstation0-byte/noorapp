@@ -46,6 +46,39 @@ export default function InventoryPage() {
               <span>عهدة فوارغ</span>
             </span>
           )}
+          {Number(row.tax_rate) === 0 ? (
+            <span style={{
+              fontSize: '11px',
+              fontWeight: 800,
+              color: '#15803d',
+              background: 'rgba(34, 197, 94, 0.12)',
+              border: '1px solid rgba(34, 197, 94, 0.35)',
+              padding: '2px 8px',
+              borderRadius: '8px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px'
+            }} title="معفي من ضريبة القيمة المضافة (0%)">
+              <span>🟢</span>
+              <span>معفي (0% ضريبة)</span>
+            </span>
+          ) : (
+            <span style={{
+              fontSize: '10.5px',
+              fontWeight: 700,
+              color: '#64748b',
+              background: 'rgba(100, 116, 139, 0.08)',
+              border: '1px solid rgba(100, 116, 139, 0.2)',
+              padding: '1px 6px',
+              borderRadius: '6px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '3px'
+            }} title="خاضع لضريبة القيمة المضافة القياسية 15%">
+              <span>🏷️</span>
+              <span>15% ضريبة</span>
+            </span>
+          )}
         </div>
       )
     },
@@ -182,9 +215,9 @@ export default function InventoryPage() {
                 </div>
               </div>
               <div className="summary-glass-card" style={{ padding: '10px', textAlign: 'center' }}>
-                <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#1C73AB' }}>أصناف عهدة 🔄</span>
-                <div className="val" style={{ fontSize: '17px', fontWeight: 900, color: '#1C73AB' }}>
-                  {logic.items?.filter((it: any) => it.is_returnable_bottle).length || 0}
+                <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#4E734F' }}>معفي ضريبياً 🌿</span>
+                <div className="val" style={{ fontSize: '17px', fontWeight: 900, color: '#4E734F' }}>
+                  {logic.items?.filter((it: any) => Number(it.tax_rate) === 0).length || 0}
                 </div>
               </div>
             </div>

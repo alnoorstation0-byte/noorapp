@@ -2140,6 +2140,10 @@ export default function PosPage() {
                                                     <span className="pos-badge-status near-low">
                                                         ⚡ {isEn ? 'Low Stock' : 'وشك النفاذ'}
                                                     </span>
+                                                ) : Number(item.tax_rate) === 0 ? (
+                                                    <span className="pos-badge-status" style={{ background: 'rgba(78, 115, 79, 0.15)', color: '#4E734F', border: '1px solid rgba(78, 115, 79, 0.3)' }}>
+                                                        🌿 {isEn ? 'Exempt' : 'معفي (0%)'}
+                                                    </span>
                                                 ) : item.is_returnable_bottle ? (
                                                     <span className="pos-badge-status returnable">
                                                         🔄 {isEn ? 'Returnable' : 'عهدة فوارغ'}
@@ -2312,6 +2316,20 @@ export default function PosPage() {
                                                         whiteSpace: 'nowrap'
                                                     }}>
                                                         🔄 عهدة ({item.qty} {isEn ? 'returnable' : 'فوارغ'})
+                                                    </span>
+                                                )}
+                                                {Number(item.tax_rate) === 0 && (
+                                                    <span style={{
+                                                        background: 'rgba(78, 115, 79, 0.15)',
+                                                        color: '#4E734F',
+                                                        border: '1px solid rgba(78, 115, 79, 0.3)',
+                                                        borderRadius: '6px',
+                                                        padding: '1px 6px',
+                                                        fontSize: '10px',
+                                                        fontWeight: 800,
+                                                        whiteSpace: 'nowrap'
+                                                    }}>
+                                                        🌿 {isEn ? 'Tax-Exempt' : 'معفي ضريبياً (0%)'}
                                                     </span>
                                                 )}
                                                 {((item.discount || 0) + (item.promo_discount || 0) > 0) && (
@@ -2572,12 +2590,21 @@ export default function PosPage() {
                                 fontSize: '11.5px'
                             }}>
                                 <div>
-                                    <span style={{ color: '#64748b', fontWeight: 700 }}>{isEn ? 'Subtotal:' : 'المجموع الفرعي:'} </span>
+                                    <span style={{ color: '#64748b', fontWeight: 700 }}>{isEn ? 'Subtotal:' : 'المجموع:'} </span>
                                     <span style={{ fontWeight: 900, color: '#122946' }}>{formatCurrency(logic.cartTotal.subtotal)}</span>
                                 </div>
+                                {logic.cartTotal.exemptSubtotal > 0 && (
+                                    <>
+                                        <div style={{ width: '1px', height: '14px', background: 'rgba(78, 115, 79, 0.3)' }}></div>
+                                        <div>
+                                            <span style={{ color: '#4E734F', fontWeight: 700 }}>{isEn ? 'Exempt:' : 'معفي:'} </span>
+                                            <span style={{ fontWeight: 900, color: '#4E734F' }}>{formatCurrency(logic.cartTotal.exemptSubtotal)}</span>
+                                        </div>
+                                    </>
+                                )}
                                 <div style={{ width: '1px', height: '14px', background: 'rgba(28, 115, 171, 0.2)' }}></div>
                                 <div>
-                                    <span style={{ color: '#64748b', fontWeight: 700 }}>{isEn ? 'VAT (15%):' : 'الضريبة (15%):'} </span>
+                                    <span style={{ color: '#64748b', fontWeight: 700 }}>{isEn ? 'VAT:' : 'الضريبة:'} </span>
                                     <span style={{ fontWeight: 900, color: '#122946' }}>{formatCurrency(logic.cartTotal.tax)}</span>
                                 </div>
                             </div>

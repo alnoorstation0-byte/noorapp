@@ -35,6 +35,7 @@ export default function InventoryItemModal({ isOpen, onClose, currentRecord, set
     reorder_level: 5,
     current_quantity: '',
     is_returnable_bottle: false,
+    tax_rate: 15,
     notes: ''
   });
 
@@ -52,6 +53,7 @@ export default function InventoryItemModal({ isOpen, onClose, currentRecord, set
         reorder_level: (currentRecord?.reorder_level !== undefined && currentRecord?.reorder_level !== null) ? currentRecord.reorder_level : 5,
         current_quantity: (currentRecord?.current_quantity !== undefined && currentRecord?.current_quantity !== null) ? currentRecord.current_quantity : '',
         is_returnable_bottle: Boolean(currentRecord?.is_returnable_bottle),
+        tax_rate: (currentRecord?.tax_rate !== undefined && currentRecord?.tax_rate !== null) ? Number(currentRecord.tax_rate) : 15,
         notes: currentRecord?.notes || ''
       });
     }
@@ -352,6 +354,52 @@ export default function InventoryItemModal({ isOpen, onClose, currentRecord, set
             <div className="item-modal-sec-title">
               <span>⚙️</span>
               <span>خيارات إضافية ومواصفات</span>
+            </div>
+
+            {/* خيار الإعفاء الضريبي (ضريبة القيمة المضافة 0%) */}
+            <div 
+              onClick={() => updateField('tax_rate', Number(formData.tax_rate) === 0 ? 15 : 0)}
+              className="item-bottle-toggle"
+              style={{ 
+                marginBottom: '12px',
+                background: Number(formData.tax_rate) === 0 
+                  ? 'linear-gradient(135deg, rgba(78, 115, 79, 0.15) 0%, rgba(194, 155, 98, 0.12) 100%)' 
+                  : 'rgba(241, 245, 249, 0.7)',
+                borderColor: Number(formData.tax_rate) === 0 ? '#4E734F' : 'rgba(203, 213, 225, 0.8)',
+                boxShadow: Number(formData.tax_rate) === 0 ? '0 4px 12px rgba(78, 115, 79, 0.15)' : 'none'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{
+                  width: '36px', height: '36px', borderRadius: '10px',
+                  background: Number(formData.tax_rate) === 0 ? 'linear-gradient(135deg, #4E734F 0%, #365337 100%)' : '#e2e8f0',
+                  color: Number(formData.tax_rate) === 0 ? 'white' : '#64748b',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px',
+                  boxShadow: Number(formData.tax_rate) === 0 ? '0 2px 8px rgba(78, 115, 79, 0.35)' : 'none'
+                }}>
+                  {Number(formData.tax_rate) === 0 ? '🌿' : '🏷️'}
+                </div>
+                <div>
+                  <div style={{ fontSize: '13px', fontWeight: 900, color: Number(formData.tax_rate) === 0 ? '#2C1A12' : '#1e293b' }}>
+                    منتج معفي من ضريبة القيمة المضافة (0% ضريبة)
+                  </div>
+                  <div style={{ fontSize: '11px', color: Number(formData.tax_rate) === 0 ? '#4E734F' : '#64748b', fontWeight: 700, marginTop: '2px' }}>
+                    {Number(formData.tax_rate) === 0 
+                      ? '🟢 معفي من الضريبة - لن يتم احتساب 15% ضريبة مضافة في المبيعات والفواتير' 
+                      : '⚪ خاضع للضريبة القياسية (15% ضريبة القيمة المضافة)'}
+                  </div>
+                </div>
+              </div>
+              <div style={{
+                width: '24px', height: '24px', borderRadius: '7px',
+                border: Number(formData.tax_rate) === 0 ? '2px solid #4E734F' : '2px solid #94a3b8',
+                background: Number(formData.tax_rate) === 0 ? '#4E734F' : 'white',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                color: 'white', fontWeight: 900, fontSize: '14px',
+                transition: '0.2s', flexShrink: 0
+              }}>
+                {Number(formData.tax_rate) === 0 ? '✓' : ''}
+              </div>
             </div>
 
             {/* عهدة العبوات والمستلزمات */}

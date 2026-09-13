@@ -24,7 +24,7 @@ export function useInventoryLogic() {
   const [isModalOpen, setIsModalOpen] = useState(false); // For adding new product to catalog
   const [isActionModalOpen, setIsActionModalOpen] = useState(false); // For Quick Action In/Out
   const [currentRecord, setCurrentRecord] = useState<any>({
-    code: '', name: '', unit: 'حبة', current_quantity: 0, reorder_level: 5, suggested_price: 0, is_returnable_bottle: false
+    code: '', name: '', unit: 'حبة', current_quantity: 0, reorder_level: 5, suggested_price: 0, is_returnable_bottle: false, tax_rate: 15
   });
 
   const categories = useMemo(() => {
@@ -180,7 +180,8 @@ export function useInventoryLogic() {
         cost_price: Number(payload.cost_price) || 0,
         suggested_price: Number(payload.suggested_price) || 0,
         default_price: Number(payload.suggested_price) || 0,
-        is_returnable_bottle: Boolean(payload.is_returnable_bottle)
+        is_returnable_bottle: Boolean(payload.is_returnable_bottle),
+        tax_rate: (payload.tax_rate !== undefined && payload.tax_rate !== null) ? Number(payload.tax_rate) : 15
       };
 
       if (payload.barcode) cleanPayload.barcode = payload.barcode;
@@ -190,8 +191,32 @@ export function useInventoryLogic() {
         const { error } = await supabase.from('inventory_items').update(cleanPayload).eq('id', payload.id);
         if (error) throw error;
       } else {
-        const { error } = await supabase.from('inventory_items').insert([cleanPayload]);
+        const { data: insertedItem, error } = await supabase.from('inventory_items').insert([cleanPayload]).select().single();
         if (error) throw error;
+
+        // 📦 إذا تم إدخال رصيد افتتاحي أولي أكبر من صفر، ننشئ حركة رصيد أول المدة للمستودع الرئيسي تلقائياً
+        if (insertedItem && Number(cleanPayload.current_quantity) > 0) {
+          const openQty = Number(cleanPayload.current_quantity);
+          const openCost = Number(cleanPayload.cost_price) || 0;
+          await supabase.from('inventory_transactions').insert([{
+            transaction_number: `TX-OPEN-${Date.now().toString().slice(-6)}`,
+            transaction_date: new Date().toISOString().split('T')[0],
+            item_id: insertedItem.id,
+            warehouse_id: MAIN_WAREHOUSE_ID,
+            type: 'in',
+            quantity: openQty,
+            unit_price: openCost,
+            total_price: openQty * openCost,
+            notes: 'رصيد افتتاحي أول المدة عند إنشاء الصنف',
+            status: 'approved'
+          }]);
+
+          await supabase.from('warehouse_inventory').upsert([{
+            warehouse_id: MAIN_WAREHOUSE_ID,
+            item_id: insertedItem.id,
+            quantity: openQty
+          }], { onConflict: 'warehouse_id,item_id' });
+        }
       }
     },
     onSuccess: () => {

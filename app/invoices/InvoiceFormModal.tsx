@@ -68,8 +68,19 @@ export default function InvoiceFormModal({ isOpen, onClose, record, setRecord, o
         const guaranteePercent = Number(record.guarantee_percent || 0);
         const guaranteeAmount = (taxableAmount * guaranteePercent) / 100;
         
-        // 💡 حساب الضريبة (لو متعلم إنها مش خاضعة بيديها 0، لو خاضعة بيحسب 15%)
-        const taxAmount = record.skip_zatca ? 0 : (taxableAmount * 0.15); 
+        // 💡 حساب الضريبة (لو متعلم إنها مش خاضعة بيديها 0، وإلا بيحسب بناءً على نسبة ضريبة كل صنف)
+        let taxAmount = 0;
+        if (!record.skip_zatca) {
+            const linesTax = (record.lines || []).reduce((sum: number, line: any) => {
+                const lSub = (Number(line.quantity || 0) * Number(line.unit_price || 0));
+                const lRate = (line.tax_rate !== undefined && line.tax_rate !== null) ? Number(line.tax_rate) : 15;
+                return sum + (lSub * (lRate / 100));
+            }, 0);
+            const curRate = (record.tax_rate !== undefined && record.tax_rate !== null) ? Number(record.tax_rate) : 15;
+            const curTax = (qty * price) * (curRate / 100);
+            taxAmount = Math.round((linesTax + curTax) * 100) / 100;
+        }
+
         const finalTotal = taxableAmount + taxAmount - guaranteeAmount;
 
         const days = Number(record.due_in_days || 0);
@@ -95,7 +106,7 @@ export default function InvoiceFormModal({ isOpen, onClose, record, setRecord, o
                 due_date: dueDateCalculated.toISOString()
             }));
         }
-    }, [record?.quantity, record?.unit_price, record?.materials_discount, record?.guarantee_percent, record?.date, record?.due_in_days, record?.skip_zatca, record?.lines]); 
+    }, [record?.quantity, record?.unit_price, record?.tax_rate, record?.materials_discount, record?.guarantee_percent, record?.date, record?.due_in_days, record?.skip_zatca, record?.lines]); 
 
     // 🚀 دالة إضافة البيان للجدول
     const handleAddStatement = (e: React.MouseEvent) => {
@@ -116,7 +127,8 @@ export default function InvoiceFormModal({ isOpen, onClose, record, setRecord, o
             unit: record.unit || 'عدد',
             unit_price: Number(record.unit_price),
             total_price: Number(record.quantity) * Number(record.unit_price),
-            item_id: record.item_id || null
+            item_id: record.item_id || null,
+            tax_rate: (record.tax_rate !== undefined && record.tax_rate !== null) ? Number(record.tax_rate) : 15
         };
 
         setRecord({
@@ -127,7 +139,8 @@ export default function InvoiceFormModal({ isOpen, onClose, record, setRecord, o
             quantity: '',
             unit_price: '',
             boq_id: null,
-            item_id: null
+            item_id: null,
+            tax_rate: 15
         });
     };
 
@@ -145,6 +158,7 @@ export default function InvoiceFormModal({ isOpen, onClose, record, setRecord, o
                 unit: foundItem.unit || 'حبة',
                 unit_price: foundItem.price || foundItem.default_price || 0,
                 item_id: foundItem.id,
+                tax_rate: (foundItem.tax_rate !== undefined && foundItem.tax_rate !== null) ? Number(foundItem.tax_rate) : 15,
                 quantity: 1
             });
             showToast(`تم العثور على: ${foundItem.name}`, 'success');
@@ -365,7 +379,8 @@ export default function InvoiceFormModal({ isOpen, onClose, record, setRecord, o
                                                 description: val.name,
                                                 unit: val.unit || 'عدد',
                                                 unit_price: val.price || 0,
-                                                item_id: val.id
+                                                item_id: val.id,
+                                                tax_rate: (val.tax_rate !== undefined && val.tax_rate !== null) ? Number(val.tax_rate) : 15
                                             });
                                         }
                                     }}

@@ -281,11 +281,10 @@ export function usePosLogic() {
         queryFn: async () => {
             if (!selectedWarehouseId) return [];
 
-            // 1. Fetch all catalog items
-            // 1. Fetch Item Master Catalog
+            // 1. Fetch Item Master Catalog with tax_rate
             const { data: catalog, error: catErr } = await supabase
                 .from('inventory_items')
-                .select('id, name, default_price, suggested_price, unit, code, reorder_level, current_quantity, is_returnable_bottle')
+                .select('id, name, default_price, suggested_price, unit, code, reorder_level, current_quantity, is_returnable_bottle, tax_rate')
                 .order('name');
 
             if (catErr) throw catErr;
@@ -327,7 +326,8 @@ export function usePosLogic() {
                     reorder_level: reorderLvl,
                     isCriticalLow: isCritical,
                     isNearLow: isNear,
-                    is_returnable_bottle: Boolean(item.is_returnable_bottle)
+                    is_returnable_bottle: Boolean(item.is_returnable_bottle),
+                    tax_rate: (item.tax_rate !== undefined && item.tax_rate !== null) ? Number(item.tax_rate) : 15
                 };
             });
         },
@@ -504,20 +504,42 @@ export function usePosLogic() {
     }, [cart, promotions, manualDiscountAmount, discountType]);
 
     const cartTotal = useMemo(() => {
-        let sum = 0;
+        let taxableSubtotal = 0;
+        let exemptSubtotal = 0;
+        let totalTax = 0;
+        
         processedCart.forEach(item => {
-            sum += item.total || 0;
+            const itemTotal = Number(item.total) || 0;
+            const itemTaxRate = (item.tax_rate !== undefined && item.tax_rate !== null) ? Number(item.tax_rate) : 15;
+            
+            if (itemTaxRate === 0) {
+                exemptSubtotal += itemTotal;
+            } else {
+                if (isTaxInclusive) {
+                    const lineSub = itemTotal / (1 + (itemTaxRate / 100));
+                    const lineTax = itemTotal - lineSub;
+                    taxableSubtotal += lineSub;
+                    totalTax += lineTax;
+                } else {
+                    taxableSubtotal += itemTotal;
+                    totalTax += itemTotal * (itemTaxRate / 100);
+                }
+            }
         });
         
-        if (isTaxInclusive) {
-            const subtotal = sum / 1.15;
-            const tax = sum - subtotal;
-            return { subtotal, tax, total: sum };
-        } else {
-            const subtotal = sum;
-            const tax = subtotal * 0.15;
-            return { subtotal, tax, total: subtotal + tax };
-        }
+        const subtotal = Math.round((taxableSubtotal + exemptSubtotal) * 100) / 100;
+        const tax = Math.round(totalTax * 100) / 100;
+        const total = isTaxInclusive 
+            ? Math.round((taxableSubtotal + totalTax + exemptSubtotal) * 100) / 100
+            : Math.round((subtotal + tax) * 100) / 100;
+
+        return { 
+            subtotal, 
+            tax, 
+            total,
+            taxableSubtotal: Math.round(taxableSubtotal * 100) / 100,
+            exemptSubtotal: Math.round(exemptSubtotal * 100) / 100
+        };
     }, [processedCart, isTaxInclusive]);
 
     const checkoutMutation = useMutation({
@@ -539,6 +561,7 @@ export function usePosLogic() {
                 unit_price: item.selected_price || item.unit_price || item.price || 0,
                 discount: (item.discount || 0) + (item.promo_discount || 0),
                 total: item.total !== undefined ? item.total : (((item.quantity || item.qty) * (item.selected_price || item.unit_price || item.price || 0)) - ((item.discount || 0) + (item.promo_discount || 0))),
+                tax_rate: (item.tax_rate !== undefined && item.tax_rate !== null) ? Number(item.tax_rate) : 15,
                 warehouse_id: selectedWarehouseId,
                 is_returnable_bottle: Boolean(item.is_returnable_bottle)
             }));
@@ -575,7 +598,7 @@ export function usePosLogic() {
                 partner_id: partnerId || null,
                 client_name: !partnerId ? 'عميل نقدي' : customers.find((c: any) => c.id === partnerId)?.name,
                 total_amount: cartTotal.total,
-                taxable_amount: cartTotal.subtotal,
+                taxable_amount: cartTotal.taxableSubtotal !== undefined ? cartTotal.taxableSubtotal : cartTotal.subtotal,
                 tax_amount: cartTotal.tax,
                 materials_discount: totalInvoiceDiscount, // Add total discount here
                 status: 'معلق',

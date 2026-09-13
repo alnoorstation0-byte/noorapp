@@ -133,7 +133,7 @@ export function useInvoicesLogic() {
             if (currentRecord?.warehouse_id) {
                 const { data, error } = await supabase
                     .from('warehouse_inventory')
-                    .select('quantity, item_id, inventory_items(name, unit, default_price)')
+                    .select('quantity, item_id, inventory_items(name, unit, default_price, tax_rate, code)')
                     .eq('warehouse_id', currentRecord.warehouse_id)
                     .gt('quantity', 0);
                 if (error) throw error;
@@ -142,17 +142,21 @@ export function useInvoicesLogic() {
                     name: d.inventory_items?.name,
                     unit: d.inventory_items?.unit,
                     price: d.inventory_items?.default_price || 0,
-                    quantity: d.quantity
+                    quantity: d.quantity,
+                    tax_rate: d.inventory_items?.tax_rate,
+                    code: d.inventory_items?.code
                 })) || [];
             } else {
-                const { data, error } = await supabase.from('inventory_items').select('id, name, unit, default_price');
+                const { data, error } = await supabase.from('inventory_items').select('id, name, unit, default_price, tax_rate, code');
                 if (error) throw error;
                 return data?.map((d: any) => ({
                     id: d.id,
                     name: d.name,
                     unit: d.unit,
                     price: d.default_price || 0,
-                    quantity: 'غير محدد'
+                    quantity: 'غير محدد',
+                    tax_rate: d.tax_rate,
+                    code: d.code
                 })) || [];
             }
         },
