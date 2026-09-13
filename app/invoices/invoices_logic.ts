@@ -43,7 +43,7 @@ export function useInvoicesLogic() {
     const deferredSearch = useDeferredValue(globalSearch); 
     const [dateFrom, setDateFrom] = useState('');
     const [dateTo, setDateTo] = useState('');
-    const [statusFilter, setStatusFilter] = useState<'all' | 'posted' | 'pending' | 'unpaid' | 'overdue'>('all');
+    const [statusFilter, setStatusFilter] = useState<'all' | 'posted' | 'pending' | 'unpaid' | 'overdue' | 'returned'>('all');
     const [togglingId, setTogglingId] = useState<string | null>(null);
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
@@ -53,15 +53,50 @@ export function useInvoicesLogic() {
 
     const [isReceiptModalOpen, setIsReceiptModalOpen] = useState(false);
     const [selectedInvoiceForPay, setSelectedInvoiceForPay] = useState<any>(null);
+    const [isReturnModalOpen, setIsReturnModalOpen] = useState(false);
+    const [selectedInvoiceForReturn, setSelectedInvoiceForReturn] = useState<any>(null);
 
-    const { data: invoices = [], isLoading: isInvLoading } = useQuery({
+    const { data: partners = [] } = useQuery({
+        queryKey: ['partners_lookup'],
+        queryFn: async () => {
+            const { data } = await supabase.from('partners').select('id, name, phone, code');
+            return data || [];
+        }
+    });
+
+    const { data: accounts = [] } = useQuery({
+        queryKey: ['accounts_lookup'],
+        queryFn: async () => {
+            const { data } = await supabase.from('accounts').select('id, name, code');
+            return data || [];
+        }
+    });
+
+    const { data: activeShift } = useQuery({
+        queryKey: ['active_pos_shift_invoices'],
+        queryFn: async () => {
+            const { data } = await supabase
+                .from('pos_shifts')
+                .select('*')
+                .eq('status', 'open')
+                .order('opened_at', { ascending: false })
+                .limit(1)
+                .maybeSingle();
+            return data || null;
+        }
+    });
+
+    const partnersMap = useMemo(() => new Map(partners.map((p: any) => [p.id, p])), [partners]);
+    const accountsMap = useMemo(() => new Map(accounts.map((a: any) => [a.id, a])), [accounts]);
+
+    const { data: rawInvoices = [], isLoading: isInvLoading } = useQuery({
         queryKey: ['invoices'],
         staleTime: 0,
         queryFn: async () => {
             const buildQuery = () => {
                 let q = supabase
                     .from('invoices')
-                    .select('*, partners:partners!invoices_partner_id_fkey(*), debit_acc:accounts!invoices_debit_acc_fkey(name)')
+                    .select('*')
                     .order('date', { ascending: false });
                 
                 // 🛡️ Data Scoping Logic
@@ -78,6 +113,21 @@ export function useInvoicesLogic() {
         },
         enabled: !!profile // Wait until profile is loaded
     });
+
+    const invoices = useMemo(() => {
+        return (rawInvoices || []).map((inv: any) => {
+            const p = inv.partner_id ? partnersMap.get(inv.partner_id) : null;
+            const debitAcc = inv.debit_account_id ? accountsMap.get(inv.debit_account_id) : null;
+            const creditAcc = inv.credit_account_id ? accountsMap.get(inv.credit_account_id) : null;
+            return {
+                ...inv,
+                partners: p || (inv.client_name ? { name: inv.client_name } : null),
+                client_name: inv.client_name || p?.name || 'عميل نقدي',
+                debit_acc: debitAcc,
+                credit_acc: creditAcc
+            };
+        });
+    }, [rawInvoices, partnersMap, accountsMap]);
 
     const { data: projects = [], isLoading: isProjLoading } = useQuery({
         queryKey: ['job_orders'],
@@ -191,6 +241,8 @@ export function useInvoicesLogic() {
                 const today = new Date();
                 today.setHours(0, 0, 0, 0);
                 matchesStatus = (total - paid) > 0 && !!inv.due_date && new Date(inv.due_date) < today;
+            } else if (statusFilter === 'returned') {
+                matchesStatus = inv.status === 'مرتجع' || inv.status === 'مرتجع جزئي' || String(inv.invoice_number || '').startsWith('RET-');
             }
 
             return matchesSearch && matchesDate && matchesStatus;
@@ -226,6 +278,7 @@ export function useInvoicesLogic() {
             pending: invoices.filter((i: any) => !['posted', 'معتمد', 'مرحل', 'approved'].includes(String(i.status || '').trim().toLowerCase()) && !i.is_posted).length,
             unpaid: invoices.filter((i: any) => (Number(i.total_amount || 0) - Number(i.paid_amount || 0)) > 0).length,
             overdue: invoices.filter((i: any) => (Number(i.total_amount || 0) - Number(i.paid_amount || 0)) > 0 && !!i.due_date && new Date(i.due_date) < today).length,
+            returned: invoices.filter((i: any) => i.status === 'مرتجع' || i.status === 'مرتجع جزئي' || String(i.invoice_number || '').startsWith('RET-')).length,
             totalSales: invoices.reduce((sum: number, i: any) => sum + Number(i.total_amount || 0), 0),
             totalCollected: invoices.reduce((sum: number, i: any) => sum + Number(i.paid_amount || 0), 0),
             totalRemaining: invoices.reduce((sum: number, i: any) => sum + Math.max(0, Number(i.total_amount || 0) - Number(i.paid_amount || 0)), 0),
@@ -453,7 +506,201 @@ export function useInvoicesLogic() {
         }
     });
 
-    const isSaving = saveMutation.isPending || postMutation.isPending || unpostMutation.isPending || deleteMutation.isPending || payMutation.isPending;
+    const returnMutation = useMutation({
+        mutationFn: async ({
+            originalInvoice,
+            returnedItems,
+            returnStockToWarehouse,
+            refundCashFromDrawer,
+            reason
+        }: any) => {
+            if (!returnedItems || returnedItems.length === 0) {
+                throw new Error("يرجى تحديد الأصناف والكميات المراد إرجاعها");
+            }
+
+            const returnTotal = returnedItems.reduce((s: number, it: any) => s + Number(it.total || 0), 0);
+            let returnTax = 0;
+            let returnTaxable = 0;
+
+            returnedItems.forEach((it: any) => {
+                const itTotal = Number(it.total || 0);
+                const itTaxRate = (it.tax_rate !== undefined && it.tax_rate !== null) ? Number(it.tax_rate) : 15;
+                if (itTaxRate === 0 || originalInvoice.skip_zatca) {
+                    returnTaxable += itTotal;
+                } else {
+                    const sub = itTotal / (1 + (itTaxRate / 100));
+                    const tax = itTotal - sub;
+                    returnTaxable += sub;
+                    returnTax += tax;
+                }
+            });
+
+            returnTax = Math.round(returnTax * 100) / 100;
+            returnTaxable = Math.round(returnTaxable * 100) / 100;
+
+            const returnInvoiceNumber = `RET-${originalInvoice.invoice_number || Date.now().toString().slice(-6)}`;
+
+            // 1. إنشاء فاتورة المرتجع / إشعار دائن (Credit Note)
+            const returnInvoiceHeader = {
+                invoice_number: returnInvoiceNumber,
+                date: new Date().toISOString().split('T')[0],
+                partner_id: originalInvoice.partner_id || null,
+                client_name: originalInvoice.client_name || 'عميل نقدي',
+                description: `مرتجع مبيعات للفاتورة #${originalInvoice.invoice_number}${reason ? ` (${reason})` : ''}`,
+                materials_discount: 0,
+                taxable_amount: -returnTaxable,
+                tax_amount: -returnTax,
+                total_amount: -returnTotal,
+                debit_account_id: originalInvoice.credit_account_id, // عكس القيد: مدين إيراد المبيعات
+                credit_account_id: originalInvoice.debit_account_id, // دائن العميل/النقدية
+                materials_acc_id: originalInvoice.materials_acc_id,
+                guarantee_acc_id: originalInvoice.guarantee_acc_id,
+                tax_acc_id: originalInvoice.tax_acc_id,
+                skip_zatca: Boolean(originalInvoice.skip_zatca),
+                status: 'مرتجع',
+                due_in_days: 0,
+                due_date: null,
+                paid_amount: (originalInvoice.payment_method === 'نقدي (كاش)' || originalInvoice.payment_method === 'نقدي') ? -returnTotal : 0,
+                lines_data: returnedItems,
+                warehouse_id: originalInvoice.warehouse_id,
+                delegate_id: originalInvoice.delegate_id,
+                payment_method: originalInvoice.payment_method || 'نقدي (كاش)',
+                shift_id: activeShift?.id || originalInvoice.shift_id || null,
+                payment_status: 'paid'
+            };
+
+            const { data: insertedReturn, error: returnErr } = await supabase
+                .from('invoices')
+                .insert([returnInvoiceHeader])
+                .select()
+                .single();
+
+            if (returnErr) throw returnErr;
+
+            // 2. فحص إذا كان المرتجع كلياً أم جزئياً لتحديث الفاتورة الأصلية
+            const originalLines = originalInvoice.lines_data || originalInvoice.lines || originalInvoice.items || [];
+            const originalTotalQty = originalLines.reduce((s: number, l: any) => s + Number(l.quantity || l.qty || 0), 0);
+            const returnedTotalQty = returnedItems.reduce((s: number, l: any) => s + Number(l.quantity || l.qty || 0), 0);
+            const isFullReturn = returnedTotalQty >= originalTotalQty && originalTotalQty > 0;
+
+            const updatedOriginalStatus = isFullReturn ? 'مرتجع' : 'مرتجع جزئي';
+            const existingDesc = originalInvoice.description ? `${originalInvoice.description} | ` : '';
+            const newDesc = `${existingDesc}تم إصدار مرتجع برقم #${returnInvoiceNumber} بقيمة ${returnTotal} ر.س`;
+
+            await supabase
+                .from('invoices')
+                .update({
+                    status: updatedOriginalStatus,
+                    description: newDesc
+                })
+                .eq('id', originalInvoice.id);
+
+            // 3. إعادة البضاعة إلى المستودع (إذا كان الخيار مفعلاً)
+            if (returnStockToWarehouse && originalInvoice.warehouse_id) {
+                const targetWh = originalInvoice.warehouse_id;
+                for (const it of returnedItems) {
+                    if (it.item_id && Number(it.quantity) > 0) {
+                        const qty = Number(it.quantity);
+                        const cost = Number(it.unit_price) || 0;
+
+                        // تسجيل حركة وارد مرتجع في inventory_transactions
+                        await supabase.from('inventory_transactions').insert([{
+                            transaction_number: `TX-RET-${Date.now().toString().slice(-6)}`,
+                            transaction_date: new Date().toISOString().split('T')[0],
+                            type: 'in',
+                            quantity: qty,
+                            unit_price: cost,
+                            total_price: qty * cost,
+                            item_id: it.item_id,
+                            warehouse_id: targetWh,
+                            invoice_id: originalInvoice.id,
+                            notes: `مرتجع مبيعات فاتورة #${originalInvoice.invoice_number}`,
+                            status: 'approved'
+                        }]);
+
+                        // زيادة رصيد المستودع
+                        const { data: whRow } = await supabase
+                            .from('warehouse_inventory')
+                            .select('id, quantity')
+                            .eq('warehouse_id', targetWh)
+                            .eq('item_id', it.item_id)
+                            .maybeSingle();
+
+                        if (whRow) {
+                            await supabase
+                                .from('warehouse_inventory')
+                                .update({ quantity: Number(whRow.quantity || 0) + qty })
+                                .eq('id', whRow.id);
+                        } else {
+                            await supabase
+                                .from('warehouse_inventory')
+                                .insert([{
+                                    warehouse_id: targetWh,
+                                    item_id: it.item_id,
+                                    quantity: qty
+                                }]);
+                        }
+
+                        // إذا كان المستودع الرئيسي، نحدث أيضاً current_quantity في inventory_items
+                        if (targetWh === '11111111-1111-1111-1111-111111111111') {
+                            const { data: catItem } = await supabase
+                                .from('inventory_items')
+                                .select('current_quantity')
+                                .eq('id', it.item_id)
+                                .maybeSingle();
+                            if (catItem) {
+                                await supabase
+                                    .from('inventory_items')
+                                    .update({ current_quantity: Number(catItem.current_quantity || 0) + qty })
+                                    .eq('id', it.item_id);
+                            }
+                        }
+                    }
+                }
+            }
+
+            // 4. استرداد المبلغ نقداً وضبط نقدية الوردية في الكاشير
+            if (refundCashFromDrawer && (originalInvoice.payment_method === 'نقدي (كاش)' || originalInvoice.payment_method === 'نقدي')) {
+                const shiftToUpdate = activeShift?.id || originalInvoice.shift_id;
+                if (shiftToUpdate) {
+                    try {
+                        const { data: sRec } = await supabase
+                            .from('pos_shifts')
+                            .select('actual_cash, expected_cash, total_sales, total_cash_sales')
+                            .eq('id', shiftToUpdate)
+                            .maybeSingle();
+
+                        if (sRec) {
+                            // خصم المرتجع من الكاش المتوقع ومبيعات الكاش بالوردية
+                            await supabase
+                                .from('pos_shifts')
+                                .update({
+                                    expected_cash: Math.max(0, Number(sRec.expected_cash || 0) - returnTotal),
+                                    total_cash_sales: Math.max(0, Number(sRec.total_cash_sales || 0) - returnTotal),
+                                    total_sales: Math.max(0, Number(sRec.total_sales || 0) - returnTotal)
+                                })
+                                .eq('id', shiftToUpdate);
+                        }
+                    } catch (shiftErr) {
+                        console.error('Error updating shift return cash:', shiftErr);
+                    }
+                }
+            }
+        },
+        onSuccess: () => {
+            showToast("تم تسجيل مرتجع المبيعات وإعادة البضاعة للمخزن بنجاح 🔄✅", "success");
+            setIsReturnModalOpen(false);
+            setSelectedInvoiceForReturn(null);
+            queryClient.invalidateQueries({ queryKey: ['invoices'] });
+            queryClient.invalidateQueries({ queryKey: ['warehouse_items'] });
+            queryClient.invalidateQueries({ queryKey: ['active_pos_shift_invoices'] });
+        },
+        onError: (err: any) => {
+            showToast(`فشل تسجيل المرتجع: ${err.message}`, "error");
+        }
+    });
+
+    const isSaving = saveMutation.isPending || postMutation.isPending || unpostMutation.isPending || deleteMutation.isPending || payMutation.isPending || returnMutation.isPending;
     const isLoading = isInvLoading || isProjLoading || isSaving;
 
     return {
@@ -466,6 +713,14 @@ export function useInvoicesLogic() {
         summary,
         isLoading,
         isSaving,
+        isReturning: returnMutation.isPending,
+        isReturnModalOpen, setIsReturnModalOpen,
+        selectedInvoiceForReturn, setSelectedInvoiceForReturn,
+        handleOpenReturnModal: (inv: any) => {
+            setSelectedInvoiceForReturn(inv);
+            setIsReturnModalOpen(true);
+        },
+        handleConfirmReturn: (payload: any) => returnMutation.mutate(payload),
         permissions: { isAdmin: can('invoices', 'edit') },
         handlePayInvoice,
         isReceiptModalOpen, setIsReceiptModalOpen,
@@ -530,7 +785,7 @@ export function useInvoicesLogic() {
                 setTogglingId(null);
             }
         },
-        statusFilter, setStatusFilter: (v: 'all' | 'posted' | 'pending' | 'unpaid' | 'overdue') => { setStatusFilter(v); setCurrentPage(1); },
+        statusFilter, setStatusFilter: (v: 'all' | 'posted' | 'pending' | 'unpaid' | 'overdue' | 'returned') => { setStatusFilter(v); setCurrentPage(1); },
         togglingId,
         filterStats,
         handleSavePayment: (record: any) => payMutation.mutate(record), 

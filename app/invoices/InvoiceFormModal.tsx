@@ -10,9 +10,20 @@ import BarcodeScannerWidget from '@/components/BarcodeScannerWidget';
 import { z } from 'zod';
 
 // --- [نافذة إضافة/تعديل فاتورة] ---
-export default function InvoiceFormModal({ isOpen, onClose, record, setRecord, onSave, isSaving, fleetOperations, warehouses, delegates, warehouseItems }: any) {
+export default function InvoiceFormModal({ 
+    isOpen, 
+    onClose, 
+    record, 
+    setRecord, 
+    onSave, 
+    isSaving, 
+    fleetOperations, 
+    warehouses, 
+    delegates, 
+    warehouseItems 
+}: any) {
     const { showToast } = useToast(); 
-    const [mounted, setMounted] = useState(false); // 🚀 للتأكد من الرندر في المتصفح
+    const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
         setMounted(true);
@@ -28,7 +39,7 @@ export default function InvoiceFormModal({ isOpen, onClose, record, setRecord, o
         // أ. الفاتورة الجديدة
         if (!record.invoice_number) {
             updates.invoice_number = `INV-${new Date().getFullYear()}-${Math.floor(10000 + Math.random() * 90000)}`;
-            updates.date = record.date || new Date().toISOString();
+            updates.date = record.date || new Date().toISOString().split('T')[0];
             updates.tax_acc_id = record.tax_acc_id || '990c949c-5f32-40d7-8d36-5fe45a6c892c'; 
             updates.materials_acc_id = record.materials_acc_id || '85e61a6a-8c85-4219-a733-3b2180dfe043';
             updates.guarantee_acc_id = record.guarantee_acc_id || '8bf39cb1-4028-4c9e-817d-27c239873030';
@@ -112,7 +123,7 @@ export default function InvoiceFormModal({ isOpen, onClose, record, setRecord, o
     const handleAddStatement = (e: React.MouseEvent) => {
         e.preventDefault();
         if (!record.description) {
-            showToast("يرجى إدخال البيان التفصيلي أولاً ⚠️", "warning");
+            showToast("يرجى إدخال اسم الصنف أو البيان أولاً ⚠️", "warning");
             return;
         }
         if (Number(record.quantity || 0) <= 0 || Number(record.unit_price || 0) <= 0) {
@@ -161,7 +172,7 @@ export default function InvoiceFormModal({ isOpen, onClose, record, setRecord, o
                 tax_rate: (foundItem.tax_rate !== undefined && foundItem.tax_rate !== null) ? Number(foundItem.tax_rate) : 15,
                 quantity: 1
             });
-            showToast(`تم العثور على: ${foundItem.name}`, 'success');
+            showToast(`تم العثور على: ${foundItem.name} (${foundItem.price || 0} ر.س)`, 'success');
         } else {
             showToast(`لم يتم العثور على صنف بالباركود: ${barcode}`, 'error');
         }
@@ -188,7 +199,6 @@ export default function InvoiceFormModal({ isOpen, onClose, record, setRecord, o
         });
 
         if (!validationResult.success) {
-            // إظهار أول خطأ تم التقاطه بواسطة Zod
             const errObj: any = validationResult.error;
             const firstError = errObj.issues?.[0]?.message || errObj.errors?.[0]?.message || "بيانات الفاتورة غير مكتملة";
             showToast(`${firstError} ⚠️`, "warning");
@@ -200,15 +210,45 @@ export default function InvoiceFormModal({ isOpen, onClose, record, setRecord, o
 
     if (!isOpen || !mounted) return null;
 
-    // 📦 محتوى المودال
+    // 📦 محتوى مفتاح الضريبة (ZATCA toggle)
     const zatcaToggle = (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: record?.skip_zatca ? '#fee2e2' : '#dcfce3', padding: '8px 15px', borderRadius: '15px', cursor: 'pointer', transition: '0.3s', border: `1px solid ${record?.skip_zatca ? '#fca5a5' : '#86efac'}` }} 
-             onClick={() => setRecord({ ...record, skip_zatca: !record.skip_zatca })}>
-            <div style={{ width: '40px', height: '22px', background: record?.skip_zatca ? 'rgba(40, 145, 200, 0.2)' : THEME.success, borderRadius: '20px', position: 'relative', transition: '0.3s' }}>
-                <div style={{ width: '18px', height: '18px', background: 'white', borderRadius: '50%', position: 'absolute', top: '2px', left: record?.skip_zatca ? '2px' : '20px', transition: '0.3s', boxShadow: '0 2px 5px rgba(0,0,0,0.3)' }} />
+        <div 
+            style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '10px', 
+                background: record?.skip_zatca ? 'rgba(239, 68, 68, 0.1)' : 'rgba(78, 115, 79, 0.12)', 
+                padding: '7px 14px', 
+                borderRadius: '12px', 
+                cursor: 'pointer', 
+                transition: '0.2s', 
+                border: `1px solid ${record?.skip_zatca ? 'rgba(239, 68, 68, 0.3)' : 'rgba(78, 115, 79, 0.3)'}` 
+            }} 
+            onClick={() => setRecord({ ...record, skip_zatca: !record.skip_zatca })}
+            title="تبديل خضوع الفاتورة لضريبة القيمة المضافة ZATCA"
+        >
+            <div style={{ 
+                width: '36px', 
+                height: '20px', 
+                background: record?.skip_zatca ? 'rgba(44, 26, 18, 0.2)' : '#4E734F', 
+                borderRadius: '20px', 
+                position: 'relative', 
+                transition: '0.3s' 
+            }}>
+                <div style={{ 
+                    width: '16px', 
+                    height: '16px', 
+                    background: 'white', 
+                    borderRadius: '50%', 
+                    position: 'absolute', 
+                    top: '2px', 
+                    left: record?.skip_zatca ? '2px' : '18px', 
+                    transition: '0.3s', 
+                    boxShadow: '0 2px 4px rgba(0,0,0,0.2)' 
+                }} />
             </div>
-            <span style={{ fontSize: '13px', fontWeight: 900, color: record?.skip_zatca ? '#dc2626' : THEME.success }}>
-                {record?.skip_zatca ? '❌ غير خاضعة (0%)' : '✅ خاضعة (15%)'}
+            <span style={{ fontSize: '12px', fontWeight: 900, color: record?.skip_zatca ? '#dc2626' : '#4E734F' }}>
+                {record?.skip_zatca ? '❌ غير خاضعة (0%)' : '✅ خاضعة للضريبة (15%)'}
             </span>
         </div>
     );
@@ -219,102 +259,401 @@ export default function InvoiceFormModal({ isOpen, onClose, record, setRecord, o
             onClose={onClose}
             title={record.id ? 'تعديل الفاتورة' : 'إنشاء فاتورة جديدة'}
             icon="📑"
-            width="950px"
+            width="1060px"
             headerExtra={zatcaToggle}
         >
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', marginBottom: '15px' }}>
-                    
-                    {/* السطر الأول: البيانات الأساسية والعميل */}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '10px' }}>
-                        <div style={{ zIndex: 100 }}>
+            {/* 🎨 Scoped Desert Glassmorphism Form Styles */}
+            <style jsx>{`
+                .invoice-modal-flow {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 16px;
+                }
+
+                .desert-form-card {
+                    background: linear-gradient(135deg, rgba(255, 253, 250, 0.88) 0%, rgba(255, 253, 250, 0.5) 100%);
+                    backdrop-filter: blur(20px) saturate(160%);
+                    border: 1px solid rgba(194, 155, 98, 0.32);
+                    border-radius: 16px;
+                    padding: 16px 18px;
+                    box-shadow: 0 4px 12px rgba(44, 26, 18, 0.05);
+                }
+
+                .card-section-title {
+                    display: flex;
+                    align-items: center;
+                    justify-content: space-between;
+                    font-size: 13px;
+                    font-weight: 900;
+                    color: #2C1A12;
+                    margin-bottom: 12px;
+                    padding-bottom: 8px;
+                    border-bottom: 1px dashed rgba(194, 155, 98, 0.35);
+                }
+
+                .card-section-title span.badge {
+                    font-size: 10.5px;
+                    padding: 2px 8px;
+                    border-radius: 6px;
+                    background: rgba(194, 155, 98, 0.15);
+                    color: #A8573C;
+                    font-weight: 800;
+                }
+
+                .form-grid-3 {
+                    display: grid;
+                    grid-template-columns: repeat(3, 1fr);
+                    gap: 12px;
+                    align-items: start;
+                }
+
+                .form-field-unit {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 5px;
+                }
+
+                .form-field-label {
+                    font-size: 12px;
+                    font-weight: 800;
+                    color: #2C1A12;
+                    display: flex;
+                    align-items: center;
+                    gap: 6px;
+                }
+
+                .field-input {
+                    height: 42px;
+                    width: 100%;
+                    border-radius: 12px;
+                    border: 1px solid rgba(194, 155, 98, 0.38);
+                    background: rgba(255, 255, 255, 0.85);
+                    padding: 0 12px;
+                    font-size: 13px;
+                    font-weight: 700;
+                    color: #2C1A12;
+                    box-sizing: border-box;
+                    outline: none;
+                    transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+                }
+
+                .field-input:focus {
+                    background: #ffffff;
+                    border-color: #C29B62;
+                    box-shadow: 0 0 0 3.5px rgba(194, 155, 98, 0.2);
+                }
+
+                .field-input[readonly] {
+                    background: rgba(241, 245, 249, 0.8);
+                    color: #64748b;
+                    cursor: not-allowed;
+                    border-color: rgba(0, 0, 0, 0.08);
+                }
+
+                .barcode-scan-container {
+                    margin-bottom: 12px;
+                    padding: 8px 12px;
+                    background: rgba(255, 255, 255, 0.6);
+                    border: 1px dashed rgba(194, 155, 98, 0.4);
+                    border-radius: 12px;
+                }
+
+                .add-item-bar {
+                    display: grid;
+                    grid-template-columns: 2.2fr 1fr 1fr 1fr 1.1fr;
+                    gap: 10px;
+                    align-items: flex-end;
+                }
+
+                .btn-add-line {
+                    height: 42px;
+                    background: linear-gradient(135deg, #C29B62, #A8573C);
+                    color: white;
+                    border: none;
+                    border-radius: 12px;
+                    font-weight: 900;
+                    font-size: 13px;
+                    cursor: pointer;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 6px;
+                    transition: 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+                    box-shadow: 0 4px 10px rgba(168, 87, 60, 0.25);
+                    white-space: nowrap;
+                }
+
+                .btn-add-line:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 6px 16px rgba(168, 87, 60, 0.35);
+                    filter: brightness(1.05);
+                }
+
+                .btn-add-line:active {
+                    transform: scale(0.98);
+                }
+
+                .table-scroll-wrap {
+                    overflow-x: auto;
+                    border-radius: 14px;
+                    border: 1px solid rgba(194, 155, 98, 0.25);
+                    background: rgba(255, 255, 255, 0.55);
+                    margin-top: 14px;
+                }
+
+                .invoice-items-table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    text-align: center;
+                    font-size: 12.5px;
+                }
+
+                .invoice-items-table th {
+                    background: #2C1A12;
+                    color: #FDFBF7;
+                    padding: 10px 12px;
+                    font-weight: 800;
+                    font-size: 12px;
+                    letter-spacing: 0.2px;
+                }
+
+                .invoice-items-table td {
+                    padding: 10px 12px;
+                    border-bottom: 1px solid rgba(194, 155, 98, 0.15);
+                    font-weight: 700;
+                    color: #2C1A12;
+                }
+
+                .invoice-items-table tr:hover td {
+                    background: rgba(194, 155, 98, 0.08);
+                }
+
+                .table-del-btn {
+                    background: rgba(239, 68, 68, 0.1);
+                    color: #dc2626;
+                    border: 1px solid rgba(239, 68, 68, 0.25);
+                    width: 28px;
+                    height: 28px;
+                    border-radius: 8px;
+                    cursor: pointer;
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 13px;
+                    transition: 0.2s;
+                }
+
+                .table-del-btn:hover {
+                    background: #dc2626;
+                    color: white;
+                }
+
+                .financial-stats-grid {
+                    display: grid;
+                    grid-template-columns: repeat(4, 1fr);
+                    gap: 12px;
+                    margin-top: 12px;
+                }
+
+                .stat-box {
+                    background: rgba(255, 255, 255, 0.7);
+                    border: 1px solid rgba(194, 155, 98, 0.3);
+                    border-radius: 14px;
+                    padding: 10px 14px;
+                    text-align: center;
+                    display: flex;
+                    flex-direction: column;
+                    gap: 3px;
+                }
+
+                .stat-box.highlight {
+                    background: linear-gradient(135deg, #2C1A12, #442416);
+                    color: white;
+                    border-color: #C29B62;
+                    box-shadow: 0 6px 18px rgba(44, 26, 18, 0.2);
+                }
+
+                .stat-box-title {
+                    font-size: 11px;
+                    font-weight: 800;
+                    color: #64748b;
+                }
+
+                .stat-box.highlight .stat-box-title {
+                    color: #C29B62;
+                }
+
+                .stat-box-value {
+                    font-size: 17px;
+                    font-weight: 900;
+                    color: #2C1A12;
+                }
+
+                .stat-box.highlight .stat-box-value {
+                    color: #ffffff;
+                    font-size: 20px;
+                }
+
+                .actions-row {
+                    display: flex;
+                    gap: 12px;
+                    margin-top: 10px;
+                }
+
+                @media (max-width: 768px) {
+                    .form-grid-3 {
+                        grid-template-columns: 1fr !important;
+                        gap: 10px !important;
+                    }
+                    .add-item-bar {
+                        grid-template-columns: 1fr !important;
+                        gap: 10px !important;
+                    }
+                    .financial-stats-grid {
+                        grid-template-columns: 1fr 1fr !important;
+                        gap: 8px !important;
+                    }
+                    .actions-row {
+                        flex-direction: column !important;
+                    }
+                    .btn-add-line {
+                        width: 100% !important;
+                    }
+                }
+            `}</style>
+
+            <div className="invoice-modal-flow">
+                
+                {/* 📋 بطاقة 1: البيانات الأساسية وأطراف الفاتورة */}
+                <div className="desert-form-card" style={{ zIndex: 100, position: 'relative' }}>
+                    <div className="card-section-title">
+                        <span>📋 البيانات الأساسية وأطراف الفاتورة</span>
+                        <span className="badge">خطوة 1 من 4</span>
+                    </div>
+
+                    <div className="form-grid-3" style={{ marginBottom: '12px' }}>
+                        {/* 1. العميل */}
+                        <div className="form-field-unit" style={{ zIndex: 105, position: 'relative' }}>
                             <SmartCombo 
                                 label="العميل (البارتنر)" 
                                 icon="👤"
                                 table="partners" 
-                                searchCols="name,code" displayCol="name"
+                                searchCols="name,code,phone" 
+                                displayCol="name"
                                 initialDisplay={record.client_name || record.partners?.name || ''} 
-                                onSelect={(p: any) => setRecord({...record, partner_id: p?.id || null, client_name: p?.name || ''})} 
+                                onSelect={(p: any) => setRecord({
+                                    ...record, 
+                                    partner_id: p?.id || null, 
+                                    client_name: p?.name || ''
+                                })} 
                                 allowAddNew={true} 
                                 enableClear={true}
+                                placeholder="ابحث بالاسم أو الهاتف أو الكود..."
                             />
                         </div>
-                        
-                        <div>
-                            <label style={{ fontSize: '12px', fontWeight: 900, color: THEME.primary, display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '6px' }}>طريقة السداد</label>
+
+                        {/* 2. طريقة السداد */}
+                        <div className="form-field-unit">
+                            <label className="form-field-label">💳 طريقة السداد</label>
                             <select 
-                                className="glass-input-field" 
+                                className="field-input" 
                                 value={record.payment_method || 'آجل'} 
-                                onChange={e => setRecord({...record, payment_method: e.target.value})}
+                                onChange={e => setRecord({ ...record, payment_method: e.target.value })}
                             >
-                                <option value="آجل">آجل</option>
-                                <option value="نقدي">نقدي</option>
+                                <option value="آجل">آجل (ذمم مدينة)</option>
+                                <option value="نقدي">نقدي (كاش)</option>
                                 <option value="تحويل بنكي">تحويل بنكي</option>
+                                <option value="شبكة">شبكة / بطاقة مدى</option>
                             </select>
                         </div>
-                        
-                        <div>
-                            <label style={{ fontSize: '12px', fontWeight: 900, color: THEME.primary, display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '6px' }}>تاريخ الفاتورة</label>
-                            <input type="date" value={record.date?.split('T')[0] ?? ''} onChange={(e) => setRecord({...record, date: e.target.value})} className="glass-input-field" />
+
+                        {/* 3. حالة الفاتورة */}
+                        <div className="form-field-unit">
+                            <label className="form-field-label">⚙️ حالة الفاتورة والاعتماد</label>
+                            <select 
+                                className="field-input" 
+                                value={['posted', 'معتمد', 'مرحل', 'approved'].includes(String(record.status || '').trim().toLowerCase()) || record.is_posted === true ? 'معتمد' : 'معلق'} 
+                                onChange={e => setRecord({ ...record, status: e.target.value })}
+                            >
+                                <option value="معلق">⏳ مسودة معلقة (قابلة للتعديل)</option>
+                                <option value="معتمد">✅ معتمد ومرحل للحسابات</option>
+                            </select>
                         </div>
-                        
-                        <div>
-                            <label style={{ fontSize: '12px', fontWeight: 900, color: THEME.primary, display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '6px' }}>📅 فترة السداد (بالأيام)</label>
+                    </div>
+
+                    <div className="form-grid-3">
+                        {/* 4. تاريخ الفاتورة */}
+                        <div className="form-field-unit">
+                            <label className="form-field-label">📅 تاريخ الفاتورة</label>
+                            <input 
+                                type="date" 
+                                value={record.date?.split('T')[0] ?? ''} 
+                                onChange={(e) => setRecord({ ...record, date: e.target.value })} 
+                                className="field-input" 
+                            />
+                        </div>
+
+                        {/* 5. فترة السداد والاستحقاق */}
+                        <div className="form-field-unit">
+                            <label className="form-field-label">⏱️ فترة السداد (بالأيام)</label>
                             <input 
                                 type="number" 
+                                min="0"
                                 placeholder="مثلاً: 30" 
                                 value={record.due_in_days ?? ''} 
-                                onChange={(e) => setRecord({...record, due_in_days: e.target.value})} 
-                                className="glass-input-field"
-                                style={{ border: `2px solid ${THEME.accent}70` }} 
+                                onChange={(e) => setRecord({ ...record, due_in_days: e.target.value })} 
+                                className="field-input" 
                             />
                             {record.due_date && (
-                                <div style={{ fontSize: '10px', marginTop: '4px', color: '#475569', fontWeight: 800 }}>
-                                    الاستحقاق: <span style={{color: THEME.primary}}>{new Date(record.due_date).toLocaleDateString('ar-EG')}</span>
+                                <div style={{ fontSize: '11px', color: '#A8573C', fontWeight: 800, marginTop: '2px' }}>
+                                    📅 الاستحقاق: {new Date(record.due_date).toLocaleDateString('ar-EG')}
                                 </div>
                             )}
                         </div>
 
-                        <div>
-                            <label style={{ fontSize: '12px', fontWeight: 900, color: THEME.primary, display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '6px' }}>حالة الفاتورة</label>
-                            <select 
-                                className="glass-input-field" 
-                                value={['posted', 'معتمد', 'مرحل', 'approved'].includes(String(record.status || '').trim().toLowerCase()) || record.is_posted === true ? 'معتمد' : 'معلق'} 
-                                onChange={e => setRecord({...record, status: e.target.value})}
-                            >
-                                <option value="معلق">⏳ معلق (مسودة قابلة للتعديل)</option>
-                                <option value="معتمد">✅ معتمد (ترحيل فوري)</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label style={{ fontSize: '12px', fontWeight: 900, color: THEME.primary, display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '6px' }}>رقم الفاتورة (تلقائي)</label>
-                            <input type="text" value={record.invoice_number ?? ''} readOnly className="glass-input-field" style={{ background: 'rgba(226, 232, 240, 0.6)', color: THEME.primary }} />
+                        {/* 6. رقم الفاتورة التلقائي */}
+                        <div className="form-field-unit">
+                            <label className="form-field-label">🔢 رقم الفاتورة (تلقائي)</label>
+                            <input 
+                                type="text" 
+                                value={record.invoice_number ?? ''} 
+                                readOnly 
+                                className="field-input" 
+                            />
                         </div>
                     </div>
+                </div>
 
-                    {/* السطر الثاني: بيانات التنفيذ (المستودع، رحلة التوزيع، المندوب) */}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '10px', padding: '10px', background: 'rgba(255,255,255,0.4)', borderRadius: '12px' }}>
-                        
-                        <div style={{ zIndex: 99 }}>
-                            <label style={{ fontSize: '12px', fontWeight: 900, color: THEME.primary, display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '6px' }}>🏭 المستودع (من أين تصرف البضاعة؟)</label>
+                {/* 🚚 بطاقة 2: التنفيذ واللوجستيات والمخازن */}
+                <div className="desert-form-card" style={{ zIndex: 90, position: 'relative' }}>
+                    <div className="card-section-title">
+                        <span>🚚 التنفيذ واللوجستيات والمخازن</span>
+                        <span className="badge">ربط التوزيع</span>
+                    </div>
+
+                    <div className="form-grid-3">
+                        {/* 1. المستودع */}
+                        <div className="form-field-unit">
+                            <label className="form-field-label">🏭 المستودع (مصدر البضاعة)</label>
                             <select 
-                                className="glass-input-field" 
+                                className="field-input" 
                                 value={record?.warehouse_id || ''} 
-                                onChange={e => setRecord({...record, warehouse_id: e.target.value})}
+                                onChange={e => setRecord({ ...record, warehouse_id: e.target.value })}
                             >
-                                <option value="">-- اختر المستودع --</option>
-                                  {warehouses?.map((wh: any) => (
-                                      <option key={wh.id} value={wh.id}>
-                                          {wh.type === 'main' ? '🏢' : (wh.type === 'vehicle' ? '🚚' : (wh.type === 'pos' ? '🏪' : '🏭'))} {wh.name}
-                                      </option>
-                                  ))}
+                                <option value="">-- اختر المستودع المورد --</option>
+                                {warehouses?.map((wh: any) => (
+                                    <option key={wh.id} value={wh.id}>
+                                        {wh.type === 'main' ? '🏢' : (wh.type === 'vehicle' ? '🚚' : (wh.type === 'pos' ? '🏪' : '🏭'))} {wh.name}
+                                    </option>
+                                ))}
                             </select>
                         </div>
 
-                        <div style={{ zIndex: 98 }}>
-                            <label style={{ fontSize: '12px', fontWeight: 900, color: THEME.primary, display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '6px' }}>🚚 رحلة التوزيع (أمر تشغيل)</label>
+                        {/* 2. رحلة التوزيع */}
+                        <div className="form-field-unit">
+                            <label className="form-field-label">🚛 رحلة التوزيع (أمر تشغيل أسطول)</label>
                             <select 
-                                className="glass-input-field" 
+                                className="field-input" 
                                 value={record?.fleet_operation_id || ''} 
                                 onChange={e => {
                                     const opId = e.target.value;
@@ -322,184 +661,278 @@ export default function InvoiceFormModal({ isOpen, onClose, record, setRecord, o
                                     setRecord({
                                         ...record, 
                                         fleet_operation_id: opId,
-                                        delegate_id: selectedOp?.driver_id || record.delegate_id // 🚀 سحب المندوب تلقائياً من الرحلة
+                                        delegate_id: selectedOp?.driver_id || record.delegate_id
                                     });
                                 }}
                             >
-                                <option value="">-- ربط برحلة توزيع --</option>
-                                  {fleetOperations?.map((op: any) => (
-                                      <option key={op.id} value={op.id}>{op.name}</option>
-                                  ))}
+                                <option value="">-- اختياري: ربط برحلة توزيع --</option>
+                                {fleetOperations?.map((op: any) => (
+                                    <option key={op.id} value={op.id}>{op.name}</option>
+                                ))}
                             </select>
                         </div>
 
-                        <div style={{ zIndex: 97 }}>
-                            <label style={{ fontSize: '12px', fontWeight: 900, color: THEME.primary, display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '6px' }}>👤 المندوب (المسؤول عن الفاتورة)</label>
+                        {/* 3. المندوب */}
+                        <div className="form-field-unit">
+                            <label className="form-field-label">👤 المندوب (المسؤول عن التحصيل)</label>
                             <select 
-                                className="glass-input-field" 
+                                className="field-input" 
                                 value={record?.delegate_id || ''} 
-                                onChange={e => setRecord({...record, delegate_id: e.target.value})}
+                                onChange={e => setRecord({ ...record, delegate_id: e.target.value })}
                             >
-                                <option value="">-- اختر المندوب --</option>
-                                  {delegates?.map((del: any) => (
-                                      <option key={del.id} value={del.id}>{del.name}</option>
-                                  ))}
+                                <option value="">-- اختياري: اختر المندوب --</option>
+                                {delegates?.map((del: any) => (
+                                    <option key={del.id} value={del.id}>{del.name}</option>
+                                ))}
                             </select>
                         </div>
-
                     </div>
                 </div>
 
-                {/* 2. Statement Line Section */}
-                <div style={{ background: 'rgba(255,255,255,0.4)', padding: '10px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.7)', marginBottom: '10px' }}>
-                    <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 0.5fr', gap: '10px', alignItems: 'end', marginBottom: '10px' }}>
-                        <div>
-                            <label style={{ fontSize: '12px', fontWeight: 900, color: THEME.primary, display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '6px' }}>البيان التفصيلي (الصنف)</label>
-                            <BarcodeScannerWidget onScan={handleBarcodeScan} placeholder="امسح الباركود للكتابة..." />
-                        </div>
+                {/* 📦 بطاقة 3: بنود الفاتورة وإضافة الأصناف */}
+                <div className="desert-form-card" style={{ zIndex: 80, position: 'relative' }}>
+                    <div className="card-section-title">
+                        <span>📦 بنود الفاتورة وإضافة الأصناف</span>
+                        <span className="badge">{record.lines?.length || 0} صنف مضاف</span>
                     </div>
-                    <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 1fr 0.5fr', gap: '10px', alignItems: 'end' }}>
-                        <div>
-                            <div style={{ zIndex: 10 }}>
-                                <SmartCombo 
-                                    options={warehouseItems?.map((i: any) => ({
-                                        ...i,
-                                        displayName: i.quantity === 'غير محدد' ? i.name : `${i.name} (متوفر: ${i.quantity} ${i.unit || ''})`
-                                    })) || []}
-                                    displayCol="displayName"
-                                    initialDisplay={record.description || ''}
-                                    placeholder="اختر أو اكتب اسم الصنف..."
-                                    freeText={true}
-                                    onSelect={(val: any) => {
-                                        if (typeof val === 'string') {
-                                            setRecord({...record, description: val});
-                                        } else if (val) {
-                                            setRecord({
-                                                ...record, 
-                                                description: val.name,
-                                                unit: val.unit || 'عدد',
-                                                unit_price: val.price || 0,
-                                                item_id: val.id,
-                                                tax_rate: (val.tax_rate !== undefined && val.tax_rate !== null) ? Number(val.tax_rate) : 15
-                                            });
-                                        }
-                                    }}
-                                />
-                            </div>
+
+                    {/* قارئ الباركود السريع */}
+                    <div className="barcode-scan-container">
+                        <div style={{ fontSize: '11px', fontWeight: 800, color: '#A8573C', marginBottom: '4px' }}>
+                            📷 مسح الباركود السريع (استخدم قارئ الليزر أو كاميرا الجوال):
+                        </div>
+                        <BarcodeScannerWidget onScan={handleBarcodeScan} placeholder="امسح باركود الصنف أو اكتبه واضغط Enter..." />
+                    </div>
+
+                    {/* شريط إضافة صنف */}
+                    <div className="add-item-bar">
+                        <div className="form-field-unit" style={{ zIndex: 85, position: 'relative' }}>
+                            <label className="form-field-label">🏷️ اسم الصنف / البيان</label>
+                            <SmartCombo 
+                                options={warehouseItems?.map((i: any) => ({
+                                    ...i,
+                                    displayName: i.quantity === 'غير محدد' ? i.name : `${i.name} (متوفر بالمخزن: ${i.quantity} ${i.unit || ''})`
+                                })) || []}
+                                displayCol="displayName"
+                                initialDisplay={record.description || ''}
+                                placeholder="اختر من المخزون أو اكتب اسماً..."
+                                freeText={true}
+                                onSelect={(val: any) => {
+                                    if (typeof val === 'string') {
+                                        setRecord({ ...record, description: val });
+                                    } else if (val) {
+                                        setRecord({
+                                            ...record, 
+                                            description: val.name,
+                                            unit: val.unit || 'عدد',
+                                            unit_price: val.price || 0,
+                                            item_id: val.id,
+                                            tax_rate: (val.tax_rate !== undefined && val.tax_rate !== null) ? Number(val.tax_rate) : 15
+                                        });
+                                    }
+                                }}
+                            />
                         </div>
 
-                        <div>
-                            <label style={{ fontSize: '12px', fontWeight: 900, color: THEME.primary, display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '6px' }}>العدد / الكمية</label>
-                            <input type="number" value={record.quantity ?? ''} onChange={(e) => setRecord({...record, quantity: e.target.value})} className="glass-input-field" />
+                        <div className="form-field-unit">
+                            <label className="form-field-label">الكمية</label>
+                            <input 
+                                type="number" 
+                                min="1"
+                                placeholder="1"
+                                value={record.quantity ?? ''} 
+                                onChange={(e) => setRecord({ ...record, quantity: e.target.value })} 
+                                className="field-input" 
+                            />
                         </div>
-                        <div>
-                            <label style={{ fontSize: '12px', fontWeight: 900, color: THEME.primary, display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '6px' }}>الوحدة</label>
-                            <select value={record.unit ?? 'عدد'} onChange={(e) => setRecord({...record, unit: e.target.value})} className="glass-input-field" style={{ appearance: 'auto' }}>
-                                {record.unit && !['متر طولي', 'متر مربع', 'متر مكعب', 'مقطوعية', 'عدد'].includes(record.unit) && (
-                                    <option value={record.unit}>{record.unit}</option>
-                                )}
+
+                        <div className="form-field-unit">
+                            <label className="form-field-label">الوحدة</label>
+                            <select 
+                                value={record.unit ?? 'عدد'} 
+                                onChange={(e) => setRecord({ ...record, unit: e.target.value })} 
+                                className="field-input"
+                            >
+                                <option value="عدد">عدد / حبة</option>
+                                <option value="كرتون">كرتون</option>
+                                <option value="طن">طن</option>
+                                <option value="كجم">كيلوجرام</option>
                                 <option value="متر طولي">متر طولي</option>
                                 <option value="متر مربع">متر مربع</option>
-                                <option value="متر مكعب">متر مكعب</option>
                                 <option value="مقطوعية">مقطوعية</option>
-                                <option value="عدد">عدد</option>
                             </select>
                         </div>
-                        <div>
-                            <label style={{ fontSize: '12px', fontWeight: 900, color: THEME.primary, display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '6px' }}>سعر الوحدة</label>
-                            <input type="number" value={record.unit_price ?? ''} onChange={(e) => setRecord({...record, unit_price: e.target.value})} className="glass-input-field" />
+
+                        <div className="form-field-unit">
+                            <label className="form-field-label">سعر الوحدة</label>
+                            <input 
+                                type="number" 
+                                min="0" 
+                                step="0.01"
+                                placeholder="0.00"
+                                value={record.unit_price ?? ''} 
+                                onChange={(e) => setRecord({ ...record, unit_price: e.target.value })} 
+                                className="field-input" 
+                            />
                         </div>
 
-                        <button type="button" onClick={handleAddStatement} style={{ background: THEME.accent, color: 'white', border: 'none', height: '38px', borderRadius: '12px', fontWeight: 900, cursor: 'pointer', transition: '0.3s', marginTop: 'auto' }}>
-                            ➕ إدراج
+                        <button 
+                            type="button" 
+                            onClick={handleAddStatement} 
+                            className="btn-add-line"
+                            title="إضافة الصنف إلى جدول الفاتورة"
+                        >
+                            <span>➕</span>
+                            <span>إدراج الصنف</span>
                         </button>
                     </div>
-                </div>
 
-                    {/* 💎 أمان الدالة (record.lines || []) لضمان عدم حدوث Crash */}
-                    {record.lines && record.lines.length > 0 && (
-                        <div style={{ gridColumn: 'span 3', background: 'rgba(255,255,255,0.6)', padding: '10px', borderRadius: '16px', border: `1px solid ${THEME.border}` }}>
-                            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'center' }}>
+                    {/* جدول الأصناف */}
+                    {record.lines && record.lines.length > 0 ? (
+                        <div className="table-scroll-wrap cinematic-scroll">
+                            <table className="invoice-items-table">
                                 <thead>
                                     <tr>
-                                        <th style={{ background: THEME.primary, color: 'white', padding: '8px', borderRadius: '0 8px 8px 0', fontSize: '12px' }}>م</th>
-                                        <th style={{ background: THEME.primary, color: 'white', padding: '8px', textAlign: 'right', fontSize: '12px' }}>البيان</th>
-                                        <th style={{ background: THEME.primary, color: 'white', padding: '8px', fontSize: '12px' }}>الكمية</th>
-                                        <th style={{ background: THEME.primary, color: 'white', padding: '8px', fontSize: '12px' }}>الوحدة</th>
-                                        <th style={{ background: THEME.primary, color: 'white', padding: '8px', fontSize: '12px' }}>السعر</th>
-                                        <th style={{ background: THEME.primary, color: 'white', padding: '8px', fontSize: '12px' }}>الإجمالي</th>
-                                        <th style={{ background: THEME.primary, color: 'white', padding: '8px', borderRadius: '8px 0 0 0', fontSize: '12px' }}>إجراء</th>
+                                        <th style={{ width: '40px' }}>#</th>
+                                        <th style={{ textAlign: 'right' }}>الصنف / البيان</th>
+                                        <th style={{ width: '80px' }}>الكمية</th>
+                                        <th style={{ width: '90px' }}>الوحدة</th>
+                                        <th style={{ width: '100px' }}>السعر</th>
+                                        <th style={{ width: '120px' }}>الإجمالي</th>
+                                        <th style={{ width: '50px' }}>حذف</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {(record.lines || []).map((line: any, idx: number) => (
-                                        <tr key={idx} style={{ borderBottom: '1px solid rgba(0,0,0,0.05)' }}>
-                                            <td style={{ padding: '8px', fontWeight: 900 }}>{idx + 1}</td>
-                                            <td style={{ padding: '8px', textAlign: 'right', fontWeight: 700 }}>{line.description}</td>
-                                            <td style={{ padding: '8px', fontWeight: 700 }}>{line.quantity}</td>
-                                            <td style={{ padding: '8px', fontWeight: 700 }}>{line.unit}</td>
-                                            <td style={{ padding: '8px', fontWeight: 700 }}>{formatCurrency(line.unit_price)}</td>
-                                            <td style={{ padding: '8px', fontWeight: 900, color: THEME.primary }}>{formatCurrency(line.total_price)}</td>
-                                            <td style={{ padding: '8px' }}>
-                                                <button type="button" onClick={() => handleRemoveLine(idx)} style={{ background: '#fee2e2', color: '#dc2626', border: 'none', padding: '5px 10px', borderRadius: '6px', cursor: 'pointer', fontWeight: 900 }}>✖</button>
+                                    {record.lines.map((line: any, idx: number) => (
+                                        <tr key={idx}>
+                                            <td style={{ fontWeight: 900, color: '#64748b' }}>{idx + 1}</td>
+                                            <td style={{ textAlign: 'right', fontWeight: 800 }}>{line.description}</td>
+                                            <td>{line.quantity}</td>
+                                            <td>{line.unit}</td>
+                                            <td>{formatCurrency(line.unit_price)}</td>
+                                            <td style={{ fontWeight: 900, color: '#2C1A12' }}>{formatCurrency(line.total_price)}</td>
+                                            <td>
+                                                <button 
+                                                    type="button" 
+                                                    onClick={() => handleRemoveLine(idx)} 
+                                                    className="table-del-btn"
+                                                    title="حذف هذا الصنف من الفاتورة"
+                                                >
+                                                    ✖
+                                                </button>
                                             </td>
                                         </tr>
                                     ))}
                                 </tbody>
                             </table>
                         </div>
+                    ) : (
+                        <div style={{ 
+                            marginTop: '12px', 
+                            padding: '14px', 
+                            textAlign: 'center', 
+                            background: 'rgba(255, 255, 255, 0.4)', 
+                            borderRadius: '12px', 
+                            color: '#64748b', 
+                            fontSize: '12px', 
+                            fontWeight: 700 
+                        }}>
+                            📦 لم يتم إدراج أصناف بعد — اختر صنفاً أو امسح الباركود واضغط "إدراج الصنف" للإضافة
+                        </div>
                     )}
+                </div>
 
-                    {/* 3. Accounting & Summary Section */}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '10px', marginBottom: '10px' }}>
-                        <SmartCombo 
-                            key={`debit-${record.debit_account_id || 'empty'}`}
-                            label="حساب المدين (من حـ/)" 
-                            icon="💳"
-                            table="accounts" 
-                            searchCols="name,code" displayCol="name"
-                            initialDisplay={record.debit_account_name || record.debit_account?.name || ''}
-                            onSelect={(a: any) => setRecord({...record, debit_account_id: a?.id || null, debit_account_name: a?.name || ''})} 
-                        />
-                        <SmartCombo 
-                            key={`credit-${record.credit_account_id || 'empty'}`}
-                            label="حساب الدائن (إلى حـ/)" 
-                            icon="🏦"
-                            table="accounts" 
-                            searchCols="name,code" displayCol="name"
-                            initialDisplay={record.credit_account_name || record.credit_account?.name || ''}
-                            onSelect={(a: any) => setRecord({...record, credit_account_id: a?.id || null, credit_account_name: a?.name || ''})} 
-                        />
-                        
-                        <div style={{ background: 'rgba(255,255,255,0.7)', border: '1px solid rgba(255,255,255,0.9)', padding: '10px', borderRadius: '16px', textAlign: 'center', boxShadow: '0 4px 15px rgba(0,0,0,0.02)' }}>
-                            <div style={{ fontSize: '11px', color: '#64748b', fontWeight: 800 }}>الإجمالي قبل الخصم</div>
-                            <div style={{ fontSize: '20px', fontWeight: 900, color: THEME.primary }}>{formatCurrency(record.line_total ?? 0)}</div>
+                {/* 💳 بطاقة 4: التوجيه المحاسبي والملخص المالي */}
+                <div className="desert-form-card" style={{ zIndex: 70, position: 'relative' }}>
+                    <div className="card-section-title">
+                        <span>💳 التوجيه المحاسبي والملخص المالي</span>
+                        <span className="badge">الحسابات والضريبة</span>
+                    </div>
+
+                    {/* الحسابات الدائنة والمدينة */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '12px', marginBottom: '14px' }}>
+                        <div style={{ zIndex: 75, position: 'relative' }}>
+                            <SmartCombo 
+                                key={`debit-${record.debit_account_id || 'empty'}`}
+                                label="حساب المدين (من حـ/ العميل أو الصندوق)" 
+                                icon="💳"
+                                table="accounts" 
+                                searchCols="name,code" 
+                                displayCol="name"
+                                initialDisplay={record.debit_account_name || record.debit_account?.name || ''}
+                                onSelect={(a: any) => setRecord({
+                                    ...record, 
+                                    debit_account_id: a?.id || null, 
+                                    debit_account_name: a?.name || ''
+                                })} 
+                                placeholder="ابحث في دليل الحسابات..."
+                            />
+                        </div>
+
+                        <div style={{ zIndex: 74, position: 'relative' }}>
+                            <SmartCombo 
+                                key={`credit-${record.credit_account_id || 'empty'}`}
+                                label="حساب الدائن (إلى حـ/ المبيعات)" 
+                                icon="🏦"
+                                table="accounts" 
+                                searchCols="name,code" 
+                                displayCol="name"
+                                initialDisplay={record.credit_account_name || record.credit_account?.name || ''}
+                                onSelect={(a: any) => setRecord({
+                                    ...record, 
+                                    credit_account_id: a?.id || null, 
+                                    credit_account_name: a?.name || ''
+                                })} 
+                                placeholder="ابحث في دليل الحسابات..."
+                            />
                         </div>
                     </div>
 
-                <div className="responsive-summary-grid" style={{ marginTop: '15px', padding: '15px', background: 'linear-gradient(135deg, #1e293b, #0f172a)', borderRadius: '24px', color: 'white', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))', gap: '10px', textAlign: 'center', boxShadow: '0 10px 30px rgba(0,0,0,0.3)' }}>
-                    <div style={{ background: 'rgba(255,255,255,0.05)', padding: '10px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                        <div style={{ fontSize: '11px', color: '#475569', fontWeight: 800 }}>خاضع للضريبة</div>
-                        <div style={{ fontSize: '18px', fontWeight: 900 }}>{formatCurrency(record.taxable_amount ?? 0)}</div>
-                    </div>
-                    <div style={{ background: 'rgba(255,255,255,0.05)', padding: '10px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.1)' }}>
-                        <div style={{ fontSize: '11px', color: '#475569', fontWeight: 800 }}>الضريبة (15%)</div>
-                        <div style={{ fontSize: '18px', fontWeight: 900 }}>{formatCurrency(record.tax_amount ?? 0)}</div>
-                    </div>
-                    <div style={{ background: `linear-gradient(135deg, ${THEME.accent}40, transparent)`, padding: '10px', borderRadius: '16px', border: `1px solid ${THEME.accent}80`, boxShadow: `0 0 20px ${THEME.accent}20` }}>
-                        <div style={{ fontSize: '11px', fontWeight: 900, color: THEME.accentLight }}>الصافي النهائي</div>
-                        <div style={{ fontSize: '22px', fontWeight: 900, color: '#ffffff', textShadow: '0 2px 10px rgba(0,0,0,0.5)' }}>{formatCurrency(record.total_amount ?? 0)}</div>
+                    {/* كروت المجاميع والضريبة */}
+                    <div className="financial-stats-grid">
+                        <div className="stat-box">
+                            <span className="stat-box-title">إجمالي البنود</span>
+                            <span className="stat-box-value">{formatCurrency(record.line_total ?? 0)}</span>
+                        </div>
+                        <div className="stat-box">
+                            <span className="stat-box-title">الخاضع للضريبة</span>
+                            <span className="stat-box-value">{formatCurrency(record.taxable_amount ?? 0)}</span>
+                        </div>
+                        <div className="stat-box">
+                            <span className="stat-box-title">ضريبة القيمة المضافة</span>
+                            <span className="stat-box-value" style={{ color: record.skip_zatca ? '#dc2626' : '#4E734F' }}>
+                                {record.skip_zatca ? '0.00 ر.س (معفى)' : formatCurrency(record.tax_amount ?? 0)}
+                            </span>
+                        </div>
+                        <div className="stat-box highlight">
+                            <span className="stat-box-title">الصافي المطلوب سداده</span>
+                            <span className="stat-box-value">{formatCurrency(record.total_amount ?? 0)}</span>
+                        </div>
                     </div>
                 </div>
 
-                <div className="responsive-actions" style={{ display: 'flex', gap: '10px', marginTop: '15px' }}>
-                    <button onClick={handleValidateAndSave} disabled={isSaving} className="btn-glass-save" style={{ flex: 2, padding: '12px' }}>
-                        {isSaving ? '⏳ جاري الحفظ...' : '✅ حفظ الفاتورة'}
+                {/* أزرار الحفظ والإلغاء */}
+                <div className="actions-row">
+                    <button 
+                        type="button" 
+                        onClick={handleValidateAndSave} 
+                        disabled={isSaving} 
+                        className="btn-glass-save" 
+                        style={{ flex: 2, height: '46px', fontSize: '15px' }}
+                    >
+                        {isSaving ? '⏳ جاري حفظ الفاتورة...' : '✅ حفظ الفاتورة (Ctrl+Enter)'}
                     </button>
-                    <button onClick={onClose} className="btn-glass-cancel" style={{ flex: 1, padding: '12px' }}>
-                        إلغاء
+                    <button 
+                        type="button" 
+                        onClick={onClose} 
+                        className="btn-glass-cancel" 
+                        style={{ flex: 1, height: '46px', fontSize: '14px' }}
+                    >
+                        إلغاء (Esc)
                     </button>
                 </div>
+
+            </div>
         </AquaModalWrapper>
     );
 }

@@ -20,6 +20,7 @@ import SmartCombo from '@/components/SmartCombo';
   // 🎬 المودالز
 import InvoiceFormModal from './InvoiceFormModal';
 import InvoicePrintModal from './InvoicePrintModal';
+import InvoiceReturnModal from './InvoiceReturnModal';
 import ReceiptVoucherModal from '@/app/ReceiptVouchers/ReceiptVoucherModal';
 import LoadingScreen from '@/components/LoadingScreen';
 
@@ -93,12 +94,32 @@ export default function InvoicesPage() {
       label: 'رقم الفاتورة', 
       render: (row: any) => {
         if (!row) return null;
+        const isReturnNote = String(row.invoice_number || '').startsWith('RET-');
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-            <b style={{ color: THEME.accent, textShadow: '0 0 10px rgba(40, 145, 200, 0.3)', fontSize: '14px' }}>#{row.invoice_number}</b>
-            <span style={{ fontSize: '10px', color: '#64748b' }}>
-               {row.skip_zatca ? '📄 فاتورة داخلية' : '✅ ضريبية (ZATCA)'}
-            </span>
+            <b style={{ color: isReturnNote ? '#dc2626' : THEME.accent, textShadow: '0 0 10px rgba(40, 145, 200, 0.3)', fontSize: '14px' }}>
+              #{row.invoice_number}
+            </b>
+            <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', alignItems: 'center' }}>
+              <span style={{ fontSize: '10px', color: '#64748b' }}>
+                 {row.skip_zatca ? '📄 فاتورة داخلية' : '✅ ضريبية (ZATCA)'}
+              </span>
+              {row.status === 'مرتجع' && (
+                <span style={{ fontSize: '10px', color: '#dc2626', background: 'rgba(239, 68, 68, 0.12)', padding: '1px 6px', borderRadius: '4px', border: '1px solid rgba(239, 68, 68, 0.25)', fontWeight: 900 }}>
+                  🔄 مرتجع بالكامل
+                </span>
+              )}
+              {row.status === 'مرتجع جزئي' && (
+                <span style={{ fontSize: '10px', color: '#d97706', background: 'rgba(245, 158, 11, 0.12)', padding: '1px 6px', borderRadius: '4px', border: '1px solid rgba(245, 158, 11, 0.25)', fontWeight: 900 }}>
+                  🔄 مرتجع جزئي
+                </span>
+              )}
+              {isReturnNote && row.status !== 'مرتجع' && (
+                <span style={{ fontSize: '10px', color: '#dc2626', background: 'rgba(239, 68, 68, 0.12)', padding: '1px 6px', borderRadius: '4px', border: '1px solid rgba(239, 68, 68, 0.25)', fontWeight: 900 }}>
+                  📑 إشعار دائن
+                </span>
+              )}
+            </div>
           </div>
         );
       } 
@@ -206,6 +227,27 @@ export default function InvoicesPage() {
       label: 'الاعتماد',
       render: (row: any) => {
         if (!row) return null; 
+        if (row.status === 'مرتجع') {
+          return (
+            <div onClick={(e) => e.stopPropagation()} style={{ display: 'inline-flex', alignItems: 'center' }}>
+              <span className="invoice-status-pill danger" style={{ background: 'rgba(239, 68, 68, 0.12)', color: '#dc2626', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
+                <span className="status-dot red" />
+                <span>مرتجع بالكامل</span>
+              </span>
+            </div>
+          );
+        }
+        if (row.status === 'مرتجع جزئي') {
+          return (
+            <div onClick={(e) => e.stopPropagation()} style={{ display: 'inline-flex', alignItems: 'center' }}>
+              <span className="invoice-status-pill amber" style={{ background: 'rgba(245, 158, 11, 0.12)', color: '#d97706', border: '1px solid rgba(245, 158, 11, 0.3)' }}>
+                <span className="status-dot amber" />
+                <span>مرتجع جزئي</span>
+              </span>
+            </div>
+          );
+        }
+
         const isApproved = ['posted', 'معتمد', 'مرحل', 'approved'].includes(String(row.status || '').trim().toLowerCase()) || row.is_posted === true;
         const isToggling = String(logic.togglingId) === String(row.id);
         
@@ -268,6 +310,8 @@ export default function InvoicesPage() {
         const balance = total - paid;
         const needsPayment = balance > 0; 
         const isApproved = ['posted', 'معتمد', 'مرحل', 'approved'].includes(String(row.status || '').trim().toLowerCase()) || row.is_posted === true;
+        const isReturnNote = String(row.invoice_number || '').startsWith('RET-');
+        const canReturn = row.status !== 'مرتجع' && !isReturnNote;
         
         return (
           <div onClick={(e) => e.stopPropagation()} style={{ display: 'inline-flex', gap: '6px', alignItems: 'center' }}>
@@ -289,7 +333,17 @@ export default function InvoicesPage() {
               </button>
             )}
 
-            {!isApproved && (
+            {canReturn && (
+              <button 
+                onClick={() => logic.handleOpenReturnModal(row)} 
+                className="inv-row-btn return" 
+                title="إجراء مرتجع مبيعات (استرجاع للمخزن وتسوية الكاشير)"
+              >
+                🔄
+              </button>
+            )}
+
+            {!isApproved && !isReturnNote && (
               <button 
                 onClick={() => logic.handleEdit(row)} 
                 className="inv-row-btn edit" 
@@ -490,6 +544,8 @@ export default function InvoicesPage() {
         .inv-row-btn.print:hover { background: #f1f5f9 !important; border-color: #cbd5e1 !important; }
         .inv-row-btn.edit { color: #0284c7; }
         .inv-row-btn.edit:hover { background: #f0f9ff !important; border-color: #7dd3fc !important; }
+        .inv-row-btn.return { color: #dc2626; }
+        .inv-row-btn.return:hover { background: #fee2e2 !important; border-color: #fca5a5 !important; }
 
         /* 📊 كروت KPI المودرن */
         .invoice-kpi-grid {
@@ -868,6 +924,17 @@ export default function InvoicesPage() {
                 <span>متأخرة</span>
                 <span className="tab-count">{logic.filterStats?.overdue || 0}</span>
               </button>
+
+              <button
+                type="button"
+                className={`filter-tab-pill ${logic.statusFilter === 'returned' ? 'active' : ''}`}
+                onClick={() => logic.setStatusFilter('returned')}
+                style={logic.statusFilter === 'returned' ? { background: '#dc2626', borderColor: '#dc2626' } : {}}
+              >
+                <span className="dot red" />
+                <span>مرتجعات</span>
+                <span className="tab-count">{logic.filterStats?.returned || 0}</span>
+              </button>
             </div>
 
             <div className="toolbar-actions-group">
@@ -1035,6 +1102,16 @@ export default function InvoicesPage() {
             onClose={() => setIsPrintModalOpen(false)} 
             record={printData} 
             projects={logic.projects} 
+          />
+      )}
+
+      {mounted && logic.isReturnModalOpen && (
+          <InvoiceReturnModal 
+            isOpen={logic.isReturnModalOpen}
+            onClose={() => logic.setIsReturnModalOpen(false)}
+            invoice={logic.selectedInvoiceForReturn}
+            onConfirmReturn={logic.handleConfirmReturn}
+            isSubmitting={logic.isReturning}
           />
       )}
       
