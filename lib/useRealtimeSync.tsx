@@ -72,6 +72,7 @@ export const WATCHED_TABLES = [
   'partners',
   'accounts',
   'fleet_operations',
+  'service_operations',
   'fleet_vehicles',
   'pos_shifts',
   'payroll_slips',

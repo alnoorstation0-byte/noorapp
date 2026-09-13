@@ -13,6 +13,7 @@ export const menuGroups = [
             { id: 'pos_dashboard', title: 'أرباح منافذ البيع', icon: '📈', path: '/pos/dashboard' },
             { id: 'pos_settlements', title: 'تسوية عهد منافذ البيع', icon: '🏪', path: '/pos-settlements' },
             { id: 'fleet_operations', title: 'رحلات التشغيل', icon: '🚚', path: '/fleet_operations' },
+            { id: 'service_operations', title: 'إيرادات الخدمات والتشغيل', icon: '💼', path: '/service-operations' },
             { id: 'invoices', title: 'الفواتير والمبيعات', icon: '🧾', path: '/invoices' }
         ] 
     },
