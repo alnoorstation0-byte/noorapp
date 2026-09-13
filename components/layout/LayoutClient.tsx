@@ -115,8 +115,10 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
       
       setLowGraphics(isLow);
       if (isLow) {
+        document.documentElement.classList.add('low-graphics-mode');
         document.body.classList.add('low-graphics-mode');
       } else {
+        document.documentElement.classList.remove('low-graphics-mode');
         document.body.classList.remove('low-graphics-mode');
       }
     }
@@ -127,8 +129,10 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
       const newVal = !prev;
       localStorage.setItem('lowGraphicsMode', String(newVal));
       if (newVal) {
+        document.documentElement.classList.add('low-graphics-mode');
         document.body.classList.add('low-graphics-mode');
       } else {
+        document.documentElement.classList.remove('low-graphics-mode');
         document.body.classList.remove('low-graphics-mode');
       }
       return newVal;

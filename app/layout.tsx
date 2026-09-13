@@ -42,6 +42,21 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ar" dir="rtl" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{
+          __html: `
+            (function() {
+              try {
+                var saved = localStorage.getItem('lowGraphicsMode');
+                // Default to true for max performance unless explicitly set to false
+                if (saved === 'true' || saved === null) {
+                  document.documentElement.classList.add('low-graphics-mode');
+                }
+              } catch(e) {}
+            })();
+          `
+        }} />
+      </head>
       <body 
         className={`${cairo.className} ${cairo.variable}`} 
         style={{ 

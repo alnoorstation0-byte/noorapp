@@ -254,7 +254,7 @@ input:focus, select:focus, textarea:focus {
 }
 
 /* 🚀 وضع الأداء السريع (Low Graphics Mode) للجوالات القديمة أو التفعيل اليدوي */
-body.low-graphics-mode * {
+.low-graphics-mode * {
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
   box-shadow: none !important;
@@ -262,43 +262,51 @@ body.low-graphics-mode * {
   transition: none !important;
 }
 
-body.low-graphics-mode .desert-glass, 
-body.low-graphics-mode .glass-card, 
-body.low-graphics-mode .glass-panel,
-body.low-graphics-mode .group-section,
-body.low-graphics-mode .nav-card,
-body.low-graphics-mode .fab-main,
-body.low-graphics-mode .admin-header-glass,
-body.low-graphics-mode .desert-bottom-dock {
+.low-graphics-mode .desert-glass, 
+.low-graphics-mode .glass-card, 
+.low-graphics-mode .glass-panel,
+.low-graphics-mode .group-section,
+.low-graphics-mode .nav-card,
+.low-graphics-mode .fab-main,
+.low-graphics-mode .admin-header-glass,
+.low-graphics-mode .desert-bottom-dock {
   background: #FFFFFF !important;
   border: 1px solid rgba(194, 155, 98, 0.4) !important;
 }
 
-body.low-graphics-mode .overlay-backdrop {
+.low-graphics-mode .overlay-backdrop {
   background: rgba(44, 26, 18, 0.9) !important; /* تغميق الخلفية لتعويض غياب التغبيش */
 }
 
-body.low-graphics-mode .btn-main-glass, 
-body.low-graphics-mode .desert-btn {
+.low-graphics-mode .bg-glass-tint {
+  display: none !important;
+}
+
+.low-graphics-mode .bg-master-container {
+  background: #FDFBF7 !important;
+}
+
+.low-graphics-mode .btn-main-glass, 
+.low-graphics-mode .desert-btn {
   background: #FFFFFF !important;
   border: 1px solid rgba(194, 155, 98, 0.5) !important;
 }
 
-body.low-graphics-mode .btn-main-glass.gold, 
-body.low-graphics-mode .btn-main-glass.primary,
-body.low-graphics-mode .desert-btn-primary {
+.low-graphics-mode .btn-main-glass.gold, 
+.low-graphics-mode .btn-main-glass.primary,
+.low-graphics-mode .desert-btn-primary {
   background: #C29B62 !important;
   color: #FFFFFF !important;
 }
 
-body.low-graphics-mode .btn-main-glass.green,
-body.low-graphics-mode .btn-main-glass.success {
+.low-graphics-mode .btn-main-glass.green,
+.low-graphics-mode .btn-main-glass.success {
   background: #4E734F !important;
   color: #FFFFFF !important;
 }
 
-body.low-graphics-mode .btn-main-glass.red,
-body.low-graphics-mode .btn-main-glass.danger {
+.low-graphics-mode .btn-main-glass.red,
+.low-graphics-mode .btn-main-glass.danger {
   background: #DC2626 !important;
   color: #FFFFFF !important;
 }
