@@ -1053,6 +1053,9 @@ export default function PosPage() {
                         -webkit-overflow-scrolling: touch !important;
                         margin-top: 8px !important;
                         padding-right: 4px !important;
+                        align-content: start !important;
+                        align-items: start !important;
+                        grid-auto-rows: max-content !important;
                     }
                     .clean-page.pos-master-page .cart-section {
                         height: 100% !important;
@@ -1302,8 +1305,11 @@ export default function PosPage() {
                 /* 🛍️ شبكة الأصناف التفاعلية المتناسقة تماماً */
                 .items-grid {
                     display: grid;
-                    grid-template-columns: repeat(auto-fill, minmax(122px, 1fr));
-                    gap: 8px;
+                    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+                    grid-auto-rows: max-content;
+                    align-content: start;
+                    align-items: start;
+                    gap: 10px;
                     overflow-y: auto;
                     -webkit-overflow-scrolling: touch;
                     padding-right: 4px;
@@ -1314,30 +1320,48 @@ export default function PosPage() {
                 @media (max-width: 540px) {
                     .items-grid {
                         grid-template-columns: repeat(2, 1fr) !important;
+                        grid-auto-rows: max-content !important;
+                        align-content: start !important;
+                        align-items: start !important;
                         gap: 8px !important;
                     }
                 }
                 @media (min-width: 541px) and (max-width: 820px) {
                     .items-grid {
                         grid-template-columns: repeat(3, 1fr) !important;
-                        gap: 8px !important;
+                        grid-auto-rows: max-content !important;
+                        align-content: start !important;
+                        align-items: start !important;
+                        gap: 10px !important;
                     }
                 }
                 @media (min-width: 821px) and (max-width: 1024px) {
                     .items-grid {
                         grid-template-columns: repeat(4, 1fr) !important;
-                        gap: 8px !important;
+                        grid-auto-rows: max-content !important;
+                        align-content: start !important;
+                        align-items: start !important;
+                        gap: 10px !important;
+                    }
+                }
+                @media (min-width: 1025px) {
+                    .items-grid {
+                        grid-template-columns: repeat(auto-fill, minmax(135px, 1fr)) !important;
+                        grid-auto-rows: max-content !important;
+                        align-content: start !important;
+                        align-items: start !important;
+                        gap: 10px !important;
                     }
                 }
 
-                /* 🌟 بطاقة الصنف الصحراوية الزجاجية المتناسقة والموحدة */
+                /* 🌟 بطاقة الصنف الصحراوية الزجاجية المتناسقة والمربعة */
                 .pos-item-card {
                     background: linear-gradient(135deg, rgba(255, 253, 250, 0.96) 0%, rgba(255, 253, 250, 0.72) 100%);
                     backdrop-filter: blur(20px) saturate(160%);
                     -webkit-backdrop-filter: blur(20px);
                     border: 1.5px solid rgba(194, 155, 98, 0.3);
-                    border-radius: 13px;
-                    padding: 7px 8px;
+                    border-radius: 14px;
+                    padding: 8px 8px 6px 8px;
                     cursor: pointer;
                     transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
                     display: flex;
@@ -1345,11 +1369,14 @@ export default function PosPage() {
                     justify-content: space-between;
                     position: relative;
                     box-shadow: 0 3px 8px rgba(44, 26, 18, 0.05);
+                    aspect-ratio: 1 / 1;
                     min-height: 140px;
-                    height: 100%;
+                    max-height: 175px;
+                    width: 100%;
                     box-sizing: border-box;
                     user-select: none;
                     -webkit-tap-highlight-color: transparent;
+                    overflow: hidden;
                 }
 
                 .pos-item-card:hover {
@@ -1442,22 +1469,23 @@ export default function PosPage() {
                     flex-direction: column;
                     align-items: center;
                     text-align: center;
-                    margin: 2px 0 4px 0;
+                    margin: 1px 0 2px 0;
                     flex: 1;
                     justify-content: center;
+                    min-height: 0;
                 }
                 .pos-item-avatar {
-                    width: 28px;
-                    height: 28px;
-                    border-radius: 8px;
+                    width: 26px;
+                    height: 26px;
+                    border-radius: 7px;
                     background: rgba(194, 155, 98, 0.14);
                     border: 1px solid rgba(194, 155, 98, 0.28);
                     display: flex;
                     align-items: center;
                     justify-content: center;
-                    font-size: 14px;
+                    font-size: 13px;
                     color: #C29B62;
-                    margin: 0 auto 3px auto;
+                    margin: 0 auto 2px auto;
                     transition: transform 0.2s ease;
                     flex-shrink: 0;
                 }
