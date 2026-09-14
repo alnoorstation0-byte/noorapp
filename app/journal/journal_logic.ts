@@ -72,42 +72,55 @@ export function useJournalLogic() {
 
             // 🛡️ Fallback المباشر: استعلام الجداول الأساسية مباشرة
             try {
-                let q = supabase.from('journal_lines').select(`
-                    id, debit, credit, item_name, notes, created_at, account_id, partner_id, delegate_id, fleet_operation_id, tax_amount, tax_rate,
-                    journal_headers!inner (id, entry_date, description, reference_id, v_type, status),
-                    accounts (code, name),
-                    partners (name)
-                `).order('created_at', { ascending: false });
+                const [linesRes, headersRes, accountsRes, partnersRes] = await Promise.all([
+                    supabase.from('journal_lines').select('*').order('created_at', { ascending: false }).limit(1000),
+                    supabase.from('journal_headers').select('id, entry_date, description, reference_id, v_type, status'),
+                    supabase.from('accounts').select('id, code, name'),
+                    supabase.from('partners').select('id, name')
+                ]);
 
-                if (dateFrom) q = q.gte('journal_headers.entry_date', dateFrom);
-                if (dateTo) q = q.lte('journal_headers.entry_date', dateTo);
-                if (filterAccountId) q = q.eq('account_id', filterAccountId);
-                if (filterPartnerId) q = q.eq('partner_id', filterPartnerId);
+                const headerMap = new Map((headersRes.data || []).map((h: any) => [h.id, h]));
+                const accountMap = new Map((accountsRes.data || []).map((a: any) => [a.id, a]));
+                const partnerMap = new Map((partnersRes.data || []).map((p: any) => [p.id, p]));
 
-                const { data: rawLines } = await q.limit(1000);
-                return (rawLines || []).map((l: any) => ({
-                    line_id: l.id,
-                    header_id: l.journal_headers?.id,
-                    entry_date: l.journal_headers?.entry_date,
-                    header_description: l.journal_headers?.description,
-                    reference_id: l.journal_headers?.reference_id,
-                    v_type: l.journal_headers?.v_type,
-                    header_status: l.journal_headers?.status,
-                    account_id: l.account_id,
-                    account_code: l.accounts?.code,
-                    account_name: l.accounts?.name,
-                    partner_id: l.partner_id,
-                    partner_name: l.partners?.name,
-                    debit: Number(l.debit || 0),
-                    credit: Number(l.credit || 0),
-                    item_name: l.item_name,
-                    line_notes: l.notes,
-                    tax_amount: l.tax_amount,
-                    tax_rate: l.tax_rate,
-                    line_created_at: l.created_at,
-                    fleet_operation_id: l.fleet_operation_id,
-                    delegate_id: l.delegate_id
-                }));
+                let rawLines = linesRes.data || [];
+
+                if (filterAccountId) rawLines = rawLines.filter((l: any) => l.account_id === filterAccountId);
+                if (filterPartnerId) rawLines = rawLines.filter((l: any) => l.partner_id === filterPartnerId);
+
+                return rawLines.map((l: any) => {
+                    const h = headerMap.get(l.header_id);
+                    const acc = accountMap.get(l.account_id);
+                    const p = partnerMap.get(l.partner_id);
+
+                    const entryDate = h?.entry_date;
+                    if (dateFrom && entryDate && entryDate < dateFrom) return null;
+                    if (dateTo && entryDate && entryDate > dateTo) return null;
+
+                    return {
+                        line_id: l.id,
+                        header_id: h?.id,
+                        entry_date: entryDate,
+                        header_description: h?.description,
+                        reference_id: h?.reference_id,
+                        v_type: h?.v_type,
+                        header_status: h?.status,
+                        account_id: l.account_id,
+                        account_code: acc?.code,
+                        account_name: acc?.name,
+                        partner_id: l.partner_id,
+                        partner_name: p?.name,
+                        debit: Number(l.debit || 0),
+                        credit: Number(l.credit || 0),
+                        item_name: l.item_name,
+                        line_notes: l.notes,
+                        tax_amount: l.tax_amount,
+                        tax_rate: l.tax_rate,
+                        line_created_at: l.created_at,
+                        fleet_operation_id: l.fleet_operation_id,
+                        delegate_id: l.delegate_id
+                    };
+                }).filter(Boolean);
             } catch (fallbackErr) {
                 console.error("Journal fallback error:", fallbackErr);
                 return [];

@@ -65,36 +65,34 @@ export function useVATReturnLogic() {
       const vatAccountId = accounts[0].id;
 
       // 2. Fetch journal lines for VAT account in date range
-      // Because we want to filter by entry_date, we need to join with journal_headers.
-      // In Supabase, if the foreign key is properly setup, we can filter using inner join syntax.
-      const { data: lines, error: linesError } = await (supabase
-        .from('journal_lines')
-        .select(`
-          id,
-          debit,
-          credit,
-          notes,
-          journal_headers!inner (
-            id,
-            entry_date,
-            description,
-            v_type,
-            reference_id
-          )
-        `)
-        .eq('account_id', vatAccountId)
-        .gte('journal_headers.entry_date', dateRange.start)
-        .lte('journal_headers.entry_date', dateRange.end)
-        .order('id', { ascending: false })) as any;
+      const [linesRes, headersRes] = await Promise.all([
+        supabase
+          .from('journal_lines')
+          .select('id, header_id, debit, credit, notes')
+          .eq('account_id', vatAccountId),
+        supabase
+          .from('journal_headers')
+          .select('id, entry_date, description, v_type, reference_id')
+      ]);
 
-      if (linesError) throw linesError;
+      if (linesRes.error) throw linesRes.error;
+      const headerMap = new Map((headersRes.data || []).map((h: any) => [h.id, h]));
+
+      const rawLines = (linesRes.data || []).filter((l: any) => {
+        const h = headerMap.get(l.header_id);
+        const d = h?.entry_date;
+        if (!d) return true;
+        if (dateRange.start && d < dateRange.start) return false;
+        if (dateRange.end && d > dateRange.end) return false;
+        return true;
+      });
 
       let totalInput = 0;
       let totalOutput = 0;
       const trans: VATTransaction[] = [];
 
-      for (const line of lines || []) {
-        const header = line.journal_headers;
+      for (const line of rawLines) {
+        const header = headerMap.get(line.header_id);
         if (!header) continue;
 
         // Input VAT (مدخلات) = Debit

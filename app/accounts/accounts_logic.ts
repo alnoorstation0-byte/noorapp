@@ -38,41 +38,50 @@ export function useHierarchicalAccountsLogic() {
       }
 
       // 🛡️ Fallback المباشر: حساب أرصدة الحركات وتجميع الشجرة مباشرة
-      const [accRes, linesRes] = await Promise.all([
+      const [accRes, linesRes, headersRes, partnersRes] = await Promise.all([
         supabase.from('accounts').select('*').order('code'),
-        supabase.from('journal_lines').select(`
-          id, account_id, debit, credit, notes, item_name,
-          journal_headers!inner (entry_date, description),
-          partners (name)
-        `)
+        supabase.from('journal_lines').select('id, header_id, account_id, partner_id, debit, credit, notes, item_name'),
+        supabase.from('journal_headers').select('id, entry_date, description, status'),
+        supabase.from('partners').select('id, name')
       ]);
 
       const accounts = accRes.data || [];
       const lines = linesRes.data || [];
+      const headers = headersRes.data || [];
+      const partners = partnersRes.data || [];
+
+      const headerMap = new Map(headers.map((h: any) => [h.id, h]));
+      const partnerMap = new Map(partners.map((p: any) => [p.id, p]));
+
       const dateFrom = startDate || '1900-01-01';
       const dateTo = endDate || '2099-12-31';
 
       return accounts.map(acc => {
         const accLines = lines.filter((l: any) => {
           if (l.account_id !== acc.id) return false;
-          const d = l.journal_headers?.entry_date;
-          return d >= dateFrom && d <= dateTo;
+          const h = headerMap.get(l.header_id);
+          const d = h?.entry_date;
+          return d ? (d >= dateFrom && d <= dateTo) : true;
         });
 
         const totalDebit = accLines.reduce((sum: number, l: any) => sum + Number(l.debit || 0), 0);
         const totalCredit = accLines.reduce((sum: number, l: any) => sum + Number(l.credit || 0), 0);
-        const isDebitNature = ['assets', 'expenses'].includes(String(acc.account_type || '').toLowerCase());
+        const isDebitNature = ['assets', 'expenses', 'asset', 'expense', 'أصول', 'مصروفات', 'المصروفات', 'الأصول'].includes(String(acc.account_type || '').toLowerCase());
         const balance = isDebitNature ? totalDebit - totalCredit : totalCredit - totalDebit;
 
-        const transactions = accLines.map((l: any) => ({
-          id: l.id,
-          entry_date: l.journal_headers?.entry_date,
-          description: l.journal_headers?.description,
-          debit: l.debit,
-          credit: l.credit,
-          notes: l.notes || l.item_name,
-          partner_name: l.partners?.name
-        }));
+        const transactions = accLines.map((l: any) => {
+          const h = headerMap.get(l.header_id);
+          const p = partnerMap.get(l.partner_id);
+          return {
+            id: l.id,
+            entry_date: h?.entry_date,
+            description: h?.description,
+            debit: l.debit,
+            credit: l.credit,
+            notes: l.notes || l.item_name,
+            partner_name: p?.name
+          };
+        });
 
         return {
           id: acc.id,
@@ -147,7 +156,10 @@ export function useHierarchicalAccountsLogic() {
       
       node.totalDebit = Math.round(debit * 100) / 100;
       node.totalCredit = Math.round(credit * 100) / 100;
-      node.balance = Math.round((node.totalDebit - node.totalCredit) * 100) / 100;
+      const isDebitNature = ['assets', 'expenses', 'asset', 'expense', 'أصول', 'مصروفات', 'المصروفات', 'الأصول'].includes(String(node.account_type || '').toLowerCase());
+      node.balance = isDebitNature 
+        ? Math.round((node.totalDebit - node.totalCredit) * 100) / 100 
+        : Math.round((node.totalCredit - node.totalDebit) * 100) / 100;
       
       return { debit: node.totalDebit, credit: node.totalCredit };
     };

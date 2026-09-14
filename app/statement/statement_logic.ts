@@ -87,30 +87,38 @@ export function useStatementLogic() {
 
             // 🛡️ Fallback المباشر: استعلام journal_lines مباشرة للشريك
             try {
-                const { data: lines } = await supabase
-                    .from('journal_lines')
-                    .select(`
-                        id, debit, credit, notes, item_name, quantity, partner_id,
-                        journal_headers!inner (entry_date, description, reference_id, v_type),
-                        partners (name, partner_type)
-                    `)
-                    .eq('partner_id', effectivePartnerId)
-                    .order('created_at', { ascending: true });
+                const [linesRes, headersRes, partnersRes] = await Promise.all([
+                    supabase.from('journal_lines')
+                        .select('id, header_id, debit, credit, notes, item_name, quantity, partner_id, created_at')
+                        .eq('partner_id', effectivePartnerId)
+                        .order('created_at', { ascending: true }),
+                    supabase.from('journal_headers')
+                        .select('id, entry_date, description, reference_id, v_type'),
+                    supabase.from('partners')
+                        .select('id, name, partner_type')
+                ]);
 
-                return (lines || []).map((l: any, index: number) => ({
-                    line_id: l.id || `line-${index}`,
-                    partner_id: l.partner_id,
-                    partner_name: l.partners?.name,
-                    partner_type: l.partners?.partner_type,
-                    transaction_date: l.journal_headers?.entry_date,
-                    debit: Number(l.debit || 0),
-                    credit: Number(l.credit || 0),
-                    main_description: l.journal_headers?.description,
-                    line_details: l.notes || l.item_name,
-                    v_type: l.journal_headers?.v_type,
-                    reference_id: l.journal_headers?.reference_id,
-                    attendance_value: l.quantity
-                }));
+                const headerMap = new Map((headersRes.data || []).map((h: any) => [h.id, h]));
+                const partnerMap = new Map((partnersRes.data || []).map((p: any) => [p.id, p]));
+
+                return (linesRes.data || []).map((l: any, index: number) => {
+                    const h = headerMap.get(l.header_id);
+                    const p = partnerMap.get(l.partner_id);
+                    return {
+                        line_id: l.id || `line-${index}`,
+                        partner_id: l.partner_id,
+                        partner_name: p?.name,
+                        partner_type: p?.partner_type,
+                        transaction_date: h?.entry_date,
+                        debit: Number(l.debit || 0),
+                        credit: Number(l.credit || 0),
+                        main_description: h?.description,
+                        line_details: l.notes || l.item_name,
+                        v_type: h?.v_type,
+                        reference_id: h?.reference_id,
+                        attendance_value: l.quantity
+                    };
+                });
             } catch (fallbackErr) {
                 console.error("Statement fallback error:", fallbackErr);
                 return [];

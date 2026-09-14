@@ -30,16 +30,16 @@ export function useTrialBalanceLogic() {
 
             // 🛡️ Fallback المباشر: حساب ميزان المراجعة من الدفاتر مباشرة
             if (!trialData) {
-                const [accountsRes, linesRes] = await Promise.all([
+                const [accountsRes, linesRes, headersRes] = await Promise.all([
                     supabase.from('accounts').select('id, code, name, is_transactional').order('code'),
-                    supabase.from('journal_lines').select(`
-                        account_id, debit, credit,
-                        journal_headers!inner (entry_date, status)
-                    `).lte('journal_headers.entry_date', endDate)
+                    supabase.from('journal_lines').select('header_id, account_id, debit, credit'),
+                    supabase.from('journal_headers').select('id, entry_date, status')
                 ]);
 
                 const accounts = accountsRes.data || [];
                 const lines = linesRes.data || [];
+                const headers = headersRes.data || [];
+                const headerMap = new Map(headers.map((h: any) => [h.id, h]));
 
                 const accMap = new Map<string, any>();
                 accounts.forEach(a => {
@@ -60,15 +60,18 @@ export function useTrialBalanceLogic() {
                 lines.forEach((l: any) => {
                     const row = accMap.get(l.account_id);
                     if (!row) return;
-                    const date = l.journal_headers?.entry_date;
+                    const h = headerMap.get(l.header_id);
+                    const date = h?.entry_date || '';
+                    if (endDate && date > endDate) return;
+
                     const d = Number(l.debit || 0);
                     const c = Number(l.credit || 0);
                     if (d !== 0 || c !== 0) row.has_activity = true;
 
-                    if (date < startDate) {
+                    if (startDate && date < startDate) {
                         row.opening_debit += d;
                         row.opening_credit += c;
-                    } else if (date >= startDate && date <= endDate) {
+                    } else if ((!startDate || date >= startDate) && (!endDate || date <= endDate)) {
                         row.period_debit += d;
                         row.period_credit += c;
                     }

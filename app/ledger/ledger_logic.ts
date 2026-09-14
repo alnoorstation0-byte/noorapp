@@ -51,30 +51,34 @@ export function useLedgerLogic() {
       }
 
       // 🛡️ Fallback المباشر: استعلام journal_lines مباشرة
-      const { data: rawLines } = await supabase
-        .from('journal_lines')
-        .select(`
-          id, debit, credit, item_name, notes,
-          journal_headers!inner (entry_date, description),
-          partners (name)
-        `)
-        .eq('account_id', selectedAccountId)
-        .order('created_at', { ascending: true });
+      const [linesRes, headersRes, partnersRes] = await Promise.all([
+        supabase.from('journal_lines').select('id, header_id, debit, credit, item_name, notes, partner_id, created_at')
+          .eq('account_id', selectedAccountId).order('created_at', { ascending: true }),
+        supabase.from('journal_headers').select('id, entry_date, description'),
+        supabase.from('partners').select('id, name')
+      ]);
 
-      return (rawLines || []).map((r: any) => ({
-        id: r.id,
-        debit: Number(r.debit || 0),
-        credit: Number(r.credit || 0),
-        item_name: r.item_name,
-        notes: r.notes,
-        journal_headers: {
-          entry_date: r.journal_headers?.entry_date,
-          description: r.journal_headers?.description
-        },
-        partners: {
-          name: r.partners?.name
-        }
-      }));
+      const headerMap = new Map((headersRes.data || []).map((h: any) => [h.id, h]));
+      const partnerMap = new Map((partnersRes.data || []).map((p: any) => [p.id, p]));
+
+      return (linesRes.data || []).map((r: any) => {
+        const h = headerMap.get(r.header_id);
+        const p = partnerMap.get(r.partner_id);
+        return {
+          id: r.id,
+          debit: Number(r.debit || 0),
+          credit: Number(r.credit || 0),
+          item_name: r.item_name,
+          notes: r.notes,
+          journal_headers: {
+            entry_date: h?.entry_date,
+            description: h?.description
+          },
+          partners: {
+            name: p?.name
+          }
+        };
+      });
     }
   });
 
