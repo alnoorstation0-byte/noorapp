@@ -5,6 +5,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/lib/toast-context'; 
 import { useRealtimeListener } from '@/lib/useRealtimeSync';
 import { syncAllWarehouseBalances, MAIN_WAREHOUSE_ID } from '@/lib/inventory_engine'; 
+import { getLocalExpiryMetadata, saveLocalExpiryMetadata } from '@/app/expiry-alerts/expiry_alerts_logic';
 
 export function useInventoryLogic() {
   const { showToast } = useToast();
@@ -24,7 +25,8 @@ export function useInventoryLogic() {
   const [isModalOpen, setIsModalOpen] = useState(false); // For adding new product to catalog
   const [isActionModalOpen, setIsActionModalOpen] = useState(false); // For Quick Action In/Out
   const [currentRecord, setCurrentRecord] = useState<any>({
-    code: '', name: '', unit: 'حبة', current_quantity: 0, reorder_level: 5, suggested_price: 0, is_returnable_bottle: false, tax_rate: 15
+    code: '', name: '', unit: 'حبة', current_quantity: 0, reorder_level: 5, suggested_price: 0, is_returnable_bottle: false, tax_rate: 15,
+    expiry_date: '', batch_number: '', alert_before_days: 30
   });
 
   const categories = useMemo(() => {
@@ -103,6 +105,10 @@ export function useInventoryLogic() {
   const [filterLowStockOnly, setFilterLowStockOnly] = useState(false);
 
   const enrichedItems = useMemo(() => {
+    const localMeta = getLocalExpiryMetadata();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
     return items.map(item => {
       const whItem = warehouseInventory.find(wi => wi.item_id === item.id && wi.warehouse_id === selectedWarehouseId);
       let qty = whItem ? Math.max(0, Number(whItem.quantity)) : 0;
@@ -113,6 +119,23 @@ export function useInventoryLogic() {
       const reorderLvl = Number(item.reorder_level) || 5;
       const isLow = qty <= reorderLvl;
 
+      const cached = localMeta[item.id] || {};
+      const expDate = item.expiry_date || cached.expiry_date || null;
+      const batchNo = item.batch_number || cached.batch_number || null;
+      const alertDays = Number(item.alert_before_days || cached.alert_before_days || 30);
+
+      let daysLeft: number | null = null;
+      let isExpired = false;
+      let isNearExpiry = false;
+
+      if (expDate) {
+        const exp = new Date(expDate);
+        exp.setHours(0, 0, 0, 0);
+        daysLeft = Math.ceil((exp.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+        isExpired = daysLeft <= 0;
+        isNearExpiry = daysLeft > 0 && daysLeft <= alertDays;
+      }
+
       return {
         ...item,
         available_qty: qty,
@@ -120,7 +143,13 @@ export function useInventoryLogic() {
         isLowStock: isLow,
         cost_price: Number(item.cost_price || 0),
         last_purchase_price: lastPrices[item.id] || Number(item.cost_price) || 0,
-        avg_cost: 0
+        avg_cost: 0,
+        expiry_date: expDate,
+        batch_number: batchNo,
+        alert_before_days: alertDays,
+        days_left: daysLeft,
+        isExpired,
+        isNearExpiry
       };
     }).filter(i => {
       const matchSearch = (i.name || '').toLowerCase().includes(searchQuery.toLowerCase()) || (i.code || '').toLowerCase().includes(searchQuery.toLowerCase());
@@ -187,12 +216,54 @@ export function useInventoryLogic() {
       if (payload.barcode) cleanPayload.barcode = payload.barcode;
       if (payload.item_type) cleanPayload.item_type = payload.item_type;
 
+      // ⏳ دعم حقول الصلاحية والتشغيلة مع حماية Fallback
+      if (payload.expiry_date) cleanPayload.expiry_date = payload.expiry_date;
+      if (payload.batch_number) cleanPayload.batch_number = payload.batch_number;
+      if (payload.alert_before_days) cleanPayload.alert_before_days = Number(payload.alert_before_days);
+
+      const saveLocally = (id: string) => {
+        saveLocalExpiryMetadata(id, {
+          expiry_date: payload.expiry_date || undefined,
+          batch_number: payload.batch_number || undefined,
+          alert_before_days: Number(payload.alert_before_days) || 30
+        });
+      };
+
       if (payload.id) {
+        saveLocally(payload.id);
         const { error } = await supabase.from('inventory_items').update(cleanPayload).eq('id', payload.id);
-        if (error) throw error;
+        if (error) {
+          // If error is missing column (42703), retry without expiry columns
+          if (error.code === '42703') {
+            delete cleanPayload.expiry_date;
+            delete cleanPayload.batch_number;
+            delete cleanPayload.alert_before_days;
+            await supabase.from('inventory_items').update(cleanPayload).eq('id', payload.id);
+          } else {
+            throw error;
+          }
+        }
       } else {
-        const { data: insertedItem, error } = await supabase.from('inventory_items').insert([cleanPayload]).select().single();
-        if (error) throw error;
+        let insertedItem: any = null;
+        const { data, error } = await supabase.from('inventory_items').insert([cleanPayload]).select().single();
+        if (error) {
+          if (error.code === '42703') {
+            delete cleanPayload.expiry_date;
+            delete cleanPayload.batch_number;
+            delete cleanPayload.alert_before_days;
+            const res2 = await supabase.from('inventory_items').insert([cleanPayload]).select().single();
+            if (res2.error) throw res2.error;
+            insertedItem = res2.data;
+          } else {
+            throw error;
+          }
+        } else {
+          insertedItem = data;
+        }
+
+        if (insertedItem) {
+          saveLocally(insertedItem.id);
+        }
 
         // 📦 إذا تم إدخال رصيد افتتاحي أولي أكبر من صفر، ننشئ حركة رصيد أول المدة للمستودع الرئيسي تلقائياً
         if (insertedItem && Number(cleanPayload.current_quantity) > 0) {

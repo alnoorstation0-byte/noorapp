@@ -21,6 +21,7 @@ export const menuGroups = [
         group: "المستودع", 
         items: [
             { id: 'inventory', title: 'الأصناف', icon: '📦', path: '/inventory' },
+            { id: 'expiry_alerts', title: 'مراقبة الصلاحيات ⏳', icon: '⏳', path: '/expiry-alerts' },
             { id: 'purchase_orders', title: 'أوامر الشراء', icon: '🛒', path: '/purchase_orders' },
             { id: 'warehouses', title: 'المستودعات', icon: '🏢', path: '/inventory/warehouses' },
             { id: 'inventory_transactions', title: 'حركات المخزون', icon: '🔄', path: '/inventory/transactions' }

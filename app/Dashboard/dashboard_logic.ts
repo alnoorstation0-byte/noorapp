@@ -167,6 +167,33 @@ export const useDashboardLogic = () => {
         });
       });
 
+      // --- ⏳ مراقبة الصلاحيات والإنذارات ---
+      let expiredItemsCount = 0;
+      let criticalExpiryCount = 0;
+      try {
+        const { data: expItems } = await supabase.from('inventory_items').select('id, expiry_date, alert_before_days');
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        let localExp: any = {};
+        if (typeof window !== 'undefined') {
+          try { localExp = JSON.parse(localStorage.getItem('taj_expiry_metadata_cache') || '{}'); } catch {}
+        }
+        (expItems || inventoryItems || []).forEach((it: any) => {
+          const cached = localExp[it.id] || {};
+          const expDate = it.expiry_date || cached.expiry_date;
+          const alertDays = Number(it.alert_before_days || cached.alert_before_days || 30);
+          if (expDate) {
+            const exp = new Date(expDate);
+            exp.setHours(0, 0, 0, 0);
+            const diff = Math.ceil((exp.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+            if (diff <= 0) expiredItemsCount++;
+            else if (diff <= alertDays) criticalExpiryCount++;
+          }
+        });
+      } catch (e) {
+        console.warn('Dashboard expiry check fallback:', e);
+      }
+
       // --- 🍩 تجميع المصروفات للرسم البياني ---
       const categoryMap: Record<string, number> = {};
       expenses.forEach(exp => {
@@ -195,6 +222,8 @@ export const useDashboardLogic = () => {
         ],
         expensesByCategory,
         pendingActions,
+        expiredItemsCount,
+        criticalExpiryCount,
 
         // 🏛️ كائن totals والبيانات المتقدمة
         totals: {

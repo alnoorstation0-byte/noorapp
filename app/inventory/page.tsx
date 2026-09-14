@@ -126,6 +126,43 @@ export default function InventoryPage() {
       }
     },
     {
+      key: 'expiry_date', label: 'الصلاحية / الدفعة ⏳',
+      render: (row: any) => {
+        if (!row.expiry_date) {
+          return <span style={{ color: '#94a3b8', fontSize: '11px' }}>غير محدد</span>;
+        }
+        const days = row.days_left;
+        const isExp = row.isExpired || (days !== undefined && days !== null && days <= 0);
+        const isNear = row.isNearExpiry;
+        
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px', minWidth: '110px' }}>
+            <span style={{ fontSize: '12px', fontWeight: 800, color: isExp ? '#dc2626' : (isNear ? '#d97706' : '#2C1A12') }}>
+              {row.expiry_date}
+            </span>
+            {isExp ? (
+              <span style={{ fontSize: '9.5px', background: 'rgba(239, 68, 68, 0.15)', color: '#dc2626', padding: '1px 6px', borderRadius: '6px', fontWeight: 900, border: '1px solid rgba(239, 68, 68, 0.3)' }}>
+                ⛔ منتهي الصلاحية
+              </span>
+            ) : isNear ? (
+              <span style={{ fontSize: '9.5px', background: 'rgba(245, 158, 11, 0.15)', color: '#b45309', padding: '1px 6px', borderRadius: '6px', fontWeight: 900, border: '1px solid rgba(245, 158, 11, 0.3)' }}>
+                ⏳ متبقي {days} يوم
+              </span>
+            ) : (
+              <span style={{ fontSize: '9.5px', background: 'rgba(78, 115, 79, 0.12)', color: '#4E734F', padding: '1px 6px', borderRadius: '6px', fontWeight: 800 }}>
+                🟢 {days} يوم
+              </span>
+            )}
+            {row.batch_number && (
+              <span style={{ fontSize: '9px', color: '#64748b' }}>
+                تشغيلة: {row.batch_number}
+              </span>
+            )}
+          </div>
+        );
+      }
+    },
+    {
       key: 'actions', label: 'الإجراءات', type: 'actions',
       render: (row: any) => (
         <div className="table-actions-container" style={{ display: 'flex', flexDirection: 'row', flexWrap: 'nowrap', gap: '6px', justifyContent: 'center', alignItems: 'center', minWidth: '125px' }}>
@@ -221,6 +258,16 @@ export default function InventoryPage() {
                 </div>
               </div>
             </div>
+            {logic.items?.some((it: any) => it.isExpired || it.isNearExpiry) && (
+              <Link href="/expiry-alerts" style={{ textDecoration: 'none' }}>
+                <div className="summary-glass-card" style={{ padding: '8px 12px', background: 'rgba(239, 68, 68, 0.08)', border: '1px solid rgba(239, 68, 68, 0.3)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', cursor: 'pointer' }}>
+                  <span style={{ fontSize: '11px', fontWeight: 800, color: '#b91c1c' }}>⚠️ سلع بحاجة للمتابعة:</span>
+                  <span style={{ fontSize: '14px', fontWeight: 900, color: '#dc2626' }}>
+                    {logic.items?.filter((it: any) => it.isExpired || it.isNearExpiry).length} صنف ⏳
+                  </span>
+                </div>
+              </Link>
+            )}
           </div>
         }
         actions={
@@ -233,6 +280,16 @@ export default function InventoryPage() {
               <span>➕</span>
               <span>إضافة صنف جديد</span>
             </button>
+            <Link href="/expiry-alerts" style={{ textDecoration: 'none', width: '100%' }}>
+              <button 
+                type="button" 
+                className="btn-main-glass"
+                style={{ width: '100%', borderColor: 'rgba(168, 87, 60, 0.4)', color: '#A8573C' }}
+              >
+                <span>⏳</span>
+                <span>مراقبة الصلاحيات والإنذارات</span>
+              </button>
+            </Link>
             <button 
               type="button" 
               className="btn-main-glass"

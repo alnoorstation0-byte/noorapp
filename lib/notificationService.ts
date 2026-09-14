@@ -264,3 +264,40 @@ export async function notifySystemAlert(params: {
     target_roles: ['super_admin', 'admin', 'staff']
   });
 }
+
+// =========================================================================
+// ⏳ إشعارات وتنبيهات صلاحية البضاعة (Expiry Alerts)
+// =========================================================================
+
+/**
+ * إشعار انتهاء أو قرب انتهاء صلاحية صنف
+ */
+export async function notifyExpiryAlert(params: {
+  itemName: string;
+  daysLeft: number;
+  expiryDate: string;
+  isExpired: boolean;
+  quantity?: number;
+  warehouseName?: string;
+}) {
+  const whText = params.warehouseName ? ` بمستودع: ${params.warehouseName}` : '';
+  const qtyText = params.quantity !== undefined ? ` (الكمية الحالية: ${params.quantity})` : '';
+
+  if (params.isExpired) {
+    return sendSystemNotification({
+      title: `⛔ بضاعة منتهية الصلاحية: (${params.itemName})`,
+      message: `انتهت صلاحية الصنف ${params.itemName}${qtyText} في تاريخ ${params.expiryDate}${whText}. يرجى سحبه أو عمل محضر إتلاف.`,
+      type: 'alert',
+      action_url: '/expiry-alerts',
+      target_roles: ['super_admin', 'admin', 'manager', 'staff']
+    });
+  } else {
+    return sendSystemNotification({
+      title: `⏳ تنبيه قرب انتهاء الصلاحية: (${params.itemName})`,
+      message: `الصنف ${params.itemName}${qtyText} متبقي على انتهاء صلاحيته ${params.daysLeft} يوماً فقط (تاريخ الانتهاء: ${params.expiryDate})${whText}.`,
+      type: 'alert',
+      action_url: '/expiry-alerts',
+      target_roles: ['super_admin', 'admin', 'manager', 'staff']
+    });
+  }
+}

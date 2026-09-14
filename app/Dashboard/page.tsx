@@ -34,8 +34,71 @@ export default function DashboardPage() {
       {logic.isLoading || !logic.stats ? (
         <LoadingScreen message="جاري تحميل لوحة القيادة..." subMessage="نقوم الآن بتجميع البيانات وتحديث المؤشرات..." fullScreen={false} />
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '35px', animation: 'fadeUp 0.6s ease-out', paddingBottom: '50px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '30px', animation: 'fadeUp 0.6s ease-out', paddingBottom: '50px' }}>
           
+          {/* ⏳ إنذار مراقبة تواريخ الصلاحية */}
+          {((logic.stats?.expiredItemsCount || 0) > 0 || (logic.stats?.criticalExpiryCount || 0) > 0) && (
+            <div 
+              onClick={() => router.push('/expiry-alerts')}
+              style={{
+                background: (logic.stats?.expiredItemsCount || 0) > 0 
+                  ? 'linear-gradient(135deg, rgba(254, 226, 226, 0.95) 0%, rgba(254, 242, 242, 0.85) 100%)' 
+                  : 'linear-gradient(135deg, rgba(254, 243, 199, 0.95) 0%, rgba(255, 251, 235, 0.85) 100%)',
+                border: (logic.stats?.expiredItemsCount || 0) > 0 ? '1.5px solid #ef4444' : '1.5px solid #f59e0b',
+                borderRadius: '16px',
+                padding: '14px 20px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '14px',
+                cursor: 'pointer',
+                boxShadow: '0 4px 15px rgba(44, 26, 18, 0.06)',
+                backdropFilter: 'blur(16px)'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+                <div style={{
+                  width: '44px', height: '44px', borderRadius: '12px',
+                  background: (logic.stats?.expiredItemsCount || 0) > 0 ? '#fee2e2' : '#fef3c7',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px'
+                }}>
+                  {(logic.stats?.expiredItemsCount || 0) > 0 ? '⛔' : '⏳'}
+                </div>
+                <div>
+                  <div style={{ fontWeight: 900, fontSize: '14px', color: (logic.stats?.expiredItemsCount || 0) > 0 ? '#991b1b' : '#92400e' }}>
+                    {(logic.stats?.expiredItemsCount || 0) > 0 
+                      ? `تنبيه أمان: يوجد ${logic.stats?.expiredItemsCount} صنف منتهي الصلاحية في المستودعات!`
+                      : `إنذار صلاحية: يوجد ${logic.stats?.criticalExpiryCount} صنف قارب على انتهاء الصلاحية!`
+                    }
+                  </div>
+                  <div style={{ fontSize: '11.5px', color: '#64748b', fontWeight: 700, marginTop: '2px' }}>
+                    انقر هنا لفتح شاشة مراقبة الصلاحيات، تحرير تواريخ الانتهاء، أو جدولة الإتلافات والعروض.
+                  </div>
+                </div>
+              </div>
+              <button
+                type="button"
+                style={{
+                  background: (logic.stats?.expiredItemsCount || 0) > 0 ? 'linear-gradient(135deg, #dc2626, #b91c1c)' : 'linear-gradient(135deg, #d97706, #b45309)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '10px',
+                  padding: '8px 16px',
+                  fontSize: '12.5px',
+                  fontWeight: 900,
+                  cursor: 'pointer',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}
+              >
+                <span>فحص السلع ⏳</span>
+              </button>
+            </div>
+          )}
+
           {/* ========== 1. القسم العلوي: المؤشرات المالية الأساسية ========== */}
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '20px' }}>
@@ -77,7 +140,7 @@ export default function DashboardPage() {
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '20px' }}>
               <h3 className="section-title">📦 الحركة التشغيلية والمخزون</h3>
             </div>
-            <div className="premium-grid-4">
+            <div className="premium-grid-4" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))' }}>
               <div className="premium-card center-content" onClick={() => router.push('/inventory')} style={{ cursor: 'pointer' }}>
                 <div className="icon-wrapper lg" style={{ background: '#f8fafc', color: THEME.primary }}>🏭</div>
                 <div className="card-value sm">{logic.stats?.totalWarehouses || 0}</div>
@@ -88,6 +151,14 @@ export default function DashboardPage() {
                 <div className="icon-wrapper lg" style={{ background: '#f8fafc', color: '#f59e0b' }}>📦</div>
                 <div className="card-value sm">{(logic.stats?.totalInventoryValue || 0) > 0 ? logic.formatCurrency(logic.stats?.totalInventoryValue || 0) : '0'}</div>
                 <div className="card-title">قيمة المخزون الإجمالية</div>
+              </div>
+
+              <div className="premium-card center-content" onClick={() => router.push('/expiry-alerts')} style={{ cursor: 'pointer', border: (logic.stats?.expiredItemsCount || 0) > 0 ? '1.5px solid #ef4444' : undefined }}>
+                <div className="icon-wrapper lg" style={{ background: (logic.stats?.expiredItemsCount || 0) > 0 ? '#fee2e2' : '#f8fafc', color: (logic.stats?.expiredItemsCount || 0) > 0 ? '#dc2626' : '#C29B62' }}>⏳</div>
+                <div className="card-value sm" style={{ color: (logic.stats?.expiredItemsCount || 0) > 0 ? '#dc2626' : '#2C1A12' }}>
+                  {(logic.stats?.expiredItemsCount || 0) + (logic.stats?.criticalExpiryCount || 0)}
+                </div>
+                <div className="card-title">تنبيهات الصلاحية</div>
               </div>
 
               <div className="premium-card center-content" onClick={() => router.push('/fleet')} style={{ cursor: 'pointer' }}>

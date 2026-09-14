@@ -8,6 +8,7 @@ import { SALES_ACCOUNTS, CASH_ACCOUNTS, ACC } from '@/lib/account-ids';
 import { syncAllWarehouseBalances } from '@/lib/inventory_engine';
 import { notifyInvoiceCreated } from '@/lib/notificationService';
 import { distributeManualDiscount, applyPromotions, Promotion, PosCartItem } from '@/lib/promotions_engine';
+import { getLocalExpiryMetadata } from '@/app/expiry-alerts/expiry_alerts_logic';
 
 
 export function usePosLogic() {
@@ -301,13 +302,28 @@ export function usePosLogic() {
         queryFn: async () => {
             if (!selectedWarehouseId) return [];
 
-            // 1. Fetch Item Master Catalog with tax_rate
-            const { data: catalog, error: catErr } = await supabase
+            // 1. Fetch Item Master Catalog with tax_rate and expiry columns
+            let catalog: any[] = [];
+            const { data: catData, error: catErr } = await supabase
                 .from('inventory_items')
-                .select('id, name, default_price, suggested_price, unit, code, barcode, reorder_level, current_quantity, is_returnable_bottle, tax_rate')
+                .select('id, name, default_price, suggested_price, unit, code, barcode, reorder_level, current_quantity, is_returnable_bottle, tax_rate, expiry_date, batch_number, alert_before_days')
                 .order('name');
 
-            if (catErr) throw catErr;
+            if (catErr) {
+                // Resilient fallback if expiry columns are not yet applied via migration
+                const { data: fbData, error: fbErr } = await supabase
+                    .from('inventory_items')
+                    .select('id, name, default_price, suggested_price, unit, code, barcode, reorder_level, current_quantity, is_returnable_bottle, tax_rate')
+                    .order('name');
+                if (fbErr) throw fbErr;
+                catalog = fbData || [];
+            } else {
+                catalog = catData || [];
+            }
+
+            const localExp = getLocalExpiryMetadata();
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
 
             // 2. Fetch inventory for selected warehouse
             const { data: whInv, error: whErr } = await supabase
@@ -336,6 +352,27 @@ export function usePosLogic() {
                 const isCritical = availableQty <= reorderLvl;
                 const isNear = availableQty > reorderLvl && availableQty <= reorderLvl * 1.5;
 
+                const cachedMeta = localExp[item.id] || {};
+                const expiryDate = item.expiry_date || cachedMeta.expiry_date || null;
+                const batchNum = item.batch_number || cachedMeta.batch_number || null;
+                const alertDays = Number(item.alert_before_days || cachedMeta.alert_before_days || 30);
+
+                let daysLeft: number | null = null;
+                let isExpired = false;
+                let isNearExpiry = false;
+
+                if (expiryDate) {
+                    const exp = new Date(expiryDate);
+                    exp.setHours(0, 0, 0, 0);
+                    const diffTime = exp.getTime() - today.getTime();
+                    daysLeft = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    if (daysLeft <= 0) {
+                        isExpired = true;
+                    } else if (daysLeft <= alertDays) {
+                        isNearExpiry = true;
+                    }
+                }
+
                 return {
                     id: item.id,
                     name: item.name || 'صنف غير معروف',
@@ -348,7 +385,13 @@ export function usePosLogic() {
                     isCriticalLow: isCritical,
                     isNearLow: isNear,
                     is_returnable_bottle: Boolean(item.is_returnable_bottle),
-                    tax_rate: (item.tax_rate !== undefined && item.tax_rate !== null) ? Number(item.tax_rate) : 15
+                    tax_rate: (item.tax_rate !== undefined && item.tax_rate !== null) ? Number(item.tax_rate) : 15,
+                    expiry_date: expiryDate,
+                    batch_number: batchNum,
+                    alert_before_days: alertDays,
+                    days_left: daysLeft,
+                    isExpired,
+                    isNearExpiry
                 };
             });
         },
@@ -357,6 +400,14 @@ export function usePosLogic() {
 
     const lowStockCount = useMemo(() => {
         return inventoryItems.filter((i: any) => i.isCriticalLow).length;
+    }, [inventoryItems]);
+
+    const expiredCount = useMemo(() => {
+        return inventoryItems.filter((i: any) => i.isExpired).length;
+    }, [inventoryItems]);
+
+    const nearExpiryCount = useMemo(() => {
+        return inventoryItems.filter((i: any) => i.isNearExpiry).length;
     }, [inventoryItems]);
 
     // Fetch customers
@@ -387,6 +438,13 @@ export function usePosLogic() {
             setIsShiftOpenModalOpen(true);
             return;
         }
+        if (item.isExpired) {
+            setTimeout(() => showToast(`⛔ منع البيع: الصنف (${item.name}) منتهي الصلاحية بتاريخ ${item.expiry_date}! يمنع بيع السلع منتهية الصلاحية.`, 'error'), 0);
+            return;
+        }
+        if (item.isNearExpiry) {
+            setTimeout(() => showToast(`⏳ تنبيه: الصنف (${item.name}) قارب على انتهاء الصلاحية (متبقي ${item.days_left} يوم)!`, 'warning'), 0);
+        }
         setCart(prev => {
             const existing = prev.find(i => i.id === item.id);
             const unitPrice = price !== undefined ? price : (existing ? existing.unit_price : (item.suggested_price || 0));
@@ -412,6 +470,13 @@ export function usePosLogic() {
             setIsShiftOpenModalOpen(true);
             return;
         }
+        if (item.isExpired) {
+            showToast(`⛔ لا يمكن بيع (${item.name}): الصنف منتهي الصلاحية بتاريخ ${item.expiry_date}!`, 'error');
+            return;
+        }
+        if (item.isNearExpiry) {
+            showToast(`⏳ تنبيه: الصنف (${item.name}) قارب على انتهاء الصلاحية (متبقي ${item.days_left} يوم)!`, 'warning');
+        }
         setSelectedItemForCart({ ...item, selected_qty: 1, selected_price: item.suggested_price || 0 });
     };
 
@@ -422,6 +487,10 @@ export function usePosLogic() {
             return;
         }
         if (selectedItemForCart) {
+            if (selectedItemForCart.isExpired) {
+                showToast(`⛔ لا يمكن بيع (${selectedItemForCart.name}): الصنف منتهي الصلاحية!`, 'error');
+                return;
+            }
             if (selectedItemForCart.selected_qty > selectedItemForCart.available_qty) {
                 showToast(`⛔ منع البيع: الكمية المطلوبة (${selectedItemForCart.selected_qty}) تتجاوز الرصيد المتوفر في المستودع (${selectedItemForCart.available_qty})!`, 'error');
                 return;
@@ -487,6 +556,15 @@ export function usePosLogic() {
         if (!item) {
             showToast(`⚠️ الصنف غير موجود أو غير متوفر في هذا المنفذ: ${cleanCode}`, 'error');
             return;
+        }
+
+        if (item.isExpired) {
+            showToast(`⛔ منع البيع: الصنف (${item.name}) منتهي الصلاحية بتاريخ ${item.expiry_date}! يمنع بيع السلع المنتهية للمستهلكين.`, 'error');
+            return;
+        }
+
+        if (item.isNearExpiry) {
+            showToast(`⏳ تنبيه كاشير: الصنف (${item.name}) قارب على انتهاء الصلاحية (متبقي ${item.days_left} يوم)`, 'warning');
         }
 
         // 3. إضافة حبة أولى إذا لم يكن في السلة، أو زيادة العدد إذا كان موجوداً مسبقاً
@@ -1032,6 +1110,7 @@ export function usePosLogic() {
         isDelegateLocked: isManagerOrAdmin ? false : (isDelegateLocked || !!activeShift),
         activeFleetOperation,
         onlyLowStock, setOnlyLowStock, lowStockCount,
+        expiredCount, nearExpiryCount,
         handleCheckout: () => checkoutMutation.mutate(),
         isCheckingOut: checkoutMutation.isPending,
         isLoading: loadingWarehouses || loadingItems || loadingShift,

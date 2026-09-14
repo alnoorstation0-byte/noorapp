@@ -1442,6 +1442,11 @@ export default function PosPage() {
                     background: linear-gradient(135deg, rgba(254, 242, 242, 0.95) 0%, rgba(255, 253, 250, 0.85) 100%);
                     box-shadow: 0 3px 10px rgba(239, 68, 68, 0.12);
                 }
+                .pos-item-card.expired {
+                    border: 1.5px solid #dc2626;
+                    background: linear-gradient(135deg, rgba(254, 226, 226, 0.95) 0%, rgba(254, 242, 242, 0.85) 100%);
+                    box-shadow: 0 3px 12px rgba(220, 38, 38, 0.2);
+                }
                 .pos-item-card.near-low {
                     border: 1.5px solid #f59e0b;
                     background: linear-gradient(135deg, rgba(255, 251, 235, 0.95) 0%, rgba(255, 253, 250, 0.85) 100%);
@@ -2190,6 +2195,49 @@ export default function PosPage() {
                                 </div>
                             )}
 
+                            {/* Expiry Alert Banner */}
+                            {((logic as any).expiredCount > 0 || (logic as any).nearExpiryCount > 0) && (
+                                <div style={{
+                                    background: (logic as any).expiredCount > 0 ? 'rgba(254, 226, 226, 0.9)' : 'rgba(254, 243, 199, 0.85)',
+                                    border: (logic as any).expiredCount > 0 ? '1px solid rgba(239, 68, 68, 0.4)' : '1px solid rgba(245, 158, 11, 0.4)',
+                                    borderRadius: '14px',
+                                    padding: '8px 14px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'space-between',
+                                    backdropFilter: 'blur(10px)',
+                                    gap: '10px'
+                                }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', fontWeight: 800, color: (logic as any).expiredCount > 0 ? '#991b1b' : '#92400e' }}>
+                                        <span style={{ fontSize: '16px' }}>{(logic as any).expiredCount > 0 ? '⛔' : '⏳'}</span>
+                                        <span>
+                                            {(logic as any).expiredCount > 0 
+                                                ? (isEn ? `Caution: ${(logic as any).expiredCount} expired items are blocked from sale in this branch!` : `تنبيه أمان: يوجد ${(logic as any).expiredCount} صنف منتهي الصلاحية محظور بيعه!`)
+                                                : (isEn ? `Notice: ${(logic as any).nearExpiryCount} items nearing expiry date.` : `تنبيه: يوجد ${(logic as any).nearExpiryCount} صنف قارب على انتهاء صلاحيته.`)
+                                            }
+                                        </span>
+                                    </div>
+                                    <a
+                                        href="/expiry-alerts"
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        style={{
+                                            background: (logic as any).expiredCount > 0 ? '#dc2626' : '#d97706',
+                                            color: 'white',
+                                            border: 'none',
+                                            borderRadius: '8px',
+                                            padding: '4px 10px',
+                                            fontSize: '11px',
+                                            fontWeight: 800,
+                                            textDecoration: 'none',
+                                            whiteSpace: 'nowrap'
+                                        }}
+                                    >
+                                        {isEn ? 'Inspect ⏳' : 'فحص الصلاحيات ⏳'}
+                                    </a>
+                                </div>
+                            )}
+
                                 <input 
                                     type="text" 
                                     className="glass-input-field" 
@@ -2219,7 +2267,7 @@ export default function PosPage() {
                                 </div>
                             ) : (
                                 logic.inventoryItems.map((item: any) => {
-                                    const cardClass = `pos-item-card ${item.isCriticalLow ? 'critical' : (item.isNearLow ? 'near-low' : '')}`;
+                                    const cardClass = `pos-item-card ${item.isExpired ? 'expired' : (item.isCriticalLow ? 'critical' : (item.isNearLow ? 'near-low' : ''))}`;
                                     return (
                                         <div 
                                             key={item.id} 
@@ -2229,7 +2277,15 @@ export default function PosPage() {
                                         >
                                             {/* 1. الصف العلوي لحالة وتوفر الصنف */}
                                             <div className="pos-item-top-row">
-                                                {item.isCriticalLow ? (
+                                                {item.isExpired ? (
+                                                    <span className="pos-badge-status critical" style={{ background: '#fee2e2', color: '#dc2626', border: '1px solid #f87171' }}>
+                                                        ⛔ {isEn ? 'Expired' : 'منتهي'}
+                                                    </span>
+                                                ) : item.isNearExpiry ? (
+                                                    <span className="pos-badge-status near-low" style={{ background: '#fef3c7', color: '#b45309', border: '1px solid #f59e0b' }}>
+                                                        ⏳ {item.days_left} {isEn ? 'd' : 'يوم'}
+                                                    </span>
+                                                ) : item.isCriticalLow ? (
                                                     <span className="pos-badge-status critical">
                                                         ⚠️ {isEn ? 'Reorder' : 'حد الطلب'} ({item.reorder_level})
                                                     </span>

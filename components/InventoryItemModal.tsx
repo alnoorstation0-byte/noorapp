@@ -36,7 +36,10 @@ export default function InventoryItemModal({ isOpen, onClose, currentRecord, set
     current_quantity: '',
     is_returnable_bottle: false,
     tax_rate: 15,
-    notes: ''
+    notes: '',
+    expiry_date: '',
+    batch_number: '',
+    alert_before_days: 30
   });
 
   useEffect(() => setMounted(true), []);
@@ -54,7 +57,10 @@ export default function InventoryItemModal({ isOpen, onClose, currentRecord, set
         current_quantity: (currentRecord?.current_quantity !== undefined && currentRecord?.current_quantity !== null) ? currentRecord.current_quantity : '',
         is_returnable_bottle: Boolean(currentRecord?.is_returnable_bottle),
         tax_rate: (currentRecord?.tax_rate !== undefined && currentRecord?.tax_rate !== null) ? Number(currentRecord.tax_rate) : 15,
-        notes: currentRecord?.notes || ''
+        notes: currentRecord?.notes || '',
+        expiry_date: currentRecord?.expiry_date || '',
+        batch_number: currentRecord?.batch_number || '',
+        alert_before_days: currentRecord?.alert_before_days || 30
       });
     }
   }, [isOpen, currentRecord]);
@@ -349,7 +355,50 @@ export default function InventoryItemModal({ isOpen, onClose, currentRecord, set
             </div>
           </div>
 
-          {/* 3. خيارات متقدمة (عهدة الفوارغ والملاحظات) */}
+          {/* 3. تتبع تاريخ الصلاحية ورقم التشغيلة */}
+          <div className="item-modal-section" style={{ border: '1px solid rgba(194, 155, 98, 0.4)', background: 'linear-gradient(135deg, rgba(255, 253, 250, 0.9) 0%, rgba(246, 241, 232, 0.7) 100%)' }}>
+            <div className="item-modal-sec-title" style={{ color: '#A8573C' }}>
+              <span>⏳</span>
+              <span>مراقبة الصلاحية والتشغيلة (تنبيهات تلقائية)</span>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '12px' }}>
+              <div>
+                <label className="item-modal-label">📅 تاريخ انتهاء الصلاحية</label>
+                <input 
+                  type="date" 
+                  className="glass-input-field item-modal-input" 
+                  value={formData.expiry_date || ''} 
+                  onChange={e => updateField('expiry_date', e.target.value)} 
+                />
+              </div>
+
+              <div>
+                <label className="item-modal-label">🏷️ رقم التشغيلة / الدفعة (Batch #)</label>
+                <input 
+                  type="text" 
+                  className="glass-input-field item-modal-input" 
+                  placeholder="مثال: BATCH-2026-A"
+                  value={formData.batch_number || ''} 
+                  onChange={e => updateField('batch_number', e.target.value)} 
+                />
+              </div>
+
+              <div>
+                <label className="item-modal-label">🔔 التنبيه قبل الانتهاء بـ (أيام)</label>
+                <input 
+                  type="number" 
+                  min="1"
+                  className="glass-input-field item-modal-input" 
+                  placeholder="30"
+                  value={formData.alert_before_days ?? 30} 
+                  onChange={e => updateField('alert_before_days', e.target.value === '' ? 30 : Number(e.target.value))} 
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* 4. خيارات متقدمة (عهدة الفوارغ والملاحظات) */}
           <div className="item-modal-section">
             <div className="item-modal-sec-title">
               <span>⚙️</span>
