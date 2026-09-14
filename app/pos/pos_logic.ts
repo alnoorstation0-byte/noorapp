@@ -304,7 +304,7 @@ export function usePosLogic() {
             // 1. Fetch Item Master Catalog with tax_rate
             const { data: catalog, error: catErr } = await supabase
                 .from('inventory_items')
-                .select('id, name, default_price, suggested_price, unit, code, reorder_level, current_quantity, is_returnable_bottle, tax_rate')
+                .select('id, name, default_price, suggested_price, unit, code, barcode, reorder_level, current_quantity, is_returnable_bottle, tax_rate')
                 .order('name');
 
             if (catErr) throw catErr;
@@ -432,22 +432,124 @@ export function usePosLogic() {
     };
 
 
-    const handleBarcodeScan = (barcode: string) => {
+    const handleBarcodeScan = (barcodeOrItem: any) => {
+        if (!barcodeOrItem) return;
+
         if (!activeShift) {
             showToast("⛔ يجب بدء الوردية أولاً قبل مسح الباركود وإجراء المبيعات!", "warning");
             setIsShiftOpenModalOpen(true);
             return;
         }
-        const item = inventoryItems.find((i: any) => String(i.code) === barcode || String(i.id) === barcode);
-        if (item) {
-            if (1 > item.available_qty) {
-                showToast(`⛔ نفد رصيد هذا الصنف بالمستودع (${item.name})!`, 'error');
-                return;
-            }
-            addToCart(item, 1, item.suggested_price || 0);
-            showToast(`تمت إضافة ${item.name}`, 'success');
+
+        let item: any = null;
+        let cleanCode = '';
+
+        if (typeof barcodeOrItem === 'object' && barcodeOrItem.id) {
+            item = barcodeOrItem;
+            cleanCode = item.code || item.barcode || item.name || '';
         } else {
-            showToast(`الصنف غير موجود أو نفدت كميته: ${barcode}`, 'error');
+            cleanCode = String(barcodeOrItem).trim();
+            if (!cleanCode) return;
+
+            const norm = (s: any) => String(s || '').trim().toLowerCase();
+            const normClean = norm(cleanCode);
+            const normCleanNoZero = normClean.replace(/^0+/, '');
+
+            // 1. المطابقة الدقيقة عبر الباركود أو كود الصنف أو المعرف أو الاسم
+            item = inventoryItems.find((i: any) => {
+                const itemCode = norm(i.code);
+                const itemBarcode = norm(i.barcode);
+                const itemId = norm(i.id);
+                const itemName = norm(i.name);
+
+                return (
+                    itemCode === normClean ||
+                    itemBarcode === normClean ||
+                    itemId === normClean ||
+                    itemName === normClean ||
+                    (normCleanNoZero && (itemCode.replace(/^0+/, '') === normCleanNoZero || itemBarcode.replace(/^0+/, '') === normCleanNoZero))
+                );
+            });
+
+            // 2. مطابقة مرنة في حال تم تمرير جزء من الاسم أو الكود
+            if (!item && inventoryItems.length > 0) {
+                const matches = inventoryItems.filter((i: any) => 
+                    norm(i.name).includes(normClean) || 
+                    (i.code && norm(i.code).includes(normClean)) ||
+                    (i.barcode && norm(i.barcode).includes(normClean))
+                );
+                if (matches.length === 1) {
+                    item = matches[0];
+                }
+            }
+        }
+
+        if (!item) {
+            showToast(`⚠️ الصنف غير موجود أو غير متوفر في هذا المنفذ: ${cleanCode}`, 'error');
+            return;
+        }
+
+        // 3. إضافة حبة أولى إذا لم يكن في السلة، أو زيادة العدد إذا كان موجوداً مسبقاً
+        let finalQty = 1;
+        let isIncrement = false;
+        let isOutOfStock = false;
+
+        setCart(prev => {
+            const existing = prev.find(c => c.id === item.id);
+            const unitPrice = item.suggested_price || item.default_price || (existing ? existing.unit_price : 0);
+
+            if (existing) {
+                if (existing.qty + 1 > item.available_qty) {
+                    isOutOfStock = true;
+                    return prev;
+                }
+                isIncrement = true;
+                finalQty = existing.qty + 1;
+                return prev.map(c => c.id === item.id ? { ...c, qty: existing.qty + 1, unit_price: unitPrice } : c);
+            }
+
+            if (1 > item.available_qty) {
+                isOutOfStock = true;
+                return prev;
+            }
+
+            finalQty = 1;
+            return [...prev, { ...item, qty: 1, unit_price: unitPrice }];
+        });
+
+        if (isOutOfStock) {
+            showToast(`⛔ تجاوز المخزون ممنوع! الرصيد المتاح من (${item.name}) هو ${item.available_qty} ${item.unit || ''} فقط`, 'error');
+            return;
+        }
+
+        // 4. نغمة تأكيد الكاشير واهتزاز الجوال
+        if (typeof window !== 'undefined') {
+            try {
+                const AudioCtx = window.AudioContext || (window as any).webkitAudioContext;
+                if (AudioCtx) {
+                    const ctx = new AudioCtx();
+                    const osc = ctx.createOscillator();
+                    const gain = ctx.createGain();
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(1760, ctx.currentTime);
+                    gain.gain.setValueAtTime(0.35, ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.1);
+                    osc.connect(gain);
+                    gain.connect(ctx.destination);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.1);
+                }
+            } catch {}
+            if (typeof navigator !== 'undefined' && navigator.vibrate) {
+                try { navigator.vibrate([80]); } catch {}
+            }
+        }
+
+        // 5. إشعار مرئي سريع وواضح للكمية المحدثة
+        if (isIncrement) {
+            showToast(`➕ (${item.name}) — الكمية بالسلة: ${finalQty} ${item.unit || ''}`, 'success');
+        } else {
+            showToast(`🛒 تمت إضافة (${item.name}) إلى السلة`, 'success');
         }
     };
 

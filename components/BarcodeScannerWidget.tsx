@@ -153,8 +153,10 @@ export default function BarcodeScannerWidget({
       {/* Professional Camera Modal */}
       {isCameraOpen && (
         <ProfessionalBarcodeModal 
-          onDetected={(code) => {
-            setIsCameraOpen(false);
+          onDetected={(code, shouldClose = true) => {
+            if (shouldClose) {
+              setIsCameraOpen(false);
+            }
             onScan(code);
           }}
           onClose={() => setIsCameraOpen(false)}
@@ -234,8 +236,10 @@ export function BarcodeCameraButton({
 
       {isOpen && (
         <ProfessionalBarcodeModal
-          onDetected={(code) => {
-            setIsOpen(false);
+          onDetected={(code, shouldClose = true) => {
+            if (shouldClose) {
+              setIsOpen(false);
+            }
             onScan(code);
           }}
           onClose={() => setIsOpen(false)}
@@ -250,7 +254,7 @@ export function ProfessionalBarcodeModal({
   onDetected, 
   onClose 
 }: { 
-  onDetected: (code: string) => void; 
+  onDetected: (code: string, shouldClose?: boolean) => void; 
   onClose: () => void; 
 }) {
   const [cameraError, setCameraError] = useState<string | null>(null);
@@ -260,6 +264,11 @@ export function ProfessionalBarcodeModal({
   const [availableCameras, setAvailableCameras] = useState<any[]>([]);
   const [selectedCameraId, setSelectedCameraId] = useState<string | null>(null);
   const [manualCode, setManualCode] = useState('');
+  const [isContinuousMode, setIsContinuousMode] = useState(true);
+  const [lastScannedFeedback, setLastScannedFeedback] = useState<string | null>(null);
+  const [scanCount, setScanCount] = useState(0);
+
+  const lastScanRef = useRef<{ code: string; time: number }>({ code: '', time: 0 });
 
   const html5QrCodeRef = useRef<any>(null);
   const scannerContainerId = "professional-barcode-viewport";
@@ -330,16 +339,31 @@ export function ProfessionalBarcodeModal({
         cameraIdOrFacing || { facingMode: 'environment' },
         config,
         (decodedText: string) => {
-          if (!isStoppedRef.current) {
-            isStoppedRef.current = true;
+          const now = Date.now();
+          if (isContinuousMode) {
+            // Debounce: 1100ms for exact same barcode to prevent spam, while allowing repeat scan to increment count!
+            if (decodedText === lastScanRef.current.code && (now - lastScanRef.current.time) < 1100) {
+              return;
+            }
+            lastScanRef.current = { code: decodedText, time: now };
             playPosBeep();
             triggerHaptic(80);
-            scanner.stop()
-              .then(() => scanner.clear())
-              .catch(() => {})
-              .finally(() => {
-                onDetected(decodedText);
-              });
+            setScanCount(prev => prev + 1);
+            setLastScannedFeedback(decodedText);
+            setTimeout(() => setLastScannedFeedback(null), 1400);
+            onDetected(decodedText, false);
+          } else {
+            if (!isStoppedRef.current) {
+              isStoppedRef.current = true;
+              playPosBeep();
+              triggerHaptic(80);
+              scanner.stop()
+                .then(() => scanner.clear())
+                .catch(() => {})
+                .finally(() => {
+                  onDetected(decodedText, true);
+                });
+            }
           }
         },
         () => {
@@ -507,6 +531,50 @@ export function ProfessionalBarcodeModal({
           </button>
         </div>
 
+        {/* Continuous mode toggle bar */}
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          width: '100%',
+          marginBottom: '10px'
+        }}>
+          <button
+            type="button"
+            onClick={() => setIsContinuousMode(!isContinuousMode)}
+            style={{
+              background: isContinuousMode ? 'rgba(16, 185, 129, 0.15)' : 'rgba(100, 116, 139, 0.12)',
+              color: isContinuousMode ? '#059669' : '#475569',
+              border: `1.5px solid ${isContinuousMode ? '#10b981' : '#cbd5e1'}`,
+              borderRadius: '10px',
+              padding: '5px 12px',
+              fontSize: '11px',
+              fontWeight: 800,
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '5px',
+              transition: 'all 0.2s'
+            }}
+          >
+            <span>{isContinuousMode ? '⚡ المسح المتتالي: مفعّل' : '🎯 المسح الفردي'}</span>
+          </button>
+
+          {scanCount > 0 && (
+            <span style={{
+              background: '#ecfdf5',
+              color: '#059669',
+              border: '1px solid #10b981',
+              borderRadius: '10px',
+              padding: '3px 10px',
+              fontSize: '11px',
+              fontWeight: 800
+            }}>
+              ✅ تم مسح {scanCount} صنف
+            </span>
+          )}
+        </div>
+
         {/* Viewport Box */}
         <div style={{
           width: '100%',
@@ -625,6 +693,32 @@ export function ProfessionalBarcodeModal({
               </div>
             </div>
           )}
+
+          {/* Floating Feedback on Successful Scan */}
+          {lastScannedFeedback && (
+            <div style={{
+              position: 'absolute',
+              top: '14px',
+              left: '50%',
+              transform: 'translateX(-50%)',
+              background: 'rgba(16, 185, 129, 0.95)',
+              color: '#fff',
+              padding: '6px 16px',
+              borderRadius: '20px',
+              fontSize: '12px',
+              fontWeight: 900,
+              boxShadow: '0 4px 15px rgba(0,0,0,0.35)',
+              zIndex: 25,
+              display: 'flex',
+              alignItems: 'center',
+              gap: '6px',
+              whiteSpace: 'nowrap',
+              pointerEvents: 'none'
+            }}>
+              <span>✅</span>
+              <span>تم مسح الصنف وإضافته للسلة (+1)</span>
+            </div>
+          )}
         </div>
 
         {/* Toolbar: Flashlight & Switch Camera */}
@@ -737,6 +831,33 @@ export function ProfessionalBarcodeModal({
             تأكيد ✓
           </button>
         </div>
+
+        {/* Done / Finish Button to close camera and return to cart */}
+        <button
+          type="button"
+          onClick={onClose}
+          style={{
+            width: '100%',
+            marginTop: '14px',
+            padding: '12px 16px',
+            borderRadius: '12px',
+            border: 'none',
+            background: 'linear-gradient(135deg, #4E734F 0%, #3d5b3e 100%)',
+            color: '#fff',
+            fontSize: '13px',
+            fontWeight: 800,
+            cursor: 'pointer',
+            boxShadow: '0 4px 12px rgba(78, 115, 79, 0.25)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '8px',
+            transition: 'all 0.2s'
+          }}
+        >
+          <span>✅</span>
+          <span>تم الانتهاء والرجوع للفاتورة {scanCount > 0 ? `(${scanCount} صنف تم مسحه)` : ''}</span>
+        </button>
       </div>
     </div>
   );

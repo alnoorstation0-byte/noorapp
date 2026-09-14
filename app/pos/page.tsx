@@ -734,6 +734,55 @@ export default function PosPage() {
     const [inspectShiftId, setInspectShiftId] = React.useState<string | null>(null);
     const [mobileTab, setMobileTab] = React.useState<'items' | 'cart'>('items');
 
+    // 🔍 Hardware Barcode Scanner Listener (USB / Bluetooth POS Scanners)
+    React.useEffect(() => {
+        let buffer = '';
+        let lastKeyTime = 0;
+
+        const handleKeyDown = (e: KeyboardEvent) => {
+            const activeEl = document.activeElement as HTMLElement | null;
+            const isModalOpen = !!logic.selectedItemForCart || logic.isShiftOpenModalOpen || logic.isShiftCloseModalOpen || logic.isOpenShiftsDrawerOpen;
+
+            // If a modal is open and the user is typing inside an input/textarea, do not intercept
+            if (isModalOpen && activeEl && (activeEl.tagName === 'INPUT' || activeEl.tagName === 'TEXTAREA')) {
+                return;
+            }
+
+            const now = Date.now();
+            const elapsed = now - lastKeyTime;
+            lastKeyTime = now;
+
+            if (e.key === 'Enter' || e.code === 'NumpadEnter') {
+                if (buffer.length >= 2) {
+                    const scanned = buffer.trim();
+                    buffer = '';
+                    if (scanned) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        logic.handleBarcodeScan(scanned);
+                    }
+                    return;
+                }
+                buffer = '';
+                return;
+            }
+
+            // Hardware scanners send keystrokes with < 100ms intervals
+            if (elapsed > 250) {
+                buffer = '';
+            }
+
+            if (e.key.length === 1 && !e.ctrlKey && !e.altKey && !e.metaKey) {
+                buffer += e.key;
+            }
+        };
+
+        window.addEventListener('keydown', handleKeyDown, true);
+        return () => {
+            window.removeEventListener('keydown', handleKeyDown, true);
+        };
+    }, [logic]);
+
     return (
         <MasterPage 
             title={isEn ? 'POS Cashier' : 'نقاط البيع (POS)'} 
@@ -2141,20 +2190,26 @@ export default function PosPage() {
                                 </div>
                             )}
 
-                            <input 
-                                type="text" 
-                                className="glass-input-field" 
-                                placeholder={isEn ? 'Search item by name... (Press Enter for quick select)' : 'ابحث عن صنف بالاسم... (اضغط Enter للاختيار السريع)'} 
-                                value={logic.searchQuery}
-                                onChange={(e) => logic.setSearchQuery(e.target.value)}
-                                onKeyDown={(e) => {
-                                    if ((e.key === 'Enter' || e.code === 'NumpadEnter') && logic.inventoryItems && logic.inventoryItems.length > 0) {
-                                        e.preventDefault();
-                                        logic.handleItemClick(logic.inventoryItems[0]);
-                                    }
-                                }}
-                                style={{ flex: 1 }}
-                            />
+                                <input 
+                                    type="text" 
+                                    className="glass-input-field" 
+                                    placeholder={isEn ? 'Search item by name or barcode... (Press Enter to add)' : 'ابحث عن صنف بالاسم أو الباركود... (اضغط Enter للإضافة مباشرة)'} 
+                                    value={logic.searchQuery}
+                                    onChange={(e) => logic.setSearchQuery(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === 'Enter' || e.code === 'NumpadEnter') {
+                                            e.preventDefault();
+                                            const q = (logic.searchQuery || '').trim();
+                                            if (q) {
+                                                logic.handleBarcodeScan(q);
+                                                logic.setSearchQuery('');
+                                            } else if (logic.inventoryItems && logic.inventoryItems.length > 0) {
+                                                logic.handleBarcodeScan(logic.inventoryItems[0]);
+                                            }
+                                        }
+                                    }}
+                                    style={{ flex: 1 }}
+                                />
                         </div>
                         
                         <div className="items-grid cinematic-scroll">
@@ -2234,10 +2289,10 @@ export default function PosPage() {
                                                     <button 
                                                         type="button" 
                                                         className="pos-quick-add-btn" 
-                                                        title={isEn ? 'Add to invoice' : 'إضافة للفاتورة'}
+                                                        title={isEn ? 'Add directly (+1)' : 'إضافة مباشرة للسلة (+1)'}
                                                         onClick={(e) => {
                                                             e.stopPropagation();
-                                                            logic.handleItemClick(item);
+                                                            logic.handleBarcodeScan(item);
                                                         }}
                                                     >
                                                         +
