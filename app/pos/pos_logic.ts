@@ -27,13 +27,6 @@ export function usePosLogic() {
     const [manualDiscountAmount, setManualDiscountAmount] = useState<number>(0);
     const [discountType, setDiscountType] = useState<'amount' | 'percentage'>('amount');
 
-    // 👑 التحقق من صلاحيات الإدارة العليا أو المشرف (التبديل الحر بين الفروع والمستودعات)
-    const isManagerOrAdmin = Boolean(
-        userProfile?.role === 'super_admin' || 
-        userProfile?.role === 'admin' || 
-        userProfile?.role === 'manager'
-    );
-
     // 🏢 التبديل الآمن بين المستودعات مع إفراغ السلة لمنع تداخل أرصدة الفروع
     const handleWarehouseChange = (newWarehouseId: string) => {
         if (!newWarehouseId || newWarehouseId === selectedWarehouseId) return;
@@ -68,6 +61,13 @@ export function usePosLogic() {
             return profile || { id: userId };
         }
     });
+
+    // 👑 التحقق من صلاحيات الإدارة العليا أو المشرف (التبديل الحر بين الفروع والمستودعات)
+    const isManagerOrAdmin = Boolean(
+        userProfile?.role === 'super_admin' || 
+        userProfile?.role === 'admin' || 
+        userProfile?.role === 'manager'
+    );
 
     // Fetch Warehouses (Points of Sale)
     const { data: warehouses = [], isLoading: loadingWarehouses } = useQuery({
