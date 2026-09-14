@@ -435,7 +435,7 @@ export function useInvoicesLogic() {
 
         const { data: invs } = await supabase.from('invoices').select('*').in('id', ids);
         for (const inv of (invs || [])) {
-            if (inv.is_posted) continue;
+            if (inv.is_posted || ['posted', 'معتمد', 'مرحل', 'approved'].includes(String(inv.status || '').trim().toLowerCase())) continue;
             const { data: jh } = await supabase.from('journal_headers').insert([{
                 entry_date: inv.date || new Date().toISOString().split('T')[0],
                 description: `فاتورة مبيعات رقم ${inv.invoice_number || ''}`,
@@ -492,7 +492,7 @@ export function useInvoicesLogic() {
                     await supabase.from('journal_lines').insert(lines);
                 }
             }
-            await supabase.from('invoices').update({ status: 'معتمد', is_posted: true }).eq('id', inv.id);
+            await supabase.from('invoices').update({ status: 'معتمد' }).eq('id', inv.id);
         }
     };
 
@@ -508,7 +508,7 @@ export function useInvoicesLogic() {
             await supabase.from('journal_lines').delete().in('header_id', headerIds);
             await supabase.from('journal_headers').delete().in('id', headerIds);
         }
-        await supabase.from('invoices').update({ status: 'مسودة', is_posted: false }).in('id', ids);
+        await supabase.from('invoices').update({ status: 'مسودة' }).in('id', ids);
     };
 
     const directDeleteInvoices = async (ids: string[]) => {

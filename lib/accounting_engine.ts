@@ -34,7 +34,7 @@ export function useUniversalPosting(queryKey: string, tableName: string, postRpc
                 if (tableName === 'invoices') {
                     const { data: invs } = await supabase.from('invoices').select('*').in('id', selectedIds);
                     for (const inv of (invs || [])) {
-                        if (inv.is_posted) continue;
+                        if (inv.is_posted || ['posted', 'معتمد', 'مرحل', 'approved'].includes(String(inv.status || '').trim().toLowerCase())) continue;
                         const { data: jh } = await supabase.from('journal_headers').insert([{
                             entry_date: inv.date || new Date().toISOString().split('T')[0],
                             description: `فاتورة مبيعات رقم ${inv.invoice_number || ''}`,
@@ -91,7 +91,7 @@ export function useUniversalPosting(queryKey: string, tableName: string, postRpc
                                 await supabase.from('journal_lines').insert(lines);
                             }
                         }
-                        await supabase.from('invoices').update({ status: 'معتمد', is_posted: true }).eq('id', inv.id);
+                        await supabase.from('invoices').update({ status: 'معتمد' }).eq('id', inv.id);
                     }
                 } else if (tableName === 'payment_vouchers') {
                     const { data: pvs } = await supabase.from('payment_vouchers').select('*').in('id', selectedIds);
@@ -191,7 +191,12 @@ export function useUniversalPosting(queryKey: string, tableName: string, postRpc
                         await supabase.from('receipt_vouchers').update({ status: 'معتمد' }).eq('id', rv.id);
                     }
                 } else {
-                    await supabase.from(tableName).update({ status: 'معتمد', is_posted: true }).in('id', selectedIds);
+                    const updateObj = tableName === 'expenses'
+                        ? { is_posted: true }
+                        : tableName === 'receipt_vouchers' || tableName === 'invoices'
+                        ? { status: 'معتمد' }
+                        : { status: 'معتمد', is_posted: true };
+                    await supabase.from(tableName).update(updateObj).in('id', selectedIds);
                 }
             }
         },
@@ -251,9 +256,14 @@ export function useUniversalPosting(queryKey: string, tableName: string, postRpc
             }
 
             // 🚀 تحديث حالة السجل إلى مسودة وفك الترحيل
-            const updatePayload = tableName === 'receipt_vouchers' 
-                ? { status: 'مسودة' }
-                : { status: 'مسودة', is_posted: false };
+            let updatePayload: any;
+            if (tableName === 'receipt_vouchers' || tableName === 'invoices') {
+                updatePayload = { status: 'مسودة' };
+            } else if (tableName === 'expenses') {
+                updatePayload = { is_posted: false };
+            } else {
+                updatePayload = { status: 'مسودة', is_posted: false };
+            }
             await supabase.from(tableName).update(updatePayload).in('id', selectedIds);
         },
         onSuccess: () => {

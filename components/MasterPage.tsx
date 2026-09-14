@@ -242,8 +242,8 @@ export default function MasterPage({ title, subtitle, children, headerContent, i
         supabase.from('expenses').select('id', { count: 'exact', head: true }).or('is_posted.is.null,is_posted.eq.false'),
         supabase.from('inventory_transactions').select('id', { count: 'exact', head: true }).not('status', 'eq', 'approved'),
         supabase.from('manual_journals').select('id', { count: 'exact', head: true }).or('is_posted.is.null,is_posted.eq.false'),
-        supabase.from('fleet_operations').select('id', { count: 'exact', head: true }).in('status', ['مفتوح', 'open', 'pending']),
-        supabase.from('pos_shifts').select('id', { count: 'exact', head: true }).eq('status', 'open')
+        supabase.from('fleet_operations').select('id', { count: 'exact', head: true }).in('status', ['معلق', 'pending']),
+        supabase.from('pos_shifts').select('id', { count: 'exact', head: true }).eq('status', 'closed')
       ]);
 
       const counts = {
@@ -1070,10 +1070,10 @@ html, body {
             {/* 9. ورديات نقاط البيع */}
             <div 
               className="drop-item" 
-              onClick={() => { setIsPendingMenuOpen(false); router.push('/pos/dashboard'); }}
+              onClick={() => { setIsPendingMenuOpen(false); router.push('/pos-settlements'); }}
               style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
             >
-              <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><span>🏪</span> ورديات كاشير مفتوحة</span>
+              <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><span>🏪</span> ورديات كاشير بانتظار التوريد</span>
               {pendingDetails.shifts > 0 ? (
                 <span style={{ background: '#fef3c7', color: '#b45309', padding: '2px 8px', borderRadius: '8px', fontSize: '11px', fontWeight: 800 }}>{pendingDetails.shifts}</span>
               ) : <span style={{ color: '#10b981', fontSize: '11px' }}>0</span>}
