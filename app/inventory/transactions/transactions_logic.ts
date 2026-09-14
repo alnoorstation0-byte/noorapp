@@ -3,9 +3,11 @@ import { supabase } from '@/lib/supabase';
 import { showGlobalToast } from '@/lib/toast-context';
 import { useRealtimeListener, emitTableChange } from '@/lib/useRealtimeSync';
 import { executeApproveTransaction, executeUnapproveTransaction, syncAllWarehouseBalances } from '@/lib/inventory_engine';
+import { saveLocalExpiryMetadata } from '@/app/expiry-alerts/expiry_alerts_logic';
 
 export function useInventoryTransactionsLogic() {
   const [rawRecords, setRawRecords] = useState<any[]>([]);
+  const [items, setItems] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const [globalSearch, setGlobalSearch] = useState('');
@@ -16,8 +18,7 @@ export function useInventoryTransactionsLogic() {
   const fetchTransactions = async () => {
     setIsLoading(true);
     try {
-      // تم إزالة projects تماماً من هنا
-      let query = supabase
+      let txQuery = supabase
         .from('inventory_transactions')
         .select(`
           id,
@@ -31,31 +32,62 @@ export function useInventoryTransactionsLogic() {
           journal_id,
           item_id,
           partner_id,
-          fleet_operation_id
+          fleet_operation_id,
+          batch_number,
+          expiry_date,
+          production_date
         `)
         .order('transaction_date', { ascending: false });
 
       if (filterType !== 'all') {
-        query = query.eq('type', filterType);
+        txQuery = txQuery.eq('type', filterType);
       }
       if (dateFrom) {
-        query = query.gte('transaction_date', dateFrom);
+        txQuery = txQuery.gte('transaction_date', dateFrom);
       }
       if (dateTo) {
-        query = query.lte('transaction_date', dateTo);
+        txQuery = txQuery.lte('transaction_date', dateTo);
       }
 
-      const [txRes, itemsRes, partnersRes, opsRes, vehRes] = await Promise.all([
-        query,
-        supabase.from('inventory_items').select('id, name, unit'),
+      let [txRes, itemsRes, partnersRes, opsRes, vehRes] = await Promise.all([
+        txQuery,
+        supabase.from('inventory_items').select('id, name, unit, default_price, last_purchase_price, expiry_date, production_date, batch_number, current_quantity'),
         supabase.from('partners').select('id, name, account_id, partner_type'),
         supabase.from('fleet_operations').select('id, operation_number, vehicle_id, driver_id'),
         supabase.from('fleet_vehicles').select('id, plate_number')
       ]);
 
+      if (txRes.error && txRes.error.code === '42703') {
+        // Resilient fallback if columns not yet added to Supabase
+        let fbQuery = supabase
+          .from('inventory_transactions')
+          .select(`
+            id,
+            transaction_number,
+            transaction_date,
+            type,
+            quantity,
+            unit_price,
+            notes,
+            status,
+            journal_id,
+            item_id,
+            partner_id,
+            fleet_operation_id
+          `)
+          .order('transaction_date', { ascending: false });
+        if (filterType !== 'all') fbQuery = fbQuery.eq('type', filterType);
+        if (dateFrom) fbQuery = fbQuery.gte('transaction_date', dateFrom);
+        if (dateTo) fbQuery = fbQuery.lte('transaction_date', dateTo);
+        txRes = await fbQuery;
+      }
+
       if (txRes.error) throw txRes.error;
 
-      const itemsMap = new Map((itemsRes.data || []).map((it: any) => [it.id, it]));
+      const loadedItems = itemsRes.data || [];
+      setItems(loadedItems);
+
+      const itemsMap = new Map(loadedItems.map((it: any) => [it.id, it]));
       const partnersMap = new Map((partnersRes.data || []).map((p: any) => [p.id, p]));
       const opsMap = new Map((opsRes.data || []).map((o: any) => [o.id, o]));
       const vehMap = new Map((vehRes.data || []).map((v: any) => [v.id, v]));
@@ -90,7 +122,10 @@ export function useInventoryTransactionsLogic() {
           driver_id: op?.driver_id,
           driver_name: driver?.name || 'بدون مندوب',
           driver_account_id: driver?.account_id,
-          fleet_operation_number: op?.operation_number
+          fleet_operation_number: op?.operation_number,
+          batch_number: row.batch_number || it?.batch_number || '',
+          expiry_date: row.expiry_date || it?.expiry_date || '',
+          production_date: row.production_date || it?.production_date || ''
         };
       });
 
@@ -289,9 +324,49 @@ export function useInventoryTransactionsLogic() {
     };
   }, [rawRecords]);
 
+  const handleConfirmReceipt = async (transaction: any, receiptData: { batch_number?: string, expiry_date?: string, production_date?: string }) => {
+    try {
+      const payload: any = {
+        batch_number: receiptData.batch_number || null,
+        expiry_date: receiptData.expiry_date || null,
+        production_date: receiptData.production_date || null
+      };
+      const { error } = await supabase.from('inventory_transactions').update(payload).eq('id', transaction.id);
+      if (error && error.code === '42703') {
+        console.warn('Batch/expiry columns not yet migrated in inventory_transactions');
+      }
+    } catch (err) {
+      console.warn('Transaction receipt fields update:', err);
+    }
+
+    if (transaction.item_id && (receiptData.expiry_date || receiptData.batch_number || receiptData.production_date)) {
+      try {
+        await supabase.from('inventory_items').update({
+          expiry_date: receiptData.expiry_date || null,
+          production_date: receiptData.production_date || null,
+          batch_number: receiptData.batch_number || null,
+        }).eq('id', transaction.item_id);
+      } catch (itemErr) {
+        console.warn('Item expiry update error:', itemErr);
+      }
+
+      saveLocalExpiryMetadata(transaction.item_id, {
+        expiry_date: receiptData.expiry_date || undefined,
+        batch_number: receiptData.batch_number || undefined,
+        alert_before_days: 30
+      });
+    }
+
+    await handleApproveTransaction({
+      ...transaction,
+      ...receiptData
+    });
+  };
+
   return {
     data,
     rawRecords,
+    items,
     stats,
     isLoading,
     globalSearch, setGlobalSearch,
@@ -300,6 +375,7 @@ export function useInventoryTransactionsLogic() {
     dateTo, setDateTo,
     fetchTransactions,
     handleApproveTransaction,
+    handleConfirmReceipt,
     handleUnapproveTransaction,
     handleBulkApprove,
     handleDeleteTransaction

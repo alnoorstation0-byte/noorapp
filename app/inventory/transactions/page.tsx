@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import { useInventoryTransactionsLogic } from './transactions_logic';
 import MasterPage from '@/components/MasterPage';
+import Link from 'next/link';
 import SecureAction from '@/components/SecureAction';
 import RawasiSidebarManager from '@/components/RawasiSidebarManager';
 import RawasiSmartTable from '@/components/rawasismarttable';
@@ -14,6 +15,15 @@ import ExpenseFormModal from '../../expenses/ExpenseFormModal';
 
 import { THEME } from '@/lib/theme';
 import { syncAllWarehouseBalances } from '@/lib/inventory_engine';
+import AquaModalWrapper from '@/components/AquaModalWrapper';
+import InventoryActionModal from '@/components/InventoryActionModal';
+
+const generateBatchNumber = () => {
+  const d = new Date();
+  const ymd = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
+  const rand = Math.floor(1000 + Math.random() * 9000);
+  return `BATCH-${ymd}-${rand}`;
+};
 
 export default function InventoryTransactionsPage() {
   const router = useRouter();
@@ -21,7 +31,39 @@ export default function InventoryTransactionsPage() {
   const expLogic = useExpensesLogic();
   const [mounted, setMounted] = useState(false);
 
+  // 📦 Modals state for inbound goods receipt and expiry details
+  const [isInboundModalOpen, setIsInboundModalOpen] = useState(false);
+  const [receivingTx, setReceivingTx] = useState<any>(null);
+  const [receiptBatchNumber, setReceiptBatchNumber] = useState('');
+  const [receiptExpiryDate, setReceiptExpiryDate] = useState('');
+  const [receiptProductionDate, setReceiptProductionDate] = useState('');
+  const [isReceiptSaving, setIsReceiptSaving] = useState(false);
+
   useEffect(() => setMounted(true), []);
+
+  const openReceiptModal = (row: any) => {
+    setReceivingTx(row);
+    setReceiptBatchNumber(row.batch_number || generateBatchNumber());
+    setReceiptExpiryDate(row.expiry_date || '');
+    setReceiptProductionDate(row.production_date || '');
+  };
+
+  const handleConfirmGoodsReceipt = async () => {
+    if (!receivingTx) return;
+    setIsReceiptSaving(true);
+    try {
+      await logic.handleConfirmReceipt(receivingTx, {
+        batch_number: receiptBatchNumber,
+        expiry_date: receiptExpiryDate,
+        production_date: receiptProductionDate
+      });
+      setReceivingTx(null);
+    } catch (err: any) {
+      console.error(err);
+    } finally {
+      setIsReceiptSaving(false);
+    }
+  };
 
   const columns = [
     { key: 'transaction_number', label: 'رقم الحركة', type: 'text',
@@ -73,6 +115,32 @@ export default function InventoryTransactionsPage() {
         </span>
       )
     },
+    { key: 'batch_and_expiry', label: 'الدفعة والصلاحية ⏳', type: 'text',
+      render: (row: any) => {
+        if (!row.batch_number && !row.expiry_date) {
+          return <span style={{ color: '#94a3b8', fontSize: '11px' }}>-</span>;
+        }
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+            {row.batch_number && (
+              <span style={{ fontSize: '11px', fontWeight: 800, color: '#2C1A12', background: 'rgba(194, 155, 98, 0.15)', padding: '1px 6px', borderRadius: '4px', width: 'fit-content' }}>
+                🏷️ {row.batch_number}
+              </span>
+            )}
+            {row.expiry_date && (
+              <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#A8573C' }}>
+                📅 انتهاء: {row.expiry_date}
+              </span>
+            )}
+            {row.production_date && (
+              <span style={{ fontSize: '9.5px', color: '#64748b' }}>
+                🏭 إنتاج: {row.production_date}
+              </span>
+            )}
+          </div>
+        );
+      }
+    },
     { key: 'unit_price', label: 'السعر الإفرادي', type: 'number',
       render: (row: any) => row.unit_price ? <span style={{ fontWeight: 800 }}>{row.unit_price}</span> : '-'
     },
@@ -116,7 +184,13 @@ export default function InventoryTransactionsPage() {
           {['pending', 'مسودة', 'قيد الانتظار'].includes(row.status) && (
             <>
               <button 
-                onClick={() => logic.handleApproveTransaction(row)}
+                onClick={() => {
+                  if (['in', 'transfer_in'].includes(row.type)) {
+                    openReceiptModal(row);
+                  } else {
+                    logic.handleApproveTransaction(row);
+                  }
+                }}
                 className="btn-main-glass"
                 style={{ width: 'auto', padding: '5px 12px', fontSize: '11px', margin: 0, background: '#16a34a', color: 'white' }}
               >
@@ -195,7 +269,72 @@ export default function InventoryTransactionsPage() {
 
   return (
     <>
-      <RawasiSidebarManager />
+      <RawasiSidebarManager 
+        summary={
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px' }}>
+              <span>إجمالي الحركات:</span>
+              <span style={{ fontWeight: 900 }}>{logic.stats?.totalTransactions || 0}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#b45309' }}>
+              <span>بانتظار الاعتماد:</span>
+              <span style={{ fontWeight: 900 }}>{logic.stats?.pendingCount || 0}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#15803d' }}>
+              <span>حركات معتمدة:</span>
+              <span style={{ fontWeight: 900 }}>{logic.stats?.approvedCount || 0}</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#b91c1c' }}>
+              <span>تالف وهدر:</span>
+              <span style={{ fontWeight: 900 }}>{logic.stats?.wasteCount || 0}</span>
+            </div>
+          </div>
+        }
+        actions={
+          <>
+            <SecureAction module="inventory" action="create">
+              <button 
+                type="button" 
+                className="btn-main-glass"
+                onClick={() => setIsInboundModalOpen(true)}
+                style={{ 
+                  width: '100%', 
+                  background: 'linear-gradient(135deg, #16a34a, #059669)', 
+                  color: 'white',
+                  fontWeight: 900,
+                  boxShadow: '0 4px 12px rgba(22, 163, 74, 0.25)'
+                }}
+              >
+                <span>➕</span>
+                <span>استلام بضاعة جديدة (توريد)</span>
+              </button>
+            </SecureAction>
+
+            <Link href="/expiry-alerts" style={{ textDecoration: 'none', width: '100%' }}>
+              <button 
+                type="button" 
+                className="btn-main-glass"
+                style={{ width: '100%', borderColor: 'rgba(168, 87, 60, 0.4)', color: '#A8573C' }}
+              >
+                <span>⏳</span>
+                <span>مراقبة الصلاحيات والإنذارات</span>
+              </button>
+            </Link>
+
+            <Link href="/inventory" style={{ textDecoration: 'none', width: '100%' }}>
+              <button 
+                type="button" 
+                className="btn-main-glass"
+                style={{ width: '100%' }}
+              >
+                <span>📦</span>
+                <span>دليل الأصناف والمخزون</span>
+              </button>
+            </Link>
+          </>
+        }
+        watchDeps={[logic.rawRecords?.length, logic.stats?.pendingCount]}
+      />
 
       <MasterPage 
         title="سجل حركة المستودع" 
@@ -399,6 +538,163 @@ export default function InventoryTransactionsPage() {
               isSaving={expLogic.isLoading}
               historicalData={expLogic.historicalData}
             />
+        )}
+
+        {/* 📦 Modal for Confirming Inbound Goods Receipt with Batch & Expiry */}
+        {mounted && receivingTx && (
+          <AquaModalWrapper
+            isOpen={Boolean(receivingTx)}
+            onClose={() => setReceivingTx(null)}
+            title={`📦 تأكيد استلام وتوريد للمخزون - حركة #${receivingTx.transaction_number || ''}`}
+            subtitle="تسجيل رقم التشغيلة وتواريخ الصلاحية وتحديث رصيد الصنف والإنذارات"
+            width="560px"
+          >
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{
+                background: 'rgba(255, 255, 255, 0.7)',
+                border: '1px solid rgba(194, 155, 98, 0.3)',
+                borderRadius: '12px',
+                padding: '12px 16px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '6px'
+              }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
+                  <span style={{ color: '#64748b' }}>الصنف:</span>
+                  <span style={{ fontWeight: 900, color: '#2C1A12' }}>📦 {receivingTx.item_name}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
+                  <span style={{ color: '#64748b' }}>الكمية المستلمة:</span>
+                  <span style={{ fontWeight: 900, color: '#16a34a' }}>{receivingTx.quantity} {receivingTx.unit || ''}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
+                  <span style={{ color: '#64748b' }}>الجهة / المورد:</span>
+                  <span style={{ fontWeight: 800, color: '#2C1A12' }}>{receivingTx.partner || 'غير محدد'}</span>
+                </div>
+              </div>
+
+              {/* Batch Number */}
+              <div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                  <label style={{ fontSize: '12px', fontWeight: 800, color: '#2C1A12' }}>
+                    🏷️ رقم الدفعة / التشغيلة (Batch Number)
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => setReceiptBatchNumber(generateBatchNumber())}
+                    style={{
+                      background: 'none',
+                      border: 'none',
+                      color: '#C29B62',
+                      fontSize: '11px',
+                      fontWeight: 800,
+                      cursor: 'pointer',
+                      textDecoration: 'underline'
+                    }}
+                  >
+                    🔄 توليد رقم تلقائي جديد
+                  </button>
+                </div>
+                <input
+                  type="text"
+                  className="glass-input-field"
+                  value={receiptBatchNumber}
+                  onChange={(e) => setReceiptBatchNumber(e.target.value)}
+                  placeholder="مثال: BATCH-20260914-1234"
+                  dir="ltr"
+                  style={{ textAlign: 'left', fontWeight: 900, letterSpacing: '0.5px' }}
+                />
+                <div style={{ fontSize: '10px', color: '#64748b', marginTop: '3px' }}>
+                  * تم توليد رقم التشغيلة تلقائياً ويمكنك تعديله يدوياً حسب شحنة التوريد.
+                </div>
+              </div>
+
+              {/* Expiry Date */}
+              <div>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#2C1A12', marginBottom: '6px' }}>
+                  ⏳ تاريخ انتهاء الصلاحية (Expiry Date)
+                </label>
+                <input
+                  type="date"
+                  className="glass-input-field"
+                  value={receiptExpiryDate}
+                  onChange={(e) => setReceiptExpiryDate(e.target.value)}
+                />
+                <div style={{ fontSize: '10px', color: '#64748b', marginTop: '3px' }}>
+                  سيتم إدراج هذا التاريخ في منظومة إنذارات الصلاحية التلقائية وتنبيهات الكاشير.
+                </div>
+              </div>
+
+              {/* Production Date (Optional) */}
+              <div>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#2C1A12', marginBottom: '6px' }}>
+                  📅 تاريخ الإنتاج (اختياري يدوي)
+                </label>
+                <input
+                  type="date"
+                  className="glass-input-field"
+                  value={receiptProductionDate}
+                  onChange={(e) => setReceiptProductionDate(e.target.value)}
+                />
+              </div>
+
+              {/* Actions */}
+              <div style={{ display: 'flex', gap: '10px', marginTop: '10px' }}>
+                <button
+                  type="button"
+                  disabled={isReceiptSaving}
+                  onClick={handleConfirmGoodsReceipt}
+                  style={{
+                    flex: 1,
+                    background: 'linear-gradient(135deg, #16a34a, #059669)',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '12px',
+                    padding: '12px',
+                    fontWeight: 900,
+                    fontSize: '14px',
+                    cursor: isReceiptSaving ? 'not-allowed' : 'pointer',
+                    boxShadow: '0 4px 12px rgba(22, 163, 74, 0.25)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px'
+                  }}
+                >
+                  {isReceiptSaving ? '⏳ جاري الحفظ والاعتماد...' : '✅ تأكيد الاستلام والتوريد للمخزون'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setReceivingTx(null)}
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.8)',
+                    color: '#64748b',
+                    border: '1px solid rgba(0,0,0,0.1)',
+                    borderRadius: '12px',
+                    padding: '12px 18px',
+                    fontWeight: 800,
+                    fontSize: '13px',
+                    cursor: 'pointer'
+                  }}
+                >
+                  إلغاء
+                </button>
+              </div>
+            </div>
+          </AquaModalWrapper>
+        )}
+
+        {/* ➕ Modal for Creating New Inbound Movement */}
+        {mounted && isInboundModalOpen && (
+          <InventoryActionModal
+            isOpen={isInboundModalOpen}
+            onClose={() => setIsInboundModalOpen(false)}
+            actionType="in"
+            items={logic.items}
+            onSuccess={() => {
+              logic.fetchTransactions();
+            }}
+          />
         )}
 
         <style>{`

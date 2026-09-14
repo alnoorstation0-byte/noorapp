@@ -8,6 +8,14 @@ import { THEME } from '@/lib/theme';
 import SearchableSelect from './SearchableSelect';
 import { BarcodeCameraButton } from './BarcodeScannerWidget';
 import { executeApproveTransaction, syncAllWarehouseBalances } from '@/lib/inventory_engine';
+import { saveLocalExpiryMetadata } from '@/app/expiry-alerts/expiry_alerts_logic';
+
+const generateBatchNumber = () => {
+  const d = new Date();
+  const ymd = `${d.getFullYear()}${String(d.getMonth() + 1).padStart(2, '0')}${String(d.getDate()).padStart(2, '0')}`;
+  const rand = Math.floor(1000 + Math.random() * 9000);
+  return `BATCH-${ymd}-${rand}`;
+};
 
 interface InventoryActionModalProps {
   isOpen: boolean;
@@ -36,7 +44,10 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
     waste_reason: 'كسر عبوة / جالون',
     warehouse_id: '',        // المستودع المصدر
     destination_warehouse_id: '', // المستودع الوجهة (للصرف فقط)
-    include_tax: false
+    include_tax: false,
+    batch_number: '',
+    expiry_date: '',
+    production_date: ''
   });
 
   useEffect(() => {
@@ -56,7 +67,10 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
           waste_reason: 'كسر عبوة / جالون',
           warehouse_id: initialData.warehouse_id || '11111111-1111-1111-1111-111111111111',
           destination_warehouse_id: initialData.destination_warehouse_id || '',
-          include_tax: initialData.include_tax || false
+          include_tax: initialData.include_tax || false,
+          batch_number: initialData.batch_number || (actionType === 'in' ? generateBatchNumber() : ''),
+          expiry_date: initialData.expiry_date || '',
+          production_date: initialData.production_date || ''
         });
       } else {
         const prefix = actionType === 'waste' ? 'WASTE' : (actionType === 'empty_return' ? 'RETURN' : actionType.toUpperCase());
@@ -74,7 +88,10 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
           waste_reason: 'كسر عبوة / جالون',
           warehouse_id: '11111111-1111-1111-1111-111111111111',
           destination_warehouse_id: '',
-          include_tax: false
+          include_tax: false,
+          batch_number: actionType === 'in' ? generateBatchNumber() : '',
+          expiry_date: '',
+          production_date: ''
         });
       }
     }
@@ -175,22 +192,63 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
         fleet_operation_id: cleanId(formData.fleet_operation_id),
         warehouse_id: cleanId(formData.warehouse_id),
         destination_warehouse_id: actionType === 'out' ? cleanId(formData.destination_warehouse_id) : null,
+        batch_number: (actionType === 'in' || formData.batch_number) ? (formData.batch_number || null) : null,
+        expiry_date: (actionType === 'in' || formData.expiry_date) ? (formData.expiry_date || null) : null,
+        production_date: (actionType === 'in' || formData.production_date) ? (formData.production_date || null) : null,
         notes: fullNotes
       };
 
       let txError;
       let newId = initialData?.id;
       if (initialData?.id) {
-        const { error } = await supabase.from('inventory_transactions').update(payload).eq('id', initialData.id);
-        txError = error;
+        let { error } = await supabase.from('inventory_transactions').update(payload).eq('id', initialData.id);
+        if (error && error.code === '42703') {
+          // Fallback if columns not yet migrated in Supabase
+          delete payload.batch_number;
+          delete payload.expiry_date;
+          delete payload.production_date;
+          const retry = await supabase.from('inventory_transactions').update(payload).eq('id', initialData.id);
+          txError = retry.error;
+        } else {
+          txError = error;
+        }
       } else {
         payload.status = 'approved';
-        const { data: inserted, error } = await supabase.from('inventory_transactions').insert([payload]).select('id').single();
-        txError = error;
-        if (inserted) newId = inserted.id;
+        let { data: inserted, error } = await supabase.from('inventory_transactions').insert([payload]).select('id').single();
+        if (error && error.code === '42703') {
+          // Fallback if columns not yet migrated in Supabase
+          delete payload.batch_number;
+          delete payload.expiry_date;
+          delete payload.production_date;
+          const retry = await supabase.from('inventory_transactions').insert([payload]).select('id').single();
+          txError = retry.error;
+          if (retry.data) newId = retry.data.id;
+        } else {
+          txError = error;
+          if (inserted) newId = inserted.id;
+        }
       }
 
       if (txError) throw new Error(txError.message);
+
+      // ⏳ تحديث بيانات الصنف والتشغيلة وتاريخ الانتهاء في دليل الأصناف والكاش الفوري
+      if (actionType === 'in' && formData.item_id && (formData.expiry_date || formData.batch_number || formData.production_date)) {
+        try {
+          await supabase.from('inventory_items').update({
+            expiry_date: formData.expiry_date || null,
+            production_date: formData.production_date || null,
+            batch_number: formData.batch_number || null,
+          }).eq('id', formData.item_id);
+        } catch (itemUpdateErr) {
+          console.warn('Could not update inventory_items with expiry/batch:', itemUpdateErr);
+        }
+
+        saveLocalExpiryMetadata(formData.item_id, {
+          expiry_date: formData.expiry_date || undefined,
+          batch_number: formData.batch_number || undefined,
+          alert_before_days: 30
+        });
+      }
 
       // 🚀 اعتماد فوري وتحديث لأرصدة المستودع والسيارة فوراً
       if (newId) {
@@ -457,6 +515,85 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
                 <label htmlFor="include_tax" style={{ fontSize: '14px', fontWeight: 800, color: THEME.primary, cursor: 'pointer', margin: 0 }}>
                   إضافة ضريبة القيمة المضافة 15% على الفاتورة
                 </label>
+              </div>
+            )}
+
+            {/* ⏳ بيانات الصلاحية والتشغيلة للمخزون المستلم */}
+            {actionType === 'in' && (
+              <div style={{
+                background: 'linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(246, 241, 232, 0.85) 100%)',
+                border: '1.5px solid rgba(194, 155, 98, 0.45)',
+                borderRadius: '16px',
+                padding: '14px 16px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '12px',
+                boxShadow: '0 4px 12px rgba(44, 26, 18, 0.05)'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px dashed rgba(194, 155, 98, 0.3)', paddingBottom: '8px' }}>
+                  <span style={{ fontSize: '13px', fontWeight: 900, color: '#A8573C', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span>⏳</span>
+                    <span>بيانات الصلاحية والتشغيلة (استلام وتوريد)</span>
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setFormData(prev => ({ ...prev, batch_number: generateBatchNumber() }))}
+                    style={{
+                      background: 'rgba(194, 155, 98, 0.15)',
+                      border: '1px solid rgba(194, 155, 98, 0.4)',
+                      borderRadius: '8px',
+                      padding: '4px 10px',
+                      fontSize: '11px',
+                      fontWeight: 800,
+                      color: '#2C1A12',
+                      cursor: 'pointer'
+                    }}
+                    title="توليد رقم تشغيلة جديد تلقائياً"
+                  >
+                    🔄 توليد دفعة جديدة
+                  </button>
+                </div>
+
+                <div>
+                  <label style={{ fontSize: '12.5px', fontWeight: 900, color: THEME.primary, marginBottom: '6px', display: 'block' }}>
+                    🏷️ رقم الدفعة / التشغيلة (Batch #) * <span style={{ fontSize: '11px', color: '#16a34a', fontWeight: 700 }}>(تلقائي وقابل للتعديل)</span>
+                  </label>
+                  <input 
+                    type="text" 
+                    className="glass-input-field" 
+                    placeholder="BATCH-YYYYMMDD-XXXX"
+                    value={formData.batch_number}
+                    onChange={e => setFormData({ ...formData, batch_number: e.target.value })}
+                    style={{ fontWeight: 800, letterSpacing: '0.5px' }}
+                  />
+                </div>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                  <div>
+                    <label style={{ fontSize: '12.5px', fontWeight: 900, color: '#A8573C', marginBottom: '6px', display: 'block' }}>
+                      📅 تاريخ انتهاء الصلاحية *
+                    </label>
+                    <input 
+                      type="date" 
+                      className="glass-input-field" 
+                      value={formData.expiry_date}
+                      onChange={e => setFormData({ ...formData, expiry_date: e.target.value })}
+                      style={{ borderColor: formData.expiry_date ? '#16a34a' : 'rgba(168, 87, 60, 0.4)' }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: '12.5px', fontWeight: 900, color: THEME.primary, marginBottom: '6px', display: 'block' }}>
+                      🏭 تاريخ الإنتاج <span style={{ fontSize: '10.5px', color: '#64748b', fontWeight: 700 }}>(اختياري يدوي)</span>
+                    </label>
+                    <input 
+                      type="date" 
+                      className="glass-input-field" 
+                      value={formData.production_date}
+                      onChange={e => setFormData({ ...formData, production_date: e.target.value })}
+                    />
+                  </div>
+                </div>
               </div>
             )}
           </div>
