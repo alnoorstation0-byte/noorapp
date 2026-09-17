@@ -346,14 +346,15 @@ input:focus, select:focus, textarea:focus {
 .low-graphics-mode [class*="glass"],
 .low-graphics-mode [class*="card"] {
   background-image: none !important;
-  background: #FFFFFF !important;
-  border: 1px solid rgba(194, 155, 98, 0.3) !important;
+  background: #141822 !important;
+  border: 1px solid rgba(0, 229, 255, 0.2) !important;
   box-shadow: none !important;
   transform: none !important;
+  color: #F8FAFC !important;
 }
 
 .low-graphics-mode .overlay-backdrop {
-  background: rgba(30, 20, 15, 0.75) !important;
+  background: rgba(11, 14, 20, 0.9) !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
@@ -369,8 +370,9 @@ input:focus, select:focus, textarea:focus {
 .low-graphics-mode .bg-master-container,
 .low-graphics-mode body,
 .low-graphics-mode .main-content {
-  background: #FDFBF7 !important;
+  background: #0B0E14 !important;
   background-image: none !important;
+  color: #F8FAFC !important;
 }
 
 /* 4. جداول وسطور البيانات في وضع الأداء */
@@ -386,21 +388,22 @@ input:focus, select:focus, textarea:focus {
 }
 
 .low-graphics-mode thead th {
-  background: #F5EFE6 !important;
-  color: #2C1A12 !important;
-  border-bottom: 1px solid rgba(194, 155, 98, 0.4) !important;
+  background: #141822 !important;
+  color: #00E5FF !important;
+  border-bottom: 1px solid rgba(0, 229, 255, 0.3) !important;
 }
 
 .low-graphics-mode tbody tr {
-  background: #FFFFFF !important;
+  background: #141822 !important;
+  color: #F8FAFC !important;
 }
 
 .low-graphics-mode tbody tr:nth-child(even) {
-  background: #FAF7F2 !important;
+  background: #0F131D !important;
 }
 
 .low-graphics-mode tbody tr:hover {
-  background: #F0E8DC !important;
+  background: #1A2234 !important;
   transform: none !important;
 }
 
@@ -410,12 +413,13 @@ input:focus, select:focus, textarea:focus {
 .low-graphics-mode .modal-content,
 .low-graphics-mode .supreme-dropdown,
 .low-graphics-mode [role="dialog"] {
-  background: #FFFFFF !important;
+  background: #141822 !important;
   background-image: none !important;
-  border: 1px solid #C29B62 !important;
-  box-shadow: 0 4px 12px rgba(44, 26, 18, 0.12) !important;
+  border: 1px solid rgba(0, 229, 255, 0.3) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5) !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
+  color: #F8FAFC !important;
 }
 
 /* 6. الأزرار المسطحة فائقة السرعة */
@@ -427,51 +431,56 @@ input:focus, select:focus, textarea:focus {
 .low-graphics-mode .perf-switcher-pill,
 .low-graphics-mode .nav-btn-glass {
   background-image: none !important;
-  background: #FFFFFF !important;
-  border: 1px solid rgba(194, 155, 98, 0.4) !important;
+  background: #141822 !important;
+  border: 1px solid rgba(0, 229, 255, 0.3) !important;
   box-shadow: none !important;
-  color: #2C1A12 !important;
+  color: #F8FAFC !important;
 }
 
 .low-graphics-mode .btn-main-glass.gold, 
 .low-graphics-mode .btn-main-glass.primary,
 .low-graphics-mode .desert-btn-primary {
   background-image: none !important;
-  background: #C29B62 !important;
-  color: #FFFFFF !important;
-  border: 1px solid #A87E47 !important;
+  background: #00E5FF !important;
+  color: #0B0E14 !important;
+  border: 1px solid #00B4D8 !important;
+  font-weight: 900 !important;
 }
 
 .low-graphics-mode .btn-main-glass.green,
 .low-graphics-mode .btn-main-glass.success {
   background-image: none !important;
-  background: #4E734F !important;
-  color: #FFFFFF !important;
-  border: 1px solid #3B573C !important;
+  background: #10B981 !important;
+  color: #0B0E14 !important;
+  border: 1px solid #059669 !important;
+  font-weight: 900 !important;
 }
 
 .low-graphics-mode .btn-main-glass.red,
 .low-graphics-mode .btn-main-glass.danger {
   background-image: none !important;
-  background: #DC2626 !important;
+  background: #EF4444 !important;
   color: #FFFFFF !important;
-  border: 1px solid #B91C1C !important;
+  border: 1px solid #DC2626 !important;
+  font-weight: 900 !important;
 }
 
 .low-graphics-mode .btn-main-glass.yellow,
 .low-graphics-mode .btn-main-glass.warning {
   background-image: none !important;
-  background: #D97706 !important;
-  color: #FFFFFF !important;
-  border: 1px solid #B45309 !important;
+  background: #F59E0B !important;
+  color: #0B0E14 !important;
+  border: 1px solid #D97706 !important;
+  font-weight: 900 !important;
 }
 
 /* 7. حقول الإدخال */
 .low-graphics-mode input,
 .low-graphics-mode select,
 .low-graphics-mode textarea {
-  background: #FFFFFF !important;
-  border: 1px solid rgba(194, 155, 98, 0.4) !important;
+  background: #0B0E14 !important;
+  border: 1px solid rgba(0, 229, 255, 0.3) !important;
+  color: #F8FAFC !important;
   box-shadow: none !important;
 }
 

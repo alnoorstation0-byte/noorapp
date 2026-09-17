@@ -276,7 +276,7 @@ export default function PosSettlementPrintModal({
 
                     {/* Section 3: Fuel Pump Meters & Reconciliation */}
                     <div style={{ marginBottom: '20px' }}>
-                        <h4 style={{ margin: '0 0 8px 0', fontSize: '13px', fontWeight: 900, color: '#C29B62', borderRight: '3px solid #C29B62', paddingRight: '8px' }}>
+                        <h4 style={{ margin: '0 0 8px 0', fontSize: '13px', fontWeight: 900, color: '#0284C7', borderRight: '3px solid #0284C7', paddingRight: '8px' }}>
                             ثالثاً: جرد ومطابقة عدادات مضخات المحروقات (المضخوخ مقابل الفواتير)
                         </h4>
                         {Array.isArray(shift.pumpReadings) && shift.pumpReadings.length > 0 ? (
@@ -301,14 +301,14 @@ export default function PosSettlementPrintModal({
                                             <td style={{ padding: '6px 10px', textAlign: 'center', fontWeight: 700 }}>{p.end_reading !== null && p.end_reading !== undefined ? Number(p.end_reading).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 2 }) : '—'}</td>
                                             <td style={{ padding: '6px 10px', textAlign: 'center', fontWeight: 800 }}>{Number(p.liters_pumped || 0).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 2 })}</td>
                                             <td style={{ padding: '6px 10px', textAlign: 'center' }}>{Number(p.unit_price || 0).toFixed(2)} ر.س</td>
-                                            <td style={{ padding: '6px 10px', textAlign: 'center', fontWeight: 800, color: '#C29B62' }}>{formatCurrency(Number(p.expected_amount || 0))}</td>
+                                            <td style={{ padding: '6px 10px', textAlign: 'center', fontWeight: 800, color: '#0284C7' }}>{formatCurrency(Number(p.expected_amount || 0))}</td>
                                         </tr>
                                     ))}
                                     <tr style={{ background: '#f8fafc', fontWeight: 900, borderTop: '1.5px solid #cbd5e1' }}>
                                         <td colSpan={4} style={{ padding: '6px 10px' }}>الإجمالي الكلي للعدادات والمطابقة مع الفواتير</td>
-                                        <td style={{ padding: '6px 10px', textAlign: 'center', color: '#2C1A12' }}>{Number(shift.totalLitersSold || 0).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 2 })} لتر</td>
+                                        <td style={{ padding: '6px 10px', textAlign: 'center', color: '#0F172A' }}>{Number(shift.totalLitersSold || 0).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 2 })} لتر</td>
                                         <td style={{ padding: '6px 10px', textAlign: 'center' }}>—</td>
-                                        <td style={{ padding: '6px 10px', textAlign: 'center', color: '#C29B62' }}>{formatCurrency(Number(shift.meterTotalAmount || 0))}</td>
+                                        <td style={{ padding: '6px 10px', textAlign: 'center', color: '#0284C7' }}>{formatCurrency(Number(shift.meterTotalAmount || 0))}</td>
                                     </tr>
                                 </tbody>
                             </table>
@@ -319,8 +319,8 @@ export default function PosSettlementPrintModal({
                                     <div style={{ fontWeight: 800, fontSize: '13px', marginTop: '2px' }}>{Number(shift.totalLitersSold || 0).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 2 })} لتر</div>
                                 </div>
                                 <div>
-                                    <span style={{ color: '#C29B62' }}>قيمة الوقود بالعدادات:</span>
-                                    <div style={{ fontWeight: 800, fontSize: '13px', marginTop: '2px', color: '#C29B62' }}>{formatCurrency(shift.meterTotalAmount || 0)}</div>
+                                    <span style={{ color: '#0284C7' }}>قيمة الوقود بالعدادات:</span>
+                                    <div style={{ fontWeight: 800, fontSize: '13px', marginTop: '2px', color: '#0284C7' }}>{formatCurrency(shift.meterTotalAmount || 0)}</div>
                                 </div>
                                 <div>
                                     <span style={{ color: '#1C73AB' }}>فارق العدادات مع الفواتير:</span>

@@ -11,7 +11,7 @@ async function printBarcodeLabel(barcode: string, itemName: string, price?: numb
   const win = window.open('', '_blank', 'width=420,height=320');
   if (!win) return;
   win.document.write(`<!DOCTYPE html><html dir="rtl" lang="ar"><head><meta charset="UTF-8"><title>ملصق</title>
-<style>@page{size:58mm 40mm;margin:1.5mm}*{box-sizing:border-box;margin:0;padding:0}body{width:58mm;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:Arial,sans-serif;background:white;padding:2mm;min-height:35mm}.name{font-size:9pt;font-weight:bold;text-align:center;margin-bottom:1.5mm;max-width:54mm;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.price{font-size:8pt;color:#2C1A12;font-weight:bold;margin-top:1.5mm}svg{max-width:54mm}</style>
+<style>@page{size:58mm 40mm;margin:1.5mm}*{box-sizing:border-box;margin:0;padding:0}body{width:58mm;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:Arial,sans-serif;background:white;padding:2mm;min-height:35mm}.name{font-size:9pt;font-weight:bold;text-align:center;margin-bottom:1.5mm;max-width:54mm;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.price{font-size:8pt;color:#000000;font-weight:bold;margin-top:1.5mm}svg{max-width:54mm}</style>
 </head><body>
 <div class="name">${itemName || 'صنف'}</div>
 <svg id="bc"></svg>
@@ -97,8 +97,8 @@ export default function InventoryItemModal({ isOpen, onClose, currentRecord, set
       >
         <style>{`
           .item-modal-section {
-            background: rgba(255, 253, 250, 0.7);
-            border: 1px solid rgba(194, 155, 98, 0.25);
+            background: rgba(11, 14, 20, 0.6);
+            border: 1px solid rgba(0, 229, 255, 0.2);
             border-radius: 16px;
             padding: 14px 16px;
             margin-bottom: 12px;
@@ -107,12 +107,12 @@ export default function InventoryItemModal({ isOpen, onClose, currentRecord, set
           .item-modal-sec-title {
             font-size: 13px;
             font-weight: 900;
-            color: #2C1A12;
+            color: #00E5FF;
             margin-bottom: 12px;
             display: flex;
             align-items: center;
             gap: 6px;
-            border-bottom: 1px dashed rgba(194, 155, 98, 0.25);
+            border-bottom: 1px dashed rgba(0, 229, 255, 0.2);
             padding-bottom: 6px;
           }
 
@@ -131,7 +131,7 @@ export default function InventoryItemModal({ isOpen, onClose, currentRecord, set
           .item-modal-label {
             font-size: 12px;
             font-weight: 900;
-            color: #2C1A12;
+            color: #F8FAFC;
             margin-bottom: 5px;
             display: block;
           }
@@ -147,8 +147,8 @@ export default function InventoryItemModal({ isOpen, onClose, currentRecord, set
           }
 
           .item-bottle-toggle {
-            background: rgba(241, 245, 249, 0.7);
-            border: 1px solid rgba(203, 213, 225, 0.8);
+            background: rgba(11, 14, 20, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
             border-radius: 14px;
             padding: 10px 14px;
             display: flex;
@@ -159,9 +159,9 @@ export default function InventoryItemModal({ isOpen, onClose, currentRecord, set
           }
 
           .item-bottle-toggle.active {
-            background: linear-gradient(135deg, rgba(194, 155, 98, 0.15) 0%, rgba(168, 87, 60, 0.15) 100%);
-            border-color: #C29B62;
-            box-shadow: 0 4px 12px rgba(194, 155, 98, 0.15);
+            background: linear-gradient(135deg, rgba(0, 229, 255, 0.15) 0%, rgba(2, 132, 199, 0.15) 100%);
+            border-color: #00E5FF;
+            box-shadow: 0 4px 15px rgba(0, 229, 255, 0.2);
           }
 
           .item-footer-actions {
@@ -273,7 +273,7 @@ export default function InventoryItemModal({ isOpen, onClose, currentRecord, set
                   </button>
                 </div>
                 {hasBarcode && (
-                  <div style={{ marginTop: '5px', padding: '3px 8px', background: 'rgba(194,155,98,0.12)', borderRadius: '6px', fontSize: '11px', color: '#A8573C', fontFamily: 'monospace', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <div style={{ marginTop: '5px', padding: '3px 8px', background: 'rgba(0, 229, 255, 0.15)', borderRadius: '6px', fontSize: '11px', color: '#00E5FF', fontFamily: 'monospace', display: 'flex', alignItems: 'center', gap: '4px' }}>
                     <span>✅</span><span style={{ fontWeight: 800 }}>{formData.code}</span>
                   </div>
                 )}
@@ -356,8 +356,8 @@ export default function InventoryItemModal({ isOpen, onClose, currentRecord, set
           </div>
 
           {/* 3. تتبع تاريخ الصلاحية ورقم التشغيلة */}
-          <div className="item-modal-section" style={{ border: '1px solid rgba(194, 155, 98, 0.4)', background: 'linear-gradient(135deg, rgba(255, 253, 250, 0.9) 0%, rgba(246, 241, 232, 0.7) 100%)' }}>
-            <div className="item-modal-sec-title" style={{ color: '#A8573C' }}>
+          <div className="item-modal-section" style={{ border: '1px solid rgba(0, 229, 255, 0.25)', background: 'linear-gradient(135deg, rgba(20, 24, 34, 0.95) 0%, rgba(15, 20, 30, 0.85) 100%)' }}>
+            <div className="item-modal-sec-title" style={{ color: '#00E5FF' }}>
               <span>⏳</span>
               <span>مراقبة الصلاحية والتشغيلة (تنبيهات تلقائية)</span>
             </div>
@@ -412,27 +412,27 @@ export default function InventoryItemModal({ isOpen, onClose, currentRecord, set
               style={{ 
                 marginBottom: '12px',
                 background: Number(formData.tax_rate) === 0 
-                  ? 'linear-gradient(135deg, rgba(78, 115, 79, 0.15) 0%, rgba(194, 155, 98, 0.12) 100%)' 
-                  : 'rgba(241, 245, 249, 0.7)',
-                borderColor: Number(formData.tax_rate) === 0 ? '#4E734F' : 'rgba(203, 213, 225, 0.8)',
-                boxShadow: Number(formData.tax_rate) === 0 ? '0 4px 12px rgba(78, 115, 79, 0.15)' : 'none'
+                  ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(0, 229, 255, 0.1) 100%)' 
+                  : 'rgba(11, 14, 20, 0.6)',
+                borderColor: Number(formData.tax_rate) === 0 ? '#10B981' : 'rgba(255, 255, 255, 0.1)',
+                boxShadow: Number(formData.tax_rate) === 0 ? '0 4px 15px rgba(16, 185, 129, 0.2)' : 'none'
               }}
             >
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <div style={{
                   width: '36px', height: '36px', borderRadius: '10px',
-                  background: Number(formData.tax_rate) === 0 ? 'linear-gradient(135deg, #4E734F 0%, #365337 100%)' : '#e2e8f0',
-                  color: Number(formData.tax_rate) === 0 ? 'white' : '#64748b',
+                  background: Number(formData.tax_rate) === 0 ? 'linear-gradient(135deg, #10B981 0%, #059669 100%)' : 'rgba(255, 255, 255, 0.1)',
+                  color: Number(formData.tax_rate) === 0 ? '#0B0E14' : '#94A3B8',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px',
-                  boxShadow: Number(formData.tax_rate) === 0 ? '0 2px 8px rgba(78, 115, 79, 0.35)' : 'none'
+                  boxShadow: Number(formData.tax_rate) === 0 ? '0 2px 8px rgba(16, 185, 129, 0.35)' : 'none'
                 }}>
                   {Number(formData.tax_rate) === 0 ? '🌿' : '🏷️'}
                 </div>
                 <div>
-                  <div style={{ fontSize: '13px', fontWeight: 900, color: Number(formData.tax_rate) === 0 ? '#2C1A12' : '#1e293b' }}>
+                  <div style={{ fontSize: '13px', fontWeight: 900, color: '#F8FAFC' }}>
                     منتج معفي من ضريبة القيمة المضافة (0% ضريبة)
                   </div>
-                  <div style={{ fontSize: '11px', color: Number(formData.tax_rate) === 0 ? '#4E734F' : '#64748b', fontWeight: 700, marginTop: '2px' }}>
+                  <div style={{ fontSize: '11px', color: Number(formData.tax_rate) === 0 ? '#10B981' : '#94A3B8', fontWeight: 700, marginTop: '2px' }}>
                     {Number(formData.tax_rate) === 0 
                       ? '🟢 معفي من الضريبة - لن يتم احتساب 15% ضريبة مضافة في المبيعات والفواتير' 
                       : '⚪ خاضع للضريبة القياسية (15% ضريبة القيمة المضافة)'}
@@ -441,10 +441,10 @@ export default function InventoryItemModal({ isOpen, onClose, currentRecord, set
               </div>
               <div style={{
                 width: '24px', height: '24px', borderRadius: '7px',
-                border: Number(formData.tax_rate) === 0 ? '2px solid #4E734F' : '2px solid #94a3b8',
-                background: Number(formData.tax_rate) === 0 ? '#4E734F' : 'white',
+                border: Number(formData.tax_rate) === 0 ? '2px solid #10B981' : '2px solid rgba(255, 255, 255, 0.2)',
+                background: Number(formData.tax_rate) === 0 ? '#10B981' : 'transparent',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: 'white', fontWeight: 900, fontSize: '14px',
+                color: '#0B0E14', fontWeight: 900, fontSize: '14px',
                 transition: '0.2s', flexShrink: 0
               }}>
                 {Number(formData.tax_rate) === 0 ? '✓' : ''}
@@ -460,28 +460,28 @@ export default function InventoryItemModal({ isOpen, onClose, currentRecord, set
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <div style={{
                   width: '36px', height: '36px', borderRadius: '10px',
-                  background: formData.is_returnable_bottle ? 'linear-gradient(135deg, #C29B62 0%, #A8573C 100%)' : '#e2e8f0',
-                  color: formData.is_returnable_bottle ? 'white' : '#64748b',
+                  background: formData.is_returnable_bottle ? 'linear-gradient(135deg, #00E5FF 0%, #0284C7 100%)' : 'rgba(255, 255, 255, 0.1)',
+                  color: formData.is_returnable_bottle ? '#0B0E14' : '#94A3B8',
                   display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px',
-                  boxShadow: formData.is_returnable_bottle ? '0 2px 8px rgba(194, 155, 98, 0.35)' : 'none'
+                  boxShadow: formData.is_returnable_bottle ? '0 2px 8px rgba(0, 229, 255, 0.35)' : 'none'
                 }}>
                   🔄
                 </div>
                 <div>
-                  <div style={{ fontSize: '13px', fontWeight: 900, color: formData.is_returnable_bottle ? '#2C1A12' : '#1e293b' }}>
+                  <div style={{ fontSize: '13px', fontWeight: 900, color: '#F8FAFC' }}>
                     صنف خاضع لعهدة العبوات والمستلزمات (جالون / عبوة مسترجعة)
                   </div>
-                  <div style={{ fontSize: '11px', color: '#64748b', fontWeight: 700, marginTop: '2px' }}>
+                  <div style={{ fontSize: '11px', color: '#94A3B8', fontWeight: 700, marginTop: '2px' }}>
                     يتم احتساب الكميات المباعة تلقائياً كعهدة فوارغ لدى العميل أو المندوب
                   </div>
                 </div>
               </div>
               <div style={{
                 width: '24px', height: '24px', borderRadius: '7px',
-                border: formData.is_returnable_bottle ? '2px solid #C29B62' : '2px solid #94a3b8',
-                background: formData.is_returnable_bottle ? '#C29B62' : 'white',
+                border: formData.is_returnable_bottle ? '2px solid #00E5FF' : '2px solid rgba(255, 255, 255, 0.2)',
+                background: formData.is_returnable_bottle ? '#00E5FF' : 'transparent',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: 'white', fontWeight: 900, fontSize: '14px',
+                color: '#0B0E14', fontWeight: 900, fontSize: '14px',
                 transition: '0.2s', flexShrink: 0
               }}>
                 {formData.is_returnable_bottle ? '✓' : ''}

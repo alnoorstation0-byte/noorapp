@@ -324,11 +324,11 @@ export default function InvoicePrintModal({
                     transform: translateY(-2px); 
                     box-shadow: 0 5px 15px rgba(0,0,0,0.2); 
                 }
-                .action-btn.print { background: linear-gradient(135deg, #C29B62, #A8573C); color: white; }
+                .action-btn.print { background: linear-gradient(135deg, #00E5FF, #0077B6); color: #0B0E14; font-weight: 900; box-shadow: 0 4px 12px rgba(0, 229, 255, 0.3); }
                 .action-btn.whatsapp { background: #25D366; color: white; box-shadow: 0 4px 12px rgba(37,211,102,0.3); }
                 .action-btn.whatsapp:hover { background: #20ba59; }
                 .action-btn.format-switch { background: #f59e0b; color: white; }
-                .action-btn.close { background: #fee2e2; color: #dc2626; }
+                .action-btn.close { background: rgba(239, 68, 68, 0.15); color: #EF4444; border: 1px solid rgba(239, 68, 68, 0.3); }
 
                 /* نافذة الواتساب المنبثقة */
                 .wa-modal-box {
@@ -374,7 +374,7 @@ export default function InvoicePrintModal({
                     display: grid; 
                     grid-template-columns: 100px 1fr 110px; 
                     align-items: center; 
-                    border-bottom: 3px solid #C29B62; 
+                    border-bottom: 3px solid #0284C7; 
                     padding-bottom: 10px; 
                     margin-bottom: 15px; 
                     width: 100%; 
@@ -394,20 +394,20 @@ export default function InvoicePrintModal({
                     align-items: center !important; 
                     padding: 3px !important; 
                     background: #fff !important; 
-                    border: 1.5px solid rgba(194, 155, 98, 0.3) !important; 
+                    border: 1.5px solid rgba(2, 132, 199, 0.3) !important; 
                     border-radius: 8px !important; 
-                    box-shadow: 0 2px 5px rgba(44, 26, 18, 0.08) !important; 
+                    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08) !important; 
                 }
 
                 .inv-title-box { text-align: center; margin-bottom: 15px; }
                 .inv-title { 
                     font-size: 17px; 
                     font-weight: 900; 
-                    border: 2.5px solid #C29B62; 
+                    border: 2.5px solid #0284C7; 
                     padding: 5px 30px; 
                     display: inline-block; 
-                    background: linear-gradient(135deg, rgba(194, 155, 98, 0.12), rgba(168, 87, 60, 0.08)); 
-                    color: #2C1A12; 
+                    background: linear-gradient(135deg, rgba(2, 132, 199, 0.08), rgba(0, 229, 255, 0.08)); 
+                    color: #0F172A; 
                     letter-spacing: 0.5px; 
                     border-radius: 12px; 
                 }
@@ -415,7 +415,7 @@ export default function InvoicePrintModal({
                 .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px; }
                 
                 .info-box { 
-                    border: 1.5px solid rgba(194, 155, 98, 0.3); 
+                    border: 1.5px solid rgba(2, 132, 199, 0.25); 
                     border-radius: 14px !important; 
                     padding: 14px 14px 10px 14px; 
                     display: flex; flex-direction: column; justify-content: center;
@@ -423,32 +423,32 @@ export default function InvoicePrintModal({
                 }
                 .box-label { 
                     position: absolute; top: -10px; right: 16px; background: white; 
-                    padding: 0 8px; font-size: 11px; font-weight: 900; color: #C29B62; 
-                    border-radius: 12px; border: 1px solid rgba(194, 155, 98, 0.3);
+                    padding: 0 8px; font-size: 11px; font-weight: 900; color: #0284C7; 
+                    border-radius: 12px; border: 1px solid rgba(2, 132, 199, 0.3);
                 }
 
                 .inner-table { width: 100%; border-collapse: collapse; }
                 .inner-table td { padding: 3px 0; font-size: 12px; vertical-align: middle; }
-                .label-cell { text-align: right; font-weight: 800; color: rgba(44, 26, 18, 0.6); width: 32%; }
-                .value-cell { text-align: left; font-weight: 900; color: #2C1A12; width: 68%; }
-                .value-highlight { color: #A8573C; font-size: 14px; font-weight: 900; }
+                .label-cell { text-align: right; font-weight: 800; color: #64748B; width: 32%; }
+                .value-cell { text-align: left; font-weight: 900; color: #0F172A; width: 68%; }
+                .value-highlight { color: #0284C7; font-size: 14px; font-weight: 900; }
 
                 .inv-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; font-size: 11.5px; border-radius: 8px; overflow: hidden; }
                 .inv-table th { 
-                    background: linear-gradient(135deg, rgba(194, 155, 98, 0.18), rgba(168, 87, 60, 0.1)); 
+                    background: linear-gradient(135deg, rgba(2, 132, 199, 0.12), rgba(0, 229, 255, 0.08)); 
                     padding: 7px 5px; 
                     text-align: center; 
-                    border-bottom: 2px solid #C29B62; 
-                    border-top: 2px solid #C29B62; 
-                    color: #2C1A12; 
+                    border-bottom: 2px solid #0284C7; 
+                    border-top: 2px solid #0284C7; 
+                    color: #0F172A; 
                     font-weight: 900; 
                     font-size: 11.5px; 
                 }
                 .inv-table td { 
                     padding: 6px 5px; 
-                    border-bottom: 1px solid rgba(194, 155, 98, 0.2); 
+                    border-bottom: 1px solid rgba(2, 132, 199, 0.15); 
                     text-align: center; 
-                    color: #2C1A12; 
+                    color: #0F172A; 
                     font-weight: 700; 
                 }
                 .inv-table td.desc { text-align: right; font-weight: 900; font-size: 12px; line-height: 1.4; }
@@ -456,38 +456,38 @@ export default function InvoicePrintModal({
                 .inv-footer-flex { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 15px; flex-grow: 1; gap: 20px; }
                 .inv-amount-words { flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
                 .inv-amount-words .words-box { 
-                    background: rgba(253, 251, 247, 0.9); 
-                    border: 1px dashed rgba(194, 155, 98, 0.4); 
+                    background: #F8FAFC; 
+                    border: 1px dashed rgba(2, 132, 199, 0.4); 
                     padding: 10px; 
                     border-radius: 10px; 
                     font-weight: 800; 
                     font-size: 12px; 
-                    color: #2C1A12; 
+                    color: #0F172A; 
                     line-height: 1.4; 
                 }
                 
                 .signature-area { margin-top: 15px; text-align: center; align-self: flex-start; }
-                .signature-title { font-weight: 900; font-size: 11px; color: rgba(44, 26, 18, 0.6); margin-bottom: 6px; border-bottom: 1px solid rgba(194, 155, 98, 0.2); padding-bottom: 4px; }
+                .signature-title { font-weight: 900; font-size: 11px; color: #64748B; margin-bottom: 6px; border-bottom: 1px solid rgba(2, 132, 199, 0.2); padding-bottom: 4px; }
 
                 .inv-totals-box { width: 380px; }
-                .inv-total-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 12px; font-weight: 800; color: #2C1A12; align-items: center; }
-                .inv-total-row.tax { color: #A8573C; }
+                .inv-total-row { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 12px; font-weight: 800; color: #0F172A; align-items: center; }
+                .inv-total-row.tax { color: #0284C7; }
                 .inv-total-row.discount { color: #dc2626; }
                 .inv-total-row.grand-total { 
-                    border-top: 2.5px solid #C29B62; 
+                    border-top: 2.5px solid #0284C7; 
                     padding-top: 8px; 
                     margin-top: 6px; 
                     font-size: 15px; 
                     font-weight: 900; 
-                    color: #2C1A12; 
-                    background: linear-gradient(135deg, rgba(194, 155, 98, 0.15), rgba(168, 87, 60, 0.08)); 
+                    color: #0F172A; 
+                    background: linear-gradient(135deg, rgba(2, 132, 199, 0.1), rgba(0, 229, 255, 0.05)); 
                     padding: 8px 10px; 
                     border-radius: 10px; 
                 }
 
                 .inv-footer-contact { 
                     margin-top: auto !important; 
-                    border-top: 1.5px solid rgba(194, 155, 98, 0.3); 
+                    border-top: 1.5px solid rgba(2, 132, 199, 0.3); 
                     padding-top: 10px; 
                     text-align: center; 
                     font-size: 11px; 
@@ -835,14 +835,14 @@ export default function InvoicePrintModal({
                     </div>
 
                     {/* 5️⃣ إقرار الاستلام والتعهد القانوني المعتمد */}
-                    <div style={{ marginTop: '10px', border: '1px solid rgba(194,155,98,0.35)', borderRadius: '10px', padding: '8px 12px', background: 'linear-gradient(135deg, rgba(194,155,98,0.06), rgba(168,87,60,0.04))' }}>
-                        <p style={{ fontSize: '9px', lineHeight: '1.5', color: '#2C1A12', fontWeight: 600, margin: '0 0 6px 0' }}>
-                            <strong style={{color:'#2C1A12', fontSize: '9.5px'}}>إقرار بالاستلام والسداد:</strong> أقرّ بأنني استلمت البضائع/الخدمات الواردة أعلاه كاملة بحالة سليمة، وأتعهد بسداد قيمتها البالغة <strong style={{color:'#A8573C'}}>{formatCurrencyEn(totalAmount)}</strong>. وفي حال التأخر يحق لمحطات النور للوقود اتخاذ الإجراءات النظامية أمام المحاكم والجهات المختصة.
+                    <div style={{ marginTop: '10px', border: '1px solid rgba(2, 132, 199, 0.25)', borderRadius: '10px', padding: '8px 12px', background: 'rgba(2, 132, 199, 0.04)' }}>
+                        <p style={{ fontSize: '9px', lineHeight: '1.5', color: '#0F172A', fontWeight: 600, margin: '0 0 6px 0' }}>
+                            <strong style={{color:'#0F172A', fontSize: '9.5px'}}>إقرار بالاستلام والسداد:</strong> أقرّ بأنني استلمت البضائع/الخدمات الواردة أعلاه كاملة بحالة سليمة، وأتعهد بسداد قيمتها البالغة <strong style={{color:'#0284C7'}}>{formatCurrencyEn(totalAmount)}</strong>. وفي حال التأخر يحق لمحطات النور للوقود اتخاذ الإجراءات النظامية أمام المحاكم والجهات المختصة.
                         </p>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px' }}>
-                            <div style={{ textAlign: 'center' }}><div style={{ fontSize: '9px', fontWeight: 800, color: 'rgba(44,26,18,0.6)' }}>الاسم والصفة</div><div style={{ borderBottom: '1px solid #C29B62', height: '18px' }}></div></div>
-                            <div style={{ textAlign: 'center' }}><div style={{ fontSize: '9px', fontWeight: 800, color: 'rgba(44,26,18,0.6)' }}>رقم الهوية / الإقامة</div><div style={{ borderBottom: '1px solid #C29B62', height: '18px' }}></div></div>
-                            <div style={{ textAlign: 'center' }}><div style={{ fontSize: '9px', fontWeight: 800, color: 'rgba(44,26,18,0.6)' }}>التوقيع / الختم</div><div style={{ borderBottom: '1px solid #C29B62', height: '18px' }}></div></div>
+                            <div style={{ textAlign: 'center' }}><div style={{ fontSize: '9px', fontWeight: 800, color: '#64748B' }}>الاسم والصفة</div><div style={{ borderBottom: '1px solid #0284C7', height: '18px' }}></div></div>
+                            <div style={{ textAlign: 'center' }}><div style={{ fontSize: '9px', fontWeight: 800, color: '#64748B' }}>رقم الهوية / الإقامة</div><div style={{ borderBottom: '1px solid #0284C7', height: '18px' }}></div></div>
+                            <div style={{ textAlign: 'center' }}><div style={{ fontSize: '9px', fontWeight: 800, color: '#64748B' }}>التوقيع / الختم</div><div style={{ borderBottom: '1px solid #0284C7', height: '18px' }}></div></div>
                         </div>
                     </div>
 

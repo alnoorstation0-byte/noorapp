@@ -123,12 +123,12 @@ export default function InventoryTransactionsPage() {
         return (
           <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
             {row.batch_number && (
-              <span style={{ fontSize: '11px', fontWeight: 800, color: '#2C1A12', background: 'rgba(194, 155, 98, 0.15)', padding: '1px 6px', borderRadius: '4px', width: 'fit-content' }}>
+              <span style={{ fontSize: '11px', fontWeight: 800, color: '#00E5FF', background: 'rgba(0, 229, 255, 0.12)', padding: '1px 6px', borderRadius: '4px', width: 'fit-content' }}>
                 🏷️ {row.batch_number}
               </span>
             )}
             {row.expiry_date && (
-              <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#A8573C' }}>
+              <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#F59E0B' }}>
                 📅 انتهاء: {row.expiry_date}
               </span>
             )}
@@ -314,7 +314,7 @@ export default function InventoryTransactionsPage() {
               <button 
                 type="button" 
                 className="btn-main-glass"
-                style={{ width: '100%', borderColor: 'rgba(168, 87, 60, 0.4)', color: '#A8573C' }}
+                style={{ width: '100%', borderColor: 'rgba(245, 158, 11, 0.4)', color: '#F59E0B' }}
               >
                 <span>⏳</span>
                 <span>مراقبة الصلاحيات والإنذارات</span>
@@ -551,8 +551,8 @@ export default function InventoryTransactionsPage() {
           >
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div style={{
-                background: 'rgba(255, 255, 255, 0.7)',
-                border: '1px solid rgba(194, 155, 98, 0.3)',
+                background: 'rgba(20, 24, 34, 0.6)',
+                border: '1px solid rgba(0, 229, 255, 0.25)',
                 borderRadius: '12px',
                 padding: '12px 16px',
                 display: 'flex',
@@ -561,22 +561,22 @@ export default function InventoryTransactionsPage() {
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
                   <span style={{ color: '#64748b' }}>الصنف:</span>
-                  <span style={{ fontWeight: 900, color: '#2C1A12' }}>📦 {receivingTx.item_name}</span>
+                  <span style={{ fontWeight: 900, color: '#F8FAFC' }}>📦 {receivingTx.item_name}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
                   <span style={{ color: '#64748b' }}>الكمية المستلمة:</span>
-                  <span style={{ fontWeight: 900, color: '#16a34a' }}>{receivingTx.quantity} {receivingTx.unit || ''}</span>
+                  <span style={{ fontWeight: 900, color: '#10B981' }}>{receivingTx.quantity} {receivingTx.unit || ''}</span>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
                   <span style={{ color: '#64748b' }}>الجهة / المورد:</span>
-                  <span style={{ fontWeight: 800, color: '#2C1A12' }}>{receivingTx.partner || 'غير محدد'}</span>
+                  <span style={{ fontWeight: 800, color: '#F8FAFC' }}>{receivingTx.partner || 'غير محدد'}</span>
                 </div>
               </div>
 
               {/* Batch Number */}
               <div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
-                  <label style={{ fontSize: '12px', fontWeight: 800, color: '#2C1A12' }}>
+                  <label style={{ fontSize: '12px', fontWeight: 800, color: '#F8FAFC' }}>
                     🏷️ رقم الدفعة / التشغيلة (Batch Number)
                   </label>
                   <button
@@ -585,7 +585,7 @@ export default function InventoryTransactionsPage() {
                     style={{
                       background: 'none',
                       border: 'none',
-                      color: '#C29B62',
+                      color: '#00E5FF',
                       fontSize: '11px',
                       fontWeight: 800,
                       cursor: 'pointer',
@@ -611,7 +611,7 @@ export default function InventoryTransactionsPage() {
 
               {/* Expiry Date */}
               <div>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#2C1A12', marginBottom: '6px' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#F8FAFC', marginBottom: '6px' }}>
                   ⏳ تاريخ انتهاء الصلاحية (Expiry Date)
                 </label>
                 <input
@@ -627,7 +627,7 @@ export default function InventoryTransactionsPage() {
 
               {/* Production Date (Optional) */}
               <div>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#2C1A12', marginBottom: '6px' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#F8FAFC', marginBottom: '6px' }}>
                   📅 تاريخ الإنتاج (اختياري يدوي)
                 </label>
                 <input

@@ -89,22 +89,22 @@ export default function MasterDashboard() {
                 display: 'flex',
                 padding: '25px 35px',
                 justifyContent: 'space-between',
-                borderBottom: '4px solid #C29B62'
+                borderBottom: '4px solid #00E5FF'
             }}>
-                <div className="gs-header-col" style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1, borderLeft: '1px solid rgba(194, 155, 98, 0.25)' }}>
-                    <span style={{ color: '#475569', fontSize: '14px', fontWeight: 700 }}>صافي السيولة النقدية</span>
+                <div className="gs-header-col" style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1, borderLeft: '1px solid rgba(0, 229, 255, 0.2)' }}>
+                    <span style={{ color: '#94A3B8', fontSize: '14px', fontWeight: 700 }}>صافي السيولة النقدية</span>
                     <span style={{ color: '#10b981', fontSize: '28px', fontWeight: 900, textShadow: '0 0 20px rgba(16,185,129,0.4)' }}>
                         {formatCurrency(summary.finance.liquidity)}
                     </span>
                 </div>
-                <div className="gs-header-col" style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1, borderLeft: '1px solid rgba(194, 155, 98, 0.25)', paddingRight: '35px' }}>
-                    <span style={{ color: '#475569', fontSize: '14px', fontWeight: 700 }}>رحلات التوزيع النشطة</span>
-                    <span style={{ color: '#1e293b', fontSize: '28px', fontWeight: 900 }}>
-                        {summary.operations.activeTrips} <span style={{ fontSize: '16px', fontWeight: 500, color: '#475569' }}>رحلة</span>
+                <div className="gs-header-col" style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1, borderLeft: '1px solid rgba(0, 229, 255, 0.2)', paddingRight: '35px' }}>
+                    <span style={{ color: '#94A3B8', fontSize: '14px', fontWeight: 700 }}>رحلات التوزيع النشطة</span>
+                    <span style={{ color: '#F8FAFC', fontSize: '28px', fontWeight: 900 }}>
+                        {summary.operations.activeTrips} <span style={{ fontSize: '16px', fontWeight: 500, color: '#94A3B8' }}>رحلة</span>
                     </span>
                 </div>
                 <div className="gs-header-col" style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1, paddingRight: '35px' }}>
-                    <span style={{ color: '#475569', fontSize: '14px', fontWeight: 700 }}>تنبيهات محاسبية</span>
+                    <span style={{ color: '#94A3B8', fontSize: '14px', fontWeight: 700 }}>تنبيهات محاسبية</span>
                     <span style={{ color: summary.audit.unbalanced + summary.audit.orphans > 0 ? '#ef4444' : '#10b981', fontSize: '28px', fontWeight: 900 }}>
                         {summary.audit.unbalanced + summary.audit.orphans} <span style={{ fontSize: '16px', fontWeight: 500, color: '#94a3b8' }}>تنبيه</span>
                     </span>

@@ -137,19 +137,19 @@ export default function InventoryPage() {
         
         return (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px', minWidth: '110px' }}>
-            <span style={{ fontSize: '12px', fontWeight: 800, color: isExp ? '#dc2626' : (isNear ? '#d97706' : '#2C1A12') }}>
+            <span style={{ fontSize: '12px', fontWeight: 800, color: isExp ? '#ef4444' : (isNear ? '#f59e0b' : '#F8FAFC') }}>
               {row.expiry_date}
             </span>
             {isExp ? (
-              <span style={{ fontSize: '9.5px', background: 'rgba(239, 68, 68, 0.15)', color: '#dc2626', padding: '1px 6px', borderRadius: '6px', fontWeight: 900, border: '1px solid rgba(239, 68, 68, 0.3)' }}>
+              <span style={{ fontSize: '9.5px', background: 'rgba(239, 68, 68, 0.15)', color: '#ef4444', padding: '1px 6px', borderRadius: '6px', fontWeight: 900, border: '1px solid rgba(239, 68, 68, 0.3)' }}>
                 ⛔ منتهي الصلاحية
               </span>
             ) : isNear ? (
-              <span style={{ fontSize: '9.5px', background: 'rgba(245, 158, 11, 0.15)', color: '#b45309', padding: '1px 6px', borderRadius: '6px', fontWeight: 900, border: '1px solid rgba(245, 158, 11, 0.3)' }}>
+              <span style={{ fontSize: '9.5px', background: 'rgba(245, 158, 11, 0.15)', color: '#f59e0b', padding: '1px 6px', borderRadius: '6px', fontWeight: 900, border: '1px solid rgba(245, 158, 11, 0.3)' }}>
                 ⏳ متبقي {days} يوم
               </span>
             ) : (
-              <span style={{ fontSize: '9.5px', background: 'rgba(78, 115, 79, 0.12)', color: '#4E734F', padding: '1px 6px', borderRadius: '6px', fontWeight: 800 }}>
+              <span style={{ fontSize: '9.5px', background: 'rgba(16, 185, 129, 0.15)', color: '#10B981', padding: '1px 6px', borderRadius: '6px', fontWeight: 800 }}>
                 🟢 {days} يوم
               </span>
             )}
@@ -170,9 +170,9 @@ export default function InventoryPage() {
             <button 
               className="table-action-btn edit-btn" 
               style={{
-                background: 'linear-gradient(135deg, #C29B62 0%, #A8573C 100%)',
-                color: 'white',
-                border: 'none',
+                background: 'rgba(0, 229, 255, 0.15)',
+                color: '#00E5FF',
+                border: '1px solid rgba(0, 229, 255, 0.35)',
                 borderRadius: '8px',
                 padding: '5px 9px',
                 fontSize: '11px',
@@ -284,7 +284,7 @@ export default function InventoryPage() {
               <button 
                 type="button" 
                 className="btn-main-glass"
-                style={{ width: '100%', borderColor: 'rgba(168, 87, 60, 0.4)', color: '#A8573C' }}
+                style={{ width: '100%', borderColor: 'rgba(245, 158, 11, 0.4)', color: '#F59E0B' }}
               >
                 <span>⏳</span>
                 <span>مراقبة الصلاحيات والإنذارات</span>

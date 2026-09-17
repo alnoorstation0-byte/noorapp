@@ -522,48 +522,48 @@ export default function PosSettlementActionModal({
                                 background: 'rgba(255, 255, 255, 0.85)',
                                 padding: '22px 24px',
                                 borderRadius: '22px',
-                                border: '1px solid rgba(194, 155, 98, 0.3)',
+                                border: '1px solid rgba(0, 229, 255, 0.25)',
                                 marginBottom: '20px'
                             }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                                    <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 900, color: '#2C1A12' }}>
+                                    <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 900, color: '#F8FAFC' }}>
                                         ⛽ جرد ومطابقة عدادات مضخات المحروقات
                                     </h3>
-                                    <span style={{ fontSize: '12px', color: '#64748b' }}>
+                                    <span style={{ fontSize: '12px', color: '#94A3B8' }}>
                                         مقارنة كمية الوقود المضخوخ مع إجمالي الفواتير الصادرة
                                     </span>
                                 </div>
 
                                 {/* KPIs Row */}
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '14px', marginBottom: '20px' }}>
-                                    <div style={{ background: 'rgba(194, 155, 98, 0.08)', padding: '14px 16px', borderRadius: '16px', border: '1px solid rgba(194, 155, 98, 0.2)' }}>
-                                        <div style={{ fontSize: '11px', fontWeight: 800, color: '#C29B62' }}>إجمالي اللترات المباعة ⛽</div>
-                                        <div style={{ fontSize: '18px', fontWeight: 900, color: '#2C1A12', marginTop: '4px' }}>
+                                    <div style={{ background: 'rgba(20, 24, 34, 0.6)', padding: '14px 16px', borderRadius: '16px', border: '1px solid rgba(0, 229, 255, 0.2)' }}>
+                                        <div style={{ fontSize: '11px', fontWeight: 800, color: '#00E5FF' }}>إجمالي اللترات المباعة ⛽</div>
+                                        <div style={{ fontSize: '18px', fontWeight: 900, color: '#F8FAFC', marginTop: '4px' }}>
                                             {Number(shift.totalLitersSold || 0).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 2 })} لتر
                                         </div>
                                     </div>
-                                    <div style={{ background: 'rgba(194, 155, 98, 0.08)', padding: '14px 16px', borderRadius: '16px', border: '1px solid rgba(194, 155, 98, 0.2)' }}>
-                                        <div style={{ fontSize: '11px', fontWeight: 800, color: '#C29B62' }}>قيمة الوقود بالعدادات 💰</div>
-                                        <div style={{ fontSize: '18px', fontWeight: 900, color: '#2C1A12', marginTop: '4px' }}>
+                                    <div style={{ background: 'rgba(20, 24, 34, 0.6)', padding: '14px 16px', borderRadius: '16px', border: '1px solid rgba(0, 229, 255, 0.2)' }}>
+                                        <div style={{ fontSize: '11px', fontWeight: 800, color: '#00E5FF' }}>قيمة الوقود بالعدادات 💰</div>
+                                        <div style={{ fontSize: '18px', fontWeight: 900, color: '#F8FAFC', marginTop: '4px' }}>
                                             {formatCurrency(shift.meterTotalAmount || 0)}
                                         </div>
                                     </div>
-                                    <div style={{ background: 'rgba(28, 115, 171, 0.08)', padding: '14px 16px', borderRadius: '16px', border: '1px solid rgba(28, 115, 171, 0.2)' }}>
-                                        <div style={{ fontSize: '11px', fontWeight: 800, color: '#1C73AB' }}>إجمالي مبيعات الكاشير 🧾</div>
-                                        <div style={{ fontSize: '18px', fontWeight: 900, color: '#122946', marginTop: '4px' }}>
+                                    <div style={{ background: 'rgba(20, 24, 34, 0.6)', padding: '14px 16px', borderRadius: '16px', border: '1px solid rgba(0, 229, 255, 0.2)' }}>
+                                        <div style={{ fontSize: '11px', fontWeight: 800, color: '#00E5FF' }}>إجمالي مبيعات الكاشير 🧾</div>
+                                        <div style={{ fontSize: '18px', fontWeight: 900, color: '#F8FAFC', marginTop: '4px' }}>
                                             {formatCurrency(shift.totalSales || 0)}
                                         </div>
                                     </div>
                                     <div style={{ 
-                                        background: Math.abs(shift.meterSalesVariance || 0) <= 5 ? 'rgba(22, 163, 74, 0.08)' : 'rgba(239, 68, 68, 0.08)', 
+                                        background: Math.abs(shift.meterSalesVariance || 0) <= 5 ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', 
                                         padding: '14px 16px', 
                                         borderRadius: '16px', 
-                                        border: `1px solid ${Math.abs(shift.meterSalesVariance || 0) <= 5 ? 'rgba(22, 163, 74, 0.25)' : 'rgba(239, 68, 68, 0.25)'}` 
+                                        border: `1px solid ${Math.abs(shift.meterSalesVariance || 0) <= 5 ? 'rgba(16, 185, 129, 0.3)' : 'rgba(239, 68, 68, 0.3)'}` 
                                     }}>
-                                        <div style={{ fontSize: '11px', fontWeight: 800, color: Math.abs(shift.meterSalesVariance || 0) <= 5 ? '#16a34a' : '#ef4444' }}>
+                                        <div style={{ fontSize: '11px', fontWeight: 800, color: Math.abs(shift.meterSalesVariance || 0) <= 5 ? '#10B981' : '#EF4444' }}>
                                             فارق المطابقة (عدادات - فواتير) ⚖️
                                         </div>
-                                        <div style={{ fontSize: '18px', fontWeight: 900, color: Math.abs(shift.meterSalesVariance || 0) <= 5 ? '#16a34a' : '#ef4444', marginTop: '4px' }}>
+                                        <div style={{ fontSize: '18px', fontWeight: 900, color: Math.abs(shift.meterSalesVariance || 0) <= 5 ? '#10B981' : '#EF4444', marginTop: '4px' }}>
                                             {Math.abs(shift.meterSalesVariance || 0) <= 5 
                                                 ? '✅ مطابق تماماً' 
                                                 : `${(shift.meterSalesVariance || 0) > 0 ? '+' : ''}${formatCurrency(shift.meterSalesVariance || 0)}`}
@@ -576,25 +576,25 @@ export default function PosSettlementActionModal({
                                     <div style={{ overflowX: 'auto' }}>
                                         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
                                             <thead>
-                                                <tr style={{ background: 'rgba(194, 155, 98, 0.08)', borderBottom: '1.5px solid rgba(194, 155, 98, 0.2)' }}>
-                                                    <th style={{ padding: '10px 14px', textAlign: 'right', color: '#2C1A12' }}>المضخة</th>
-                                                    <th style={{ padding: '10px 14px', textAlign: 'center', color: '#2C1A12' }}>نوع الوقود</th>
-                                                    <th style={{ padding: '10px 14px', textAlign: 'center', color: '#2C1A12' }}>سعر اللتر</th>
-                                                    <th style={{ padding: '10px 14px', textAlign: 'center', color: '#64748b' }}>قراءة البداية</th>
-                                                    <th style={{ padding: '10px 14px', textAlign: 'center', color: '#A8573C' }}>قراءة النهاية</th>
-                                                    <th style={{ padding: '10px 14px', textAlign: 'center', color: '#2C1A12' }}>اللترات المضخوخة</th>
-                                                    <th style={{ padding: '10px 14px', textAlign: 'center', color: '#C29B62' }}>القيمة المتوقعة</th>
+                                                <tr style={{ background: 'rgba(11, 14, 20, 0.8)', borderBottom: '1.5px solid rgba(0, 229, 255, 0.25)' }}>
+                                                    <th style={{ padding: '10px 14px', textAlign: 'right', color: '#F8FAFC' }}>المضخة</th>
+                                                    <th style={{ padding: '10px 14px', textAlign: 'center', color: '#F8FAFC' }}>نوع الوقود</th>
+                                                    <th style={{ padding: '10px 14px', textAlign: 'center', color: '#F8FAFC' }}>سعر اللتر</th>
+                                                    <th style={{ padding: '10px 14px', textAlign: 'center', color: '#94A3B8' }}>قراءة البداية</th>
+                                                    <th style={{ padding: '10px 14px', textAlign: 'center', color: '#F59E0B' }}>قراءة النهاية</th>
+                                                    <th style={{ padding: '10px 14px', textAlign: 'center', color: '#F8FAFC' }}>اللترات المضخوخة</th>
+                                                    <th style={{ padding: '10px 14px', textAlign: 'center', color: '#00E5FF' }}>القيمة المتوقعة</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 {pumps.map((p, pIdx) => {
                                                     const isOctane91 = p.fuel_type?.includes('91');
                                                     const isOctane95 = p.fuel_type?.includes('95');
-                                                    const badgeBg = isOctane91 ? '#dcfce7' : isOctane95 ? '#fee2e2' : '#fef3c7';
-                                                    const badgeColor = isOctane91 ? '#15803d' : isOctane95 ? '#b91c1c' : '#b45309';
+                                                    const badgeBg = isOctane91 ? 'rgba(16, 185, 129, 0.15)' : isOctane95 ? 'rgba(239, 68, 68, 0.15)' : 'rgba(245, 158, 11, 0.15)';
+                                                    const badgeColor = isOctane91 ? '#10B981' : isOctane95 ? '#EF4444' : '#F59E0B';
 
                                                     return (
-                                                        <tr key={p.pump_id || pIdx} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                                                        <tr key={p.pump_id || pIdx} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.06)' }}>
                                                             <td style={{ padding: '10px 14px', fontWeight: 800 }}>
                                                                 ⛽ {p.pump_name || `مضخة #${p.pump_number}`}
                                                             </td>
@@ -606,18 +606,18 @@ export default function PosSettlementActionModal({
                                                             <td style={{ padding: '10px 14px', textAlign: 'center', fontWeight: 700 }}>
                                                                 {Number(p.unit_price || 0).toFixed(2)} ر.س
                                                             </td>
-                                                            <td style={{ padding: '10px 14px', textAlign: 'center', fontWeight: 700, color: '#64748b' }}>
+                                                            <td style={{ padding: '10px 14px', textAlign: 'center', fontWeight: 700, color: '#94A3B8' }}>
                                                                 {Number(p.start_reading || 0).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 2 })}
                                                             </td>
-                                                            <td style={{ padding: '10px 14px', textAlign: 'center', fontWeight: 800, color: '#A8573C' }}>
+                                                            <td style={{ padding: '10px 14px', textAlign: 'center', fontWeight: 800, color: '#F59E0B' }}>
                                                                 {p.end_reading !== null && p.end_reading !== undefined
                                                                     ? Number(p.end_reading).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 2 })
                                                                     : '—'}
                                                             </td>
-                                                            <td style={{ padding: '10px 14px', textAlign: 'center', fontWeight: 900, color: '#2C1A12' }}>
+                                                            <td style={{ padding: '10px 14px', textAlign: 'center', fontWeight: 900, color: '#F8FAFC' }}>
                                                                 {Number(p.liters_pumped || 0).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 2 })} لتر
                                                             </td>
-                                                            <td style={{ padding: '10px 14px', textAlign: 'center', fontWeight: 900, color: '#C29B62' }}>
+                                                            <td style={{ padding: '10px 14px', textAlign: 'center', fontWeight: 900, color: '#00E5FF' }}>
                                                                 {formatCurrency(Number(p.expected_amount || 0))}
                                                             </td>
                                                         </tr>

@@ -65,7 +65,7 @@ export default function SearchableSelect({ options, value, onChange, placeholder
           style={{
             paddingLeft: value ? '50px' : '30px',
             textOverflow: 'ellipsis',
-            color: '#1e293b',
+            color: '#F8FAFC',
             fontWeight: 800,
             cursor: disabled ? 'not-allowed' : 'text'
           }}
@@ -116,7 +116,7 @@ export default function SearchableSelect({ options, value, onChange, placeholder
         <div 
           style={{ 
             position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', 
-            pointerEvents: 'none', color: '#64748b', transition: '0.2s', fontSize: '10px',
+            pointerEvents: 'none', color: '#00E5FF', transition: '0.2s', fontSize: '10px',
             rotate: isOpen ? '180deg' : '0deg'
           }}
         >
@@ -131,11 +131,11 @@ export default function SearchableSelect({ options, value, onChange, placeholder
           left: 0,
           right: 0,
           marginTop: '5px',
-          background: 'rgba(255, 255, 255, 0.98)',
+          background: 'rgba(20, 24, 34, 0.98)',
           backdropFilter: 'blur(20px)',
-          border: '1px solid rgba(40, 145, 200, 0.3)',
+          border: '1px solid rgba(0, 229, 255, 0.3)',
           borderRadius: '12px',
-          boxShadow: '0 12px 35px rgba(0,0,0,0.15)',
+          boxShadow: '0 12px 35px rgba(0,0,0,0.5)',
           maxHeight: '220px',
           overflowY: 'auto',
           zIndex: 999999,
@@ -159,13 +159,13 @@ export default function SearchableSelect({ options, value, onChange, placeholder
                     cursor: 'pointer',
                     fontWeight: isSelected ? 900 : 700,
                     fontSize: '13px',
-                    color: isSelected ? '#A8573C' : '#2C1A12',
-                    background: isSelected ? 'rgba(194, 155, 98, 0.15)' : 'transparent',
-                    borderBottom: index < filteredOptions.length - 1 ? '1px solid rgba(194, 155, 98, 0.1)' : 'none',
+                    color: isSelected ? '#00E5FF' : '#F8FAFC',
+                    background: isSelected ? 'rgba(0, 229, 255, 0.2)' : 'transparent',
+                    borderBottom: index < filteredOptions.length - 1 ? '1px solid rgba(255, 255, 255, 0.08)' : 'none',
                     transition: 'all 0.15s'
                   }}
                   onMouseEnter={(e) => {
-                    if (!isSelected) e.currentTarget.style.background = 'rgba(194, 155, 98, 0.08)';
+                    if (!isSelected) e.currentTarget.style.background = 'rgba(0, 229, 255, 0.1)';
                   }}
                   onMouseLeave={(e) => {
                     if (!isSelected) e.currentTarget.style.background = 'transparent';

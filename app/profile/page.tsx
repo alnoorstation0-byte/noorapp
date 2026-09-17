@@ -746,13 +746,13 @@ export default function EmployeeProfilePage() {
                                 </div>
                             </div>
                             
-                            <div style={{ borderTop: '2px dashed rgba(194, 155, 98, 0.25)', paddingTop: '20px' }}>
-                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255, 253, 250, 0.85)', padding: '16px 20px', borderRadius: '16px', border: '1px solid rgba(194, 155, 98, 0.35)', gap: '15px', flexWrap: 'wrap' }}>
+                            <div style={{ borderTop: '2px dashed rgba(0, 229, 255, 0.25)', paddingTop: '20px' }}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(20, 24, 34, 0.85)', padding: '16px 20px', borderRadius: '16px', border: '1px solid rgba(0, 229, 255, 0.25)', gap: '15px', flexWrap: 'wrap' }}>
                                     <div style={{ flex: 1, minWidth: '220px' }}>
-                                        <div style={{ fontWeight: 900, color: '#2C1A12', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                        <div style={{ fontWeight: 900, color: '#F8FAFC', fontSize: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
                                             <span>⚡️</span> وضع الأداء الفائق (للجوالات القديمة)
                                         </div>
-                                        <div style={{ fontSize: '11.5px', color: 'rgba(44, 26, 18, 0.65)', marginTop: '4px', fontWeight: 700 }}>
+                                        <div style={{ fontSize: '11.5px', color: '#94A3B8', marginTop: '4px', fontWeight: 700 }}>
                                             إلغاء التأثيرات الزجاجية الثقيلة لتسريع فتح وتصفح النظام وحفظ هذا التفضيل في حسابك
                                         </div>
                                     </div>
@@ -766,9 +766,9 @@ export default function EmployeeProfilePage() {
                                             fontSize: '13px',
                                             cursor: 'pointer',
                                             border: '1px solid',
-                                            background: isLowGraphics ? 'linear-gradient(135deg, #C29B62, #A8573C)' : 'rgba(44, 26, 18, 0.06)',
-                                            borderColor: isLowGraphics ? '#C29B62' : 'rgba(194, 155, 98, 0.3)',
-                                            color: isLowGraphics ? '#FFFFFF' : '#2C1A12',
+                                            background: isLowGraphics ? 'linear-gradient(135deg, #00E5FF, #0284C7)' : 'rgba(255, 255, 255, 0.08)',
+                                            borderColor: isLowGraphics ? '#00E5FF' : 'rgba(0, 229, 255, 0.3)',
+                                            color: isLowGraphics ? '#0B0E14' : '#F8FAFC',
                                             transition: '0.2s',
                                             display: 'inline-flex',
                                             alignItems: 'center',

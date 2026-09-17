@@ -2,13 +2,13 @@
 import React, { Suspense } from 'react';
 import { useLoginLogic } from './login_logic';
 
-// 🏜️ سيم الزجاج الصحراوي (Desert Glassmorphism)
-const DESERT_THEME = {
-  tentBrown: '#2C1A12',
-  goldenSand: '#C29B62',
-  terracotta: '#A8573C',
-  dunePearl: '#FDFBF7',
-  oasisGreen: '#4E734F',
+// ⚡️ ثيم مركز القيادة لمحطات النور (Noor Command Center Theme)
+const NOOR_THEME = {
+  bgDark: '#0B0E14',
+  surfaceTitanium: '#141822',
+  cyanAccent: '#00E5FF',
+  emeraldGreen: '#10B981',
+  amberAlert: '#F59E0B',
 };
 
 function LoginPageContent() {

@@ -606,7 +606,7 @@ export default function InvoiceFormModal({
                                 className="field-input" 
                             />
                             {record.due_date && (
-                                <div style={{ fontSize: '11px', color: '#A8573C', fontWeight: 800, marginTop: '2px' }}>
+                                <div style={{ fontSize: '11px', color: '#F59E0B', fontWeight: 800, marginTop: '2px' }}>
                                     📅 الاستحقاق: {new Date(record.due_date).toLocaleDateString('ar-EG')}
                                 </div>
                             )}
@@ -699,7 +699,7 @@ export default function InvoiceFormModal({
 
                     {/* قارئ الباركود السريع */}
                     <div className="barcode-scan-container">
-                        <div style={{ fontSize: '11px', fontWeight: 800, color: '#A8573C', marginBottom: '4px' }}>
+                        <div style={{ fontSize: '11px', fontWeight: 800, color: '#00E5FF', marginBottom: '4px' }}>
                             📷 مسح الباركود السريع (استخدم قارئ الليزر أو كاميرا الجوال):
                         </div>
                         <BarcodeScannerWidget onScan={handleBarcodeScan} placeholder="امسح باركود الصنف أو اكتبه واضغط Enter..." />
@@ -811,7 +811,7 @@ export default function InvoiceFormModal({
                                             <td>{line.quantity}</td>
                                             <td>{line.unit}</td>
                                             <td>{formatCurrency(line.unit_price)}</td>
-                                            <td style={{ fontWeight: 900, color: '#2C1A12' }}>{formatCurrency(line.total_price)}</td>
+                                            <td style={{ fontWeight: 900, color: '#F8FAFC' }}>{formatCurrency(line.total_price)}</td>
                                             <td>
                                                 <button 
                                                     type="button" 
@@ -901,7 +901,7 @@ export default function InvoiceFormModal({
                         </div>
                         <div className="stat-box">
                             <span className="stat-box-title">ضريبة القيمة المضافة</span>
-                            <span className="stat-box-value" style={{ color: record.skip_zatca ? '#dc2626' : '#4E734F' }}>
+                            <span className="stat-box-value" style={{ color: record.skip_zatca ? '#EF4444' : '#10B981' }}>
                                 {record.skip_zatca ? '0.00 ر.س (معفى)' : formatCurrency(record.tax_amount ?? 0)}
                             </span>
                         </div>

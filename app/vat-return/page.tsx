@@ -218,19 +218,19 @@ export default function VATReturnPage() {
         <style>{`
           .filter-bar { display: flex; gap: 15px; margin-bottom: 25px; background: rgba(255,255,255,0.2); backdrop-filter: blur(15px); padding: 20px; border-radius: 24px; border: 1px solid rgba(255,255,255,0.3); align-items: center; }
           .filter-group { display: flex; flex-direction: column; gap: 5px; }
-          .filter-group label { font-size: 12px; font-weight: 900; color: #475569; }
-          .filter-group input { padding: 10px 15px; border-radius: 12px; border: none; outline: none; font-weight: 800; background: rgba(255,255,255,0.7); }
+          .filter-group label { font-size: 12px; font-weight: 900; color: #94A3B8; }
+          .filter-group input { padding: 10px 15px; border-radius: 12px; border: 1px solid rgba(0, 229, 255, 0.25); outline: none; font-weight: 800; background: rgba(11, 14, 20, 0.8); color: #F8FAFC; }
           
-          .btn-main-glass { width: 100%; padding: 14px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.2); backdrop-filter: blur(15px); font-weight: 900; cursor: pointer; transition: 0.2s; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px; }
-          .btn-main-glass.blue { background: linear-gradient(135deg, rgba(14, 165, 233, 0.8), rgba(2, 132, 199, 0.9)); color: white; }
-          .btn-main-glass.white { background: rgba(255, 255, 255, 0.6); color: #1e293b; border: 1px solid rgba(255,255,255,0.8); }
-          .btn-main-glass:hover { transform: translateY(-3px); filter: brightness(1.1); }
+          .btn-main-glass { width: 100%; padding: 14px; border-radius: 16px; border: 1px solid rgba(0, 229, 255, 0.25); backdrop-filter: blur(15px); font-weight: 900; cursor: pointer; transition: 0.2s; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+          .btn-main-glass.blue { background: linear-gradient(135deg, #00E5FF, #0284C7); color: #0B0E14; font-weight: 900; }
+          .btn-main-glass.white { background: rgba(255, 255, 255, 0.08); color: #F8FAFC; border: 1px solid rgba(255, 255, 255, 0.15); }
+          .btn-main-glass:hover { transform: translateY(-2px); filter: brightness(1.1); }
           
-          .summary-glass-card { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); padding: 20px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.2); margin-bottom: 25px; }
-          .loading-state { text-align: center; padding: 100px; font-weight: 900; color: #64748b; }
+          .summary-glass-card { background: rgba(20, 24, 34, 0.85); backdrop-filter: blur(10px); padding: 20px; border-radius: 20px; border: 1px solid rgba(0, 229, 255, 0.2); margin-bottom: 25px; }
+          .loading-state { text-align: center; padding: 100px; font-weight: 900; color: #00E5FF; }
           .loading-state .spinner { font-size: 40px; margin-bottom: 15px; }
 
-          .section-title { color: #122946; font-weight: 900; margin-top: 40px; margin-bottom: 25px; border-bottom: 2px solid rgba(40,145,200,0.15); padding-bottom: 12px; display: flex; align-items: center; font-size: 20px; }
+          .section-title { color: #F8FAFC; font-weight: 900; margin-top: 40px; margin-bottom: 25px; border-bottom: 2px solid rgba(0, 229, 255, 0.2); padding-bottom: 12px; display: flex; align-items: center; font-size: 20px; }
           .section-title span { font-size: 26px; margin-left: 12px; }
 
           .vat-summary-grid {
@@ -241,12 +241,12 @@ export default function VATReturnPage() {
           }
 
           .vat-card {
-            background: rgba(255,255,255,0.7);
+            background: rgba(20, 24, 34, 0.9);
             backdrop-filter: blur(15px);
             padding: 30px;
             border-radius: 24px;
-            border: 1px solid rgba(255,255,255,0.5);
-            box-shadow: 0 10px 40px rgba(0,0,0,0.05);
+            border: 1px solid rgba(0, 229, 255, 0.2);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
             position: relative;
             overflow: hidden;
             text-align: center;
@@ -254,7 +254,7 @@ export default function VATReturnPage() {
           
           .vat-card h3 {
             font-size: 16px;
-            color: #475569;
+            color: #94A3B8;
             font-weight: 900;
             margin: 0 0 15px 0;
           }
@@ -267,13 +267,13 @@ export default function VATReturnPage() {
 
           .vat-base {
             font-size: 13px;
-            color: #64748b;
+            color: #94A3B8;
             font-weight: 800;
             padding-top: 15px;
-            border-top: 1px dashed rgba(0,0,0,0.1);
+            border-top: 1px dashed rgba(255,255,255,0.1);
           }
           .vat-base span {
-            color: #1e293b;
+            color: #F8FAFC;
           }
 
           .vat-icon {
@@ -289,26 +289,26 @@ export default function VATReturnPage() {
           .input-card .vat-amount { color: #ef4444; }
           
           .net-card {
-            background: linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.7));
+            background: rgba(20, 24, 34, 0.95);
             border-width: 2px;
           }
           .net-card.payable { border-color: #f59e0b; }
-          .net-card.payable .vat-amount { color: #d97706; }
-          .net-card.payable .status-badge { color: #d97706; background: rgba(245, 158, 11, 0.1); padding: 5px 10px; border-radius: 8px; display: inline-block; margin-top: 10px; }
+          .net-card.payable .vat-amount { color: #f59e0b; }
+          .net-card.payable .status-badge { color: #f59e0b; background: rgba(245, 158, 11, 0.15); padding: 5px 10px; border-radius: 8px; display: inline-block; margin-top: 10px; }
 
           .net-card.refundable { border-color: #10b981; }
-          .net-card.refundable .vat-amount { color: #059669; }
-          .net-card.refundable .status-badge { color: #059669; background: rgba(16, 185, 129, 0.1); padding: 5px 10px; border-radius: 8px; display: inline-block; margin-top: 10px; }
+          .net-card.refundable .vat-amount { color: #10b981; }
+          .net-card.refundable .status-badge { color: #10b981; background: rgba(16, 185, 129, 0.15); padding: 5px 10px; border-radius: 8px; display: inline-block; margin-top: 10px; }
 
           /* Table Styles */
           .table-glass-container {
-            background: rgba(255, 255, 255, 0.5);
+            background: rgba(20, 24, 34, 0.95);
             backdrop-filter: blur(15px);
             border-radius: 24px;
-            border: 1px solid rgba(255,255,255,0.4);
+            border: 1px solid rgba(0, 229, 255, 0.2);
             padding: 5px;
             overflow-x: auto;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.03);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
           }
           .aqua-table {
             width: 100%;
@@ -316,23 +316,23 @@ export default function VATReturnPage() {
             border-spacing: 0;
           }
           .aqua-table th {
-            background: rgba(194, 155, 98, 0.12);
-            color: #2C1A12;
+            background: rgba(11, 14, 20, 0.9);
+            color: #00E5FF;
             font-weight: 900;
             padding: 18px 20px;
             text-align: right;
             font-size: 13px;
-            border-bottom: 2px solid rgba(194, 155, 98, 0.3);
+            border-bottom: 2px solid rgba(0, 229, 255, 0.25);
           }
           .aqua-table td {
             padding: 16px 20px;
-            border-bottom: 1px solid rgba(194, 155, 98, 0.12);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
             font-size: 14px;
             vertical-align: middle;
-            color: #2C1A12;
+            color: #F8FAFC;
           }
           .aqua-table tbody tr:hover {
-            background: rgba(194, 155, 98, 0.08);
+            background: rgba(0, 229, 255, 0.05);
           }
           
           .badge {

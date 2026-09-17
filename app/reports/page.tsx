@@ -125,25 +125,25 @@ export default function ReportsPage() {
         </div>
 
         <style>{`
-          .filter-bar { display: flex; gap: 15px; margin-bottom: 25px; background: rgba(255,255,255,0.6); backdrop-filter: blur(15px); padding: 20px; border-radius: 24px; border: 1px solid rgba(255,255,255,0.9); align-items: center; box-shadow: 0 4px 15px rgba(28, 115, 171, 0.05); }
+          .filter-bar { display: flex; gap: 15px; margin-bottom: 25px; background: rgba(20, 24, 34, 0.85); backdrop-filter: blur(15px); padding: 20px; border-radius: 24px; border: 1px solid rgba(0, 229, 255, 0.2); align-items: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); }
           .filter-group { display: flex; flex-direction: column; gap: 5px; }
-          .filter-group label { font-size: 12px; font-weight: 900; color: #122946; }
-          .filter-group input { padding: 10px 15px; border-radius: 12px; border: 1px solid rgba(28, 115, 171, 0.2); outline: none; font-weight: 800; background: white; color: #122946; transition: 0.3s; }
-          .filter-group input:focus { border-color: #1C73AB; box-shadow: 0 0 0 3px rgba(28, 115, 171, 0.1); }
+          .filter-group label { font-size: 12px; font-weight: 900; color: #94A3B8; }
+          .filter-group input { padding: 10px 15px; border-radius: 12px; border: 1px solid rgba(0, 229, 255, 0.25); outline: none; font-weight: 800; background: rgba(11, 14, 20, 0.8); color: #F8FAFC; transition: 0.3s; }
+          .filter-group input:focus { border-color: #00E5FF; box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.2); }
           
-          .section-title { color: #122946; font-weight: 900; margin-bottom: 25px; border-bottom: 2px solid rgba(40,145,200,0.15); padding-bottom: 12px; display: flex; align-items: center; font-size: 20px; }
+          .section-title { color: #F8FAFC; font-weight: 900; margin-bottom: 25px; border-bottom: 2px solid rgba(0, 229, 255, 0.2); padding-bottom: 12px; display: flex; align-items: center; font-size: 20px; }
           .section-title span { font-size: 26px; margin-left: 12px; }
           
           .reports-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; }
           
           .report-link-card {
-            background: linear-gradient(135deg, rgba(255, 253, 250, 0.85) 0%, rgba(255, 253, 250, 0.55) 100%);
+            background: linear-gradient(135deg, rgba(20, 24, 34, 0.95) 0%, rgba(15, 20, 30, 0.85) 100%);
             backdrop-filter: blur(24px) saturate(160%);
             -webkit-backdrop-filter: blur(24px) saturate(160%);
             padding: 24px;
             border-radius: 20px;
-            border: 1px solid rgba(194, 155, 98, 0.3);
-            box-shadow: 0 4px 15px rgba(44, 26, 18, 0.05);
+            border: 1px solid rgba(0, 229, 255, 0.2);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
             text-decoration: none;
             display: flex;
             flex-direction: column;
@@ -154,36 +154,36 @@ export default function ReportsPage() {
           }
           .report-link-card:not(.disabled):hover {
             transform: translateY(-5px);
-            background: #FFFFFF;
-            box-shadow: 0 15px 35px rgba(168, 87, 60, 0.15);
-            border-color: #C29B62;
+            background: rgba(26, 32, 46, 0.95);
+            box-shadow: 0 15px 35px rgba(0, 229, 255, 0.15);
+            border-color: #00E5FF;
           }
           .report-link-card.disabled {
-            opacity: 0.6;
+            opacity: 0.5;
             cursor: not-allowed;
             filter: grayscale(100%);
           }
           .report-link-card.disabled .report-link-title::after {
             content: '(⏳ قريباً)';
             font-size: 11px;
-            color: #d97706;
+            color: #F59E0B;
             margin-right: 8px;
-            background: rgba(217, 119, 6, 0.1);
+            background: rgba(245, 158, 11, 0.15);
             padding: 3px 6px;
             border-radius: 8px;
             vertical-align: middle;
           }
           .report-link-icon { font-size: 36px; margin-bottom: 5px; }
-          .report-link-title { font-size: 15px; font-weight: 900; color: #2C1A12; margin: 0; display: flex; align-items: center; }
-          .report-link-desc { font-size: 12px; color: rgba(44, 26, 18, 0.65); font-weight: 700; line-height: 1.6; margin: 0; }
-          .report-link-arrow { position: absolute; top: 24px; left: 24px; color: #C29B62; font-size: 18px; opacity: 0; transition: 0.3s; transform: translateX(10px); }
+          .report-link-title { font-size: 15px; font-weight: 900; color: #F8FAFC; margin: 0; display: flex; align-items: center; }
+          .report-link-desc { font-size: 12px; color: #94A3B8; font-weight: 700; line-height: 1.6; margin: 0; }
+          .report-link-arrow { position: absolute; top: 24px; left: 24px; color: #00E5FF; font-size: 18px; opacity: 0; transition: 0.3s; transform: translateX(10px); }
           .report-link-card:not(.disabled):hover .report-link-arrow { opacity: 1; transform: translateX(0); }
           
-          .btn-main-glass { width: 100%; padding: 14px; border-radius: 16px; border: 1px solid rgba(194,155,98,0.3); backdrop-filter: blur(15px); font-weight: 900; cursor: pointer; transition: 0.2s; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 10px rgba(44, 26, 18, 0.05); }
-          .btn-main-glass.blue { background: linear-gradient(135deg, #C29B62, #A8573C); color: white; border: none; }
-          .btn-main-glass.white { background: white; color: #2C1A12; border: 1px solid rgba(194,155,98,0.3); }
-          .btn-main-glass:hover { transform: translateY(-3px); filter: brightness(1.05); box-shadow: 0 8px 18px rgba(168, 87, 60, 0.2); }
-          .summary-glass-card { background: rgba(255, 253, 250, 0.75); backdrop-filter: blur(10px); padding: 20px; border-radius: 20px; border: 1px solid rgba(194, 155, 98, 0.3); margin-bottom: 25px; box-shadow: 0 4px 15px rgba(44, 26, 18, 0.05); }
+          .btn-main-glass { width: 100%; padding: 14px; border-radius: 16px; border: 1px solid rgba(0, 229, 255, 0.25); backdrop-filter: blur(15px); font-weight: 900; cursor: pointer; transition: 0.2s; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); }
+          .btn-main-glass.blue { background: linear-gradient(135deg, #00E5FF, #0284C7); color: #0B0E14; border: none; font-weight: 900; }
+          .btn-main-glass.white { background: rgba(255, 255, 255, 0.08); color: #F8FAFC; border: 1px solid rgba(255, 255, 255, 0.15); }
+          .btn-main-glass:hover { transform: translateY(-2px); filter: brightness(1.1); box-shadow: 0 8px 18px rgba(0, 229, 255, 0.25); }
+          .summary-glass-card { background: rgba(20, 24, 34, 0.85); backdrop-filter: blur(10px); padding: 20px; border-radius: 20px; border: 1px solid rgba(0, 229, 255, 0.2); margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); }
 
           @media (max-width: 768px) {
             .filter-bar { flex-direction: column !important; align-items: stretch !important; padding: 12px 10px !important; gap: 10px !important; }

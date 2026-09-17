@@ -102,24 +102,26 @@ export default function ExpensePrintModal({ isOpen, onClose, record, projects }:
                 /* 🚀 تم استرجاع كلاس الخلفية عشان المودال يظهر فوق الشاشة وما يختفيش */
                 .print-modal-overlay { 
                     position: fixed !important; inset: 0 !important; 
-                    background: rgba(18, 41, 70, 0.90) !important; 
-                    backdrop-filter: blur(10px) !important; 
+                    background: rgba(11, 14, 20, 0.92) !important; 
+                    backdrop-filter: blur(12px) !important; 
                     z-index: 999999999 !important; 
                     display: flex !important; flex-direction: column !important; 
                     align-items: center !important; justify-content: flex-start !important; 
                     padding: 30px 20px !important; overflow-y: auto !important; 
-                    font-family: 'Arial', sans-serif; 
+                    font-family: 'Cairo', sans-serif; 
                 }
 
                 .print-actions-bar {
                     display: flex !important; gap: 15px !important; margin-bottom: 25px !important;
-                    background: white !important; padding: 15px 30px !important; border-radius: 50px !important;
-                    box-shadow: 0 10px 30px rgba(0,0,0,0.3) !important; position: sticky !important; 
+                    background: rgba(20, 24, 34, 0.95) !important; 
+                    border: 1px solid rgba(0, 229, 255, 0.3) !important;
+                    padding: 12px 28px !important; border-radius: 50px !important;
+                    box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important; position: sticky !important; 
                     top: 20px !important; z-index: 1000000000 !important; 
                 }
-                .action-btn { padding: 12px 25px; border-radius: 10px; border: none; font-weight: 900; font-size: 16px; cursor: pointer; transition: 0.2s; }
-                .action-btn.print { background: linear-gradient(135deg, #C29B62, #A8573C); color: white; }
-                .action-btn.close { background: #fee2e2; color: #dc2626; }
+                .action-btn { padding: 12px 25px; border-radius: 10px; border: none; font-weight: 900; font-size: 15px; cursor: pointer; transition: 0.2s; }
+                .action-btn.print { background: linear-gradient(135deg, #00E5FF, #0284C7); color: #0B0E14; font-weight: 900; }
+                .action-btn.close { background: rgba(239, 68, 68, 0.15); color: #EF4444; border: 1px solid rgba(239, 68, 68, 0.3); }
 
                 .a4-preview-box {
                     width: 210mm !important; min-height: 297mm !important; background: white !important; color: #000;
@@ -128,40 +130,40 @@ export default function ExpensePrintModal({ isOpen, onClose, record, projects }:
                     display: flex !important; flex-direction: column !important; box-sizing: border-box !important; 
                 }
 
-                .inv-header { display: grid; grid-template-columns: 180px 1fr 180px; align-items: center; border-bottom: 3px solid #C29B62; padding-bottom: 20px; margin-bottom: 25px; width: 100%; gap: 15px; }
+                .inv-header { display: grid; grid-template-columns: 180px 1fr 180px; align-items: center; border-bottom: 3px solid #0284C7; padding-bottom: 20px; margin-bottom: 25px; width: 100%; gap: 15px; }
                 .header-center { text-align: center; }
                 .header-logo { display: flex; justify-content: flex-end; } 
                 .header-logo img { max-height: 120px; width: auto; max-width: 100%; object-fit: contain; } 
 
                 .inv-title-box { text-align: center; margin-bottom: 25px; }
-                .inv-title { font-size: 22px; font-weight: 900; border: 2.5px solid #C29B62; padding: 8px 35px; display: inline-block; background: linear-gradient(135deg, rgba(194,155,98,0.07), rgba(168,87,60,0.07)); color: #2C1A12; text-transform: uppercase; letter-spacing: 1px; border-radius: 12px; }
+                .inv-title { font-size: 22px; font-weight: 900; border: 2px solid #0284C7; padding: 8px 35px; display: inline-block; background: #F0F9FF; color: #0284C7; text-transform: uppercase; letter-spacing: 1px; border-radius: 12px; }
 
                 .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 30px; }
-                .info-box { border: 1.5px solid rgba(194, 155, 98, 0.3); border-radius: 16px !important; padding: 18px 15px 12px 15px; display: flex; flex-direction: column; justify-content: center; position: relative; background: #fff; min-height: 90px; }
-                .box-label { position: absolute; top: -10px; right: 20px; background: white; padding: 0 10px; font-size: 12px; font-weight: 900; color: #C29B62; border-radius: 20px; }
+                .info-box { border: 1.5px solid rgba(2, 132, 199, 0.3); border-radius: 16px !important; padding: 18px 15px 12px 15px; display: flex; flex-direction: column; justify-content: center; position: relative; background: #fff; min-height: 90px; }
+                .box-label { position: absolute; top: -10px; right: 20px; background: white; padding: 0 10px; font-size: 12px; font-weight: 900; color: #0284C7; border-radius: 20px; }
                 .inner-table { width: 100%; border-collapse: collapse; }
                 .inner-table td { padding: 4px 0; font-size: 13px; vertical-align: middle; }
                 .label-cell { text-align: left; font-weight: 900; color: #64748b; width: 90px; padding-left: 10px !important; }
                 .value-cell { text-align: right; font-weight: 900; color: #0f172a; }
 
                 .inv-table { width: 100%; border-collapse: collapse; margin-bottom: 30px; font-size: 14px; border-radius: 12px; overflow: hidden; }
-                .inv-table th { background: linear-gradient(135deg, rgba(194,155,98,0.08), rgba(168,87,60,0.05)); padding: 12px; text-align: center; border-bottom: 2px solid #C29B62; border-top: 2px solid #C29B62; color: #2C1A12; font-weight: 900; }
-                .inv-table td { padding: 12px; border-bottom: 1px solid rgba(194, 155, 98, 0.15); text-align: center; color: #1e293b; font-weight: 700; }
+                .inv-table th { background: #F8FAFC; padding: 12px; text-align: center; border-bottom: 2px solid #0284C7; border-top: 2px solid #0284C7; color: #0F172A; font-weight: 900; }
+                .inv-table td { padding: 12px; border-bottom: 1px solid #E2E8F0; text-align: center; color: #1e293b; font-weight: 700; }
 
                 .inv-footer-flex { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 40px; flex-grow: 1; gap: 40px; }
                 .inv-amount-words { flex: 1; display: flex; flex-direction: column; }
-                .inv-amount-words .words-box { background: rgba(255, 255, 255, 0.6); border: 1px dashed rgba(194, 155, 98, 0.3); padding: 15px; border-radius: 16px; font-weight: 900; font-size: 15px; color: #0f172a; line-height: 1.6; }
+                .inv-amount-words .words-box { background: rgba(255, 255, 255, 0.6); border: 1px dashed rgba(2, 132, 199, 0.4); padding: 15px; border-radius: 16px; font-weight: 900; font-size: 15px; color: #0f172a; line-height: 1.6; }
                 
                 .signature-area { margin-top: 30px; text-align: center; align-self: flex-start; }
-                .signature-title { font-weight: 900; font-size: 13px; color: #64748b; margin-bottom: 15px; border-bottom: 1px solid rgba(194, 155, 98, 0.2); padding-bottom: 8px; }
+                .signature-title { font-weight: 900; font-size: 13px; color: #64748b; margin-bottom: 15px; border-bottom: 1px solid rgba(2, 132, 199, 0.2); padding-bottom: 8px; }
 
                 .inv-totals-box { width: 350px; }
                 .inv-total-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 14px; font-weight: 700; color: #334155; }
-                .inv-total-row.tax { color: #A8573C; }
+                .inv-total-row.tax { color: #EF4444; }
                 .inv-total-row.discount { color: #dc2626; }
-                .inv-total-row.grand-total { border-top: 3px solid #C29B62; padding-top: 12px; margin-top: 12px; font-size: 20px; font-weight: 900; color: #2C1A12; background: linear-gradient(135deg, rgba(194,155,98,0.08), rgba(168,87,60,0.06)); padding: 10px; border-radius: 12px; }
+                .inv-total-row.grand-total { border-top: 3px solid #0284C7; padding-top: 12px; margin-top: 12px; font-size: 20px; font-weight: 900; color: #0284C7; background: #F0F9FF; padding: 10px; border-radius: 12px; }
 
-                .inv-footer-contact { margin-top: auto !important; border-top: 2px solid rgba(194, 155, 98, 0.2); padding-top: 15px; text-align: center; font-size: 13px; color: #64748b; font-weight: 700; }
+                .inv-footer-contact { margin-top: auto !important; border-top: 2px solid rgba(2, 132, 199, 0.2); padding-top: 15px; text-align: center; font-size: 13px; color: #64748b; font-weight: 700; }
 
                 /* 🚀 Thermal Styles */
                 .thermal-preview-box {
@@ -228,8 +230,8 @@ export default function ExpensePrintModal({ isOpen, onClose, record, projects }:
                 <div className="inv-header">
                     <div style={{width: '180px'}}></div> 
                     <div className="header-center">
-                        <h1 style={{ fontSize: '20px', fontWeight: 900, color: '#2C1A12', margin: '0 0 4px 0' }}>محطات النور للوقود</h1>
-                        <h2 style={{ fontSize: '14px', fontWeight: 700, color: '#C29B62', margin: '0 0 8px 0', letterSpacing: '0.5px' }}>Al-Noor Gas Stations Gas Station</h2>
+                        <h1 style={{ fontSize: '20px', fontWeight: 900, color: '#0F172A', margin: '0 0 4px 0' }}>محطات النور للوقود</h1>
+                        <h2 style={{ fontSize: '14px', fontWeight: 700, color: '#0284C7', margin: '0 0 8px 0', letterSpacing: '0.5px' }}>Al-Noor Gas Stations Gas Station</h2>
                         <div style={{ fontSize: '13px', fontWeight: 700, color: '#334155' }}>الرقم الضريبي: ٣١٢٤٨٧٤٧٧٨٠٠٠٠٣</div>
                         <div style={{ fontSize: '13px', fontWeight: 700, color: '#334155', marginTop: '2px' }}>الرقم الموحد: ٧٠٥١٠١٣٥١٩</div>
                     </div>

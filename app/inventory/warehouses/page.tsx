@@ -32,9 +32,9 @@ export default function WarehousesPage() {
                 onClick={(e) => { e.stopPropagation(); logic.handleEdit(row); }} 
                 className="table-action-btn edit-btn" 
                 style={{
-                    background: 'linear-gradient(135deg, #C29B62 0%, #A8573C 100%)',
-                    color: 'white',
-                    border: 'none',
+                    background: 'rgba(0, 229, 255, 0.15)',
+                    color: '#00E5FF',
+                    border: '1px solid rgba(0, 229, 255, 0.35)',
                     borderRadius: '8px',
                     padding: '5px 9px',
                     fontSize: '11px',
@@ -83,20 +83,20 @@ export default function WarehousesPage() {
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <div className="summary-glass-card" style={{ padding: '16px', textAlign: 'center' }}>
               <span style={{ fontSize: '11px', fontWeight: 800, color: '#64748b' }}>إجمالي المستودعات والمنافذ 🏢</span>
-              <div className="val" style={{ fontSize: '22px', fontWeight: 900, color: '#2C1A12', marginTop: '4px' }}>
+              <div className="val" style={{ fontSize: '22px', fontWeight: 900, color: '#F8FAFC', marginTop: '4px' }}>
                 {logic.warehouses?.length || 0} مستودع
               </div>
             </div>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
+            <div style={{ gridTemplateColumns: '1fr 1fr', display: 'grid', gap: '8px' }}>
               <div className="summary-glass-card" style={{ padding: '10px', textAlign: 'center' }}>
-                <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#4E734F' }}>النشطة ✅</span>
-                <div className="val" style={{ fontSize: '17px', fontWeight: 900, color: '#4E734F' }}>
+                <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#10B981' }}>النشطة ✅</span>
+                <div className="val" style={{ fontSize: '17px', fontWeight: 900, color: '#10B981' }}>
                   {logic.warehouses?.filter((w: any) => w.is_active).length || 0}
                 </div>
               </div>
               <div className="summary-glass-card" style={{ padding: '10px', textAlign: 'center' }}>
-                <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#C29B62' }}>منافذ البيع 🛍️</span>
-                <div className="val" style={{ fontSize: '17px', fontWeight: 900, color: '#C29B62' }}>
+                <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#00E5FF' }}>منافذ البيع 🛍️</span>
+                <div className="val" style={{ fontSize: '17px', fontWeight: 900, color: '#00E5FF' }}>
                   {logic.warehouses?.filter((w: any) => w.type === 'pos').length || 0}
                 </div>
               </div>
@@ -138,20 +138,20 @@ export default function WarehousesPage() {
                       width: '46px',
                       height: '46px',
                       borderRadius: '14px',
-                      background: 'linear-gradient(135deg, rgba(194, 155, 98, 0.2), rgba(168, 87, 60, 0.1))',
+                      background: 'rgba(0, 229, 255, 0.12)',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       fontSize: '24px',
-                      border: '1px solid rgba(194, 155, 98, 0.3)'
+                      border: '1px solid rgba(0, 229, 255, 0.3)'
                   }}>
                       🏢
                   </div>
                   <div>
-                      <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 900, color: '#2C1A12' }}>
+                      <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 900, color: '#F8FAFC' }}>
                           المستودعات ومنافذ البيع
                       </h3>
-                      <span style={{ fontSize: '12px', color: 'rgba(44, 26, 18, 0.65)', fontWeight: 700 }}>
+                      <span style={{ fontSize: '12px', color: '#94A3B8', fontWeight: 700 }}>
                           {logic.warehouses.length} مستودع ومنفذ مسجل في النظام
                       </span>
                   </div>
@@ -185,7 +185,7 @@ export default function WarehousesPage() {
                           padding: '10px 24px',
                           fontSize: '14px',
                           fontWeight: 900,
-                          boxShadow: '0 8px 20px rgba(194, 155, 98, 0.35)',
+                          boxShadow: '0 8px 20px rgba(0, 229, 255, 0.25)',
                           display: 'inline-flex',
                           alignItems: 'center',
                           gap: '8px',

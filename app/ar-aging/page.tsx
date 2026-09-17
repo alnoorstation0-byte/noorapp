@@ -25,41 +25,42 @@ export default function ArAgingPage() {
         <MasterPage icon="⏳" title="أعمار الديون (AR Aging)" subtitle="تتبع الديون المتأخرة والذمم المدينة للعملاء مقسمة حسب فترات التأخير." headerContent={headerContent}>
             
             <style>{`
-                .btn-main-glass { padding: 14px; border-radius: 16px; border: 1px solid rgba(194, 155, 98, 0.3); backdrop-filter: blur(15px); font-weight: 900; cursor: pointer; transition: 0.2s; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 10px rgba(44, 26, 18, 0.05); }
-                .btn-main-glass.green { background: #4E734F; color: white; border-color: #4E734F; }
-                .btn-main-glass.disabled { background: rgba(255,255,255,0.5); color: #94a3b8; cursor: not-allowed; border-color: white; box-shadow: none; }
-                .btn-main-glass:not(.disabled):hover { transform: translateY(-3px); filter: brightness(1.1); box-shadow: 0 8px 15px rgba(78, 115, 79, 0.2); }
+                .btn-main-glass { padding: 12px 18px; border-radius: 14px; border: 1px solid rgba(0, 229, 255, 0.25); backdrop-filter: blur(15px); font-weight: 900; cursor: pointer; transition: 0.2s; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3); }
+                .btn-main-glass.green { background: linear-gradient(135deg, #10B981 0%, #059669 100%); color: #0B0E14; border-color: rgba(16, 185, 129, 0.5); }
+                .btn-main-glass.disabled { background: rgba(255,255,255,0.05); color: #64748B; cursor: not-allowed; border-color: rgba(255,255,255,0.1); box-shadow: none; }
+                .btn-main-glass:not(.disabled):hover { transform: translateY(-2px); filter: brightness(1.1); box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3); }
 
-                .search-box { width: 100%; padding: 14px 20px; border-radius: 14px; background: white; border: 1.5px solid rgba(194, 155, 98, 0.25); color: #2C1A12; outline: none; transition: all 0.3s; font-weight: 800; font-family: inherit; }
-                .search-box:focus { border-color: #C29B62; box-shadow: 0 0 0 3px rgba(194, 155, 98, 0.15); }
+                .search-box { width: 100%; padding: 14px 20px; border-radius: 14px; background: rgba(11, 14, 20, 0.8); border: 1.5px solid rgba(0, 229, 255, 0.25); color: #F8FAFC; outline: none; transition: all 0.3s; font-weight: 800; font-family: inherit; }
+                .search-box:focus { border-color: #00E5FF; box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.2); }
+                .search-box::placeholder { color: #64748B; }
 
-                .stat-card { flex: 1; min-width: 150px; background: linear-gradient(135deg, rgba(255, 253, 250, 0.85) 0%, rgba(255, 253, 250, 0.5) 100%); border: 1px solid rgba(194, 155, 98, 0.3); padding: 20px; border-radius: 20px; text-align: center; box-shadow: 0 4px 15px rgba(44, 26, 18, 0.05); }
-                .stat-card.danger { background: rgba(239, 68, 68, 0.05); border: 1px solid rgba(239, 68, 68, 0.2); }
+                .stat-card { flex: 1; min-width: 150px; background: linear-gradient(135deg, rgba(20, 24, 34, 0.95) 0%, rgba(15, 20, 30, 0.85) 100%); border: 1px solid rgba(0, 229, 255, 0.2); padding: 20px; border-radius: 20px; text-align: center; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3); }
+                .stat-card.danger { background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.3); }
                 
                 .stat-title { font-size: 13px; font-weight: 900; margin-bottom: 8px; }
-                .stat-value { font-size: 20px; font-weight: 900; color: #2C1A12; }
-                .stat-value.danger { color: #ef4444; }
+                .stat-value { font-size: 20px; font-weight: 900; color: #F8FAFC; }
+                .stat-value.danger { color: #EF4444; }
 
-                .data-table-container { background: linear-gradient(135deg, rgba(255, 253, 250, 0.85) 0%, rgba(255, 253, 250, 0.5) 100%); backdrop-filter: blur(20px); border-radius: 24px; border: 1px solid rgba(194, 155, 98, 0.3); overflow: hidden; box-shadow: 0 4px 15px rgba(44, 26, 18, 0.05); }
-                .data-table { width: 100%; border-collapse: collapse; text-align: right; color: #2C1A12; }
-                .data-table th { padding: 20px; font-size: 14px; font-weight: 900; color: #2C1A12; border-bottom: 2px solid rgba(194, 155, 98, 0.25); background: rgba(255, 253, 250, 0.9); }
-                .data-table td { padding: 20px; font-weight: 800; border-bottom: 1px solid rgba(194, 155, 98, 0.1); }
-                .data-table tr:hover { background: rgba(194, 155, 98, 0.05); }
-                .data-table tr:nth-child(even) { background: rgba(255, 253, 250, 0.4); }
+                .data-table-container { background: linear-gradient(135deg, rgba(20, 24, 34, 0.95) 0%, rgba(15, 20, 30, 0.85) 100%); backdrop-filter: blur(20px); border-radius: 24px; border: 1px solid rgba(0, 229, 255, 0.2); overflow: hidden; box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4); }
+                .data-table { width: 100%; border-collapse: collapse; text-align: right; color: #F8FAFC; }
+                .data-table th { padding: 18px 20px; font-size: 13px; font-weight: 900; color: #94A3B8; border-bottom: 2px solid rgba(0, 229, 255, 0.2); background: rgba(11, 14, 20, 0.85); }
+                .data-table td { padding: 18px 20px; font-weight: 800; border-bottom: 1px solid rgba(255, 255, 255, 0.06); color: #F8FAFC; }
+                .data-table tr:hover { background: rgba(0, 229, 255, 0.04); }
+                .data-table tr:nth-child(even) { background: rgba(255, 255, 255, 0.02); }
 
                 @media (max-width: 768px) {
                     .data-table-container { border-radius: 16px !important; }
                     .data-table { min-width: 650px !important; }
-                    .data-table th, .data-table td { padding: 8px 10px !important; font-size: 11px !important; }
+                    .data-table th, .data-table td { padding: 10px 12px !important; font-size: 12px !important; }
                     .stat-card { padding: 12px 10px !important; min-width: 140px !important; }
                     .stat-value { font-size: 16px !important; }
                 }
             `}</style>
 
             {/* Filters */}
-            <div style={{ display: 'flex', gap: '15px', marginBottom: '25px', background: 'linear-gradient(135deg, rgba(255, 253, 250, 0.85) 0%, rgba(255, 253, 250, 0.5) 100%)', padding: '20px', borderRadius: '24px', border: '1px solid rgba(194, 155, 98, 0.3)', boxShadow: '0 4px 15px rgba(44, 26, 18, 0.05)' }}>
+            <div style={{ display: 'flex', gap: '15px', marginBottom: '25px', background: 'linear-gradient(135deg, rgba(20, 24, 34, 0.95) 0%, rgba(15, 20, 30, 0.85) 100%)', padding: '20px', borderRadius: '24px', border: '1px solid rgba(0, 229, 255, 0.2)', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)' }}>
                 <div style={{ flex: '1 1 300px' }}>
-                    <div style={{ color: '#2C1A12', fontSize: '13px', fontWeight: 900, marginBottom: '8px' }}>بحث باسم العميل 🔍</div>
+                    <div style={{ color: '#F8FAFC', fontSize: '13px', fontWeight: 900, marginBottom: '8px' }}>بحث باسم العميل 🔍</div>
                     <input 
                         type="text" 
                         placeholder="ابحث عن عميل..." 

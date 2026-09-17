@@ -38,11 +38,11 @@ const MultiSelectDropdown = ({ options, selected, onChange, placeholder, title, 
 
     return (
         <div ref={dropdownRef} style={{ position: 'relative', flex: 1, minWidth: '200px' }}>
-            <div style={{ fontSize: '11px', fontWeight: 900, marginBottom: '6px', color: '#64748b', display: 'flex', justifyContent: 'space-between' }}>
+            <div style={{ fontSize: '11px', fontWeight: 900, marginBottom: '6px', color: '#94A3B8', display: 'flex', justifyContent: 'space-between' }}>
                 <span>{title}</span>
                 {selected.length > 0 && (
                     <span 
-                        style={{ color: '#ef4444', cursor: 'pointer', fontSize: '10px', background: '#fef2f2', padding: '2px 6px', borderRadius: '4px' }} 
+                        style={{ color: '#EF4444', cursor: 'pointer', fontSize: '10px', background: 'rgba(239, 68, 68, 0.15)', padding: '2px 8px', borderRadius: '6px', border: '1px solid rgba(239, 68, 68, 0.3)' }} 
                         onClick={() => onChange([])}
                     >
                         إلغاء ({selected.length})
@@ -52,47 +52,48 @@ const MultiSelectDropdown = ({ options, selected, onChange, placeholder, title, 
             
             <div 
                 onClick={() => setIsOpen(!isOpen)}
-                style={{ background: 'white', padding: '12px 15px', borderRadius: '10px', border: `2px solid rgba(40, 145, 200, 0.15)`, cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: '0.2s', height: '48px' }}
+                style={{ background: 'rgba(11, 14, 20, 0.8)', padding: '12px 15px', borderRadius: '12px', border: '1px solid rgba(0, 229, 255, 0.25)', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: '0.2s', height: '48px' }}
             >
-                <span style={{ fontWeight: 800, color: selected.length ? '#334155' : '#475569', fontSize: '13px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <span style={{ fontWeight: 800, color: selected.length ? '#F8FAFC' : '#94A3B8', fontSize: '13px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {selected.length > 0 ? selected.join('، ') : placeholder}
                 </span>
-                <span style={{ color: '#475569', transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: '0.2s' }}>▼</span>
+                <span style={{ color: '#00E5FF', transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: '0.2s' }}>▼</span>
             </div>
             
             {isOpen && (
-                <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'white', border: `1px solid rgba(40, 145, 200, 0.15)`, borderRadius: '12px', marginTop: '8px', zIndex: 50, boxShadow: '0 10px 25px rgba(0,0,0,0.1)', overflow: 'hidden' }}>
-                    <div style={{ padding: '10px', background: 'rgba(255, 255, 255, 0.6)', borderBottom: '1px solid rgba(40, 145, 200, 0.15)' }}>
+                <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'rgba(20, 24, 34, 0.98)', backdropFilter: 'blur(20px)', border: '1px solid rgba(0, 229, 255, 0.3)', borderRadius: '14px', marginTop: '8px', zIndex: 50, boxShadow: '0 12px 35px rgba(0,0,0,0.6)', overflow: 'hidden' }}>
+                    <div style={{ padding: '10px', background: 'rgba(11, 14, 20, 0.7)', borderBottom: '1px solid rgba(255, 255, 255, 0.08)' }}>
                         <input 
                             type="text" 
                             placeholder="🔍 بحث سريع..." 
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             onClick={(e) => e.stopPropagation()}
-                            style={{ width: '100%', padding: '8px 12px', border: '1px solid rgba(40, 145, 200, 0.2)', borderRadius: '6px', outline: 'none', fontSize: '12px', fontWeight: 700 }}
+                            style={{ width: '100%', padding: '8px 12px', border: '1px solid rgba(0, 229, 255, 0.25)', borderRadius: '8px', outline: 'none', fontSize: '12px', fontWeight: 700, background: 'rgba(20, 24, 34, 0.9)', color: '#F8FAFC' }}
                         />
                     </div>
-                    <div className="custom-scrollbar" style={{ maxHeight: '220px', overflowY: 'auto', padding: '5px' }}>
+                    <div className="custom-scrollbar" style={{ maxHeight: '220px', overflowY: 'auto', padding: '6px' }}>
                         {filteredOptions.length > 0 ? filteredOptions.map((opt: string) => (
-                            <label key={opt} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 10px', cursor: 'pointer', borderRadius: '6px', background: selected.includes(opt) ? `${accentColor}15` : 'transparent', transition: '0.2s' }}>
+                            <label key={opt} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 10px', cursor: 'pointer', borderRadius: '8px', background: selected.includes(opt) ? `${accentColor}25` : 'transparent', transition: '0.2s' }}>
                                 <input 
                                     type="checkbox" 
                                     checked={selected.includes(opt)} 
                                     onChange={() => handleToggle(opt)} 
                                     style={{ accentColor: accentColor, transform: 'scale(1.2)', cursor: 'pointer' }}
                                 />
-                                <span style={{ fontSize: '12px', fontWeight: 800, color: selected.includes(opt) ? accentColor : '#334155' }}>{opt}</span>
+                                <span style={{ fontSize: '12px', fontWeight: 800, color: selected.includes(opt) ? accentColor : '#F8FAFC' }}>{opt}</span>
                             </label>
                         )) : (
-                            <div style={{ padding: '15px', textAlign: 'center', fontSize: '12px', color: '#475569', fontWeight: 700 }}>لا توجد نتائج مطابقة</div>
+                            <div style={{ padding: '15px', textAlign: 'center', fontSize: '12px', color: '#94A3B8', fontWeight: 700 }}>لا توجد نتائج مطابقة</div>
                         )}
                     </div>
                 </div>
             )}
             <style>{`
                 .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-                .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.4); border-radius: 4px; }
-                .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(40, 145, 200, 0.2); border-radius: 4px; }
+                .custom-scrollbar::-webkit-scrollbar-track { background: rgba(11, 14, 20, 0.5); border-radius: 4px; }
+                .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0, 229, 255, 0.3); border-radius: 4px; }
+            `}</style>
                 .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #475569; }
             `}</style>
         </div>
@@ -299,51 +300,51 @@ export default function CashFlowsPage() {
     }, [treeGroupedData, currentPage, rowsPerPage]);
 
     return (
-        <div className="clean-page" style={{ background: 'rgba(255, 255, 255, 0.6)', minHeight: '100vh', paddingBottom: '50px' }}>
+        <div className="clean-page" style={{ background: 'transparent', minHeight: '100vh', paddingBottom: '50px' }}>
             <MasterPage title="التدفقات النقدية (Cash Flows)" subtitle="مراقبة حركات السيولة، المقبوضات، والمدفوعات بشكل لحظي وتجميعي">
                 
                 <style>{`
-                    .summary-card { background: rgba(255,255,255,0.8); backdrop-filter: blur(20px); border-radius: 20px; padding: 25px; flex: 1; border: 1px solid rgba(255,255,255,0.9); position: relative; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.03); transition: all 0.3s ease; }
-                    .summary-card:hover { transform: translateY(-5px); box-shadow: 0 15px 40px rgba(0,0,0,0.06); }
+                    .summary-card { background: rgba(20, 24, 34, 0.85); backdrop-filter: blur(20px); border-radius: 20px; padding: 25px; flex: 1; border: 1px solid rgba(0, 229, 255, 0.2); position: relative; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3); transition: all 0.3s ease; }
+                    .summary-card:hover { transform: translateY(-3px); box-shadow: 0 15px 40px rgba(0,0,0,0.4); border-color: rgba(0, 229, 255, 0.4); }
                     .summary-card::after { content: ''; position: absolute; top: 0; right: 0; width: 100%; height: 5px; }
-                    .summary-card.inflow::after { background: linear-gradient(90deg, #4E734F, #10b981); }
-                    .summary-card.outflow::after { background: linear-gradient(90deg, #ef4444, #f87171); }
-                    .summary-card.net::after { background: linear-gradient(90deg, #C29B62, #A8573C); }
+                    .summary-card.inflow::after { background: linear-gradient(90deg, #10B981, #059669); }
+                    .summary-card.outflow::after { background: linear-gradient(90deg, #EF4444, #DC2626); }
+                    .summary-card.net::after { background: linear-gradient(90deg, #00E5FF, #0284C7); }
                     
-                    .summary-label { font-size: 14px; font-weight: 900; color: rgba(44, 26, 18, 0.6); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
-                    .summary-val { font-size: 32px; font-weight: 900; color: #2C1A12; text-shadow: 0 2px 10px rgba(0,0,0,0.02); }
+                    .summary-label { font-size: 14px; font-weight: 900; color: #94A3B8; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+                    .summary-val { font-size: 32px; font-weight: 900; color: #F8FAFC; text-shadow: 0 2px 10px rgba(0,0,0,0.4); }
 
-                    .source-breakdown-card { background: rgba(255,255,255,0.8); backdrop-filter: blur(10px); padding: 20px; border-radius: 16px; border: 1px solid rgba(194, 155, 98, 0.3); display: flex; align-items: center; justify-content: space-between; flex: 1; min-width: 220px; box-shadow: 0 5px 20px rgba(44, 26, 18, 0.04); transition: all 0.3s ease; }
-                    .source-breakdown-card:hover { transform: translateY(-3px); }
-                    .source-breakdown-title { font-size: 12px; font-weight: 900; color: rgba(44, 26, 18, 0.6); margin-bottom: 8px; }
+                    .source-breakdown-card { background: rgba(20, 24, 34, 0.85); backdrop-filter: blur(10px); padding: 20px; border-radius: 16px; border: 1px solid rgba(0, 229, 255, 0.2); display: flex; align-items: center; justify-content: space-between; flex: 1; min-width: 220px; box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3); transition: all 0.3s ease; }
+                    .source-breakdown-card:hover { transform: translateY(-3px); border-color: rgba(0, 229, 255, 0.4); }
+                    .source-breakdown-title { font-size: 12px; font-weight: 900; color: #94A3B8; margin-bottom: 8px; }
                     .source-breakdown-val { font-size: 20px; font-weight: 900; }
                     
-                    .filter-input { width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid rgba(194, 155, 98, 0.25); outline: none; font-weight: 800; color: #2C1A12; transition: 0.2s; height: 50px; background: rgba(255,255,255,0.9); }
-                    .filter-input:focus { border-color: #C29B62; box-shadow: 0 0 0 3px rgba(194, 155, 98, 0.15); }
+                    .filter-input { width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid rgba(0, 229, 255, 0.25); outline: none; font-weight: 800; color: #F8FAFC; transition: 0.2s; height: 50px; background: rgba(11, 14, 20, 0.8); }
+                    .filter-input:focus { border-color: #00E5FF; box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.2); }
 
                     .tree-table { width: 100%; border-collapse: separate; border-spacing: 0; text-align: center; background: transparent; }
-                    .tree-thead { background: ${THEME.gradients.primary}; color: ${THEME.white}; border-radius: 16px 16px 0 0; }
-                    .tree-thead th { padding: 20px 15px; font-size: 15px; font-weight: 900; border: none; }
+                    .tree-thead { background: rgba(11, 14, 20, 0.9); color: #00E5FF; border-radius: 16px 16px 0 0; }
+                    .tree-thead th { padding: 18px 15px; font-size: 14px; font-weight: 900; border-bottom: 2px solid rgba(0, 229, 255, 0.3); }
                     .tree-thead th:first-child { border-top-right-radius: 16px; }
                     .tree-thead th:last-child { border-top-left-radius: 16px; }
                     
-                    .master-group-row { cursor: pointer; background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(10px); transition: 0.3s; box-shadow: 0 2px 10px rgba(0,0,0,0.02); }
-                    .master-group-row:hover { background: #ffffff; transform: scale(1.002); z-index: 10; position: relative; box-shadow: 0 5px 20px rgba(0,0,0,0.05); }
-                    .master-group-row td { padding: 20px 16px; font-size: 15px; font-weight: 900; border-bottom: 1px solid rgba(255, 255, 255, 0.4); }
+                    .master-group-row { cursor: pointer; background: rgba(20, 24, 34, 0.9); backdrop-filter: blur(10px); transition: 0.3s; box-shadow: 0 2px 10px rgba(0,0,0,0.2); }
+                    .master-group-row:hover { background: rgba(26, 32, 46, 0.95); transform: scale(1.002); z-index: 10; position: relative; box-shadow: 0 5px 20px rgba(0,0,0,0.3); }
+                    .master-group-row td { padding: 18px 16px; font-size: 14px; font-weight: 900; border-bottom: 1px solid rgba(255, 255, 255, 0.08); color: #F8FAFC; }
 
-                    .child-tree-container { background: rgba(248, 250, 252, 0.9); padding: 20px 40px; border-bottom: 2px solid ${THEME.border}; backdrop-filter: blur(5px); }
-                    .child-table { width: 100%; border-collapse: collapse; background: #ffffff; border-radius: 14px; border: 1px solid ${THEME.border}; overflow: hidden; box-shadow: 0 5px 25px rgba(0,0,0,0.03); }
-                    .child-table th { background: linear-gradient(135deg, #fdfbf7, #f3eedf); color: ${THEME.brand.coffee}; padding: 15px; font-size: 13px; font-weight: 900; border-bottom: 2px solid ${THEME.brand.goldLight}; }
-                    .child-table td { padding: 15px 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.4); font-size: 13px; font-weight: 800; color: #2C1A12; transition: 0.2s; }
-                    .child-table tr:hover td { background: rgba(194, 155, 98, 0.05); }
+                    .child-tree-container { background: rgba(11, 14, 20, 0.9); padding: 20px 40px; border-bottom: 2px solid rgba(0, 229, 255, 0.2); backdrop-filter: blur(5px); }
+                    .child-table { width: 100%; border-collapse: collapse; background: rgba(20, 24, 34, 0.95); border-radius: 14px; border: 1px solid rgba(0, 229, 255, 0.2); overflow: hidden; box-shadow: 0 5px 25px rgba(0,0,0,0.3); }
+                    .child-table th { background: rgba(11, 14, 20, 0.95); color: #00E5FF; padding: 15px; font-size: 13px; font-weight: 900; border-bottom: 2px solid rgba(0, 229, 255, 0.3); }
+                    .child-table td { padding: 15px 12px; border-bottom: 1px solid rgba(255, 255, 255, 0.05); font-size: 13px; font-weight: 800; color: #F8FAFC; transition: 0.2s; }
+                    .child-table tr:hover td { background: rgba(0, 229, 255, 0.05); }
                     
-                    .arrow-icon { display: inline-block; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); margin-left: 12px; color: #C29B62; font-size: 16px; background: rgba(194, 155, 98, 0.12); width: 28px; height: 28px; line-height: 28px; text-align: center; border-radius: 50%; }
-                    .arrow-expanded { transform: rotate(90deg); background: #C29B62; color: white; }
+                    .arrow-icon { display: inline-block; transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1); margin-left: 12px; color: #00E5FF; font-size: 16px; background: rgba(0, 229, 255, 0.15); width: 28px; height: 28px; line-height: 28px; text-align: center; border-radius: 50%; }
+                    .arrow-expanded { transform: rotate(90deg); background: #00E5FF; color: #0B0E14; }
 
                     .view-toggle-btn { flex: 1; padding: 12px; font-size: 14px; font-weight: 900; border: none; cursor: pointer; transition: 0.3s; }
-                    .view-toggle-btn.active { background: #C29B62; color: white; }
-                    .view-toggle-btn:not(.active) { background: transparent; color: rgba(44, 26, 18, 0.6); }
-                    .view-toggle-btn:not(.active):hover { background: rgba(194, 155, 98, 0.08); color: #2C1A12; }
+                    .view-toggle-btn.active { background: #00E5FF; color: #0B0E14; font-weight: 900; }
+                    .view-toggle-btn:not(.active) { background: transparent; color: #94A3B8; }
+                    .view-toggle-btn:not(.active):hover { background: rgba(0, 229, 255, 0.1); color: #00E5FF; }
 
                     @media (max-width: 768px) {
                         .summary-card { flex: 1 1 100% !important; padding: 15px !important; margin-bottom: 8px !important; border-radius: 14px !important; }
@@ -387,7 +388,7 @@ export default function CashFlowsPage() {
                     {/* 🎛️ أزرار طرق العرض - مدمجة في صف السامري */}
                     <div className="summary-card" style={{ flex: '1.2', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                         <div className="summary-label"><span>👁️</span> طريقة التجميع والعرض</div>
-                        <div style={{ display: 'flex', background: 'rgba(255, 255, 255, 0.4)', borderRadius: '12px', overflow: 'hidden', border: '1px solid rgba(40, 145, 200, 0.15)', flex: 1 }}>
+                        <div style={{ display: 'flex', background: 'rgba(11, 14, 20, 0.6)', borderRadius: '12px', overflow: 'hidden', border: '1px solid rgba(0, 229, 255, 0.2)', flex: 1 }}>
                             <button 
                                 className={`view-toggle-btn ${groupBy === 'partner' ? 'active' : ''}`} 
                                 onClick={() => {setGroupBy('partner'); setExpandedGroups([]);}}
@@ -438,7 +439,7 @@ export default function CashFlowsPage() {
 
 
                 {/* 🔍 شريط الفلاتر */}
-                <div className="cashflows-filters" style={{ display: 'flex', gap: '15px', marginBottom: '30px', background: 'rgba(255,255,255,0.8)', padding: '25px', borderRadius: '20px', boxShadow: '0 5px 20px rgba(0,0,0,0.02)', border: `1px solid rgba(255,255,255,0.9)`, flexWrap: 'wrap', alignItems: 'flex-end', backdropFilter: 'blur(10px)' }}>
+                <div className="cashflows-filters" style={{ display: 'flex', gap: '15px', marginBottom: '30px', background: 'rgba(20, 24, 34, 0.85)', padding: '25px', borderRadius: '20px', boxShadow: '0 5px 20px rgba(0,0,0,0.3)', border: '1px solid rgba(0, 229, 255, 0.2)', flexWrap: 'wrap', alignItems: 'flex-end', backdropFilter: 'blur(10px)' }}>
                     
                     <div style={{ flex: '1', minWidth: '180px' }}>
                         <label style={{ fontSize: '11px', fontWeight: 900, color: '#64748b', marginBottom: '6px', display: 'block' }}>بحث عام</label>
@@ -521,17 +522,17 @@ export default function CashFlowsPage() {
                                 return (
                                     <React.Fragment key={group.name}>
                                         <tr className="master-group-row" onClick={() => toggleGroup(group.name)}>
-                                            <td style={{ textAlign: 'right', color: '#1e293b', paddingRight: '20px' }}>
+                                            <td style={{ textAlign: 'right', color: '#F8FAFC', paddingRight: '20px' }}>
                                                 <span className={`arrow-icon ${isExpanded ? 'arrow-expanded' : ''}`}>◀</span>
                                                 {group.name}
                                             </td>
-                                            <td style={{ color: '#059669' }}>{formatCurrency(group.totalIn)}</td>
-                                            <td style={{ color: '#dc2626' }}>{formatCurrency(group.totalOut)}</td>
-                                            <td style={{ color: netGroupAmount >= 0 ? '#10b981' : '#ef4444', fontWeight: 900 }}>
+                                            <td style={{ color: '#10B981' }}>{formatCurrency(group.totalIn)}</td>
+                                            <td style={{ color: '#EF4444' }}>{formatCurrency(group.totalOut)}</td>
+                                            <td style={{ color: netGroupAmount >= 0 ? '#10B981' : '#EF4444', fontWeight: 900 }}>
                                                 {netGroupAmount > 0 ? '+' : ''}{formatCurrency(netGroupAmount)}
                                             </td>
                                             <td>
-                                                <span style={{ background: 'rgba(255, 255, 255, 0.4)', padding: '6px 15px', borderRadius: '20px', fontSize: '13px', color: '#475569' }}>
+                                                <span style={{ background: 'rgba(255, 255, 255, 0.08)', padding: '6px 15px', borderRadius: '20px', fontSize: '13px', color: '#94A3B8' }}>
                                                     {group.items.length} حركة
                                                 </span>
                                             </td>
@@ -572,14 +573,14 @@ export default function CashFlowsPage() {
                                                                                 {item.project?.Property ? `🏢 ${item.project.Property}` : '---'}
                                                                             </td>
                                                                             <td style={{ textAlign: 'right' }}>
-                                                                                <div style={{ fontWeight: 800, color: '#1e293b' }}>{item.sub_category}</div>
-                                                                                <div style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>
+                                                                                <div style={{ fontWeight: 800, color: '#F8FAFC' }}>{item.sub_category}</div>
+                                                                                <div style={{ fontSize: '11px', color: '#94A3B8', marginTop: '2px' }}>
                                                                                     {item.payment_method} {item.reference_number ? `| مرجع: ${item.reference_number}` : ''}
                                                                                 </div>
-                                                                                {item.description && <div style={{ fontSize: '11px', color: '#475569', marginTop: '4px' }}>📝 {item.description}</div>}
+                                                                                {item.description && <div style={{ fontSize: '11px', color: '#64748B', marginTop: '4px' }}>📝 {item.description}</div>}
                                                                             </td>
                                                                             <td>
-                                                                                <span style={{ fontSize: '12px', fontWeight: 900, color: '#C29B62' }}>
+                                                                                <span style={{ fontSize: '12px', fontWeight: 900, color: '#00E5FF' }}>
                                                                                     🏦 {item.account?.name || 'حساب عام'}
                                                                                 </span>
                                                                             </td>
@@ -597,18 +598,18 @@ export default function CashFlowsPage() {
                             })}
                             
                             {treeGroupedData.length > 0 && (
-                                <tr style={{ background: 'rgba(194, 155, 98, 0.12)', backdropFilter: 'blur(5px)' }}>
-                                    <td style={{ padding: '25px', fontWeight: 900, color: '#2C1A12', textAlign: 'left' }}>الإجمالي الكلي للصفحة والفلتر:</td>
-                                    <td style={{ fontWeight: 900, color: '#4E734F', fontSize: '18px' }}>{formatCurrency(summaryStats.totalIn)}</td>
-                                    <td style={{ fontWeight: 900, color: '#dc2626', fontSize: '18px' }}>{formatCurrency(summaryStats.totalOut)}</td>
-                                    <td style={{ fontWeight: 900, color: summaryStats.netCash >= 0 ? '#4E734F' : '#dc2626', fontSize: '18px' }}>{formatCurrency(summaryStats.netCash)}</td>
+                                <tr style={{ background: 'rgba(0, 229, 255, 0.1)', backdropFilter: 'blur(5px)' }}>
+                                    <td style={{ padding: '25px', fontWeight: 900, color: '#F8FAFC', textAlign: 'left' }}>الإجمالي الكلي للصفحة والفلتر:</td>
+                                    <td style={{ fontWeight: 900, color: '#10B981', fontSize: '18px' }}>{formatCurrency(summaryStats.totalIn)}</td>
+                                    <td style={{ fontWeight: 900, color: '#EF4444', fontSize: '18px' }}>{formatCurrency(summaryStats.totalOut)}</td>
+                                    <td style={{ fontWeight: 900, color: summaryStats.netCash >= 0 ? '#10B981' : '#EF4444', fontSize: '18px' }}>{formatCurrency(summaryStats.netCash)}</td>
                                     <td></td>
                                 </tr>
                             )}
 
                             {treeGroupedData.length === 0 && (
                                 <tr>
-                                    <td colSpan={5} style={{ padding: '40px', color: '#475569', fontWeight: 900, background: 'rgba(255,255,255,0.8)' }}>❌ لا توجد أي تدفقات نقدية مطابقة للفلاتر الحالية</td>
+                                    <td colSpan={5} style={{ padding: '40px', color: '#94A3B8', fontWeight: 900, background: 'rgba(20, 24, 34, 0.8)' }}>❌ لا توجد أي تدفقات نقدية مطابقة للفلاتر الحالية</td>
                                 </tr>
                             )}
                         </tbody>
@@ -618,16 +619,16 @@ export default function CashFlowsPage() {
 
                 {/* 🔢 تقسيم الصفحات */}
                 {!logic.isLoading && treeGroupedData.length > 0 && (
-                    <div className="cashflows-pagination" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '20px', padding: '20px', background: 'rgba(255,255,255,0.8)', borderRadius: '16px', border: `1px solid rgba(194, 155, 98, 0.25)`, backdropFilter: 'blur(10px)', boxShadow: '0 5px 20px rgba(44, 26, 18, 0.04)' }}>
-                        <div style={{ fontSize: '14px', color: '#2C1A12', fontWeight: 900 }}>
-                            إجمالي الـ {groupBy === 'partner' ? 'الشركاء' : 'أيام الحركة'}: <b style={{ color: '#C29B62', fontSize: '18px' }}>{treeGroupedData.length}</b>
+                    <div className="cashflows-pagination" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '20px', padding: '20px', background: 'rgba(20, 24, 34, 0.85)', borderRadius: '16px', border: '1px solid rgba(0, 229, 255, 0.25)', backdropFilter: 'blur(10px)', boxShadow: '0 5px 20px rgba(0, 0, 0, 0.3)' }}>
+                        <div style={{ fontSize: '14px', color: '#F8FAFC', fontWeight: 900 }}>
+                            إجمالي الـ {groupBy === 'partner' ? 'الشركاء' : 'أيام الحركة'}: <b style={{ color: '#00E5FF', fontSize: '18px' }}>{treeGroupedData.length}</b>
                         </div>
                         
                         <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
                             <select 
                                 value={rowsPerPage} 
                                 onChange={(e) => {setRowsPerPage(Number(e.target.value)); setCurrentPage(1);}} 
-                                style={{ padding: '10px 15px', borderRadius: '10px', border: `1px solid rgba(194, 155, 98, 0.25)`, outline: 'none', fontWeight: 900, cursor: 'pointer', background: 'white', color: '#2C1A12' }}
+                                style={{ padding: '10px 15px', borderRadius: '10px', border: '1px solid rgba(0, 229, 255, 0.25)', outline: 'none', fontWeight: 900, cursor: 'pointer', background: 'rgba(11, 14, 20, 0.8)', color: '#F8FAFC' }}
                             >
                                 <option value={10}>عرض 10 عناصر</option>
                                 <option value={50}>عرض 50 عنصر</option>
@@ -639,17 +640,17 @@ export default function CashFlowsPage() {
                                 <button 
                                     disabled={currentPage === 1} 
                                     onClick={() => setCurrentPage(p => p - 1)} 
-                                    style={{ padding: '10px 20px', borderRadius: '10px', border: 'none', background: currentPage === 1 ? 'rgba(255, 255, 255, 0.6)' : '#1e293b', color: currentPage === 1 ? '#475569' : 'white', cursor: currentPage === 1 ? 'not-allowed' : 'pointer', fontWeight: 900, transition: '0.2s' }}
+                                    style={{ padding: '10px 20px', borderRadius: '10px', border: '1px solid rgba(255, 255, 255, 0.12)', background: currentPage === 1 ? 'rgba(255, 255, 255, 0.04)' : 'rgba(20, 24, 34, 0.9)', color: currentPage === 1 ? '#64748B' : '#F8FAFC', cursor: currentPage === 1 ? 'not-allowed' : 'pointer', fontWeight: 900, transition: '0.2s' }}
                                 >
                                     السابق
                                 </button>
-                                <span style={{ padding: '10px 20px', background: 'white', borderRadius: '10px', fontWeight: 900, border: `1px solid rgba(40, 145, 200, 0.15)` }}>
+                                <span style={{ padding: '10px 20px', background: 'rgba(0, 229, 255, 0.12)', color: '#00E5FF', borderRadius: '10px', fontWeight: 900, border: '1px solid rgba(0, 229, 255, 0.3)' }}>
                                     {currentPage} / {totalPages}
                                 </span>
                                 <button 
                                     disabled={currentPage >= totalPages} 
                                     onClick={() => setCurrentPage(p => p + 1)} 
-                                    style={{ padding: '10px 20px', borderRadius: '10px', border: 'none', background: currentPage >= totalPages ? 'rgba(255, 255, 255, 0.6)' : '#1e293b', color: currentPage >= totalPages ? '#475569' : 'white', cursor: currentPage >= totalPages ? 'not-allowed' : 'pointer', fontWeight: 900, transition: '0.2s' }}
+                                    style={{ padding: '10px 20px', borderRadius: '10px', border: '1px solid rgba(255, 255, 255, 0.12)', background: currentPage >= totalPages ? 'rgba(255, 255, 255, 0.04)' : 'rgba(20, 24, 34, 0.9)', color: currentPage >= totalPages ? '#64748B' : '#F8FAFC', cursor: currentPage >= totalPages ? 'not-allowed' : 'pointer', fontWeight: 900, transition: '0.2s' }}
                                 >
                                     التالي
                                 </button>

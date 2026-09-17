@@ -24,7 +24,7 @@ export default {
           'cyan-dark': '#00B4D8',
           orange: '#E06D44',
           'orange-glow': '#FF7A45',
-          gold: '#C29B62',
+          gold: '#F59E0B',
           green: '#10B981',
           amber: '#F59E0B',
           red: '#EF4444',

@@ -521,17 +521,17 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
             {/* ⏳ بيانات الصلاحية والتشغيلة للمخزون المستلم */}
             {actionType === 'in' && (
               <div style={{
-                background: 'linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(246, 241, 232, 0.85) 100%)',
-                border: '1.5px solid rgba(194, 155, 98, 0.45)',
+                background: 'linear-gradient(135deg, rgba(20, 24, 34, 0.95) 0%, rgba(15, 20, 30, 0.85) 100%)',
+                border: '1px solid rgba(0, 229, 255, 0.25)',
                 borderRadius: '16px',
                 padding: '14px 16px',
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '12px',
-                boxShadow: '0 4px 12px rgba(44, 26, 18, 0.05)'
+                boxShadow: '0 4px 15px rgba(0, 0, 0, 0.3)'
               }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px dashed rgba(194, 155, 98, 0.3)', paddingBottom: '8px' }}>
-                  <span style={{ fontSize: '13px', fontWeight: 900, color: '#A8573C', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px dashed rgba(0, 229, 255, 0.25)', paddingBottom: '8px' }}>
+                  <span style={{ fontSize: '13px', fontWeight: 900, color: '#00E5FF', display: 'flex', alignItems: 'center', gap: '6px' }}>
                     <span>⏳</span>
                     <span>بيانات الصلاحية والتشغيلة (استلام وتوريد)</span>
                   </span>
@@ -539,13 +539,13 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
                     type="button"
                     onClick={() => setFormData(prev => ({ ...prev, batch_number: generateBatchNumber() }))}
                     style={{
-                      background: 'rgba(194, 155, 98, 0.15)',
-                      border: '1px solid rgba(194, 155, 98, 0.4)',
+                      background: 'rgba(0, 229, 255, 0.15)',
+                      border: '1px solid rgba(0, 229, 255, 0.3)',
                       borderRadius: '8px',
                       padding: '4px 10px',
                       fontSize: '11px',
                       fontWeight: 800,
-                      color: '#2C1A12',
+                      color: '#00E5FF',
                       cursor: 'pointer'
                     }}
                     title="توليد رقم تشغيلة جديد تلقائياً"
@@ -555,8 +555,8 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
                 </div>
 
                 <div>
-                  <label style={{ fontSize: '12.5px', fontWeight: 900, color: THEME.primary, marginBottom: '6px', display: 'block' }}>
-                    🏷️ رقم الدفعة / التشغيلة (Batch #) * <span style={{ fontSize: '11px', color: '#16a34a', fontWeight: 700 }}>(تلقائي وقابل للتعديل)</span>
+                  <label style={{ fontSize: '12.5px', fontWeight: 900, color: '#F8FAFC', marginBottom: '6px', display: 'block' }}>
+                    🏷️ رقم الدفعة / التشغيلة (Batch #) * <span style={{ fontSize: '11px', color: '#10B981', fontWeight: 700 }}>(تلقائي وقابل للتعديل)</span>
                   </label>
                   <input 
                     type="text" 
@@ -570,7 +570,7 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
 
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
                   <div>
-                    <label style={{ fontSize: '12.5px', fontWeight: 900, color: '#A8573C', marginBottom: '6px', display: 'block' }}>
+                    <label style={{ fontSize: '12.5px', fontWeight: 900, color: '#F59E0B', marginBottom: '6px', display: 'block' }}>
                       📅 تاريخ انتهاء الصلاحية *
                     </label>
                     <input 
@@ -578,7 +578,7 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
                       className="glass-input-field" 
                       value={formData.expiry_date}
                       onChange={e => setFormData({ ...formData, expiry_date: e.target.value })}
-                      style={{ borderColor: formData.expiry_date ? '#16a34a' : 'rgba(168, 87, 60, 0.4)' }}
+                      style={{ borderColor: formData.expiry_date ? '#10B981' : 'rgba(245, 158, 11, 0.4)' }}
                     />
                   </div>
 

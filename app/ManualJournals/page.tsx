@@ -310,29 +310,29 @@ export default function ManualJournalsPage() {
             </MasterPage>
 
             {mounted && isModalOpen && createPortal(
-                <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(18, 41, 70, 0.5)', backdropFilter: 'blur(12px)', zIndex: 999999, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px', overflowY: 'auto' }} onClick={() => setIsModalOpen(false)}>
-                    <div className="cinematic-scroll" onClick={e => e.stopPropagation()} style={{ background: '#ffffff', padding: '30px', borderRadius: '24px', width: '100%', maxWidth: '900px', direction: 'rtl', boxShadow: '0 20px 60px rgba(0,0,0,0.3)', margin: 'auto' }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px', borderBottom: '2px dashed rgba(40, 145, 200, 0.15)', paddingBottom: '15px' }}>
-                            <h2 style={{ fontWeight: 900, fontSize: '22px', color: '#1e293b', margin: 0 }}>{editingVoucher ? 'تعديل سند التسوية ✏️' : 'سند تسوية جديد ➕'}</h2>
-                            <button onClick={() => setIsModalOpen(false)} style={{ background: 'rgba(255, 255, 255, 0.4)', border: 'none', width: '36px', height: '36px', borderRadius: '50%', cursor: 'pointer', fontWeight: 'bold', color: '#64748b' }}>×</button>
+                <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(7, 9, 13, 0.75)', backdropFilter: 'blur(16px)', zIndex: 999999, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px', overflowY: 'auto' }} onClick={() => setIsModalOpen(false)}>
+                    <div className="cinematic-scroll" onClick={e => e.stopPropagation()} style={{ background: 'linear-gradient(135deg, rgba(20, 24, 34, 0.98) 0%, rgba(11, 14, 20, 0.95) 100%)', border: '1px solid rgba(0, 229, 255, 0.25)', boxShadow: '0 25px 70px rgba(0,0,0,0.7)', padding: '32px', borderRadius: '24px', width: '100%', maxWidth: '900px', direction: 'rtl', margin: 'auto' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', paddingBottom: '15px' }}>
+                            <h2 style={{ fontWeight: 900, fontSize: '22px', color: '#F8FAFC', margin: 0 }}>{editingVoucher ? 'تعديل سند التسوية ✏️' : 'سند تسوية جديد ➕'}</h2>
+                            <button onClick={() => setIsModalOpen(false)} style={{ background: 'rgba(255, 255, 255, 0.06)', border: '1px solid rgba(255, 255, 255, 0.12)', width: '36px', height: '36px', borderRadius: '50%', cursor: 'pointer', fontWeight: 'bold', color: '#94A3B8' }}>×</button>
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                             <div className="glass-input-group">
-                                <label>التاريخ 📅</label>
+                                <label style={{ color: '#00E5FF', fontWeight: 800 }}>التاريخ 📅</label>
                                 <input type="date" className="glass-input" value={formData.entry_date} onChange={e => setFormData({...formData, entry_date: e.target.value})} />
                             </div>
                             <div className="glass-input-group">
-                                <label>المبلغ 💰</label>
+                                <label style={{ color: '#00E5FF', fontWeight: 800 }}>المبلغ 💰</label>
                                 <input type="number" className="glass-input" placeholder="0.00" value={formData.amount} onChange={e => setFormData({...formData, amount: e.target.value})} />
                             </div>
                             <div className="glass-input-group">
-                                <label>البيان / تفاصيل التسوية 📝</label>
+                                <label style={{ color: '#00E5FF', fontWeight: 800 }}>البيان / تفاصيل التسوية 📝</label>
                                 <textarea className="glass-input" rows={2} placeholder="سبب التسوية..." value={formData.description} onChange={e => setFormData({...formData, description: e.target.value})} />
                             </div>
                             
                             <div style={{ display: 'flex', gap: '15px' }}>
                                 <div className="glass-input-group" style={{ flex: 1 }}>
-                                    <label>من حساب (الطرف الدائن 🔴)</label>
+                                    <label style={{ color: '#EF4444', fontWeight: 800 }}>من حساب (الطرف الدائن 🔴)</label>
                                     <SmartCombo 
                                         options={logic.state.accounts || []}
                                         displayCol="name"
@@ -342,7 +342,7 @@ export default function ManualJournalsPage() {
                                     />
                                 </div>
                                 <div className="glass-input-group" style={{ flex: 1 }}>
-                                    <label>إلى حساب (الطرف المدين 🟢)</label>
+                                    <label style={{ color: '#10B981', fontWeight: 800 }}>إلى حساب (الطرف المدين 🟢)</label>
                                     <SmartCombo 
                                         options={logic.state.accounts || []}
                                         displayCol="name"
@@ -355,7 +355,7 @@ export default function ManualJournalsPage() {
 
                             <div style={{ display: 'flex', gap: '15px' }}>
                                 <div className="glass-input-group" style={{ flex: 1 }}>
-                                    <label>الشريك (اختياري) 👥</label>
+                                    <label style={{ color: '#00E5FF', fontWeight: 800 }}>الشريك (اختياري) 👥</label>
                                     <SmartCombo 
                                         options={logic.state.partners || []}
                                         displayCol="name"
@@ -366,7 +366,7 @@ export default function ManualJournalsPage() {
                                 </div>
 
                                 <div className="glass-input-group" style={{ flex: 1 }}>
-                                    <label>أمر الشغل (اختياري) 📝</label>
+                                    <label style={{ color: '#00E5FF', fontWeight: 800 }}>أمر الشغل (اختياري) 📝</label>
                                     <SmartCombo 
                                         table="job_orders"
                                         displayCol="order_number"
@@ -380,7 +380,7 @@ export default function ManualJournalsPage() {
                                 </div>
                             </div>
                         </div>
-                        <div style={{ display: 'flex', gap: '15px', marginTop: '30px', borderTop: '2px dashed rgba(40, 145, 200, 0.15)', paddingTop: '20px' }}>
+                        <div style={{ display: 'flex', gap: '15px', marginTop: '30px', borderTop: '1px solid rgba(255, 255, 255, 0.1)', paddingTop: '20px' }}>
                             <button className="btn-main-glass green" onClick={handleSave} disabled={logic.state.isProcessing} style={{ flex: 2, padding: '15px', fontSize: '16px' }}>
                                 {editingVoucher ? 'تحديث التسوية 💾' : 'حفظ التسوية 💾'}
                             </button>

@@ -1900,9 +1900,9 @@ export default function PosPage() {
                         </select>
                         {logic.isManagerOrAdmin && (
                             <span style={{
-                                background: 'linear-gradient(135deg, rgba(194, 155, 98, 0.2) 0%, rgba(168, 87, 60, 0.15) 100%)',
-                                color: '#A8573C',
-                                border: '1px solid rgba(194, 155, 98, 0.4)',
+                                background: 'rgba(0, 229, 255, 0.15)',
+                                color: '#00E5FF',
+                                border: '1px solid rgba(0, 229, 255, 0.35)',
                                 borderRadius: '6px',
                                 padding: '2px 7px',
                                 fontSize: '10px',
@@ -2139,15 +2139,15 @@ export default function PosPage() {
                                     type="button"
                                     onClick={() => logic.setIsShiftOpenModalOpen(true)}
                                     style={{
-                                        background: 'linear-gradient(135deg, #A8573C 0%, #8C3D26 100%)',
-                                        color: 'white',
+                                        background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+                                        color: '#0B0E14',
                                         border: 'none',
                                         borderRadius: '12px',
                                         padding: '10px 20px',
                                         fontSize: '13px',
                                         fontWeight: 900,
                                         cursor: 'pointer',
-                                        boxShadow: '0 4px 14px rgba(168, 87, 60, 0.35)',
+                                        boxShadow: '0 4px 14px rgba(16, 185, 129, 0.35)',
                                         display: 'flex',
                                         alignItems: 'center',
                                         gap: '6px'
@@ -2386,8 +2386,8 @@ export default function PosPage() {
                                 </h3>
                                 {logic.cart.length > 0 && (
                                     <span style={{
-                                        background: 'rgba(194, 155, 98, 0.18)',
-                                        color: '#A8573C',
+                                        background: 'rgba(0, 229, 255, 0.15)',
+                                        color: '#00E5FF',
                                         fontSize: '11px',
                                         fontWeight: 800,
                                         padding: '2px 8px',

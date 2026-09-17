@@ -530,15 +530,19 @@ html, body {
 .badge-counter {
     position: absolute !important;
     top: -5px !important; right: -5px !important;
-    background: #A8573C !important; color: white !important;
+    background: #EF4444 !important; color: white !important;
     font-size: 11px !important; font-weight: 900 !important;
     min-width: 19px !important; height: 19px !important;
     border-radius: 50% !important;
     display: flex !important; align-items: center !important; justify-content: center !important;
-    box-shadow: 0 2px 6px rgba(168, 87, 60, 0.4) !important;
-    border: 2px solid white !important;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.5) !important;
+    border: 2px solid #0B0E14 !important;
 }
-.badge-counter.msg-badge { background: #C29B62 !important; }
+.badge-counter.msg-badge { 
+    background: #00E5FF !important; 
+    color: #0B0E14 !important;
+    box-shadow: 0 2px 8px rgba(0, 229, 255, 0.5) !important;
+}
 
 .pending-alert-btn {
     background: rgba(254, 243, 199, 0.95) !important;
