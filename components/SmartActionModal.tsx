@@ -1,5 +1,6 @@
 "use client";
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 interface SmartActionModalProps {
   isOpen: boolean;
@@ -8,17 +9,22 @@ interface SmartActionModalProps {
 }
 
 export default function SmartActionModal({ isOpen, onClose, siteData }: SmartActionModalProps) {
+  const [mounted, setMounted] = useState(false);
   const [activeTab, setActiveTab] = useState<'financial' | 'labor' | 'attachments'>('financial');
   
   // States لحساب التكلفة التلقائية للخامات
   const [qty, setQty] = useState(1);
   const [unitPrice, setUnitPrice] = useState(0);
 
-  if (!isOpen || !siteData) return null;
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
-  return (
-    <div style={styles.overlay}>
-      <div style={styles.card}>
+  if (!isOpen || !siteData || (!mounted && typeof document === 'undefined')) return null;
+
+  return createPortal(
+    <div style={styles.overlay} onClick={onClose} className="smart-action-modal-overlay">
+      <div style={styles.card} onClick={(e) => e.stopPropagation()}>
         
         {/* 🔝 الهيدر */}
         <div style={styles.header}>
@@ -166,12 +172,13 @@ export default function SmartActionModal({ isOpen, onClose, siteData }: SmartAct
         </div>
 
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
 
 const styles: { [key: string]: React.CSSProperties } = {
-  overlay: { position: 'fixed', inset: 0, backgroundColor: 'rgba(11, 14, 20, 0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 99999, backdropFilter: 'blur(8px)', direction: 'rtl', padding: '15px' },
+  overlay: { position: 'fixed', inset: 0, top: 0, left: 0, right: 0, bottom: 0, width: '100vw', height: '100vh', backgroundColor: 'rgba(11, 14, 20, 0.85)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 999999999, isolation: 'isolate', pointerEvents: 'auto', backdropFilter: 'blur(12px)', direction: 'rtl', padding: '15px' },
   card: { backgroundColor: 'rgba(20, 24, 34, 0.98)', width: '100%', maxWidth: '750px', maxHeight: '95vh', borderRadius: '16px', border: '1px solid rgba(0, 229, 255, 0.25)', overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 20px 50px rgba(0,0,0,0.6)' },
   
   header: { padding: '20px 25px', backgroundColor: 'rgba(11, 14, 20, 0.95)', borderBottom: '1px solid rgba(0, 229, 255, 0.2)', color: '#F8FAFC', display: 'flex', justifyContent: 'space-between', alignItems: 'center' },

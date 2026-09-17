@@ -363,6 +363,59 @@ export default function VATReturnPage() {
             .aqua-table th, .aqua-table td { padding: 10px 12px !important; font-size: 12px !important; }
           }
 
+          .daylight-theme .filter-bar {
+            background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.90) 100%) !important;
+            border-color: rgba(194, 155, 98, 0.3) !important;
+            box-shadow: 0 4px 15px rgba(44, 26, 18, 0.08) !important;
+          }
+          .daylight-theme .filter-group label {
+            color: rgba(44, 26, 18, 0.7) !important;
+          }
+          .daylight-theme .filter-group input {
+            background: #FFFFFF !important;
+            border-color: rgba(194, 155, 98, 0.35) !important;
+            color: #2C1A12 !important;
+          }
+          .daylight-theme .vat-card {
+            background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.90) 100%) !important;
+            border-color: rgba(194, 155, 98, 0.3) !important;
+            box-shadow: 0 4px 20px rgba(44, 26, 18, 0.08) !important;
+          }
+          .daylight-theme .vat-card h3 {
+            color: #2C1A12 !important;
+          }
+          .daylight-theme .vat-base {
+            color: rgba(44, 26, 18, 0.7) !important;
+            border-top-color: rgba(194, 155, 98, 0.2) !important;
+          }
+          .daylight-theme .vat-base span {
+            color: #2C1A12 !important;
+          }
+          .daylight-theme .table-glass-container {
+            background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.90) 100%) !important;
+            border-color: rgba(194, 155, 98, 0.3) !important;
+            box-shadow: 0 8px 30px rgba(44, 26, 18, 0.08) !important;
+          }
+          .daylight-theme .aqua-table th {
+            background: rgba(194, 155, 98, 0.12) !important;
+            color: #2C1A12 !important;
+            border-bottom: 2px solid rgba(194, 155, 98, 0.25) !important;
+          }
+          .daylight-theme .aqua-table td {
+            border-bottom: 1px solid rgba(194, 155, 98, 0.15) !important;
+            color: #2C1A12 !important;
+          }
+          .daylight-theme .aqua-table tbody tr:hover {
+            background: rgba(194, 155, 98, 0.06) !important;
+          }
+          .daylight-theme .section-title {
+            color: #2C1A12 !important;
+            border-bottom-color: rgba(194, 155, 98, 0.3) !important;
+          }
+          .daylight-theme .vat-chart-container h3 {
+            color: #2C1A12 !important;
+          }
+
           @media print {
             body { 
                 background: white !important; 

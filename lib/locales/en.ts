@@ -17,7 +17,7 @@ export const en: Record<LocaleKeys, string> = {
 
     // Menu Items - Operations & Sales
     menu_pos: "POS Cashier",
-    menu_pos_dashboard: "Outlets Profitability",
+    menu_pos_dashboard: "Gas Stations Profitability",
     menu_pos_settlements: "Shift & Pump Settlements",
     menu_invoices: "Invoices & Sales",
     menu_sales_analysis: "Sales Analysis",
@@ -28,7 +28,7 @@ export const en: Record<LocaleKeys, string> = {
     menu_reorder_alerts: "Reorder & Shortage Alerts",
     menu_inventory_valuation: "Inventory Valuation",
     menu_purchase_orders: "Fuel Purchase Orders",
-    menu_warehouses: "Warehouses & Tanks",
+    menu_warehouses: "Gas Stations & Tanks",
     menu_inventory_transactions: "Stock Transactions",
 
     // Menu Items - Accounts & Finance

@@ -34,8 +34,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
             if (body) {
                 body.classList.add('daylight-theme');
                 body.setAttribute('data-theme', 'daylight');
-                body.style.backgroundColor = '#F1F5F9';
-                body.style.color = '#0F172A';
+                body.style.backgroundColor = '#FDFBF7';
+                body.style.color = '#2C1A12';
             }
         } else {
             html.classList.remove('daylight-theme');

@@ -73,7 +73,7 @@ export async function notifyInvoiceCreated(params: {
 }
 
 /**
- * إشعار فتح وردية كاشير / منفذ بيع
+ * إشعار فتح وردية كاشير / محطة وقود
  */
 export async function notifyShiftOpened(params: {
   shiftId: string;
@@ -207,22 +207,29 @@ export async function notifyLowStockAlert(params: {
 /**
  * إشعار عملية أسطول جديدة أو معلقة تحتاج مراجعة وإغلاق
  */
-export async function notifyFleetOperationAlert(params: {
-  tripNumber: string;
-  driverName?: string;
-  vehiclePlate?: string;
+export async function notifyShiftOperationAlert(params: {
+  shiftNumber: string;
+  workerName?: string;
   status?: string;
-  operationId?: string;
+  shiftId?: string;
 }) {
-  const driverText = params.driverName ? ` (السائق: ${params.driverName})` : '';
-  const plateText = params.vehiclePlate ? ` - شاحنة: ${params.vehiclePlate}` : '';
+  const workerText = params.workerName ? ` (المشغل: ${params.workerName})` : '';
   return sendSystemNotification({
-    title: `🚚 رحلة أسطول معلقة #${params.tripNumber}`,
-    message: `رحلة توزيع بانتظار المراجعة والاعتماد النهائي${driverText}${plateText}`,
-    type: 'fleet',
-    related_id: params.operationId,
-    action_url: `/fleet_operations`,
+    title: `⛽ وردية محطة وقود معلقة #${params.shiftNumber}`,
+    message: `وردية بانتظار الإغلاق والمطابقة والاعتماد النهائي${workerText}`,
+    type: 'finance',
+    related_id: params.shiftId,
+    action_url: `/pos/shifts`,
     target_roles: ['super_admin', 'admin', 'accountant', 'manager', 'staff']
+  });
+}
+
+// Kept for backward compatibility
+export async function notifyFleetOperationAlert(params: any) {
+  return notifyShiftOperationAlert({
+    shiftNumber: params.tripNumber || '',
+    workerName: params.driverName,
+    shiftId: params.operationId
   });
 }
 
@@ -285,7 +292,7 @@ export async function notifyExpiryAlert(params: {
 
   if (params.isExpired) {
     return sendSystemNotification({
-      title: `⛔ بضاعة منتهية الصلاحية: (${params.itemName})`,
+      title: `⛔ صنف / مادة منتهية الصلاحية: (${params.itemName})`,
       message: `انتهت صلاحية الصنف ${params.itemName}${qtyText} في تاريخ ${params.expiryDate}${whText}. يرجى سحبه أو عمل محضر إتلاف.`,
       type: 'alert',
       action_url: '/expiry-alerts',

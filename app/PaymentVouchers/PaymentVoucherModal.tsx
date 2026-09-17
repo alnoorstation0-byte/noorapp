@@ -13,8 +13,7 @@ export default function PaymentVoucherModal({
     onSave, 
     isSaving,
     partnerBalance = 0, 
-    isBalanceLoading = false,
-    fleetOperations = []
+    isBalanceLoading = false
 }: any) {
     const [mounted, setMounted] = useState(false);
 
@@ -108,21 +107,6 @@ export default function PaymentVoucherModal({
                             })} 
                             allowAddNew={true} 
                         />
-                    </div>
-                    
-                    <div style={{ zIndex: 30, position: 'relative', marginTop: '10px' }}>
-                        <label style={{ fontSize: '13px', fontWeight: 900, color: '#00E5FF', display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '8px' }}>🚚 رحلة التوزيع (أمر تشغيل اختياري)</label>
-                        <select 
-                            className="glass-input" 
-                            style={{ appearance: 'auto', width: '100%', padding: '10px', borderRadius: '14px', border: '1px solid rgba(0, 229, 255, 0.25)', background: 'rgba(11, 14, 20, 0.8)', fontWeight: 700, color: '#F8FAFC' }}
-                            value={record?.fleet_operation_id || ''} 
-                            onChange={e => setRecord({...record, fleet_operation_id: e.target.value})}
-                        >
-                            <option value="">-- بدون ربط برحلة --</option>
-                              {fleetOperations?.map((op: any) => (
-                                  <option key={op.id} value={op.id}>{op.name}</option>
-                              ))}
-                        </select>
                     </div>
                 </div>
 

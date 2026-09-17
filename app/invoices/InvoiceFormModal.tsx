@@ -521,6 +521,78 @@ export default function InvoiceFormModal({
                         width: 100% !important;
                     }
                 }
+
+                .daylight-theme .desert-form-card {
+                    background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.90) 100%) !important;
+                    border-color: rgba(194, 155, 98, 0.3) !important;
+                    box-shadow: 0 4px 15px rgba(44, 26, 18, 0.08) !important;
+                }
+                .daylight-theme .card-section-title {
+                    color: #2C1A12 !important;
+                    border-bottom-color: rgba(194, 155, 98, 0.3) !important;
+                }
+                .daylight-theme .card-section-title span.badge {
+                    background: rgba(194, 155, 98, 0.15) !important;
+                    color: #A8573C !important;
+                }
+                .daylight-theme .form-field-label {
+                    color: rgba(44, 26, 18, 0.8) !important;
+                }
+                .daylight-theme .field-input {
+                    background: #FFFFFF !important;
+                    border-color: rgba(194, 155, 98, 0.35) !important;
+                    color: #2C1A12 !important;
+                }
+                .daylight-theme .field-input:focus {
+                    background: #FFFFFF !important;
+                    border-color: #C29B62 !important;
+                    box-shadow: 0 0 12px rgba(194, 155, 98, 0.25) !important;
+                }
+                .daylight-theme .field-input[readonly] {
+                    background: rgba(194, 155, 98, 0.08) !important;
+                    color: rgba(44, 26, 18, 0.6) !important;
+                }
+                .daylight-theme .barcode-scan-container {
+                    background: rgba(194, 155, 98, 0.08) !important;
+                    border-color: rgba(194, 155, 98, 0.35) !important;
+                }
+                .daylight-theme .table-scroll-wrap {
+                    background: #FFFFFF !important;
+                    border-color: rgba(194, 155, 98, 0.25) !important;
+                }
+                .daylight-theme .invoice-items-table th {
+                    background: rgba(194, 155, 98, 0.12) !important;
+                    color: #2C1A12 !important;
+                    border-bottom: 1px solid rgba(194, 155, 98, 0.25) !important;
+                }
+                .daylight-theme .invoice-items-table td {
+                    border-bottom: 1px solid rgba(194, 155, 98, 0.15) !important;
+                    color: #2C1A12 !important;
+                }
+                .daylight-theme .invoice-items-table tr:hover td {
+                    background: rgba(194, 155, 98, 0.06) !important;
+                }
+                .daylight-theme .stat-box {
+                    background: #FFFFFF !important;
+                    border-color: rgba(194, 155, 98, 0.25) !important;
+                }
+                .daylight-theme .stat-box-title {
+                    color: rgba(44, 26, 18, 0.7) !important;
+                }
+                .daylight-theme .stat-box-value {
+                    color: #2C1A12 !important;
+                }
+                .daylight-theme .stat-box.highlight {
+                    background: linear-gradient(135deg, rgba(194, 155, 98, 0.18) 0%, rgba(168, 87, 60, 0.12) 100%) !important;
+                    border-color: #C29B62 !important;
+                    box-shadow: 0 4px 15px rgba(168, 87, 60, 0.15) !important;
+                }
+                .daylight-theme .stat-box.highlight .stat-box-title {
+                    color: #A8573C !important;
+                }
+                .daylight-theme .stat-box.highlight .stat-box-value {
+                    color: #2C1A12 !important;
+                }
             `}</style>
 
             <div className="invoice-modal-flow">
@@ -628,60 +700,37 @@ export default function InvoiceFormModal({
                 {/* 🚚 بطاقة 2: التنفيذ واللوجستيات والمخازن */}
                 <div className="desert-form-card" style={{ zIndex: 90, position: 'relative' }}>
                     <div className="card-section-title">
-                        <span>🚚 التنفيذ واللوجستيات والمخازن</span>
-                        <span className="badge">ربط التوزيع</span>
+                        <span>⛽ محطة الوقود، الخزانات، ومشغلي المضخات</span>
+                        <span className="badge">بيانات المحطة والمشغل</span>
                     </div>
 
                     <div className="form-grid-3">
-                        {/* 1. المستودع */}
+                        {/* 1. المستودع / المحطة */}
                         <div className="form-field-unit">
-                            <label className="form-field-label">🏭 المستودع (مصدر البضاعة)</label>
+                            <label className="form-field-label">⛽ محطة الوقود / الخزان المصدر</label>
                             <select 
                                 className="field-input" 
                                 value={record?.warehouse_id || ''} 
                                 onChange={e => setRecord({ ...record, warehouse_id: e.target.value })}
                             >
-                                <option value="">-- اختر المستودع المورد --</option>
+                                <option value="">-- اختر محطة الوقود أو الخزان --</option>
                                 {warehouses?.map((wh: any) => (
                                     <option key={wh.id} value={wh.id}>
-                                        {wh.type === 'main' ? '🏢' : (wh.type === 'vehicle' ? '🚚' : (wh.type === 'pos' ? '🏪' : '🏭'))} {wh.name}
+                                        {wh.type === 'main' ? '⛽' : (wh.type === 'vehicle' ? '🚛' : (wh.type === 'pos' ? '⛽' : '🛢️'))} {wh.name}
                                     </option>
                                 ))}
                             </select>
                         </div>
 
-                        {/* 2. رحلة التوزيع */}
+                        {/* 2. مشغل المحطة */}
                         <div className="form-field-unit">
-                            <label className="form-field-label">🚛 رحلة التوزيع (أمر تشغيل أسطول)</label>
-                            <select 
-                                className="field-input" 
-                                value={record?.fleet_operation_id || ''} 
-                                onChange={e => {
-                                    const opId = e.target.value;
-                                    const selectedOp = fleetOperations?.find((op: any) => String(op.id) === String(opId));
-                                    setRecord({
-                                        ...record, 
-                                        fleet_operation_id: opId,
-                                        delegate_id: selectedOp?.driver_id || record.delegate_id
-                                    });
-                                }}
-                            >
-                                <option value="">-- اختياري: ربط برحلة توزيع --</option>
-                                {fleetOperations?.map((op: any) => (
-                                    <option key={op.id} value={op.id}>{op.name}</option>
-                                ))}
-                            </select>
-                        </div>
-
-                        {/* 3. المندوب */}
-                        <div className="form-field-unit">
-                            <label className="form-field-label">👤 المندوب (المسؤول عن التحصيل)</label>
+                            <label className="form-field-label">👤 مشغل المحطة / المسؤول عن التحصيل</label>
                             <select 
                                 className="field-input" 
                                 value={record?.delegate_id || ''} 
                                 onChange={e => setRecord({ ...record, delegate_id: e.target.value })}
                             >
-                                <option value="">-- اختياري: اختر المندوب --</option>
+                                <option value="">-- اختياري: اختر مشغل المحطة --</option>
                                 {delegates?.map((del: any) => (
                                     <option key={del.id} value={del.id}>{del.name}</option>
                                 ))}

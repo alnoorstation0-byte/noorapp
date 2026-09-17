@@ -307,11 +307,11 @@ export default function ManualJournalsPage() {
             </MasterPage>
 
             {mounted && isModalOpen && createPortal(
-                <div style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(7, 9, 13, 0.75)', backdropFilter: 'blur(16px)', zIndex: 999999, display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px', overflowY: 'auto' }} onClick={() => setIsModalOpen(false)}>
-                    <div className="cinematic-scroll" onClick={e => e.stopPropagation()} style={{ background: 'linear-gradient(135deg, rgba(20, 24, 34, 0.98) 0%, rgba(11, 14, 20, 0.95) 100%)', border: '1px solid rgba(0, 229, 255, 0.25)', boxShadow: '0 25px 70px rgba(0,0,0,0.7)', padding: '32px', borderRadius: '24px', width: '100%', maxWidth: '900px', direction: 'rtl', margin: 'auto' }}>
+                <div className="warm-portal-overlay-fullscreen" style={{ position: 'fixed', inset: 0, backgroundColor: 'rgba(7, 9, 13, 0.75)', backdropFilter: 'blur(16px)', zIndex: 999999999, isolation: 'isolate', pointerEvents: 'auto', display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '20px', overflowY: 'auto' }} onClick={() => setIsModalOpen(false)}>
+                    <div className="cinematic-scroll manual-journal-modal" onClick={e => e.stopPropagation()} style={{ padding: '32px', borderRadius: '24px', width: '100%', maxWidth: '900px', direction: 'rtl', margin: 'auto' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '25px', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', paddingBottom: '15px' }}>
-                            <h2 style={{ fontWeight: 900, fontSize: '22px', color: '#F8FAFC', margin: 0 }}>{editingVoucher ? 'تعديل سند التسوية ✏️' : 'سند تسوية جديد ➕'}</h2>
-                            <button onClick={() => setIsModalOpen(false)} style={{ background: 'rgba(255, 255, 255, 0.06)', border: '1px solid rgba(255, 255, 255, 0.12)', width: '36px', height: '36px', borderRadius: '50%', cursor: 'pointer', fontWeight: 'bold', color: '#94A3B8' }}>×</button>
+                            <h2 style={{ fontWeight: 900, fontSize: '22px', margin: 0 }}>{editingVoucher ? 'تعديل سند التسوية ✏️' : 'سند تسوية جديد ➕'}</h2>
+                            <button className="btn-close-modal" onClick={() => setIsModalOpen(false)} style={{ width: '36px', height: '36px', borderRadius: '50%', cursor: 'pointer', fontWeight: 'bold' }}>×</button>
                         </div>
                         <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
                             <div className="glass-input-group">
@@ -372,6 +372,48 @@ export default function ManualJournalsPage() {
                     </div>
                 </div>
             , document.body)}
+
+            <style>{`
+                .manual-journal-modal {
+                    background: linear-gradient(135deg, rgba(20, 24, 34, 0.98) 0%, rgba(11, 14, 20, 0.95) 100%);
+                    border: 1px solid rgba(0, 229, 255, 0.25);
+                    box-shadow: 0 25px 70px rgba(0,0,0,0.7);
+                }
+                .manual-journal-modal h2 {
+                    color: #F8FAFC;
+                }
+                .manual-journal-modal .btn-close-modal {
+                    background: rgba(255, 255, 255, 0.06);
+                    border: 1px solid rgba(255, 255, 255, 0.12);
+                    color: #94A3B8;
+                }
+
+                /* Daylight Desert Glassmorphism */
+                .daylight-theme .warm-portal-overlay-fullscreen {
+                    background-color: rgba(253, 251, 247, 0.85) !important;
+                }
+                .daylight-theme .manual-journal-modal {
+                    background: linear-gradient(135deg, rgba(255, 253, 250, 0.98) 0%, rgba(245, 238, 228, 0.95) 100%) !important;
+                    border: 1px solid rgba(194, 155, 98, 0.35) !important;
+                    box-shadow: 0 25px 70px rgba(44, 26, 18, 0.15) !important;
+                }
+                .daylight-theme .manual-journal-modal h2 {
+                    color: #2C1A12 !important;
+                }
+                .daylight-theme .manual-journal-modal .glass-input-group label {
+                    color: #2C1A12 !important;
+                }
+                .daylight-theme .manual-journal-modal .glass-input {
+                    background: #FFFFFF !important;
+                    border: 1px solid rgba(194, 155, 98, 0.35) !important;
+                    color: #2C1A12 !important;
+                }
+                .daylight-theme .manual-journal-modal .btn-close-modal {
+                    background: rgba(44, 26, 18, 0.06) !important;
+                    border: 1px solid rgba(194, 155, 98, 0.3) !important;
+                    color: #2C1A12 !important;
+                }
+            `}</style>
         </div>
     );
 }

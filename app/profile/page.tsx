@@ -1,6 +1,7 @@
 // @ts-nocheck
 "use client";
 import React, { useState, useMemo, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { useProfileLogic } from './profile_logic';
 import { formatCurrency, formatDate } from '@/lib/helpers';
 import SignaturePad from '@/components/signaturepad';
@@ -14,6 +15,11 @@ import { supabase } from '@/lib/supabase';
 import { toast } from 'react-hot-toast';
 
 export default function EmployeeProfilePage() {
+    const [mounted, setMounted] = useState(false);
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
     const { 
         isLoading, isSaving, userProfile, financials, 
         recentAdvances, recentDeductions, filteredLogs,
@@ -282,7 +288,20 @@ export default function EmployeeProfilePage() {
             />
 
             <style>{`
-                .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(12px); display: flex; justify-content: center; align-items: center; z-index: 2000; animation: fadeIn 0.3s ease; }
+                .modal-overlay { 
+                    position: fixed !important; 
+                    inset: 0 !important; 
+                    top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
+                    width: 100vw !important; height: 100vh !important;
+                    background: rgba(15, 23, 42, 0.82) !important; 
+                    backdrop-filter: blur(14px) !important; 
+                    -webkit-backdrop-filter: blur(14px) !important;
+                    display: flex !important; justify-content: center !important; align-items: center !important; 
+                    z-index: 999999999 !important; 
+                    isolation: isolate !important;
+                    pointer-events: auto !important;
+                    animation: fadeIn 0.25s ease !important; 
+                }
                 .modal-box { background: rgba(255,255,255,0.95); backdrop-filter: blur(20px); width: 600px; padding: 40px; border-radius: 35px; border: 1px solid rgba(255,255,255,0.8); box-shadow: 0 25px 50px rgba(0,0,0,0.2); position: relative; max-height: 90vh; overflow-y: auto; }
                 .sidebar-input { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: rgba(255,255,255,0.05); color: white; margin-bottom: 20px; outline: none; font-size: 13px; transition: 0.3s; }
                 .sidebar-input:focus { border-color: ${THEME.goldAccent}; background: rgba(40, 145, 200, 0.05); }
@@ -680,7 +699,7 @@ export default function EmployeeProfilePage() {
             </div>
 
             {/* 🚀 ⚙️ Glass Modal الإعدادات */}
-            {isSettingsOpen && (
+            {isSettingsOpen && mounted && typeof document !== 'undefined' && createPortal(
                 <div className="modal-overlay" onClick={() => setIsSettingsOpen(false)}>
                     <div className="modal-box" onClick={e => e.stopPropagation()}>
                         <button onClick={() => setIsSettingsOpen(false)} style={{ position: 'absolute', top: '25px', left: '25px', background: 'rgba(255, 255, 255, 0.4)', border: 'none', width: '40px', height: '40px', borderRadius: '50%', fontSize: '18px', cursor: 'pointer', color: '#64748b', fontWeight: 900 }}>✕</button>
@@ -783,7 +802,8 @@ export default function EmployeeProfilePage() {
                             <button onClick={() => setIsSettingsOpen(false)} style={{ width:'100%', padding: '18px', fontSize: '16px', borderRadius: '15px', background: THEME.primary, color: 'white', border: 'none', fontWeight: 900, cursor: 'pointer', marginTop: '10px' }}>إغلاق النافذة</button>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </>
     );

@@ -31,7 +31,8 @@ export function useInventoryTransactionsLogic() {
           journal_id,
           item_id,
           partner_id,
-          fleet_operation_id,
+          warehouse_id,
+          destination_warehouse_id,
           batch_number,
           expiry_date,
           production_date
@@ -48,16 +49,14 @@ export function useInventoryTransactionsLogic() {
         txQuery = txQuery.lte('transaction_date', dateTo);
       }
 
-      let [txRes, itemsRes, partnersRes, opsRes, vehRes] = await Promise.all([
+      let [txRes, itemsRes, partnersRes, whRes] = await Promise.all([
         txQuery,
         supabase.from('inventory_items').select('id, name, unit, default_price, last_purchase_price, expiry_date, production_date, batch_number, current_quantity'),
         supabase.from('partners').select('id, name, account_id, partner_type'),
-        supabase.from('fleet_operations').select('id, operation_number, vehicle_id, driver_id'),
-        supabase.from('fleet_vehicles').select('id, plate_number')
+        supabase.from('warehouses').select('id, name, type')
       ]);
 
       if (txRes.error && txRes.error.code === '42703') {
-        // Resilient fallback if columns not yet added to Supabase
         let fbQuery = supabase
           .from('inventory_transactions')
           .select(`
@@ -72,7 +71,8 @@ export function useInventoryTransactionsLogic() {
             journal_id,
             item_id,
             partner_id,
-            fleet_operation_id
+            warehouse_id,
+            destination_warehouse_id
           `)
           .order('transaction_date', { ascending: false });
         if (filterType !== 'all') fbQuery = fbQuery.eq('type', filterType);
@@ -88,15 +88,18 @@ export function useInventoryTransactionsLogic() {
 
       const itemsMap = new Map(loadedItems.map((it: any) => [it.id, it]));
       const partnersMap = new Map((partnersRes.data || []).map((p: any) => [p.id, p]));
-      const opsMap = new Map((opsRes.data || []).map((o: any) => [o.id, o]));
-      const vehMap = new Map((vehRes.data || []).map((v: any) => [v.id, v]));
+      const whMap = new Map((whRes.data || []).map((w: any) => [w.id, w]));
 
       const formattedData = (txRes.data || []).map((row: any) => {
         const it = itemsMap.get(row.item_id);
         const part = partnersMap.get(row.partner_id);
-        const op = opsMap.get(row.fleet_operation_id);
-        const veh = op ? vehMap.get(op.vehicle_id) : null;
-        const driver = op ? partnersMap.get(op.driver_id) : null;
+        const srcWh = whMap.get(row.warehouse_id);
+        const destWh = whMap.get(row.destination_warehouse_id);
+
+        let whDisplayName = srcWh?.name || 'الخزان الرئيسي';
+        if (destWh) {
+          whDisplayName = `${srcWh?.name || 'مستودع'} ➔ ${destWh.name}`;
+        }
 
         return {
           id: row.id,
@@ -110,18 +113,16 @@ export function useInventoryTransactionsLogic() {
           journal_id: row.journal_id,
           item_id: row.item_id,
           partner_id: row.partner_id,
+          warehouse_id: row.warehouse_id,
+          destination_warehouse_id: row.destination_warehouse_id,
+          warehouse_name: whDisplayName,
           item_name: it?.name || 'غير معروف',
           unit: it?.unit || '',
           partner: part?.name || '',
           partner_type: part?.partner_type || '',
           partner_account_id: part?.account_id,
-          fleet_operation: op ? `${op.operation_number} - ${veh?.plate_number || 'بدون سيارة'}` : '',
-          vehicle_id: op?.vehicle_id,
-          vehicle_plate: veh?.plate_number || 'بدون سيارة',
-          driver_id: op?.driver_id,
-          driver_name: driver?.name || 'بدون مندوب',
-          driver_account_id: driver?.account_id,
-          fleet_operation_number: op?.operation_number,
+          fleet_operation: whDisplayName,
+          driver_name: part?.name || 'بدون مشغل',
           batch_number: row.batch_number || it?.batch_number || '',
           expiry_date: row.expiry_date || it?.expiry_date || '',
           production_date: row.production_date || it?.production_date || ''

@@ -23,16 +23,16 @@ export function usePosLogic() {
     const [searchQuery, setSearchQuery] = useState('');
     const [paymentMethod, setPaymentMethod] = useState<'نقدي (كاش)' | 'شبكة (مدى)' | 'آجل'>('نقدي (كاش)');
     const [partnerId, setPartnerId] = useState<string>('');
-    const [delegateId, setDelegateId] = useState<string>(''); // المندوب المسؤول
-    const [isDelegateLocked, setIsDelegateLocked] = useState(false); // القفل إذا كان المستخدم مندوب
+    const [delegateId, setDelegateId] = useState<string>(''); // المشغل المسؤول
+    const [isDelegateLocked, setIsDelegateLocked] = useState(false); // القفل إذا كان المستخدم مشغل محطة
     const [manualDiscountAmount, setManualDiscountAmount] = useState<number>(0);
     const [discountType, setDiscountType] = useState<'amount' | 'percentage'>('amount');
 
-    // 🏢 التبديل الآمن بين المستودعات مع إفراغ السلة لمنع تداخل أرصدة الفروع
+    // ⛽ التبديل الآمن بين محطات الوقود مع إفراغ السلة لمنع تداخل أرصدة المحطات
     const handleWarehouseChange = (newWarehouseId: string) => {
         if (!newWarehouseId || newWarehouseId === selectedWarehouseId) return;
         if (cart.length > 0) {
-            const confirmMsg = "تنبيه: التبديل إلى فرع أو مستودع آخر سيقوم بإفراغ سلة المشتريات الحالية لضمان استقلالية المخزون والوردية لكل فرع.\n\nهل تريد المتابعة وتغيير الفرع؟";
+            const confirmMsg = "تنبيه: التبديل إلى محطة وقود أو خزان آخر سيقوم بإفراغ سلة المبيعات الحالية لضمان استقلالية المخزون والوردية لكل محطة.\n\nهل تريد المتابعة وتغيير المحطة؟";
             if (typeof window !== 'undefined' && !window.confirm(confirmMsg)) {
                 return;
             }
@@ -163,14 +163,14 @@ export function usePosLogic() {
 
             return {
                 ...rawShift,
-                warehouse: wh || { id: rawShift.warehouse_id, name: 'منفذ البيع' },
+                warehouse: wh || { id: rawShift.warehouse_id, name: isEn ? 'Gas Station' : 'محطة الوقود / الخزان' },
                 delegate: del ? { id: del.partnerId || del.id, name: del.name, phone: del.phone } : null
             };
         },
         enabled: !!selectedWarehouseId
     });
 
-    // 🔒 مزامنة المندوب المسؤول تلقائياً مع الوردية النشطة للمستودع المختار
+    // 🔒 مزامنة مشغل المحطة المسؤول تلقائياً مع الوردية النشطة للمحطة/الخزان المختار
     useEffect(() => {
         if (activeShift && activeShift.warehouse_id === selectedWarehouseId) {
             if (activeShift.delegate_id && activeShift.delegate_id !== delegateId) {
@@ -181,7 +181,7 @@ export function usePosLogic() {
         }
     }, [activeShift?.id, activeShift?.delegate_id, selectedWarehouseId]);
 
-    // Fetch all currently open shifts across the system (استعراض ورديات كل الموظفين والمنافذ)
+    // Fetch all currently open shifts across the system (استعراض ورديات كل المشغلين والمحطات)
     const { data: allOpenShifts = [], isLoading: loadingAllShifts } = useQuery({
         queryKey: ['pos_open_shifts', warehouses, delegates],
         queryFn: async () => {
@@ -204,58 +204,14 @@ export function usePosLogic() {
                 );
                 return {
                     ...s,
-                    warehouse: wh || { id: s.warehouse_id, name: 'منفذ البيع' },
+                    warehouse: wh || { id: s.warehouse_id, name: isEn ? 'Gas Station' : 'محطة الوقود / الخزان' },
                     delegate: del ? { id: del.partnerId || del.id, name: del.name, phone: del.phone } : null
                 };
             });
         }
     });
 
-    // 🚚 جلب أمر التشغيل المفتوح تلقائياً إذا كان منفذ البيع المختار سيارة
-    const { data: activeFleetOperation = null } = useQuery({
-        queryKey: ['pos_active_fleet_op', selectedWarehouseId],
-        enabled: !!selectedWarehouseId,
-        queryFn: async () => {
-            if (!selectedWarehouseId) return null;
-            const currentWh = warehouses.find(w => w.id === selectedWarehouseId);
-            if (!currentWh || currentWh.type !== 'vehicle') return null;
-
-            const targetVehicleId = currentWh.vehicle_id || currentWh.id;
-
-            const { data, error } = await supabase
-                .from('fleet_operations')
-                .select(`
-                    id,
-                    operation_number,
-                    operation_date,
-                    status,
-                    driver_id,
-                    vehicle_id,
-                    warehouse_id,
-                    driver:partners!driver_id(id, name, phone),
-                    vehicle:fleet_vehicles(id, plate_number)
-                `)
-                .or(`vehicle_id.eq.${targetVehicleId},warehouse_id.eq.${selectedWarehouseId}`)
-                .neq('status', 'مغلق')
-                .neq('status', 'closed')
-                .order('operation_date', { ascending: false })
-                .limit(1)
-                .maybeSingle();
-
-            if (error) {
-                console.warn('Could not fetch active fleet operation for POS:', error);
-                return null;
-            }
-            return data || null;
-        }
-    });
-
-    // مزامنة المندوب تلقائياً من أمر تشغيل الرحلة إذا كان منفذ البيع سيارة والمندوب غير مقفل
-    useEffect(() => {
-        if (activeFleetOperation?.driver_id && !isDelegateLocked) {
-            setDelegateId(activeFleetOperation.driver_id);
-        }
-    }, [activeFleetOperation, isDelegateLocked]);
+    const activeFleetOperation = null;
 
     // Auto-select delegate and warehouse based on logged-in user
     useEffect(() => {
@@ -302,24 +258,18 @@ export function usePosLogic() {
         queryFn: async () => {
             if (!selectedWarehouseId) return [];
 
-            // 1. Fetch Item Master Catalog with tax_rate and expiry columns
+            // 1. Fetch Item Master Catalog
             let catalog: any[] = [];
             const { data: catData, error: catErr } = await supabase
                 .from('inventory_items')
-                .select('id, name, default_price, suggested_price, unit, code, barcode, reorder_level, current_quantity, is_returnable_bottle, tax_rate, expiry_date, batch_number, alert_before_days')
+                .select('*')
                 .order('name');
 
             if (catErr) {
-                // Resilient fallback if expiry columns are not yet applied via migration
-                const { data: fbData, error: fbErr } = await supabase
-                    .from('inventory_items')
-                    .select('id, name, default_price, suggested_price, unit, code, barcode, reorder_level, current_quantity, is_returnable_bottle, tax_rate')
-                    .order('name');
-                if (fbErr) throw fbErr;
-                catalog = fbData || [];
-            } else {
-                catalog = catData || [];
+                console.warn("pos_inventory catalog fetch error:", catErr);
+                return [];
             }
+            catalog = catData || [];
 
             
             const today = new Date();
@@ -378,7 +328,8 @@ export function usePosLogic() {
                     reorder_level: reorderLvl,
                     isCriticalLow: isCritical,
                     isNearLow: isNear,
-                    is_returnable_bottle: Boolean(item.is_returnable_bottle),
+                    category: item.category || 'fuel',
+                    fuel_type: item.fuel_type || '',
                     tax_rate: (item.tax_rate !== undefined && item.tax_rate !== null) ? Number(item.tax_rate) : 15,
                     
                     batch_number: batchNum,
@@ -548,7 +499,7 @@ export function usePosLogic() {
         }
 
         if (!item) {
-            showToast(`⚠️ الصنف غير موجود أو غير متوفر في هذا المنفذ: ${cleanCode}`, 'error');
+            showToast(`⚠️ نوع الوقود / الصنف غير متوفر في هذه المحطة أو الخزان: ${cleanCode}`, 'error');
             return;
         }
 
@@ -745,7 +696,7 @@ export function usePosLogic() {
                 throw new Error("⛔ منع أمني: لا يمكن إتمام أي عملية بيع بدون بدء وفتح الوردية أولاً! يرجى الضغط على 'بدء الوردية' لتسجيل العهدة وبدء البيع.");
             }
             if (cart.length === 0) throw new Error("السلة فارغة!");
-            if (!selectedWarehouseId) throw new Error("يرجى تحديد منفذ البيع!");
+            if (!selectedWarehouseId) throw new Error("يرجى تحديد محطة الوقود / الخزان!");
 
             const autoNumber = `INV-POS-${Date.now().toString().slice(-6)}`;
             
@@ -757,36 +708,13 @@ export function usePosLogic() {
                 discount: (item.discount || 0) + (item.promo_discount || 0),
                 total: item.total !== undefined ? item.total : (((item.quantity || item.qty) * (item.selected_price || item.unit_price || item.price || 0)) - ((item.discount || 0) + (item.promo_discount || 0))),
                 tax_rate: (item.tax_rate !== undefined && item.tax_rate !== null) ? Number(item.tax_rate) : 15,
-                warehouse_id: selectedWarehouseId,
-                is_returnable_bottle: Boolean(item.is_returnable_bottle)
+                warehouse_id: selectedWarehouseId
             }));
-
-            const totalInvoiceDiscount = processedCart.reduce((sum, item) => sum + (item.discount || 0) + (item.promo_discount || 0), 0);
-
-            // Resolve fleet_operation_id if warehouse is a vehicle
-            let fleetOpId = activeFleetOperation?.id || null;
-            if (!fleetOpId && selectedWarehouseId) {
-                const wh = warehouses.find(w => w.id === selectedWarehouseId);
-                if (wh?.type === 'vehicle') {
-                    const targetVehicleId = wh.vehicle_id || wh.id;
-                    const { data: op } = await supabase.from('fleet_operations')
-                        .select('id, driver_id')
-                        .or(`vehicle_id.eq.${targetVehicleId},warehouse_id.eq.${selectedWarehouseId}`)
-                        .neq('status', 'مغلق')
-                        .neq('status', 'closed')
-                        .order('operation_date', { ascending: false })
-                        .limit(1)
-                        .maybeSingle();
-                    if (op) {
-                        fleetOpId = op.id;
-                    }
-                }
-            }
 
             // 🔑 الحسابات من الملف المركزي — بدون استعلامات DB إضافية
             // 123 العملاء (ذمم مدينون) — 41 إيرادات المبيعات
 
-            // 1. إنشاء الفاتورة بحالة معلق
+            // 1. إنشاء الفاتورة بحالة معتمد
             const invoiceHeader = {
                 invoice_number: autoNumber,
                 date: new Date().toISOString().split('T')[0],
@@ -795,7 +723,6 @@ export function usePosLogic() {
                 total_amount: cartTotal.total,
                 taxable_amount: cartTotal.taxableSubtotal !== undefined ? cartTotal.taxableSubtotal : cartTotal.subtotal,
                 tax_amount: cartTotal.tax,
-                materials_discount: totalInvoiceDiscount, // Add total discount here
                 status: 'معتمد',
                 warehouse_id: selectedWarehouseId,
                 delegate_id: delegateId || null,
@@ -806,7 +733,6 @@ export function usePosLogic() {
                 tax_acc_id: SALES_ACCOUNTS.VAT,             // 215 ضريبة القيمة المضافة
                 lines_data: linesData,
                 shift_id: activeShift?.id,
-                fleet_operation_id: fleetOpId,
                 payment_status: paymentMethod !== 'آجل' ? 'paid' : 'unpaid'
             };
 
@@ -820,38 +746,6 @@ export function usePosLogic() {
                 totalAmount: Number(invoiceHeader.total_amount) || 0,
                 invoiceId: insertedInv?.id
             }).catch(() => {});
-
-
-            // 🔄 التحديث التلقائي لعهدة العبوات والمستلزمات (إن وُجدت أصناف فوارغ)
-            const returnableBottlesCount = cart.reduce((acc, it) => acc + (it.is_returnable_bottle ? (Number(it.qty) || Number(it.quantity) || 0) : 0), 0);
-            if (returnableBottlesCount > 0) {
-                // 1. تسجيل عهدة الفوارغ في حساب العميل المسجل
-                if (partnerId) {
-                    try {
-                        const { data: pRec } = await supabase.from('partners').select('bottle_custody').eq('id', partnerId).maybeSingle();
-                        const currentCustody = Number(pRec?.bottle_custody || 0);
-                        await supabase.from('partners').update({
-                            bottle_custody: currentCustody + returnableBottlesCount
-                        }).eq('id', partnerId);
-                    } catch (custodyErr) {
-                        console.error('Error updating partner bottle custody:', custodyErr);
-                    }
-                }
-
-                // 2. تحديث عداد الفوارغ المباعة في الوردية الحالية
-                if (activeShift?.id) {
-                    try {
-                        const { data: sRec } = await supabase.from('pos_shifts').select('bottles_sold').eq('id', activeShift.id).maybeSingle();
-                        const curSold = Number(sRec?.bottles_sold || 0);
-                        await supabase.from('pos_shifts').update({
-                            bottles_sold: curSold + returnableBottlesCount
-                        }).eq('id', activeShift.id);
-                    } catch (shiftErr) {
-                        console.error('Error updating shift bottles_sold:', shiftErr);
-                    }
-                }
-            }
-
             // Deduct from warehouse and create inventory transaction history
             for (let line of linesData) {
                 // 1. Insert inventory_transaction to persist history (bypassing RPC to prevent double accounting)

@@ -1131,7 +1131,7 @@ export default function WelcomeHomePage() {
                     <div className="section-header-box">
                         <div className="section-header-title">
                             <span style={{ fontSize: '20px' }}>👤</span>
-                            <h2>{isEn ? 'Currently Open Shifts' : 'الورديات المفتوحة حالياً بالمنفذ'}</h2>
+                            <h2>{isEn ? 'Currently Active Shifts' : 'الورديات النشطة حالياً بمحطات الوقود'}</h2>
                         </div>
                         <Link 
                             href="/pos" 

@@ -3,7 +3,6 @@ export const menuGroups = [
         group: "الرئيسية والملخصات", 
         items: [
             { id: 'dashboard', title: 'لوحة القيادة والتحكم', icon: '⚡', path: '/Dashboard' },
-            { id: 'global_summary', title: 'الملخص العام', icon: '📊', path: '/GlobalSummary' },
             { id: 'kpis', title: 'مؤشرات الأداء التشغيلي', icon: '🎯', path: '/kpis' },
             { id: 'profit_dashboard', title: 'أرباح ومؤشرات المحطة', icon: '📈', path: '/profit-dashboard' }
         ] 
@@ -12,21 +11,21 @@ export const menuGroups = [
         group: "التشغيل والمبيعات", 
         items: [
             { id: 'pos', title: 'شاشة الكاشير (POS)', icon: '⛽', path: '/pos' },
-            { id: 'pos_dashboard', title: 'أرباح منافذ البيع', icon: '💹', path: '/pos/dashboard' },
-            { id: 'pos_settlements', title: 'تسوية الورديات والعدادات', icon: '🏪', path: '/pos-settlements' },
+            { id: 'pos_dashboard', title: 'أرباح وتشغيل محطات الوقود', icon: '📈', path: '/pos/dashboard' },
+            { id: 'pos_settlements', title: 'تسوية الورديات والعدادات', icon: '⛽', path: '/pos-settlements' },
             { id: 'invoices', title: 'الفواتير والمبيعات', icon: '🧾', path: '/invoices' },
             { id: 'sales_analysis', title: 'تحليل المبيعات', icon: '📊', path: '/sales-analysis' }
         ] 
     },
     { 
-        group: "المستودع وخزانات الوقود", 
+        group: "المحطات وخزانات الوقود", 
         items: [
             { id: 'inventory', title: 'الأصناف وخزانات الوقود', icon: '🛢️', path: '/inventory' },
             { id: 'item_card', title: 'بطاقة الصنف والحركة', icon: '🏷️', path: '/item-card' },
             { id: 'reorder_alerts', title: 'تنبيهات حدود الطلب والنواقص', icon: '⚠️', path: '/reorder-alerts' },
             { id: 'inventory_valuation', title: 'تقييم المخزون', icon: '💰', path: '/inventory-valuation' },
             { id: 'purchase_orders', title: 'أوامر الشراء والتوريد', icon: '🛒', path: '/purchase_orders' },
-            { id: 'warehouses', title: 'المستودعات والخزانات', icon: '🏢', path: '/inventory/warehouses' },
+            { id: 'warehouses', title: 'محطات الوقود والخزانات', icon: '⛽', path: '/inventory/warehouses' },
             { id: 'inventory_transactions', title: 'حركات المخزون والتوريد', icon: '🔄', path: '/inventory/transactions' }
         ] 
     },

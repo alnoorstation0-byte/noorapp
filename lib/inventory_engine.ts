@@ -5,7 +5,7 @@ import { emitTableChange } from '@/lib/useRealtimeSync';
 export const MAIN_WAREHOUSE_ID = '11111111-1111-1111-1111-111111111111';
 
 /**
- * 🔄 إعادة احتساب ومزامنة كافة أرصدة المستودعات وسيارات التوزيع
+ * 🔄 إعادة احتساب ومزامنة كافة أرصدة المستودعات وخزانات الوقود
  * متوافقة 100% مع اسكيما قاعدة البيانات
  */
 export async function syncAllWarehouseBalances() {
@@ -13,7 +13,7 @@ export async function syncAllWarehouseBalances() {
     // 1. جلب كافة الحركات المعتمدة
     const { data: transactions, error: txErr } = await supabase
       .from('inventory_transactions')
-      .select('id, type, quantity, item_id, warehouse_id, destination_warehouse_id, status, fleet_operation_id, fleet_operations(vehicle_id)')
+      .select('id, type, quantity, item_id, warehouse_id, destination_warehouse_id, status')
       .eq('status', 'approved');
 
     if (txErr) throw txErr;
@@ -26,7 +26,7 @@ export async function syncAllWarehouseBalances() {
 
     const { data: warehouses, error: whErr } = await supabase
       .from('warehouses')
-      .select('id, name, type, vehicle_id')
+      .select('id, name, type, tank_capacity_liters, fuel_type')
       .eq('is_active', true);
     if (whErr) throw whErr;
 
@@ -51,13 +51,7 @@ export async function syncAllWarehouseBalances() {
       if (!tx.item_id || qty <= 0) return;
 
       const srcWh = tx.warehouse_id || MAIN_WAREHOUSE_ID;
-      let destWh = tx.destination_warehouse_id;
-
-      // ربط ذكي لمستودع السيارة إن وجد أمر تشغيل رحلة
-      if (!destWh && (tx as any).fleet_operations?.vehicle_id) {
-        const vWh = warehouses?.find(w => w.vehicle_id === (tx as any).fleet_operations.vehicle_id);
-        if (vWh) destWh = vWh.id;
-      }
+      const destWh = tx.destination_warehouse_id;
 
       if (!whBalances[srcWh]) whBalances[srcWh] = {};
       if (whBalances[srcWh][tx.item_id] === undefined) whBalances[srcWh][tx.item_id] = 0;
@@ -160,38 +154,11 @@ export async function executeApproveTransaction(transactionId: string, options?:
     } catch {}
   }
 
-  let fleetOpNumber = '';
-  let fleetDriverId = '';
-  let fleetVehicleId = '';
-  if (txn.fleet_operation_id) {
-    try {
-      const { data: fo } = await supabase.from('fleet_operations').select('operation_number, driver_id, vehicle_id').eq('id', txn.fleet_operation_id).maybeSingle();
-      if (fo) {
-        fleetOpNumber = fo.operation_number || '';
-        fleetDriverId = fo.driver_id || '';
-        fleetVehicleId = fo.vehicle_id || '';
-      }
-    } catch {}
-  }
-
   const qty = Number(txn.quantity) || 0;
   const unitPrice = Number(txn.unit_price) || 0;
   const totalAmount = qty * unitPrice;
   const srcWh = txn.warehouse_id || MAIN_WAREHOUSE_ID;
-  let destWh = txn.destination_warehouse_id;
-
-  // إذا كانت الحركة مربوطة بأمر تشغيل رحلة ولم يُحدد مستودع وجهة، نحدد مستودع السيارة تلقائياً
-  if (!destWh && fleetVehicleId) {
-    try {
-      const { data: vWh } = await supabase
-        .from('warehouses')
-        .select('id')
-        .eq('vehicle_id', fleetVehicleId)
-        .eq('is_active', true)
-        .maybeSingle();
-      if (vWh) destWh = vWh.id;
-    } catch {}
-  }
+  const destWh = txn.destination_warehouse_id;
 
   // 2. توليد القيد المحاسبي المزدوج لحركة المخزون (إن لم يكن موجوداً)
   let journalId = txn.journal_id;
@@ -210,7 +177,7 @@ export async function executeApproveTransaction(transactionId: string, options?:
       headerDesc = `توريد مخزني #${txn.transaction_number || ''} - صنف: ${itemName} (كمية: ${qty})`;
       debitAcc = ACC.INVENTORY;
       creditAcc = partnerAccountId || ACC.PENDING_INVOICES;
-      debitNotes = 'إضافة لمخزون البضائع (مدين)';
+      debitNotes = 'إضافة لمخزون البضائع/المحروقات (مدين)';
       creditNotes = 'استحقاق قيد الاستلام / مورد (دائن)';
       partnerIdForLine = txn.partner_id || null;
     } else if (txn.type === 'waste') {
@@ -219,22 +186,22 @@ export async function executeApproveTransaction(transactionId: string, options?:
       debitAcc = ACC.WASTE_LOSS;
       creditAcc = ACC.INVENTORY;
       debitNotes = 'خسائر توالف وهدر مخزني (مدين)';
-      creditNotes = 'تخفيض مخزون البضائع (دائن)';
-    } else if (txn.fleet_operation_id) {
-      // تحميل عهدة أسطول ومندوب
-      headerDesc = `تحميل عهدة أسطول #${fleetOpNumber || ''} - صنف: ${itemName} (كمية: ${qty})`;
-      debitAcc = ACC.INVENTORY_CUSTODY;
+      creditNotes = 'تخفيض مخزون البضائع/المحروقات (دائن)';
+    } else if (destWh) {
+      // تحويل مخزني بين خزانات الوقود أو المستودعات
+      headerDesc = `تحويل مخزني #${txn.transaction_number || ''} - صنف: ${itemName} (كمية: ${qty})`;
+      debitAcc = ACC.INVENTORY;
       creditAcc = ACC.INVENTORY;
-      debitNotes = 'تحميل عهدة سيارة/مندوب (مدين)';
-      creditNotes = 'صرف من المستودع للعهدة (دائن)';
-      partnerIdForLine = fleetDriverId || txn.partner_id || null;
+      debitNotes = 'تحويل إلى مستودع/خزان الوجهة (مدين)';
+      creditNotes = 'صرف من مستودع/خزان المصدر (دائن)';
+      partnerIdForLine = txn.partner_id || null;
     } else {
       // صرف مخزني عادي
       headerDesc = `صرف مخزني #${txn.transaction_number || ''} - صنف: ${itemName} (كمية: ${qty})`;
       debitAcc = partnerAccountId || ACC.CUSTOMERS_AR;
       creditAcc = ACC.INVENTORY;
       debitNotes = 'استحقاق مدين (ذمة)';
-      creditNotes = 'صرف من مخزون البضائع (دائن)';
+      creditNotes = 'صرف من مخزون البضائع/المحروقات (دائن)';
       partnerIdForLine = txn.partner_id || null;
     }
 
@@ -356,7 +323,7 @@ export async function executeUnapproveTransaction(transactionId: string) {
     .update({ status: 'pending', journal_id: null })
     .eq('id', transactionId);
 
-  // 4. 🚀 إعادة مزامنة وتحديث أرصدة كافة المستودعات وسيارات التوزيع فوراً
+  // 4. 🚀 إعادة مزامنة وتحديث أرصدة كافة المستودعات وخزانات الوقود فوراً
   await syncAllWarehouseBalances();
 
   // 5. بث التحديث اللحظي

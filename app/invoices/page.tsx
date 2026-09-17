@@ -156,7 +156,7 @@ export default function InvoicesPage() {
     },
     {
       key: 'delegate_name',
-      label: 'المندوب (التحصيل)',
+      label: 'مشغل المحطة / المسؤول',
       render: (row: any) => {
         if (!row) return null;
         const delegate = logic.delegates?.find((d:any) => d.id === row.delegate_id);
@@ -169,12 +169,12 @@ export default function InvoicesPage() {
     },
     {
       key: 'invoice_source',
-      label: 'مصدر الفاتورة',
+      label: 'محطة الوقود / الخزان',
       render: (row: any) => {
         if (!row) return null;
         const wh = logic.warehouses?.find((w:any) => w.id === row.warehouse_id);
         if (!wh) return <span style={{ fontSize: '11px', color: '#94a3b8' }}>---</span>;
-        const typeIcon = wh.type === 'main' ? '🏢' : (wh.type === 'vehicle' ? '🚚' : (wh.type === 'pos' ? '🏪' : '🏭'));
+        const typeIcon = wh.type === 'main' ? '⛽' : (wh.type === 'vehicle' ? '🚛' : (wh.type === 'pos' ? '⛽' : '🛢️'));
         return (
           <span style={{ fontSize: '11px', fontWeight: 900, color: '#0f172a', background: 'rgba(255,255,255,0.7)', padding: '4px 8px', borderRadius: '6px', border: '1px solid rgba(0,0,0,0.05)' }}>
              {typeIcon} {wh.name}
@@ -811,6 +811,106 @@ export default function InvoicesPage() {
           .toolbar-actions-group { width: 100% !important; justify-content: space-between !important; }
           .invoices-toolbar-card { padding: 8px 10px !important; }
           .floating-batch-bar { bottom: 12px !important; padding: 8px 12px !important; gap: 8px !important; width: 96vw !important; justify-content: space-between !important; }
+        }
+
+        /* 🏜️ Daylight Desert Glassmorphism */
+        .daylight-theme .invoice-kpi-card {
+          background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.9) 100%) !important;
+          border: 1px solid rgba(194, 155, 98, 0.3) !important;
+          box-shadow: 0 4px 15px rgba(44, 26, 18, 0.08) !important;
+        }
+        .daylight-theme .invoice-kpi-card:hover {
+          background: #FFFFFF !important;
+          border-color: #C29B62 !important;
+          box-shadow: 0 8px 25px rgba(168, 87, 60, 0.15) !important;
+        }
+        .daylight-theme .invoice-kpi-card.active-filter {
+          border-color: #C29B62 !important;
+          background: rgba(194, 155, 98, 0.12) !important;
+          box-shadow: 0 8px 24px rgba(194, 155, 98, 0.25) !important;
+        }
+        .daylight-theme .kpi-label {
+          color: rgba(44, 26, 18, 0.65) !important;
+        }
+        .daylight-theme .kpi-value.text-blue {
+          color: #A8573C !important;
+        }
+        .daylight-theme .kpi-sub {
+          color: rgba(44, 26, 18, 0.55) !important;
+        }
+        .daylight-theme .invoices-toolbar-card {
+          background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.9) 100%) !important;
+          border: 1px solid rgba(194, 155, 98, 0.3) !important;
+          box-shadow: 0 4px 15px rgba(44, 26, 18, 0.08) !important;
+        }
+        .daylight-theme .filter-tab-pill {
+          background: #FFFFFF !important;
+          border: 1px solid rgba(194, 155, 98, 0.25) !important;
+          color: rgba(44, 26, 18, 0.7) !important;
+        }
+        .daylight-theme .filter-tab-pill:hover {
+          background: #FFFFFF !important;
+          color: #A8573C !important;
+          border-color: #C29B62 !important;
+        }
+        .daylight-theme .filter-tab-pill.active {
+          background: linear-gradient(135deg, #C29B62 0%, #A8573C 100%) !important;
+          color: #FFFFFF !important;
+          border-color: #C29B62 !important;
+          box-shadow: 0 4px 14px rgba(168, 87, 60, 0.3) !important;
+        }
+        .daylight-theme .filter-tab-pill.active .tab-count {
+          background: rgba(255, 255, 255, 0.25) !important;
+          color: #FFFFFF !important;
+        }
+        .daylight-theme .tab-count {
+          background: rgba(44, 26, 18, 0.08) !important;
+          color: rgba(44, 26, 18, 0.7) !important;
+        }
+        .daylight-theme .quick-search-input {
+          background: #FFFFFF !important;
+          border: 1px solid rgba(194, 155, 98, 0.3) !important;
+          color: #2C1A12 !important;
+        }
+        .daylight-theme .quick-search-input:focus {
+          border-color: #C29B62 !important;
+          box-shadow: 0 0 0 3px rgba(194, 155, 98, 0.2) !important;
+        }
+        .daylight-theme .btn-create-invoice {
+          background: linear-gradient(135deg, #C29B62 0%, #A8573C 100%) !important;
+          color: #FFFFFF !important;
+          box-shadow: 0 4px 14px rgba(168, 87, 60, 0.3) !important;
+        }
+        .daylight-theme .inv-row-btn {
+          background: #FFFFFF !important;
+          border: 1px solid rgba(194, 155, 98, 0.3) !important;
+          box-shadow: 0 2px 5px rgba(44, 26, 18, 0.06) !important;
+        }
+        .daylight-theme .inv-row-btn:hover {
+          background: rgba(194, 155, 98, 0.15) !important;
+          border-color: #C29B62 !important;
+        }
+        .daylight-theme .inv-row-btn.print {
+          color: #2C1A12 !important;
+        }
+        .daylight-theme .inv-row-btn.edit {
+          color: #A8573C !important;
+        }
+        .daylight-theme .floating-batch-bar {
+          background: linear-gradient(135deg, rgba(255, 253, 250, 0.98) 0%, rgba(245, 238, 228, 0.95) 100%) !important;
+          border: 1px solid rgba(194, 155, 98, 0.4) !important;
+          box-shadow: 0 20px 50px rgba(44, 26, 18, 0.2) !important;
+        }
+        .daylight-theme .batch-info {
+          color: #2C1A12 !important;
+        }
+        .daylight-theme .batch-badge {
+          background: linear-gradient(135deg, #C29B62, #A8573C) !important;
+          color: #FFFFFF !important;
+        }
+        .daylight-theme .batch-btn.cancel {
+          background: rgba(44, 26, 18, 0.08) !important;
+          color: #2C1A12 !important;
         }
       `}</style>
 

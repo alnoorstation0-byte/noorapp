@@ -359,7 +359,7 @@ function useJournalLogic() {
         },
         handleDeleteSingleHeader: async (headerId: string) => {
             if (!headerId) return;
-            if (!confirm('تنبيه هام ⚠️: سيتم حذف هذا القيد بالكامل.\nإذا كان مرتبطاً بوردية كاشير، سيتم إلغاء الفاتورة وتعديل أرقام ومبيعات الوردية وإرجاع البضاعة للمستودع تلقائياً.\nهل أنت متأكد؟')) return;
+            if (!confirm('تنبيه هام ⚠️: سيتم حذف هذا القيد بالكامل.\nإذا كان مرتبطاً بوردية كاشير، سيتم إلغاء الفاتورة وتعديل أرقام ومبيعات الوردية وإرجاع كميات الوقود والمنتجات للخزانات تلقائياً.\nهل أنت متأكد؟')) return;
             setRowActionLoadingId(headerId);
             try {
                 const res = await reconcileShiftOnJournalDeletion([headerId]);
@@ -913,6 +913,109 @@ export default function JournalPage() {
                 width: 42px !important;
               }
             }
+
+            /* Daylight Desert Glassmorphism */
+            .daylight-theme .summary-glass-card {
+              background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.90) 100%) !important;
+              border: 1px solid rgba(194, 155, 98, 0.3) !important;
+              box-shadow: 0 4px 20px rgba(44, 26, 18, 0.08) !important;
+            }
+            .daylight-theme .summary-glass-card span {
+              color: rgba(44, 26, 18, 0.7) !important;
+            }
+            .daylight-theme .summary-glass-card div {
+              border-color: rgba(194, 155, 98, 0.2) !important;
+            }
+            .daylight-theme .filter-label {
+              color: rgba(44, 26, 18, 0.75) !important;
+            }
+            .daylight-theme .filter-input-glass {
+              background: #FFFFFF !important;
+              border-color: rgba(194, 155, 98, 0.35) !important;
+              color: #2C1A12 !important;
+              box-shadow: inset 0 2px 4px rgba(44, 26, 18, 0.05) !important;
+            }
+            .daylight-theme .filter-input-glass:focus {
+              border-color: #C29B62 !important;
+              box-shadow: 0 0 15px rgba(194, 155, 98, 0.25) !important;
+            }
+            .daylight-theme .custom-select option {
+              background: #FFFFFF !important;
+              color: #2C1A12 !important;
+            }
+            .daylight-theme .filter-btn {
+              background: rgba(255, 255, 255, 0.7) !important;
+              color: rgba(44, 26, 18, 0.75) !important;
+              border-color: rgba(194, 155, 98, 0.3) !important;
+            }
+            .daylight-theme .filter-btn.active {
+              background: linear-gradient(135deg, rgba(194, 155, 98, 0.25), rgba(194, 155, 98, 0.12)) !important;
+              color: #A8573C !important;
+              border-color: #C29B62 !important;
+              box-shadow: 0 0 12px rgba(194, 155, 98, 0.2) !important;
+            }
+            .daylight-theme .pagination-container {
+              background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.90) 100%) !important;
+              border-color: rgba(194, 155, 98, 0.3) !important;
+              box-shadow: 0 4px 15px rgba(44, 26, 18, 0.08) !important;
+            }
+            .daylight-theme .pagination-container span {
+              color: rgba(44, 26, 18, 0.7) !important;
+            }
+            .daylight-theme .pagination-container b {
+              color: #2C1A12 !important;
+            }
+            .daylight-theme .btn-pagination {
+              background: rgba(255, 255, 255, 0.85) !important;
+              color: #A8573C !important;
+              border-color: rgba(194, 155, 98, 0.35) !important;
+            }
+            .daylight-theme .btn-pagination:hover:not(:disabled) {
+              background: #C29B62 !important;
+              color: #FFFFFF !important;
+              border-color: #C29B62 !important;
+              box-shadow: 0 0 12px rgba(194, 155, 98, 0.3) !important;
+            }
+            .daylight-theme .pending-journals-alert {
+              background: linear-gradient(135deg, rgba(254, 243, 199, 0.95) 0%, rgba(255, 251, 235, 0.9) 100%) !important;
+              border-color: rgba(245, 158, 11, 0.4) !important;
+              box-shadow: 0 4px 15px rgba(245, 158, 11, 0.1) !important;
+            }
+            .daylight-theme .pending-journals-alert div {
+              color: #92400e !important;
+            }
+            .daylight-theme .journal-selection-bar {
+              background: linear-gradient(135deg, rgba(255, 253, 250, 0.98) 0%, rgba(245, 238, 228, 0.95) 100%) !important;
+              border-color: rgba(194, 155, 98, 0.4) !important;
+              box-shadow: 0 4px 20px rgba(44, 26, 18, 0.1) !important;
+            }
+            .daylight-theme .selection-badge {
+              color: #A8573C !important;
+              background: rgba(194, 155, 98, 0.15) !important;
+              border-color: rgba(194, 155, 98, 0.3) !important;
+            }
+            .daylight-theme .selection-header-name {
+              color: #2C1A12 !important;
+            }
+            .daylight-theme .selection-action-btn.print {
+              background: linear-gradient(135deg, #C29B62, #A8573C) !important;
+              color: #FFFFFF !important;
+              box-shadow: 0 4px 12px rgba(168, 87, 60, 0.25) !important;
+            }
+            .daylight-theme .selection-action-btn.clear {
+              background: rgba(44, 26, 18, 0.06) !important;
+              color: #2C1A12 !important;
+              border-color: rgba(194, 155, 98, 0.3) !important;
+            }
+            .daylight-theme .btn-row-action.print {
+              background: rgba(194, 155, 98, 0.15) !important;
+              color: #A8573C !important;
+              border-color: rgba(194, 155, 98, 0.3) !important;
+            }
+            .daylight-theme .btn-row-action.print:hover:not(:disabled) {
+              background: #C29B62 !important;
+              color: #FFFFFF !important;
+            }
           `}</style>
 
           {(logic.isLoading || permsLoading) ? (
@@ -924,7 +1027,7 @@ export default function JournalPage() {
           ) : (
             <>
               {logic.pendingJournalsCount > 0 && (
-                <div style={{
+                <div className="pending-journals-alert" style={{
                   background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(20, 24, 34, 0.95) 100%)',
                   border: '1px solid rgba(245, 158, 11, 0.4)',
                   borderRadius: '16px',

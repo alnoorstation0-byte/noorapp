@@ -37,9 +37,9 @@ const MultiSelectDropdown = ({ options, selected, onChange, placeholder, title, 
     };
 
     return (
-        <div ref={dropdownRef} style={{ position: 'relative', flex: 1, minWidth: '200px' }}>
+        <div ref={dropdownRef} className="multi-select-wrap" style={{ position: 'relative', flex: 1, minWidth: '200px' }}>
             <div style={{ fontSize: '11px', fontWeight: 900, marginBottom: '6px', color: '#94A3B8', display: 'flex', justifyContent: 'space-between' }}>
-                <span>{title}</span>
+                <span className="multi-select-title">{title}</span>
                 {selected.length > 0 && (
                     <span 
                         style={{ color: '#EF4444', cursor: 'pointer', fontSize: '10px', background: 'rgba(239, 68, 68, 0.15)', padding: '2px 8px', borderRadius: '6px', border: '1px solid rgba(239, 68, 68, 0.3)' }} 
@@ -52,36 +52,38 @@ const MultiSelectDropdown = ({ options, selected, onChange, placeholder, title, 
             
             <div 
                 onClick={() => setIsOpen(!isOpen)}
-                style={{ background: 'rgba(11, 14, 20, 0.8)', padding: '12px 15px', borderRadius: '12px', border: '1px solid rgba(0, 229, 255, 0.25)', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: '0.2s', height: '48px' }}
+                className="multi-select-trigger"
+                style={{ padding: '12px 15px', borderRadius: '12px', cursor: 'pointer', display: 'flex', justifyContent: 'space-between', alignItems: 'center', transition: '0.2s', height: '48px' }}
             >
-                <span style={{ fontWeight: 800, color: selected.length ? '#F8FAFC' : '#94A3B8', fontSize: '13px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                <span className="multi-select-text" style={{ fontWeight: 800, fontSize: '13px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {selected.length > 0 ? selected.join('، ') : placeholder}
                 </span>
-                <span style={{ color: '#00E5FF', transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: '0.2s' }}>▼</span>
+                <span className="multi-select-arrow" style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: '0.2s' }}>▼</span>
             </div>
             
             {isOpen && (
-                <div style={{ position: 'absolute', top: '100%', left: 0, right: 0, background: 'rgba(20, 24, 34, 0.98)', backdropFilter: 'blur(20px)', border: '1px solid rgba(0, 229, 255, 0.3)', borderRadius: '14px', marginTop: '8px', zIndex: 50, boxShadow: '0 12px 35px rgba(0,0,0,0.6)', overflow: 'hidden' }}>
-                    <div style={{ padding: '10px', background: 'rgba(11, 14, 20, 0.7)', borderBottom: '1px solid rgba(255, 255, 255, 0.08)' }}>
+                <div className="multi-select-menu" style={{ position: 'absolute', top: '100%', left: 0, right: 0, backdropFilter: 'blur(20px)', borderRadius: '14px', marginTop: '8px', zIndex: 50, boxShadow: '0 12px 35px rgba(0,0,0,0.4)', overflow: 'hidden' }}>
+                    <div className="multi-select-search-wrap" style={{ padding: '10px', borderBottom: '1px solid rgba(255, 255, 255, 0.08)' }}>
                         <input 
                             type="text" 
                             placeholder="🔍 بحث سريع..." 
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             onClick={(e) => e.stopPropagation()}
-                            style={{ width: '100%', padding: '8px 12px', border: '1px solid rgba(0, 229, 255, 0.25)', borderRadius: '8px', outline: 'none', fontSize: '12px', fontWeight: 700, background: 'rgba(20, 24, 34, 0.9)', color: '#F8FAFC' }}
+                            className="multi-select-search"
+                            style={{ width: '100%', padding: '8px 12px', borderRadius: '8px', outline: 'none', fontSize: '12px', fontWeight: 700 }}
                         />
                     </div>
                     <div className="custom-scrollbar" style={{ maxHeight: '220px', overflowY: 'auto', padding: '6px' }}>
                         {filteredOptions.length > 0 ? filteredOptions.map((opt: string) => (
-                            <label key={opt} style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 10px', cursor: 'pointer', borderRadius: '8px', background: selected.includes(opt) ? `${accentColor}25` : 'transparent', transition: '0.2s' }}>
+                            <label key={opt} className="multi-select-option" style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '8px 10px', cursor: 'pointer', borderRadius: '8px', background: selected.includes(opt) ? `${accentColor}25` : 'transparent', transition: '0.2s' }}>
                                 <input 
                                     type="checkbox" 
                                     checked={selected.includes(opt)} 
                                     onChange={() => handleToggle(opt)} 
                                     style={{ accentColor: accentColor, transform: 'scale(1.2)', cursor: 'pointer' }}
                                 />
-                                <span style={{ fontSize: '12px', fontWeight: 800, color: selected.includes(opt) ? accentColor : '#F8FAFC' }}>{opt}</span>
+                                <span className="multi-select-opt-label" style={{ fontSize: '12px', fontWeight: 800, color: selected.includes(opt) ? accentColor : undefined }}>{opt}</span>
                             </label>
                         )) : (
                             <div style={{ padding: '15px', textAlign: 'center', fontSize: '12px', color: '#94A3B8', fontWeight: 700 }}>لا توجد نتائج مطابقة</div>
@@ -94,6 +96,21 @@ const MultiSelectDropdown = ({ options, selected, onChange, placeholder, title, 
                 .custom-scrollbar::-webkit-scrollbar-track { background: rgba(11, 14, 20, 0.5); border-radius: 4px; }
                 .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0, 229, 255, 0.3); border-radius: 4px; }
                 .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #00E5FF; }
+
+                .multi-select-trigger { background: rgba(11, 14, 20, 0.8); border: 1px solid rgba(0, 229, 255, 0.25); color: #F8FAFC; }
+                .multi-select-trigger .multi-select-text { color: #F8FAFC; }
+                .multi-select-trigger .multi-select-arrow { color: #00E5FF; }
+                .multi-select-menu { background: rgba(20, 24, 34, 0.98); border: 1px solid rgba(0, 229, 255, 0.3); }
+                .multi-select-search { background: rgba(20, 24, 34, 0.9); border: 1px solid rgba(0, 229, 255, 0.25); color: #F8FAFC; }
+                .multi-select-opt-label { color: #F8FAFC; }
+
+                .daylight-theme .multi-select-trigger { background: #FFFFFF !important; border: 1.5px solid rgba(194, 155, 98, 0.35) !important; color: #2C1A12 !important; }
+                .daylight-theme .multi-select-trigger .multi-select-text { color: #2C1A12 !important; }
+                .daylight-theme .multi-select-trigger .multi-select-arrow { color: #C29B62 !important; }
+                .daylight-theme .multi-select-menu { background: #FFFFFF !important; border: 1.5px solid rgba(194, 155, 98, 0.35) !important; box-shadow: 0 12px 35px rgba(44, 26, 18, 0.12) !important; }
+                .daylight-theme .multi-select-search { background: #FDFBF7 !important; border: 1px solid rgba(194, 155, 98, 0.3) !important; color: #2C1A12 !important; }
+                .daylight-theme .multi-select-opt-label { color: #2C1A12 !important; }
+                .daylight-theme .multi-select-title { color: rgba(44, 26, 18, 0.7) !important; }
             ` }} />
         </div>
     );
@@ -317,9 +334,13 @@ export default function CashFlowsPage() {
                     .source-breakdown-card:hover { transform: translateY(-3px); border-color: rgba(0, 229, 255, 0.4); }
                     .source-breakdown-title { font-size: 12px; font-weight: 900; color: #94A3B8; margin-bottom: 8px; }
                     .source-breakdown-val { font-size: 20px; font-weight: 900; }
+
+                    .cashflows-filters { background: rgba(20, 24, 34, 0.85); border: 1px solid rgba(0, 229, 255, 0.2); backdrop-filter: blur(10px); }
                     
                     .filter-input { width: 100%; padding: 12px 15px; border-radius: 12px; border: 1.5px solid rgba(0, 229, 255, 0.25); outline: none; font-weight: 800; color: #F8FAFC; transition: 0.2s; height: 50px; background: rgba(11, 14, 20, 0.8); }
                     .filter-input:focus { border-color: #00E5FF; box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.2); }
+
+                    .view-toggle-wrap { background: rgba(11, 14, 20, 0.6); border: 1px solid rgba(0, 229, 255, 0.2); border-radius: 12px; overflow: hidden; }
 
                     .tree-table { width: 100%; border-collapse: separate; border-spacing: 0; text-align: center; background: transparent; }
                     .tree-thead { background: rgba(11, 14, 20, 0.9); color: #00E5FF; border-radius: 16px 16px 0 0; }
@@ -345,6 +366,79 @@ export default function CashFlowsPage() {
                     .view-toggle-btn:not(.active) { background: transparent; color: #94A3B8; }
                     .view-toggle-btn:not(.active):hover { background: rgba(0, 229, 255, 0.1); color: #00E5FF; }
 
+                    /* ☀️ Desert Glass Daylight Overrides */
+                    .daylight-theme .summary-card,
+                    .daylight-theme .source-breakdown-card,
+                    .daylight-theme .cashflows-filters {
+                        background: linear-gradient(135deg, rgba(255, 253, 250, 0.96) 0%, rgba(250, 246, 240, 0.92) 100%) !important;
+                        border: 1px solid rgba(194, 155, 98, 0.3) !important;
+                        box-shadow: 0 4px 20px rgba(44, 26, 18, 0.08) !important;
+                    }
+                    .daylight-theme .summary-val {
+                        color: #2C1A12 !important;
+                        text-shadow: none !important;
+                    }
+                    .daylight-theme .summary-label,
+                    .daylight-theme .source-breakdown-title {
+                        color: rgba(44, 26, 18, 0.7) !important;
+                    }
+                    .daylight-theme .view-toggle-wrap {
+                        background: rgba(253, 251, 247, 0.9) !important;
+                        border-color: rgba(194, 155, 98, 0.3) !important;
+                    }
+                    .daylight-theme .view-toggle-btn.active {
+                        background: #C29B62 !important;
+                        color: #FFFFFF !important;
+                    }
+                    .daylight-theme .view-toggle-btn:not(.active) {
+                        color: rgba(44, 26, 18, 0.65) !important;
+                    }
+                    .daylight-theme .filter-input {
+                        background: #FFFFFF !important;
+                        border-color: rgba(194, 155, 98, 0.35) !important;
+                        color: #2C1A12 !important;
+                    }
+                    .daylight-theme .tree-thead {
+                        background: rgba(194, 155, 98, 0.12) !important;
+                        color: #2C1A12 !important;
+                    }
+                    .daylight-theme .tree-thead th {
+                        color: #2C1A12 !important;
+                        border-bottom-color: rgba(194, 155, 98, 0.3) !important;
+                    }
+                    .daylight-theme .master-group-row {
+                        background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(250, 247, 242, 0.9) 100%) !important;
+                    }
+                    .daylight-theme .master-group-row td {
+                        color: #2C1A12 !important;
+                        border-bottom-color: rgba(194, 155, 98, 0.2) !important;
+                    }
+                    .daylight-theme .child-tree-container {
+                        background: rgba(253, 251, 247, 0.95) !important;
+                        border-bottom-color: rgba(194, 155, 98, 0.3) !important;
+                    }
+                    .daylight-theme .child-table {
+                        background: #FFFFFF !important;
+                        border-color: rgba(194, 155, 98, 0.3) !important;
+                    }
+                    .daylight-theme .child-table th {
+                        background: rgba(194, 155, 98, 0.1) !important;
+                        color: #2C1A12 !important;
+                        border-bottom-color: rgba(194, 155, 98, 0.3) !important;
+                    }
+                    .daylight-theme .child-table td {
+                        color: #2C1A12 !important;
+                        border-bottom-color: rgba(194, 155, 98, 0.15) !important;
+                    }
+                    .daylight-theme .arrow-icon {
+                        background: rgba(194, 155, 98, 0.15) !important;
+                        color: #C29B62 !important;
+                    }
+                    .daylight-theme .arrow-expanded {
+                        background: #C29B62 !important;
+                        color: #FFFFFF !important;
+                    }
+
                     @media (max-width: 768px) {
                         .summary-card { flex: 1 1 100% !important; padding: 15px !important; margin-bottom: 8px !important; border-radius: 14px !important; }
                         .summary-val { font-size: 22px !important; }
@@ -361,7 +455,6 @@ export default function CashFlowsPage() {
                         .tree-thead th { padding: 10px 8px !important; font-size: 11px !important; }
                         .master-group-row td { padding: 10px 8px !important; font-size: 11px !important; }
                         .cashflows-pagination { flex-direction: column !important; gap: 12px !important; padding: 12px !important; align-items: stretch !important; text-align: center !important; }
-                        .cashflows-pagination > div { justify-content: center !important; }
                     }
                 ` }} />
 
@@ -387,7 +480,7 @@ export default function CashFlowsPage() {
                     {/* 🎛️ أزرار طرق العرض - مدمجة في صف السامري */}
                     <div className="summary-card" style={{ flex: '1.2', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
                         <div className="summary-label"><span>👁️</span> طريقة التجميع والعرض</div>
-                        <div style={{ display: 'flex', background: 'rgba(11, 14, 20, 0.6)', borderRadius: '12px', overflow: 'hidden', border: '1px solid rgba(0, 229, 255, 0.2)', flex: 1 }}>
+                        <div className="view-toggle-wrap" style={{ display: 'flex', flex: 1 }}>
                             <button 
                                 className={`view-toggle-btn ${groupBy === 'partner' ? 'active' : ''}`} 
                                 onClick={() => {setGroupBy('partner'); setExpandedGroups([]);}}
@@ -438,7 +531,7 @@ export default function CashFlowsPage() {
 
 
                 {/* 🔍 شريط الفلاتر */}
-                <div className="cashflows-filters" style={{ display: 'flex', gap: '15px', marginBottom: '30px', background: 'rgba(20, 24, 34, 0.85)', padding: '25px', borderRadius: '20px', boxShadow: '0 5px 20px rgba(0,0,0,0.3)', border: '1px solid rgba(0, 229, 255, 0.2)', flexWrap: 'wrap', alignItems: 'flex-end', backdropFilter: 'blur(10px)' }}>
+                <div className="cashflows-filters" style={{ display: 'flex', gap: '15px', marginBottom: '30px', padding: '25px', borderRadius: '20px', boxShadow: '0 5px 20px rgba(0,0,0,0.15)', flexWrap: 'wrap', alignItems: 'flex-end' }}>
                     
                     <div style={{ flex: '1', minWidth: '180px' }}>
                         <label style={{ fontSize: '11px', fontWeight: 900, color: '#64748b', marginBottom: '6px', display: 'block' }}>بحث عام</label>

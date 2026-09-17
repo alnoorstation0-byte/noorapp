@@ -32,14 +32,14 @@ DROP TABLE IF EXISTS public.sys_financial_reports CASCADE;
 
 -- أ. جدول الشركاء والعملاء (partners)
 ALTER TABLE public.partners 
-    DROP COLUMN IF EXISTS bottle_custody,
-    DROP COLUMN IF EXISTS route_name,
-    DROP COLUMN IF EXISTS location_lat,
-    DROP COLUMN IF EXISTS location_lng;
+    DROP COLUMN IF EXISTS bottle_custody CASCADE,
+    DROP COLUMN IF EXISTS route_name CASCADE,
+    DROP COLUMN IF EXISTS location_lat CASCADE,
+    DROP COLUMN IF EXISTS location_lng CASCADE;
 
 -- ب. جدول الأصناف والمخزون (inventory_items)
 ALTER TABLE public.inventory_items 
-    DROP COLUMN IF EXISTS is_returnable_bottle;
+    DROP COLUMN IF EXISTS is_returnable_bottle CASCADE;
 
 -- إضافة عمدان تصنيف الوقود والمنتجات إذا لم تكن موجودة
 ALTER TABLE public.inventory_items 
@@ -48,13 +48,13 @@ ALTER TABLE public.inventory_items
 
 -- ج. جدول ورديات الكاشير ونقاط البيع (pos_shifts)
 ALTER TABLE public.pos_shifts 
-    DROP COLUMN IF EXISTS starting_bottles,
-    DROP COLUMN IF EXISTS bottles_sold,
-    DROP COLUMN IF EXISTS bottles_returned,
-    DROP COLUMN IF EXISTS bottles_shortage,
-    DROP COLUMN IF EXISTS expected_bottles,
-    DROP COLUMN IF EXISTS actual_bottles,
-    DROP COLUMN IF EXISTS fleet_operation_id;
+    DROP COLUMN IF EXISTS starting_bottles CASCADE,
+    DROP COLUMN IF EXISTS bottles_sold CASCADE,
+    DROP COLUMN IF EXISTS bottles_returned CASCADE,
+    DROP COLUMN IF EXISTS bottles_shortage CASCADE,
+    DROP COLUMN IF EXISTS expected_bottles CASCADE,
+    DROP COLUMN IF EXISTS actual_bottles CASCADE,
+    DROP COLUMN IF EXISTS fleet_operation_id CASCADE;
 
 -- إضافة عمدان العدادات ومبيعات الوقود اللحظية
 ALTER TABLE public.pos_shifts 
@@ -65,55 +65,58 @@ ALTER TABLE public.pos_shifts
 
 -- د. جدول الفواتير (invoices)
 ALTER TABLE public.invoices 
-    DROP COLUMN IF EXISTS guarantee_percent,
-    DROP COLUMN IF EXISTS guarantee_amount,
-    DROP COLUMN IF EXISTS materials_discount,
-    DROP COLUMN IF EXISTS materials_acc_id,
-    DROP COLUMN IF EXISTS guarantee_acc_id,
-    DROP COLUMN IF EXISTS job_order_id,
-    DROP COLUMN IF EXISTS fleet_operation_id;
+    DROP COLUMN IF EXISTS guarantee_percent CASCADE,
+    DROP COLUMN IF EXISTS guarantee_amount CASCADE,
+    DROP COLUMN IF EXISTS materials_discount CASCADE,
+    DROP COLUMN IF EXISTS materials_acc_id CASCADE,
+    DROP COLUMN IF EXISTS guarantee_acc_id CASCADE,
+    DROP COLUMN IF EXISTS job_order_id CASCADE,
+    DROP COLUMN IF EXISTS fleet_operation_id CASCADE;
 
 -- هـ. جدول المصروفات (expenses)
 ALTER TABLE public.expenses 
-    DROP COLUMN IF EXISTS sub_contractor,
-    DROP COLUMN IF EXISTS site_ref,
-    DROP COLUMN IF EXISTS is_deducted_in_claim,
-    DROP COLUMN IF EXISTS claim_id,
-    DROP COLUMN IF EXISTS job_order_id,
-    DROP COLUMN IF EXISTS is_deducted_from_contractor,
-    DROP COLUMN IF EXISTS fleet_operation_id;
+    DROP COLUMN IF EXISTS sub_contractor CASCADE,
+    DROP COLUMN IF EXISTS site_ref CASCADE,
+    DROP COLUMN IF EXISTS is_deducted_in_claim CASCADE,
+    DROP COLUMN IF EXISTS claim_id CASCADE,
+    DROP COLUMN IF EXISTS job_order_id CASCADE,
+    DROP COLUMN IF EXISTS is_deducted_from_contractor CASCADE,
+    DROP COLUMN IF EXISTS fleet_operation_id CASCADE;
 
 -- و. جدول سندات القبض (receipt_vouchers)
 ALTER TABLE public.receipt_vouchers 
-    DROP COLUMN IF EXISTS job_order_id,
-    DROP COLUMN IF EXISTS fleet_operation_id;
+    DROP COLUMN IF EXISTS job_order_id CASCADE,
+    DROP COLUMN IF EXISTS fleet_operation_id CASCADE;
 
 -- ز. جدول سندات الصرف (payment_vouchers)
 ALTER TABLE public.payment_vouchers 
-    DROP COLUMN IF EXISTS site_ref,
-    DROP COLUMN IF EXISTS related_expense_id,
-    DROP COLUMN IF EXISTS sub_claim_id,
-    DROP COLUMN IF EXISTS fleet_operation_id;
+    DROP COLUMN IF EXISTS site_ref CASCADE,
+    DROP COLUMN IF EXISTS related_expense_id CASCADE,
+    DROP COLUMN IF EXISTS sub_claim_id CASCADE,
+    DROP COLUMN IF EXISTS fleet_operation_id CASCADE;
 
 -- ح. جدول القيود اليدوية (manual_journals)
 ALTER TABLE public.manual_journals 
-    DROP COLUMN IF EXISTS project_id,
-    DROP COLUMN IF EXISTS job_order_id;
+    DROP COLUMN IF EXISTS project_id CASCADE,
+    DROP COLUMN IF EXISTS job_order_id CASCADE;
 
 -- ط. جدول رؤوس وتفاصيل القيود (journal_headers & journal_lines)
+-- إسقاط العرض المتأثر CASCADE أولاً لمنع الخطأ 2BP01
+DROP VIEW IF EXISTS public.journal_master_view CASCADE;
+
 ALTER TABLE public.journal_headers 
-    DROP COLUMN IF EXISTS fleet_operation_id;
+    DROP COLUMN IF EXISTS fleet_operation_id CASCADE;
 
 ALTER TABLE public.journal_lines 
-    DROP COLUMN IF EXISTS fleet_operation_id;
+    DROP COLUMN IF EXISTS fleet_operation_id CASCADE;
 
 -- ي. جدول حركات المخزون (inventory_transactions)
 ALTER TABLE public.inventory_transactions 
-    DROP COLUMN IF EXISTS fleet_operation_id;
+    DROP COLUMN IF EXISTS fleet_operation_id CASCADE;
 
 -- ك. جدول المستودعات والخزانات (warehouses)
 ALTER TABLE public.warehouses 
-    DROP COLUMN IF EXISTS vehicle_id;
+    DROP COLUMN IF EXISTS vehicle_id CASCADE;
 
 ALTER TABLE public.warehouses 
     ADD COLUMN IF NOT EXISTS tank_capacity_liters numeric DEFAULT 0,
@@ -164,11 +167,291 @@ CREATE INDEX IF NOT EXISTS idx_shift_pump_readings_shift ON public.shift_pump_re
 CREATE INDEX IF NOT EXISTS idx_shift_pump_readings_pump ON public.shift_pump_readings(pump_id);
 
 -- ------------------------------------------------------------------------------
--- 4. ترقية الدوال التخزينية (RPCs) لدعم محطة الوقود بنقاء
+-- 4. إعادة بناء العرض المحاسبي العام الموحد بدون عمدان الأسطول (journal_master_view)
+-- ------------------------------------------------------------------------------
+CREATE OR REPLACE VIEW public.journal_master_view AS
+SELECT 
+    jl.id AS line_id,
+    jh.id AS header_id,
+    jh.entry_date,
+    jh.description AS header_description,
+    jh.reference_id,
+    jh.v_type,
+    jh.status AS header_status,
+    jl.account_id,
+    a.code AS account_code,
+    a.name AS account_name,
+    jl.partner_id,
+    p.name AS partner_name,
+    COALESCE(jl.debit, 0) AS debit,
+    COALESCE(jl.credit, 0) AS credit,
+    jl.item_name,
+    jl.notes AS line_notes,
+    jl.tax_amount,
+    jl.tax_rate,
+    jl.created_at AS line_created_at,
+    jl.delegate_id
+FROM public.journal_lines jl
+JOIN public.journal_headers jh ON jh.id = jl.header_id
+LEFT JOIN public.accounts a ON a.id = jl.account_id
+LEFT JOIN public.partners p ON p.id = jl.partner_id;
+
+-- ------------------------------------------------------------------------------
+-- 5. ترقية دوال ترحيل القيود لتعمل بنقاء بدون أي إشارة لـ fleet_operation_id
+-- ------------------------------------------------------------------------------
+
+-- ترحيل الفواتير المجمع
+CREATE OR REPLACE FUNCTION public.post_invoices_bulk(p_ids uuid[])
+RETURNS void AS $$
+DECLARE
+    v_inv RECORD;
+    v_jh_id uuid;
+    v_total numeric;
+    v_tax numeric;
+    v_taxable numeric;
+    v_debit_acc uuid;
+    v_credit_acc uuid;
+    v_tax_acc uuid;
+BEGIN
+    FOR v_inv IN SELECT * FROM public.invoices WHERE id = ANY(p_ids)
+    LOOP
+        IF v_inv.is_posted = true OR v_inv.status IN ('posted', 'معتمد', 'مرحل', 'approved') THEN
+            CONTINUE;
+        END IF;
+
+        v_total := COALESCE(v_inv.total_amount, 0);
+        v_tax := COALESCE(v_inv.tax_amount, 0);
+        v_taxable := COALESCE(v_inv.taxable_amount, v_total - v_tax);
+
+        v_debit_acc := v_inv.debit_account_id;
+        v_credit_acc := v_inv.credit_account_id;
+        v_tax_acc := v_inv.tax_acc_id;
+
+        IF v_debit_acc IS NULL THEN
+            SELECT id INTO v_debit_acc FROM public.accounts WHERE code = '1103' OR name LIKE '%عملاء%' OR account_type = 'assets' LIMIT 1;
+        END IF;
+        IF v_credit_acc IS NULL THEN
+            SELECT id INTO v_credit_acc FROM public.accounts WHERE code = '4101' OR name LIKE '%مبيعات%' OR account_type = 'revenues' LIMIT 1;
+        END IF;
+        IF v_tax_acc IS NULL AND v_tax > 0 THEN
+            SELECT id INTO v_tax_acc FROM public.accounts WHERE code = '2105' OR name LIKE '%ضريبة%' OR account_type = 'liabilities' LIMIT 1;
+        END IF;
+
+        INSERT INTO public.journal_headers (entry_date, description, reference_id, v_type, status)
+        VALUES (
+            COALESCE(v_inv.date, CURRENT_DATE),
+            'فاتورة مبيعات رقم ' || COALESCE(v_inv.invoice_number, v_inv.id::text),
+            v_inv.id,
+            'invoice',
+            'posted'
+        )
+        RETURNING id INTO v_jh_id;
+
+        IF v_total > 0 AND v_debit_acc IS NOT NULL THEN
+            INSERT INTO public.journal_lines (header_id, account_id, partner_id, debit, credit, notes, delegate_id)
+            VALUES (
+                v_jh_id, v_debit_acc, v_inv.partner_id, v_total, 0,
+                'استحقاق فاتورة مبيعات #' || COALESCE(v_inv.invoice_number, ''),
+                v_inv.delegate_id
+            );
+        END IF;
+
+        IF v_taxable > 0 AND v_credit_acc IS NOT NULL THEN
+            INSERT INTO public.journal_lines (header_id, account_id, partner_id, debit, credit, notes, delegate_id)
+            VALUES (
+                v_jh_id, v_credit_acc, v_inv.partner_id, 0, v_taxable,
+                'إيراد مبيعات فاتورة #' || COALESCE(v_inv.invoice_number, ''),
+                v_inv.delegate_id
+            );
+        END IF;
+
+        IF v_tax > 0 AND v_tax_acc IS NOT NULL THEN
+            INSERT INTO public.journal_lines (header_id, account_id, partner_id, debit, credit, notes, tax_amount, delegate_id)
+            VALUES (
+                v_jh_id, v_tax_acc, v_inv.partner_id, 0, v_tax,
+                'ضريبة القيمة المضافة فاتورة #' || COALESCE(v_inv.invoice_number, ''),
+                v_tax, v_inv.delegate_id
+            );
+        END IF;
+
+        UPDATE public.invoices 
+        SET status = 'معتمد', is_posted = true 
+        WHERE id = v_inv.id;
+    END LOOP;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- ترحيل سندات القبض
+CREATE OR REPLACE FUNCTION public.post_receipts_bulk(p_ids uuid[])
+RETURNS void AS $$
+DECLARE
+    v_rec RECORD;
+    v_jh_id uuid;
+    v_amt numeric;
+    v_safe_acc uuid;
+    v_partner_acc uuid;
+BEGIN
+    FOR v_rec IN SELECT * FROM public.receipt_vouchers WHERE id = ANY(p_ids)
+    LOOP
+        IF v_rec.status IN ('posted', 'معتمد', 'مرحل', 'approved') THEN
+            CONTINUE;
+        END IF;
+
+        v_amt := COALESCE(v_rec.amount, 0);
+        v_safe_acc := v_rec.safe_bank_acc_id;
+        v_partner_acc := v_rec.partner_acc_id;
+
+        IF v_safe_acc IS NULL THEN
+            SELECT id INTO v_safe_acc FROM public.accounts WHERE code IN ('1101', '1102') OR name LIKE '%صندوق%' OR name LIKE '%خزينة%' OR account_type = 'assets' LIMIT 1;
+        END IF;
+        IF v_partner_acc IS NULL THEN
+            SELECT id INTO v_partner_acc FROM public.accounts WHERE code = '1103' OR name LIKE '%عملاء%' OR account_type = 'assets' LIMIT 1;
+        END IF;
+
+        INSERT INTO public.journal_headers (entry_date, description, reference_id, v_type, status)
+        VALUES (
+            COALESCE(v_rec.date, CURRENT_DATE),
+            'سند قبض رقم ' || COALESCE(v_rec.receipt_number, v_rec.id::text) || COALESCE(' - ' || v_rec.notes, ''),
+            v_rec.id,
+            'receipt',
+            'posted'
+        )
+        RETURNING id INTO v_jh_id;
+
+        IF v_amt > 0 AND v_safe_acc IS NOT NULL THEN
+            INSERT INTO public.journal_lines (header_id, account_id, partner_id, debit, credit, notes, delegate_id)
+            VALUES (
+                v_jh_id, v_safe_acc, v_rec.partner_id, v_amt, 0,
+                'تحصيل نقدية سند قبض #' || COALESCE(v_rec.receipt_number, ''),
+                v_rec.delegate_id
+            );
+        END IF;
+
+        IF v_amt > 0 AND v_partner_acc IS NOT NULL THEN
+            INSERT INTO public.journal_lines (header_id, account_id, partner_id, debit, credit, notes, delegate_id)
+            VALUES (
+                v_jh_id, v_partner_acc, v_rec.partner_id, 0, v_amt,
+                'سداد عميل سند قبض #' || COALESCE(v_rec.receipt_number, ''),
+                v_rec.delegate_id
+            );
+        END IF;
+
+        UPDATE public.receipt_vouchers 
+        SET status = 'معتمد' 
+        WHERE id = v_rec.id;
+    END LOOP;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- ترحيل سندات الصرف
+CREATE OR REPLACE FUNCTION public.post_payment_vouchers_bulk(p_ids uuid[])
+RETURNS void AS $$
+DECLARE
+    v_pv RECORD;
+    v_jh_id uuid;
+    v_amt numeric;
+    v_debit_acc uuid;
+    v_credit_acc uuid;
+BEGIN
+    FOR v_pv IN SELECT * FROM public.payment_vouchers WHERE id = ANY(p_ids)
+    LOOP
+        IF v_pv.is_posted = true OR v_pv.status IN ('posted', 'معتمد', 'مرحل', 'approved') THEN
+            CONTINUE;
+        END IF;
+
+        v_amt := COALESCE(v_pv.amount, 0);
+        v_debit_acc := v_pv.debit_account_id;
+        v_credit_acc := v_pv.credit_account_id;
+
+        IF v_debit_acc IS NULL THEN
+            SELECT id INTO v_debit_acc FROM public.accounts WHERE code = '2101' OR name LIKE '%موردين%' OR account_type IN ('liabilities', 'expenses') LIMIT 1;
+        END IF;
+        IF v_credit_acc IS NULL THEN
+            SELECT id INTO v_credit_acc FROM public.accounts WHERE code IN ('1101', '1102') OR name LIKE '%صندوق%' OR name LIKE '%بنك%' OR account_type = 'assets' LIMIT 1;
+        END IF;
+
+        INSERT INTO public.journal_headers (entry_date, description, reference_id, v_type, status)
+        VALUES (
+            COALESCE(v_pv.date, CURRENT_DATE),
+            'سند صرف رقم ' || COALESCE(v_pv.voucher_number, v_pv.id::text) || COALESCE(' - ' || v_pv.description, ''),
+            v_pv.id,
+            'payment_voucher',
+            'posted'
+        )
+        RETURNING id INTO v_jh_id;
+
+        IF v_amt > 0 AND v_debit_acc IS NOT NULL THEN
+            INSERT INTO public.journal_lines (header_id, account_id, partner_id, debit, credit, notes)
+            VALUES (
+                v_jh_id, v_debit_acc, v_pv.partner_id, v_amt, 0,
+                'سند صرف #' || COALESCE(v_pv.voucher_number, '')
+            );
+        END IF;
+
+        IF v_amt > 0 AND v_credit_acc IS NOT NULL THEN
+            INSERT INTO public.journal_lines (header_id, account_id, partner_id, debit, credit, notes)
+            VALUES (
+                v_jh_id, v_credit_acc, NULL, 0, v_amt,
+                'سداد سند صرف #' || COALESCE(v_pv.voucher_number, '')
+            );
+        END IF;
+
+        UPDATE public.payment_vouchers 
+        SET status = 'معتمد', is_posted = true 
+        WHERE id = v_pv.id;
+    END LOOP;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- ترحيل المصروف المفرد
+CREATE OR REPLACE FUNCTION public.post_expense_to_journal(p_expense_id UUID)
+RETURNS void AS $$
+DECLARE
+    v_expense RECORD;
+    v_journal_id UUID;
+    v_debit_acc UUID;
+    v_credit_acc UUID;
+    v_total_amount NUMERIC;
+BEGIN
+    SELECT * INTO v_expense FROM public.expenses WHERE id = p_expense_id;
+
+    IF v_expense.is_posted THEN
+        RAISE EXCEPTION 'هذا المصروف مرحّل مسبقاً ولا يمكن ترحيله مرة أخرى';
+    END IF;
+
+    v_total_amount := COALESCE(v_expense.total_price, (v_expense.quantity * v_expense.unit_price)) + COALESCE(v_expense.vat_amount, 0);
+
+    SELECT id INTO v_debit_acc FROM public.accounts WHERE code = split_part(v_expense.creditor_account, ' - ', 1) LIMIT 1;
+    SELECT id INTO v_credit_acc FROM public.accounts WHERE code = split_part(v_expense.payment_account, ' - ', 1) LIMIT 1;
+
+    IF v_debit_acc IS NULL THEN
+        SELECT id INTO v_debit_acc FROM public.accounts WHERE account_type = 'expenses' LIMIT 1;
+    END IF;
+    IF v_credit_acc IS NULL THEN
+        SELECT id INTO v_credit_acc FROM public.accounts WHERE account_type = 'assets' LIMIT 1;
+    END IF;
+
+    INSERT INTO public.journal_headers (entry_date, description, reference_id, status)
+    VALUES (v_expense.exp_date, 'قيد مصروف آلي: ' || v_expense.description, v_expense.id, 'posted')
+    RETURNING id INTO v_journal_id;
+
+    INSERT INTO public.journal_lines (header_id, account_id, debit, credit, notes, partner_id)
+    VALUES (v_journal_id, v_debit_acc, v_total_amount, 0, v_expense.description, v_expense.payee_id);
+
+    INSERT INTO public.journal_lines (header_id, account_id, debit, credit, notes, partner_id)
+    VALUES (v_journal_id, v_credit_acc, 0, v_total_amount, 'سداد مصروف: ' || v_expense.description, v_expense.payee_id);
+
+    UPDATE public.expenses SET is_posted = true WHERE id = p_expense_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- ------------------------------------------------------------------------------
+-- 6. ترقية الدوال التخزينية الخاصة بالورديات ومحطة الوقود بنقاء
 -- ------------------------------------------------------------------------------
 
 -- دالة جلب تفاصيل الوردية النقية بدون أي حقول قوارير
-CREATE OR REPLACE FUNCTION get_pos_shift_details(p_shift_id UUID)
+DROP FUNCTION IF EXISTS public.get_pos_shift_details(UUID);
+CREATE OR REPLACE FUNCTION public.get_pos_shift_details(p_shift_id UUID)
 RETURNS jsonb AS $$
 DECLARE
     v_shift RECORD;
@@ -318,6 +601,132 @@ BEGIN
     );
 
     RETURN v_result;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- ------------------------------------------------------------------------------
+-- 5. تحديث وتطهير دالة حفظ المصروفات (Cleaned save_expense_with_settlement)
+-- ------------------------------------------------------------------------------
+DROP FUNCTION IF EXISTS public.save_expense_with_settlement;
+CREATE OR REPLACE FUNCTION public.save_expense_with_settlement(
+    p_id uuid,
+    p_exp_date date,
+    p_main_category text,
+    p_sub_contractor text DEFAULT NULL,
+    p_site_ref text DEFAULT NULL,
+    p_creditor_account text DEFAULT NULL,
+    p_description text DEFAULT NULL,
+    p_payee_name text DEFAULT NULL,
+    p_payment_method text DEFAULT 'آجل',
+    p_payment_account text DEFAULT NULL,
+    p_employee_name text DEFAULT NULL,
+    p_quantity numeric DEFAULT 1,
+    p_unit_price numeric DEFAULT 0,
+    p_vat_amount numeric DEFAULT 0,
+    p_discount_amount numeric DEFAULT 0,
+    p_discount_account text DEFAULT NULL,
+    p_notes text DEFAULT NULL,
+    p_invoice_image text DEFAULT NULL,
+    p_lines_data jsonb DEFAULT '[]'::jsonb,
+    p_is_auto_distributed boolean DEFAULT false,
+    p_payee_id uuid DEFAULT NULL,
+    p_job_order_id uuid DEFAULT NULL,
+    p_is_deducted_from_contractor boolean DEFAULT false
+) RETURNS jsonb AS $$
+DECLARE
+    generated_expense_number text;
+    first_inserted_id uuid;
+    line_record jsonb;
+    current_line_qty numeric;
+    current_line_price numeric;
+    current_line_vat numeric;
+    current_line_disc numeric;
+    current_line_desc text;
+    lines_array jsonb;
+BEGIN
+    IF p_id IS NULL THEN
+        generated_expense_number := 'EXP-' || to_char(CURRENT_DATE, 'YYYYMMDD') || '-' || upper(substring(md5(random()::text) from 1 for 4));
+    ELSE
+        SELECT expense_number INTO generated_expense_number FROM public.expenses WHERE id = p_id LIMIT 1;
+        IF generated_expense_number IS NOT NULL THEN
+            DELETE FROM public.expenses WHERE expense_number = generated_expense_number;
+        ELSE
+            generated_expense_number := 'EXP-' || to_char(CURRENT_DATE, 'YYYYMMDD') || '-' || upper(substring(md5(random()::text) from 1 for 4));
+        END IF;
+    END IF;
+
+    IF p_lines_data IS NULL OR jsonb_array_length(p_lines_data) = 0 THEN
+        lines_array := jsonb_build_array(
+            jsonb_build_object(
+                'description', p_description,
+                'quantity', p_quantity,
+                'unit_price', p_unit_price,
+                'vat_amount', p_vat_amount,
+                'discount_amount', p_discount_amount
+            )
+        );
+    ELSE
+        lines_array := p_lines_data;
+    END IF;
+
+    FOR line_record IN SELECT * FROM jsonb_array_elements(lines_array)
+    LOOP
+        current_line_desc := COALESCE(line_record->>'description', line_record->>'item_name', line_record->>'work_item', p_description);
+        current_line_qty := COALESCE((line_record->>'quantity')::numeric, 1);
+        current_line_price := COALESCE((line_record->>'unit_price')::numeric, 0);
+        current_line_vat := COALESCE((line_record->>'vat_amount')::numeric, 0);
+        current_line_disc := COALESCE((line_record->>'discount_amount')::numeric, 0);
+
+        INSERT INTO public.expenses (
+            expense_number,
+            exp_date,
+            main_category,
+            creditor_account,
+            description,
+            payee_name,
+            payment_method,
+            payment_account,
+            employee_name,
+            quantity,
+            unit_price,
+            vat_amount,
+            discount_amount,
+            discount_account,
+            notes,
+            invoice_image,
+            is_auto_distributed,
+            payee_id,
+            lines_data
+        ) VALUES (
+            generated_expense_number,
+            p_exp_date,
+            p_main_category,
+            p_creditor_account,
+            current_line_desc,
+            p_payee_name,
+            p_payment_method,
+            p_payment_account,
+            p_employee_name,
+            current_line_qty,
+            current_line_price,
+            current_line_vat,
+            current_line_disc,
+            p_discount_account,
+            p_notes,
+            p_invoice_image,
+            p_is_auto_distributed,
+            p_payee_id,
+            '[]'::jsonb
+        ) RETURNING id INTO first_inserted_id;
+    END LOOP;
+
+    RETURN jsonb_build_object(
+        'success', true, 
+        'expense_number', generated_expense_number,
+        'id', first_inserted_id 
+    );
+EXCEPTION WHEN OTHERS THEN
+    RETURN jsonb_build_object('success', false, 'error', SQLERRM);
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 

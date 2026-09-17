@@ -67,13 +67,11 @@ export const WATCHED_TABLES = [
   'manual_journals',
   'inventory_items',
   'warehouse_inventory',
-  'vehicle_inventory',
   'warehouses',
+  'fuel_pumps',
+  'shift_pump_readings',
   'partners',
   'accounts',
-  'fleet_operations',
-  'service_operations',
-  'fleet_vehicles',
   'pos_shifts',
   'payroll_slips',
 ] as const;
@@ -149,15 +147,13 @@ const TABLE_QUERY_KEY_MAP: Record<string, string[][]> = {
     ['ledger_entries'], 
     ['trial_balance']
   ],
-  fleet_operations: [
-    ['fleet_operations'], 
-    ['fleet_operations_open'], 
-    ['operations_for_vehicles'],
-    ['delegate_settlements_trips']
+  fuel_pumps: [
+    ['fuel_pumps'],
+    ['active_fuel_pumps']
   ],
-  fleet_vehicles: [
-    ['fleet_vehicles'], 
-    ['fleet_vehicles_list']
+  shift_pump_readings: [
+    ['shift_pump_readings'],
+    ['shift_readings']
   ],
   pos_shifts: [
     ['pos_shifts'], 

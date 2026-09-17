@@ -1,5 +1,6 @@
 "use client";
 import React from 'react';
+import { createPortal } from 'react-dom';
 import MasterPage from '@/components/MasterPage';
 import { useLanguage } from '@/lib/LanguageContext';
 import { usePosLogic } from './pos_logic';
@@ -34,6 +35,11 @@ function PosItemNumpadModal({
     onConfirm,
     onClose,
 }: PosItemNumpadModalProps) {
+    const [mounted, setMounted] = React.useState(false);
+    React.useEffect(() => {
+        setMounted(true);
+    }, []);
+
     const { language } = useLanguage();
     const isEn = language === 'en';
 
@@ -228,20 +234,24 @@ function PosItemNumpadModal({
     const isExceeded = (item.selected_qty || 0) > (item.available_qty || 0);
     const totalPrice = (item.selected_qty || 0) * (item.selected_price || 0);
 
-    return (
+    if (!mounted || typeof document === 'undefined') return null;
+
+    return createPortal(
         <div className="pos-numpad-overlay">
             <style>{`
                 .pos-numpad-overlay {
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    right: 0;
-                    bottom: 0;
-                    background: rgba(11, 14, 20, 0.85);
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    z-index: 9999;
+                    position: fixed !important;
+                    top: 0 !important;
+                    left: 0 !important;
+                    right: 0 !important;
+                    bottom: 0 !important;
+                    background: rgba(11, 14, 20, 0.85) !important;
+                    display: flex !important;
+                    align-items: center !important;
+                    justify-content: center !important;
+                    z-index: 999999999 !important;
+                    isolation: isolate !important;
+                    pointer-events: auto !important;
                     backdrop-filter: blur(16px);
                     -webkit-backdrop-filter: blur(16px);
                     padding: 16px;
@@ -707,7 +717,8 @@ function PosItemNumpadModal({
 
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }
 
@@ -787,9 +798,9 @@ export default function PosPage() {
 
     return (
         <MasterPage 
-            title={isEn ? 'POS Cashier' : 'نقاط البيع (POS)'} 
-            subtitle={isEn ? 'Quick Sales & POS Register' : 'شاشة المبيعات السريعة (كاشير) من منافذ البيع'} 
-            icon="🛍️"
+            title={isEn ? 'Station POS Cashier' : 'كاشير ومبيعات المحطة (POS)'} 
+            subtitle={isEn ? 'Fuel Sales & Station POS Register' : 'شاشة مبيعات محطة الوقود ومضخات المحروقات'} 
+            icon="⛽"
             className="pos-master-page"
         >
             <RawasiSidebarManager 
@@ -802,14 +813,14 @@ export default function PosPage() {
                             borderColor: logic.activeShift ? 'rgba(22, 163, 74, 0.3)' : 'rgba(239, 68, 68, 0.3)'
                         }}>
                             <span style={{ fontSize: '11px', fontWeight: 800, color: logic.activeShift ? '#166534' : '#991b1b' }}>
-                                {logic.activeShift ? (isEn ? '🟢 Shift Active' : '🟢 الوردية الحالية نشطة') : (isEn ? '🔴 Shift Closed' : '🔴 الوردية مغلقة حالياً')}
+                                {logic.activeShift ? (isEn ? '🟢 Shift Active' : '🟢 وردية المحطة نشطة') : (isEn ? '🔴 Shift Closed' : '🔴 الوردية مغلقة حالياً')}
                             </span>
                             <div className="val" style={{ fontSize: '17px', fontWeight: 900, color: logic.activeShift ? '#16a34a' : '#ef4444' }}>
-                                {logic.activeShift?.warehouse_name || (isEn ? 'No linked branch' : 'لا يوجد منفذ مرتبط')}
+                                {logic.activeShift?.warehouse_name || (isEn ? 'No station linked' : 'لا توجد محطة وقود مرتبطة')}
                             </div>
                             {logic.activeShift && (
                                 <div style={{ fontSize: '11px', color: '#64748b', fontWeight: 700, marginTop: '2px' }}>
-                                    {isEn ? 'Rep:' : 'المندوب:'} {logic.activeShift?.delegate_name || (isEn ? 'Not selected' : 'غير محدد')}
+                                    {isEn ? 'Station Operator:' : 'مشغل المحطة:'} {logic.activeShift?.delegate_name || (isEn ? 'Not selected' : 'غير محدد')}
                                 </div>
                             )}
                         </div>
@@ -1876,15 +1887,175 @@ export default function PosPage() {
                     padding: 9px 14px;
                     box-shadow: 0 0 20px rgba(0, 229, 255, 0.15);
                 }
+
+                /* 🏜️ Daylight Desert Glassmorphism */
+                .daylight-theme .pos-control-bar {
+                    background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.9) 100%) !important;
+                    border: 1px solid rgba(194, 155, 98, 0.3) !important;
+                    box-shadow: 0 4px 15px rgba(44, 26, 18, 0.08) !important;
+                }
+                .daylight-theme .pos-item-label {
+                    color: #2C1A12 !important;
+                }
+                .daylight-theme .pos-glass-select {
+                    background: #FFFFFF !important;
+                    border: 1.5px solid rgba(194, 155, 98, 0.35) !important;
+                    color: #2C1A12 !important;
+                    box-shadow: 0 2px 6px rgba(44, 26, 18, 0.06) !important;
+                }
+                .daylight-theme .pos-glass-select option {
+                    background: #FFFFFF !important;
+                    color: #2C1A12 !important;
+                }
+                .daylight-theme .pos-shift-btn-secondary {
+                    background: #FFFFFF !important;
+                    border: 1.5px solid rgba(194, 155, 98, 0.35) !important;
+                    color: #A8573C !important;
+                    box-shadow: 0 2px 6px rgba(44, 26, 18, 0.08) !important;
+                }
+                .daylight-theme .items-section, 
+                .daylight-theme .cart-section {
+                    background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.9) 100%) !important;
+                    border: 1px solid rgba(194, 155, 98, 0.3) !important;
+                    box-shadow: 0 4px 15px rgba(44, 26, 18, 0.08) !important;
+                }
+                .daylight-theme .pos-item-card {
+                    background: #FFFFFF !important;
+                    border: 1.5px solid rgba(194, 155, 98, 0.25) !important;
+                    box-shadow: 0 3px 10px rgba(44, 26, 18, 0.06) !important;
+                }
+                .daylight-theme .pos-item-card:hover {
+                    border-color: #C29B62 !important;
+                    box-shadow: 0 6px 16px rgba(168, 87, 60, 0.15) !important;
+                }
+                .daylight-theme .pos-item-name {
+                    color: #2C1A12 !important;
+                }
+                .daylight-theme .pos-item-avatar {
+                    background: rgba(194, 155, 98, 0.15) !important;
+                    border: 1px solid rgba(194, 155, 98, 0.3) !important;
+                    color: #A8573C !important;
+                }
+                .daylight-theme .pos-item-card:hover .pos-item-avatar {
+                    background: rgba(194, 155, 98, 0.25) !important;
+                }
+                .daylight-theme .pos-item-stock-info {
+                    background: rgba(44, 26, 18, 0.04) !important;
+                }
+                .daylight-theme .pos-item-stock-info .stock-label {
+                    color: rgba(44, 26, 18, 0.65) !important;
+                }
+                .daylight-theme .pos-item-price-tag .price-num {
+                    color: #A8573C !important;
+                }
+                .daylight-theme .pos-quick-add-btn {
+                    background: linear-gradient(135deg, #C29B62 0%, #A8573C 100%) !important;
+                    color: #FFFFFF !important;
+                    box-shadow: 0 2px 5px rgba(168, 87, 60, 0.3) !important;
+                }
+                .daylight-theme .cart-item {
+                    background: #FFFFFF !important;
+                    border: 1.5px solid rgba(194, 155, 98, 0.25) !important;
+                    box-shadow: 0 2px 8px rgba(44, 26, 18, 0.06) !important;
+                }
+                .daylight-theme .cart-item span[style*="color: #F8FAFC"],
+                .daylight-theme .cart-item span[style*="color: rgb(248, 250, 252)"] {
+                    color: #2C1A12 !important;
+                }
+                .daylight-theme .cart-item-controls-row {
+                    border-top: 1px dashed rgba(194, 155, 98, 0.3) !important;
+                }
+                .daylight-theme .cart-qty-pill {
+                    background: #FDFBF7 !important;
+                    border: 1.5px solid rgba(194, 155, 98, 0.35) !important;
+                }
+                .daylight-theme .cart-qty-input {
+                    color: #2C1A12 !important;
+                }
+                .daylight-theme .cart-qty-btn.plus {
+                    background: rgba(194, 155, 98, 0.2) !important;
+                    color: #A8573C !important;
+                }
+                .daylight-theme .cart-unit-price-box {
+                    background: #FDFBF7 !important;
+                    border: 1.5px solid rgba(194, 155, 98, 0.35) !important;
+                }
+                .daylight-theme .cart-price-input {
+                    color: #2C1A12 !important;
+                }
+                .daylight-theme .checkout-panel {
+                    background: linear-gradient(135deg, rgba(255, 253, 250, 0.98) 0%, rgba(245, 238, 228, 0.95) 100%) !important;
+                    border: 1.5px solid rgba(194, 155, 98, 0.35) !important;
+                    box-shadow: 0 4px 15px rgba(44, 26, 18, 0.08) !important;
+                }
+                .daylight-theme .pos-checkout-label,
+                .daylight-theme .pos-calc-label {
+                    color: #2C1A12 !important;
+                }
+                .daylight-theme .pos-checkout-select {
+                    background: #FFFFFF !important;
+                    color: #2C1A12 !important;
+                    border: 1.5px solid rgba(194, 155, 98, 0.35) !important;
+                }
+                .daylight-theme .pos-checkout-select option {
+                    background: #FFFFFF !important;
+                    color: #2C1A12 !important;
+                }
+                .daylight-theme .pos-discount-input,
+                .daylight-theme .pos-discount-select {
+                    background: #FFFFFF !important;
+                }
+                .daylight-theme .pos-calc-method-bar {
+                    background: rgba(194, 155, 98, 0.08) !important;
+                    border: 1px solid rgba(194, 155, 98, 0.25) !important;
+                }
+                .daylight-theme .pos-calc-toggle {
+                    background: #FFFFFF !important;
+                    border: 1px solid rgba(194, 155, 98, 0.3) !important;
+                }
+                .daylight-theme .pos-totals-row {
+                    background: #FFFFFF !important;
+                    border: 1px solid rgba(194, 155, 98, 0.25) !important;
+                }
+                .daylight-theme .pos-totals-row .pos-totals-val {
+                    color: #2C1A12 !important;
+                }
+                .daylight-theme .pos-total-banner {
+                    background: linear-gradient(135deg, rgba(194, 155, 98, 0.2) 0%, rgba(168, 87, 60, 0.12) 100%) !important;
+                    border: 1.5px solid rgba(194, 155, 98, 0.45) !important;
+                    box-shadow: 0 2px 10px rgba(168, 87, 60, 0.1) !important;
+                }
+                .daylight-theme .pos-total-banner-label {
+                    color: #2C1A12 !important;
+                }
+                .daylight-theme .pos-total-banner-val {
+                    color: #A8573C !important;
+                    text-shadow: none !important;
+                }
+                .daylight-theme .pos-fuel-liters-badge {
+                    background: #FFFFFF !important;
+                    color: #2C1A12 !important;
+                    border: 1px solid rgba(194, 155, 98, 0.35) !important;
+                }
+                .daylight-theme .pos-mobile-cart-float {
+                    background: linear-gradient(135deg, #C29B62 0%, #A8573C 100%) !important;
+                    border: 1.5px solid rgba(194, 155, 98, 0.5) !important;
+                    box-shadow: 0 10px 30px rgba(44, 26, 18, 0.25) !important;
+                }
+                .daylight-theme .btn-main-glass {
+                    background: linear-gradient(135deg, #C29B62 0%, #A8573C 100%) !important;
+                    color: #FFFFFF !important;
+                    box-shadow: 0 4px 15px rgba(168, 87, 60, 0.3) !important;
+                }
             `}</style>
 
-            {/* 🎛️ شريط تحكم الكاشير المتكامل (منفذ البيع + المندوب + الوردية) */}
+            {/* 🎛️ شريط تحكم الكاشير المتكامل (محطة الوقود + مشغل المحطة + الوردية) */}
             <div className="pos-control-bar">
                 <div className="pos-selectors-group">
-                    {/* منفذ البيع */}
+                    {/* محطة الوقود / الخزان */}
                     <div className="pos-select-item">
                         <span className="pos-item-label" style={{ color: THEME.primary }}>
-                            🏪 {isEn ? 'Branch / POS:' : 'منفذ البيع:'}
+                            ⛽ {isEn ? 'Station / Tank:' : 'محطة الوقود / الخزان:'}
                         </span>
                         <select 
                             className="pos-glass-select" 
@@ -1893,7 +2064,7 @@ export default function PosPage() {
                             style={{ minWidth: '190px' }}
                             disabled={!logic.isManagerOrAdmin && logic.isDelegateLocked}
                         >
-                            <option value="" disabled>{isEn ? '-- Select Branch --' : '-- اختر منفذ البيع --'}</option>
+                            <option value="" disabled>{isEn ? '-- Select Station --' : '-- اختر محطة الوقود --'}</option>
                             {logic.warehouses.map((w: any) => (
                                 <option key={w.id} value={w.id}>{w.name}</option>
                             ))}
@@ -1908,16 +2079,16 @@ export default function PosPage() {
                                 fontSize: '10px',
                                 fontWeight: 800,
                                 whiteSpace: 'nowrap'
-                            }} title={isEn ? 'Management Mode: Warehouse switching permitted' : 'وضع الإدارة: متاح تبديل الفروع في أي وقت مع استقلالية كل وردية'}>
+                            }} title={isEn ? 'Management Mode: Station switching permitted' : 'وضع الإدارة: متاح تبديل المحطات في أي وقت مع استقلالية كل وردية'}>
                                 👑 {isEn ? 'Admin Mode' : 'وضع الإدارة'}
                             </span>
                         )}
                     </div>
 
-                    {/* المندوب */}
+                    {/* مشغل المحطة */}
                     <div className="pos-select-item">
                         <span className="pos-item-label" style={{ color: '#16a34a' }}>
-                            👤 {isEn ? 'Cashier / Rep:' : 'المندوب / الكاشير:'}
+                            👤 {isEn ? 'Station Operator:' : 'مشغل المحطة / الكاشير:'}
                         </span>
                         <select 
                             className="pos-glass-select" 
@@ -1929,7 +2100,7 @@ export default function PosPage() {
                             }}
                             disabled={logic.isDelegateLocked}
                         >
-                            <option value="">{isEn ? '-- Select Cashier --' : '-- اختر المندوب --'}</option>
+                            <option value="">{isEn ? '-- Select Operator --' : '-- اختر المشغل --'}</option>
                             {logic.delegates.map((d: any) => (
                                 <option key={d.id} value={d.id}>{d.name}</option>
                             ))}
@@ -1996,12 +2167,10 @@ export default function PosPage() {
                             <button 
                                 onClick={() => setInspectShiftId(logic.activeShift.id)}
                                 type="button"
+                                className="pos-shift-btn-secondary"
                                 style={{
                                     padding: '9px 14px',
                                     borderRadius: '12px',
-                                    border: '1.5px solid rgba(0, 229, 255, 0.3)',
-                                    background: 'rgba(20, 24, 34, 0.85)',
-                                    color: '#00E5FF',
                                     fontWeight: 800,
                                     fontSize: '12px',
                                     cursor: 'pointer',
@@ -2029,7 +2198,7 @@ export default function PosPage() {
                                 <div>
                                     <div style={{ fontWeight: 800, fontSize: '13px' }}>{isEn ? 'No Open Shift' : 'لا توجد وردية مفتوحة'}</div>
                                     <div style={{ fontSize: '10px', color: '#64748b' }}>
-                                        {logic.warehouses.find((w: any) => w.id === logic.selectedWarehouseId)?.name || (isEn ? 'Select Branch' : 'اختر منفذ البيع')}
+                                        {logic.warehouses.find((w: any) => w.id === logic.selectedWarehouseId)?.name || (isEn ? 'Select Station' : 'اختر محطة الوقود')}
                                         {logic.delegateId && ` • ${logic.delegates.find((d: any) => d.id === logic.delegateId)?.name || ''}`}
                                     </div>
                                 </div>
@@ -2043,15 +2212,13 @@ export default function PosPage() {
                         </div>
                     )}
 
-                    {/* زر استعراض الورديات المفتوحة لكل المناديب والمستودعات */}
+                    {/* زر استعراض الورديات المفتوحة لكل المشغلين والمحطات */}
                     {logic.allOpenShifts && logic.allOpenShifts.length > 0 && (
                         <button
                             type="button"
+                            className="pos-shift-btn-secondary"
                             onClick={() => logic.setIsOpenShiftsDrawerOpen(true)}
                             style={{
-                                background: 'rgba(20, 24, 34, 0.85)',
-                                border: '1.5px solid rgba(0, 229, 255, 0.3)',
-                                color: '#00E5FF',
                                 padding: '8px 14px',
                                 borderRadius: '12px',
                                 fontSize: '12px',
@@ -2064,7 +2231,7 @@ export default function PosPage() {
                                 backdropFilter: 'blur(10px)',
                                 minHeight: '40px'
                             }}
-                            title={isEn ? 'View all open shifts across branches' : 'عرض ورديات كل المناديب والمستودعات والتبديل بينها'}
+                            title={isEn ? 'View all open shifts across stations' : 'عرض ورديات كل المشغلين ومحطات الوقود والتبديل بينها'}
                         >
                             📋 {isEn ? 'Active Shifts' : 'الورديات النشطة'} ({logic.allOpenShifts.length})
                         </button>
@@ -2131,7 +2298,7 @@ export default function PosPage() {
                                             {isEn ? 'Shift is currently closed — Sales are disabled' : 'الوردية مغلقة حالياً — لا يمكن إجراء أي عملية بيع'}
                                         </div>
                                         <div style={{ fontSize: '11.5px', color: '#64748b', fontWeight: 700 }}>
-                                            {isEn ? 'The cashier must click "Open New Shift" to declare starting cash and activate POS.' : 'يجب على المندوب أو البائع الضغط على "بدء الوردية" لتسجيل العهدة وتفعيل نقطة البيع'}
+                                            {isEn ? 'The station operator must click "Open New Shift" to declare starting cash and activate POS.' : 'يجب على مشغل المحطة أو الكاشير الضغط على "بدء الوردية" لتسجيل العهدة وتفعيل نقطة البيع'}
                                         </div>
                                     </div>
                                 </div>
@@ -2178,7 +2345,7 @@ export default function PosPage() {
                                 }}>
                                     <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', fontWeight: 800, color: '#92400e' }}>
                                         <span style={{ fontSize: '16px' }}>⚠️</span>
-                                        <span>{isEn ? 'Alert: There are ' : 'تنبيه: يوجد '}<strong>{logic.lowStockCount}</strong>{isEn ? ' items below reorder level in this branch!' : ' صنف وصل لحد إعادة الطلب في هذا المنفذ!'}</span>
+                                        <span>{isEn ? 'Alert: There are ' : 'تنبيه: يوجد '}<strong>{logic.lowStockCount}</strong>{isEn ? ' items below reorder level in this station!' : ' صنف وصل لحد إعادة الطلب في هذه المحطة!'}</span>
                                     </div>
                                     <button
                                         type="button"
@@ -2269,7 +2436,7 @@ export default function PosPage() {
                         <div className="items-grid cinematic-scroll">
                             {logic.inventoryItems.length === 0 ? (
                                 <div style={{ gridColumn: '1 / -1', textAlign: 'center', padding: '50px', color: '#64748b', fontWeight: 'bold' }}>
-                                    {logic.onlyLowStock ? (isEn ? 'No low stock items 🎉' : 'لا توجد أصناف تحت حد الطلب حالياً 🎉') : (isEn ? 'No items available in this branch currently' : 'لا توجد أصناف متاحة في هذا المنفذ حالياً')}
+                                    {logic.onlyLowStock ? (isEn ? 'No low stock items 🎉' : 'لا توجد أصناف تحت حد الطلب حالياً 🎉') : (isEn ? 'No fuel or items available in this station currently' : 'لا توجد أصناف أو وقود متاح في هذه المحطة حالياً')}
                                 </div>
                             ) : (
                                 logic.inventoryItems.map((item: any) => {
@@ -2303,9 +2470,9 @@ export default function PosPage() {
                                                     <span className="pos-badge-status" style={{ background: 'rgba(78, 115, 79, 0.15)', color: '#4E734F', border: '1px solid rgba(78, 115, 79, 0.3)' }}>
                                                         🌿 {isEn ? 'Exempt' : 'معفي (0%)'}
                                                     </span>
-                                                ) : item.is_returnable_bottle ? (
-                                                    <span className="pos-badge-status returnable">
-                                                        🔄 {isEn ? 'Returnable' : 'عهدة فوارغ'}
+                                                ) : item.category === 'fuel' ? (
+                                                    <span className="pos-badge-status" style={{ background: 'rgba(194, 155, 98, 0.2)', color: '#C29B62', border: '1px solid rgba(194, 155, 98, 0.4)' }}>
+                                                        ⛽ {item.fuel_type === 'gasoline_91' ? 'بنزين 91' : item.fuel_type === 'gasoline_95' ? 'بنزين 95' : item.fuel_type === 'diesel' ? 'ديزل' : (item.fuel_type || (isEn ? 'Fuel' : 'وقود'))}
                                                     </span>
                                                 ) : (
                                                     <span className="pos-badge-status normal">
@@ -2463,18 +2630,18 @@ export default function PosPage() {
                                                 <span style={{ fontWeight: 900, fontSize: '13.5px', color: '#F8FAFC', wordBreak: 'break-word' }}>
                                                     {item.name}
                                                 </span>
-                                                {item.is_returnable_bottle && (
+                                                {item.category === 'fuel' && (
                                                     <span style={{
-                                                        background: 'rgba(0, 229, 255, 0.12)',
-                                                        color: '#00E5FF',
-                                                        border: '1px solid rgba(0, 229, 255, 0.28)',
+                                                        background: 'rgba(194, 155, 98, 0.15)',
+                                                        color: '#C29B62',
+                                                        border: '1px solid rgba(194, 155, 98, 0.35)',
                                                         borderRadius: '6px',
                                                         padding: '1px 6px',
                                                         fontSize: '10px',
                                                         fontWeight: 800,
                                                         whiteSpace: 'nowrap'
                                                     }}>
-                                                        🔄 عهدة ({item.qty} {isEn ? 'returnable' : 'فوارغ'})
+                                                        ⛽ {item.qty} {isEn ? 'Liters' : 'لتر'}
                                                     </span>
                                                 )}
                                                 {Number(item.tax_rate) === 0 && (
@@ -2581,18 +2748,16 @@ export default function PosPage() {
                             {/* Customer & Payment Method (Side by Side) */}
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                                 <div>
-                                    <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, color: '#F8FAFC', marginBottom: '3px' }}>
+                                    <label className="pos-checkout-label" style={{ display: 'block', fontSize: '11px', fontWeight: 800, marginBottom: '3px' }}>
                                         👤 {isEn ? 'Customer:' : 'العميل:'}
                                     </label>
                                     <select 
-                                        className="glass-input-field" 
+                                        className="glass-input-field pos-checkout-select" 
                                         style={{ 
                                             width: '100%', 
                                             height: '35px', 
                                             padding: '4px 8px', 
                                             fontSize: '12px', 
-                                            background: 'rgba(15, 20, 30, 0.85)', 
-                                            color: '#F8FAFC', 
                                             fontWeight: 700, 
                                             border: '1.5px solid rgba(0, 229, 255, 0.25)',
                                             borderRadius: '10px'
@@ -2608,18 +2773,16 @@ export default function PosPage() {
                                 </div>
 
                                 <div>
-                                    <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, color: '#F8FAFC', marginBottom: '3px' }}>
+                                    <label className="pos-checkout-label" style={{ display: 'block', fontSize: '11px', fontWeight: 800, marginBottom: '3px' }}>
                                         💳 {isEn ? 'Payment Method:' : 'طريقة الدفع:'}
                                     </label>
                                     <select 
-                                        className="glass-input-field" 
+                                        className="glass-input-field pos-checkout-select" 
                                         style={{ 
                                             width: '100%', 
                                             height: '35px', 
                                             padding: '4px 8px', 
                                             fontSize: '12px', 
-                                            background: 'rgba(15, 20, 30, 0.85)', 
-                                            color: '#F8FAFC', 
                                             fontWeight: 700, 
                                             border: '1.5px solid rgba(0, 229, 255, 0.25)',
                                             borderRadius: '10px'
@@ -2635,7 +2798,7 @@ export default function PosPage() {
                             </div>
 
                             {/* الخصم اليدوي */}
-                            <div style={{
+                            <div className="pos-discount-bar" style={{
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'space-between',
@@ -2653,6 +2816,7 @@ export default function PosPage() {
                                         value={logic.manualDiscountAmount === 0 ? '' : logic.manualDiscountAmount}
                                         onChange={e => logic.setManualDiscountAmount(Number(e.target.value) || 0)}
                                         placeholder="0"
+                                        className="pos-discount-input"
                                         style={{
                                             width: '60px',
                                             height: '26px',
@@ -2662,13 +2826,13 @@ export default function PosPage() {
                                             border: '1px solid rgba(224, 109, 68, 0.35)',
                                             outline: 'none',
                                             fontWeight: 'bold',
-                                            color: '#E06D44',
-                                            background: 'rgba(15, 20, 30, 0.9)'
+                                            color: '#E06D44'
                                         }}
                                     />
                                     <select 
                                         value={logic.discountType}
                                         onChange={e => logic.setDiscountType(e.target.value as 'amount' | 'percentage')}
+                                        className="pos-discount-select"
                                         style={{
                                             height: '26px',
                                             borderRadius: '6px',
@@ -2677,7 +2841,6 @@ export default function PosPage() {
                                             fontWeight: 'bold',
                                             fontSize: '11px',
                                             padding: '0 4px',
-                                            background: 'rgba(15, 20, 30, 0.9)',
                                             color: '#E06D44'
                                         }}
                                     >
@@ -2688,7 +2851,7 @@ export default function PosPage() {
                             </div>
 
                             {/* طريقة الحساب (شامل / غير شامل الضريبة) */}
-                            <div style={{
+                            <div className="pos-calc-method-bar" style={{
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'space-between',
@@ -2697,8 +2860,8 @@ export default function PosPage() {
                                 borderRadius: '10px',
                                 border: '1px solid rgba(0, 229, 255, 0.2)'
                             }}>
-                                <span style={{ fontWeight: 800, color: '#F8FAFC', fontSize: '11.5px' }}>{isEn ? 'Calc Method:' : 'طريقة الحساب:'}</span>
-                                <div style={{ display: 'flex', background: 'rgba(15, 20, 30, 0.85)', padding: '2px', borderRadius: '8px', border: '1px solid rgba(0, 229, 255, 0.25)' }}>
+                                <span className="pos-calc-label" style={{ fontWeight: 800, fontSize: '11.5px' }}>{isEn ? 'Calc Method:' : 'طريقة الحساب:'}</span>
+                                <div className="pos-calc-toggle" style={{ display: 'flex', padding: '2px', borderRadius: '8px', border: '1px solid rgba(0, 229, 255, 0.25)' }}>
                                     <button 
                                         type="button"
                                         onClick={() => logic.setIsTaxInclusive(true)}
@@ -2739,19 +2902,18 @@ export default function PosPage() {
                             </div>
 
                             {/* ملخص المبالغ (سطر واحد مدمج وأنيق) */}
-                            <div style={{
+                            <div className="pos-totals-row" style={{
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'space-between',
                                 padding: '5px 10px',
-                                background: 'rgba(15, 20, 30, 0.75)',
                                 borderRadius: '9px',
                                 border: '1px solid rgba(0, 229, 255, 0.2)',
                                 fontSize: '11.5px'
                             }}>
                                 <div>
                                     <span style={{ color: '#94A3B8', fontWeight: 700 }}>{isEn ? 'Subtotal:' : 'المجموع:'} </span>
-                                    <span style={{ fontWeight: 900, color: '#F8FAFC' }}>{formatCurrency(logic.cartTotal.subtotal)}</span>
+                                    <span className="pos-totals-val" style={{ fontWeight: 900 }}>{formatCurrency(logic.cartTotal.subtotal)}</span>
                                 </div>
                                 {logic.cartTotal.exemptSubtotal > 0 && (
                                     <>
@@ -2765,39 +2927,39 @@ export default function PosPage() {
                                 <div style={{ width: '1px', height: '14px', background: 'rgba(0, 229, 255, 0.3)' }}></div>
                                 <div>
                                     <span style={{ color: '#94A3B8', fontWeight: 700 }}>{isEn ? 'VAT:' : 'الضريبة:'} </span>
-                                    <span style={{ fontWeight: 900, color: '#F8FAFC' }}>{formatCurrency(logic.cartTotal.tax)}</span>
+                                    <span className="pos-totals-val" style={{ fontWeight: 900 }}>{formatCurrency(logic.cartTotal.tax)}</span>
                                 </div>
                             </div>
 
                             {/* الإجمالي المطلوب - Command Center Banner */}
                             <div className="pos-total-banner">
-                                <span style={{ fontSize: '13.5px', fontWeight: 900, color: '#F8FAFC' }}>{isEn ? 'Grand Total:' : 'الإجمالي المطلوب:'}</span>
-                                <span style={{ fontSize: '20px', fontWeight: 900, color: '#00E5FF', letterSpacing: '-0.3px', textShadow: '0 0 12px rgba(0, 229, 255, 0.5)' }}>
+                                <span className="pos-total-banner-label" style={{ fontSize: '13.5px', fontWeight: 900 }}>{isEn ? 'Grand Total:' : 'الإجمالي المطلوب:'}</span>
+                                <span className="pos-total-banner-val" style={{ fontSize: '20px', fontWeight: 900, letterSpacing: '-0.3px' }}>
                                     {formatCurrency(logic.cartTotal.total)}
                                 </span>
                             </div>
 
-                            {/* 🔄 إشعار عهدة الفوارغ المستحقة إن وُجدت أصناف فوارغ بالسلة */}
+                            {/* ⛽ إجمالي اللترات المباعة بالسلة */}
                             {(() => {
-                                const totalReturnable = logic.cart.reduce((acc: number, it: any) => acc + (it.is_returnable_bottle ? (Number(it.qty) || 0) : 0), 0);
-                                if (totalReturnable <= 0) return null;
+                                const totalFuelLiters = logic.cart.reduce((sum, item) => sum + (item.category === 'fuel' ? (Number(item.qty) || 1) : 0), 0);
+                                if (totalFuelLiters <= 0) return null;
                                 return (
                                     <div style={{
                                         padding: '6px 12px',
-                                        background: 'rgba(0, 229, 255, 0.1)',
-                                        border: '1px solid rgba(0, 229, 255, 0.3)',
+                                        background: 'rgba(194, 155, 98, 0.1)',
+                                        border: '1px solid rgba(194, 155, 98, 0.3)',
                                         borderRadius: '10px',
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'space-between',
-                                        boxShadow: '0 2px 8px rgba(0, 229, 255, 0.1)'
+                                        boxShadow: '0 2px 8px rgba(194, 155, 98, 0.1)'
                                     }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                                            <span style={{ fontSize: '16px' }}>🔄</span>
-                                            <span style={{ fontSize: '11px', fontWeight: 900, color: '#00E5FF' }}>{isEn ? 'Returnables Custody:' : 'عهدة فوارغ مستحقة:'}</span>
+                                            <span style={{ fontSize: '16px' }}>⛽</span>
+                                            <span style={{ fontSize: '11px', fontWeight: 900, color: '#C29B62' }}>{isEn ? 'Total Fuel Liters:' : 'إجمالي كمية الوقود:'}</span>
                                         </div>
-                                        <span style={{ fontSize: '12px', fontWeight: 900, color: '#F8FAFC', background: 'rgba(15, 20, 30, 0.85)', padding: '2px 8px', borderRadius: '6px', border: '1px solid rgba(0, 229, 255, 0.25)' }}>
-                                            {totalReturnable} {isEn ? 'Bottles' : 'عبوة'}
+                                        <span className="pos-fuel-liters-badge" style={{ fontSize: '12px', fontWeight: 900, padding: '2px 8px', borderRadius: '6px', border: '1px solid rgba(194, 155, 98, 0.25)' }}>
+                                            {totalFuelLiters.toLocaleString()} {isEn ? 'Liters' : 'لتر'}
                                         </span>
                                     </div>
                                 );

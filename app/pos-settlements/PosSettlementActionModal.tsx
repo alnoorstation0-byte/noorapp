@@ -188,7 +188,7 @@ export default function PosSettlementActionModal({
         <div className="warm-portal-overlay-fullscreen" onClick={onClose} style={{
             position: 'fixed',
             inset: 0,
-            zIndex: 99999999,
+            zIndex: 999999999,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -217,7 +217,7 @@ export default function PosSettlementActionModal({
                     animation: 'modalSlideUp 0.3s ease-out'
                 }}
             >
-                <style>{`
+                <style dangerouslySetInnerHTML={{ __html: `
                     @keyframes modalSlideUp {
                         from { opacity: 0; transform: translateY(25px) scale(0.97); }
                         to { opacity: 1; transform: translateY(0) scale(1); }
@@ -307,7 +307,54 @@ export default function PosSettlementActionModal({
                             min-height: 44px !important;
                         }
                     }
-                `}</style>
+
+                    .daylight-theme .pos-settlement-modal-box {
+                        background: linear-gradient(135deg, rgba(255, 253, 250, 0.98) 0%, rgba(250, 246, 240, 0.95) 100%) !important;
+                        border-color: rgba(194, 155, 98, 0.35) !important;
+                        color: #2C1A12 !important;
+                        box-shadow: 0 25px 65px rgba(44, 26, 18, 0.15) !important;
+                    }
+                    .daylight-theme .pos-settlement-header {
+                        background: rgba(194, 155, 98, 0.08) !important;
+                        border-bottom-color: rgba(194, 155, 98, 0.25) !important;
+                    }
+                    .daylight-theme .pos-settlement-header h2 {
+                        color: #2C1A12 !important;
+                    }
+                    .daylight-theme .aqua-tab-btn:not(.active) {
+                        background: rgba(194, 155, 98, 0.1) !important;
+                        color: #2C1A12 !important;
+                        border-color: rgba(194, 155, 98, 0.25) !important;
+                    }
+                    .daylight-theme .field-input {
+                        background: #FFFFFF !important;
+                        border-color: rgba(194, 155, 98, 0.35) !important;
+                        color: #2C1A12 !important;
+                    }
+                    .daylight-theme .settlement-actions-footer {
+                        background: rgba(194, 155, 98, 0.08) !important;
+                        border-top-color: rgba(194, 155, 98, 0.25) !important;
+                    }
+                    .daylight-theme .pos-settlement-modal-box table {
+                        color: #2C1A12 !important;
+                    }
+                    .daylight-theme .pos-settlement-modal-box table thead,
+                    .daylight-theme .pos-settlement-modal-box table th {
+                        background: rgba(194, 155, 98, 0.12) !important;
+                        color: #2C1A12 !important;
+                        border-color: rgba(194, 155, 98, 0.25) !important;
+                    }
+                    .daylight-theme .pos-settlement-modal-box table td {
+                        color: #2C1A12 !important;
+                        border-color: rgba(194, 155, 98, 0.15) !important;
+                    }
+                    .daylight-theme .pos-settlement-modal-box table tfoot tr {
+                        background: rgba(194, 155, 98, 0.1) !important;
+                    }
+                    .daylight-theme .pos-settlement-modal-box table tfoot td {
+                        color: #2C1A12 !important;
+                    }
+                `}} />
 
                 {/* Header */}
                 <div className="pos-settlement-header" style={{
@@ -336,7 +383,7 @@ export default function PosSettlementActionModal({
                         <div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                 <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 900, color: '#F8FAFC' }}>
-                                    تسوية عهدة منفذ [{shift.warehouseName}]
+                                    تسوية عهدة محطة وقود [{shift.warehouseName}]
                                 </h2>
                                 <span style={{
                                     background: 'rgba(0, 229, 255, 0.1)',
@@ -409,8 +456,8 @@ export default function PosSettlementActionModal({
                         className={`aqua-tab-btn ${activeTab === 'inventory' ? 'active' : ''}`}
                         onClick={() => setActiveTab('inventory')}
                     >
-                        <span>📦</span>
-                        <span>جرد ومخزون المنفذ</span>
+                        <span>⛽</span>
+                        <span>خزانات الوقود</span>
                         {totalInventoryReturnQty > 0 && (
                             <span style={{ background: '#00E5FF', color: '#0B0E14', padding: '1px 6px', borderRadius: '20px', fontSize: '11px', fontWeight: 900 }}>
                                 {totalInventoryReturnQty}
@@ -713,10 +760,10 @@ export default function PosSettlementActionModal({
                             }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
                                     <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 900, color: '#F8FAFC' }}>
-                                        📦 بضاعة ومخزون منفذ البيع وإرجاع الفائض
+                                        ⛽ خزانات الوقود ومطابقة الأرصدة
                                     </h3>
                                     <div style={{ fontSize: '12px', fontWeight: 700, color: '#94A3B8' }}>
-                                        إجمالي الرصيد بالمنفذ: <b style={{ color: '#00E5FF' }}>{shift.totalRemainingStock} حبة</b>
+                                        إجمالي رصيد الوقود: <b style={{ color: '#00E5FF' }}>{shift.totalRemainingStock} لتر</b>
                                     </div>
                                 </div>
 
@@ -725,12 +772,12 @@ export default function PosSettlementActionModal({
                                         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
                                             <thead>
                                                 <tr style={{ background: 'rgba(11, 14, 20, 0.8)', borderBottom: '1.5px solid rgba(0, 229, 255, 0.25)' }}>
-                                                    <th style={{ padding: '10px 14px', textAlign: 'right', color: '#00E5FF', fontWeight: 800 }}>الصنف</th>
-                                                    <th style={{ padding: '10px 14px', textAlign: 'center', color: '#F8FAFC', fontWeight: 800 }}>الرصيد الحالي</th>
+                                                    <th style={{ padding: '10px 14px', textAlign: 'right', color: '#00E5FF', fontWeight: 800 }}>نوع الوقود / الصنف</th>
+                                                    <th style={{ padding: '10px 14px', textAlign: 'center', color: '#F8FAFC', fontWeight: 800 }}>الرصيد الدفتري (لتر)</th>
                                                     <th style={{ padding: '10px 14px', textAlign: 'center', color: '#10B981', fontWeight: 800 }}>المباع بالوردية</th>
-                                                    <th style={{ padding: '10px 14px', textAlign: 'center', color: '#00E5FF', fontWeight: 800 }}>إرجاع للمستودع الرئيسي 🚚</th>
-                                                    <th style={{ padding: '10px 14px', textAlign: 'center', color: '#F59E0B', fontWeight: 800 }}>تالف / هالك ⚠️</th>
-                                                    <th style={{ padding: '10px 14px', textAlign: 'center', color: '#EF4444', fontWeight: 800 }}>عجز جرد ❌</th>
+                                                    <th style={{ padding: '10px 14px', textAlign: 'center', color: '#00E5FF', fontWeight: 800 }}>توريد وقود إضافي 🚚</th>
+                                                    <th style={{ padding: '10px 14px', textAlign: 'center', color: '#F59E0B', fontWeight: 800 }}>عجز تبخر / هدر ⚠️</th>
+                                                    <th style={{ padding: '10px 14px', textAlign: 'center', color: '#EF4444', fontWeight: 800 }}>فروقات القياس ❌</th>
                                                     <th style={{ padding: '10px 14px', textAlign: 'right', color: '#94A3B8', fontWeight: 800 }}>ملاحظات</th>
                                                 </tr>
                                             </thead>
@@ -829,7 +876,7 @@ export default function PosSettlementActionModal({
                                                     حـ/ الخزينة الرئيسية أو البنك ({accounts.find(a => a.id === selectedSafeAcc)?.code || '122'})
                                                 </td>
                                                 <td style={{ padding: '12px 14px', color: '#94A3B8', fontSize: '12px' }}>
-                                                    توريد نقدية للخزينة من عهدة منفذ [{shift.warehouseName}] | {shift.shiftNumber} | المسئول: {shift.cashierName}{shift.cashierPhone ? ` (${shift.cashierPhone})` : ''}
+                                                    توريد نقدية للخزينة من عهدة محطة وقود [{shift.warehouseName}] | {shift.shiftNumber} | المسئول: {shift.cashierName}{shift.cashierPhone ? ` (${shift.cashierPhone})` : ''}
                                                 </td>
                                                 <td style={{ padding: '12px 14px', textAlign: 'center', fontWeight: 900, color: '#10B981' }}>
                                                     {formatCurrency(actualCashHandedOver)}
@@ -840,10 +887,10 @@ export default function PosSettlementActionModal({
                                             {/* Credit Custody */}
                                             <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
                                                 <td style={{ padding: '12px 14px', fontWeight: 800, color: '#F8FAFC' }}>
-                                                    حـ/ عهدة موظفين ونقاط بيع (125) - {shift.cashierName}
+                                                    حـ/ عهدة موظفين ومحطات الوقود (125) - {shift.cashierName}
                                                 </td>
                                                 <td style={{ padding: '12px 14px', color: '#94A3B8', fontSize: '12px' }}>
-                                                    إخلاء عهدة كاشير منفذ [{shift.warehouseName}] بالتوريد للخزينة | {shift.shiftNumber} | المسئول: {shift.cashierName}
+                                                    إخلاء عهدة مشغل محطة وقود [{shift.warehouseName}] بالتوريد للخزينة | {shift.shiftNumber} | المسئول: {shift.cashierName}
                                                 </td>
                                                 <td style={{ padding: '12px 14px', textAlign: 'center', color: '#64748B' }}>0.00 ر.س</td>
                                                 <td style={{ padding: '12px 14px', textAlign: 'center', fontWeight: 900, color: '#EF4444' }}>
@@ -856,12 +903,12 @@ export default function PosSettlementActionModal({
                                                 <>
                                                     <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)', background: 'rgba(239, 68, 68, 0.06)' }}>
                                                         <td style={{ padding: '12px 14px', fontWeight: 800, color: '#EF4444' }}>
-                                                            {shortageAction === 'debt_on_cashier' ? `حـ/ سلف وذمم موظفين ومناديب (128) - ${shift.cashierName}` : 'حـ/ تسويات وفروق هللات ومصروف عجز الصندوق (527)'}
+                                                            {shortageAction === 'debt_on_cashier' ? `حـ/ سلف وذمم موظفين ومشغلين (128) - ${shift.cashierName}` : 'حـ/ تسويات وفروق هللات ومصروف عجز الصندوق (527)'}
                                                         </td>
                                                         <td style={{ padding: '12px 14px', color: '#FCA5A5', fontSize: '12px' }}>
                                                             {shortageAction === 'debt_on_cashier' 
-                                                                ? `إثبات عجز عهدة صندوق منفذ [${shift.warehouseName}] كذمة مستحقة على الكاشير ${shift.cashierName}` 
-                                                                : `تسجيل فروقات/عجز تسوية صندوق منفذ [${shift.warehouseName}] كمصروف`}
+                                                                ? `إثبات عجز عهدة صندوق محطة [${shift.warehouseName}] كذمة مستحقة على مشغل المحطة ${shift.cashierName}` 
+                                                                : `تسجيل فروقات/عجز تسوية صندوق محطة [${shift.warehouseName}] كمصروف`}
                                                         </td>
                                                         <td style={{ padding: '12px 14px', textAlign: 'center', fontWeight: 900, color: '#10B981' }}>
                                                             {formatCurrency(Math.abs(cashVariance))}
@@ -872,10 +919,10 @@ export default function PosSettlementActionModal({
                                                     </tr>
                                                     <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)', background: 'rgba(239, 68, 68, 0.06)' }}>
                                                         <td style={{ padding: '12px 14px', fontWeight: 800, color: '#EF4444' }}>
-                                                            حـ/ عهدة موظفين ونقاط بيع (125) - {shift.cashierName}
+                                                            حـ/ عهدة موظفين ومحطات الوقود (125) - {shift.cashierName}
                                                         </td>
                                                         <td style={{ padding: '12px 14px', color: '#FCA5A5', fontSize: '12px' }}>
-                                                            إقفال عجز عهدة صندوق منفذ [{shift.warehouseName}] {shortageAction === 'debt_on_cashier' ? `بذمة الكاشير ${shift.cashierName}` : 'كمصروف تسوية'}
+                                                            إقفال عجز عهدة صندوق محطة [{shift.warehouseName}] {shortageAction === 'debt_on_cashier' ? `بذمة مشغل المحطة ${shift.cashierName}` : 'كمصروف تسوية'}
                                                         </td>
                                                         <td style={{ padding: '12px 14px', textAlign: 'center', color: '#64748B' }}>
                                                             0.00 ر.س

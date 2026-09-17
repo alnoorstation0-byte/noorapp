@@ -36,6 +36,69 @@ export default function ItemCardPage() {
                     .itemcard-table { min-width: 650px !important; }
                     .itemcard-table th, .itemcard-table td { padding: 8px 10px !important; font-size: 11px !important; }
                 }
+
+                .daylight-theme .itemcard-container {
+                    background: #FDFBF7 !important;
+                }
+                .daylight-theme .itemcard-header {
+                    background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.90) 100%) !important;
+                    border-color: rgba(194, 155, 98, 0.3) !important;
+                    box-shadow: 0 4px 20px rgba(44, 26, 18, 0.08) !important;
+                }
+                .daylight-theme .itemcard-header h1 {
+                    color: #2C1A12 !important;
+                }
+                .daylight-theme .itemcard-header p {
+                    color: rgba(44, 26, 18, 0.7) !important;
+                }
+                .daylight-theme .itemcard-filters {
+                    background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.90) 100%) !important;
+                    border-color: rgba(194, 155, 98, 0.3) !important;
+                    box-shadow: 0 4px 20px rgba(44, 26, 18, 0.08) !important;
+                }
+                .daylight-theme .itemcard-filters select,
+                .daylight-theme .itemcard-filters input {
+                    background: #FFFFFF !important;
+                    border-color: rgba(194, 155, 98, 0.35) !important;
+                    color: #2C1A12 !important;
+                }
+                .daylight-theme .itemcard-filters label,
+                .daylight-theme .itemcard-filters div {
+                    color: #2C1A12 !important;
+                }
+                .daylight-theme .itemcard-kpis > div {
+                    background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.90) 100%) !important;
+                    border-color: rgba(194, 155, 98, 0.3) !important;
+                    box-shadow: 0 4px 20px rgba(44, 26, 18, 0.08) !important;
+                }
+                .daylight-theme .itemcard-kpis div:nth-child(2) {
+                    color: #2C1A12 !important;
+                }
+                .daylight-theme .itemcard-table-card {
+                    background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.90) 100%) !important;
+                    border-color: rgba(194, 155, 98, 0.3) !important;
+                    box-shadow: 0 8px 30px rgba(44, 26, 18, 0.08) !important;
+                }
+                .daylight-theme .itemcard-table {
+                    color: #2C1A12 !important;
+                }
+                .daylight-theme .itemcard-table thead {
+                    background: rgba(194, 155, 98, 0.12) !important;
+                }
+                .daylight-theme .itemcard-table th {
+                    color: #2C1A12 !important;
+                    border-bottom: 1px solid rgba(194, 155, 98, 0.25) !important;
+                }
+                .daylight-theme .itemcard-table td {
+                    border-bottom: 1px solid rgba(194, 155, 98, 0.15) !important;
+                    color: #2C1A12 !important;
+                }
+                .daylight-theme .itemcard-table td div {
+                    color: #2C1A12 !important;
+                }
+                .daylight-theme .itemcard-table tr:hover {
+                    background: rgba(194, 155, 98, 0.06) !important;
+                }
             `}</style>
             {/* Header */}
             <div className="itemcard-header" style={{ background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(20px)', borderRadius: '24px', padding: '30px', marginBottom: '25px', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}>
@@ -135,7 +198,7 @@ export default function ItemCardPage() {
                     </div>
 
                     {/* Data Table */}
-                    <div style={{ background: 'rgba(255,255,255,0.02)', backdropFilter: 'blur(20px)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden' }}>
+                    <div className="itemcard-table-card" style={{ background: 'rgba(255,255,255,0.02)', backdropFilter: 'blur(20px)', borderRadius: '24px', border: '1px solid rgba(255,255,255,0.05)', overflow: 'hidden' }}>
                         <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
                             <table className="itemcard-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right', color: 'white' }}>
                                 <thead style={{ background: 'rgba(0,0,0,0.4)' }}>

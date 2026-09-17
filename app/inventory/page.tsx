@@ -25,25 +25,25 @@ export default function InventoryPage() {
     { key: 'code', label: 'كود الصنف', type: 'text',
       render: (row: any) => <span style={{ fontWeight: 900, color: '#64748b' }}>{row.code || '-'}</span>
     },
-    { key: 'name', label: 'اسم الصنف', type: 'text', 
+    { key: 'name', label: 'اسم الصنف / الوقود', type: 'text', 
       render: (row: any) => (
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-          <span style={{ fontWeight: 900, color: '#F8FAFC' }}>{row.name}</span>
-          {row.is_returnable_bottle && (
+          <span style={{ fontWeight: 900 }}>{row.name}</span>
+          {row.category === 'fuel' && (
             <span style={{
               fontSize: '11px',
               fontWeight: 800,
-              color: '#00E5FF',
-              background: 'rgba(0, 229, 255, 0.12)',
-              border: '1px solid rgba(0, 229, 255, 0.3)',
+              color: '#C29B62',
+              background: 'rgba(194, 155, 98, 0.15)',
+              border: '1px solid rgba(194, 155, 98, 0.35)',
               padding: '2px 8px',
               borderRadius: '8px',
               display: 'inline-flex',
               alignItems: 'center',
               gap: '4px'
             }}>
-              <span>🔄</span>
-              <span>عهدة فوارغ</span>
+              <span>⛽</span>
+              <span>{row.fuel_type === 'gasoline_91' ? 'بنزين 91' : row.fuel_type === 'gasoline_95' ? 'بنزين 95' : row.fuel_type === 'diesel' ? 'ديزل' : 'محروقات'}</span>
             </span>
           )}
           {Number(row.tax_rate) === 0 ? (
@@ -137,7 +137,7 @@ export default function InventoryPage() {
         
         return (
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '3px', minWidth: '110px' }}>
-            <span style={{ fontSize: '12px', fontWeight: 800, color: isExp ? '#ef4444' : (isNear ? '#f59e0b' : '#F8FAFC') }}>
+            <span style={{ fontSize: '12px', fontWeight: 800, color: isExp ? '#ef4444' : (isNear ? '#f59e0b' : 'inherit') }}>
               {row.expiry_date}
             </span>
             {isExp ? (
@@ -430,7 +430,7 @@ export default function InventoryPage() {
                       className="btn-main-glass" 
                       style={{ background: '#ef4444', color: 'white', fontSize: '14px' }}
                     >
-                      📤 صرف لمندوب (Out)
+                      📤 صرف وقود لمشغل المحطة (Out) ⛽
                     </button>
                   </SecureAction>
                   
@@ -440,7 +440,7 @@ export default function InventoryPage() {
                       className="btn-main-glass" 
                       style={{ background: THEME.primary, color: 'white', fontSize: '14px' }}
                     >
-                      ➕ تعريف صنف جديد
+                      ➕ تعريف صنف / وقود جديد
                     </button>
                   </SecureAction>
 
@@ -450,7 +450,7 @@ export default function InventoryPage() {
                       className="btn-main-glass" 
                       style={{ background: 'linear-gradient(135deg, #f97316 0%, #dc2626 100%)', color: 'white', fontSize: '13px', fontWeight: 800 }}
                     >
-                      🗑️ تسجيل توالف وهدر
+                      🗑️ تسجيل تبخر وهدر وقود
                     </button>
                   </SecureAction>
 
@@ -460,7 +460,7 @@ export default function InventoryPage() {
                       className="btn-main-glass" 
                       style={{ background: 'linear-gradient(135deg, #0284c7 0%, #0369a1 100%)', color: 'white', fontSize: '13px', fontWeight: 800 }}
                     >
-                      🔄 استرجاع فوارغ
+                      🔄 استرجاع براميل / عبوات زيوت
                     </button>
                   </SecureAction>
 
@@ -478,7 +478,7 @@ export default function InventoryPage() {
                       opacity: logic.isSyncing ? 0.7 : 1
                     }}
                   >
-                    {logic.isSyncing ? '⏳ جاري المزامنة...' : '🔄 مزامنة أرصدة المستودعات'}
+                    {logic.isSyncing ? '⏳ جاري المزامنة...' : '🔄 مزامنة أرصدة الخزانات'}
                   </button>
 
                   <button 

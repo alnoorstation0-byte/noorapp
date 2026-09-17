@@ -154,6 +154,42 @@ export default function AccountModal({ isOpen, onClose, record, setRecord, onSav
                         gap: 10px !important;
                     }
                 }
+
+                /* Daylight Desert Glassmorphism */
+                .daylight-theme .glass-input-dark {
+                    background: #FFFFFF !important;
+                    border-color: rgba(194, 155, 98, 0.35) !important;
+                    color: #2C1A12 !important;
+                }
+                .daylight-theme .glass-input-dark:focus {
+                    background: #FFFFFF !important;
+                    border-color: #C29B62 !important;
+                    box-shadow: 0 0 15px rgba(194, 155, 98, 0.25) !important;
+                }
+                .daylight-theme .glass-input-dark option {
+                    background: #FFFFFF !important;
+                    color: #2C1A12 !important;
+                }
+                .daylight-theme .acc-modal-actions {
+                    background: rgba(194, 155, 98, 0.08) !important;
+                    border-top: 1px solid rgba(194, 155, 98, 0.2) !important;
+                }
+                .daylight-theme .acc-modal-body label {
+                    color: rgba(44, 26, 18, 0.75) !important;
+                }
+                .daylight-theme .acc-radio-group label {
+                    color: #2C1A12 !important;
+                }
+                .daylight-theme .acc-modal-actions button:first-child {
+                    background: rgba(44, 26, 18, 0.06) !important;
+                    color: #2C1A12 !important;
+                    border-color: rgba(194, 155, 98, 0.3) !important;
+                }
+                .daylight-theme .acc-modal-actions button:last-child {
+                    background: linear-gradient(135deg, #C29B62, #A8573C) !important;
+                    color: #FFFFFF !important;
+                    box-shadow: 0 4px 12px rgba(168, 87, 60, 0.25) !important;
+                }
             `}</style>
 
                 <div className="acc-modal-body">

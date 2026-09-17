@@ -24,7 +24,7 @@ export function useInventoryLogic() {
   const [isModalOpen, setIsModalOpen] = useState(false); // For adding new product to catalog
   const [isActionModalOpen, setIsActionModalOpen] = useState(false); // For Quick Action In/Out
   const [currentRecord, setCurrentRecord] = useState<any>({
-    code: '', name: '', unit: 'حبة', current_quantity: 0, reorder_level: 5, suggested_price: 0, is_returnable_bottle: false, tax_rate: 15,
+    code: '', name: '', unit: 'لتر', category: 'fuel', fuel_type: 'gasoline_91', current_quantity: 0, reorder_level: 500, suggested_price: 0, tax_rate: 15,
     expiry_date: '', batch_number: '', alert_before_days: 30
   });
 
@@ -69,14 +69,8 @@ export function useInventoryLogic() {
       const { data: pData } = await supabase.from('partners').select('*').order('name');
       if (pData) setPartners(pData);
 
-      // Fetch active fleet operations
-      const { data: opData } = await supabase
-        .from('fleet_operations')
-        .select('*, vehicle:fleet_vehicles(plate_number), driver:partners(name)')
-        .neq('status', 'مغلق')
-        .neq('status', 'closed')
-        .order('operation_date', { ascending: false });
-      if (opData) setFleetOperations(opData);
+      // Set fleet operations empty (legacy)
+      setFleetOperations([]);
 
     } catch (err) {
       console.error("Error fetching inventory", err);
@@ -202,13 +196,14 @@ export function useInventoryLogic() {
       const cleanPayload: any = {
         code: payload.code || null,
         name: payload.name,
-        unit: payload.unit || 'حبة',
+        unit: payload.unit || 'لتر',
+        category: payload.category || 'fuel',
+        fuel_type: payload.fuel_type || null,
         current_quantity: Number(payload.current_quantity) || 0,
-        reorder_level: Number(payload.reorder_level) || 5,
+        reorder_level: Number(payload.reorder_level) || 500,
         cost_price: Number(payload.cost_price) || 0,
         suggested_price: Number(payload.suggested_price) || 0,
         default_price: Number(payload.suggested_price) || 0,
-        is_returnable_bottle: Boolean(payload.is_returnable_bottle),
         tax_rate: (payload.tax_rate !== undefined && payload.tax_rate !== null) ? Number(payload.tax_rate) : 15
       };
 

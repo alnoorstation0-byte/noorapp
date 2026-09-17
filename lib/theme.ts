@@ -111,9 +111,9 @@ export const DAYLIGHT_THEME = {
   primary: '#0284C7',       // أزرق بترولي ناصع عالي التباين النهاري
   accent: '#0284C7',        // أزرق سماوي مركز
   terracotta: '#EA580C',    // برتقالي دافئ عالي التباين
-  background: '#F1F5F9',    // تيتانيوم قطبي نهاري فاتح وناصع
+  background: '#F8FAFC',    // تيتانيوم قطبي نهاري فاتح وناصع
   surface: '#FFFFFF',       // أسطح بيضاء زجاجية
-  cardBg: 'linear-gradient(135deg, rgba(255, 255, 255, 0.94) 0%, rgba(243, 247, 252, 0.85) 100%)',
+  cardBg: 'linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(248, 250, 252, 0.9) 100%)',
   success: '#059669',       // أخضر زمردي نهاري
   
   info: '#0284C7',          
@@ -125,12 +125,12 @@ export const DAYLIGHT_THEME = {
   logo: '/logo.png',        
   logoDark: '/logo_dark.png',
 
-  navyDark: '#F1F5F9',     
+  navyDark: '#F8FAFC',     
   aquaAccent: '#0284C7',   
   cyanLight: '#0EA5E9',    
   accentLight: '#38BDF8',  
   coffeeMain: '#0284C7',   
-  coffeeDark: '#F1F5F9',   
+  coffeeDark: '#F8FAFC',   
   goldAccent: '#0284C7',   
   white: '#FFFFFF',        
   border: 'rgba(2, 132, 199, 0.22)', 
@@ -187,8 +187,8 @@ export const DAYLIGHT_THEME = {
   gradients: {
     primary: 'linear-gradient(135deg, #0284C7 0%, #0369A1 100%)',
     orange: 'linear-gradient(135deg, #EA580C 0%, #C2410C 100%)',
-    glass: 'linear-gradient(135deg, rgba(255, 255, 255, 0.94) 0%, rgba(243, 247, 252, 0.85) 100%)',
-    deepTitanium: '#F1F5F9',
+    glass: 'linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(248, 250, 252, 0.9) 100%)',
+    deepTitanium: '#F8FAFC',
     commandCard: 'linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.92) 100%)',
   },
 

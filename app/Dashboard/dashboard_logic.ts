@@ -37,9 +37,9 @@ export const useDashboardLogic = () => {
       // 1. 📡 سحب كل البيانات الأساسية بما فيها مضخات الوقود والخزانات والورديات
       const [
         expenses, invoices, payments, receipts,
-        journalLines, accounts, fleetOps,
+        journalLines, accounts,
         warehouses, warehouseInventory, inventoryItems,
-        fleetVehicles, fuelPumps, posShifts
+        fuelPumps, posShifts
       ] = await Promise.all([
         fetchAllForDashboard('expenses', 'id, total_price, unit_price, quantity, vat_amount, discount_amount, paid_amount, is_posted, main_category, created_at'),
         fetchAllForDashboard('invoices', 'id, total_amount, status, created_at'),
@@ -47,21 +47,18 @@ export const useDashboardLogic = () => {
         fetchAllForDashboard('receipt_vouchers', 'amount, status'),
         fetchAllForDashboard('journal_lines', 'debit, credit, account_id'),
         fetchAllForDashboard('accounts', 'id, account_type, code, name'),
-        fetchAllForDashboard('fleet_operations', 'status, id'),
-        fetchAllForDashboard('warehouses', 'id, name'),
+        fetchAllForDashboard('warehouses', 'id, name, tank_capacity_liters, fuel_type'),
         fetchAllForDashboard('warehouse_inventory', 'warehouse_id, item_id, quantity'),
         fetchAllForDashboard('inventory_items', 'id, name, current_quantity, default_price, cost_price, unit, item_type'),
-        fetchAllForDashboard('fleet_vehicles', 'id, status'),
         fetchAllForDashboard('fuel_pumps', 'id, pump_number, pump_name, fuel_type, unit_price, current_meter, is_active'),
         fetchAllForDashboard('pos_shifts', 'id, opened_at, closed_at, status, starting_cash, expected_cash, actual_cash, total_sales, total_liters_sold, shortage_overage')
       ]);
 
-      // --- 🏗️ تحليل حالات رحلات التوزيع ---
-      const activeProjectsCount = fleetOps.filter(f => f.status === 'نشط' || f.status === 'قيد التنفيذ').length;
-      const projectsStatusData = [
-        { name: 'رحلات نشطة', value: activeProjectsCount },
-        { name: 'رحلات مكتملة', value: fleetOps.filter(f => f.status === 'مكتمل').length },
-        { name: 'رحلات ملغاة', value: fleetOps.filter(f => f.status === 'ملغى').length }
+      // --- ⛽ تحليل حالة مضخات الوقود ---
+      const activePumpsCount = fuelPumps.filter(p => p.is_active !== false).length;
+      const pumpStatusData = [
+        { name: 'مضخات نشطة', value: activePumpsCount },
+        { name: 'مضخات تحت الصيانة', value: fuelPumps.filter(p => p.is_active === false).length }
       ].filter(p => p.value > 0);
 
       // --- 🏛️ حساب المركز المالي ورصيد النقدية والبنوك من القيود ---
@@ -304,8 +301,9 @@ export const useDashboardLogic = () => {
         cashAndBankBalance: cashAndBankBalance || 48600,
         totalWarehouses: warehouses.length,
         totalInventoryValue: totalInventoryValue || 312000,
-        totalVehicles: fleetVehicles.length,
-        totalFleetTrips: fleetOps.length,
+        totalPumps: fuelPumps.length,
+        activePumps: activePumpsCount,
+        totalShifts: posShifts.length,
         cashFlowData: [
           { name: 'المبيعات', income: approvedInvoices || totalShiftSales, expense: 0 },
           { name: 'المصروفات', income: 0, expense: approvedExpenses }
@@ -323,11 +321,11 @@ export const useDashboardLogic = () => {
           approvedInvoices,
           netProfit,
           totalInventoryValue,
-          activeProjects: activeProjectsCount,
+          activePumps: activePumpsCount,
           totalAssets,
           totalLiabilities
         },
-        projectsStatusData,
+        projectsStatusData: pumpStatusData,
         warehouseChartData,
         postingCharts,
         alerts

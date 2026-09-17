@@ -81,8 +81,8 @@ export function useSalesAnalysisLogic() {
             const c = clientsMap.get(clientName)!;
             c.total += amount; c.count += 1;
 
-            // Delegates
-            const delegateName = (inv.delegate as any)?.name || 'بدون مندوب';
+            // Operators / Delegates
+            const delegateName = (inv.delegate as any)?.name || 'بدون مشغل محطة';
             if (!delegatesMap.has(delegateName)) delegatesMap.set(delegateName, { name: delegateName, total: 0, count: 0 });
             const d = delegatesMap.get(delegateName)!;
             d.total += amount; d.count += 1;
@@ -144,19 +144,19 @@ export function useSalesAnalysisLogic() {
         ), "أفضل العملاء");
 
         XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(
-            topDelegates.map(d => ({ 'المندوب': d.name, 'عدد الفواتير': d.count, 'إجمالي المبيعات': d.total.toFixed(2) }))
-        ), "أفضل المناديب");
+            topDelegates.map(d => ({ 'مشغل المحطة': d.name, 'عدد الفواتير': d.count, 'إجمالي المبيعات': d.total.toFixed(2) }))
+        ), "أداء مشغلي المحطات");
 
         XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(
             topItems.map((i: any) => ({
-                'الصنف': i.name,
-                'الكمية المباعة': i.qty,
+                'نوع الوقود / الصنف': i.name,
+                'الكمية المباعة (لتر/وحدة)': i.qty,
                 'إجمالي الإيراد': i.revenue.toFixed(2),
-                'تكلفة البضاعة (COGS)': i.cogs.toFixed(2),
+                'تكلفة الوقود والمبيعات (COGS)': i.cogs.toFixed(2),
                 'إجمالي الربح': i.profit.toFixed(2),
                 'هامش الربح %': i.revenue > 0 ? ((i.profit / i.revenue) * 100).toFixed(1) + '%' : '0%'
             }))
-        ), "ربحية الأصناف");
+        ), "ربحية أنواع الوقود والمنتجات");
 
         XLSX.writeFile(wb, `Sales_Profitability_${new Date().toISOString().split('T')[0]}.xlsx`);
     };

@@ -248,7 +248,7 @@ export default function FinancialPlanPage() {
     const headerBg = isRevenue ? 'rgba(16, 185, 129, 0.12)' : 'rgba(239, 68, 68, 0.12)';
     
     return (
-      <div style={{ background: 'linear-gradient(135deg, rgba(20, 24, 34, 0.95) 0%, rgba(11, 14, 20, 0.9) 100%)', borderRadius: '18px', border: '1px solid rgba(0, 229, 255, 0.2)', marginBottom: '30px', overflow: 'hidden', boxShadow: '0 8px 30px rgba(0,0,0,0.4)' }}>
+      <div className="fp-table-card" style={{ background: 'linear-gradient(135deg, rgba(20, 24, 34, 0.95) 0%, rgba(11, 14, 20, 0.9) 100%)', borderRadius: '18px', border: '1px solid rgba(0, 229, 255, 0.2)', marginBottom: '30px', overflow: 'hidden', boxShadow: '0 8px 30px rgba(0,0,0,0.4)' }}>
         <div style={{ background: headerBg, padding: '16px 20px', borderBottom: `1px solid ${isRevenue ? 'rgba(16, 185, 129, 0.25)' : 'rgba(239, 68, 68, 0.25)'}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <h2 style={{ margin: 0, color: headerAccent, fontSize: '18px', fontWeight: '900' }}>
             {isRevenue ? '📈 الإيرادات المتوقعة' : '📉 المصروفات المقدرة'}
@@ -282,13 +282,13 @@ export default function FinancialPlanPage() {
               return (
                 <tr key={r.id} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)', background: idx % 2 === 0 ? 'rgba(255, 255, 255, 0.02)' : 'transparent' }}>
                   <td style={{ padding: '10px 15px' }}>
-                    <input type="text" value={r.item_name} onChange={e => logic.updateRecord(r.id, 'item_name', e.target.value)} style={{ width: '100%', padding: '9px 12px', border: '1px solid rgba(255, 255, 255, 0.12)', borderRadius: '10px', fontWeight: 800, color: '#F8FAFC', background: 'rgba(11, 14, 20, 0.7)', outline: 'none' }} />
+                    <input type="text" className="fp-input" value={r.item_name} onChange={e => logic.updateRecord(r.id, 'item_name', e.target.value)} style={{ width: '100%', padding: '9px 12px', border: '1px solid rgba(255, 255, 255, 0.12)', borderRadius: '10px', fontWeight: 800, color: '#F8FAFC', background: 'rgba(11, 14, 20, 0.7)', outline: 'none' }} />
                   </td>
                   <td style={{ padding: '10px 15px' }}>
-                    <input type="number" value={r.planned_amount === 0 ? '' : r.planned_amount} onChange={e => logic.updateRecord(r.id, 'planned_amount', e.target.value)} style={{ width: '100%', padding: '9px 12px', border: '1px solid rgba(255, 255, 255, 0.12)', borderRadius: '10px', textAlign: 'center', fontWeight: 800, color: '#F8FAFC', background: 'rgba(11, 14, 20, 0.7)', outline: 'none' }} placeholder="0" />
+                    <input type="number" className="fp-input" value={r.planned_amount === 0 ? '' : r.planned_amount} onChange={e => logic.updateRecord(r.id, 'planned_amount', e.target.value)} style={{ width: '100%', padding: '9px 12px', border: '1px solid rgba(255, 255, 255, 0.12)', borderRadius: '10px', textAlign: 'center', fontWeight: 800, color: '#F8FAFC', background: 'rgba(11, 14, 20, 0.7)', outline: 'none' }} placeholder="0" />
                   </td>
                   <td style={{ padding: '10px 15px' }}>
-                    <input type="number" value={r.actual_amount === 0 ? '' : r.actual_amount} onChange={e => logic.updateRecord(r.id, 'actual_amount', e.target.value)} style={{ width: '100%', padding: '9px 12px', border: '1px solid rgba(0, 229, 255, 0.25)', borderRadius: '10px', textAlign: 'center', fontWeight: 900, color: '#00E5FF', background: 'rgba(0, 229, 255, 0.05)', outline: 'none' }} placeholder="0" />
+                    <input type="number" className="fp-input-actual" value={r.actual_amount === 0 ? '' : r.actual_amount} onChange={e => logic.updateRecord(r.id, 'actual_amount', e.target.value)} style={{ width: '100%', padding: '9px 12px', border: '1px solid rgba(0, 229, 255, 0.25)', borderRadius: '10px', textAlign: 'center', fontWeight: 900, color: '#00E5FF', background: 'rgba(0, 229, 255, 0.05)', outline: 'none' }} placeholder="0" />
                   </td>
                   <td style={{ padding: '10px 15px', fontWeight: '900', color: varianceColor, textAlign: 'center', direction: 'ltr' }}>
                     {variance > 0 ? '+' : ''}{formatCurrency(variance)}
@@ -333,6 +333,65 @@ export default function FinancialPlanPage() {
           .fp-table { min-width: 580px !important; }
           .fp-table th, .fp-table td { padding: 8px 10px !important; font-size: 11px !important; }
         }
+
+        .daylight-theme .fp-top-bar {
+          background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.90) 100%) !important;
+          border-color: rgba(194, 155, 98, 0.3) !important;
+          box-shadow: 0 4px 15px rgba(44, 26, 18, 0.08) !important;
+        }
+        .daylight-theme .fp-top-bar select, .daylight-theme .fp-select {
+          background: #FFFFFF !important;
+          color: #2C1A12 !important;
+          border-color: rgba(194, 155, 98, 0.35) !important;
+        }
+        .daylight-theme .fp-table-card {
+          background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.90) 100%) !important;
+          border-color: rgba(194, 155, 98, 0.3) !important;
+          box-shadow: 0 4px 20px rgba(44, 26, 18, 0.08) !important;
+        }
+        .daylight-theme .fp-table {
+          color: #2C1A12 !important;
+        }
+        .daylight-theme .fp-table thead {
+          background: rgba(194, 155, 98, 0.12) !important;
+          color: #2C1A12 !important;
+        }
+        .daylight-theme .fp-table th {
+          color: #2C1A12 !important;
+          border-bottom: 1px solid rgba(194, 155, 98, 0.25) !important;
+        }
+        .daylight-theme .fp-table tr {
+          border-bottom: 1px solid rgba(194, 155, 98, 0.15) !important;
+        }
+        .daylight-theme .fp-table tr:nth-child(even) {
+          background: rgba(194, 155, 98, 0.04) !important;
+        }
+        .daylight-theme .fp-table input.fp-input {
+          background: #FFFFFF !important;
+          color: #2C1A12 !important;
+          border-color: rgba(194, 155, 98, 0.3) !important;
+        }
+        .daylight-theme .fp-table input.fp-input-actual {
+          background: rgba(194, 155, 98, 0.08) !important;
+          color: #A8573C !important;
+          border-color: rgba(194, 155, 98, 0.4) !important;
+        }
+        .daylight-theme .fp-table input::placeholder {
+          color: rgba(44, 26, 18, 0.4) !important;
+        }
+        .daylight-theme .fp-side-summary {
+          background: linear-gradient(135deg, rgba(255, 253, 250, 0.98) 0%, rgba(250, 246, 240, 0.92) 100%) !important;
+          border-color: rgba(194, 155, 98, 0.35) !important;
+          color: #2C1A12 !important;
+          box-shadow: 0 10px 30px rgba(44, 26, 18, 0.1) !important;
+        }
+        .daylight-theme .fp-side-summary h3 {
+          color: #A8573C !important;
+          border-bottom-color: rgba(194, 155, 98, 0.25) !important;
+        }
+        .daylight-theme .fp-side-summary div {
+          color: #2C1A12 !important;
+        }
       `}</style>
 
       {/* 🖥️ قسم الشاشة التفاعلي الافتراضي (يختفي بالكامل أثناء الطباعة) */}
@@ -340,10 +399,10 @@ export default function FinancialPlanPage() {
         <div className="fp-top-bar" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(20, 24, 34, 0.85)', backdropFilter: 'blur(20px)', padding: '16px 22px', borderRadius: '16px', marginBottom: '25px', border: '1px solid rgba(0, 229, 255, 0.2)', boxShadow: '0 8px 32px rgba(0,0,0,0.3)', flexWrap: 'wrap', gap: '15px' }}>
           <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
             <div style={{ fontWeight: 900, color: '#00E5FF', fontSize: '14px' }}>فترة الخطة:</div>
-            <select value={logic.selectedMonth} onChange={e => logic.setSelectedMonth(Number(e.target.value))} style={{ padding: '9px 14px', borderRadius: '10px', border: '1px solid rgba(0, 229, 255, 0.3)', fontWeight: 800, color: '#F8FAFC', background: '#0B0E14', outline: 'none', cursor: 'pointer' }}>
+            <select className="fp-select" value={logic.selectedMonth} onChange={e => logic.setSelectedMonth(Number(e.target.value))} style={{ padding: '9px 14px', borderRadius: '10px', border: '1px solid rgba(0, 229, 255, 0.3)', fontWeight: 800, color: '#F8FAFC', background: '#0B0E14', outline: 'none', cursor: 'pointer' }}>
               {Array.from({length: 12}, (_, i) => i + 1).map(m => <option key={m} value={m}>شهر {m}</option>)}
             </select>
-            <select value={logic.selectedYear} onChange={e => logic.setSelectedYear(Number(e.target.value))} style={{ padding: '9px 14px', borderRadius: '10px', border: '1px solid rgba(0, 229, 255, 0.3)', fontWeight: 800, color: '#F8FAFC', background: '#0B0E14', outline: 'none', cursor: 'pointer' }}>
+            <select className="fp-select" value={logic.selectedYear} onChange={e => logic.setSelectedYear(Number(e.target.value))} style={{ padding: '9px 14px', borderRadius: '10px', border: '1px solid rgba(0, 229, 255, 0.3)', fontWeight: 800, color: '#F8FAFC', background: '#0B0E14', outline: 'none', cursor: 'pointer' }}>
               {[2024, 2025, 2026, 2027].map(y => <option key={y} value={y}>سنة {y}</option>)}
             </select>
           </div>

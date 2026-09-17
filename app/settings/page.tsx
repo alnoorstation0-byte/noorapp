@@ -1,5 +1,6 @@
 "use client";
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import dynamic from 'next/dynamic';
 
 const PermissionsMatrix = dynamic(() => import('./PermissionsMatrix'), { 
@@ -49,9 +50,9 @@ const TABLE_GROUPS = [
   },
   {
     id: 'inventory',
-    nameAr: "📦 المخزون والمستودعات والأسطول",
-    nameEn: "📦 Inventory, Warehouses & Fleet",
-    tables: SYSTEM_TABLES.filter(t => t.group === '📦 المخزون والأسطول')
+    nameAr: "📦 المخزون وخزانات الوقود والمستودعات",
+    nameEn: "📦 Inventory, Fuel Tanks & Warehouses",
+    tables: SYSTEM_TABLES.filter(t => t.group === '📦 المخزون وخزانات الوقود')
   },
   {
     id: 'partners',
@@ -65,7 +66,8 @@ const TABLE_NAMES_EN: Record<string, string> = {
   invoices: 'Sales & POS Invoices',
   pos_shifts: 'POS Shifts & Cash Registers',
   pos_cash_drops: 'Cash Drop Transfers',
-  fleet_operations: 'Fleet Trips & Daily Routes',
+  fuel_pumps: 'Station Fuel Pumps & Nozzles',
+  shift_pump_readings: 'Shift Fuel Pump Readings',
   partner_delivery_notes: 'Delivery Notes (Bayan)',
   journal_headers: 'Journal Entries (Headers)',
   journal_lines: 'Journal Entries (Details)',
@@ -75,13 +77,11 @@ const TABLE_NAMES_EN: Record<string, string> = {
   cash_flows: 'Cash Flows Register',
   expenses: 'Operating Expenses',
   chart_of_accounts: 'Chart of Accounts',
-  inventory_items: 'Inventory Items & Products',
-  warehouse_inventory: 'Warehouse Balances',
-  vehicle_inventory: 'Vehicle Balances',
-  inventory_transactions: 'Inventory Stock Transactions',
-  warehouses: 'Warehouses & Branches',
-  fleet_vehicles: 'Fleet Vehicles',
-  partners: 'Partners (Clients & Vendors)',
+  inventory_items: 'Inventory Items & Fuels',
+  warehouse_inventory: 'Tank & Warehouse Balances',
+  inventory_transactions: 'Fuel & Stock Transactions',
+  warehouses: 'Fuel Tanks & Warehouses',
+  partners: 'Partners (Clients, Transporters & Vendors)',
   profiles: 'Users & Employees',
   payroll_slips: 'Payroll Slips',
   system_settings: 'System Configuration',
@@ -91,8 +91,13 @@ const TABLE_NAMES_EN: Record<string, string> = {
 type SettingsTab = 'backup' | 'restore' | 'reset' | 'permissions' | 'health' | 'audit';
 
 export default function SettingsPage() {
+  const [mounted, setMounted] = useState(false);
   const [activeTab, setActiveTab] = useState<SettingsTab>('backup'); 
   const [selectedTables, setSelectedTables] = useState<string[]>(SYSTEM_TABLES.map(t => t.id));
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -272,19 +277,19 @@ export default function SettingsPage() {
     try {
       const res = await clearTransactionsOnly((msg) => setStatusMsg({ text: msg, type: 'loading' }));
       if (res.success) {
-        showToast(isEn ? '✅ All transactions wiped and balances reset successfully!' : '✅ تم مسح جميع القيود وسجل الورديات وأوامر تشغيل الرحلات وتصفير الأرصدة بنجاح!', 'success');
-        setStatusMsg({ text: isEn ? '✅ Transactions wiped and balances reset successfully.' : '✅ تم مسح القيود وسجل الورديات وأوامر تشغيل الرحلات وتصفير الحركات بنجاح.', type: 'success' });
+        showToast(isEn ? '✅ All transactions wiped and balances reset successfully!' : '✅ تم مسح جميع القيود وسجل الورديات وقراءات عدادات المضخات وتصفير الأرصدة بنجاح!', 'success');
+        setStatusMsg({ text: isEn ? '✅ Transactions wiped and balances reset successfully.' : '✅ تم مسح القيود وسجل الورديات وقراءات عدادات المضخات وتصفير الحركات بنجاح.', type: 'success' });
         
         // ⚡ بث التحديثات اللحظية وإبطال الكاش لكافة الشاشات
         emitTableChange('pos_shifts');
-        emitTableChange('fleet_operations');
+        emitTableChange('fuel_pumps');
+        emitTableChange('shift_pump_readings');
         emitTableChange('invoices');
         emitTableChange('receipt_vouchers');
         emitTableChange('payment_vouchers');
         emitTableChange('expenses');
         emitTableChange('inventory_transactions');
         emitTableChange('warehouse_inventory');
-        emitTableChange('vehicle_inventory');
         emitTableChange('journal_headers');
 
         queryClient.invalidateQueries();
@@ -615,8 +620,8 @@ export default function SettingsPage() {
                 </div>
                 <p style={{ fontSize: '11.5px', color: '#CBD5E1', lineHeight: 1.5, margin: '0 0 15px 0', fontWeight: 700 }}>
                   {isEn 
-                    ? 'Deletes all invoices, vouchers, journal entries, expenses, POS shifts, and fleet trip dispatches. Resets inventory and bottle custodies to 0. Keeps Chart of Accounts, Customers, Vendors, Warehouses, and Items intact.' 
-                    : 'يحذف الفواتير، سندات القبض والصرف، القيود المحاسبية، المصروفات، سجل الورديات (نقاط البيع)، أوامر تشغيل الرحلات (الأسطول)، والتدفقات، ويصفر أرصدة المخزون وعهد الفوارغ. ويحافظ تماماً على شجرة الحسابات، العملاء، الموردين، المستودعات، والأصناف.'}
+                    ? 'Deletes all invoices, vouchers, journal entries, expenses, station shifts, and fleet trip dispatches. Resets inventory and returnable drum custodies to 0. Keeps Chart of Accounts, Customers, Vendors, Warehouses, and Items intact.' 
+                    : 'يحذف الفواتير، سندات القبض والصرف، القيود المحاسبية، المصروفات، سجل الورديات (مبيعات المحطة)، أوامر تشغيل الرحلات (الأسطول)، والتدفقات، ويصفر أرصدة المخزون وعهد البراميل المسترجعة. ويحافظ تماماً على شجرة الحسابات، العملاء، الموردين، المستودعات، والأصناف.'}
                 </p>
                 <button 
                   onClick={() => { setConfirmModalType('clear'); setConfirmInputText(''); }}
@@ -667,9 +672,9 @@ export default function SettingsPage() {
       {/* ========================================================================= */}
       {/* 🔒 نافذة التأكيد الأمني للعمليات الخطيرة                                   */}
       {/* ========================================================================= */}
-      {confirmModalType && (
-        <div className="security-modal-overlay">
-          <div className="security-modal-card">
+      {confirmModalType && mounted && typeof document !== 'undefined' && createPortal(
+        <div className="security-modal-overlay" onClick={() => { setConfirmModalType(null); setConfirmInputText(''); }}>
+          <div className="security-modal-card" onClick={(e) => e.stopPropagation()}>
             <div style={{ fontSize: '40px', marginBottom: '8px' }}>
               {confirmModalType === 'clear' ? '⚠️' : '🚨'}
             </div>
@@ -751,7 +756,8 @@ export default function SettingsPage() {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* ستايلات الـ CSS وفق طابع Aqua Glassmorphism */}
@@ -1080,15 +1086,20 @@ export default function SettingsPage() {
 
         /* نافذة التأكيد الأمني */
         .security-modal-overlay {
-          position: fixed; 
-          inset: 0;
-          background: rgba(11, 14, 20, 0.88);
-          backdrop-filter: blur(16px);
-          display: flex; 
-          align-items: center; 
-          justify-content: center;
-          z-index: 999999999; 
-          padding: 16px;
+          position: fixed !important; 
+          inset: 0 !important;
+          top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
+          width: 100vw !important; height: 100vh !important;
+          background: rgba(11, 14, 20, 0.88) !important;
+          backdrop-filter: blur(16px) !important;
+          -webkit-backdrop-filter: blur(16px) !important;
+          display: flex !important; 
+          align-items: center !important; 
+          justify-content: center !important;
+          z-index: 999999999 !important; 
+          isolation: isolate !important;
+          pointer-events: auto !important;
+          padding: 16px !important;
         }
         .security-modal-card {
           background: #141822; 
@@ -1177,6 +1188,111 @@ export default function SettingsPage() {
 
         @keyframes spin { 100% { transform: rotate(360deg); } }
         @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+
+        /* Daylight Desert Glassmorphism */
+        .daylight-theme .tab-btn {
+          background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.9) 100%);
+          border: 1px solid rgba(194, 155, 98, 0.3);
+          color: rgba(44, 26, 18, 0.7);
+        }
+        .daylight-theme .tab-btn:hover {
+          background: #FFFFFF;
+          color: #A8573C;
+          border-color: #C29B62;
+        }
+        .daylight-theme .tab-btn.active {
+          background: linear-gradient(135deg, rgba(194, 155, 98, 0.2), rgba(168, 87, 60, 0.1));
+          color: #A8573C;
+          border-color: #C29B62;
+          box-shadow: 0 0 15px rgba(194, 155, 98, 0.25);
+        }
+        .daylight-theme .group-card {
+          background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.9) 100%);
+          border: 1px solid rgba(194, 155, 98, 0.3);
+          box-shadow: 0 4px 15px rgba(44, 26, 18, 0.06);
+        }
+        .daylight-theme .table-row {
+          background: #FFFFFF;
+          border: 1px solid rgba(194, 155, 98, 0.25);
+          color: #2C1A12;
+        }
+        .daylight-theme .table-row.selected {
+          border-color: #C29B62;
+          background: rgba(194, 155, 98, 0.1);
+        }
+        .daylight-theme .table-row:hover {
+          border-color: #C29B62;
+        }
+        .daylight-theme .table-row span[style*="color: #F8FAFC"],
+        .daylight-theme .table-row span[style*="color: rgb(248, 250, 252)"] {
+          color: #2C1A12 !important;
+        }
+        .daylight-theme .table-row span[style*="color: #94A3B8"],
+        .daylight-theme .table-row span[style*="color: rgb(148, 163, 184)"] {
+          color: rgba(44, 26, 18, 0.65) !important;
+        }
+        .daylight-theme .premium-dropzone {
+          background: rgba(255, 253, 250, 0.7);
+          border-color: rgba(194, 155, 98, 0.4);
+        }
+        .daylight-theme .premium-dropzone:hover {
+          background: #FFFFFF;
+          border-color: #C29B62;
+        }
+        .daylight-theme .sidebar-summary-glass {
+          background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.9) 100%);
+          border: 1px solid rgba(194, 155, 98, 0.3);
+          box-shadow: 0 4px 15px rgba(44, 26, 18, 0.08);
+        }
+        .daylight-theme .sidebar-summary-glass .summary-title {
+          color: rgba(44, 26, 18, 0.65);
+        }
+        .daylight-theme .sidebar-summary-glass .summary-value {
+          color: #2C1A12;
+        }
+        .daylight-theme .danger-zone-container {
+          background: rgba(254, 242, 242, 0.85);
+          border: 1.5px solid rgba(239, 68, 68, 0.35);
+        }
+        .daylight-theme .danger-card {
+          background: linear-gradient(135deg, rgba(255, 253, 250, 0.98) 0%, rgba(250, 246, 240, 0.95) 100%);
+          border: 1px solid rgba(194, 155, 98, 0.25);
+          box-shadow: 0 4px 15px rgba(44, 26, 18, 0.06);
+        }
+        .daylight-theme .danger-card h4 {
+          color: #2C1A12 !important;
+        }
+        .daylight-theme .danger-card p {
+          color: rgba(44, 26, 18, 0.65) !important;
+        }
+        .daylight-theme .security-modal-overlay {
+          background: rgba(253, 251, 247, 0.85) !important;
+          backdrop-filter: blur(16px) !important;
+        }
+        .daylight-theme .security-modal-card {
+          background: linear-gradient(135deg, rgba(255, 253, 250, 0.98) 0%, rgba(245, 238, 228, 0.95) 100%) !important;
+          border: 1px solid rgba(239, 68, 68, 0.35) !important;
+          box-shadow: 0 25px 50px rgba(44, 26, 18, 0.15) !important;
+        }
+        .daylight-theme .security-modal-card h3 {
+          color: #2C1A12 !important;
+        }
+        .daylight-theme .security-modal-card p {
+          color: rgba(44, 26, 18, 0.65) !important;
+        }
+        .daylight-theme .security-input {
+          background: #FFFFFF !important;
+          border: 1.5px solid rgba(194, 155, 98, 0.4) !important;
+          color: #2C1A12 !important;
+        }
+        .daylight-theme .btn-cancel-action {
+          background: rgba(44, 26, 18, 0.06);
+          border: 1px solid rgba(194, 155, 98, 0.3);
+          color: #2C1A12;
+        }
+        .daylight-theme .btn-cancel-action:hover {
+          background: rgba(44, 26, 18, 0.12);
+        }
       `}</style>
     </MasterPage>
   );

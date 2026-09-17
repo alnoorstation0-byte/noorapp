@@ -4,8 +4,10 @@ import { formatCurrency, formatDate } from '@/lib/helpers';
 import { usePosSettlementsLogic } from './pos_settlements_logic';
 import PosSettlementActionModal from './PosSettlementActionModal';
 import PosSettlementPrintModal from './PosSettlementPrintModal';
+import { useThemeMode } from '@/lib/ThemeContext';
 
 export default function PosSettlementsPage() {
+    const { isDaylight } = useThemeMode();
     const {
         filteredSettlements,
         warehouses,
@@ -40,8 +42,8 @@ export default function PosSettlementsPage() {
 
     return (
         <div style={{
-            background: '#0B0E14',
-            color: '#F8FAFC',
+            background: isDaylight ? '#F8FAFC' : '#0B0E14',
+            color: isDaylight ? '#0F172A' : '#F8FAFC',
             minHeight: '100vh',
             padding: '30px 24px',
             direction: 'rtl',
@@ -49,7 +51,7 @@ export default function PosSettlementsPage() {
             overflowX: 'hidden',
             boxSizing: 'border-box'
         }}>
-            <style>{`
+            <style dangerouslySetInnerHTML={{ __html: `
                 /* Noor Command Center Theme Styles */
                 .aqua-glass-card {
                     background: linear-gradient(135deg, rgba(20, 24, 34, 0.88) 0%, rgba(13, 16, 24, 0.78) 100%) !important;
@@ -128,7 +130,7 @@ export default function PosSettlementsPage() {
                     .aqua-btn-primary { min-height: 44px !important; width: 100% !important; }
                     .settle-table th, .settle-table td { padding: 10px 8px !important; font-size: 11px !important; }
                 }
-            `}</style>
+            ` }} />
 
             {/* Top Hero Banner */}
             <div className="settle-page-header" style={{
@@ -207,22 +209,22 @@ export default function PosSettlementsPage() {
                     <div style={{ flex: '1 1 240px', position: 'relative' }}>
                         <input
                             type="text"
-                            placeholder="بحث باسم المنفذ، الكاشير، رقم الوردية..."
+                            placeholder="بحث باسم محطة الوقود، المشغل، رقم الوردية..."
                             value={globalSearch}
                             onChange={(e) => setGlobalSearch(e.target.value)}
                             style={{
                                 width: '100%',
                                 padding: '11px 20px 11px 40px',
                                 borderRadius: '50px',
-                                border: '1px solid rgba(0, 229, 255, 0.25)',
-                                background: 'rgba(18, 22, 30, 0.85)',
+                                border: isDaylight ? '1px solid rgba(203, 213, 225, 0.9)' : '1px solid rgba(0, 229, 255, 0.25)',
+                                background: isDaylight ? '#FFFFFF' : 'rgba(18, 22, 30, 0.85)',
                                 fontSize: '13px',
                                 fontWeight: 700,
-                                color: '#F8FAFC',
+                                color: isDaylight ? '#0F172A' : '#F8FAFC',
                                 outline: 'none'
                             }}
                         />
-                        <span style={{ position: 'absolute', left: '16px', top: '11px', fontSize: '16px', color: '#00E5FF' }}>🔍</span>
+                        <span style={{ position: 'absolute', left: '16px', top: '11px', fontSize: '16px', color: isDaylight ? '#0284C7' : '#00E5FF' }}>🔍</span>
                     </div>
 
                     {/* Outlet / Warehouse Selector */}
@@ -234,18 +236,18 @@ export default function PosSettlementsPage() {
                                 width: '100%',
                                 padding: '11px 16px',
                                 borderRadius: '50px',
-                                border: '1px solid rgba(0, 229, 255, 0.25)',
-                                background: 'rgba(18, 22, 30, 0.85)',
+                                border: isDaylight ? '1px solid rgba(203, 213, 225, 0.9)' : '1px solid rgba(0, 229, 255, 0.25)',
+                                background: isDaylight ? '#FFFFFF' : 'rgba(18, 22, 30, 0.85)',
                                 fontSize: '13px',
                                 fontWeight: 700,
-                                color: '#F8FAFC',
+                                color: isDaylight ? '#0F172A' : '#F8FAFC',
                                 outline: 'none'
                             }}
                         >
-                            <option value="all">🏢 كافة منافذ البيع</option>
+                            <option value="all">⛽ كافة محطات الوقود</option>
                             {warehouses.filter(w => w.type !== 'vehicle').map(wh => (
                                 <option key={wh.id} value={wh.id}>
-                                    {wh.name} {wh.type === 'pos' ? '(نقطة بيع)' : ''}
+                                    {wh.name} {wh.type === 'pos' ? '(مضخة / نقطة بيع)' : ''}
                                 </option>
                             ))}
                         </select>
@@ -336,8 +338,8 @@ export default function PosSettlementsPage() {
                 <div className="aqua-glass-card" style={{ padding: '22px 24px', position: 'relative', overflow: 'hidden' }}>
                     <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: '#00E5FF' }}></div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontSize: '13px', fontWeight: 800, color: '#00E5FF' }}>ورديات ومنافذ البيع 🏪</span>
-                        <span style={{ fontSize: '20px' }}>📦</span>
+                        <span style={{ fontSize: '13px', fontWeight: 800, color: '#00E5FF' }}>ورديات ومحطات الوقود ⛽</span>
+                        <span style={{ fontSize: '20px' }}>⛽</span>
                     </div>
                     <div style={{ fontSize: '32px', fontWeight: 900, color: '#F8FAFC', margin: '10px 0 6px 0', fontFamily: 'monospace' }}>
                         {totals.totalShifts}
@@ -428,16 +430,16 @@ export default function PosSettlementsPage() {
                 {isLoading ? (
                     <div style={{ padding: '80px', textAlign: 'center', color: '#00E5FF', fontWeight: 800, fontSize: '18px' }}>
                         <div style={{ fontSize: '40px', marginBottom: '15px', animation: 'spin 1.5s infinite linear' }}>⏳</div>
-                        جاري تحميل ومطابقة عهد منافذ البيع والورديات...
+                        جاري تحميل ومطابقة تسويات محطات الوقود والورديات...
                     </div>
                 ) : (
                     <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-                        <table className="settle-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right', fontSize: '13px', color: '#F8FAFC' }}>
-                            <thead style={{ background: 'rgba(0, 229, 255, 0.08)', borderBottom: '1.5px solid rgba(0, 229, 255, 0.2)' }}>
+                        <table className="settle-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right', fontSize: '13px', color: isDaylight ? '#0F172A' : '#F8FAFC' }}>
+                            <thead style={{ background: isDaylight ? 'rgba(2, 132, 199, 0.08)' : 'rgba(0, 229, 255, 0.08)', borderBottom: isDaylight ? '2px solid rgba(2, 132, 199, 0.2)' : '1.5px solid rgba(0, 229, 255, 0.2)' }}>
                                 <tr>
-                                    <th style={{ padding: '18px 20px', color: '#00E5FF', fontWeight: 900 }}>الوردية والمنفذ 🏪</th>
-                                    <th style={{ padding: '18px 20px', color: '#00E5FF', fontWeight: 900 }}>التاريخ 📅</th>
-                                    <th style={{ padding: '18px 20px', color: '#00E5FF', fontWeight: 900 }}>الكاشير / المسؤول 👤</th>
+                                    <th style={{ padding: '18px 20px', color: isDaylight ? '#0284C7' : '#00E5FF', fontWeight: 900 }}>الوردية ومحطة الوقود ⛽</th>
+                                    <th style={{ padding: '18px 20px', color: isDaylight ? '#0284C7' : '#00E5FF', fontWeight: 900 }}>التاريخ 📅</th>
+                                    <th style={{ padding: '18px 20px', color: isDaylight ? '#0284C7' : '#00E5FF', fontWeight: 900 }}>المشغل / الكاشير 👤</th>
                                     <th style={{ padding: '18px 20px', color: '#F8FAFC', fontWeight: 900, textAlign: 'center' }}>المبيعات 💰</th>
                                     <th style={{ padding: '18px 20px', color: '#EF4444', fontWeight: 900, textAlign: 'center' }}>مصروفات الدرج (-)</th>
                                     <th style={{ padding: '18px 20px', color: '#E06D44', fontWeight: 900, textAlign: 'center' }}>المطالبة النقدية 💵</th>
@@ -646,7 +648,7 @@ export default function PosSettlementsPage() {
                                                              alignItems: 'center',
                                                              gap: '4px'
                                                          }}
-                                                         title="طباعة سند تسوية ومخالصة عهدة منفذ بيع"
+                                                         title="طباعة سند تسوية ومخالصة عهدة وردية محطة وقود"
                                                      >
                                                          <span>🖨️</span>
                                                          <span>سند</span>
@@ -658,12 +660,12 @@ export default function PosSettlementsPage() {
                                  }) : (
                                      <tr>
                                          <td colSpan={11} style={{ padding: '80px 20px', textAlign: 'center', color: '#94A3B8' }}>
-                                             <div style={{ fontSize: '48px', marginBottom: '12px' }}>🏪</div>
+                                             <div style={{ fontSize: '48px', marginBottom: '12px' }}>⛽</div>
                                              <div style={{ fontSize: '18px', fontWeight: 900, color: '#F8FAFC' }}>
-                                                 لا توجد ورديات أو منافذ بيع مطابقة لخيارات البحث المحددة
+                                                 لا توجد ورديات أو محطات وقود مطابقة لخيارات البحث المحددة
                                              </div>
                                              <p style={{ fontSize: '13px', color: '#94A3B8', marginTop: '6px' }}>
-                                                 جرب تغيير فترة التاريخ أو المنفذ المختار لعرض كافة الورديات.
+                                                 جرب تغيير فترة التاريخ أو محطة الوقود المختارة لعرض كافة الورديات.
                                              </p>
                                          </td>
                                      </tr>

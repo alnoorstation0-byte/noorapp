@@ -2,7 +2,7 @@ export const ar = {
     // Menu Groups
     menu_group_home: "الرئيسية والملخصات",
     menu_group_sales: "التشغيل والمبيعات",
-    menu_group_inventory: "المستودع وخزانات الوقود",
+    menu_group_inventory: "المحطات وخزانات الوقود",
     menu_group_finance: "الحسابات والمالية",
     menu_group_partners: "العملاء والشركاء",
     menu_group_system: "النظام والتقارير",
@@ -15,7 +15,7 @@ export const ar = {
 
     // Menu Items - التشغيل والمبيعات
     menu_pos: "شاشة الكاشير (POS)",
-    menu_pos_dashboard: "أرباح منافذ البيع",
+    menu_pos_dashboard: "أرباح وتشغيل محطات الوقود",
     menu_pos_settlements: "تسوية الورديات والعدادات",
     menu_invoices: "الفواتير والمبيعات",
     menu_sales_analysis: "تحليل المبيعات",
@@ -26,7 +26,7 @@ export const ar = {
     menu_reorder_alerts: "تنبيهات حدود الطلب والنواقص",
     menu_inventory_valuation: "تقييم المخزون",
     menu_purchase_orders: "أوامر الشراء والتوريد",
-    menu_warehouses: "المستودعات والخزانات",
+    menu_warehouses: "محطات الوقود والخزانات",
     menu_inventory_transactions: "حركات المخزون والتوريد",
 
     // Menu Items - الحسابات والمالية

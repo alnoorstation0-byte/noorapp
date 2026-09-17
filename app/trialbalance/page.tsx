@@ -69,6 +69,60 @@ export default function TrialBalancePage() {
           .tb-table { min-width: 650px !important; }
         }
 
+        .daylight-theme .tb-filter-bar {
+          background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.90) 100%) !important;
+          border-color: rgba(194, 155, 98, 0.3) !important;
+          box-shadow: 0 4px 15px rgba(44, 26, 18, 0.08) !important;
+        }
+        .daylight-theme .tb-filter-bar > div:first-child {
+          color: #2C1A12 !important;
+        }
+        .daylight-theme .tb-date-group {
+          background: #FFFFFF !important;
+          border-color: rgba(194, 155, 98, 0.35) !important;
+        }
+        .daylight-theme .tb-date-group label {
+          color: rgba(44, 26, 18, 0.7) !important;
+        }
+        .daylight-theme .tb-date-group input {
+          color: #2C1A12 !important;
+          background-color: transparent !important;
+        }
+        .daylight-theme .tb-table-card {
+          background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.90) 100%) !important;
+          border-color: rgba(194, 155, 98, 0.3) !important;
+          box-shadow: 0 4px 20px rgba(44, 26, 18, 0.08) !important;
+        }
+        .daylight-theme .tb-table {
+          background: transparent !important;
+        }
+        .daylight-theme .tb-table th {
+          border: 1px solid rgba(194, 155, 98, 0.2) !important;
+          color: #2C1A12 !important;
+        }
+        .daylight-theme .tb-table td {
+          border: 1px solid rgba(194, 155, 98, 0.15) !important;
+        }
+        .daylight-theme .tb-table td.text-right {
+          color: #2C1A12 !important;
+        }
+        .daylight-theme .tb-table td.number {
+          color: #A8573C !important;
+        }
+        .daylight-theme .tb-table tr:nth-child(even) {
+          background: rgba(194, 155, 98, 0.04) !important;
+        }
+        .daylight-theme .tb-table tr:hover {
+          background: rgba(194, 155, 98, 0.09) !important;
+        }
+        .daylight-theme .tb-totals {
+          background-color: rgba(194, 155, 98, 0.15) !important;
+        }
+        .daylight-theme .tb-totals td {
+          color: #2C1A12 !important;
+          border-top-color: rgba(194, 155, 98, 0.4) !important;
+        }
+
         /* تنسيقات الطباعة المعزولة */
         @media print {
           .no-print { display: none !important; }
@@ -119,7 +173,7 @@ export default function TrialBalancePage() {
             <LoadingScreen message="جاري إعداد ميزان المراجعة وتجميع القيود..." fullScreen={false} />
           ) : (
             <>
-              <div style={{ overflowX: 'auto', borderRadius: '16px', border: '1px solid rgba(0, 229, 255, 0.2)', boxShadow: '0 8px 30px rgba(0,0,0,0.4)', background: 'rgba(20, 24, 34, 0.95)' }}>
+              <div className="tb-table-card" style={{ overflowX: 'auto', borderRadius: '16px', border: '1px solid rgba(0, 229, 255, 0.2)', boxShadow: '0 8px 30px rgba(0,0,0,0.4)', background: 'rgba(20, 24, 34, 0.95)' }}>
                 <table className="tb-table">
                   <thead>
                     <tr>

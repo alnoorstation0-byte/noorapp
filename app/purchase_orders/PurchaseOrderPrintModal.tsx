@@ -63,6 +63,18 @@ export default function PurchaseOrderPrintModal({ isOpen, onClose, record }: any
                 .action-btn.print { background: linear-gradient(135deg, #00E5FF, #0284C7); color: #0B0E14; box-shadow: 0 4px 12px rgba(0, 229, 255, 0.25); }
                 .action-btn.close { background: rgba(239, 68, 68, 0.15); color: #EF4444; border: 1px solid rgba(239, 68, 68, 0.3); }
 
+                /* Daylight Desert Glassmorphism */
+                .daylight-theme .print-actions-bar {
+                    background: linear-gradient(135deg, rgba(255, 253, 250, 0.98) 0%, rgba(245, 238, 228, 0.95) 100%) !important;
+                    border: 1px solid rgba(194, 155, 98, 0.4) !important;
+                    box-shadow: 0 10px 30px rgba(44, 26, 18, 0.15) !important;
+                }
+                .daylight-theme .action-btn.print {
+                    background: linear-gradient(135deg, #C29B62, #A8573C) !important;
+                    color: #FFFFFF !important;
+                    box-shadow: 0 4px 12px rgba(168, 87, 60, 0.25) !important;
+                }
+
                 @media (max-width: 768px) {
                     .print-modal-overlay { padding: 15px 10px !important; }
                     .print-actions-bar { padding: 10px 14px !important; border-radius: 20px !important; width: 100%; justify-content: center; gap: 8px !important; }
@@ -149,15 +161,8 @@ export default function PurchaseOrderPrintModal({ isOpen, onClose, record }: any
                             <p style={{ margin: '5px 0' }}><strong>الاسم:</strong> {record.partners?.name || 'غير محدد'}</p>
                         </div>
                         <div style={{ width: '48%', border: '1px solid #ccc', padding: '15px', borderRadius: '8px' }}>
-                            <h3 style={{ margin: '0 0 10px 0', fontSize: '16px', borderBottom: '1px solid #eee', paddingBottom: '5px' }}>معلومات الاستلام:</h3>
-                            {record.fleet_operation_id ? (
-                                <>
-                                    <p style={{ margin: '5px 0' }}><strong>رقم الرحلة:</strong> {record.fleet_operations?.operation_number}</p>
-                                    <p style={{ margin: '5px 0' }}><strong>السيارة:</strong> {record.fleet_operations?.fleet_vehicles?.plate_number}</p>
-                                </>
-                            ) : (
-                                <p style={{ margin: '5px 0' }}><strong>المستودع:</strong> {record.warehouses?.name || 'المستودع الرئيسي'}</p>
-                            )}
+                            <h3 style={{ margin: '0 0 10px 0', fontSize: '16px', borderBottom: '1px solid #eee', paddingBottom: '5px' }}>معلومات الاستلام والتفريغ:</h3>
+                            <p style={{ margin: '5px 0' }}><strong>الخزان / المستودع:</strong> {record.warehouses?.name || record.warehouse_name || 'خزان المحطة الرئيسي'}</p>
                         </div>
                     </div>
 
@@ -204,10 +209,10 @@ export default function PurchaseOrderPrintModal({ isOpen, onClose, record }: any
                     {/* Signatures */}
                     <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '50px' }}>
                         <div style={{ textAlign: 'center', width: '200px' }}>
-                            <p style={{ borderTop: '1px solid #000', paddingTop: '10px' }}>توقيع أمين المستودع</p>
+                            <p style={{ borderTop: '1px solid #000', paddingTop: '10px' }}>توقيع مسؤول الخزانات / المستودع</p>
                         </div>
                         <div style={{ textAlign: 'center', width: '200px' }}>
-                            <p style={{ borderTop: '1px solid #000', paddingTop: '10px' }}>توقيع المورد / المندوب</p>
+                            <p style={{ borderTop: '1px solid #000', paddingTop: '10px' }}>توقيع المورد / ممثل التوريد</p>
                         </div>
                     </div>
                 </div>

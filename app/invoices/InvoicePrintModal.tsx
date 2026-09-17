@@ -270,8 +270,8 @@ export default function InvoicePrintModal({
     const customerVat = customerDetails?.vat_number || customerDetails?.tax_id || '';
     const customerAddress = customerDetails?.address || record.address || 'المملكة العربية السعودية';
     const customerCr = customerDetails?.commercial_reg || customerDetails?.cr_number || '';
-    const delegateName = delegateDetails?.name || (record.delegate?.name ? record.delegate.name : (record.delegate_id ? 'مندوب مبيعات' : 'مبيعات مباشرة'));
-    const outletName = warehouseDetails?.name || (record.warehouse?.name ? record.warehouse.name : 'الفرع الرئيسي');
+    const delegateName = delegateDetails?.name || (record.delegate?.name ? record.delegate.name : (record.delegate_id ? 'مشغل المحطة' : 'مبيعات المحطة المباشرة'));
+    const outletName = warehouseDetails?.name || (record.warehouse?.name ? record.warehouse.name : 'محطة الوقود الرئيسية');
 
     const modalContent = (
         <div className="print-modal-overlay">
@@ -332,6 +332,18 @@ export default function InvoicePrintModal({
                 .action-btn.whatsapp:hover { background: #20ba59; }
                 .action-btn.format-switch { background: #f59e0b; color: white; }
                 .action-btn.close { background: rgba(239, 68, 68, 0.15); color: #EF4444; border: 1px solid rgba(239, 68, 68, 0.3); }
+
+                /* Daylight Desert Glassmorphism */
+                .daylight-theme .print-actions-bar {
+                    background: linear-gradient(135deg, rgba(255, 253, 250, 0.98) 0%, rgba(245, 238, 228, 0.95) 100%) !important;
+                    border: 1px solid rgba(194, 155, 98, 0.4) !important;
+                    box-shadow: 0 10px 30px rgba(44, 26, 18, 0.15) !important;
+                }
+                .daylight-theme .action-btn.print {
+                    background: linear-gradient(135deg, #C29B62, #A8573C) !important;
+                    color: #FFFFFF !important;
+                    box-shadow: 0 4px 12px rgba(168, 87, 60, 0.25) !important;
+                }
 
                 @media (max-width: 768px) {
                     .print-modal-overlay { padding: 15px 10px !important; }
@@ -732,11 +744,11 @@ export default function InvoicePrintModal({
                                         <td className="value-cell">{record.payment_method || 'آجل'}</td>
                                     </tr>
                                     <tr>
-                                        <td className="label-cell">المنفذ / الفرع:</td>
+                                        <td className="label-cell">محطة الوقود / الخزان:</td>
                                         <td className="value-cell">{outletName}</td>
                                     </tr>
                                     <tr>
-                                        <td className="label-cell">المندوب / البائع:</td>
+                                        <td className="label-cell">مشغل المحطة / المسؤول:</td>
                                         <td className="value-cell">{delegateName}</td>
                                     </tr>
                                 </tbody>
@@ -851,7 +863,7 @@ export default function InvoicePrintModal({
                     {/* 5️⃣ إقرار الاستلام والتعهد القانوني المعتمد */}
                     <div style={{ marginTop: '10px', border: '1px solid rgba(2, 132, 199, 0.25)', borderRadius: '10px', padding: '8px 12px', background: 'rgba(2, 132, 199, 0.04)' }}>
                         <p style={{ fontSize: '9px', lineHeight: '1.5', color: '#0F172A', fontWeight: 600, margin: '0 0 6px 0' }}>
-                            <strong style={{color:'#0F172A', fontSize: '9.5px'}}>إقرار بالاستلام والسداد:</strong> أقرّ بأنني استلمت البضائع/الخدمات الواردة أعلاه كاملة بحالة سليمة، وأتعهد بسداد قيمتها البالغة <strong style={{color:'#0284C7'}}>{formatCurrencyEn(totalAmount)}</strong>. وفي حال التأخر يحق لمحطات النور للوقود اتخاذ الإجراءات النظامية أمام المحاكم والجهات المختصة.
+                            <strong style={{color:'#0F172A', fontSize: '9.5px'}}>إقرار بالاستلام والسداد:</strong> أقرّ بأنني استلمت كميات الوقود/المنتجات والخدمات الواردة أعلاه كاملة بحالة سليمة، وأتعهد بسداد قيمتها البالغة <strong style={{color:'#0284C7'}}>{formatCurrencyEn(totalAmount)}</strong>. وفي حال التأخر يحق لمحطات النور للوقود اتخاذ الإجراءات النظامية أمام المحاكم والجهات المختصة.
                         </p>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px' }}>
                             <div style={{ textAlign: 'center' }}><div style={{ fontSize: '9px', fontWeight: 800, color: '#64748B' }}>الاسم والصفة</div><div style={{ borderBottom: '1px solid #0284C7', height: '18px' }}></div></div>
@@ -896,16 +908,16 @@ export default function InvoicePrintModal({
                                 <td className="meta-val" style={{ direction: 'ltr', textAlign: 'right' }}>{creationDate} {creationTime}</td>
                             </tr>
                             <tr>
-                                <td className="meta-label">المنفذ / الفرع:</td>
+                                <td className="meta-label">محطة الوقود:</td>
                                 <td className="meta-val">{outletName}</td>
                             </tr>
                             <tr>
-                                <td className="meta-label">المندوب / البائع:</td>
+                                <td className="meta-label">مشغل المحطة:</td>
                                 <td className="meta-val">{delegateName}</td>
                             </tr>
                             <tr>
-                                <td className="meta-label">الكاشير:</td>
-                                <td className="meta-val">{creatorInfo?.fullName || 'الكاشير'}</td>
+                                <td className="meta-label">مشغل المضخة:</td>
+                                <td className="meta-val">{creatorInfo?.fullName || 'مشغل المحطة'}</td>
                             </tr>
                             <tr>
                                 <td className="meta-label">العميل:</td>
@@ -1003,7 +1015,7 @@ export default function InvoicePrintModal({
                     <div className="thermal-divider" />
 
                     <div style={{ fontSize: '10px', marginTop: '6px', color: '#111', lineHeight: '1.4' }}>
-                        البضاعة المباعة تستبدل أو ترد خلال 3 أيام بحالتها الأصلية.<br/>
+                        تخضع مبيعات المحروقات والخدمات لمعايير الجودة المعتمدة.<br/>
                         شكراً لتعاملكم مع <strong>محطات النور للوقود</strong> ⛽🚗<br/>
                         خدمة العملاء: info@alnoor-gas.com<br/>
                         <span style={{ fontSize: '8.5px', color: '#555' }}>تم الإصدار إلكترونياً عبر نظام محطات النور</span>

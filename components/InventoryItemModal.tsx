@@ -34,7 +34,8 @@ export default function InventoryItemModal({ isOpen, onClose, currentRecord, set
     suggested_price: '',
     reorder_level: 5,
     current_quantity: '',
-    is_returnable_bottle: false,
+    category: 'fuel',
+    fuel_type: '',
     tax_rate: 15,
     notes: '',
     expiry_date: '',
@@ -55,7 +56,8 @@ export default function InventoryItemModal({ isOpen, onClose, currentRecord, set
         suggested_price: (currentRecord?.suggested_price !== undefined && currentRecord?.suggested_price !== null) ? currentRecord.suggested_price : ((currentRecord?.default_price !== undefined && currentRecord?.default_price !== null) ? currentRecord.default_price : ''),
         reorder_level: (currentRecord?.reorder_level !== undefined && currentRecord?.reorder_level !== null) ? currentRecord.reorder_level : 5,
         current_quantity: (currentRecord?.current_quantity !== undefined && currentRecord?.current_quantity !== null) ? currentRecord.current_quantity : '',
-        is_returnable_bottle: Boolean(currentRecord?.is_returnable_bottle),
+        category: currentRecord?.category || 'fuel',
+        fuel_type: currentRecord?.fuel_type || '',
         tax_rate: (currentRecord?.tax_rate !== undefined && currentRecord?.tax_rate !== null) ? Number(currentRecord.tax_rate) : 15,
         notes: currentRecord?.notes || '',
         expiry_date: currentRecord?.expiry_date || '',
@@ -144,24 +146,6 @@ export default function InventoryItemModal({ isOpen, onClose, currentRecord, set
             font-size: 13px;
             font-weight: 700;
             box-sizing: border-box;
-          }
-
-          .item-bottle-toggle {
-            background: rgba(11, 14, 20, 0.6);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            border-radius: 14px;
-            padding: 10px 14px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            cursor: pointer;
-            transition: all 0.2s ease;
-          }
-
-          .item-bottle-toggle.active {
-            background: linear-gradient(135deg, rgba(0, 229, 255, 0.15) 0%, rgba(2, 132, 199, 0.15) 100%);
-            border-color: #00E5FF;
-            box-shadow: 0 4px 15px rgba(0, 229, 255, 0.2);
           }
 
           .item-footer-actions {
@@ -398,7 +382,7 @@ export default function InventoryItemModal({ isOpen, onClose, currentRecord, set
             </div>
           </div>
 
-          {/* 4. خيارات متقدمة (عهدة الفوارغ والملاحظات) */}
+          {/* 4. خيارات متقدمة (عهدة البراميل والملاحظات) */}
           <div className="item-modal-section">
             <div className="item-modal-sec-title">
               <span>⚙️</span>
@@ -451,41 +435,40 @@ export default function InventoryItemModal({ isOpen, onClose, currentRecord, set
               </div>
             </div>
 
-            {/* عهدة العبوات والمستلزمات */}
-            <div 
-              onClick={() => updateField('is_returnable_bottle', !formData.is_returnable_bottle)}
-              className={`item-bottle-toggle ${formData.is_returnable_bottle ? 'active' : ''}`}
-              style={{ marginBottom: '12px' }}
-            >
-              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                <div style={{
-                  width: '36px', height: '36px', borderRadius: '10px',
-                  background: formData.is_returnable_bottle ? 'linear-gradient(135deg, #00E5FF 0%, #0284C7 100%)' : 'rgba(255, 255, 255, 0.1)',
-                  color: formData.is_returnable_bottle ? '#0B0E14' : '#94A3B8',
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '18px',
-                  boxShadow: formData.is_returnable_bottle ? '0 2px 8px rgba(0, 229, 255, 0.35)' : 'none'
-                }}>
-                  🔄
-                </div>
+            {/* تصنيف الصنف ونوع الوقود لمؤسسة محطات الوقود */}
+            <div style={{ display: 'grid', gridTemplateColumns: formData.category === 'fuel' ? '1fr 1fr' : '1fr', gap: '12px', marginBottom: '14px' }}>
+              <div>
+                <label className="item-modal-label">🏷️ تصنيف الصنف بالمحطة</label>
+                <select
+                  className="glass-input-field item-modal-input"
+                  value={formData.category || 'fuel'}
+                  onChange={e => updateField('category', e.target.value)}
+                  style={{ width: '100%', height: '42px' }}
+                >
+                  <option value="fuel" style={{ background: '#141822', color: '#fff' }}>⛽ وقود ومحروقات</option>
+                  <option value="oils" style={{ background: '#141822', color: '#fff' }}>🛢️ زيوت وشحوم ومحسنات</option>
+                  <option value="grocery" style={{ background: '#141822', color: '#fff' }}>🛒 تموينات وبقالة المحطة</option>
+                  <option value="services" style={{ background: '#141822', color: '#fff' }}>🔧 خدمات وصيانة وغسيل</option>
+                </select>
+              </div>
+
+              {formData.category === 'fuel' && (
                 <div>
-                  <div style={{ fontSize: '13px', fontWeight: 900, color: '#F8FAFC' }}>
-                    صنف خاضع لعهدة العبوات والمستلزمات (جالون / عبوة مسترجعة)
-                  </div>
-                  <div style={{ fontSize: '11px', color: '#94A3B8', fontWeight: 700, marginTop: '2px' }}>
-                    يتم احتساب الكميات المباعة تلقائياً كعهدة فوارغ لدى العميل أو المندوب
-                  </div>
+                  <label className="item-modal-label">⚡ نوع الوقود</label>
+                  <select
+                    className="glass-input-field item-modal-input"
+                    value={formData.fuel_type || ''}
+                    onChange={e => updateField('fuel_type', e.target.value)}
+                    style={{ width: '100%', height: '42px' }}
+                  >
+                    <option value="" style={{ background: '#141822', color: '#fff' }}>-- حدد نوع الوقود --</option>
+                    <option value="gasoline_91" style={{ background: '#141822', color: '#fff' }}>🟢 بنزين 91 ممتاز</option>
+                    <option value="gasoline_95" style={{ background: '#141822', color: '#fff' }}>🔴 بنزين 95 سوبر</option>
+                    <option value="diesel" style={{ background: '#141822', color: '#fff' }}>🟠 ديزل</option>
+                    <option value="kerosene" style={{ background: '#141822', color: '#fff' }}>🔵 كيروسين</option>
+                  </select>
                 </div>
-              </div>
-              <div style={{
-                width: '24px', height: '24px', borderRadius: '7px',
-                border: formData.is_returnable_bottle ? '2px solid #00E5FF' : '2px solid rgba(255, 255, 255, 0.2)',
-                background: formData.is_returnable_bottle ? '#00E5FF' : 'transparent',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                color: '#0B0E14', fontWeight: 900, fontSize: '14px',
-                transition: '0.2s', flexShrink: 0
-              }}>
-                {formData.is_returnable_bottle ? '✓' : ''}
-              </div>
+              )}
             </div>
 
             <TranslatableInput

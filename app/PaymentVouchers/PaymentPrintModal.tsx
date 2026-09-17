@@ -76,6 +76,18 @@ export default function PaymentPrintModal({ isOpen, onClose, record }: any) {
                 .action-btn.print { background: linear-gradient(135deg, #00E5FF, #0284C7); color: #0B0E14; box-shadow: 0 4px 12px rgba(0, 229, 255, 0.25); }
                 .action-btn.close { background: rgba(239, 68, 68, 0.15); color: #EF4444; border: 1px solid rgba(239, 68, 68, 0.3); }
                 .action-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+
+                /* Daylight Desert Glassmorphism */
+                .daylight-theme .print-actions-bar {
+                    background: linear-gradient(135deg, rgba(255, 253, 250, 0.98) 0%, rgba(245, 238, 228, 0.95) 100%) !important;
+                    border: 1px solid rgba(194, 155, 98, 0.4) !important;
+                    box-shadow: 0 10px 30px rgba(44, 26, 18, 0.15) !important;
+                }
+                .daylight-theme .action-btn.print {
+                    background: linear-gradient(135deg, #C29B62, #A8573C) !important;
+                    color: #FFFFFF !important;
+                    box-shadow: 0 4px 12px rgba(168, 87, 60, 0.25) !important;
+                }
                 @media (max-width: 768px) {
                     .print-modal-overlay { padding: 15px 10px !important; }
                     .print-actions-bar { padding: 10px 14px !important; border-radius: 20px !important; width: 100%; justify-content: center; gap: 8px !important; }

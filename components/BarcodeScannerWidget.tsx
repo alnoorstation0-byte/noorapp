@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { THEME } from '@/lib/theme';
 
 interface BarcodeScannerWidgetProps {
@@ -257,7 +258,12 @@ export function ProfessionalBarcodeModal({
   onDetected: (code: string, shouldClose?: boolean) => void; 
   onClose: () => void; 
 }) {
+  const [mounted, setMounted] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
   const [isInitializing, setIsInitializing] = useState(true);
   const [torchOn, setTorchOn] = useState(false);
   const [hasTorch, setHasTorch] = useState(false);
@@ -439,11 +445,17 @@ export function ProfessionalBarcodeModal({
     startCamera(nextCam.id);
   };
 
-  return (
+  if (!mounted && typeof document === 'undefined') return null;
+
+  return createPortal(
     <div style={{
       position: 'fixed',
       inset: 0,
-      zIndex: 99999999,
+      top: 0, left: 0, right: 0, bottom: 0,
+      width: '100vw', height: '100vh',
+      zIndex: 999999999,
+      isolation: 'isolate',
+      pointerEvents: 'auto',
       background: 'rgba(15, 23, 42, 0.88)',
       backdropFilter: 'blur(16px)',
       WebkitBackdropFilter: 'blur(16px)',
@@ -859,6 +871,7 @@ export function ProfessionalBarcodeModal({
           <span>تم الانتهاء والرجوع للفاتورة {scanCount > 0 ? `(${scanCount} صنف تم مسحه)` : ''}</span>
         </button>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

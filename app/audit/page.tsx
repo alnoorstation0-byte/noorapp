@@ -84,6 +84,52 @@ export default function AccountingAuditPage() {
                     from { opacity: 0; transform: translateY(-5px); }
                     to { opacity: 1; transform: translateY(0); }
                 }
+
+                .daylight-theme .audit-stat-card {
+                    background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.90) 100%) !important;
+                    border-color: rgba(194, 155, 98, 0.3) !important;
+                    box-shadow: 0 4px 15px rgba(44, 26, 18, 0.08) !important;
+                }
+                .daylight-theme .audit-stat-card p {
+                    color: rgba(44, 26, 18, 0.65) !important;
+                }
+                .daylight-theme .audit-ctrl-bar {
+                    background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.90) 100%) !important;
+                    border-color: rgba(194, 155, 98, 0.3) !important;
+                    box-shadow: 0 4px 15px rgba(44, 26, 18, 0.08) !important;
+                }
+                .daylight-theme .audit-search-input {
+                    background: #FFFFFF !important;
+                    border-color: rgba(194, 155, 98, 0.35) !important;
+                    color: #2C1A12 !important;
+                }
+                .daylight-theme .section-container {
+                    background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.90) 100%) !important;
+                    border-color: rgba(194, 155, 98, 0.3) !important;
+                    box-shadow: 0 8px 25px rgba(44, 26, 18, 0.08) !important;
+                }
+                .daylight-theme .err-header-row {
+                    background: rgba(194, 155, 98, 0.12) !important;
+                    border-bottom-color: rgba(194, 155, 98, 0.25) !important;
+                    color: #2C1A12 !important;
+                }
+                .daylight-theme .err-header-row span {
+                    color: #2C1A12 !important;
+                }
+                .daylight-theme .err-row {
+                    border-bottom-color: rgba(194, 155, 98, 0.15) !important;
+                    color: #2C1A12 !important;
+                }
+                .daylight-theme .err-row:hover {
+                    background: rgba(194, 155, 98, 0.06) !important;
+                }
+                .daylight-theme .err-row > div {
+                    color: #2C1A12 !important;
+                }
+                .daylight-theme .err-desc-box {
+                    background: #FFFFFF !important;
+                    color: #2C1A12 !important;
+                }
             `}</style>
 
             {/* 📊 الإحصائيات العلوية */}
@@ -103,9 +149,10 @@ export default function AccountingAuditPage() {
             </div>
 
             {/* 🎛️ شريط التحكم */}
-            <div style={{ background: 'rgba(20, 24, 34, 0.85)', backdropFilter: 'blur(20px)', padding: '16px 24px', borderRadius: '18px', marginBottom: '30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid rgba(0, 229, 255, 0.2)', boxShadow: '0 8px 32px rgba(0,0,0,0.3)', flexWrap: 'wrap', gap: '15px' }}>
+            <div className="audit-ctrl-bar" style={{ background: 'rgba(20, 24, 34, 0.85)', backdropFilter: 'blur(20px)', padding: '16px 24px', borderRadius: '18px', marginBottom: '30px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', border: '1px solid rgba(0, 229, 255, 0.2)', boxShadow: '0 8px 32px rgba(0,0,0,0.3)', flexWrap: 'wrap', gap: '15px' }}>
                 <input 
                     type="text" 
+                    className="audit-search-input"
                     placeholder="🔍 ابحث في تفاصيل المشكلة، التوجيه، الجهة، أو ID..." 
                     value={logic.searchQuery}
                     onChange={(e) => logic.setSearchQuery(e.target.value)}
@@ -161,7 +208,7 @@ export default function AccountingAuditPage() {
                                     <div className="section-header" style={{ background: cat.color }}>
                                         <span>{cat.icon}</span> {cat.title} ({catErrors.length})
                                     </div>
-                                    <div style={{ background: 'rgba(11, 14, 20, 0.85)', padding: '12px 15px', display: 'grid', gridTemplateColumns: '40px 40px 1fr 1.6fr 1.8fr 1fr 1.2fr', gap: '15px', fontWeight: 900, color: '#00E5FF', fontSize: '13px', borderBottom: '1px solid rgba(255, 255, 255, 0.08)', alignItems: 'center' }}>
+                                    <div className="err-header-row" style={{ background: 'rgba(11, 14, 20, 0.85)', padding: '12px 15px', display: 'grid', gridTemplateColumns: '40px 40px 1fr 1.6fr 1.8fr 1fr 1.2fr', gap: '15px', fontWeight: 900, color: '#00E5FF', fontSize: '13px', borderBottom: '1px solid rgba(255, 255, 255, 0.08)', alignItems: 'center' }}>
                                         <input 
                                             type="checkbox" 
                                             className="audit-checkbox"
@@ -216,7 +263,7 @@ export default function AccountingAuditPage() {
                                                 
                                                 {/* 📝 عرض البيان / وصف الفاتورة أو المصروف الاصلية */}
                                                 {err.info_description && (
-                                                    <div style={{ background: 'rgba(11, 14, 20, 0.6)', padding: '6px 10px', borderRadius: '8px', fontSize: '12px', color: '#94A3B8', marginTop: '6px', borderRight: `3px solid ${cat.color}`, fontWeight: 600 }}>
+                                                    <div className="err-desc-box" style={{ background: 'rgba(11, 14, 20, 0.6)', padding: '6px 10px', borderRadius: '8px', fontSize: '12px', color: '#94A3B8', marginTop: '6px', borderRight: `3px solid ${cat.color}`, fontWeight: 600 }}>
                                                         📝 البيان الأصلي: {err.info_description}
                                                     </div>
                                                 )}

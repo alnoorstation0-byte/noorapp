@@ -97,6 +97,37 @@ export default function AccountLedger() {
             min-height: 48px !important;
           }
         }
+
+        /* Daylight Desert Glassmorphism */
+        .daylight-theme .control-panel {
+          background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.90) 100%) !important;
+          border: 1px solid rgba(194, 155, 98, 0.3) !important;
+          box-shadow: 0 10px 30px rgba(44, 26, 18, 0.06) !important;
+        }
+        .daylight-theme .control-panel button {
+          background: linear-gradient(135deg, #C29B62, #A8573C) !important;
+          color: #FFFFFF !important;
+          border-color: #C29B62 !important;
+          box-shadow: 0 4px 12px rgba(168, 87, 60, 0.25) !important;
+        }
+        .daylight-theme .summary-card {
+          background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.90) 100%) !important;
+          border: 1px solid rgba(194, 155, 98, 0.3) !important;
+          color: #2C1A12 !important;
+          box-shadow: 0 10px 20px rgba(44, 26, 18, 0.08) !important;
+        }
+        .daylight-theme .summary-card div {
+          color: #2C1A12 !important;
+        }
+        .daylight-theme .summary-card span {
+          color: rgba(44, 26, 18, 0.7) !important;
+        }
+        .daylight-theme .ledger-empty-card {
+          background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.90) 100%) !important;
+          border: 1px solid rgba(194, 155, 98, 0.3) !important;
+          color: #2C1A12 !important;
+          box-shadow: 0 8px 32px rgba(44, 26, 18, 0.08) !important;
+        }
       `}</style>
 
       {/* 🎯 لوحة التحكم المركزية */}
@@ -125,7 +156,7 @@ export default function AccountLedger() {
 
       {/* الجدول الماسي */}
       {!logic.selectedAccountId ? (
-          <div className="no-print" style={{ textAlign: 'center', padding: '100px 30px', color: '#94A3B8', background: 'rgba(20, 24, 34, 0.85)', backdropFilter: 'blur(20px)', borderRadius: '24px', fontWeight: 900, border: '1px solid rgba(0, 229, 255, 0.2)', boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}>
+          <div className="ledger-empty-card no-print" style={{ textAlign: 'center', padding: '100px 30px', color: '#94A3B8', background: 'rgba(20, 24, 34, 0.85)', backdropFilter: 'blur(20px)', borderRadius: '24px', fontWeight: 900, border: '1px solid rgba(0, 229, 255, 0.2)', boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}>
              👆 يرجى اختيار حساب من القائمة أعلاه لعرض كشف الحساب.
           </div>
       ) : (

@@ -94,11 +94,11 @@ export default function AquaModalWrapper({ isOpen, onClose, onConfirm, title, ic
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [isOpen]);
 
-    if (!isOpen || !mounted) return null;
+    if (!isOpen || (!mounted && typeof document === 'undefined')) return null;
 
     const modalContent = (
-        <div className="warm-portal-overlay-fullscreen" onClick={onClose}>
-            <style>{`
+        <div className="warm-portal-overlay-fullscreen" onClick={onClose} style={{ position: 'fixed', inset: 0, zIndex: 999999999, isolation: 'isolate' }}>
+            <style dangerouslySetInnerHTML={{ __html: `
                 .warm-portal-overlay-fullscreen {
                     position: fixed !important;
                     top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
@@ -107,13 +107,36 @@ export default function AquaModalWrapper({ isOpen, onClose, onConfirm, title, ic
                     backdrop-filter: blur(20px) saturate(160%) !important;
                     -webkit-backdrop-filter: blur(20px) saturate(160%) !important;
                     display: flex !important; align-items: center !important; justify-content: center !important;
-                    zIndex: 999999999 !important;
+                    z-index: 999999999 !important;
+                    isolation: isolate !important;
+                    pointer-events: auto !important;
+                }
+
+                .daylight-theme .warm-portal-overlay-fullscreen {
+                    background: rgba(44, 26, 18, 0.45) !important;
+                }
+
+                .daylight-theme .glass-modal-container {
+                    background: linear-gradient(135deg, rgba(255, 253, 250, 0.98) 0%, rgba(250, 246, 240, 0.95) 100%) !important;
+                    border: 1px solid rgba(194, 155, 98, 0.35) !important;
+                    box-shadow: 0 25px 60px rgba(44, 26, 18, 0.15), 0 0 30px rgba(194, 155, 98, 0.1) !important;
+                    color: #2C1A12 !important;
+                }
+
+                .daylight-theme .glass-modal-container h2 {
+                    color: #2C1A12 !important;
+                }
+
+                .daylight-theme .modal-header-title {
+                    border-bottom-color: rgba(194, 155, 98, 0.25) !important;
                 }
 
                 .cinematic-scroll::-webkit-scrollbar { width: 6px; }
                 .cinematic-scroll::-webkit-scrollbar-track { background: transparent; }
                 .cinematic-scroll::-webkit-scrollbar-thumb { background: rgba(0, 229, 255, 0.2); border-radius: 10px; }
                 .cinematic-scroll::-webkit-scrollbar-thumb:hover { background: rgba(0, 229, 255, 0.4); }
+
+                .daylight-theme .cinematic-scroll::-webkit-scrollbar-thumb { background: rgba(194, 155, 98, 0.35); }
 
                 .glass-input-field {
                     width: 100%; padding: 8px 10px; border-radius: 12px;
@@ -127,6 +150,17 @@ export default function AquaModalWrapper({ isOpen, onClose, onConfirm, title, ic
                     background: rgba(15, 20, 30, 0.95); border-color: #00E5FF;
                     box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.2), 0 0 15px rgba(0, 229, 255, 0.15);
                 }
+
+                .daylight-theme .glass-input-field {
+                    background: #FFFFFF !important;
+                    border: 1px solid rgba(194, 155, 98, 0.35) !important;
+                    color: #2C1A12 !important;
+                    box-shadow: inset 0 1px 2px rgba(44, 26, 18, 0.05) !important;
+                }
+                .daylight-theme .glass-input-field:focus {
+                    border-color: #C29B62 !important;
+                    box-shadow: 0 0 0 3px rgba(194, 155, 98, 0.2) !important;
+                }
                 
                 .btn-glass-save {
                     background: linear-gradient(135deg, #00E5FF 0%, #0088CC 100%);
@@ -138,12 +172,35 @@ export default function AquaModalWrapper({ isOpen, onClose, onConfirm, title, ic
                 .btn-glass-save:active:not(:disabled) { transform: scale(0.98); }
                 .btn-glass-save:disabled { opacity: 0.6; cursor: not-allowed; }
 
+                .daylight-theme .btn-glass-save {
+                    background: linear-gradient(135deg, #C29B62 0%, #A8573C 100%) !important;
+                    color: #FFFFFF !important;
+                    box-shadow: 0 4px 15px rgba(168, 87, 60, 0.25) !important;
+                }
+
                 .btn-glass-cancel {
                     background: rgba(20, 24, 34, 0.8);
                     color: #94A3B8; border: 1px solid rgba(255, 255, 255, 0.1); padding: 12px 20px; border-radius: 12px;
                     font-weight: 900; font-size: 14px; cursor: pointer; transition: 0.3s;
                 }
                 .btn-glass-cancel:hover { background: rgba(26, 32, 46, 1); color: #F8FAFC; transform: translateY(-2px); border-color: rgba(0, 229, 255, 0.3); }
+
+                .daylight-theme .btn-glass-cancel {
+                    background: rgba(194, 155, 98, 0.1) !important;
+                    color: #2C1A12 !important;
+                    border: 1px solid rgba(194, 155, 98, 0.25) !important;
+                }
+                .daylight-theme .btn-glass-cancel:hover {
+                    background: #FFFFFF !important;
+                    color: #2C1A12 !important;
+                    border-color: #C29B62 !important;
+                }
+
+                .daylight-theme .modal-kbd-badge {
+                    background: rgba(194, 155, 98, 0.12) !important;
+                    color: #A8573C !important;
+                    border: 1px solid rgba(194, 155, 98, 0.25) !important;
+                }
 
                 @keyframes modalScaleUp { 0% { transform: scale(0.95); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 
@@ -209,7 +266,7 @@ export default function AquaModalWrapper({ isOpen, onClose, onConfirm, title, ic
                     border-color: #ef4444;
                     transform: scale(1.05);
                 }
-            `}</style>
+            ` }} />
 
             <div ref={containerRef} className="cinematic-scroll glass-modal-container" onClick={(e) => e.stopPropagation()} style={{ 
                 width: width, maxHeight: '95vh', background: 'linear-gradient(135deg, rgba(20, 24, 34, 0.96) 0%, rgba(13, 16, 24, 0.92) 100%)', 

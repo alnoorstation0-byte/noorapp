@@ -418,6 +418,70 @@ export default function PartnerBalancesPage() {
                         .pb-pagination { flex-direction: column !important; gap: 10px !important; text-align: center !important; }
                         .pb-pagination > div { justify-content: center !important; }
                     }
+
+                    /* Daylight Desert Glassmorphism */
+                    .daylight-theme .glass-panel {
+                        background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.90) 100%) !important;
+                        border: 1px solid rgba(194, 155, 98, 0.3) !important;
+                        box-shadow: 0 4px 25px rgba(44, 26, 18, 0.06) !important;
+                    }
+                    .daylight-theme .smart-table {
+                        background: #FFFFFF !important;
+                        border: 1px solid rgba(194, 155, 98, 0.25) !important;
+                    }
+                    .daylight-theme .smart-table th {
+                        background: rgba(194, 155, 98, 0.12) !important;
+                        color: #2C1A12 !important;
+                        border-bottom: 2px solid rgba(194, 155, 98, 0.3) !important;
+                    }
+                    .daylight-theme .smart-table td {
+                        border-bottom: 1px solid rgba(194, 155, 98, 0.15) !important;
+                        color: #2C1A12 !important;
+                    }
+                    .daylight-theme .main-row:hover {
+                        background: rgba(194, 155, 98, 0.08) !important;
+                    }
+                    .daylight-theme .ledger-container {
+                        background: rgba(253, 251, 247, 0.95) !important;
+                        border-bottom: 2px solid rgba(194, 155, 98, 0.3) !important;
+                    }
+                    .daylight-theme .ledger-table {
+                        background: #FFFFFF !important;
+                        border: 1px solid rgba(194, 155, 98, 0.25) !important;
+                    }
+                    .daylight-theme .ledger-table th {
+                        background: rgba(194, 155, 98, 0.15) !important;
+                        color: #2C1A12 !important;
+                    }
+                    .daylight-theme .ledger-table td {
+                        border-bottom: 1px solid rgba(194, 155, 98, 0.15) !important;
+                        color: #2C1A12 !important;
+                    }
+                    .daylight-theme .arrow-icon {
+                        color: #C29B62 !important;
+                    }
+                    .daylight-theme .arrow-expanded {
+                        color: #A8573C !important;
+                    }
+                    .daylight-theme .glass-input {
+                        background: #FFFFFF !important;
+                        border-color: rgba(194, 155, 98, 0.35) !important;
+                        color: #2C1A12 !important;
+                    }
+                    .daylight-theme .glass-input:focus {
+                        border-color: #C29B62 !important;
+                        box-shadow: 0 0 0 3px rgba(194, 155, 98, 0.2) !important;
+                    }
+                    .daylight-theme .pill-btn {
+                        background: rgba(255, 255, 255, 0.8) !important;
+                        border-color: rgba(194, 155, 98, 0.3) !important;
+                        color: rgba(44, 26, 18, 0.75) !important;
+                    }
+                    .daylight-theme .pill-btn.active {
+                        background: linear-gradient(135deg, #C29B62, #A8573C) !important;
+                        color: #FFFFFF !important;
+                        border-color: #C29B62 !important;
+                    }
                 `}</style>
 
                 <div className="glass-panel" style={{ display: 'flex', gap: '20px', flexWrap: 'wrap' }}>

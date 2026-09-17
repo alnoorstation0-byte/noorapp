@@ -269,10 +269,10 @@ export default function ShiftCloseModal({
                 backdropFilter: 'blur(16px)',
                 WebkitBackdropFilter: 'blur(16px)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                zIndex: 9999999,
+                zIndex: 999999999,
                 padding: '15px'
             }}>
-                <div className="glass-modal-container" onClick={(e) => e.stopPropagation()} style={{
+                <div className="glass-modal-container shift-close-modal-box" onClick={(e) => e.stopPropagation()} style={{
                     background: 'linear-gradient(135deg, rgba(20, 24, 34, 0.98) 0%, rgba(15, 20, 30, 0.98) 100%)',
                     backdropFilter: 'blur(32px) saturate(180%)',
                     WebkitBackdropFilter: 'blur(32px) saturate(180%)',
@@ -319,10 +319,10 @@ export default function ShiftCloseModal({
             backdropFilter: 'blur(16px)',
             WebkitBackdropFilter: 'blur(16px)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            zIndex: 9999999,
+            zIndex: 999999999,
             padding: '15px'
         }}>
-            <div className="glass-modal-container" onClick={(e) => e.stopPropagation()} style={{
+            <div className="glass-modal-container shift-close-modal-box" onClick={(e) => e.stopPropagation()} style={{
                 background: 'linear-gradient(135deg, rgba(20, 24, 34, 0.98) 0%, rgba(15, 20, 30, 0.98) 100%)',
                 backdropFilter: 'blur(32px) saturate(180%)',
                 WebkitBackdropFilter: 'blur(32px) saturate(180%)',
@@ -338,6 +338,54 @@ export default function ShiftCloseModal({
                 boxShadow: '0 25px 60px rgba(0, 0, 0, 0.65), 0 0 25px rgba(0, 229, 255, 0.1)',
                 position: 'relative'
             }}>
+                <style>{`
+                    /* Daylight Desert Glassmorphism */
+                    .daylight-theme .shift-close-modal-box {
+                        background: linear-gradient(135deg, rgba(255, 253, 250, 0.98) 0%, rgba(245, 238, 228, 0.95) 100%) !important;
+                        border: 1px solid rgba(194, 155, 98, 0.4) !important;
+                        box-shadow: 0 25px 60px rgba(44, 26, 18, 0.2) !important;
+                    }
+                    .daylight-theme .shift-close-modal-box h2,
+                    .daylight-theme .shift-close-modal-box h3,
+                    .daylight-theme .shift-close-modal-box h4 {
+                        color: #A8573C !important;
+                    }
+                    .daylight-theme .shift-close-modal-box strong {
+                        color: #2C1A12 !important;
+                    }
+                    .daylight-theme .shift-close-modal-box span {
+                        color: rgba(44, 26, 18, 0.7) !important;
+                    }
+                    .daylight-theme .shift-meta-box {
+                        background: rgba(194, 155, 98, 0.08) !important;
+                        border-color: rgba(194, 155, 98, 0.25) !important;
+                    }
+                    .daylight-theme .shift-sales-summary {
+                        background: rgba(255, 255, 255, 0.85) !important;
+                        border: 1px solid rgba(194, 155, 98, 0.3) !important;
+                    }
+                    .daylight-theme .shift-meters-box {
+                        background: rgba(255, 255, 255, 0.85) !important;
+                        border: 1.5px solid rgba(194, 155, 98, 0.3) !important;
+                    }
+                    .daylight-theme .pump-reading-item {
+                        background: rgba(253, 251, 247, 0.9) !important;
+                        border: 1px solid rgba(194, 155, 98, 0.2) !important;
+                    }
+                    .daylight-theme .meter-col-start {
+                        background: #FFFFFF !important;
+                        border-color: rgba(194, 155, 98, 0.2) !important;
+                    }
+                    .daylight-theme .meter-col-output {
+                        background: rgba(194, 155, 98, 0.1) !important;
+                        border-color: rgba(194, 155, 98, 0.25) !important;
+                    }
+                    .daylight-theme .shift-close-modal-box input {
+                        background: #FFFFFF !important;
+                        color: #2C1A12 !important;
+                        border-color: rgba(194, 155, 98, 0.4) !important;
+                    }
+                `}</style>
                 {/* Header */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '15px', marginBottom: '14px' }}>
                     <div>
@@ -367,8 +415,8 @@ export default function ShiftCloseModal({
                     </button>
                 </div>
 
-                {/* تفاصيل المستودع والمندوب للوردية */}
-                <div style={{
+                {/* تفاصيل المحطة والمشغل للوردية */}
+                <div className="shift-meta-box" style={{
                     background: 'rgba(0, 229, 255, 0.05)',
                     border: '1px solid rgba(0, 229, 255, 0.2)',
                     borderRadius: '16px',
@@ -380,11 +428,11 @@ export default function ShiftCloseModal({
                     gap: '10px'
                 }}>
                     <div>
-                        <span style={{ color: '#94A3B8', fontSize: '11px', display: 'block', fontWeight: 700 }}>🏪 {isEn ? 'Branch:' : 'منفذ البيع:'}</span>
-                        <strong style={{ color: '#00E5FF', fontSize: '13px' }}>{currentWarehouse?.name || (isEn ? 'Unknown Branch' : 'مستودع غير محدد')}</strong>
+                        <span style={{ color: '#94A3B8', fontSize: '11px', display: 'block', fontWeight: 700 }}>⛽ {isEn ? 'Station / Tank:' : 'محطة الوقود / الخزان:'}</span>
+                        <strong style={{ color: '#00E5FF', fontSize: '13px' }}>{currentWarehouse?.name || (isEn ? 'Unknown Station' : 'محطة غير محددة')}</strong>
                     </div>
                     <div>
-                        <span style={{ color: '#94A3B8', fontSize: '11px', display: 'block', fontWeight: 700 }}>👤 {isEn ? 'Cashier / Rep:' : 'المندوب / الكاشير:'}</span>
+                        <span style={{ color: '#94A3B8', fontSize: '11px', display: 'block', fontWeight: 700 }}>👤 {isEn ? 'Cashier / Operator:' : 'مشغل المحطة / الكاشير:'}</span>
                         <strong style={{ color: '#F8FAFC', fontSize: '13px' }}>{currentDelegate?.name || (isEn ? 'Direct Sales' : 'مبيعات مباشرة')}</strong>
                     </div>
                     <div>
@@ -402,7 +450,7 @@ export default function ShiftCloseModal({
                 ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                         {/* ملخص المبيعات */}
-                        <div style={{ background: 'rgba(15, 20, 30, 0.7)', border: '1px solid rgba(255, 255, 255, 0.08)', padding: '16px', borderRadius: '16px' }}>
+                        <div className="shift-sales-summary" style={{ background: 'rgba(15, 20, 30, 0.7)', border: '1px solid rgba(255, 255, 255, 0.08)', padding: '16px', borderRadius: '16px' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', fontSize: '14px', fontWeight: 700, color: '#94A3B8' }}>
                                 <span>💵 {isEn ? 'Opening Cash:' : 'العهدة الافتتاحية:'}</span>
                                 <strong style={{ color: '#F8FAFC' }}>{Number(activeShift.starting_cash || 0).toFixed(2)} {isEn ? 'SAR' : 'ريال'}</strong>
@@ -483,7 +531,7 @@ export default function ShiftCloseModal({
                         )}
 
                         {/* ⛽ قراءات عدادات المضخات ومطابقة كميات الوقود */}
-                        <div style={{
+                        <div className="shift-meters-box" style={{
                             background: 'rgba(15, 20, 30, 0.7)',
                             border: '1.5px solid rgba(0, 229, 255, 0.25)',
                             padding: '16px',
@@ -535,6 +583,7 @@ export default function ShiftCloseModal({
                                         return (
                                             <div 
                                                 key={p.pump_id} 
+                                                className="pump-reading-item"
                                                 style={{ 
                                                     background: 'rgba(20, 24, 34, 0.8)', 
                                                     border: '1px solid rgba(255, 255, 255, 0.08)', 
@@ -563,7 +612,7 @@ export default function ShiftCloseModal({
 
                                                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1.3fr 1.2fr', gap: '8px', alignItems: 'center' }}>
                                                     {/* بداية الوردية */}
-                                                    <div style={{ background: 'rgba(11, 14, 20, 0.6)', padding: '6px 8px', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.06)' }}>
+                                                    <div className="meter-col-start" style={{ background: 'rgba(11, 14, 20, 0.6)', padding: '6px 8px', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.06)' }}>
                                                         <span style={{ fontSize: '10px', color: '#94A3B8', display: 'block', fontWeight: 700 }}>
                                                              {isEn ? 'Start Meter' : 'بداية الوردية'}
                                                         </span>
@@ -601,7 +650,7 @@ export default function ShiftCloseModal({
                                                     </div>
 
                                                     {/* الناتج المحسوب للترات والمبلغ */}
-                                                    <div style={{ textAlign: 'end', background: 'rgba(0, 229, 255, 0.06)', padding: '6px 8px', borderRadius: '8px', border: '1px solid rgba(0, 229, 255, 0.15)' }}>
+                                                    <div className="meter-col-output" style={{ textAlign: 'end', background: 'rgba(0, 229, 255, 0.06)', padding: '6px 8px', borderRadius: '8px', border: '1px solid rgba(0, 229, 255, 0.15)' }}>
                                                         <span style={{ fontSize: '10px', color: '#94A3B8', display: 'block', fontWeight: 700 }}>
                                                             {isEn ? 'Dispensed' : 'المضخوخ'}
                                                         </span>

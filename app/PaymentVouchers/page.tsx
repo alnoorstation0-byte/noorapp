@@ -467,7 +467,7 @@ export default function PaymentVouchersPage() {
 
       {/* 🚀 المودال الجديد للتصحيح المجمع */}
       {mounted && logic.state.isBulkFixModalOpen && createPortal(
-          <div style={{ position: 'fixed', inset: 0, zIndex: 999999999, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', background: 'rgba(7, 9, 13, 0.8)', backdropFilter: 'blur(16px)', padding: '50px 20px', overflowY: 'auto' }}>
+          <div className="warm-portal-overlay-fullscreen" style={{ position: 'fixed', inset: 0, zIndex: 999999999, isolation: 'isolate', pointerEvents: 'auto', display: 'flex', alignItems: 'flex-start', justifyContent: 'center', background: 'rgba(7, 9, 13, 0.8)', backdropFilter: 'blur(16px)', padding: '50px 20px', overflowY: 'auto' }}>
               <div style={{ position: 'fixed', inset: 0 }} onClick={() => logic.actions.setIsBulkFixModalOpen(false)} />
               <div className="cinematic-scroll" style={{ background: 'linear-gradient(135deg, rgba(20, 24, 34, 0.98) 0%, rgba(11, 14, 20, 0.95) 100%)', border: '1px solid rgba(0, 229, 255, 0.25)', borderRadius: '24px', width: '100%', maxWidth: '600px', padding: '40px', position: 'relative', zIndex: 10, margin: 'auto', boxShadow: '0 25px 70px rgba(0,0,0,0.7)' }}>
                   <h2 style={{ fontWeight: 900, textAlign: 'center', marginBottom: '30px', color: '#00E5FF', fontSize: '22px' }}>🛠️ تصحيح الحسابات لـ ({logic.state.selectedIds.length}) سند معلق</h2>
@@ -527,7 +527,6 @@ export default function PaymentVouchersPage() {
               isSaving={logic.isLoading}
               partnerBalance={logic.state.partnerBalance}
               isBalanceLoading={logic.state.isBalanceLoading}
-              fleetOperations={logic.state.fleetOperations}
           />
       )}
 

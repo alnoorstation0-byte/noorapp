@@ -47,18 +47,20 @@ const PAGE_TITLES_EN: Record<string, string> = {
   "أرصدة العملاء": "Partner Balances",
   "أرصدة وذمم العملاء": "Partner Balances & Receivables",
   "أرصدة الشركاء وكشف الحساب": "Partner Balances & Statement",
-  "ذمم المناديب": "Delegate Debts",
-  "تسويات العهد": "Delegate Settlements",
-  "تسوية عهد المناديب": "Delegate Custody Settlements",
+  "ذمم مشغلي المحطات": "Station Operators Receivables",
+  "تسويات ورديات الوقود": "Shift & Fuel Settlements",
+  "تسوية ورديات ومحطات الوقود": "Gas Station Settlements",
   "كشف حساب": "Account Statement",
   "كشف حساب تفصيلي": "Detailed Statement",
   "كشف حساب الشركاء": "Partner Account Statement",
   "شاشة الكاشير (POS)": "POS Cashier",
   "شاشة الكاشير": "POS Cashier",
-  "الكاشير ونقاط البيع": "POS & Cashier",
-  "تسوية عهد منافذ البيع": "POS Custody Settlements",
-  "تسوية عهد منافذ البيع وإغلاق الورديات": "POS Custody Settlements & Shift Closing",
-  "أرباح منافذ البيع": "Outlets Profitability",
+  "الكاشير ومبيعات المحطة": "Gas Station POS",
+  "تسوية عهد منافذ البيع": "Gas Station Settlements",
+  "تسوية عهد منافذ البيع وإغلاق الورديات": "Gas Station Settlements & Shift Closing",
+  "أرباح منافذ البيع": "Gas Stations Profitability",
+  "أرباح وتشغيل محطات الوقود": "Gas Stations Profitability",
+  "تسوية الورديات والعدادات": "Shift & Fuel Meter Settlements",
   "لوحة الربحية الشاملة": "Profitability Dashboard",
   "لوحة القيادة": "Dashboard",
   "لوحة القيادة المركزية": "Central Dashboard",
@@ -234,7 +236,6 @@ export default function MasterPage({ title, subtitle, children, headerContent, i
         expRes,
         txRes,
         mjRes,
-        fleetRes,
         shiftRes
       ] = await Promise.all([
         supabase.from('journal_headers').select('id', { count: 'exact', head: true }).not('status', 'eq', 'posted'),
@@ -244,7 +245,6 @@ export default function MasterPage({ title, subtitle, children, headerContent, i
         supabase.from('expenses').select('id', { count: 'exact', head: true }).or('is_posted.is.null,is_posted.eq.false'),
         supabase.from('inventory_transactions').select('id', { count: 'exact', head: true }).not('status', 'eq', 'approved'),
         supabase.from('manual_journals').select('id', { count: 'exact', head: true }).or('is_posted.is.null,is_posted.eq.false'),
-        supabase.from('fleet_operations').select('id', { count: 'exact', head: true }).in('status', ['معلق', 'pending']),
         supabase.from('pos_shifts').select('id', { count: 'exact', head: true }).eq('status', 'closed')
       ]);
 
@@ -256,7 +256,6 @@ export default function MasterPage({ title, subtitle, children, headerContent, i
         expenses: expRes.count || 0,
         inventory: txRes.count || 0,
         manual: mjRes.count || 0,
-        fleet: fleetRes.count || 0,
         shifts: shiftRes.count || 0
       };
 
@@ -842,19 +841,19 @@ html, body {
           <div className="header-actions" style={{ display: 'flex', flexDirection: 'row', gap: '6px', alignItems: 'center', borderRight: isRtl ? '2px solid rgba(0, 229, 255, 0.2)' : 'none', borderLeft: !isRtl ? '2px solid rgba(0, 229, 255, 0.2)' : 'none', paddingRight: isRtl ? '10px' : '0', paddingLeft: !isRtl ? '10px' : '0' }}>
              
              {/* Desktop Nav Arrows & Shortcuts Button */}
-             <div className="nav-group" style={{ display: 'flex', gap: '4px', margin: 0, border: 'none', background: 'rgba(20, 24, 34, 0.6)', borderRadius: '12px', padding: '3px' }}>
+             <div className="nav-group" style={{ display: 'flex', gap: '4px', margin: 0, border: 'none', background: isDaylight ? 'rgba(255, 253, 250, 0.9)' : 'rgba(20, 24, 34, 0.6)', borderRadius: '12px', padding: '3px' }}>
                 <button 
                   onClick={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'F1', bubbles: true }))} 
                   className="nav-btn-glass" 
                   title={language === 'en' ? 'Keyboard Shortcuts (F1)' : 'خريطة اختصارات الكيبورد (F1)'} 
-                  style={{ width: '34px', height: '34px', borderRadius: '9px', fontSize: '15px', background: 'rgba(20, 24, 34, 0.85)', border: '1px solid rgba(0, 229, 255, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#00E5FF' }}
+                  style={{ width: '34px', height: '34px', borderRadius: '9px', fontSize: '15px', background: isDaylight ? '#FFFFFF' : 'rgba(20, 24, 34, 0.85)', border: isDaylight ? '1px solid rgba(194, 155, 98, 0.3)' : '1px solid rgba(0, 229, 255, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: isDaylight ? '#C29B62' : '#00E5FF' }}
                 >
                   ⌨️
                 </button>
-                <button onClick={() => router.forward()} className="nav-btn-glass" title={language === 'en' ? 'Forward' : 'تقدم للأمام'} style={{ width: '34px', height: '34px', borderRadius: '9px', fontSize: '16px', background: 'rgba(20, 24, 34, 0.85)', border: '1px solid rgba(0, 229, 255, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#00E5FF' }}>
+                <button onClick={() => router.forward()} className="nav-btn-glass" title={language === 'en' ? 'Forward' : 'تقدم للأمام'} style={{ width: '34px', height: '34px', borderRadius: '9px', fontSize: '16px', background: isDaylight ? '#FFFFFF' : 'rgba(20, 24, 34, 0.85)', border: isDaylight ? '1px solid rgba(194, 155, 98, 0.3)' : '1px solid rgba(0, 229, 255, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: isDaylight ? '#C29B62' : '#00E5FF' }}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
                 </button>
-                <button onClick={() => router.back()} className="nav-btn-glass" title={language === 'en' ? 'Back' : 'رجوع للخلف'} style={{ width: '34px', height: '34px', borderRadius: '9px', fontSize: '16px', background: 'rgba(20, 24, 34, 0.85)', border: '1px solid rgba(0, 229, 255, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#00E5FF' }}>
+                <button onClick={() => router.back()} className="nav-btn-glass" title={language === 'en' ? 'Back' : 'رجوع للخلف'} style={{ width: '34px', height: '34px', borderRadius: '9px', fontSize: '16px', background: isDaylight ? '#FFFFFF' : 'rgba(20, 24, 34, 0.85)', border: isDaylight ? '1px solid rgba(194, 155, 98, 0.3)' : '1px solid rgba(0, 229, 255, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: isDaylight ? '#C29B62' : '#00E5FF' }}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
                 </button>
              </div>
@@ -981,22 +980,29 @@ html, body {
             maxHeight: '85vh',
             overflowY: 'auto',
             padding: '12px',
-            background: 'linear-gradient(135deg, rgba(20, 24, 34, 0.98) 0%, rgba(13, 16, 24, 0.95) 100%)',
+            background: isDaylight
+              ? 'linear-gradient(135deg, rgba(255, 253, 250, 0.98) 0%, rgba(250, 246, 240, 0.95) 100%)'
+              : 'linear-gradient(135deg, rgba(20, 24, 34, 0.98) 0%, rgba(13, 16, 24, 0.95) 100%)',
             backdropFilter: 'blur(30px) saturate(200%)',
-            boxShadow: '0 20px 50px rgba(0, 0, 0, 0.8), 0 0 25px rgba(0, 229, 255, 0.15)',
-            border: '1px solid rgba(0, 229, 255, 0.25)',
+            boxShadow: isDaylight
+              ? '0 20px 50px rgba(44, 26, 18, 0.15), 0 0 25px rgba(194, 155, 98, 0.15)'
+              : '0 20px 50px rgba(0, 0, 0, 0.8), 0 0 25px rgba(0, 229, 255, 0.15)',
+            border: isDaylight
+              ? '1px solid rgba(194, 155, 98, 0.35)'
+              : '1px solid rgba(0, 229, 255, 0.25)',
             borderRadius: '20px',
-            zIndex: 999999
+            zIndex: 999999,
+            color: isDaylight ? '#2C1A12' : '#F8FAFC'
           }} 
           onClick={(e) => e.stopPropagation()}
         >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px 10px', borderBottom: '1px solid rgba(0, 229, 255, 0.2)', marginBottom: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px 10px', borderBottom: isDaylight ? '1px solid rgba(194, 155, 98, 0.2)' : '1px solid rgba(0, 229, 255, 0.2)', marginBottom: '8px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ fontSize: '14px', fontWeight: 900, color: '#00E5FF' }}>🔔 مركز التدقيق والمعلقات</span>
+              <span style={{ fontSize: '14px', fontWeight: 900, color: isDaylight ? '#2C1A12' : '#00E5FF' }}>🔔 مركز التدقيق والمعلقات</span>
               <button 
                 onClick={(e) => { e.stopPropagation(); fetchPendingCount(); }}
                 title="تحديث لحظي"
-                style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '13px', padding: '2px 4px', color: '#00E5FF' }}
+                style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '13px', padding: '2px 4px', color: isDaylight ? '#C29B62' : '#00E5FF' }}
               >
                 🔄
               </button>
@@ -1091,17 +1097,6 @@ html, body {
               ) : <span style={{ color: '#10b981', fontSize: '11px' }}>0</span>}
             </div>
 
-            {/* 8. حركة وتوزيع الأسطول */}
-            <div 
-              className="drop-item" 
-              onClick={() => { setIsPendingMenuOpen(false); router.push('/fleet_operations'); }}
-              style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}
-            >
-              <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}><span>🚚</span> رحلات أسطول وتوزيع معلقة</span>
-              {pendingDetails.fleet > 0 ? (
-                <span style={{ background: '#fee2e2', color: '#dc2626', padding: '2px 8px', borderRadius: '8px', fontSize: '11px', fontWeight: 800 }}>{pendingDetails.fleet}</span>
-              ) : <span style={{ color: '#10b981', fontSize: '11px' }}>0</span>}
-            </div>
 
             {/* 9. ورديات نقاط البيع */}
             <div 

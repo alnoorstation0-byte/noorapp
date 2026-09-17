@@ -31,7 +31,7 @@ export async function GET(
 
         // جلب بيانات المستودع والمندوب والكاشير بشكل آمن
         const [whRes, delRes, profRes] = await Promise.all([
-            rawShift.warehouse_id ? supabaseAdmin.from('warehouses').select('id, name, type, location, phone, vehicle_id').eq('id', rawShift.warehouse_id).maybeSingle() : Promise.resolve({ data: null }),
+            rawShift.warehouse_id ? supabaseAdmin.from('warehouses').select('id, name, type, location, phone').eq('id', rawShift.warehouse_id).maybeSingle() : Promise.resolve({ data: null }),
             rawShift.delegate_id ? supabaseAdmin.from('partners').select('id, name, phone, code').eq('id', rawShift.delegate_id).maybeSingle() : Promise.resolve({ data: null }),
             rawShift.user_id ? supabaseAdmin.from('profiles').select('id, full_name, username, email').eq('id', rawShift.user_id).maybeSingle() : Promise.resolve({ data: null })
         ]);
@@ -53,7 +53,7 @@ export async function GET(
         // جلب الفواتير التابعة للوردية (باستثناء الملغاة)
         const { data: invoices = [] } = await supabaseAdmin
             .from('invoices')
-            .select('id, invoice_number, date, created_at, client_name, partner_id, total_amount, tax_amount, taxable_amount, paid_amount, payment_method, status, fleet_operation_id, lines_data')
+            .select('id, invoice_number, date, created_at, client_name, partner_id, total_amount, tax_amount, taxable_amount, paid_amount, payment_method, status, lines_data')
             .eq('shift_id', id)
             .neq('status', 'ملغي')
             .order('created_at', { ascending: false });
@@ -181,12 +181,12 @@ export async function GET(
             duration_minutes: durationMinutes,
             warehouse: {
                 id: shift.warehouse?.id,
-                name: shift.warehouse?.name || 'مستودع غير محدد',
+                name: shift.warehouse?.name || 'محطة الوقود / الخزان',
                 type: shift.warehouse?.type || 'main'
             },
             delegate: {
                 id: shift.delegate?.id,
-                name: shift.delegate?.name || 'مبيعات مباشرة (بدون مندوب)',
+                name: shift.delegate?.name || 'مبيعات المحطة المباشرة (بدون مشغل)',
                 phone: shift.delegate?.phone,
                 code: shift.delegate?.code
             },
@@ -217,11 +217,6 @@ export async function GET(
                 meter_total_amount: Number(shift.meter_total_amount || 0),
                 meter_sales_variance: Number(shift.meter_sales_variance || 0)
             },
-            bottles: {
-                sold: 0,
-                returned: 0,
-                shortage: 0
-            },
             invoices_count: (invoices || []).length,
             invoices: (invoices || []).map((inv: any) => ({
                 id: inv.id,
@@ -236,7 +231,6 @@ export async function GET(
                 paid_amount: Number(inv.paid_amount || 0),
                 payment_method: inv.payment_method,
                 status: inv.status,
-                fleet_operation_id: inv.fleet_operation_id,
                 lines_count: Array.isArray(inv.lines_data) ? inv.lines_data.length : 0
             })),
             items_summary: itemsSummary,

@@ -150,7 +150,7 @@ export async function POST(request: Request) {
 
         if (!warehouse_id) {
             return NextResponse.json(
-                { success: false, error: 'يرجى تحديد منفذ البيع / المستودع' },
+                { success: false, error: 'يرجى تحديد محطة الوقود / الخزان' },
                 { status: 400 }
             );
         }
@@ -267,12 +267,12 @@ export async function POST(request: Request) {
 
             if (existingDelegateShift) {
                 const { data: delWh } = await supabaseAdmin.from('warehouses').select('name').eq('id', existingDelegateShift.warehouse_id).maybeSingle();
-                const whName = delWh?.name || 'منفذ آخر';
+                const whName = delWh?.name || 'محطة أخرى';
                 return NextResponse.json(
                     {
                         success: false,
                         code: 'DELEGATE_HAS_OPEN_SHIFT',
-                        error: `⛔ لا يمكن فتح الوردية! هذا الموظف / المندوب لديه بالفعل وردية نشطة مفتوحة حالياً في (${whName}). المسؤول شخص واحد ولا يمكن تشغيل ورديتين لنفس الشخص، يجب تقفيل ورديته السابقة أولاً.`,
+                        error: `⛔ لا يمكن فتح الوردية! مشغل المحطة لديه بالفعل وردية نشطة مفتوحة حالياً في (${whName}). المسؤول شخص واحد ولا يمكن تشغيل ورديتين لنفس المشغل، يجب تقفيل ورديته السابقة أولاً.`,
                         existing_shift: existingDelegateShift
                     },
                     { status: 409 }
@@ -373,7 +373,7 @@ export async function POST(request: Request) {
                     {
                         success: false,
                         code: 'DUPLICATE_OPEN_SHIFT',
-                        error: '⚠️ تعارض: توجد بالفعل وردية نشطة مفتوحة لهذا المستودع أو المندوب. يرجى تحديث الصفحة.'
+                        error: '⚠️ تعارض: توجد بالفعل وردية نشطة مفتوحة لمحطة الوقود أو مشغل المحطة. يرجى تحديث الصفحة.'
                     },
                     { status: 409 }
                 );

@@ -68,7 +68,7 @@ export const ConfirmProvider = ({ children }: { children: ReactNode }) => {
 
             {/* 🚀 نافذة التأكيد الزجاجية الفخمة تظهر هنا على مستوى السيستم */}
             {confirmState.isOpen && confirmState.options && typeof document !== 'undefined' && createPortal(
-                <div style={{ position: 'fixed', inset: 0, zIndex: 999999999, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(15, 23, 42, 0.7)', backdropFilter: 'blur(10px)', direction: 'rtl' }}>
+                <div className="warm-portal-overlay-fullscreen" style={{ position: 'fixed', inset: 0, zIndex: 999999999, isolation: 'isolate', pointerEvents: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(15, 23, 42, 0.7)', backdropFilter: 'blur(10px)', direction: 'rtl' }}>
                     <div style={{ background: 'white', padding: '35px', borderRadius: '24px', maxWidth: '450px', width: '90%', textAlign: 'center', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.25)', border: '1px solid #fee2e2', animation: 'fadeIn 0.2s ease-out' }}>
                         
                         <div style={{ fontSize: '55px', marginBottom: '15px', animation: 'pulse-alert 2s infinite' }}>

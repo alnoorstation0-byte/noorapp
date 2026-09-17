@@ -8,8 +8,9 @@ import { useToast , showGlobalToast} from '@/lib/toast-context';
 import { supabase } from '@/lib/supabase'; 
 
 const EXPENSE_CATEGORIES = [
-    "مشتريات بضائع",
-    "شراء بضاعة",
+    "توريد وشراء وقود ومحروقات",
+    "مشتريات زيوت ومواد تشغيل",
+    "وقود ومحروقات إضافية",
     "إعاشة وتغذية",
     "محروقات وانتقالات",
     "عدد ومعدات",
@@ -217,35 +218,13 @@ export default function ExpenseFormModal({
                             }} 
                         />
                     </div>
-                    <div style={{ zIndex: 78, position: 'relative' }}>
-                        <SmartCombo 
-                            label="🚚 رحلة التوزيع (أمر تشغيل)" 
-                            icon="🚚" 
-                            options={historicalData?.fleetOperations || []}
-                            displayCol="name" 
-                            initialDisplay={historicalData?.fleetOperations?.find((op: any) => op.id === record?.fleet_operation_id)?.name || ''} 
-                            onSelect={(val:any) => setRecord({...record, fleet_operation_id: typeof val === 'object' && val !== null ? val.id : null})} 
-                            strict={true}
-                        />
-                    </div>
-                    <div style={{ zIndex: 77, position: 'relative' }}>
-                        <SmartCombo 
-                            label="🚗 السيارة المرتبطة بالمصروف" 
-                            icon="🚗" 
-                            options={historicalData?.fleetVehicles || []}
-                            displayCol="plate_number" 
-                            initialDisplay={historicalData?.fleetVehicles?.find((v: any) => v.id === record?.site_ref)?.plate_number || record?.site_ref || ''} 
-                            onSelect={(val:any) => setRecord({...record, site_ref: typeof val === 'object' && val !== null ? val.id : val})} 
-                            strict={false}
-                        />
-                    </div>
                     <div style={{ zIndex: 75, position: 'relative' }}>
                         <SmartCombo label="📁 التصنيف الرئيسي *" icon="📁" options={EXPENSE_CATEGORIES} initialDisplay={record?.main_category} onSelect={(val:any) => {
                             const selectedCategory = typeof val === 'object' && val !== null ? val.name : val;
                             let newCreditor = record.creditor_account;
                             let newPayment = record.payment_account;
                             if (!record?.id) {
-                                if (selectedCategory === 'شراء بضاعة' || selectedCategory === 'مشتريات بضائع') {
+                                if (selectedCategory === 'شراء بضاعة' || selectedCategory === 'مشتريات بضائع' || selectedCategory?.includes('وقود') || selectedCategory?.includes('مشتريات')) {
                                     newCreditor = 'فواتير قيد الاستلام';
                                     newPayment = 'الموردين';
                                 } else if (selectedCategory === 'مصاريف إدارية') {

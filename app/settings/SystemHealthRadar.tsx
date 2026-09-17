@@ -55,10 +55,10 @@ export default function SystemHealthRadar() {
             if (negInv && negInv.length > 0) {
                 detectedIssues.push({
                     id: 'neg_inv',
-                    titleAr: 'أرصدة المخزون بالسالب',
-                    titleEn: 'Negative Inventory Balances',
-                    descriptionAr: 'صرف أو بيع بضاعة غير متوفرة دفترياً بسبب تأخر إثبات فواتير المشتريات.',
-                    descriptionEn: 'Issuing or selling goods not available in books due to delayed purchase invoices.',
+                    titleAr: 'أرصدة خزانات الوقود بالسالب',
+                    titleEn: 'Negative Fuel Tank Balances',
+                    descriptionAr: 'صرف أو بيع وقود غير متوفر دفترياً بسبب تأخر إثبات فواتير توريد الوقود.',
+                    descriptionEn: 'Dispensing fuel not registered in books due to delayed fuel supply invoices.',
                     count: negInv.length,
                     severity: 'high',
                     data: negInv
@@ -75,10 +75,10 @@ export default function SystemHealthRadar() {
             if (suspTransfers && suspTransfers.length > 0) {
                 detectedIssues.push({
                     id: 'susp_transfers',
-                    titleAr: 'التحويلات المخزنية المعلقة',
-                    titleEn: 'Suspended Inventory Transfers',
-                    descriptionAr: 'بضاعة خرجت من المستودع الرئيسي ولم يتم تأكيد استلامها.',
-                    descriptionEn: 'Goods issued from main warehouse but not confirmed received.',
+                    titleAr: 'تحويلات وتفريغات الوقود المعلقة',
+                    titleEn: 'Pending Fuel Tank Transfers',
+                    descriptionAr: 'شحنة وقود خرجت من المستودع/الصهريج ولم يتم تأكيد تفريغها بالخزان.',
+                    descriptionEn: 'Fuel dispatched but not yet confirmed received in station tank.',
                     count: suspTransfers.length,
                     severity: 'medium',
                     data: suspTransfers
@@ -137,8 +137,8 @@ export default function SystemHealthRadar() {
                     id: 'unallocated',
                     titleAr: 'الدفعات غير المسواة (Unallocated)',
                     titleEn: 'Unallocated Payments',
-                    descriptionAr: 'مبالغ نقدية حصلها المناديب دون ربطها أو إقفالها مع الفواتير المستحقة.',
-                    descriptionEn: 'Cash amounts collected without linking to due invoices.',
+                    descriptionAr: 'مبالغ نقدية حصلها مشغلو المحطات دون ربطها أو إقفالها مع الفواتير المستحقة.',
+                    descriptionEn: 'Cash amounts collected by station operators without linking to invoices.',
                     count: unallocated.length,
                     severity: 'medium',
                     data: unallocated

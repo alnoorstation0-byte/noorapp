@@ -366,13 +366,14 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
   const currentMargin = isSidebarOpen ? '320px' : '0px';
 
   const groupKeyMap: Record<string, string> = {
-    "الرئيسية والملخصات": "menu_group_home",
+    "الرئيسية والملخصات": "menu_group_dashboard",
     "التشغيل والمبيعات": "menu_group_sales",
+    "المحطات وخزانات الوقود": "menu_group_inventory",
     "المستودع وخزانات الوقود": "menu_group_inventory",
     "المستودع": "menu_group_inventory",
     "الحسابات والمالية": "menu_group_finance",
     "العملاء والشركاء": "menu_group_partners",
-    "العملاء والمندوبين": "menu_group_partners",
+    "العملاء ومشغلو المحطات": "menu_group_partners",
     "النظام والتقارير": "menu_group_system",
   };
 
@@ -783,6 +784,83 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
             width: 20px;
             height: 20px;
           }
+        }
+
+        /* ☀️ وضع الرؤية النهارية لمركز القيادة والقوائم والشريط السفلي */
+        .daylight-theme .overlay-nav {
+          background: rgba(15, 23, 42, 0.45) !important;
+        }
+        .daylight-theme .admin-header-glass {
+          background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.94) 100%) !important;
+          border-color: rgba(2, 132, 199, 0.25) !important;
+          box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08) !important;
+        }
+        .daylight-theme .brand-title {
+          color: #0F172A !important;
+        }
+        .daylight-theme .brand-subtitle {
+          color: #0284C7 !important;
+        }
+        .daylight-theme .brand-logo-wrap {
+          background: rgba(2, 132, 199, 0.1) !important;
+          border-color: rgba(2, 132, 199, 0.3) !important;
+          box-shadow: 0 0 12px rgba(2, 132, 199, 0.12) !important;
+        }
+        .daylight-theme .btn-close-modal {
+          background: rgba(241, 245, 249, 0.9) !important;
+          border-color: rgba(203, 213, 225, 0.8) !important;
+          color: #475569 !important;
+        }
+        .daylight-theme .btn-close-modal:hover {
+          background: rgba(239, 68, 68, 0.12) !important;
+          color: #dc2626 !important;
+        }
+        .daylight-theme .group-section {
+          background: linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(243, 247, 252, 0.9) 100%) !important;
+          border: 1px solid rgba(2, 132, 199, 0.2) !important;
+          box-shadow: 0 10px 25px rgba(15, 23, 42, 0.05) !important;
+        }
+        .daylight-theme .group-header {
+          color: #0284C7 !important;
+          border-bottom-color: rgba(2, 132, 199, 0.2) !important;
+        }
+        .daylight-theme .nav-card {
+          background: rgba(255, 255, 255, 0.92) !important;
+          border-color: rgba(226, 232, 240, 0.9) !important;
+          box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04) !important;
+          color: #0F172A !important;
+        }
+        .daylight-theme .nav-card:hover {
+          background: #FFFFFF !important;
+          border-color: #0284C7 !important;
+          box-shadow: 0 8px 20px rgba(2, 132, 199, 0.18) !important;
+        }
+        .daylight-theme .nav-title {
+          color: #0F172A !important;
+        }
+        .daylight-theme .nav-title-block span:nth-child(2) {
+          color: #64748B !important;
+        }
+        .daylight-theme .icon-wrapper {
+          background: rgba(2, 132, 199, 0.1) !important;
+          border-color: rgba(2, 132, 199, 0.25) !important;
+          color: #0284C7 !important;
+        }
+        .daylight-theme .desert-bottom-dock {
+          background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.95) 100%) !important;
+          border: 1px solid rgba(2, 132, 199, 0.25) !important;
+          box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12) !important;
+        }
+        .daylight-theme .dock-item {
+          color: #64748B !important;
+        }
+        .daylight-theme .dock-item.active {
+          color: #0284C7 !important;
+          background: rgba(2, 132, 199, 0.1) !important;
+        }
+        .daylight-theme .dock-item.active::after {
+          background: #0284C7 !important;
+          box-shadow: 0 0 6px #0284C7 !important;
         }
       `}} />
 

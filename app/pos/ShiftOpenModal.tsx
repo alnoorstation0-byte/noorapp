@@ -133,7 +133,7 @@ export default function ShiftOpenModal({
     const openShiftMutation = useMutation({
         mutationFn: async () => {
             if (!targetWarehouseId) {
-                throw new Error(isEn ? 'Please select a branch first' : 'يرجى تحديد منفذ البيع / المستودع أولاً');
+                throw new Error(isEn ? 'Please select a gas station first' : 'يرجى تحديد محطة الوقود / الخزان أولاً');
             }
 
             let currentUserId = userProfile?.id;
@@ -187,7 +187,7 @@ export default function ShiftOpenModal({
             notifyShiftOpened({
                 shiftId: res?.shift?.id || 'new-shift',
                 cashierName: userProfile?.displayName || userProfile?.full_name || 'الكاشير',
-                warehouseName: whObj?.name || 'الفرع/المنفذ',
+                warehouseName: whObj?.name || (isEn ? 'Gas Station' : 'محطة الوقود'),
                 startingCash: Number(startingCash) || 0
             }).catch(() => {});
 
@@ -218,6 +218,13 @@ export default function ShiftOpenModal({
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [isOpen, onClose, targetWarehouseId, existingWarehouseShift, isConflictWithOtherWarehouse, openShiftMutation]);
+
+    const handleOpenShift = () => {
+        if (!openShiftMutation.isPending && targetWarehouseId && !existingWarehouseShift && !isConflictWithOtherWarehouse) {
+            openShiftMutation.mutate();
+        }
+    };
+    const loading = openShiftMutation.isPending;
 
     if (!isOpen || !mounted) return null;
 
@@ -308,6 +315,41 @@ export default function ShiftOpenModal({
                     border-color: #00E5FF;
                     box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.2);
                 }
+
+                .daylight-theme .aqua-glass-card {
+                    background: linear-gradient(135deg, rgba(255, 253, 250, 0.98) 0%, rgba(250, 246, 240, 0.95) 100%) !important;
+                    border-color: rgba(194, 155, 98, 0.35) !important;
+                    box-shadow: 0 25px 60px rgba(44, 26, 18, 0.15) !important;
+                    color: #2C1A12 !important;
+                }
+                .daylight-theme .aqua-glass-card h2 {
+                    color: #2C1A12 !important;
+                }
+                .daylight-theme .aqua-glass-card p {
+                    color: rgba(44, 26, 18, 0.7) !important;
+                }
+                .daylight-theme .shift-select-field {
+                    background: #FFFFFF !important;
+                    border-color: rgba(194, 155, 98, 0.35) !important;
+                    color: #2C1A12 !important;
+                }
+                .daylight-theme .shift-select-field option {
+                    background: #FFFFFF !important;
+                    color: #2C1A12 !important;
+                }
+                .daylight-theme .aqua-shift-input {
+                    background: #FFFFFF !important;
+                    border-color: rgba(194, 155, 98, 0.35) !important;
+                    color: #A8573C !important;
+                }
+                .daylight-theme .shift-info-box {
+                    background: rgba(194, 155, 98, 0.08) !important;
+                    border-color: rgba(194, 155, 98, 0.25) !important;
+                }
+                .daylight-theme .shift-info-box label,
+                .daylight-theme .shift-info-box span {
+                    color: #2C1A12 !important;
+                }
             `}</style>
             
             <div className="aqua-glass-card glass-modal-container" onClick={(e) => e.stopPropagation()} style={{ position: 'relative' }}>
@@ -336,7 +378,7 @@ export default function ShiftOpenModal({
                 </div>
 
                 {/* اختيار وتحديد منفذ البيع والمندوب */}
-                <div style={{
+                <div className="shift-info-box" style={{
                     background: 'rgba(15, 20, 30, 0.7)',
                     border: '1px solid rgba(0, 229, 255, 0.2)',
                     borderRadius: '16px',
@@ -348,14 +390,14 @@ export default function ShiftOpenModal({
                 }}>
                     <div>
                         <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#F8FAFC', marginBottom: '5px' }}>
-                            🏪 {isEn ? 'Branch / Warehouse to open shift for:' : 'منفذ البيع / المستودع المراد فتح ورديته:'}
+                            ⛽ {isEn ? 'Gas Station / Fuel Tank to open shift for:' : 'محطة الوقود / الخزان المراد فتح ورديتها:'}
                         </label>
                         <select 
                             className="shift-select-field"
                             value={targetWarehouseId}
                             onChange={(e) => setTargetWarehouseId(e.target.value)}
                         >
-                            <option value="">{isEn ? '-- Select Branch --' : '-- اختر منفذ البيع --'}</option>
+                            <option value="">{isEn ? '-- Select Gas Station --' : '-- اختر محطة الوقود --'}</option>
                             {warehouses.map((w: any) => {
                                 const hasOpen = allActiveShifts.some((s: any) => s.warehouse_id === w.id);
                                 return (
@@ -369,14 +411,14 @@ export default function ShiftOpenModal({
 
                     <div>
                         <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#F8FAFC', marginBottom: '5px' }}>
-                            👤 {isEn ? 'Responsible Employee / Cashier:' : 'الموظف / الكاشير المسؤول عن الوردية:'}
+                            👤 {isEn ? 'Station Operator / Cashier:' : 'مشغل المحطة / الكاشير المسؤول:'}
                         </label>
                         <select 
                             className="shift-select-field"
                             value={targetDelegateId}
                             onChange={(e) => setTargetDelegateId(e.target.value)}
                         >
-                            <option value="">{isEn ? '-- Select Responsible Employee / Cashier --' : '-- اختر الموظف / الكاشير المسؤول --'}</option>
+                            <option value="">{isEn ? '-- Select Station Operator --' : '-- اختر مشغل المحطة / الكاشير --'}</option>
                             {delegates.map((d: any) => {
                                 const hasOpen = allActiveShifts.some((s: any) => 
                                     (s.delegate_id && (s.delegate_id === d.id || s.delegate_id === d.partnerId)) ||
@@ -405,28 +447,15 @@ export default function ShiftOpenModal({
                     }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#f87171', fontWeight: 900, fontSize: '14px', marginBottom: '6px' }}>
                             <span style={{ fontSize: '18px' }}>⛔</span>
-                            <span>{isEn ? 'Branch already running!' : 'المستودع قيد التشغيل بالفعل!'}</span>
+                            <span>{isEn ? 'Station already running!' : 'محطة الوقود قيد التشغيل بالفعل!'}</span>
                         </div>
                         <p style={{ color: '#fca5a5', fontSize: '12.5px', margin: '0 0 8px 0', lineHeight: 1.6, fontWeight: 700 }}>
-                            {isEn ? 'There is currently an active shift in ' : 'توجد حالياً وردية مفتوحة في '}<strong>{selectedWarehouse?.name}</strong>{isEn ? ' ID: ' : ' برقم '}<strong>#{String(existingWarehouseShift.id).slice(-6)}</strong>.
-                            <br />
-                            {isEn ? 'Current Cashier: ' : 'المسؤول الحالي: '}<strong style={{ color: '#F8FAFC' }}>{(Array.isArray(existingWarehouseShift.delegate) ? existingWarehouseShift.delegate[0]?.name : (existingWarehouseShift.delegate as any)?.name) || (isEn ? 'Direct Sales' : 'مبيعات مباشرة')}</strong>.
+                            {isEn ? 'A shift is currently open for this station: ' : 'توجد وردية نشطة ومفتوحة حالياً لهذه المحطة برقم '}<strong>#{existingWarehouseShift.shift_number || String(existingWarehouseShift.id).slice(-6)}</strong>.
                         </p>
-                        <div style={{
-                            background: 'rgba(239, 68, 68, 0.2)',
-                            padding: '8px 10px',
-                            borderRadius: '10px',
-                            color: '#fca5a5',
-                            fontSize: '11.5px',
-                            fontWeight: 800,
-                            border: '1px dashed #ef4444'
-                        }}>
-                            {isEn ? '🔒 System Protection: Only one active shift per branch is allowed. Please close the current shift first.' : '🔒 حماية النظام: المسؤول شخص واحد في المستودع ولا يمكن فتح ورديتين معاً في نفس الوقت. يجب إنهاء وتقفيل الوردية الحالية أولاً لبدء وردية جديدة.'}
-                        </div>
                     </div>
                 )}
 
-                {/* ⚠️ تنبيه الحماية 2: المندوب لديه وردية مفتوحة في مستودع آخر */}
+                {/* ⚠️ تنبيه الحماية 2: المشغل لديه وردية مفتوحة في محطة أخرى */}
                 {isConflictWithOtherWarehouse && (
                     <div style={{
                         background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.08) 100%)',
@@ -438,12 +467,12 @@ export default function ShiftOpenModal({
                     }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#fbbf24', fontWeight: 900, fontSize: '14px', marginBottom: '6px' }}>
                             <span style={{ fontSize: '18px' }}>⚠️</span>
-                            <span>{isEn ? 'Rep has active shift in another branch!' : 'المندوب مسؤول عن وردية نشطة في منفذ آخر!'}</span>
+                            <span>{isEn ? 'Operator has active shift in another station!' : 'المشغل مسؤول عن وردية نشطة في محطة أخرى!'}</span>
                         </div>
                         <p style={{ color: '#fcd34d', fontSize: '12.5px', margin: 0, lineHeight: 1.6, fontWeight: 700 }}>
-                            {isEn ? 'Rep ' : 'المندوب '}<strong>{selectedDelegate?.name}</strong>{isEn ? ' is currently managing an active shift in ' : ' يدير حالياً وردية نشطة في '}<strong>{(Array.isArray(existingDelegateShift?.warehouse) ? existingDelegateShift?.warehouse[0]?.name : (existingDelegateShift?.warehouse as any)?.name) || (isEn ? 'another branch' : 'منفذ آخر')}</strong>.
+                            {isEn ? 'Operator ' : 'المشغل '}<strong>{selectedDelegate?.name}</strong>{isEn ? ' is currently managing an active shift in ' : ' يدير حالياً وردية نشطة في '}<strong>{(Array.isArray(existingDelegateShift?.warehouse) ? existingDelegateShift?.warehouse[0]?.name : (existingDelegateShift?.warehouse as any)?.name) || (isEn ? 'another station' : 'محطة أخرى')}</strong>.
                             <br />
-                            {isEn ? 'A rep cannot manage two shifts simultaneously.' : 'المسؤول شخص واحد ولا يمكن الجمع بين ورديتين لنفس الشخص في نفس الوقت.'}
+                            {isEn ? 'An operator cannot manage two shifts simultaneously.' : 'المسؤول شخص واحد ولا يمكن الجمع بين ورديتين لنفس المشغل في نفس الوقت.'}
                         </p>
                     </div>
                 )}
@@ -482,10 +511,10 @@ export default function ShiftOpenModal({
                     }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#10B981', fontWeight: 900, fontSize: '13.5px', marginBottom: '4px' }}>
                             <span style={{ fontSize: '18px' }}>🔄</span>
-                            <span>{isEn ? 'Resume today\'s shift for this rep' : 'استئناف وردية اليوم لنفس المندوب'}</span>
+                            <span>{isEn ? 'Resume today\'s shift for this operator' : 'استئناف وردية اليوم لنفس المشغل'}</span>
                         </div>
                         <p style={{ color: '#94A3B8', fontSize: '12px', margin: 0, lineHeight: 1.5, fontWeight: 700 }}>
-                            {isEn ? 'There is a closed shift today for this rep in this branch ID: ' : 'توجد وردية أُغلقت اليوم لهذا المندوب في هذا المنفذ برقم '}<strong>#{todayClosedShift.shift_number || String(todayClosedShift.id).slice(-6)}</strong>.
+                            {isEn ? 'There is a closed shift today for this operator in this station ID: ' : 'توجد وردية أُغلقت اليوم لهذا المشغل في هذه المحطة برقم '}<strong>#{todayClosedShift.shift_number || String(todayClosedShift.id).slice(-6)}</strong>.
                             <br />
                             {isEn ? 'Clicking below will ' : 'النقر أدناه سيقوم بـ '}<strong>{isEn ? 'resume the same shift' : 'استئناف نفس الوردية'}</strong>{isEn ? ' to continue today\'s sales.' : ' لتكملة مبيعات اليوم عليها دون فتح وردية مكررة.'}
                         </p>
@@ -512,36 +541,37 @@ export default function ShiftOpenModal({
                     />
                 </div>
 
-                <div style={{ display: 'flex', gap: '10px' }}>
+                <div style={{ display: 'flex', gap: '12px' }}>
                     <button 
-                        onClick={() => openShiftMutation.mutate()} 
-                        disabled={
-                            openShiftMutation.isPending || 
-                            !targetWarehouseId || 
-                            !!existingWarehouseShift || 
-                            !!isConflictWithOtherWarehouse
-                        }
-                        className="aqua-shift-btn"
-                        style={{ 
+                        disabled={loading || !!existingWarehouseShift || !!isConflictWithOtherWarehouse || !targetWarehouseId}
+                        onClick={handleOpenShift}
+                        type="button"
+                        style={{
                             flex: 2,
-                            opacity: (!targetWarehouseId || !!existingWarehouseShift || !!isConflictWithOtherWarehouse) ? 0.6 : 1,
-                            cursor: (!targetWarehouseId || !!existingWarehouseShift || !!isConflictWithOtherWarehouse) ? 'not-allowed' : 'pointer',
-                            background: (existingWarehouseShift || isConflictWithOtherWarehouse)
-                                ? '#334155'
-                                : todayClosedShift
-                                    ? 'linear-gradient(135deg, #10B981 0%, #059669 100%)'
-                                    : 'linear-gradient(135deg, #00E5FF 0%, #0284C7 100%)',
-                            color: (existingWarehouseShift || isConflictWithOtherWarehouse) ? '#94a3b8' : '#0B0E14'
+                            background: (existingWarehouseShift || isConflictWithOtherWarehouse || !targetWarehouseId)
+                                ? 'rgba(255, 255, 255, 0.1)'
+                                : 'linear-gradient(135deg, #00E5FF 0%, #0077B6 100%)',
+                            color: (existingWarehouseShift || isConflictWithOtherWarehouse || !targetWarehouseId) ? '#64748B' : '#0B0E14',
+                            border: 'none',
+                            padding: '14px',
+                            borderRadius: '14px',
+                            fontWeight: 900,
+                            fontSize: '14px',
+                            cursor: (existingWarehouseShift || isConflictWithOtherWarehouse || !targetWarehouseId) ? 'not-allowed' : 'pointer',
+                            boxShadow: (existingWarehouseShift || isConflictWithOtherWarehouse || !targetWarehouseId)
+                                ? 'none'
+                                : '0 4px 20px rgba(0, 229, 255, 0.4)',
+                            transition: 'all 0.2s ease'
                         }}
                     >
-                        {openShiftMutation.isPending 
+                        {loading 
                             ? (todayClosedShift ? (isEn ? '⏳ Resuming shift...' : '⏳ جاري استئناف الوردية...') : (isEn ? '⏳ Opening shift...' : '⏳ جاري فتح الوردية...'))
                             : existingWarehouseShift 
-                                ? (isEn ? '⛔ Branch has active shift' : '⛔ المستودع به وردية نشطة بالفعل') 
+                                ? (isEn ? '⛔ Station has active shift' : '⛔ المحطة بها وردية نشطة بالفعل') 
                                 : isConflictWithOtherWarehouse 
-                                    ? (isEn ? '⛔ Rep has active shift' : '⛔ المندوب لديه وردية نشطة') 
+                                    ? (isEn ? '⛔ Operator has active shift' : '⛔ المشغل لديه وردية نشطة') 
                                     : !targetWarehouseId
-                                        ? (isEn ? '⚠️ Select Branch' : '⚠️ اختر منفذ البيع')
+                                        ? (isEn ? '⚠️ Select Station' : '⚠️ اختر محطة الوقود')
                                         : todayClosedShift
                                             ? (isEn ? '🔄 Resume Shift' : '🔄 استئناف وردية اليوم وتكملة المبيعات')
                                             : (isEn ? '✨ Open Shift & Start' : '✨ فتح الصندوق وبدء الوردية')

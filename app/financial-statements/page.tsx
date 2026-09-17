@@ -151,6 +151,39 @@ export default function FinancialStatementsPage() {
             .modern-table th, .modern-table td { padding: 8px 10px !important; font-size: 12px !important; }
             .table-wrapper { overflow-x: auto !important; -webkit-overflow-scrolling: touch !important; }
           }
+
+          /* 🏜️ Daylight Desert Glassmorphism */
+          .daylight-theme .glass-panel {
+            background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.9) 100%) !important;
+            border: 1px solid rgba(194, 155, 98, 0.3) !important;
+            box-shadow: 0 4px 15px rgba(44, 26, 18, 0.08) !important;
+            color: #2C1A12 !important;
+          }
+          .daylight-theme .glass-panel h2 {
+            color: #2C1A12 !important;
+          }
+          .daylight-theme .glass-panel h3 {
+            background: rgba(194, 155, 98, 0.08) !important;
+            border-bottom: 1px solid rgba(194, 155, 98, 0.2) !important;
+            color: #2C1A12 !important;
+          }
+          .daylight-theme .modern-table {
+            color: #2C1A12 !important;
+          }
+          .daylight-theme .modern-table th {
+            color: rgba(44, 26, 18, 0.65) !important;
+            border-bottom: 1px solid rgba(194, 155, 98, 0.2) !important;
+          }
+          .daylight-theme .modern-table td {
+            color: #2C1A12 !important;
+            border-bottom: 1px solid rgba(194, 155, 98, 0.1) !important;
+          }
+          .daylight-theme .modern-table tfoot tr {
+            background: rgba(194, 155, 98, 0.08) !important;
+          }
+          .daylight-theme .modern-table tfoot td {
+            color: #2C1A12 !important;
+          }
         `}</style>
 
         <PrintHeader title="القوائم المالية" subtitle="قائمة الدخل والمركز المالي" />

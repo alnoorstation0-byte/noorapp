@@ -26,10 +26,10 @@ export default function SalesAnalysisPage() {
     return (
         <MasterPage 
             title="تحليل المبيعات الشامل" 
-            subtitle="تحليل ومراقبة أفضل العملاء، المناديب، والأصناف مبيعاً خلال الفترة المحددة" 
+            subtitle="تحليل ومراقبة أفضل العملاء، مشغلي المحطات، وأنواع الوقود والمنتجات الأكثر مبيعاً" 
             icon="📊"
         >
-            <style>{`
+            <style dangerouslySetInnerHTML={{ __html: `
                 @media (max-width: 768px) {
                     .sales-header-card { padding: 15px !important; border-radius: 16px !important; }
                     .sales-btn-group { width: 100% !important; flex-direction: column !important; }
@@ -40,7 +40,41 @@ export default function SalesAnalysisPage() {
                     .sales-chart-wrapper { height: 260px !important; }
                     .sales-items-grid { grid-template-columns: 1fr !important; gap: 15px !important; }
                 }
-            `}</style>
+                .daylight-theme .sales-header-card { 
+                    background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.90) 100%) !important; 
+                    border: 1px solid rgba(194, 155, 98, 0.3) !important; 
+                    box-shadow: 0 4px 20px rgba(44, 26, 18, 0.08) !important; 
+                }
+                .daylight-theme .sales-header-card h2 { color: #2C1A12 !important; }
+                .daylight-theme .sales-header-card p { color: rgba(44, 26, 18, 0.7) !important; }
+                .daylight-theme .sales-header-card .glass-input-field { 
+                    background: #FFFFFF !important; 
+                    border: 1px solid rgba(194, 155, 98, 0.35) !important; 
+                    color: #2C1A12 !important; 
+                }
+                .daylight-theme .sales-chart-card { 
+                    background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.90) 100%) !important; 
+                    border: 1px solid rgba(194, 155, 98, 0.3) !important; 
+                    box-shadow: 0 4px 20px rgba(44, 26, 18, 0.08) !important; 
+                }
+                .daylight-theme .sales-chart-card h3 { 
+                    border-bottom-color: rgba(194, 155, 98, 0.25) !important; 
+                }
+                .daylight-theme .sales-kpi-card { 
+                    background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.90) 100%) !important; 
+                    border-color: rgba(194, 155, 98, 0.3) !important; 
+                    box-shadow: 0 4px 15px rgba(44, 26, 18, 0.08) !important; 
+                }
+                .daylight-theme .sales-kpi-card div:nth-child(2) { color: #2C1A12 !important; }
+                .daylight-theme .sales-table-wrapper { 
+                    background: #FFFFFF !important; 
+                    border: 1px solid rgba(194, 155, 98, 0.25) !important; 
+                }
+                .daylight-theme .sales-table { color: #2C1A12 !important; }
+                .daylight-theme .sales-table thead { background: rgba(194, 155, 98, 0.12) !important; }
+                .daylight-theme .sales-table th { color: #2C1A12 !important; border-bottom: 1px solid rgba(194, 155, 98, 0.25) !important; }
+                .daylight-theme .sales-table td { border-bottom: 1px solid rgba(194, 155, 98, 0.15) !important; color: #2C1A12 !important; }
+            `}} />
             <PrintHeader title="تحليل المبيعات الشامل" subtitle={`عن الفترة من ${dateFrom} إلى ${dateTo}`} />
             
             {/* Header Actions & Filters Card */}
@@ -149,7 +183,7 @@ export default function SalesAnalysisPage() {
                         {/* Top Delegates Chart */}
                         <div className="sales-chart-card" style={{ background: 'linear-gradient(135deg, rgba(20, 24, 34, 0.95) 0%, rgba(15, 20, 30, 0.85) 100%)', backdropFilter: 'blur(24px)', borderRadius: '20px', border: '1px solid rgba(0, 229, 255, 0.2)', padding: '25px', boxShadow: '0 8px 30px rgba(0,0,0,0.3)' }}>
                             <h3 style={{ color: '#10B981', fontSize: '17px', fontWeight: 900, margin: '0 0 18px 0', borderBottom: '1px solid rgba(16, 185, 129, 0.2)', paddingBottom: '10px' }}>
-                                🚚 أفضل 10 مناديب (حسب الإيرادات)
+                                ⛽ أعلى 10 مشغلي محطات (حسب الإيرادات)
                             </h3>
                             <div className="sales-chart-wrapper" style={{ height: '350px', width: '100%' }} dir="ltr">
                                 <ResponsiveContainer>
@@ -175,7 +209,7 @@ export default function SalesAnalysisPage() {
                         {/* Top Items Table & Chart */}
                         <div className="sales-chart-card" style={{ background: 'linear-gradient(135deg, rgba(20, 24, 34, 0.95) 0%, rgba(15, 20, 30, 0.85) 100%)', backdropFilter: 'blur(24px)', borderRadius: '20px', border: '1px solid rgba(0, 229, 255, 0.2)', padding: '25px', boxShadow: '0 8px 30px rgba(0,0,0,0.3)' }}>
                             <h3 style={{ color: '#F59E0B', fontSize: '17px', fontWeight: 900, margin: '0 0 18px 0', borderBottom: '1px solid rgba(245, 158, 11, 0.2)', paddingBottom: '10px' }}>
-                                📦 أفضل 10 أصناف (حسب الكمية المباعة)
+                                ⛽ أفضل أنواع الوقود والمنتجات (حسب الكمية المباعة باللتر)
                             </h3>
                             <div className="sales-items-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '25px' }}>
                                 <div className="sales-chart-wrapper" style={{ height: '350px', width: '100%' }} dir="ltr">
@@ -187,7 +221,7 @@ export default function SalesAnalysisPage() {
                                             <Tooltip 
                                                 cursor={{fill: 'rgba(245, 158, 11, 0.05)'}} 
                                                 contentStyle={{ background: 'rgba(11, 14, 20, 0.95)', border: '1px solid rgba(245, 158, 11, 0.3)', borderRadius: '12px', color: '#F8FAFC', textAlign: 'right', boxShadow: '0 10px 30px rgba(0,0,0,0.5)' }} 
-                                                formatter={(val: any) => [`${val} وحدة`, 'الكمية']} 
+                                                formatter={(val: any) => [`${val} لتر/وحدة`, 'الكمية']} 
                                             />
                                             <Bar dataKey="qty" radius={[8, 8, 0, 0]}>
                                                 {topItems.map((entry, index) => (
@@ -197,12 +231,12 @@ export default function SalesAnalysisPage() {
                                         </BarChart>
                                     </ResponsiveContainer>
                                 </div>
-                                <div style={{ overflowX: 'auto', background: 'rgba(11, 14, 20, 0.6)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px' }}>
-                                    <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right', color: '#F8FAFC' }}>
+                                <div className="sales-table-wrapper" style={{ overflowX: 'auto', background: 'rgba(11, 14, 20, 0.6)', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px' }}>
+                                    <table className="sales-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right', color: '#F8FAFC' }}>
                                         <thead style={{ background: 'rgba(20, 24, 34, 0.9)' }}>
                                             <tr>
-                                                <th style={{ padding: '14px', color: '#00E5FF', borderBottom: '1px solid rgba(255,255,255,0.1)', fontWeight: 900 }}>الصنف</th>
-                                                <th style={{ padding: '14px', color: '#F59E0B', borderBottom: '1px solid rgba(255,255,255,0.1)', fontWeight: 900 }}>الكمية</th>
+                                                <th style={{ padding: '14px', color: '#00E5FF', borderBottom: '1px solid rgba(255,255,255,0.1)', fontWeight: 900 }}>نوع الوقود / الصنف</th>
+                                                <th style={{ padding: '14px', color: '#F59E0B', borderBottom: '1px solid rgba(255,255,255,0.1)', fontWeight: 900 }}>الكمية المباعة (لتر/وحدة)</th>
                                                 <th style={{ padding: '14px', color: '#10B981', borderBottom: '1px solid rgba(255,255,255,0.1)', fontWeight: 900 }}>الإيراد 💰</th>
                                             </tr>
                                         </thead>
@@ -210,7 +244,7 @@ export default function SalesAnalysisPage() {
                                             {topItems.map((item, idx) => (
                                                 <tr key={idx} style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', background: idx % 2 === 0 ? 'rgba(255,255,255,0.02)' : 'transparent' }}>
                                                     <td style={{ padding: '14px', fontWeight: 800 }}>{item.name}</td>
-                                                    <td style={{ padding: '14px', fontWeight: 900, color: '#F59E0B' }}>{item.qty} وحدة</td>
+                                                    <td style={{ padding: '14px', fontWeight: 900, color: '#F59E0B' }}>{item.qty} لتر/وحدة</td>
                                                     <td style={{ padding: '14px', fontWeight: 900, color: '#00E5FF' }}>{formatCurrency(item.revenue)}</td>
                                                 </tr>
                                             ))}

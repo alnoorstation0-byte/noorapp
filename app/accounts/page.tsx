@@ -1289,6 +1289,93 @@ export default function HierarchicalLedgerPage() {
             padding: 2px 6px !important;
           }
         }
+
+        .daylight-theme .glass-master-card {
+          background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.90) 100%) !important;
+          border-color: rgba(194, 155, 98, 0.3) !important;
+          box-shadow: 0 10px 40px rgba(44, 26, 18, 0.08) !important;
+        }
+        .daylight-theme .card-header {
+          background: rgba(194, 155, 98, 0.08) !important;
+          border-bottom-color: rgba(194, 155, 98, 0.2) !important;
+        }
+        .daylight-theme .summary-glass-card {
+          background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.90) 100%) !important;
+          border-color: rgba(194, 155, 98, 0.3) !important;
+          box-shadow: 0 4px 15px rgba(44, 26, 18, 0.06) !important;
+        }
+        .daylight-theme .glass-input {
+          background: #FFFFFF !important;
+          border-color: rgba(194, 155, 98, 0.3) !important;
+          color: #2C1A12 !important;
+        }
+        .daylight-theme .table-header {
+          background: rgba(194, 155, 98, 0.12) !important;
+          border-color: rgba(194, 155, 98, 0.25) !important;
+          color: #2C1A12 !important;
+        }
+        .daylight-theme .table-header-title {
+          color: #2C1A12 !important;
+        }
+        .daylight-theme .acc-row {
+          background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.90) 100%) !important;
+          border-color: rgba(194, 155, 98, 0.25) !important;
+          box-shadow: 0 2px 10px rgba(44, 26, 18, 0.06) !important;
+        }
+        .daylight-theme .acc-row.root-node {
+          background: linear-gradient(135deg, #FFFFFF 0%, rgba(248, 242, 232, 0.95) 100%) !important;
+          border-color: rgba(194, 155, 98, 0.4) !important;
+        }
+        .daylight-theme .acc-row.child-node {
+          background: linear-gradient(135deg, rgba(255, 253, 250, 0.92) 0%, rgba(250, 246, 240, 0.85) 100%) !important;
+        }
+        .daylight-theme .acc-row:hover {
+          border-color: #C29B62 !important;
+          box-shadow: 0 6px 20px rgba(168, 87, 60, 0.15) !important;
+        }
+        .daylight-theme .acc-row.selected {
+          background: rgba(194, 155, 98, 0.18) !important;
+          border-color: #C29B62 !important;
+        }
+        .daylight-theme .acc-name-text {
+          color: #2C1A12 !important;
+        }
+        .daylight-theme .acc-stat-box.balance .acc-stat-val {
+          color: #2C1A12 !important;
+        }
+        .daylight-theme .entry-line {
+          background: rgba(255, 253, 250, 0.9) !important;
+          border-color: rgba(194, 155, 98, 0.25) !important;
+          color: #2C1A12 !important;
+        }
+        .daylight-theme .entry-line-desc {
+          color: #2C1A12 !important;
+        }
+        .daylight-theme .mobile-summary-card {
+          background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.90) 100%) !important;
+          border-color: rgba(194, 155, 98, 0.3) !important;
+        }
+        .daylight-theme .mobile-accounts-toolbar {
+          background: rgba(194, 155, 98, 0.08) !important;
+          border-color: rgba(194, 155, 98, 0.2) !important;
+        }
+        .daylight-theme .mobile-search-bar {
+          background: #FFFFFF !important;
+          border-color: rgba(194, 155, 98, 0.3) !important;
+        }
+        .daylight-theme .mobile-search-input {
+          color: #2C1A12 !important;
+        }
+        .daylight-theme .mobile-action-pill {
+          background: rgba(194, 155, 98, 0.12) !important;
+          border-color: rgba(194, 155, 98, 0.3) !important;
+          color: #2C1A12 !important;
+        }
+        .daylight-theme .accounts-selection-bar {
+          background: rgba(194, 155, 98, 0.15) !important;
+          border-color: rgba(194, 155, 98, 0.35) !important;
+          color: #2C1A12 !important;
+        }
       `}</style>
     </MasterPage>
   );

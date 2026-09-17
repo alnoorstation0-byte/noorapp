@@ -16,7 +16,7 @@ export default function PermissionsMatrix() {
         { key: 'dashboard', nameAr: 'الداشبورد', nameEn: 'Dashboard' },
         { key: 'invoices', nameAr: 'الفواتير', nameEn: 'Invoices' },
         { key: 'pos', nameAr: 'نقاط البيع', nameEn: 'POS' },
-        { key: 'fleet_operations', nameAr: 'الأسطول', nameEn: 'Fleet' },
+        { key: 'fuel_pumps', nameAr: 'مضخات الوقود', nameEn: 'Fuel Pumps' },
         { key: 'inventory', nameAr: 'المخزون', nameEn: 'Inventory' },
         { key: 'receipts', nameAr: 'سندات القبض', nameEn: 'Receipts' },
         { key: 'payments', nameAr: 'سندات الصرف', nameEn: 'Payments' },

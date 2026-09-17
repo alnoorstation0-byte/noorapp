@@ -6,6 +6,7 @@ import jsPDF from 'jspdf';
 import 'jspdf-autotable';
 import { toast } from 'react-hot-toast';
 import { useLanguage } from '@/lib/LanguageContext';
+import { useThemeMode } from '@/lib/ThemeContext';
 
 const COLUMN_TRANSLATIONS: Record<string, string> = {
     "كود": "Code",
@@ -51,10 +52,14 @@ const COLUMN_TRANSLATIONS: Record<string, string> = {
     "سعر البيع": "Sale Price",
     "السعر": "Price",
     "الباركود": "Barcode",
-    "المندوب": "Delegate",
+    "المندوب": "Operator",
+    "مشغل المحطة": "Station Operator",
+    "مشغل": "Operator",
     "العميل": "Client",
     "المورد": "Supplier",
-    "المنفذ": "Outlet",
+    "المنفذ": "Station / Tank",
+    "محطة الوقود": "Gas Station",
+    "الخزانات": "Fuel Tanks",
     "الكاشير": "Cashier",
     "الوردية": "Shift",
     "الفرع": "Branch",
@@ -135,6 +140,7 @@ export default function RawasiSmartTable({
     rowKey
 }: RawasiSmartTableProps) {
     const { language, isRtl } = useLanguage();
+    const { isDaylight } = useThemeMode();
 
     const translateHeader = (headerNode: React.ReactNode): React.ReactNode => {
         if (language !== 'en') return headerNode;
@@ -266,13 +272,13 @@ export default function RawasiSmartTable({
 
     return (
         <div className="rawasi-table-wrapper" style={{ 
-            background: 'linear-gradient(135deg, rgba(20, 24, 34, 0.88) 0%, rgba(13, 16, 24, 0.75) 100%)', 
+            background: isDaylight ? 'linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.92) 100%)' : 'linear-gradient(135deg, rgba(20, 24, 34, 0.88) 0%, rgba(13, 16, 24, 0.75) 100%)', 
             backdropFilter: 'blur(24px) saturate(160%)', 
             WebkitBackdropFilter: 'blur(24px)',
             borderRadius: '20px', 
             padding: '20px', 
-            border: '1px solid rgba(0, 229, 255, 0.2)', 
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(0, 229, 255, 0.03)' 
+            border: isDaylight ? '1px solid rgba(194, 155, 98, 0.3)' : '1px solid rgba(0, 229, 255, 0.2)', 
+            boxShadow: isDaylight ? '0 10px 30px rgba(44, 26, 18, 0.06), 0 1px 2px rgba(44, 26, 18, 0.04)' : '0 8px 32px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(0, 229, 255, 0.03)' 
         }}>
             
             {/* 🛠️ شريط أدوات الجدول (أزرار التصدير والعنوان) */}
@@ -285,19 +291,18 @@ export default function RawasiSmartTable({
 
             <div style={{ overflowX: 'auto', borderRadius: '12px' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: isRtl ? 'right' : 'left' }} className="rawasi-printable-table">
-                    <thead style={{ background: 'rgba(0, 229, 255, 0.06)' }}>
+                    <thead style={{ background: isDaylight ? 'rgba(194, 155, 98, 0.08)' : 'rgba(0, 229, 255, 0.06)' }}>
                         <tr>
                             {selectable && (
                                 <th className="hide-on-print" style={{ padding: '15px', width: '40px', textAlign: isRtl ? 'right' : 'left' }}>
                                     <input 
                                         type="checkbox" 
                                         onChange={(e) => {
-                                            // 🚀 تم تغييرها للتعامل مع البيانات المعروضة في الصفحة فقط عند التحديد السريع
                                             if (e.target.checked) onSelectionChange?.(paginatedData.map(i => i.id));
                                             else onSelectionChange?.([]);
                                         }}
                                         checked={paginatedData.length > 0 && selectedIds.length === paginatedData.length}
-                                        style={{ accentColor: THEME.goldAccent, width: '16px', height: '16px', cursor: 'pointer' }}
+                                        style={{ accentColor: isDaylight ? '#C29B62' : THEME.goldAccent, width: '16px', height: '16px', cursor: 'pointer' }}
                                     />
                                 </th>
                             )}
@@ -313,10 +318,10 @@ export default function RawasiSmartTable({
                                         style={{ 
                                             padding: isActions ? '15px 8px' : '15px', 
                                             textAlign: isRtl ? 'right' : 'left', 
-                                            color: '#00E5FF', 
+                                            color: isDaylight ? '#2C1A12' : '#00E5FF', 
                                             fontWeight: 900, 
                                             fontSize: '13px', 
-                                            borderBottom: '1px solid rgba(0, 229, 255, 0.25)',
+                                            borderBottom: isDaylight ? '2px solid rgba(194, 155, 98, 0.3)' : '1px solid rgba(0, 229, 255, 0.25)',
                                             cursor: sortKey ? 'pointer' : 'default',
                                             userSelect: 'none',
                                             whiteSpace: 'nowrap',
@@ -326,12 +331,11 @@ export default function RawasiSmartTable({
                                         title={sortKey ? `فرز حسب ${typeof col.label === 'string' ? col.label : (typeof col.header === 'string' ? col.header : '')}` : ''}
                                     >
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '5px' }}>
-                                            {/* 🟢 الآن يمكن رسم الـ Checkbox هنا بدون أخطاء */}
                                             {translateHeader(col.label || col.header)}
                                             
                                             {/* مؤشر الفرز */}
                                             {sortKey && (
-                                                <span style={{ fontSize: '10px', color: isSorted ? THEME.goldAccent : 'transparent' }}>
+                                                <span style={{ fontSize: '10px', color: isSorted ? (isDaylight ? '#C29B62' : THEME.goldAccent) : 'transparent' }}>
                                                     {sortConfig?.direction === 'asc' ? '🔼' : '🔽'}
                                                 </span>
                                             )}
@@ -343,18 +347,17 @@ export default function RawasiSmartTable({
                     </thead>
                     <motion.tbody variants={containerVariants} initial="hidden" animate="show">
                         {paginatedData.length === 0 ? (
-                            <tr><td colSpan={columns.length + (selectable ? 1 : 0)} style={{ padding: '40px', textAlign: 'center', color: '#94A3B8', fontWeight: 900 }}>{emptyMessage || (language === 'en' ? 'No data available' : 'لا توجد بيانات')}</td></tr>
+                            <tr><td colSpan={columns.length + (selectable ? 1 : 0)} style={{ padding: '40px', textAlign: 'center', color: isDaylight ? 'rgba(44, 26, 18, 0.6)' : '#94A3B8', fontWeight: 900 }}>{emptyMessage || (language === 'en' ? 'No data available' : 'لا توجد بيانات')}</td></tr>
                         ) : (
-                            // 🚀 رسم البيانات المقطوعة فقط لمنع تهنيج المتصفح
                             paginatedData.map((row, rowIndex) => (
                                 <motion.tr 
                                     key={row._unique_key || row.id || rowIndex} 
                                     variants={itemVariants} 
                                     onClick={() => onRowClick?.(row)} 
                                     style={{ 
-                                        borderBottom: '1px solid rgba(255, 255, 255, 0.05)', 
+                                        borderBottom: isDaylight ? '1px solid rgba(194, 155, 98, 0.15)' : '1px solid rgba(255, 255, 255, 0.05)', 
                                         cursor: onRowClick ? 'pointer' : 'default',
-                                        background: rowIndex % 2 === 0 ? 'transparent' : 'rgba(255, 255, 255, 0.02)',
+                                        background: rowIndex % 2 === 0 ? 'transparent' : (isDaylight ? 'rgba(194, 155, 98, 0.04)' : 'rgba(255, 255, 255, 0.02)'),
                                         transition: '0.2s'
                                     }}
                                     className="table-row-hover"
@@ -370,7 +373,7 @@ export default function RawasiSmartTable({
                                                         : [...selectedIds, row.id];
                                                     onSelectionChange?.(newSelection);
                                                 }}
-                                                style={{ accentColor: THEME.goldAccent, width: '16px', height: '16px', cursor: 'pointer' }}
+                                                style={{ accentColor: isDaylight ? '#C29B62' : THEME.goldAccent, width: '16px', height: '16px', cursor: 'pointer' }}
                                             />
                                         </td>
                                     )}
@@ -381,7 +384,7 @@ export default function RawasiSmartTable({
                                                 key={colIndex} 
                                                 style={{ 
                                                     padding: isActions ? '10px 8px' : '12px 15px', 
-                                                    color: '#F8FAFC', 
+                                                    color: isDaylight ? '#2C1A12' : '#F8FAFC', 
                                                     fontSize: '13px',
                                                     textAlign: isRtl ? 'right' : 'left',
                                                     whiteSpace: isActions ? 'nowrap' : undefined,
@@ -403,21 +406,29 @@ export default function RawasiSmartTable({
             {enablePagination && activeTotal > 0 && (
                 <div className="hide-on-print table-pagination-mobile" style={{ 
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center', 
-                    padding: '15px 20px', marginTop: '15px', borderTop: '1px solid rgba(0, 229, 255, 0.15)',
-                    background: 'rgba(20, 24, 34, 0.6)', borderRadius: '12px', flexWrap: 'wrap', gap: '15px'
+                    padding: '15px 20px', marginTop: '15px', 
+                    borderTop: isDaylight ? '1px solid rgba(194, 155, 98, 0.25)' : '1px solid rgba(0, 229, 255, 0.15)',
+                    background: isDaylight ? 'rgba(255, 253, 250, 0.9)' : 'rgba(20, 24, 34, 0.6)', 
+                    borderRadius: '12px', flexWrap: 'wrap', gap: '15px'
                 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <span style={{ fontSize: '12px', fontWeight: 900, color: '#94A3B8' }}>{language === 'en' ? 'Show:' : 'عرض:'}</span>
+                        <span style={{ fontSize: '12px', fontWeight: 900, color: isDaylight ? 'rgba(44, 26, 18, 0.7)' : '#94A3B8' }}>{language === 'en' ? 'Show:' : 'عرض:'}</span>
                         <select 
                             value={activeRows} 
                             onChange={(e) => handleRowsChange(Number(e.target.value))}
-                            style={{ padding: '8px 15px', borderRadius: '12px', border: '1px solid rgba(0, 229, 255, 0.25)', outline: 'none', fontWeight: 800, cursor: 'pointer', background: '#141822', color: '#F8FAFC' }}
+                            style={{ 
+                                padding: '8px 15px', borderRadius: '12px', 
+                                border: isDaylight ? '1px solid rgba(194, 155, 98, 0.35)' : '1px solid rgba(0, 229, 255, 0.25)', 
+                                outline: 'none', fontWeight: 800, cursor: 'pointer', 
+                                background: isDaylight ? '#FFFFFF' : '#141822', 
+                                color: isDaylight ? '#2C1A12' : '#F8FAFC' 
+                            }}
                         >
                             <option value="50">{language === 'en' ? '50 records' : '50 سجل'}</option>
                             <option value="100">{language === 'en' ? '100 records' : '100 سجل'}</option>
                             <option value="500">{language === 'en' ? '500 records' : '500 سجل'}</option>
                         </select>
-                        <span style={{ fontSize: '12px', fontWeight: 700, color: '#94A3B8' }}>
+                        <span style={{ fontSize: '12px', fontWeight: 700, color: isDaylight ? 'rgba(44, 26, 18, 0.7)' : '#94A3B8' }}>
                             {language === 'en' ? `of ${activeTotal} total` : `من إجمالي ${activeTotal}`}
                         </span>
                     </div>
@@ -426,17 +437,39 @@ export default function RawasiSmartTable({
                         <button 
                             disabled={activePage === 1} 
                             onClick={(e) => { e.stopPropagation(); handlePageChange(activePage - 1); }} 
-                            style={{ padding: '8px 16px', borderRadius: '12px', border: '1px solid rgba(0, 229, 255, 0.25)', background: 'rgba(20, 24, 34, 0.85)', fontWeight: 900, cursor: activePage === 1 ? 'not-allowed' : 'pointer', opacity: activePage === 1 ? 0.4 : 1, color: '#F8FAFC', transition: '0.2s' }}
+                            style={{ 
+                                padding: '8px 16px', borderRadius: '12px', 
+                                border: isDaylight ? '1px solid rgba(194, 155, 98, 0.35)' : '1px solid rgba(0, 229, 255, 0.25)', 
+                                background: isDaylight ? '#FFFFFF' : 'rgba(20, 24, 34, 0.85)', 
+                                fontWeight: 900, cursor: activePage === 1 ? 'not-allowed' : 'pointer', 
+                                opacity: activePage === 1 ? 0.4 : 1, 
+                                color: isDaylight ? '#2C1A12' : '#F8FAFC', 
+                                transition: '0.2s' 
+                            }}
                         >
                             {language === 'en' ? 'Previous' : 'السابق'}
                         </button>
-                        <div style={{ background: 'linear-gradient(135deg, #00E5FF 0%, #0088CC 100%)', color: '#0B0E14', padding: '8px 20px', borderRadius: '12px', fontWeight: 900, fontSize: '13px', boxShadow: '0 0 15px rgba(0, 229, 255, 0.35)', textAlign: 'center' }}>
+                        <div style={{ 
+                            background: isDaylight ? 'linear-gradient(135deg, #C29B62 0%, #A8573C 100%)' : 'linear-gradient(135deg, #00E5FF 0%, #0088CC 100%)', 
+                            color: '#FFFFFF', 
+                            padding: '8px 20px', borderRadius: '12px', fontWeight: 900, fontSize: '13px', 
+                            boxShadow: isDaylight ? '0 2px 8px rgba(194, 155, 98, 0.3)' : '0 0 15px rgba(0, 229, 255, 0.35)', 
+                            textAlign: 'center' 
+                        }}>
                             {language === 'en' ? `Page ${activePage} of ${totalPages}` : `صفحة ${activePage} من ${totalPages}`}
                         </div>
                         <button 
                             disabled={activePage >= totalPages} 
                             onClick={(e) => { e.stopPropagation(); handlePageChange(activePage + 1); }} 
-                            style={{ padding: '8px 16px', borderRadius: '12px', border: '1px solid rgba(0, 229, 255, 0.25)', background: 'rgba(20, 24, 34, 0.85)', fontWeight: 900, cursor: activePage >= totalPages ? 'not-allowed' : 'pointer', opacity: activePage >= totalPages ? 0.4 : 1, color: '#F8FAFC', transition: '0.2s' }}
+                            style={{ 
+                                padding: '8px 16px', borderRadius: '12px', 
+                                border: isDaylight ? '1px solid rgba(194, 155, 98, 0.35)' : '1px solid rgba(0, 229, 255, 0.25)', 
+                                background: isDaylight ? '#FFFFFF' : 'rgba(20, 24, 34, 0.85)', 
+                                fontWeight: 900, cursor: activePage >= totalPages ? 'not-allowed' : 'pointer', 
+                                opacity: activePage >= totalPages ? 0.4 : 1, 
+                                color: isDaylight ? '#2C1A12' : '#F8FAFC', 
+                                transition: '0.2s' 
+                            }}
                         >
                             {language === 'en' ? 'Next' : 'التالي'}
                         </button>
@@ -445,8 +478,12 @@ export default function RawasiSmartTable({
             )}
 
             {/* 🎨 CSS للطباعة ولتأثيرات الهوفر والجوال */}
-            <style>{`
-                .table-row-hover:hover { background: rgba(0, 229, 255, 0.06) !important; box-shadow: 0 0 15px rgba(0, 229, 255, 0.08); transform: translateY(-1px); }
+            <style dangerouslySetInnerHTML={{ __html: `
+                .table-row-hover:hover { 
+                    background: ${isDaylight ? 'rgba(2, 132, 199, 0.05)' : 'rgba(0, 229, 255, 0.06)'} !important; 
+                    box-shadow: ${isDaylight ? '0 2px 8px rgba(15, 23, 42, 0.04)' : '0 0 15px rgba(0, 229, 255, 0.08)'}; 
+                    transform: translateY(-1px); 
+                }
                 
                 @media (max-width: 768px) {
                     .rawasi-table-wrapper {
@@ -506,7 +543,7 @@ export default function RawasiSmartTable({
                     .rawasi-printable-table { border: 1px solid #000; }
                     .rawasi-printable-table th, .rawasi-printable-table td { border: 1px solid #000; padding: 8px; }
                 }
-            `}</style>
+            ` }} />
         </div>
     );
 }

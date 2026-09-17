@@ -55,12 +55,60 @@ export default function ArAgingPage() {
                     .stat-card { padding: 12px 10px !important; min-width: 140px !important; }
                     .stat-value { font-size: 16px !important; }
                 }
+
+                .daylight-theme .ar-aging-filters {
+                    background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.90) 100%) !important;
+                    border-color: rgba(194, 155, 98, 0.3) !important;
+                    box-shadow: 0 4px 20px rgba(44, 26, 18, 0.08) !important;
+                }
+                .daylight-theme .ar-filter-label {
+                    color: #2C1A12 !important;
+                }
+                .daylight-theme .search-box {
+                    background: #FFFFFF !important;
+                    border-color: rgba(194, 155, 98, 0.35) !important;
+                    color: #2C1A12 !important;
+                }
+                .daylight-theme .stat-card {
+                    background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.90) 100%) !important;
+                    border-color: rgba(194, 155, 98, 0.3) !important;
+                    box-shadow: 0 4px 20px rgba(44, 26, 18, 0.08) !important;
+                }
+                .daylight-theme .stat-title {
+                    color: rgba(44, 26, 18, 0.7) !important;
+                }
+                .daylight-theme .stat-value {
+                    color: #2C1A12 !important;
+                }
+                .daylight-theme .data-table-container {
+                    background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.90) 100%) !important;
+                    border-color: rgba(194, 155, 98, 0.3) !important;
+                    box-shadow: 0 8px 30px rgba(44, 26, 18, 0.08) !important;
+                }
+                .daylight-theme .data-table {
+                    color: #2C1A12 !important;
+                }
+                .daylight-theme .data-table th {
+                    background: rgba(194, 155, 98, 0.12) !important;
+                    color: #2C1A12 !important;
+                    border-bottom: 2px solid rgba(194, 155, 98, 0.25) !important;
+                }
+                .daylight-theme .data-table td {
+                    border-bottom: 1px solid rgba(194, 155, 98, 0.15) !important;
+                    color: #2C1A12 !important;
+                }
+                .daylight-theme .data-table tr:hover {
+                    background: rgba(194, 155, 98, 0.06) !important;
+                }
+                .daylight-theme .data-table tr:nth-child(even) {
+                    background: rgba(194, 155, 98, 0.03) !important;
+                }
             `}</style>
 
             {/* Filters */}
-            <div style={{ display: 'flex', gap: '15px', marginBottom: '25px', background: 'linear-gradient(135deg, rgba(20, 24, 34, 0.95) 0%, rgba(15, 20, 30, 0.85) 100%)', padding: '20px', borderRadius: '24px', border: '1px solid rgba(0, 229, 255, 0.2)', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)' }}>
+            <div className="ar-aging-filters" style={{ display: 'flex', gap: '15px', marginBottom: '25px', background: 'linear-gradient(135deg, rgba(20, 24, 34, 0.95) 0%, rgba(15, 20, 30, 0.85) 100%)', padding: '20px', borderRadius: '24px', border: '1px solid rgba(0, 229, 255, 0.2)', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)' }}>
                 <div style={{ flex: '1 1 300px' }}>
-                    <div style={{ color: '#F8FAFC', fontSize: '13px', fontWeight: 900, marginBottom: '8px' }}>بحث باسم العميل 🔍</div>
+                    <div className="ar-filter-label" style={{ color: '#F8FAFC', fontSize: '13px', fontWeight: 900, marginBottom: '8px' }}>بحث باسم العميل 🔍</div>
                     <input 
                         type="text" 
                         placeholder="ابحث عن عميل..." 

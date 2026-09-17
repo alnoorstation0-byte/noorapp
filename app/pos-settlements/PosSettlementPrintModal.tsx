@@ -53,7 +53,7 @@ export default function PosSettlementPrintModal({
         <div className="warm-portal-overlay-fullscreen" onClick={onClose} style={{
             position: 'fixed',
             inset: 0,
-            zIndex: 999999,
+            zIndex: 999999999,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
@@ -63,7 +63,7 @@ export default function PosSettlementPrintModal({
             WebkitBackdropFilter: 'blur(20px)',
             direction: 'rtl'
         }}>
-            <style>{`
+            <style dangerouslySetInnerHTML={{ __html: `
                 @media (max-width: 768px) {
                     .pos-settlement-print-box {
                         width: 95vw !important;
@@ -100,7 +100,29 @@ export default function PosSettlementPrintModal({
                         display: none !important;
                     }
                 }
-            `}</style>
+
+                /* Daylight Desert Glassmorphism */
+                .daylight-theme .warm-portal-overlay-fullscreen {
+                    background-color: rgba(253, 251, 247, 0.85) !important;
+                }
+                .daylight-theme .pos-settlement-print-box {
+                    border: 1px solid rgba(194, 155, 98, 0.35) !important;
+                    box-shadow: 0 25px 60px rgba(44, 26, 18, 0.15) !important;
+                }
+                .daylight-theme .print-modal-topbar {
+                    background: linear-gradient(135deg, rgba(255, 253, 250, 0.98) 0%, rgba(245, 238, 228, 0.95) 100%) !important;
+                    border-bottom: 1px solid rgba(194, 155, 98, 0.3) !important;
+                    color: #2C1A12 !important;
+                }
+                .daylight-theme .print-modal-topbar h3 {
+                    color: #2C1A12 !important;
+                }
+                .daylight-theme .btn-print-pos-action {
+                    background: linear-gradient(135deg, #C29B62 0%, #A8573C 100%) !important;
+                    color: #FFFFFF !important;
+                    box-shadow: 0 4px 15px rgba(168, 87, 60, 0.3) !important;
+                }
+            `}} />
 
             <div className="pos-settlement-print-box" onClick={(e) => e.stopPropagation()} style={{
                 background: '#ffffff',
@@ -127,12 +149,13 @@ export default function PosSettlementPrintModal({
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <span style={{ fontSize: '20px' }}>🖨️</span>
                         <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 900, color: '#F8FAFC' }}>
-                            معاينة وطباعة سند تسوية ومخالصة عهدة منفذ بيع
+                            معاينة وطباعة سند تسوية ومخالصة وردية محطة وقود
                         </h3>
                     </div>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <button
                             type="button"
+                            className="btn-print-pos-action"
                             onClick={handlePrint}
                             style={{
                                 padding: '8px 20px',
@@ -190,7 +213,7 @@ export default function PosSettlementPrintModal({
                                 محطات النور للوقود
                             </h1>
                             <div style={{ fontSize: '12px', color: '#64748b', fontWeight: 700 }}>
-                                مبيعات الجملة والتجزئة ومنافذ التوزيع المعتمدة
+                                خدمات المحروقات ومحطات الوقود المعتمدة
                             </div>
                             <div style={{ fontSize: '12px', color: '#122946', fontWeight: 800, marginTop: '2px' }}>
                                 الرقم الضريبي: <span style={{ fontFamily: 'monospace', color: '#1C73AB' }}>300000000000003</span>
@@ -232,12 +255,12 @@ export default function PosSettlementPrintModal({
                         marginBottom: '20px'
                     }}>
                         <div>
-                            <span style={{ color: '#64748b', fontWeight: 700 }}>منفذ البيع / الفرع:</span>{' '}
+                            <span style={{ color: '#64748b', fontWeight: 700 }}>محطة الوقود / الخزان:</span>{' '}
                             <b style={{ color: '#1C73AB', fontSize: '14px' }}>{shift.warehouseName}</b>
                             {shift.warehouseLocation && <span style={{ color: '#64748b' }}> ({shift.warehouseLocation})</span>}
                         </div>
                         <div>
-                            <span style={{ color: '#64748b', fontWeight: 700 }}>الكاشير / المسؤول:</span>{' '}
+                            <span style={{ color: '#64748b', fontWeight: 700 }}>المشغل / الكاشير:</span>{' '}
                             <b style={{ color: '#122946', fontSize: '13px' }}>{shift.cashierName}</b>
                             {shift.cashierPhone && <span> - 📞 {shift.cashierPhone}</span>}
                         </div>
@@ -380,15 +403,15 @@ export default function PosSettlementPrintModal({
                     {/* Clearance Statement */}
                     <div style={{
                         background: '#f8fafc',
-                        padding: '14px 18px',
-                        borderRadius: '12px',
+                        padding: '12px 16px',
+                        borderRadius: '10px',
                         border: '1px solid #e2e8f0',
                         fontSize: '11px',
                         lineHeight: 1.6,
                         color: '#334155',
                         marginBottom: '26px'
                     }}>
-                        <b>إقرار ومخالصة:</b> نشهد نحن الموقعين أدناه أنه تمت مراجعة وتدقيق مبيعات وإيرادات وصندوق ومخزون منفذ بيع (<b>{shift.warehouseName}</b>) للوردية الموضحة، وتم استلام وتوريد المبالغ النقدية المحددة بالخزينة المركزية وترحيل القيود المحاسبية بالنظام، وتعتبر ذمة الكاشير/المسؤول مبرأة نظامياً ومحاسبياً عن هذه الوردية.
+                        <b>إقرار ومخالصة:</b> نشهد نحن الموقعين أدناه أنه تمت مراجعة وتدقيق مبيعات وإيرادات وصندوق وخزانات وقود محطة (<b>{shift.warehouseName}</b>) للوردية الموضحة، وتم استلام وتوريد المبالغ النقدية المحددة بالخزينة المركزية وترحيل القيود المحاسبية بالنظام، وتعتبر ذمة المشغل/المسؤول مبرأة نظامياً ومحاسبياً عن هذه الوردية.
                     </div>
 
                     {/* Signature Blocks */}
@@ -402,7 +425,7 @@ export default function PosSettlementPrintModal({
                         paddingTop: '14px'
                     }}>
                         <div>
-                            <b style={{ color: '#122946' }}>الكاشير / مسؤول المنفذ</b>
+                            <b style={{ color: '#122946' }}>مشغل المحطة / الكاشير</b>
                             <div style={{ color: '#64748b', fontSize: '10px', marginTop: '2px' }}>{shift.cashierName}</div>
                             <div style={{ height: '40px' }}></div>
                             <div style={{ borderTop: '1px dashed #94a3b8', width: '80%', margin: '0 auto' }}>التوقيع</div>

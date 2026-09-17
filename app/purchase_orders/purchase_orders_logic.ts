@@ -197,10 +197,10 @@ export function usePurchaseOrdersLogic() {
         vat_amount: taxAmount,
         discount_amount: 0,
         paid_amount: 0,
-        notes: 'تم التوليد آلياً من أمر الشراء',
+        notes: 'تم التوليد آلياً من أمر شراء الوقود والمحروقات',
         is_posted: false,
         expense_number: expNo,
-        main_category: 'شراء بضاعة'
+        main_category: 'توريد وشراء وقود ومحروقات'
       };
 
       const { error: expErr } = await supabase.from('expenses').insert([expensePayload]);

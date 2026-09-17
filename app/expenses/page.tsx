@@ -257,16 +257,6 @@ export default function ExpensesPage() {
       exportValue: (row: any) => row.payee_name || '---'
     },
     { 
-      header: renderSortableHeader('أمر التشغيل', 'fleet_operation_id'), 
-      accessor: 'fleet_operation_id', 
-      render: (row: any) => row ? (
-        <span style={{ fontSize:'11px', background: 'rgba(245, 158, 11, 0.1)', padding: '4px 8px', borderRadius: '8px', color: '#b45309', fontWeight: 900, whiteSpace: 'nowrap' }}>
-          🚚 {row.fleet_operation_id ? `مربوط (${row.fleet_operation_id})` : '---'}
-        </span>
-      ) : null,
-      exportValue: (row: any) => row.fleet_operation_id ? `مربوط (${row.fleet_operation_id})` : '---'
-    },
-    { 
       header: renderSortableHeader('البيان التفصيلي', 'description'), 
       accessor: 'description', 
       render: (row: any) => {
@@ -693,8 +683,27 @@ export default function ExpensesPage() {
             .summary-glass-card { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); padding: 20px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.2); margin-bottom: 25px; }
             .filter-btn { flex: 1; padding: 8px; border-radius: 8px; background: rgba(255,255,255,0.1); color: white; border: none; font-weight: 900; cursor: pointer; font-size: 11px; transition: 0.3s; }
             .filter-btn.active { background: ${THEME.goldAccent}; color: #1e293b; }
-            .custom-checkbox { width: 20px; height: 20px; accent-color: ${THEME.goldAccent}; cursor: pointer; transition: 0.1s; }
             @keyframes modalEntrance { from { opacity: 0; transform: translateY(40px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
+
+            /* 🏜️ Daylight Desert Glassmorphism */
+            .daylight-theme .table-glass-wrapper {
+              background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.9) 100%) !important;
+              border: 1px solid rgba(194, 155, 98, 0.3) !important;
+              box-shadow: 0 4px 15px rgba(44, 26, 18, 0.08) !important;
+            }
+            .daylight-theme .summary-glass-card {
+              background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.9) 100%) !important;
+              border: 1px solid rgba(194, 155, 98, 0.3) !important;
+            }
+            .daylight-theme .filter-btn {
+              background: rgba(44, 26, 18, 0.06) !important;
+              color: #2C1A12 !important;
+              border: 1px solid rgba(194, 155, 98, 0.2) !important;
+            }
+            .daylight-theme .filter-btn.active {
+              background: linear-gradient(135deg, #C29B62, #A8573C) !important;
+              color: #FFFFFF !important;
+            }
           `}</style>
 
           {(logic.isLoading || permsLoading) ? (

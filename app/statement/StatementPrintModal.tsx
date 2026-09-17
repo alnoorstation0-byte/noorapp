@@ -273,6 +273,30 @@ export default function StatementPrintModal({
                 .btn-close { background: rgba(255, 255, 255, 0.06); color: #94A3B8; border: 1px solid rgba(255, 255, 255, 0.15); padding: 10px 20px; border-radius: 12px; font-weight: 900; font-size: 14px; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; justify-content: center; min-height: 44px; }
                 .btn-close:hover { background: rgba(255, 255, 255, 0.12); color: #F8FAFC; }
 
+                /* Daylight Desert Glassmorphism */
+                .daylight-theme .print-modal-overlay {
+                    background: rgba(253, 251, 247, 0.85) !important;
+                    backdrop-filter: blur(16px) !important;
+                }
+                .daylight-theme .controls-bar {
+                    background: linear-gradient(135deg, rgba(255, 253, 250, 0.98) 0%, rgba(245, 238, 228, 0.95) 100%) !important;
+                    border: 1px solid rgba(194, 155, 98, 0.4) !important;
+                    box-shadow: 0 10px 30px rgba(44, 26, 18, 0.15) !important;
+                }
+                .daylight-theme .btn-print {
+                    background: linear-gradient(135deg, #C29B62 0%, #A8573C 100%) !important;
+                    color: #FFFFFF !important;
+                    box-shadow: 0 4px 15px rgba(168, 87, 60, 0.25) !important;
+                }
+                .daylight-theme .btn-close {
+                    background: rgba(44, 26, 18, 0.06) !important;
+                    color: #2C1A12 !important;
+                    border: 1px solid rgba(194, 155, 98, 0.3) !important;
+                }
+                .daylight-theme .btn-close:hover {
+                    background: rgba(44, 26, 18, 0.12) !important;
+                }
+
                 @media (max-width: 768px) {
                     .print-modal-overlay { padding: 15px 10px !important; }
                     .controls-bar { padding: 10px 14px; border-radius: 16px; justify-content: center; width: 100%; }

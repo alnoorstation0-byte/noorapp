@@ -289,14 +289,13 @@ export default function ReceiptVouchersPage() {
                             setRecord={logic.setCurrentRecord} 
                             onSave={logic.handleSave}
                             delegates={logic.delegates}
-                            fleetOperations={logic.fleetOperations}
                         />
                     )}
 
             {/* 🛠️ مودال التصحيح المجمع (Bulk Fix) */}
             {mounted && logic.isBulkFixModalOpen && createPortal(
-                <div style={{
-                    position: 'fixed', inset: 0, zIndex: 999999, display: 'flex', alignItems: 'center', justifyContent: 'center', 
+                <div className="warm-portal-overlay-fullscreen" style={{
+                    position: 'fixed', inset: 0, zIndex: 999999999, isolation: 'isolate', pointerEvents: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', 
                     background: 'rgba(7, 9, 13, 0.8)', backdropFilter: 'blur(16px)', direction: 'rtl', padding: '20px'
                 }}>
                     <div className="cinematic-scroll" style={{ background: 'linear-gradient(135deg, rgba(20, 24, 34, 0.98) 0%, rgba(11, 14, 20, 0.95) 100%)', border: '1px solid rgba(0, 229, 255, 0.25)', borderRadius: '24px', width: '100%', maxWidth: '500px', padding: '32px', boxShadow: '0 25px 70px rgba(0,0,0,0.7)', zIndex: 10 }}>

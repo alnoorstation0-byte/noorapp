@@ -109,8 +109,8 @@ export function useProfileLogic() {
                     // سحب كشف الحساب من الدفتر المجمع (نفس شكل شاشة الشركاء)
                     supabase.from('partner_statement_ledger').select('*').eq('partner_id', searchPartnerId).order('transaction_date', { ascending: false }).limit(500),
                     supabase.from('payroll_slips').select('net_salary').eq('emp_id', searchPartnerId).order('created_at', { ascending: false }).limit(1),
-                    // سحب يوميات العامل
-                    supabase.from('labor_daily_logs').select('*').eq('worker_name', partner?.name).order('work_date', { ascending: false })
+                    // سحب ورديات تشغيل المحطة للعامل
+                    supabase.from('pos_shifts').select('*').eq('delegate_id', searchPartnerId).order('opened_at', { ascending: false }).limit(50)
                 ]);
                 
                 advData = statementRes.data || []; // هنستخدم نفس المتغير ده عشان نبعت كشف الحساب كامل

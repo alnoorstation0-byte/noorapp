@@ -67,29 +67,24 @@ export function usePayrollLogic() {
                 if (!error && data) syncData = data;
             } catch {}
 
-            // 🛡️ Fallback المباشر: حساب بيانات الحضور والغياب والخصومات
+            // 🛡️ Fallback المباشر: حساب بيانات الحضور والورديات والسلفيات
             if (!syncData || syncData.length === 0) {
-                const [logsRes, violRes, pvRes] = await Promise.all([
-                    supabase.from('labor_daily_logs').select('laborer_id, quantity, log_date').lte('log_date', cutoffDate),
-                    supabase.from('violations').select('partner_id, amount, violation_date').lte('violation_date', cutoffDate),
+                const [shiftsRes, pvRes] = await Promise.all([
+                    supabase.from('pos_shifts').select('delegate_id, opened_at').lte('opened_at', cutoffDate),
                     supabase.from('payment_vouchers').select('partner_id, amount, date').lte('date', cutoffDate)
                 ]);
 
-                const logs = logsRes.data || [];
-                const viols = violRes.data || [];
+                const shifts = shiftsRes.data || [];
                 const pvs = pvRes.data || [];
 
                 syncData = (empData || []).map(emp => {
-                    const empLogs = logs.filter((l: any) => l.laborer_id === emp.id && new Date(l.log_date).getMonth() + 1 === selectedMonth && new Date(l.log_date).getFullYear() === selectedYear);
-                    const daysWorked = empLogs.reduce((s: number, l: any) => s + Number(l.quantity || 0), 0);
-
-                    const empViols = viols.filter((v: any) => v.partner_id === emp.id && new Date(v.violation_date).getMonth() + 1 === selectedMonth && new Date(v.violation_date).getFullYear() === selectedYear);
-                    const deductions = empViols.reduce((s: number, v: any) => s + Number(v.amount || 0), 0);
+                    const empShifts = shifts.filter((s: any) => s.delegate_id === emp.id && new Date(s.opened_at).getMonth() + 1 === selectedMonth && new Date(s.opened_at).getFullYear() === selectedYear);
+                    const daysWorked = empShifts.length > 0 ? empShifts.length : 30;
 
                     const empPvs = pvs.filter((p: any) => p.partner_id === emp.id && new Date(p.date).getMonth() + 1 === selectedMonth && new Date(p.date).getFullYear() === selectedYear);
                     const advances = empPvs.reduce((s: number, p: any) => s + Number(p.amount || 0), 0);
 
-                    return { partner_id: emp.id, days_worked: daysWorked, deductions, advances };
+                    return { partner_id: emp.id, days_worked: daysWorked, deductions: 0, advances };
                 });
             }
 
@@ -113,43 +108,19 @@ export function usePayrollLogic() {
                 .eq('month', targetMonthStr);
             if (slipsError) throw slipsError;
 
-            // --- Fetch Custody (عهدة) ---
-            const { data: invData } = await supabase
-                .from('invoices')
-                .select('fleet_operation_id, total_amount, payment_method, fleet_operations(driver_id)')
-                .not('fleet_operation_id', 'is', null)
-                .neq('status', 'مسودة');
-
-            const { data: recData } = await supabase
-                .from('receipt_vouchers')
-                .select('fleet_operation_id, amount')
-                .not('fleet_operation_id', 'is', null)
-                .neq('status', 'مسودة');
+            // --- حساب عهد وفروقات ورديات المشغلين ---
+            const { data: shiftCustodyData } = await supabase
+                .from('pos_shifts')
+                .select('delegate_id, shortage_overage')
+                .not('delegate_id', 'is', null);
 
             const custodyMap = new Map<string, number>();
-            const opCashMap = new Map<string, number>();
-            const opDriverMap = new Map<string, string>();
-
-            (invData || []).forEach((inv: any) => {
-                const opId = inv.fleet_operation_id;
-                const driverId = inv.fleet_operations?.driver_id;
-                if (opId && driverId) {
-                    opDriverMap.set(opId, driverId);
-                    if (inv.payment_method !== 'اجل') {
-                         opCashMap.set(opId, (opCashMap.get(opId) || 0) + Number(inv.total_amount || 0));
+            (shiftCustodyData || []).forEach((s: any) => {
+                if (s.delegate_id) {
+                    const diff = Number(s.shortage_overage || 0);
+                    if (diff < 0) {
+                        custodyMap.set(s.delegate_id, (custodyMap.get(s.delegate_id) || 0) + Math.abs(diff));
                     }
-                }
-            });
-            (recData || []).forEach((rec: any) => {
-                const opId = rec.fleet_operation_id;
-                if (opId) {
-                    opCashMap.set(opId, (opCashMap.get(opId) || 0) - Number(rec.amount || 0));
-                }
-            });
-            opCashMap.forEach((netCash, opId) => {
-                const driverId = opDriverMap.get(opId);
-                if (driverId) {
-                    custodyMap.set(driverId, (custodyMap.get(driverId) || 0) + netCash);
                 }
             });
             // ----------------------------

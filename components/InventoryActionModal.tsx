@@ -285,12 +285,12 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
   const totalAmount = subtotal + taxAmount;
 
   const modalTitle = actionType === 'in' 
-    ? 'استلام بضاعة (In)' 
+    ? 'استلام وتوريد وقود / مواد (In)' 
     : actionType === 'out' 
-    ? 'صرف من المستودع (Out)' 
+    ? 'صرف من المستودع / الخزان (Out)' 
     : actionType === 'waste' 
-    ? 'تسجيل توالف وهدر (Waste / Damage)' 
-    : 'استرجاع فوارغ جالونات (Empty Return)';
+    ? 'تسجيل توالف وهدر / تبخر (Waste / Loss)' 
+    : 'استرجاع براميل / عبوات (Returnables)';
 
   const modalIcon = actionType === 'in' 
     ? '➕' 
@@ -335,7 +335,7 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
 
             <div>
               <label style={{ fontSize: '13px', fontWeight: 900, color: THEME.primary, marginBottom: '8px', display: 'block' }}>
-                🏢 {actionType === 'out' ? 'المستودع المصدر (من)' : 'المستودع / منفذ البيع'}
+                ⛽ {actionType === 'out' ? 'المستودع / الخزان المصدر (من)' : 'محطة الوقود / الخزان'}
               </label>
                 <select
                   className="glass-input-field"
@@ -361,7 +361,7 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
                   }}
                   style={{ width: '100%', padding: '10px' }}
                 >
-                <option value="">-- اختر المستودع --</option>
+                <option value="">-- اختر محطة الوقود / الخزان --</option>
                 {warehousesList.map((wh: any) => (
                   <option key={wh.id} value={wh.id}>{wh.name}</option>
                 ))}
@@ -372,7 +372,7 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
             {actionType === 'out' && (
               <div>
                 <label style={{ fontSize: '13px', fontWeight: 900, color: '#0284c7', marginBottom: '8px', display: 'block' }}>
-                  🚛 مستودع الوجهة (سيارة المندوب / المستودع المستلم) <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b' }}>- يُحدد تلقائياً مع أمر تشغيل الرحلة</span>
+                  ⛽ خزان / وجهة التوريد (المحطة / صهريج الوقود) <span style={{ fontSize: '11px', fontWeight: 600, color: '#64748b' }}>- يُحدد تلقائياً مع رحلة التزويد</span>
                 </label>
                 <select
                   className="glass-input-field"
@@ -381,7 +381,7 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
                     const destWhId = e.target.value;
                     const destWh = warehousesList?.find((w: any) => w.id === destWhId);
                     
-                    // 🚀 ربط ذكي تلقائي: إذا تم اختيار مستودع سيارة، يتم فوراً ربط أمر تشغيل الرحلة النشط لهذه السيارة والمندوب
+                    // 🚀 ربط ذكي تلقائي: إذا تم اختيار صهريج أو محطة، يتم فوراً ربط أمر تشغيل الرحلة النشط
                     let matchedOp: any = null;
                     if (destWh && (destWh.type === 'vehicle' || destWh.vehicle_id)) {
                       matchedOp = fleetOperations?.find((op: any) => 
@@ -401,12 +401,12 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
                   }}
                   style={{ width: '100%', padding: '10px', borderColor: formData.destination_warehouse_id ? '#0284c7' : undefined }}
                 >
-                  <option value="">-- بدون نقل لمستودع آخر (صرف نهائي) --</option>
+                  <option value="">-- بدون نقل لخزان آخر (صرف وقود نهائي) --</option>
                   {warehousesList
                     .filter((wh: any) => wh.id !== formData.warehouse_id)
                     .map((wh: any) => (
                       <option key={wh.id} value={wh.id}>
-                        {wh.type === 'vehicle' ? '🚚 ' : '🏢 '} {wh.name}
+                        {wh.type === 'vehicle' ? '🚛 ' : '⛽ '} {wh.name}
                       </option>
                     ))}
                 </select>
@@ -417,7 +417,7 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
             {actionType === 'waste' && (
               <div>
                 <label style={{ fontSize: '13px', fontWeight: 900, color: '#ef4444', marginBottom: '8px', display: 'block' }}>
-                  ⚠️ سبب التلف / الهدر *
+                  ⚠️ سبب التبخر / العجز / الهدر *
                 </label>
                 <select
                   className="glass-input-field"
@@ -425,12 +425,11 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
                   onChange={e => setFormData({ ...formData, waste_reason: e.target.value })}
                   style={{ width: '100%', padding: '10px', border: '1.5px solid #f87171' }}
                 >
-                  <option value="كسر عبوة / قارورة">كسر عبوة منتج أو قارورة فارغة</option>
-                  <option value="تلف كرتون أو تسريب">تلف كرتون علاج أو تسريب عبوة</option>
-                  <option value="عيب تصنيع أو غطاء غير محكم">عيب تصنيع أو غطاء غير محكم</option>
-                  <option value="تلف أثناء النقل والتوزيع">تلف أثناء نقل وتوزيع البضاعة</option>
-                  <option value="انتهاء صلاحية / سوء تخزين">انتهاء صلاحية أو سوء تخزين</option>
-                  <option value="تلف مواد تعبئة (أغطية/ستيكرات)">تلف مواد تعبئة (أغطية / كراتين / ستيكرات)</option>
+                  <option value="تبخر طبيعي في الخزان">تبخر طبيعي في خزانات الوقود</option>
+                  <option value="تسرب أو تلف في الصمامات والمضخات">تسرب أو تلف في الصمامات والمضخات</option>
+                  <option value="عيب تفريغ أو خلط وقود">عيب تفريغ أو خلط وقود</option>
+                  <option value="هدر أثناء النقل بالصهريج">هدر أثناء نقل وتفريغ شحنة الوقود</option>
+                  <option value="تلف عبوات زيوت أو منتجات المحطة">تلف عبوات زيوت أو منتجات المحطة</option>
                   <option value="أخرى">سبب آخر (يُذكر في الملاحظات)</option>
                 </select>
               </div>
@@ -611,10 +610,10 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
               <label style={{ fontSize: '13px', fontWeight: 900, color: THEME.primary, marginBottom: '8px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <span>🚚</span>
-                  <span>أمر تشغيل الرحلة (رحلة التوزيع)</span>
+                  <span>أمر تشغيل صهريج النقل والتوزيع</span>
                 </span>
                 <span style={{ fontSize: '11px', fontWeight: 700, color: '#0284c7' }}>
-                  {actionType === 'out' ? '⚡ يربط المندوب والسيارة تلقائياً' : 'اختياري'}
+                  {actionType === 'out' ? '⚡ يربط مشغل الصهريج والمركبة تلقائياً' : 'اختياري'}
                 </span>
               </label>
               <select 
@@ -650,14 +649,14 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
                     }
                   }}
               >
-                  <option value="">-- ربط بأمر تشغيل رحلة --</option>
+                  <option value="">-- ربط برحلة تزويد صهريج وقود --</option>
                   {fleetOperations?.map((op: any) => {
-                      const driverName = op.driver?.name || 'بدون مندوب';
-                      const carPlate = op.vehicle?.plate_number || 'بدون سيارة';
+                      const driverName = op.driver?.name || 'بدون مشغل / سائق';
+                      const carPlate = op.vehicle?.plate_number || 'بدون صهريج';
                       const desc = op.description ? ` (${op.description})` : '';
                       return (
                         <option key={op.id} value={op.id}>
-                          {`🚚 ${op.operation_number} | المندوب: ${driverName} | سيارة: ${carPlate}${desc} - [${op.operation_date || ''}]`}
+                          {`🚛 ${op.operation_number} | مشغل الصهريج: ${driverName} | الصهريج: ${carPlate}${desc} - [${op.operation_date || ''}]`}
                         </option>
                       );
                   })}
@@ -672,26 +671,26 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
                     display: 'flex', alignItems: 'center', justifyContent: 'space-between', fontSize: '12px' 
                   }}>
                     <span style={{ fontWeight: 800, color: '#0369a1' }}>
-                      ✅ تم ربط الرحلة: {selectedOp.operation_number}
+                      ✅ تم ربط رحلة الوقود: {selectedOp.operation_number}
                     </span>
                     <span style={{ color: '#0284c7', fontWeight: 800 }}>
-                      👤 المندوب: {selectedOp.driver?.name || 'محدد'} | 🚗 {selectedOp.vehicle?.plate_number || ''}
+                      👤 مشغل الصهريج: {selectedOp.driver?.name || 'محدد'} | 🚛 {selectedOp.vehicle?.plate_number || ''}
                     </span>
                   </div>
                 ) : null;
               })()}
             </div>
 
-            {/* الطرف المرتبط / المندوب */}
+            {/* الطرف المرتبط / مشغل المحطة */}
             <div>
               <label style={{ fontSize: '13px', fontWeight: 900, color: THEME.primary, marginBottom: '8px', display: 'block' }}>
                 {actionType === 'in' 
-                  ? '👤 العميل / المورد (اختياري)' 
+                  ? '👤 المورد / جهة توريد الوقود (اختياري)' 
                   : actionType === 'waste'
-                  ? '👤 المسؤول عن التلف / السائق (اختياري)'
+                  ? '👤 المسؤول عن الفاقد / المشغل (اختياري)'
                   : actionType === 'empty_return'
-                  ? '👤 العميل أو المندوب المسلم للفوارغ (اختياري)'
-                  : '👤 المندوب المستلم / الطرف المرتبط'}
+                  ? '👤 العميل أو مشغل المحطة (اختياري)'
+                  : '👤 مشغل المحطة المستلم / الطرف المرتبط'}
               </label>
               <SearchableSelect
                 options={partners.map((p: any) => ({
@@ -700,7 +699,7 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
                 }))}
                 value={formData.partner_id || formData.delegate_id}
                 onChange={val => setFormData(prev => ({ ...prev, partner_id: val, delegate_id: val }))}
-                placeholder="-- ابحث عن الطرف أو المندوب المرتبط --"
+                placeholder="-- ابحث عن مشغل المحطة أو الطرف المرتبط --"
               />
             </div>
 
@@ -756,11 +755,11 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
             {actionType === 'empty_return' && (
                <div style={{ background: '#f0f9ff', padding: '15px', borderRadius: '12px', border: '1px solid #bae6fd', display: 'flex', flexDirection: 'column', gap: '8px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', color: '#0369a1', fontSize: '13px', fontWeight: 800 }}>
-                      <span>عدد الفوارغ المسترجعة:</span>
-                      <span style={{ fontWeight: 900, fontSize: '16px' }}>{formData.quantity} عبوة/جالون</span>
+                      <span>عدد البراميل / العبوات المسترجعة:</span>
+                      <span style={{ fontWeight: 900, fontSize: '16px' }}>{formData.quantity} برميل/عبوة</span>
                   </div>
                   <div style={{ fontSize: '11px', color: '#0284c7', fontWeight: 700 }}>
-                      💡 سيتم إضافة هذه الفوارغ لرصيد المستودع المختار بعد اعتماد الحركة.
+                      💡 سيتم إضافة هذه البراميل/العبوات لرصيد المستودع أو المحطة المختار بعد اعتماد الحركة.
                   </div>
                </div>
             )}
@@ -785,7 +784,7 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
                       ? '✅ تأكيد الصرف' 
                       : (actionType === 'waste' 
                           ? '🗑️ تأكيد تسجيل التالف / الهدر' 
-                          : '🔄 تأكيد استلام الفوارغ')))}
+                          : '🔄 تأكيد استلام البراميل / العبوات')))}
           </button>
           <button 
             onClick={onClose}

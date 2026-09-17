@@ -90,7 +90,7 @@ export default function InventoryTransactionsPage() {
               border: '1px solid rgba(2, 132, 199, 0.4)',
               padding: '4px 12px', borderRadius: '8px', fontSize: '12px', fontWeight: 900 
             }}>
-              🔄 إرجاع فوارغ
+              🔄 إرجاع براميل / عبوات
             </span>
           );
         }
@@ -151,11 +151,11 @@ export default function InventoryTransactionsPage() {
            let typeLabel = '';
            if (row.partner_type === 'عميل') { color = '#ef4444'; typeLabel = ' (عميل)'; }
            else if (row.partner_type === 'مورد') { color = '#10b981'; typeLabel = ' (مورد)'; }
-           else if (row.partner_type === 'عامل يومية' || row.partner_type === 'مندوب') { color = '#f59e0b'; typeLabel = ` (${row.partner_type})`; }
+           else if (row.partner_type === 'عامل يومية' || row.partner_type === 'مشغل' || row.partner_type === 'مندوب') { color = '#f59e0b'; typeLabel = ` (${row.partner_type === 'مندوب' ? 'مشغل' : row.partner_type})`; }
            else { typeLabel = row.partner_type ? ` (${row.partner_type})` : ''; }
            return <span style={{ color, fontWeight: 900 }}>{row.partner} <span style={{ fontSize: '10px', opacity: 0.8 }}>{typeLabel}</span></span>;
-        } else if (row.driver_name && row.driver_name !== 'بدون مندوب') {
-           return <span style={{ color: '#f59e0b', fontWeight: 900 }}>{row.driver_name} <span style={{ fontSize: '10px', opacity: 0.8 }}>(مندوب)</span></span>;
+        } else if (row.driver_name && row.driver_name !== 'بدون مشغل' && row.driver_name !== 'بدون مندوب') {
+           return <span style={{ color: '#f59e0b', fontWeight: 900 }}>{row.driver_name} <span style={{ fontSize: '10px', opacity: 0.8 }}>(مشغل المحطة)</span></span>;
         } else {
            return <span style={{ color: '#475569', fontStyle: 'italic' }}>غير محدد</span>;
         }
@@ -164,8 +164,8 @@ export default function InventoryTransactionsPage() {
     { key: 'notes', label: 'ملاحظات', type: 'text',
       render: (row: any) => <span style={{ fontSize: '11px', color: '#64748b' }}>{row.notes || '-'}</span>
     },
-    { key: 'fleet_operation', label: 'الرحلة / السيارة', type: 'text',
-      render: (row: any) => row.fleet_operation ? <span style={{ fontSize: '11px', fontWeight: 'bold', color: '#0ea5e9' }}>🚚 {row.fleet_operation}</span> : <span style={{ color: '#94a3b8' }}>-</span>
+    { key: 'warehouse', label: 'الخزان / المستودع', type: 'text',
+      render: (row: any) => row.warehouse_name ? <span style={{ fontSize: '11px', fontWeight: 'bold', color: '#C29B62' }}>⛽ {row.warehouse_name}</span> : <span style={{ color: '#94a3b8' }}>-</span>
     },
     { key: 'status', label: 'الحالة', type: 'badge',
       render: (row: any) => (
@@ -234,10 +234,10 @@ export default function InventoryTransactionsPage() {
                            </style>
                        </head>
                        <body>
-                           <div class="header">
-                               <h1>سند ${['in', 'transfer_in'].includes(row.type) ? 'استلام (توريد)' : 'صرف'} بضاعة</h1>
-                               <h3>رقم الحركة: ${row.transaction_number || '-'}</h3>
-                           </div>
+                            <div class="header">
+                                <h1>سند ${['in', 'transfer_in'].includes(row.type) ? 'استلام وتفريغ' : 'صرف'} وقود ومحروقات</h1>
+                                <h3>رقم الحركة: ${row.transaction_number || '-'}</h3>
+                            </div>
                            <table>
                                <tr><th>تاريخ الحركة</th><td>${row.transaction_date || '-'}</td></tr>
                                <tr><th>العميل / المورد</th><td>${row.partner || 'غير محدد'}</td></tr>
@@ -306,7 +306,7 @@ export default function InventoryTransactionsPage() {
                 }}
               >
                 <span>➕</span>
-                <span>استلام بضاعة جديدة (توريد)</span>
+                <span>تفريغ وتوريد شحنة وقود ⛽</span>
               </button>
             </SecureAction>
 
@@ -404,16 +404,8 @@ export default function InventoryTransactionsPage() {
               gap: '15px'
             }}>
               {/* بطاقة التوالف */}
-              <div style={{
-                background: 'rgba(20, 24, 34, 0.95)',
-                border: '1px solid rgba(239, 68, 68, 0.35)',
-                borderRadius: '16px',
-                padding: '16px',
-                backdropFilter: 'blur(20px)',
-                boxShadow: '0 10px 25px rgba(0,0,0,0.4)',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '6px'
+              <div className="stat-summary-card" style={{
+                border: '1px solid rgba(239, 68, 68, 0.35)'
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ fontSize: '13px', fontWeight: 800, color: '#F87171' }}>خسائر التوالف والهدر</span>
@@ -428,40 +420,24 @@ export default function InventoryTransactionsPage() {
               </div>
 
               {/* بطاقة الفوارغ المسترجعة */}
-              <div style={{
-                background: 'rgba(20, 24, 34, 0.95)',
-                border: '1px solid rgba(0, 229, 255, 0.35)',
-                borderRadius: '16px',
-                padding: '16px',
-                backdropFilter: 'blur(20px)',
-                boxShadow: '0 10px 25px rgba(0,0,0,0.4)',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '6px'
+              <div className="stat-summary-card" style={{
+                border: '1px solid rgba(0, 229, 255, 0.35)'
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '13px', fontWeight: 800, color: '#38BDF8' }}>فوارغ الجالونات المسترجعة</span>
+                  <span style={{ fontSize: '13px', fontWeight: 800, color: '#38BDF8' }}>براميل وعبوات زيوت مسترجعة</span>
                   <span style={{ fontSize: '20px' }}>🔄</span>
                 </div>
                 <div style={{ fontSize: '20px', fontWeight: 900, color: '#00E5FF' }}>
-                  {(logic.stats?.emptyReturnQty || 0).toLocaleString()} جالون / عبوة
+                  {(logic.stats?.emptyReturnQty || 0).toLocaleString()} برميل / عبوة
                 </div>
                 <div style={{ fontSize: '11px', color: '#94A3B8', fontWeight: 700 }}>
-                  تم استلامها وإعادتها لدورة التعبئة
+                  تم استلامها وإعادتها لمستودع المحطة
                 </div>
               </div>
 
               {/* بطاقة الحركات المعلقة */}
-              <div style={{
-                background: 'rgba(20, 24, 34, 0.95)',
-                border: '1px solid rgba(245, 158, 11, 0.35)',
-                borderRadius: '16px',
-                padding: '16px',
-                backdropFilter: 'blur(20px)',
-                boxShadow: '0 10px 25px rgba(0,0,0,0.4)',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '6px'
+              <div className="stat-summary-card" style={{
+                border: '1px solid rgba(245, 158, 11, 0.35)'
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                   <span style={{ fontSize: '13px', fontWeight: 800, color: '#FBBF24' }}>حركات قيد الانتظار</span>
@@ -494,13 +470,12 @@ export default function InventoryTransactionsPage() {
                   className="glass-input-field" 
                   value={logic.filterType} 
                   onChange={e => logic.setFilterType(e.target.value)}
-                  style={{ background: '#141822', color: '#F8FAFC' }}
                 >
                   <option value="all">الكل</option>
                   <option value="in">🟢 استلام (In)</option>
                   <option value="out">🔴 صرف (Out)</option>
                   <option value="waste">🗑️ توالف وهدر (Waste)</option>
-                  <option value="empty_return">🔄 استرجاع فوارغ (Empty Return)</option>
+                  <option value="empty_return">🔄 استرجاع براميل وعبوات (Returnable)</option>
                 </select>
               </div>
               <div>
@@ -554,15 +529,7 @@ export default function InventoryTransactionsPage() {
             width="560px"
           >
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-              <div style={{
-                background: 'rgba(20, 24, 34, 0.6)',
-                border: '1px solid rgba(0, 229, 255, 0.25)',
-                borderRadius: '12px',
-                padding: '12px 16px',
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '6px'
-              }}>
+              <div className="receipt-info-card">
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px' }}>
                   <span style={{ color: '#64748b' }}>الصنف:</span>
                   <span style={{ fontWeight: 900, color: '#F8FAFC' }}>📦 {receivingTx.item_name}</span>
@@ -702,6 +669,25 @@ export default function InventoryTransactionsPage() {
         )}
 
         <style>{`
+          .stat-summary-card {
+            background: rgba(20, 24, 34, 0.95);
+            border-radius: 16px;
+            padding: 16px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.4);
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+          }
+          .receipt-info-card {
+            background: rgba(20, 24, 34, 0.6);
+            border: 1px solid rgba(0, 229, 255, 0.25);
+            border-radius: 12px;
+            padding: 12px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+          }
           .apple-glass-filter-bar {
             background: rgba(20, 24, 34, 0.95);
             backdrop-filter: blur(20px);
@@ -731,6 +717,45 @@ export default function InventoryTransactionsPage() {
             background: rgba(20, 24, 34, 0.95); 
             border-color: #00E5FF; 
             box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.25); 
+          }
+
+          /* Daylight Desert Glassmorphism */
+          .daylight-theme .stat-summary-card {
+            background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.9) 100%) !important;
+            box-shadow: 0 4px 6px rgba(44, 26, 18, 0.08) !important;
+          }
+          .daylight-theme .stat-summary-card div[style*="color: #94A3B8"],
+          .daylight-theme .stat-summary-card div[style*="color: rgb(148, 163, 184)"] {
+            color: rgba(44, 26, 18, 0.65) !important;
+          }
+          .daylight-theme .apple-glass-filter-bar {
+            background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.9) 100%) !important;
+            border: 1px solid rgba(194, 155, 98, 0.3) !important;
+            box-shadow: 0 4px 6px rgba(44, 26, 18, 0.08) !important;
+          }
+          .daylight-theme .apple-glass-filter-bar label {
+            color: rgba(44, 26, 18, 0.65) !important;
+          }
+          .daylight-theme .glass-input-field {
+            background: #FFFFFF !important;
+            border: 1px solid rgba(194, 155, 98, 0.3) !important;
+            color: #2C1A12 !important;
+            box-shadow: inset 0 1px 2px rgba(44, 26, 18, 0.05) !important;
+          }
+          .daylight-theme .glass-input-field:focus {
+            border-color: #C29B62 !important;
+            box-shadow: 0 0 0 3px rgba(194, 155, 98, 0.2) !important;
+          }
+          .daylight-theme select.glass-input-field option {
+            background: #FFFFFF !important;
+            color: #2C1A12 !important;
+          }
+          .daylight-theme .receipt-info-card {
+            background: rgba(253, 251, 247, 0.8) !important;
+            border: 1px solid rgba(194, 155, 98, 0.3) !important;
+          }
+          .daylight-theme .receipt-info-card span[style*="color: #F8FAFC"] {
+            color: #2C1A12 !important;
           }
         `}</style>
       </MasterPage>

@@ -72,7 +72,7 @@ export function useWarehousesLogic() {
   });
 
   const handleDelete = (id: string) => {
-    if (window.confirm('هل أنت متأكد من حذف هذا المستودع/المنفذ؟')) {
+    if (window.confirm('هل أنت متأكد من حذف هذه المحطة / الخزان؟')) {
       deleteMutation.mutate(id);
     }
   };

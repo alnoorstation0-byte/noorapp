@@ -224,9 +224,9 @@ export default function ThermalReceiptModal({ isOpen, onClose, record, onOpenA4 
     const customerDisplayName = customerDetails?.name || record.client_name || 'عميل نقدي';
     const customerPhone = customerDetails?.phone || record.phone || '';
     const customerVat = customerDetails?.vat_number || customerDetails?.tax_id || '';
-    const delegateName = delegateDetails?.name || (record.delegate?.name ? record.delegate.name : (record.delegate_id ? 'مندوب مبيعات' : 'مبيعات مباشرة'));
-    const outletName = warehouseDetails?.name || (record.warehouse?.name ? record.warehouse.name : 'المنفذ الرئيسي');
-    const cashierName = creatorDetails?.fullName || 'كاشير الفرع';
+    const delegateName = delegateDetails?.name || (record.delegate?.name ? record.delegate.name : (record.delegate_id ? 'مشغل المحطة' : 'مبيعات مباشرة'));
+    const outletName = warehouseDetails?.name || (record.warehouse?.name ? record.warehouse.name : 'محطة الوقود الرئيسية');
+    const cashierName = creatorDetails?.fullName || 'مشغل المحطة';
 
     return createPortal(
         <div className="thermal-modal-overlay">
@@ -291,6 +291,18 @@ export default function ThermalReceiptModal({ isOpen, onClose, record, onOpenA4 
                     background: rgba(239, 68, 68, 0.15); 
                     color: #EF4444; 
                     border: 1px solid rgba(239, 68, 68, 0.3);
+                }
+
+                /* Daylight Desert Glassmorphism */
+                .daylight-theme .thermal-actions {
+                    background: linear-gradient(135deg, rgba(255, 253, 250, 0.98) 0%, rgba(245, 238, 228, 0.95) 100%) !important;
+                    border: 1px solid rgba(194, 155, 98, 0.4) !important;
+                    box-shadow: 0 10px 30px rgba(44, 26, 18, 0.15) !important;
+                }
+                .daylight-theme .btn-print-thermal {
+                    background: linear-gradient(135deg, #C29B62, #A8573C) !important;
+                    color: #FFFFFF !important;
+                    box-shadow: 0 4px 12px rgba(168, 87, 60, 0.25) !important;
                 }
                 
                 /* صندوق إيصال الـ 80 ملم الحراري */
@@ -561,15 +573,15 @@ export default function ThermalReceiptModal({ isOpen, onClose, record, onOpenA4 
                             <td className="meta-val" style={{ direction: 'ltr', textAlign: 'right' }}>{formattedDate} {formattedTime}</td>
                         </tr>
                         <tr>
-                            <td className="meta-label">المنفذ / السيارة:</td>
+                            <td className="meta-label">المحطة / المضخة:</td>
                             <td className="meta-val">{outletName}</td>
                         </tr>
                         <tr>
-                            <td className="meta-label">المندوب / البائع:</td>
+                            <td className="meta-label">مشغل المحطة:</td>
                             <td className="meta-val">{delegateName}</td>
                         </tr>
                         <tr>
-                            <td className="meta-label">الكاشير:</td>
+                            <td className="meta-label">مشغل المضخة:</td>
                             <td className="meta-val">{cashierName}</td>
                         </tr>
                         <tr>
@@ -689,7 +701,7 @@ export default function ThermalReceiptModal({ isOpen, onClose, record, onOpenA4 
 
                 {/* 6. التذييل والشروط */}
                 <div style={{ fontSize: '10px', marginTop: '6px', color: '#111', lineHeight: '1.4' }}>
-                    البضاعة المباعة تستبدل أو ترد خلال 3 أيام بحالتها الأصلية.<br/>
+                    تخضع مبيعات المحروقات والخدمات لمعايير الجودة المعتمدة.<br/>
                     شكراً لتعاملكم مع <strong>محطات النور للوقود</strong> ⛽🚗<br/>
                     خدمة العملاء: info@alnoor-gas.com<br/>
                     <span style={{ fontSize: '8.5px', color: '#555' }}>تم الإصدار إلكترونياً عبر نظام محطات النور</span>

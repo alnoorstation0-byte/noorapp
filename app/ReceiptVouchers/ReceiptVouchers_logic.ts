@@ -87,25 +87,6 @@ export function useReceiptVouchersLogic() {
         }
     });
 
-    const { data: fleetOperations = [] } = useQuery({
-        queryKey: ['fleet_operations_open'],
-        queryFn: async () => {
-            const { data, error } = await supabase
-                .from('fleet_operations')
-                .select('id, operation_number, operation_date, status, vehicle_id, description, vehicle:fleet_vehicles(plate_number), driver:partners(name)')
-                .neq('status', 'مغلق')
-                .neq('status', 'closed')
-                .order('operation_date', { ascending: false });
-            if (error) throw error;
-            return data?.map((op:any) => ({
-                id: op.id,
-                operation_number: op.operation_number,
-                status: op.status,
-                vehicle_id: op.vehicle_id,
-                name: `🚚 ${op.operation_number} | ${op.driver?.name ? `مندوب: ${op.driver.name}` : 'بدون مندوب'} | ${op.vehicle?.plate_number ? `سيارة: ${op.vehicle.plate_number}` : ''} ${op.description ? `(${op.description})` : ''}`
-            })) || [];
-        }
-    });
 
     // =========================================================================
     // ⚙️ المعالجة والفلاتر (Filtering)
@@ -156,8 +137,6 @@ export function useReceiptVouchersLogic() {
                 amount: amount, 
                 invoice_id: cleanId(record.invoice_id),
                 partner_id: cleanId(record.partner_id),
-                fleet_operation_id: cleanId(record.fleet_operation_id),
-                job_order_id: cleanId(record.job_order_id),
                 delegate_id: cleanId(record.delegate_id),
                 safe_bank_acc_id: cleanId(record.safe_bank_acc_id),
                 partner_acc_id: cleanId(record.partner_acc_id),
@@ -209,8 +188,7 @@ export function useReceiptVouchersLogic() {
                 description: `سند قبض رقم ${rv.receipt_number || ''}`,
                 reference_id: rv.id,
                 v_type: 'receipt',
-                status: 'posted',
-                fleet_operation_id: rv.fleet_operation_id || null
+                status: 'posted'
             }]).select().single();
 
             if (jh) {
@@ -224,7 +202,6 @@ export function useReceiptVouchersLogic() {
                         debit: amt,
                         credit: 0,
                         notes: `تحصيل نقدية سند قبض #${rv.receipt_number || ''}`,
-                        fleet_operation_id: rv.fleet_operation_id || null,
                         delegate_id: rv.delegate_id || null
                     });
                 }
@@ -236,7 +213,6 @@ export function useReceiptVouchersLogic() {
                         debit: 0,
                         credit: amt,
                         notes: `سداد عميل سند قبض #${rv.receipt_number || ''}`,
-                        fleet_operation_id: rv.fleet_operation_id || null,
                         delegate_id: rv.delegate_id || null
                     });
                 }
@@ -392,7 +368,7 @@ export function useReceiptVouchersLogic() {
         currentRecord, setCurrentRecord, 
         
         // 🚀 أدوات ميزة التصحيح المجمع
-        delegates, fleetOperations,
+        delegates,
         isBulkFixModalOpen, setIsBulkFixModalOpen,
         bulkFixAccounts, setBulkFixAccounts,
         handleBulkFixSave: () => bulkFixMutation.mutate(),

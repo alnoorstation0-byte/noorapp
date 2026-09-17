@@ -14,16 +14,16 @@ export default function WarehousesPage() {
   const [selectedIds, setSelectedIds] = React.useState<any[]>([]);
 
   const columns = [
-    { key: 'name', label: 'اسم المستودع / المنفذ', sortable: true },
+    { key: 'name', label: 'اسم محطة الوقود / الخزان', sortable: true },
     { key: 'type', label: 'النوع', sortable: true, render: (row: any) => {
-        if (row.type === 'main') return <span style={{color: THEME.primary, fontWeight: 'bold'}}>رئيسي</span>;
-        if (row.type === 'vehicle') return <span style={{color: '#3b82f6', fontWeight: 'bold'}}>سيارة / متنقل</span>;
-        if (row.type === 'pos') return <span style={{color: '#eab308', fontWeight: 'bold'}}>منفذ بيع (POS)</span>;
-        return <span style={{color: '#8b5cf6', fontWeight: 'bold'}}>مستودع فرعي</span>;
+        if (row.type === 'main') return <span style={{color: THEME.primary, fontWeight: 'bold'}}>خزان رئيسي ⛽</span>;
+        if (row.type === 'vehicle') return <span style={{color: '#3b82f6', fontWeight: 'bold'}}>صهريج محروقات 🚛</span>;
+        if (row.type === 'pos') return <span style={{color: '#eab308', fontWeight: 'bold'}}>محطة وقود ومضخات (POS) ⛽</span>;
+        return <span style={{color: '#8b5cf6', fontWeight: 'bold'}}>خزان فرعي / أرضي</span>;
     } },
-    { key: 'location', label: 'العنوان', render: (row: any) => row.location || '---' },
+    { key: 'location', label: 'العنوان / الموقع', render: (row: any) => row.location || '---' },
     { key: 'phone', label: 'الهاتف', render: (row: any) => row.phone || '---' },
-    { key: 'manager_name', label: 'المسؤول', render: (row: any) => row.manager_name || '---' },
+    { key: 'manager_name', label: 'مشغل المحطة / المسؤول', render: (row: any) => row.manager_name || '---' },
     { key: 'is_active', label: 'الحالة', sortable: true, render: (row: any) => row.is_active ? 'نشط' : 'غير نشط' },
   
     { key: 'actions', label: 'إجراءات', type: 'actions', render: (row: any) => (
@@ -82,9 +82,9 @@ export default function WarehousesPage() {
         summary={
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <div className="summary-glass-card" style={{ padding: '16px', textAlign: 'center' }}>
-              <span style={{ fontSize: '11px', fontWeight: 800, color: '#64748b' }}>إجمالي المستودعات والمنافذ 🏢</span>
+              <span style={{ fontSize: '11px', fontWeight: 800, color: '#64748b' }}>إجمالي المحطات والخزانات ⛽</span>
               <div className="val" style={{ fontSize: '22px', fontWeight: 900, color: '#F8FAFC', marginTop: '4px' }}>
-                {logic.warehouses?.length || 0} مستودع
+                {logic.warehouses?.length || 0} محطة / خزان
               </div>
             </div>
             <div style={{ gridTemplateColumns: '1fr 1fr', display: 'grid', gap: '8px' }}>
@@ -95,9 +95,9 @@ export default function WarehousesPage() {
                 </div>
               </div>
               <div className="summary-glass-card" style={{ padding: '10px', textAlign: 'center' }}>
-                <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#00E5FF' }}>منافذ البيع 🛍️</span>
+                <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#00E5FF' }}>محطات الوقود ⛽</span>
                 <div className="val" style={{ fontSize: '17px', fontWeight: 900, color: '#00E5FF' }}>
-                  {logic.warehouses?.filter((w: any) => w.type === 'pos').length || 0}
+                  {logic.warehouses?.filter((w: any) => w.type === 'pos' || w.type === 'main').length || 0}
                 </div>
               </div>
             </div>
@@ -111,7 +111,7 @@ export default function WarehousesPage() {
             style={{ width: '100%', minHeight: '44px', fontWeight: 900 }}
           >
             <span>➕</span>
-            <span>إضافة مستودع / منفذ جديد</span>
+            <span>إضافة محطة وقود / خزان جديد</span>
           </button>
         }
         watchDeps={[logic.warehouses?.length]}
@@ -119,9 +119,9 @@ export default function WarehousesPage() {
 
       <div className="clean-page">
         <MasterPage 
-          icon="🏢"
-          title="إدارة المستودعات (Multi-Warehouse)" 
-          subtitle="إدارة المستودعات الرئيسية، الفرعية، وسيارات التوزيع"
+          icon="⛽"
+          title="إدارة محطات الوقود وخزانات المحروقات" 
+          subtitle="إدارة محطات الوقود، الخزانات الرئيسية والأرضية، ومضخات التعبئة"
         >
           {/* 🌟 شريط التحكم والعمليات الرئيسي بتصميم الزجاج الصحراوي */}
           <div className="desert-glass" style={{
@@ -145,14 +145,14 @@ export default function WarehousesPage() {
                       fontSize: '24px',
                       border: '1px solid rgba(0, 229, 255, 0.3)'
                   }}>
-                      🏢
+                      ⛽
                   </div>
                   <div>
                       <h3 style={{ margin: 0, fontSize: '17px', fontWeight: 900, color: '#F8FAFC' }}>
-                          المستودعات ومنافذ البيع
+                          محطات الوقود وخزانات المحروقات
                       </h3>
                       <span style={{ fontSize: '12px', color: '#94A3B8', fontWeight: 700 }}>
-                          {logic.warehouses.length} مستودع ومنفذ مسجل في النظام
+                          {logic.warehouses.length} محطة وخزان مسجل في النظام
                       </span>
                   </div>
               </div>
@@ -162,7 +162,7 @@ export default function WarehousesPage() {
                       <button 
                           className="btn-main-glass red" 
                           onClick={() => {
-                              if (window.confirm(`هل أنت متأكد من حذف ${selectedIds.length} مستودع؟`)) {
+                              if (window.confirm(`هل أنت متأكد من حذف ${selectedIds.length} محطة / خزان؟`)) {
                                   selectedIds.forEach(id => {
                                       const row = logic.warehouses.find((w: any) => w.id === id);
                                       if (row && row.type !== 'main' && row.type !== 'vehicle') {
@@ -193,7 +193,7 @@ export default function WarehousesPage() {
                       }}
                   >
                       <span style={{ fontSize: '18px' }}>➕</span>
-                      <span>إضافة مستودع / منفذ جديد</span>
+                      <span>إضافة محطة وقود / خزان جديد</span>
                   </button>
               </div>
           </div>
@@ -208,12 +208,12 @@ export default function WarehousesPage() {
         <AquaModalWrapper
             isOpen={logic.isModalOpen}
             onClose={() => logic.setIsModalOpen(false)}
-            title={logic.currentRecord.id ? 'تعديل المستودع' : 'إضافة مستودع جديد'}
-            icon="🏭"
+            title={logic.currentRecord.id ? 'تعديل بيانات المحطة / الخزان' : 'إضافة محطة وقود / خزان جديد'}
+            icon="⛽"
             width="500px"
         >
                   <div className="form-group" style={{ marginBottom: '15px' }}>
-                      <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>اسم المستودع</label>
+                      <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>اسم المحطة / الخزان</label>
                       <input 
                           type="text" 
                           className="glass-input-field" 
@@ -224,24 +224,24 @@ export default function WarehousesPage() {
                   </div>
 
                   <div className="form-group" style={{ marginBottom: '15px' }}>
-                      <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>نوع المستودع</label>
+                      <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>نوع الخزان / المنشأة</label>
                       <select 
                           className="glass-input-field" 
                           style={{ width: '100%' }}
-                          value={logic.currentRecord.type || 'sub'}
+                          value={logic.currentRecord.type || 'pos'}
                           onChange={e => logic.setCurrentRecord({...logic.currentRecord, type: e.target.value})}
                           disabled={logic.currentRecord.type === 'main' || logic.currentRecord.type === 'vehicle'}
                       >
-                          <option value="main">مستودع رئيسي</option>
-                          <option value="sub">مستودع فرعي</option>
-                          <option value="pos">منفذ بيع (POS)</option>
-                          <option value="vehicle">سيارة / متنقل</option>
+                          <option value="main">خزان رئيسي (محطة رئيسية)</option>
+                          <option value="pos">محطة وقود / مضخات (POS)</option>
+                          <option value="sub">خزان فرعي / أرضي</option>
+                          <option value="vehicle">صهريج نقل محروقات</option>
                       </select>
                   </div>
 
                   
                   <div className="form-group" style={{ marginBottom: '15px' }}>
-                      <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>العنوان / الموقع</label>
+                      <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>العنوان / الموقع الجغرافي</label>
                       <input 
                           type="text" 
                           className="glass-input-field" 
@@ -251,7 +251,7 @@ export default function WarehousesPage() {
                       />
                   </div>
                   <div className="form-group" style={{ marginBottom: '15px' }}>
-                      <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>رقم الهاتف</label>
+                      <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>رقم الهاتف / الطوارئ</label>
                       <input 
                           type="text" 
                           className="glass-input-field" 
@@ -261,7 +261,7 @@ export default function WarehousesPage() {
                       />
                   </div>
                   <div className="form-group" style={{ marginBottom: '15px' }}>
-                      <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>المسؤول</label>
+                      <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>مشغل المحطة / المسؤول</label>
                       <input 
                           type="text" 
                           className="glass-input-field" 
@@ -271,7 +271,7 @@ export default function WarehousesPage() {
                       />
                   </div>
                   <div className="form-group" style={{ marginBottom: '15px' }}>
-                      <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>وصف / ملاحظات</label>
+                      <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold' }}>وصف / سعة الخزان / ملاحظات</label>
                       <textarea 
                           className="glass-input-field" 
                           style={{ width: '100%' }}
@@ -294,7 +294,7 @@ export default function WarehousesPage() {
 
                   <div style={{ display: 'flex', gap: '10px' }}>
                       <button onClick={logic.handleSave} disabled={logic.isSaving} className="btn-main-glass gold" style={{ flex: 2, margin: 0 }}>
-                          {logic.isSaving ? 'جاري الحفظ...' : 'حفظ المستودع'}
+                          {logic.isSaving ? 'جاري الحفظ...' : 'حفظ البيانات'}
                       </button>
                       <button onClick={() => logic.setIsModalOpen(false)} className="btn-main-glass white" style={{ flex: 1, margin: 0 }}>
                           إلغاء

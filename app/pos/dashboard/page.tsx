@@ -37,13 +37,13 @@ export default function PosDashboardPage() {
         },
         {
             key: 'warehouse',
-            header: 'منفذ البيع / المستودع',
+            header: 'محطة الوقود / الخزان',
             render: (r: any) => (
                 <div>
-                    <span style={{ fontWeight: 800, color: '#F8FAFC' }}>{r.warehouse?.name || 'مستودع غير محدد'}</span>
+                    <span style={{ fontWeight: 800, color: '#F8FAFC' }}>{r.warehouse?.name || 'محطة غير محددة'}</span>
                     {r.warehouse?.type === 'vehicle' && (
                         <span style={{ marginRight: '6px', fontSize: '10.5px', background: 'rgba(0, 229, 255, 0.15)', color: '#00E5FF', border: '1px solid rgba(0, 229, 255, 0.3)', padding: '2px 6px', borderRadius: '6px', fontWeight: 800 }}>
-                            سيارة توزيع 🚙
+                            صهريج محروقات 🚛
                         </span>
                     )}
                 </div>
@@ -51,7 +51,7 @@ export default function PosDashboardPage() {
         },
         {
             key: 'delegate',
-            header: 'المندوب / المسؤول',
+            header: 'مشغل المحطة / المسؤول',
             render: (r: any) => (
                 <span style={{ fontWeight: 700, color: '#94A3B8' }}>
                     {r.delegate?.name || 'مبيعات مباشرة'}
@@ -93,7 +93,7 @@ export default function PosDashboardPage() {
         },
         {
             key: 'computed_cogs',
-            header: 'تكلفة البضاعة (COGS)',
+            header: 'تكلفة الوقود (COGS)',
             render: (r: any) => (
                 <span style={{ fontWeight: 800, color: '#EF4444', fontSize: '13px' }}>
                     {formatCurrency(r.computed_cogs || 0)}
@@ -222,7 +222,7 @@ export default function PosDashboardPage() {
         <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
             <div>
                 <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', color: '#94A3B8', fontSize: '12.5px' }}>
-                    اختر منفذ البيع / السيارة:
+                    اختر محطة الوقود / الخزان:
                 </label>
                 <select 
                     className="glass-input-field" 
@@ -230,10 +230,10 @@ export default function PosDashboardPage() {
                     onChange={(e) => logic.setSelectedWarehouseId(e.target.value)}
                     style={{ width: '100%' }}
                 >
-                    <option value="all">كافة المنافذ والسيارات</option>
+                    <option value="all">كافة المحطات والخزانات</option>
                     {logic.warehouses.map((w: any) => (
                         <option key={w.id} value={w.id}>
-                            {w.name} {w.type === 'vehicle' ? '(سيارة توزيع)' : ''}
+                            {w.name} {w.type === 'vehicle' ? '(صهريج محروقات)' : ''}
                         </option>
                     ))}
                 </select>
@@ -241,7 +241,7 @@ export default function PosDashboardPage() {
 
             <div>
                 <label style={{ display: 'block', marginBottom: '5px', fontWeight: 'bold', color: '#94A3B8', fontSize: '12.5px' }}>
-                    حالة الوردية / المنفذ:
+                    حالة وردية المحطة:
                 </label>
                 <select 
                     className="glass-input-field" 
@@ -250,7 +250,7 @@ export default function PosDashboardPage() {
                     style={{ width: '100%' }}
                 >
                     <option value="all">كافة الحالات (مفتوحة ومغلقة)</option>
-                    <option value="open">🟢 المنافذ الشغالة الآن فقط (مباشر)</option>
+                    <option value="open">🟢 المحطات الشغالة الآن فقط (مباشر)</option>
                     <option value="closed">🔒 الورديات المغلقة والمقفلة</option>
                 </select>
             </div>
@@ -282,15 +282,15 @@ export default function PosDashboardPage() {
 
     return (
         <MasterPage 
-            title="تقرير ربحية منافذ البيع والتشغيل" 
-            subtitle="متابعة أرباح المنافذ الشغالة لحظياً، تكلفة البضاعة المباعة (COGS)، وصافي الأرباح وهوامش التشغيل" 
+            title="تقرير ربحية وتشغيل محطات الوقود" 
+            subtitle="متابعة أرباح المحطات الشغالة لحظياً، تكلفة الوقود والمبيعات (COGS)، وصافي الأرباح وهوامش التشغيل" 
             icon="📈"
         >
             <RawasiSidebarManager 
                 summary={
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                         <div className="summary-glass-card" style={{ border: '1.5px solid rgba(16, 185, 129, 0.4)', background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.15) 0%, rgba(20, 24, 34, 0.95) 100%)' }}>
-                            <span style={{ fontSize: '11px', fontWeight: 800, color: '#10B981' }}>صافي أرباح المنافذ 🎯</span>
+                            <span style={{ fontSize: '11px', fontWeight: 800, color: '#10B981' }}>صافي أرباح المحطات 🎯</span>
                             <div className="val" style={{ fontSize: '20px', fontWeight: 900, color: '#10B981' }}>
                                 {formatCurrency(totals.totalNetProfit)}
                             </div>
@@ -306,7 +306,7 @@ export default function PosDashboardPage() {
                                 </div>
                             </div>
                             <div className="summary-glass-card" style={{ padding: '10px', textAlign: 'center', background: 'rgba(20, 24, 34, 0.8)', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
-                                <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#94A3B8' }}>التكلفة (COGS) 📦</span>
+                                <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#94A3B8' }}>التكلفة (COGS) ⛽</span>
                                 <div className="val" style={{ fontSize: '14px', fontWeight: 900, color: '#EF4444' }}>
                                     {formatCurrency(totals.totalCOGS)}
                                 </div>
@@ -323,7 +323,7 @@ export default function PosDashboardPage() {
                                 fontWeight: 800,
                                 color: '#10B981'
                             }}>
-                                🟢 {totals.liveCount} منافذ تعمل الآن ومحققة: +{formatCurrency(totals.liveTotalNetProfit)} ربح
+                                🟢 {totals.liveCount} محطات تعمل الآن ومحققة: +{formatCurrency(totals.liveTotalNetProfit)} ربح
                             </div>
                         )}
                     </div>
@@ -353,27 +353,27 @@ export default function PosDashboardPage() {
             />
 
             {logic.isLoading ? (
-                <LoadingScreen message="جاري احتساب أرباح المنافذ والتشغيل..." fullScreen={false} />
+                <LoadingScreen message="جاري احتساب أرباح وتشغيل محطات الوقود..." fullScreen={false} />
             ) : (
                 <>
                     {/* 📊 بطاقات المؤشرات المالية العليا (Top High-Level KPIs) */}
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(210px, 1fr))', gap: '15px', marginBottom: '25px' }}>
                         <div className="aqua-card" style={{ padding: '18px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                            <div style={{ fontSize: '12.5px', fontWeight: 'bold', color: '#94A3B8' }}>إجمالي مبيعات المنافذ 🛒</div>
+                            <div style={{ fontSize: '12.5px', fontWeight: 'bold', color: '#94A3B8' }}>إجمالي مبيعات المحطات ⛽</div>
                             <div style={{ fontSize: '22px', fontWeight: 900, color: '#F8FAFC' }}>{formatCurrency(totals.totalRevenue)}</div>
                             <span style={{ fontSize: '11px', color: '#64748B' }}>إجمالي الفواتير الصادرة</span>
                         </div>
 
                         <div className="aqua-card" style={{ padding: '18px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-                            <div style={{ fontSize: '12.5px', fontWeight: 'bold', color: '#EF4444' }}>تكلفة البضاعة المباعة (COGS) 📦</div>
+                            <div style={{ fontSize: '12.5px', fontWeight: 'bold', color: '#EF4444' }}>تكلفة الوقود والمبيعات (COGS) 🛢️</div>
                             <div style={{ fontSize: '22px', fontWeight: 900, color: '#EF4444' }}>- {formatCurrency(totals.totalCOGS)}</div>
-                            <span style={{ fontSize: '11px', color: '#64748B' }}>محسوبة من تكلفة الأصناف</span>
+                            <span style={{ fontSize: '11px', color: '#64748B' }}>محسوبة من تكلفة المحروقات</span>
                         </div>
 
                         <div className="aqua-card" style={{ padding: '18px', display: 'flex', flexDirection: 'column', gap: '6px' }}>
                             <div style={{ fontSize: '12.5px', fontWeight: 'bold', color: '#F59E0B' }}>المصروفات التشغيلية 💸</div>
                             <div style={{ fontSize: '22px', fontWeight: 900, color: '#F59E0B' }}>- {formatCurrency(totals.totalExpenses)}</div>
-                            <span style={{ fontSize: '11px', color: '#64748B' }}>محروقات وصيانة ونثريات</span>
+                            <span style={{ fontSize: '11px', color: '#64748B' }}>صيانة وتشغيل ونثريات</span>
                         </div>
 
                         {(() => {
@@ -390,7 +390,7 @@ export default function PosDashboardPage() {
                                     border: `1.5px solid ${isLoss ? 'rgba(239, 68, 68, 0.4)' : 'rgba(16, 185, 129, 0.4)'}`
                                 }}>
                                     <div style={{ fontSize: '12.5px', fontWeight: 900, color: isLoss ? '#EF4444' : '#10B981' }}>
-                                        {isLoss ? 'صافي خسائر المنافذ 🚨' : 'صافي أرباح المنافذ المحققة 🎯'}
+                                        {isLoss ? 'صافي خسائر المحطات 🚨' : 'صافي أرباح المحطات المحققة 🎯'}
                                     </div>
                                     <div style={{ fontSize: '24px', fontWeight: 900, color: isLoss ? '#EF4444' : '#10B981' }}>
                                         {isLoss ? formatCurrency(totals.totalNetProfit) : `+${formatCurrency(totals.totalNetProfit)}`}
@@ -403,7 +403,7 @@ export default function PosDashboardPage() {
                         })()}
                     </div>
 
-                    {/* 🟢 القسم الخاص: "المنفذ وهو شغال مطلع أرباح كام" (المنافذ النشطة قيد التشغيل حالياً) */}
+                    {/* 🟢 القسم الخاص: "المحطات النشطة قيد التشغيل حالياً" */}
                     <div style={{
                         background: 'linear-gradient(135deg, rgba(20, 24, 34, 0.95) 0%, rgba(15, 20, 30, 0.85) 100%)',
                         border: '1px solid rgba(0, 229, 255, 0.25)',
@@ -424,17 +424,17 @@ export default function PosDashboardPage() {
                                     animation: 'pulse 1.5s infinite'
                                 }}></span>
                                 <h3 style={{ margin: 0, fontSize: '16px', color: '#00E5FF', fontWeight: 900 }}>
-                                    المنافذ والسيارات قيد التشغيل حالياً (Live Running Outlets - متابعة لحظية)
+                                    محطات الوقود قيد التشغيل حالياً (Live Running Stations - متابعة لحظية ⛽)
                                 </h3>
                             </div>
                             <span style={{ fontSize: '12.5px', fontWeight: 800, color: '#00E5FF', background: 'rgba(0, 229, 255, 0.15)', border: '1px solid rgba(0, 229, 255, 0.3)', padding: '4px 12px', borderRadius: '20px' }}>
-                                عدد المنافذ الشغالة الآن: {liveRunningOutlets.length}
+                                عدد المحطات الشغالة الآن: {liveRunningOutlets.length}
                             </span>
                         </div>
 
                         {liveRunningOutlets.length === 0 ? (
                             <div style={{ textAlign: 'center', padding: '30px', color: '#94A3B8', fontWeight: 700 }}>
-                                🔒 لا توجد منافذ أو سيارات تعمل حالياً. جميع الورديات السابقة مغلقة.
+                                🔒 لا توجد محطات أو خزانات تعمل حالياً. جميع الورديات السابقة مغلقة.
                             </div>
                         ) : (
                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '16px' }}>
@@ -455,7 +455,7 @@ export default function PosDashboardPage() {
                                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                                             <div>
                                                 <h4 style={{ margin: '0 0 4px 0', fontSize: '15px', color: '#F8FAFC', fontWeight: 900 }}>
-                                                    {shift.warehouse?.name || 'منفذ بيع'}
+                                                    {shift.warehouse?.name || 'محطة وقود'}
                                                 </h4>
                                                 <span style={{ fontSize: '12px', color: '#94A3B8', fontWeight: 700 }}>
                                                     👤 {shift.delegate?.name || 'مبيعات مباشرة'}
@@ -564,7 +564,7 @@ export default function PosDashboardPage() {
                                 transition: '0.2s'
                             }}
                         >
-                            📋 سجل أرباح الورديات والمنافذ ({filteredShifts.length})
+                            📋 سجل أرباح الورديات ومحطات الوقود ({filteredShifts.length})
                         </button>
                         <button
                             type="button"
@@ -582,7 +582,7 @@ export default function PosDashboardPage() {
                                 transition: '0.2s'
                             }}
                         >
-                            📦 تحليل ربحية الأصناف المباعة ({itemsProfitability.length})
+                            ⛽ تحليل ربحية أنواع الوقود والمنتجات ({itemsProfitability.length})
                         </button>
                     </div>
 
@@ -590,10 +590,10 @@ export default function PosDashboardPage() {
                         <div className="aqua-card" style={{ padding: '20px' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px', flexWrap: 'wrap', gap: '10px' }}>
                                 <h3 style={{ margin: 0, color: '#F8FAFC', fontWeight: 900, fontSize: '16px' }}>
-                                    جدول أرباح الورديات ومنافذ البيع بالتفصيل
+                                    جدول أرباح الورديات ومحطات الوقود بالتفصيل
                                 </h3>
                                 <span style={{ fontSize: '12px', color: '#94A3B8' }}>
-                                    صافي الربح = إجمالي المبيعات - تكلفة البضاعة (COGS) - المصروفات التشغيلية
+                                    صافي الربح = إجمالي المبيعات - تكلفة الوقود (COGS) - المصروفات التشغيلية
                                 </span>
                             </div>
                             <RawasiSmartTable 
@@ -607,10 +607,10 @@ export default function PosDashboardPage() {
                         <div className="aqua-card" style={{ padding: '20px' }}>
                             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px', flexWrap: 'wrap', gap: '10px' }}>
                                 <h3 style={{ margin: 0, color: '#F8FAFC', fontWeight: 900, fontSize: '16px' }}>
-                                    جدول ربحية الأصناف المباعة (إيراد، تكلفة، مجمل ربح، وهامش)
+                                    جدول ربحية مبيعات الوقود والمنتجات (إيراد، تكلفة، مجمل ربح، وهامش)
                                 </h3>
                                 <span style={{ fontSize: '12px', color: '#94A3B8' }}>
-                                    مرتبة بحسب أعلى المنتجات تحقيقاً للإيرادات
+                                    مرتبة بحسب أعلى أنواع المحروقات والمنتجات تحقيقاً للإيرادات
                                 </span>
                             </div>
                             <RawasiSmartTable 

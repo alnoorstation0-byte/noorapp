@@ -496,6 +496,92 @@ export default function JournalVoucherModal({
           }
         }
 
+        /* 🏜️ Desert Glassmorphism Daylight Theme */
+        :global(.daylight-theme) .jv-modal-box,
+        :global([data-theme="daylight"]) .jv-modal-box {
+          background: #FDFBF7 !important;
+          border: 1px solid rgba(194, 155, 98, 0.4) !important;
+          box-shadow: 0 25px 60px rgba(44, 26, 18, 0.15) !important;
+        }
+        :global(.daylight-theme) .jv-screen-actions,
+        :global([data-theme="daylight"]) .jv-screen-actions {
+          background: linear-gradient(135deg, rgba(255, 253, 250, 0.98) 0%, rgba(245, 238, 228, 0.95) 100%) !important;
+          border-bottom: 1px solid rgba(194, 155, 98, 0.3) !important;
+        }
+        :global(.daylight-theme) .jv-screen-actions span,
+        :global([data-theme="daylight"]) .jv-screen-actions span {
+          color: #2C1A12 !important;
+        }
+        :global(.daylight-theme) .jv-btn-close,
+        :global([data-theme="daylight"]) .jv-btn-close {
+          background: rgba(44, 26, 18, 0.06) !important;
+          color: #2C1A12 !important;
+          border-color: rgba(194, 155, 98, 0.3) !important;
+        }
+        :global(.daylight-theme) .jv-btn-close:hover,
+        :global([data-theme="daylight"]) .jv-btn-close:hover {
+          background: rgba(44, 26, 18, 0.12) !important;
+        }
+        :global(.daylight-theme) .jv-btn-print,
+        :global([data-theme="daylight"]) .jv-btn-print {
+          background: linear-gradient(135deg, #C29B62, #A8573C) !important;
+          color: #FFFFFF !important;
+          box-shadow: 0 4px 12px rgba(168, 87, 60, 0.25) !important;
+        }
+        :global(.daylight-theme) .jv-paper-container,
+        :global([data-theme="daylight"]) .jv-paper-container {
+          background: #FFFFFF !important;
+        }
+        :global(.daylight-theme) .jv-company-name,
+        :global([data-theme="daylight"]) .jv-company-name,
+        :global(.daylight-theme) .jv-meta-val,
+        :global([data-theme="daylight"]) .jv-meta-val {
+          color: #2C1A12 !important;
+        }
+        :global(.daylight-theme) .jv-meta-label,
+        :global([data-theme="daylight"]) .jv-meta-label {
+          color: rgba(44, 26, 18, 0.65) !important;
+        }
+        :global(.daylight-theme) .jv-meta-grid,
+        :global([data-theme="daylight"]) .jv-meta-grid {
+          background: rgba(194, 155, 98, 0.08) !important;
+          border-color: rgba(194, 155, 98, 0.25) !important;
+        }
+        :global(.daylight-theme) .jv-doc-title,
+        :global([data-theme="daylight"]) .jv-doc-title {
+          color: #A8573C !important;
+        }
+        :global(.daylight-theme) .jv-divider-thick,
+        :global([data-theme="daylight"]) .jv-divider-thick {
+          background: linear-gradient(90deg, #C29B62, rgba(168, 87, 60, 0.2)) !important;
+        }
+        :global(.daylight-theme) .jv-table th,
+        :global([data-theme="daylight"]) .jv-table th {
+          background: rgba(194, 155, 98, 0.12) !important;
+          color: #2C1A12 !important;
+          border-color: rgba(194, 155, 98, 0.25) !important;
+        }
+        :global(.daylight-theme) .jv-table td,
+        :global([data-theme="daylight"]) .jv-table td {
+          border-color: rgba(194, 155, 98, 0.15) !important;
+          color: #2C1A12 !important;
+        }
+        :global(.daylight-theme) .jv-table tr:nth-child(even) td,
+        :global([data-theme="daylight"]) .jv-table tr:nth-child(even) td {
+          background: rgba(253, 251, 247, 0.6) !important;
+        }
+        :global(.daylight-theme) .jv-total-row td,
+        :global([data-theme="daylight"]) .jv-total-row td {
+          background: rgba(194, 155, 98, 0.12) !important;
+          border-top: 2px solid #C29B62 !important;
+          color: #2C1A12 !important;
+        }
+        :global(.daylight-theme) .jv-logo-box,
+        :global([data-theme="daylight"]) .jv-logo-box {
+          background: linear-gradient(135deg, #C29B62, #A8573C) !important;
+          color: #FFFFFF !important;
+        }
+
         /* 🖨️ Print Styles */
         @media print {
           .jv-modal-overlay {

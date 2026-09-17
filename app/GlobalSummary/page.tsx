@@ -21,10 +21,10 @@ export default function MasterDashboard() {
         const loadMasterData = async () => {
             setLoading(true);
             try {
-                // 🚀 سحب البيانات من كافة الموديولات (توزيع ومبيعات)
-                const [lines, fleetOps, invoices, expenses, auditErrors, accounts] = await Promise.all([
+                // 🚀 سحب البيانات من كافة الموديولات (تشغيل ومبيعات)
+                const [lines, shifts, invoices, expenses, auditErrors, accounts] = await Promise.all([
                     fetchAllSupabaseData(supabase, 'journal_lines'),
-                    fetchAllSupabaseData(supabase, 'fleet_operations'),
+                    fetchAllSupabaseData(supabase, 'pos_shifts'),
                     fetchAllSupabaseData(supabase, 'invoices'),
                     fetchAllSupabaseData(supabase, 'expenses'),
                     Promise.resolve([]),
@@ -45,9 +45,9 @@ export default function MasterDashboard() {
                 const pendingInvoices = invoices?.filter(i => i.status !== 'مدفوع' && i.status !== 'مرحل' && i.payment_status !== 'paid').reduce((a, c) => a + (Number(c.total_amount || 0) - Number(c.paid_amount || 0)), 0) || 0;
                 const totalSales = invoices?.filter(i => ['مرحل', 'معتمد', 'مدفوع', 'مغلق', 'posted'].includes(i.status)).reduce((a, c) => a + Number(c.total_amount || 0), 0) || 0;
 
-                // --- 2. إدارة رحلات التشغيل والتوزيع ---
-                const activeTrips = fleetOps?.filter(f => f.status === 'نشط' || f.status === 'قيد التنفيذ').length || 0;
-                const totalTrips = fleetOps?.length || 0;
+                // --- 2. إدارة ورديات تشغيل المحطة ---
+                const activeTrips = shifts?.filter((s: any) => s.status === 'open').length || 0;
+                const totalTrips = shifts?.length || 0;
 
                 // --- 3. الرقابة والتدقيق (تم التصحيح لسحبها من قاعدة البيانات الموحدة) ---
                 const orphans = auditErrors?.filter(e => e.error_type?.includes('orphan')).length || 0;
@@ -80,6 +80,55 @@ export default function MasterDashboard() {
                     .gs-header-col:last-child { border-bottom: none !important; }
                     .gs-header-col span:last-child { font-size: 22px !important; }
                     .gs-grid { grid-template-columns: 1fr !important; gap: 15px !important; }
+                }
+
+                /* Daylight Desert Glassmorphism */
+                .daylight-theme .gs-header-card {
+                    background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.90) 100%) !important;
+                    border: 1px solid rgba(194, 155, 98, 0.3) !important;
+                    border-bottom: 4px solid #C29B62 !important;
+                    box-shadow: 0 8px 30px rgba(44, 26, 18, 0.08) !important;
+                }
+                .daylight-theme .gs-header-col {
+                    border-left: 1px solid rgba(194, 155, 98, 0.25) !important;
+                }
+                .daylight-theme .gs-header-col span:first-child {
+                    color: rgba(44, 26, 18, 0.7) !important;
+                }
+                .daylight-theme .gs-header-col span:last-child {
+                    color: #2C1A12 !important;
+                }
+                .daylight-theme .kpi-card {
+                    background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.90) 100%) !important;
+                    border: 1px solid rgba(194, 155, 98, 0.3) !important;
+                    box-shadow: 0 10px 30px rgba(44, 26, 18, 0.08) !important;
+                }
+                .daylight-theme .kpi-card span:first-child {
+                    color: rgba(44, 26, 18, 0.7) !important;
+                }
+                .daylight-theme .gs-radar-card {
+                    background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.90) 100%) !important;
+                    border: 1px solid rgba(194, 155, 98, 0.3) !important;
+                    box-shadow: 0 10px 30px rgba(44, 26, 18, 0.08) !important;
+                }
+                .daylight-theme .gs-radar-card div > div {
+                    border-bottom: 1px solid rgba(194, 155, 98, 0.2) !important;
+                }
+                .daylight-theme .gs-radar-card span {
+                    color: #2C1A12 !important;
+                }
+                .daylight-theme .gs-quick-btn {
+                    background: rgba(255, 255, 255, 0.85) !important;
+                    border: 1px solid rgba(194, 155, 98, 0.3) !important;
+                    box-shadow: 0 8px 20px rgba(44, 26, 18, 0.06) !important;
+                }
+                .daylight-theme .gs-quick-btn span {
+                    color: #2C1A12 !important;
+                }
+                .daylight-theme .gs-quick-btn:hover {
+                    background: #FFFFFF !important;
+                    border-color: #C29B62 !important;
+                    box-shadow: 0 12px 25px rgba(168, 87, 60, 0.15) !important;
                 }
             `}</style>
             
@@ -125,9 +174,9 @@ export default function MasterDashboard() {
                 {/* العمود الأيمن: تحليل العمليات */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
                     <GlassContainer>
-                        <h3 style={{ marginBottom: '20px' }}>🚚 حركة التوزيع التشغيلية (Trips)</h3>
-                        <ProgressBar label="رحلات مكتملة" percentage={summary.operations.totalTrips > 0 ? ((summary.operations.totalTrips - summary.operations.activeTrips) / summary.operations.totalTrips) * 100 : 0} color={THEME.success} />
-                        <ProgressBar label="رحلات قيد التنفيذ" percentage={summary.operations.totalTrips > 0 ? (summary.operations.activeTrips / summary.operations.totalTrips) * 100 : 0} color={THEME.accent} />
+                        <h3 style={{ marginBottom: '20px' }}>⛽ ورديات تشغيل المحطة (Shifts)</h3>
+                        <ProgressBar label="ورديات مكتملة" percentage={summary.operations.totalTrips > 0 ? ((summary.operations.totalTrips - summary.operations.activeTrips) / summary.operations.totalTrips) * 100 : 0} color={THEME.success} />
+                        <ProgressBar label="ورديات قيد التشغيل" percentage={summary.operations.totalTrips > 0 ? (summary.operations.activeTrips / summary.operations.totalTrips) * 100 : 0} color={THEME.accent} />
                     </GlassContainer>
 
                     <GlassContainer>
@@ -139,7 +188,7 @@ export default function MasterDashboard() {
 
                 {/* العمود الأيسر: الإجراءات والرقابة */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
-                    <GlassContainer style={{ background: 'linear-gradient(135deg, rgba(20, 24, 34, 0.95) 0%, rgba(15, 20, 30, 0.85) 100%)', border: '1px solid rgba(0, 229, 255, 0.25)' }}>
+                    <GlassContainer className="gs-radar-card" style={{ background: 'linear-gradient(135deg, rgba(20, 24, 34, 0.95) 0%, rgba(15, 20, 30, 0.85) 100%)', border: '1px solid rgba(0, 229, 255, 0.25)' }}>
                         <h3 style={{ color: THEME.primary, display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
                             <span style={{ fontSize: '24px' }}>🛡️</span> 
                             رادار الرقابة المالية
@@ -160,7 +209,7 @@ export default function MasterDashboard() {
                         <h3 style={{ color: '#F8FAFC' }}>⚡ وصول سريع</h3>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '15px', marginTop: '15px' }}>
                             <QuickAction icon="📝" label="قيد جديد" href="/journal" />
-                            <QuickAction icon="🚚" label="رحلة توزيع" href="/fleet_operations" />
+                            <QuickAction icon="⛽" label="شاشة الكاشير" href="/pos" />
                             <QuickAction icon="🧾" label="فاتورة بيع" href="/invoices" />
                             <QuickAction icon="⚙️" label="الإعدادات" href="/settings" />
                         </div>
@@ -225,7 +274,7 @@ function QuickAction({ icon, label, href }: any) {
     return (
         <div 
             onClick={() => href && router.push(href)}
-            className="btn" 
+            className="btn gs-quick-btn" 
             style={{ 
                 background: 'rgba(20, 24, 34, 0.85)', 
                 border: '1px solid rgba(0, 229, 255, 0.2)', 

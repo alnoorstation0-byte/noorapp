@@ -281,9 +281,7 @@ export function useInvoicesLogic() {
             partner_acc_name: inv.debit_acc?.name || 'العملاء (أصحاب الفروع)', 
             safe_bank_acc_id: '21b8a1db-bc9f-4cf8-b741-1efeded0963c',
             safe_bank_acc_name: 'الخزينة الرئيسية',
-            delegate_id: inv.delegate_id,
-            fleet_operation_id: inv.fleet_operation_id,
-            job_order_id: inv.job_order_id,
+            delegate_id: inv.delegate_id
         });
         setIsReceiptModalOpen(true);
     };
@@ -405,8 +403,7 @@ export function useInvoicesLogic() {
                 description: `فاتورة مبيعات رقم ${inv.invoice_number || ''}`,
                 reference_id: inv.id,
                 v_type: 'invoice',
-                status: 'posted',
-                fleet_operation_id: inv.fleet_operation_id || null
+                status: 'posted'
             }]).select().single();
 
             if (jh) {
@@ -423,7 +420,6 @@ export function useInvoicesLogic() {
                         debit: total,
                         credit: 0,
                         notes: `استحقاق فاتورة مبيعات #${inv.invoice_number || ''}`,
-                        fleet_operation_id: inv.fleet_operation_id || null,
                         delegate_id: inv.delegate_id || null
                     });
                 }
@@ -435,7 +431,6 @@ export function useInvoicesLogic() {
                         debit: 0,
                         credit: taxable,
                         notes: `إيراد مبيعات فاتورة #${inv.invoice_number || ''}`,
-                        fleet_operation_id: inv.fleet_operation_id || null,
                         delegate_id: inv.delegate_id || null
                     });
                 }
@@ -448,7 +443,6 @@ export function useInvoicesLogic() {
                         credit: tax,
                         notes: `ضريبة القيمة المضافة فاتورة #${inv.invoice_number || ''}`,
                         tax_amount: tax,
-                        fleet_operation_id: inv.fleet_operation_id || null,
                         delegate_id: inv.delegate_id || null
                     });
                 }
@@ -748,7 +742,7 @@ export function useInvoicesLogic() {
             }
         },
         onSuccess: () => {
-            showToast("تم تسجيل مرتجع المبيعات وإعادة البضاعة للمخزن بنجاح 🔄✅", "success");
+            showToast("تم تسجيل مرتجع المبيعات وإعادة كميات الوقود للخزانات بنجاح 🔄✅", "success");
             setIsReturnModalOpen(false);
             setSelectedInvoiceForReturn(null);
             queryClient.invalidateQueries({ queryKey: ['invoices'] });

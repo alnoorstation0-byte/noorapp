@@ -376,7 +376,7 @@ export default function AuditLogs() {
 
             {/* 🔍 Details Modal */}
             {mounted && selectedLog && createPortal(
-                <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 999999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+                <div className="warm-portal-overlay-fullscreen" style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 999999999, isolation: 'isolate', pointerEvents: 'auto', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
                     <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(7, 9, 13, 0.8)', backdropFilter: 'blur(16px)' }} onClick={() => setSelectedLog(null)} />
                     
                     <div style={{ background: 'linear-gradient(135deg, rgba(20, 24, 34, 0.98) 0%, rgba(11, 14, 20, 0.95) 100%)', width: '900px', maxWidth: '95vw', maxHeight: '90vh', borderRadius: '24px', zIndex: 10, display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 25px 70px rgba(0,0,0,0.7)', border: '1px solid rgba(0, 229, 255, 0.25)' }}>

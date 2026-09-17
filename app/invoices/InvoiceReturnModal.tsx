@@ -229,6 +229,70 @@ export default function InvoiceReturnModal({
                     background: #00E5FF;
                     color: #0B0E14;
                 }
+
+                /* Daylight Desert Glassmorphism */
+                .daylight-theme .return-sec-card {
+                    background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.90) 100%) !important;
+                    border: 1px solid rgba(194, 155, 98, 0.3) !important;
+                    box-shadow: 0 4px 12px rgba(44, 26, 18, 0.06) !important;
+                }
+                .daylight-theme .return-sec-card strong,
+                .daylight-theme .return-sec-card div {
+                    color: #2C1A12 !important;
+                }
+                .daylight-theme .return-sec-card span[style*="color: #94A3B8"],
+                .daylight-theme .return-sec-card span[style*="color:#94A3B8"] {
+                    color: rgba(44, 26, 18, 0.65) !important;
+                }
+                .daylight-theme .return-sec-title {
+                    color: #A8573C !important;
+                    border-bottom: 1px dashed rgba(194, 155, 98, 0.35) !important;
+                }
+                .daylight-theme .return-table th {
+                    background: rgba(194, 155, 98, 0.12) !important;
+                    color: #2C1A12 !important;
+                }
+                .daylight-theme .return-table td {
+                    border-bottom: 1px solid rgba(194, 155, 98, 0.15) !important;
+                    color: #2C1A12 !important;
+                }
+                .daylight-theme .return-toggle-option {
+                    background: rgba(255, 255, 255, 0.7) !important;
+                    border: 1px solid rgba(194, 155, 98, 0.3) !important;
+                }
+                .daylight-theme .return-toggle-option.active {
+                    background: rgba(194, 155, 98, 0.15) !important;
+                    border-color: #C29B62 !important;
+                }
+                .daylight-theme .return-qty-stepper {
+                    background: #FFFFFF !important;
+                    border: 1px solid rgba(194, 155, 98, 0.4) !important;
+                }
+                .daylight-theme .return-qty-stepper input {
+                    color: #2C1A12 !important;
+                }
+                .daylight-theme .return-qty-btn {
+                    background: rgba(194, 155, 98, 0.2) !important;
+                    color: #A8573C !important;
+                }
+                .daylight-theme .return-qty-btn:hover {
+                    background: #C29B62 !important;
+                    color: #FFFFFF !important;
+                }
+                .daylight-theme .return-footer-summary {
+                    background: linear-gradient(135deg, rgba(255, 253, 250, 0.98) 0%, rgba(245, 238, 228, 0.95) 100%) !important;
+                    border: 1px solid rgba(194, 155, 98, 0.4) !important;
+                    box-shadow: 0 8px 25px rgba(44, 26, 18, 0.12) !important;
+                    color: #2C1A12 !important;
+                }
+                .daylight-theme .return-footer-summary div {
+                    color: #2C1A12 !important;
+                }
+                .daylight-theme .return-footer-summary .btn-glass-save {
+                    background: linear-gradient(135deg, #C29B62 0%, #A8573C 100%) !important;
+                    color: #FFFFFF !important;
+                    box-shadow: 0 4px 15px rgba(168, 87, 60, 0.3) !important;
+                }
             `}</style>
 
             <form onSubmit={handleSubmit}>
@@ -369,19 +433,19 @@ export default function InvoiceReturnModal({
                         <span>خيارات الأثر المخزني والمالي للمرتجع</span>
                     </div>
 
-                    {/* خيار إعادة البضاعة للمخزن */}
+                    {/* خيار إعادة الوقود/المنتجات للخزانات */}
                     <div 
                         onClick={() => setReturnStockToWarehouse(!returnStockToWarehouse)}
                         className={`return-toggle-option ${returnStockToWarehouse ? 'active' : ''}`}
                     >
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                            <span style={{ fontSize: '20px' }}>📦</span>
+                            <span style={{ fontSize: '20px' }}>⛽</span>
                             <div>
-                                <div style={{ fontSize: '12.5px', fontWeight: 900, color: '#F8FAFC' }}>
-                                    إعادة البضاعة للمخزون (المستودع الرئيسي / الفرع)
+                                <div style={{ fontSize: '12.5px', fontWeight: 900, color: 'var(--text-main, #F8FAFC)' }}>
+                                    إعادة كميات الوقود والمنتجات إلى رصيد الخزانات
                                 </div>
-                                <div style={{ fontSize: '11px', color: '#94A3B8' }}>
-                                    يقوم النظام بزيادة رصيد الأصناف المرتجعة في المستودع فوراً وإثبات حركة وارد مرتجع
+                                <div style={{ fontSize: '11px', color: 'var(--text-muted, #94A3B8)' }}>
+                                    يقوم النظام بزيادة رصيد الوقود في خزان المحطة فوراً وإثبات حركة وارد مرتجع
                                 </div>
                             </div>
                         </div>
@@ -405,10 +469,10 @@ export default function InvoiceReturnModal({
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                 <span style={{ fontSize: '20px' }}>💵</span>
                                 <div>
-                                    <div style={{ fontSize: '12.5px', fontWeight: 900, color: '#F8FAFC' }}>
+                                    <div style={{ fontSize: '12.5px', fontWeight: 900, color: 'var(--text-main, #F8FAFC)' }}>
                                         استرداد المبلغ نقداً وخصمه من نقدية الدرج / الوردية
                                     </div>
-                                    <div style={{ fontSize: '11px', color: '#94A3B8' }}>
+                                    <div style={{ fontSize: '11px', color: 'var(--text-muted, #94A3B8)' }}>
                                         يقوم النظام بخصم المبلغ المرتجع من نقدية الوردية بالكاشير لضبط مطابقة الدرج
                                     </div>
                                 </div>
@@ -442,7 +506,7 @@ export default function InvoiceReturnModal({
                 </div>
 
                 {/* 4. ملخص مبالغ الاسترداد والزر النهائي */}
-                <div style={{
+                <div className="return-footer-summary" style={{
                     background: 'linear-gradient(135deg, rgba(20, 24, 34, 0.98) 0%, rgba(11, 14, 20, 0.95) 100%)',
                     border: '1px solid rgba(0, 229, 255, 0.3)',
                     borderRadius: '16px',

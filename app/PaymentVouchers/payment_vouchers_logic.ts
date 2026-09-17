@@ -77,25 +77,6 @@ export function usePaymentVouchersLogic() {
         }
     });
 
-    const { data: fleetOperations = [] } = useQuery({
-        queryKey: ['fleet_operations_open'],
-        queryFn: async () => {
-            const { data, error } = await supabase
-                .from('fleet_operations')
-                .select('id, operation_number, operation_date, status, vehicle_id, description, vehicle:fleet_vehicles(plate_number), driver:partners(name)')
-                .neq('status', 'مغلق')
-                .neq('status', 'closed')
-                .order('operation_date', { ascending: false });
-            if (error) throw error;
-            return data?.map((op:any) => ({
-                id: op.id,
-                operation_number: op.operation_number,
-                status: op.status,
-                vehicle_id: op.vehicle_id,
-                name: `رقم الرحلة: ${op.operation_number} | ${op.operation_date} | 🚚 ${op.vehicle?.plate_number || 'بدون سيارة'} | 👤 ${op.driver?.name || 'بدون مندوب'}`
-            })) || [];
-        }
-    });
 
     const { profile, can } = useAuth();
 
@@ -190,7 +171,6 @@ export function usePaymentVouchersLogic() {
             delete payload.partner;
             delete payload.credit_account;
             delete payload.debit_account;
-            delete payload.fleet_operations;
             delete payload.payee;
 
             if (payload.id) {
@@ -284,7 +264,7 @@ export function usePaymentVouchersLogic() {
         state: {
             globalSearch, filterStatus, dateRange, selectedIds, currentPage, rowsPerPage,
             isEditModalOpen, currentVoucher, partnerBalance, isBalanceLoading,
-            isBulkFixModalOpen, bulkFixAccounts, fleetOperations
+            isBulkFixModalOpen, bulkFixAccounts
         },
         actions: {
             setGlobalSearch, setFilterStatus, setSelectedIds, setCurrentPage, setRowsPerPage,
@@ -295,7 +275,7 @@ export function usePaymentVouchersLogic() {
                     payment_method: 'نقدي', 
                     amount: '', 
                     debit_account_id: null, debit_account_name: '', credit_account_id: null, credit_account_name: '',
-                    partner_id: null, payee_id: '', payee_name: '', is_posted: false, status: 'مسودة', fleet_operation_id: null
+                    partner_id: null, payee_id: '', payee_name: '', is_posted: false, status: 'مسودة'
                 });
                 setIsEditModalOpen(true);
             },

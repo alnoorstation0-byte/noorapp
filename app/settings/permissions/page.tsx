@@ -72,39 +72,39 @@ const ROLES_DATA: RoleDefinition[] = [
             'المبيعات والمشتريات': ['فواتير المبيعات والمردودات', 'أوامر الشراء', 'الاعتماد المالي'],
             'المخزون والمستودعات': ['عرض تقييم المخزون والأصناف'],
             'المالية والمحاسبة': ['سندات القبض', 'سندات الصرف', 'دفتر اليومية', 'القيود اليدوية', 'شجرة الحسابات', 'ميزان المراجعة', 'القوائم المالية', 'الإقرار الضريبي'],
-            'الشركاء والمناديب': ['أرصدة الشركاء', 'كشوف الحسابات', 'تسويات عهد المناديب'],
+            'الشركاء ومشغلو المحطات': ['أرصدة الشركاء', 'كشوف الحسابات', 'تسويات ورديات ومحطات الوقود'],
             'الإدارة والرقابة': ['التقارير المالية والمحاسبية', 'مسيرات الرواتب']
         }
     },
     {
         id: 'storekeeper',
-        name: 'أمين مستودع',
-        title: 'Storekeeper',
-        icon: '📦',
-        desc: 'إدارة حركات الجرد، استلام البضائع، التحويل بين الفروع، ومتابعة النواقص.',
+        name: 'مسؤول الخزانات والمستودع',
+        title: 'Tank & Depot Manager',
+        icon: '⛽',
+        desc: 'إدارة جرد الخزانات، استلام وتفريغ شحنات الوقود، والتحويل بين المحطات ومتابعة الفواقد.',
         badgeBg: 'rgba(0, 229, 255, 0.12)',
         badgeColor: '#00E5FF',
         badgeBorder: 'rgba(0, 229, 255, 0.3)',
         modules: {
-            'المخزون والمستودعات': ['دليل الأصناف والباركود', 'أرصدة المستودعات', 'حركات التحويل المخزني', 'تنبيهات نواقص المخزون'],
-            'المبيعات والمشتريات': ['عرض أوامر الشراء للاستلام', 'سندات الاستلام المخزني'],
-            'لوحات التحكم': ['مؤشرات حركة المخزون']
+            'المخزون والخزانات': ['دليل المحروقات والمنتجات', 'أرصدة الخزانات والمستودعات', 'حركات تحويل وتفريغ الوقود', 'تنبيهات نواقص الوقود'],
+            'المشتريات والتوريد': ['عرض أوامر الشراء للاستلام', 'سندات تفريغ واستلام الوقود'],
+            'لوحات التحكم': ['مؤشرات حركة ومخزون الوقود']
         }
     },
     {
         id: 'delegate',
-        name: 'مندوب مبيعات / موزع',
-        title: 'Delegate / Sales Rep',
-        icon: '🚚',
-        desc: 'إصدار الفواتير الفورية عبر الكاشير المحمول، تحصيل السندات، ومتابعة عهدته.',
+        name: 'مشغل محطة وقود',
+        title: 'Station Operator',
+        icon: '⛽',
+        desc: 'تشغيل مضخات الوقود وإصدار الفواتير الفورية، تسجيل قراءات العدادات، ومتابعة نقدية الوردية.',
         badgeBg: 'rgba(59, 130, 246, 0.15)',
         badgeColor: '#3B82F6',
         badgeBorder: 'rgba(59, 130, 246, 0.3)',
         modules: {
-            'نقاط البيع والكاشير': ['نظام الكاشير السريع (POS)', 'إصدار الفواتير الفورية', 'طباعة الإيصالات'],
-            'التحصيل والعهد': ['إصدار سندات القبض', 'متابعة الذمم والعهدة الشخصية'],
-            'العملاء': ['عرض قائمة العملاء المخصصين له', 'تسجيل زيارة عميل'],
-            'الأسطول': ['عرض بيانات سيارة التوزيع']
+            'كاشير ومبيعات المحطة': ['نظام كاشير المحطة (POS)', 'إصدار فواتير الوقود السريعة', 'طباعة إيصالات المضخات'],
+            'التحصيل والورديات': ['إصدار سندات القبض', 'مطابقة قراءات العدادات وتسليم النقدية'],
+            'العملاء والشركاء': ['عرض عملاء العقود والآجل المعتمدين بالمحطة', 'البيع لبطاقات الأسطول'],
+            'صهاريج النقل': ['متابعة تفريغ الصهريج في خزانات المحطة']
         }
     },
     {
@@ -138,15 +138,14 @@ export default function PermissionsPage() {
                 const { data } = await supabase
                     .from('profiles')
                     .select('id, full_name, email, role, is_active, permissions')
-                    .order('created_at', { ascending: false });
+                    .order('full_name');
                 if (data) setTeamMembers(data);
             } catch (err) {
-                console.error("Error loading team members:", err);
+                console.error(err);
             } finally {
                 setIsLoadingMembers(false);
             }
         };
-
         loadUsers();
     }, []);
 
@@ -158,7 +157,7 @@ export default function PermissionsPage() {
             title="مصفوفة الأدوار والصلاحيات" 
             subtitle="المرجع القياسي لصلاحيات المنصة وتعيين الامتيازات حسب الهيكل الوظيفي"
         >
-            <style>{`
+            <style dangerouslySetInnerHTML={{ __html: `
                 .role-card-selector {
                     background: linear-gradient(135deg, rgba(20, 24, 34, 0.95) 0%, rgba(15, 20, 30, 0.85) 100%);
                     backdrop-filter: blur(24px) saturate(160%);
@@ -216,7 +215,45 @@ export default function PermissionsPage() {
                     transform: translateY(-2px);
                     box-shadow: 0 4px 15px rgba(0, 229, 255, 0.25);
                 }
-            `}</style>
+                .daylight-theme .role-card-selector {
+                    background: #FFFFFF !important;
+                    border: 1px solid #E2E8F0 !important;
+                    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04) !important;
+                }
+                .daylight-theme .role-card-selector:hover {
+                    border-color: #C29B62 !important;
+                    box-shadow: 0 8px 20px rgba(194, 155, 98, 0.15) !important;
+                }
+                .daylight-theme .role-card-selector.active {
+                    background: rgba(194, 155, 98, 0.08) !important;
+                    border: 2px solid #C29B62 !important;
+                }
+                .daylight-theme .role-card-selector div {
+                    color: #0F172A !important;
+                }
+                .daylight-theme .matrix-container {
+                    background: #FFFFFF !important;
+                    border: 1px solid #E2E8F0 !important;
+                    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04) !important;
+                }
+                .daylight-theme .matrix-container h2, 
+                .daylight-theme .matrix-container h3, 
+                .daylight-theme .matrix-container h4,
+                .daylight-theme .matrix-container span,
+                .daylight-theme .matrix-container p {
+                    color: #0F172A !important;
+                }
+                .daylight-theme .perm-badge {
+                    background: #F1F5F9 !important;
+                    border-color: #CBD5E1 !important;
+                    color: #1E293B !important;
+                }
+                .daylight-theme .user-pill {
+                    background: #F8FAFC !important;
+                    border-color: #CBD5E1 !important;
+                    color: #0F172A !important;
+                }
+            `}} />
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '22px' }}>
                 

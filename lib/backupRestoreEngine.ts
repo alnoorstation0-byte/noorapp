@@ -35,7 +35,7 @@ export const SYSTEM_TABLES: TableMeta[] = [
             status: 'حالة الفاتورة (Status)',
             lines_data: 'تفاصيل الأصناف والوقود المباع (Items Summary)',
             warehouse_id: 'معرف الخزان/المستودع',
-            delegate_id: 'معرف المندوب/الكاشير',
+            delegate_id: 'معرف المشغل/الكاشير',
             shift_id: 'معرف الوردية',
             created_at: 'وقت الإنشاء'
         }
@@ -64,7 +64,7 @@ export const SYSTEM_TABLES: TableMeta[] = [
             shortage_overage: 'العجز / الزيادة (Shortage/Overage)',
             status: 'حالة الوردية (Status)',
             warehouse_id: 'معرف المستودع/الخزان',
-            delegate_id: 'معرف المندوب'
+            delegate_id: 'معرف مشغل المحطة'
         }
     },
     {
@@ -84,7 +84,7 @@ export const SYSTEM_TABLES: TableMeta[] = [
             partner_id: 'معرف العميل',
             invoice_id: 'معرف الفاتورة المرتبطة',
             safe_bank_acc_id: 'حساب الخزينة/البنك',
-            delegate_id: 'المندوب المحصل',
+            delegate_id: 'مشغل المحطة / المحصل',
             created_at: 'وقت الإنشاء'
         }
     },

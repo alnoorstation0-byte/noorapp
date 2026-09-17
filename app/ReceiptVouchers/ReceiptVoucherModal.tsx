@@ -125,7 +125,7 @@ const SmartCombo = ({ label, table, onSelect, placeholder, searchCols = 'name,co
 // =========================================================================
 // 📝 المودال الرئيسي (سند القبض) - مطابق للميثاق الماسي V9
 // =========================================================================
-export default function ReceiptVoucherModal({ isOpen, onClose, record, setRecord, onSave, delegates, fleetOperations }: any) {
+export default function ReceiptVoucherModal({ isOpen, onClose, record, setRecord, onSave, delegates }: any) {
     if (!isOpen) return null;
 
     // 🚀 المراقبة الذكية لجلب الأسماء عند الضغط من الخارج
@@ -184,9 +184,7 @@ export default function ReceiptVoucherModal({ isOpen, onClose, record, setRecord
             partner_acc_name: pAccName,
             safe_bank_acc_id: record.safe_bank_acc_id || '21b8a1db-bc9f-4cf8-b741-1efeded0963c',
             safe_bank_acc_name: record.safe_bank_acc_name || 'الخزينة الرئيسية',
-            delegate_id: inv.delegate_id || record.delegate_id,
-            fleet_operation_id: inv.fleet_operation_id || record.fleet_operation_id,
-            job_order_id: inv.job_order_id || record.job_order_id
+            delegate_id: inv.delegate_id || record.delegate_id
         });
     };
     const handleSubmit = (e: React.FormEvent) => {
@@ -272,33 +270,15 @@ export default function ReceiptVoucherModal({ isOpen, onClose, record, setRecord
                         </div>
                     </div>
 
-                    {/* 🔹 القسم الثاني: تفاصيل التنفيذ (الرحلة والمندوب) */}
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px', padding: '15px', background: 'rgba(255,255,255,0.15)', borderRadius: '16px', marginBottom: '20px', border: '1px dashed rgba(40, 145, 200, 0.3)' }}>
-                        <div>
-                            <label style={{ fontSize: '12px', fontWeight: 900, color: THEME.primary, display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '6px' }}>🚚 رحلة التوزيع (أمر تشغيل)</label>
-                            <select 
-                                tabIndex={7}
-                                className="glass-input-field" 
-                                style={{ appearance: 'auto' }}
-                                value={record?.fleet_operation_id || ''} 
-                                onChange={e => setRecord({...record, fleet_operation_id: e.target.value})}
-                            >
-                                <option value="">-- ربط برحلة توزيع --</option>
-                                  {fleetOperations?.map((op: any) => (
-                                      <option key={op.id} value={op.id}>{op.name}</option>
-                                  ))}
-                            </select>
-                        </div>
-
-                        <div>
-                            <label style={{ fontSize: '12px', fontWeight: 900, color: THEME.primary, display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '6px' }}>👤 المندوب المحصل</label>
-                            <select tabIndex={8} value={record.delegate_id || ''} onChange={e => setRecord({...record, delegate_id: e.target.value})} className="glass-input-field" style={{ appearance: 'auto' }}>
-                                <option value="">-- اختر المندوب (اختياري) --</option>
-                                {delegates?.map((del: any) => (
-                                    <option key={del.id} value={del.id}>{del.name}</option>
-                                ))}
-                            </select>
-                        </div>
+                    {/* 🔹 القسم الثاني: تفاصيل التنفيذ (مشغل المحطة / المحصل) */}
+                    <div style={{ padding: '15px', background: 'rgba(255,255,255,0.15)', borderRadius: '16px', marginBottom: '20px', border: '1px dashed rgba(40, 145, 200, 0.3)' }}>
+                        <label style={{ fontSize: '12px', fontWeight: 900, color: THEME.primary, display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '6px' }}>👤 مشغل المحطة / المحصل</label>
+                        <select tabIndex={8} value={record.delegate_id || ''} onChange={e => setRecord({...record, delegate_id: e.target.value})} className="glass-input-field" style={{ appearance: 'auto' }}>
+                            <option value="">-- اختر مشغل المحطة / المحصل (اختياري) --</option>
+                            {delegates?.map((del: any) => (
+                                <option key={del.id} value={del.id}>{del.name}</option>
+                            ))}
+                        </select>
                     </div>
 
                     {/* --- التوجيه المحاسبي --- */}

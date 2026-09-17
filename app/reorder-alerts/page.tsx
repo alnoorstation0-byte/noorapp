@@ -35,6 +35,36 @@ export default function ReorderAlertsPage() {
                     .reorder-table { min-width: 600px !important; }
                     .reorder-table th, .reorder-table td { padding: 8px 10px !important; font-size: 11px !important; }
                 }
+
+                .daylight-theme .reorder-container { background: #FDFBF7 !important; }
+                .daylight-theme .reorder-header { 
+                    background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.90) 100%) !important; 
+                    border: 1px solid rgba(194, 155, 98, 0.3) !important; 
+                    box-shadow: 0 4px 20px rgba(44, 26, 18, 0.08) !important; 
+                }
+                .daylight-theme .reorder-header h1 { color: #2C1A12 !important; }
+                .daylight-theme .reorder-header p { color: rgba(44, 26, 18, 0.7) !important; }
+                .daylight-theme .reorder-header input { 
+                    background: #FFFFFF !important; 
+                    border-color: rgba(194, 155, 98, 0.35) !important; 
+                    color: #2C1A12 !important; 
+                }
+                .daylight-theme .reorder-kpi-card { 
+                    background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.90) 100%) !important; 
+                    border: 1px solid rgba(194, 155, 98, 0.3) !important; 
+                    box-shadow: 0 4px 15px rgba(44, 26, 18, 0.08) !important; 
+                }
+                .daylight-theme .reorder-kpi-card div:nth-child(2) { color: #2C1A12 !important; }
+                .daylight-theme .reorder-table-card { 
+                    background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.90) 100%) !important; 
+                    border: 1px solid rgba(194, 155, 98, 0.3) !important; 
+                    box-shadow: 0 8px 30px rgba(44, 26, 18, 0.08) !important; 
+                }
+                .daylight-theme .reorder-table { color: #2C1A12 !important; }
+                .daylight-theme .reorder-table thead { background: rgba(194, 155, 98, 0.12) !important; }
+                .daylight-theme .reorder-table th { color: #2C1A12 !important; border-bottom: 1px solid rgba(194, 155, 98, 0.25) !important; }
+                .daylight-theme .reorder-table td { border-bottom: 1px solid rgba(194, 155, 98, 0.15) !important; color: #2C1A12 !important; }
+                .daylight-theme .reorder-table tr:hover { background: rgba(194, 155, 98, 0.06) !important; }
             `}</style>
             {/* Header */}
             <div className="reorder-header" style={{ background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(20px)', borderRadius: '24px', padding: '30px', marginBottom: '25px', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}>

@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { THEME } from '@/lib/theme';
 
 interface ShortcutItem {
@@ -175,8 +176,13 @@ const CATEGORIES = [
 ];
 
 export default function KeyboardShortcutsModal({ isOpen, onClose }: { isOpen: boolean; onClose: () => void }) {
+    const [mounted, setMounted] = useState(false);
     const [search, setSearch] = useState('');
     const [selectedCategory, setSelectedCategory] = useState<string>('all');
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     useEffect(() => {
         if (!isOpen) return;
@@ -205,21 +211,25 @@ export default function KeyboardShortcutsModal({ isOpen, onClose }: { isOpen: bo
         });
     }, [search, selectedCategory]);
 
-    if (!isOpen) return null;
+    if (!isOpen || (!mounted && typeof document === 'undefined')) return null;
 
-    return (
+    return createPortal(
         <div className="shortcuts-modal-overlay" onClick={onClose}>
             <style>{`
                 .shortcuts-modal-overlay {
                     position: fixed !important;
                     inset: 0 !important;
-                    background: rgba(15, 23, 42, 0.72) !important;
-                    backdrop-filter: blur(12px) !important;
-                    -webkit-backdrop-filter: blur(12px) !important;
+                    top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
+                    width: 100vw !important; height: 100vh !important;
+                    background: rgba(15, 23, 42, 0.78) !important;
+                    backdrop-filter: blur(14px) !important;
+                    -webkit-backdrop-filter: blur(14px) !important;
                     display: flex !important;
                     align-items: center !important;
                     justify-content: center !important;
                     z-index: 999999999 !important;
+                    isolation: isolate !important;
+                    pointer-events: auto !important;
                     padding: 20px;
                     direction: rtl;
                 }
@@ -424,6 +434,7 @@ export default function KeyboardShortcutsModal({ isOpen, onClose }: { isOpen: bo
                     </button>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }

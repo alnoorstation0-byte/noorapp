@@ -63,8 +63,8 @@ export default function RootLayout({
                   if (savedTheme === 'daylight' && document.body) {
                     document.body.classList.add('daylight-theme');
                     document.body.setAttribute('data-theme', 'daylight');
-                    document.body.style.backgroundColor = '#F1F5F9';
-                    document.body.style.color = '#0F172A';
+                    document.body.style.backgroundColor = '#FDFBF7';
+                    document.body.style.color = '#2C1A12';
                   }
                 });
               } catch(e) {}
@@ -73,6 +73,7 @@ export default function RootLayout({
         }} />
       </head>
       <body 
+        suppressHydrationWarning={true}
         className={`${cairo.className} ${cairo.variable}`} 
         style={{ 
           position: 'relative', 
@@ -122,27 +123,27 @@ export default function RootLayout({
             transition: opacity 0.3s ease, filter 0.3s ease;
           }
 
-          /* ☀️ خلفية الرؤية النهارية (Daylight Mode Background) */
-          .daylight-theme body, body.daylight-theme {
-            background-color: #F1F5F9 !important;
-            color: #0F172A !important;
+          /* ☀️ خلفية الرؤية النهارية الصحراوية (Desert Glassmorphism Daylight Mode Background) */
+          .daylight-theme body, body.daylight-theme, html.daylight-theme body {
+            background-color: #FDFBF7 !important;
+            color: #2C1A12 !important;
           }
           .daylight-theme .bg-master-container {
             background: 
-              radial-gradient(circle at 10% 15%, rgba(2, 132, 199, 0.07) 0%, transparent 50%),
-              radial-gradient(circle at 90% 85%, rgba(234, 88, 12, 0.05) 0%, transparent 50%),
-              #F1F5F9 !important; 
+              radial-gradient(circle at 10% 15%, rgba(194, 155, 98, 0.12) 0%, transparent 50%),
+              radial-gradient(circle at 90% 85%, rgba(168, 87, 60, 0.08) 0%, transparent 50%),
+              #FDFBF7 !important; 
           }
           .daylight-theme .bg-glass-tint {
             background: radial-gradient(
               circle at 50% 50%, 
-              rgba(255, 255, 255, 0.4) 0%, 
-              rgba(241, 245, 249, 0.85) 100% 
+              rgba(255, 253, 250, 0.5) 0%, 
+              rgba(253, 251, 247, 0.85) 100% 
             ) !important;
           }
           .daylight-theme .watermark-bg {
-            opacity: 0.04 !important;
-            filter: drop-shadow(0 0 30px rgba(2, 132, 199, 0.12)) !important;
+            opacity: 0.035 !important;
+            filter: drop-shadow(0 0 30px rgba(194, 155, 98, 0.18)) !important;
           }
 
           @media print { .no-print { display: none !important; } }

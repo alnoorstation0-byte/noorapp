@@ -30,12 +30,12 @@ export function useProfitDashboardLogic() {
         }
     });
 
-    const tripsQuery = useQuery({
-        queryKey: ['profit_dash_trips', dateFrom, dateTo],
+    const shiftsQuery = useQuery({
+        queryKey: ['profit_dash_shifts', dateFrom, dateTo],
         queryFn: async () => {
-            let q = supabase.from('fleet_operations').select('total_sales, total_expenses, inventory_cost, net_profit');
-            if (dateFrom) q = q.gte('operation_date', dateFrom);
-            if (dateTo) q = q.lte('operation_date', dateTo);
+            let q = supabase.from('pos_shifts').select('id, total_sales, total_expenses, total_liters_sold, status, opened_at');
+            if (dateFrom) q = q.gte('opened_at', dateFrom);
+            if (dateTo) q = q.lte('opened_at', dateTo);
             
             const { data, error } = await q;
             if (error) throw error;
@@ -46,7 +46,7 @@ export function useProfitDashboardLogic() {
     const dashboardData = useMemo(() => {
         const rawInvoices = invoicesQuery.data?.invoices || [];
         const costMap = invoicesQuery.data?.costMap || {};
-        const rawTrips = tripsQuery.data || [];
+        const rawShifts = shiftsQuery.data || [];
 
         let totalRevenue = 0, totalCOGS = 0;
         const itemsMap = new Map<string, { name: string, revenue: number, cogs: number, profit: number }>();
@@ -56,7 +56,7 @@ export function useProfitDashboardLogic() {
             const amount = Number(inv.total_amount || 0);
             totalRevenue += amount;
             
-            const delegateName = (inv.delegate as any)?.name || 'بدون مندوب';
+            const delegateName = (inv.delegate as any)?.name || 'بدون مشغل محطة';
             if (!delegatesMap.has(delegateName)) delegatesMap.set(delegateName, { name: delegateName, revenue: 0, cogs: 0, profit: 0 });
             const d = delegatesMap.get(delegateName)!;
             d.revenue += amount;
@@ -89,12 +89,14 @@ export function useProfitDashboardLogic() {
             d.profit += (amount - invCogs);
         });
 
-        let tripSales = 0, tripExp = 0, tripInv = 0, tripProfit = 0;
-        rawTrips.forEach((t: any) => {
-            tripSales += Number(t.total_sales || 0);
-            tripExp += Number(t.total_expenses || 0);
-            tripInv += Number(t.inventory_cost || 0);
-            tripProfit += Number(t.net_profit || 0);
+        let shiftSales = 0, shiftExp = 0, shiftLiters = 0, shiftProfit = 0;
+        rawShifts.forEach((s: any) => {
+            const sales = Number(s.total_sales || 0);
+            const exp = Number(s.total_expenses || 0);
+            shiftSales += sales;
+            shiftExp += exp;
+            shiftLiters += Number(s.total_liters_sold || 0);
+            shiftProfit += (sales - exp);
         });
 
         const grossProfit = totalRevenue - totalCOGS;
@@ -107,9 +109,9 @@ export function useProfitDashboardLogic() {
             totalCOGS,
             topItems: Array.from(itemsMap.values()).sort((a,b) => b.profit - a.profit).slice(0, 7),
             topDelegates: Array.from(delegatesMap.values()).sort((a,b) => b.profit - a.profit).slice(0, 5),
-            trips: { sales: tripSales, expenses: tripExp, invCost: tripInv, profit: tripProfit, count: rawTrips.length }
+            trips: { sales: shiftSales, expenses: shiftExp, invCost: shiftLiters, profit: shiftProfit, count: rawShifts.length }
         };
-    }, [invoicesQuery.data, tripsQuery.data]);
+    }, [invoicesQuery.data, shiftsQuery.data]);
 
     return {
         dateFrom, setDateFrom, 

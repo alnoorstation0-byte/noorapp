@@ -81,14 +81,15 @@ export default function ReportsPage() {
         </div>
 
         {/* 2. تقارير التشغيل وحركة المناديب */}
+        {/* 2. تقارير تشغيل محطات الوقود والمشغلين */}
         <h2 className="section-title" style={{ marginTop: '50px' }}>
-          <span>🚚</span> 2. تقارير التشغيل وحركة المناديب (Van Sales)
+          <span>⛽</span> 2. تقارير تشغيل محطات الوقود والمشغلين (Fuel Station Ops)
         </h2>
         <div className="reports-grid">
-          <ReportLinkCard href="/trip-profitability" icon="🚚" title="ربحية الرحلات (Trip Profitability)" desc="المبيعات والتكلفة وصافي الربح لكل رحلة." />
-          <ReportLinkCard href="/delegate-settlements" icon="🤝" title="تسوية عهد المناديب" desc="المطابقة اليومية للبضاعة والنقدية لمعرفة العهد المتبقية في ذمة كل مندوب." />
-          <ReportLinkCard href="/delegate-debts" icon="🎯" title="كشف عهدة التحصيل" desc="الديون المتأخرة في السوق والمطلوب من كل مندوب تحصيلها." />
-          <ReportLinkCard href="/vehicle-expenses" icon="⛽" title="مصروفات السيارات" desc="تجميع تكاليف الديزل والصيانة لكل سيارة على حدة." />
+          <ReportLinkCard href="/pos/dashboard" icon="⛽" title="أرباح وتشغيل محطات الوقود" desc="تحليل المبيعات، تكلفة الوقود المباع، صافي الأرباح، والعدادات لكل محطة وردية." />
+          <ReportLinkCard href="/pos-settlements" icon="🤝" title="تسويات ورديات محطات الوقود" desc="المطابقة الدورية لمبيعات الوقود والنقدية وعهد مشغلي المحطات والخزانات." />
+          <ReportLinkCard href="/PartnerBalances" icon="🎯" title="أرصدة وذمم العملاء والشركاء" desc="متابعة أرصدة العملاء والشركاء والمبالغ المستحقة للتحصيل." />
+          <ReportLinkCard href="/expenses" icon="💸" title="المصروفات التشغيلية للمحطات" desc="تجميع تكاليف التشغيل والصيانة والكهرباء لمحطات وخزانات الوقود." />
         </div>
 
         {/* 3. تقارير المبيعات والعملاء */}
@@ -97,21 +98,20 @@ export default function ReportsPage() {
         </h2>
         <div className="reports-grid">
           <ReportLinkCard href="/statement" icon="🧾" title="كشف حساب عميل" desc="حركة فواتير وسدادات عميل معين والرصيد المتبقي عليه." />
-          <ReportLinkCard href="/statement" icon="📦" title="كشف حساب مورد" desc="متابعة فواتير المشتريات والدفعات لموردي البضاعة." />
+          <ReportLinkCard href="/statement" icon="📦" title="كشف حساب مورد" desc="متابعة فواتير التوريد والدفعات لموردي المحروقات والوقود." />
           <ReportLinkCard href="/ar-aging" icon="⏳" title="أعمار الديون (AR Aging)" desc="الديون غير المحصلة مقسمة حسب مدة التأخير (30-60-90 يوم)." />
-          <ReportLinkCard href="/sales-analysis" icon="📊" title="تحليل المبيعات الشامل" desc="مبيعات الشركة مقسمة حسب العملاء، المناديب، والأصناف." />
+          <ReportLinkCard href="/sales-analysis" icon="📊" title="تحليل المبيعات الشامل" desc="مبيعات المحطات مقسمة حسب العملاء، مشغلي المحطات، وأنواع الوقود والمنتجات." />
         </div>
 
-        {/* 4. تقارير المخازن والمستودعات */}
+        {/* 4. تقارير خزانات الوقود والمخزون */}
         <h2 className="section-title" style={{ marginTop: '50px' }}>
-          <span>📦</span> 4. تقارير المخازن والمستودعات (Inventory)
+          <span>⛽</span> 4. تقارير خزانات الوقود والمستودعات (Fuel Storage & Tanks)
         </h2>
         <div className="reports-grid">
-          <ReportLinkCard href="/item-card" icon="🏷️" title="بطاقة / كارت الصنف" desc="تتبع مسار صنف معين (الوارد والمنصرف بالتفصيل)." />
-          <ReportLinkCard href="/inventory-valuation" icon="💵" title="تقييم المخزون (Inventory Valuation)" desc="يعرض قيمة البضاعة الحالية كرقم مالي (الكمية × متوسط التكلفة)." />
-          <ReportLinkCard href="/inventory/warehouses" icon="🏢" title="أرصدة المستودعات والسيارات" desc="مقارنة كميات الأصناف الموجودة بالمستودع والسيارات." />
-          <ReportLinkCard href="/reorder-alerts" icon="⚠️" title="نواقص المخزون (Reorder Alerts)" desc="الأصناف التي وصل رصيدها للحد الأدنى ويجب شراؤها." />
-          <ReportLinkCard href="/dead-stock" icon="🐢" title="المخزون الراكد" desc="بضاعة لم يتم سحبها أو بيعها منذ فترة طويلة." />
+          <ReportLinkCard href="/inventory/warehouses" icon="⛽" title="محطات الوقود والخزانات" desc="مقارنة ومتابعة كميات الوقود في الخزانات الرئيسية والصهاريج ومحطات التوزيع." />
+          <ReportLinkCard href="/item-card" icon="🏷️" title="بطاقة / كارت الوقود والصنف" desc="تتبع مسار الوقود (الوارد والتفريغ والمنصرف بالتفصيل)." />
+          <ReportLinkCard href="/inventory-valuation" icon="💵" title="تقييم مخزون الوقود (Inventory Valuation)" desc="يعرض القيمة المالية للوقود في الخزانات (الكمية باللتر × متوسط التكلفة)." />
+          <ReportLinkCard href="/reorder-alerts" icon="⚠️" title="تنبيهات نقص الخزانات (Reorder Alerts)" desc="الخزانات والوقود الذي وصل للحد الأدنى ويحتاج توريد وتفريغ شحنات." />
         </div>
 
         {/* 5. لوحات الإدارة العليا */}

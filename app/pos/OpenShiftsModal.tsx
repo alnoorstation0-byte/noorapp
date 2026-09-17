@@ -43,7 +43,7 @@ export default function OpenShiftsModal({
             backdropFilter: 'blur(16px)',
             WebkitBackdropFilter: 'blur(16px)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            zIndex: 99999,
+            zIndex: 999999999,
             padding: '15px'
         }}>
             <style>{`
@@ -110,9 +110,47 @@ export default function OpenShiftsModal({
                         justify-content: center;
                     }
                 }
+
+                /* Daylight Desert Glassmorphism */
+                .daylight-theme .open-shifts-modal-box {
+                    background: linear-gradient(135deg, rgba(255, 253, 250, 0.98) 0%, rgba(245, 238, 228, 0.95) 100%) !important;
+                    border: 1px solid rgba(194, 155, 98, 0.4) !important;
+                    box-shadow: 0 25px 60px rgba(44, 26, 18, 0.2) !important;
+                }
+                .daylight-theme .open-shifts-modal-box h2 {
+                    color: #A8573C !important;
+                }
+                .daylight-theme .open-shifts-modal-box span {
+                    color: rgba(44, 26, 18, 0.7) !important;
+                }
+                .daylight-theme .open-shifts-modal-box strong {
+                    color: #2C1A12 !important;
+                }
+                .daylight-theme .shift-card-item {
+                    background: rgba(255, 255, 255, 0.9) !important;
+                    border: 1px solid rgba(194, 155, 98, 0.3) !important;
+                    box-shadow: 0 4px 15px rgba(44, 26, 18, 0.06) !important;
+                }
+                .daylight-theme .shift-card-item:hover {
+                    border-color: #C29B62 !important;
+                    box-shadow: 0 8px 25px rgba(168, 87, 60, 0.15) !important;
+                    background: #FFFFFF !important;
+                }
+                .daylight-theme .shift-card-item.active {
+                    border: 2px solid #4E734F !important;
+                    background: rgba(78, 115, 79, 0.1) !important;
+                }
+                .daylight-theme .btn-switch-shift {
+                    background: linear-gradient(135deg, #C29B62 0%, #A8573C 100%) !important;
+                    color: #FFFFFF !important;
+                    box-shadow: 0 4px 12px rgba(168, 87, 60, 0.25) !important;
+                }
+                .daylight-theme .btn-switch-shift:hover {
+                    background: linear-gradient(135deg, #A8573C 0%, #C29B62 100%) !important;
+                }
             `}</style>
 
-            <div style={{
+            <div className="open-shifts-modal-box" style={{
                 background: 'linear-gradient(135deg, rgba(20, 24, 34, 0.98) 0%, rgba(15, 20, 30, 0.98) 100%)',
                 backdropFilter: 'blur(32px) saturate(180%)',
                 WebkitBackdropFilter: 'blur(32px) saturate(180%)',
@@ -135,7 +173,7 @@ export default function OpenShiftsModal({
                             📋 {isEn ? 'Currently Active Shifts in System' : 'الورديات النشطة حالياً بالنظام'} ({openShifts.length})
                         </h2>
                         <span style={{ fontSize: '12px', color: '#94A3B8', fontWeight: 700 }}>
-                            {isEn ? 'Each rep and branch has an independent shift' : 'لكل مندوب ولكل مستودع وردية مستقلة تماماً'}
+                            {isEn ? 'Each operator and gas station has an independent shift' : 'لكل مشغل ولكل محطة وقود وردية مستقلة تماماً'}
                         </span>
                     </div>
                     <button 
@@ -167,7 +205,7 @@ export default function OpenShiftsModal({
                             {isEn ? 'No active shifts currently' : 'لا توجد أي وردية نشطة حالياً'}
                         </h3>
                         <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '20px' }}>
-                            {isEn ? 'You can select a branch and a rep, then click open new shift to start.' : 'يمكنك اختيار منفذ البيع والمندوب ثم الضغط على فتح وردية جديدة للبدء.'}
+                            {isEn ? 'You can select a gas station and operator, then click open new shift to start.' : 'يمكنك اختيار محطة الوقود والمشغل ثم الضغط على فتح وردية جديدة للبدء.'}
                         </p>
                         <button
                             type="button"
@@ -317,7 +355,7 @@ export default function OpenShiftsModal({
                                     transition: 'all 0.2s ease'
                                 }}
                             >
-                                ➕ {isEn ? 'Open new shift for another branch/rep' : 'فتح وردية جديدة لمستودع أو مندوب آخر'}
+                                ➕ {isEn ? 'Open new shift for another station/operator' : 'فتح وردية جديدة لمحطة وقود أو مشغل آخر'}
                             </button>
                         </div>
                     </div>

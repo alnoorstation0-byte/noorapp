@@ -545,7 +545,7 @@ export function usePosSettlementsLogic() {
                 status: shift.status,
                 settlementStatus,
                 warehouseId: shift.warehouse_id,
-                warehouseName: whData?.name || 'منفذ بيع غير معروف',
+                warehouseName: whData?.name || 'محطة وقود / خزان غير محدد',
                 warehouseType: whData?.type || 'pos',
                 warehouseLocation: whData?.location || '',
                 warehousePhone: whData?.phone || '',
@@ -727,7 +727,7 @@ export function usePosSettlementsLogic() {
             // ─────────────────────────────────────────────────────────────
             if (cashAmount > 0) {
                 const receiptNumber = `RV-SETTLE-POS-${Date.now().toString().slice(-6)}`;
-                const voucherNotes = `توريد نقدية تسوية عهدة منفذ [${warehouseName}${locationInfo}] | ${shiftLabel} | المسئول: ${cashierInfo}${salesStr}${expStr} | المبلغ المورد للخزينة: ${cashAmount.toFixed(2)} ر.س${shortageStr}${extraNotes}`;
+                const voucherNotes = `توريد نقدية تسوية عهدة محطة وقود [${warehouseName}${locationInfo}] | ${shiftLabel} | المسئول: ${cashierInfo}${salesStr}${expStr} | المبلغ المورد للخزينة: ${cashAmount.toFixed(2)} ر.س${shortageStr}${extraNotes}`;
 
                 // A. Insert into receipt_vouchers
                 const { data: rvData, error: rvErr } = await supabase
@@ -741,7 +741,7 @@ export function usePosSettlementsLogic() {
                         delegate_id: cashierId || null,
                         shift_id: shiftId,
                         safe_bank_acc_id: targetSafeAcc,
-                        partner_acc_id: ACC.EMPLOYEE_CUSTODY, // 125 ذمة موظف/مندوب
+                        partner_acc_id: ACC.EMPLOYEE_CUSTODY, // 125 ذمة موظف/مشغل
                         status: 'معتمد',
                         notes: voucherNotes
                     }])
@@ -755,7 +755,7 @@ export function usePosSettlementsLogic() {
                 createdReceiptVoucherId = rvData?.id || null;
 
                 // B. Insert Journal Header
-                const journalHeaderDesc = `إخلاء وتوريد نقدية عهدة منفذ [${warehouseName}${locationInfo}] | ${shiftLabel} | المسئول: ${cashierInfo}${salesStr}${expStr} | المبلغ المورد للخزينة: ${cashAmount.toFixed(2)} ر.س${shortageStr}${extraNotes}`;
+                const journalHeaderDesc = `إخلاء وتوريد نقدية عهدة محطة وقود [${warehouseName}${locationInfo}] | ${shiftLabel} | المسئول: ${cashierInfo}${salesStr}${expStr} | المبلغ المورد للخزينة: ${cashAmount.toFixed(2)} ر.س${shortageStr}${extraNotes}`;
 
                 const { data: jhData, error: jhErr } = await supabase
                     .from('journal_headers')
@@ -763,7 +763,7 @@ export function usePosSettlementsLogic() {
                         entry_date: date,
                         description: journalHeaderDesc,
                         status: 'posted',
-                        v_type: 'تسوية عهدة منفذ',
+                        v_type: 'تسوية عهدة محطة وقود',
                         reference_id: createdReceiptVoucherId || shiftId
                     }])
                     .select('id')
@@ -785,7 +785,7 @@ export function usePosSettlementsLogic() {
                         delegate_id: cashierId || null,
                         debit: cashAmount,
                         credit: 0,
-                        notes: `توريد نقدية للخزينة من عهدة منفذ [${warehouseName}] | ${shiftLabel} | المسئول: ${cashierInfo}`
+                        notes: `توريد نقدية للخزينة من عهدة محطة وقود [${warehouseName}] | ${shiftLabel} | المسئول: ${cashierInfo}`
                     },
                     // Credit: Cashier Custody (125)
                     {
@@ -795,7 +795,7 @@ export function usePosSettlementsLogic() {
                         delegate_id: cashierId || null,
                         debit: 0,
                         credit: cashAmount,
-                        notes: `إخلاء عهدة كاشير منفذ [${warehouseName}] بالتوريد للخزينة | ${shiftLabel} | المسئول: ${cashierInfo} | المبلغ: ${cashAmount.toFixed(2)} ر.س`
+                        notes: `إخلاء عهدة مشغل محطة وقود [${warehouseName}] بالتوريد للخزينة | ${shiftLabel} | المسئول: ${cashierInfo} | المبلغ: ${cashAmount.toFixed(2)} ر.س`
                     }
                 ];
 
@@ -810,7 +810,7 @@ export function usePosSettlementsLogic() {
                             delegate_id: cashierId || null,
                             debit: absShortage,
                             credit: 0,
-                            notes: `إثبات عجز عهدة صندوق منفذ [${warehouseName}] كذمة مستحقة على الكاشير ${cashierInfo} | ${shiftLabel}`
+                            notes: `إثبات عجز عهدة صندوق محطة [${warehouseName}] كذمة مستحقة على مشغل المحطة ${cashierInfo} | ${shiftLabel}`
                         });
                         journalLinesToInsert.push({
                             header_id: createdJournalHeaderId,
@@ -819,7 +819,7 @@ export function usePosSettlementsLogic() {
                             delegate_id: cashierId || null,
                             debit: 0,
                             credit: absShortage,
-                            notes: `إقفال عجز عهدة منفذ [${warehouseName}] بذمة الكاشير ${cashierInfo} | ${shiftLabel}`
+                            notes: `إقفال عجز عهدة محطة وقود [${warehouseName}] بذمة مشغل المحطة ${cashierInfo} | ${shiftLabel}`
                         });
                     } else if (shortageAction === 'shortage_expense' || shortageAction === 'rounding') {
                         journalLinesToInsert.push({
@@ -829,7 +829,7 @@ export function usePosSettlementsLogic() {
                             delegate_id: cashierId || null,
                             debit: absShortage,
                             credit: 0,
-                            notes: `تسجيل فروقات/عجز تسوية صندوق منفذ [${warehouseName}] كمصروف | ${shiftLabel} | المسئول: ${cashierInfo}`
+                            notes: `تسجيل فروقات/عجز تسوية صندوق محطة [${warehouseName}] كمصروف | ${shiftLabel} | المسئول: ${cashierInfo}`
                         });
                         journalLinesToInsert.push({
                             header_id: createdJournalHeaderId,
@@ -838,7 +838,7 @@ export function usePosSettlementsLogic() {
                             delegate_id: cashierId || null,
                             debit: 0,
                             credit: absShortage,
-                            notes: `إقفال فرق تسوية عهدة منفذ [${warehouseName}] | ${shiftLabel} | المسئول: ${cashierInfo}`
+                            notes: `إقفال فرق تسوية عهدة محطة [${warehouseName}] | ${shiftLabel} | المسئول: ${cashierInfo}`
                         });
                     }
                 }
@@ -873,7 +873,7 @@ export function usePosSettlementsLogic() {
                         warehouse_id: warehouseId,
                         destination_warehouse_id: MAIN_WAREHOUSE_ID,
                         shift_id: shiftId,
-                        notes: `إرجاع فائض بضاعة من منفذ ${warehouseName} إلى المستودع الرئيسي | ${shiftLabel} | الكاشير: ${cashierInfo} (${ret.notes || ''})`
+                        notes: `تحويل/إرجاع وقود فائض من محطة ${warehouseName} إلى الخزان الرئيسي | ${shiftLabel} | المسئول: ${cashierInfo} (${ret.notes || ''})`
                     }]);
                 }
 
@@ -891,7 +891,7 @@ export function usePosSettlementsLogic() {
                         status: 'approved',
                         warehouse_id: warehouseId,
                         shift_id: shiftId,
-                        notes: `تسجيل تالف/هالك بضاعة أثناء تشغيل منفذ ${warehouseName} | ${shiftLabel} | الكاشير: ${cashierInfo}`
+                        notes: `تسجيل تبخر/هالك وقود أثناء تشغيل محطة ${warehouseName} | ${shiftLabel} | المسئول: ${cashierInfo}`
                     }]);
                 }
 
@@ -909,7 +909,7 @@ export function usePosSettlementsLogic() {
                         status: 'approved',
                         warehouse_id: warehouseId,
                         shift_id: shiftId,
-                        notes: `تسجيل عجز جرد مخزني في منفذ ${warehouseName} | ${shiftLabel} | الكاشير: ${cashierInfo}`
+                        notes: `تسجيل عجز جرد خزانات وقود في محطة ${warehouseName} | ${shiftLabel} | المسئول: ${cashierInfo}`
                     }]);
                 }
             }
@@ -967,7 +967,7 @@ export function usePosSettlementsLogic() {
             emitTableChange('warehouse_inventory');
 
             sendSystemNotification({
-                title: `🤝 تمت تسوية عهدة منفذ [${warehouseName}]`,
+                title: `🤝 تمت تسوية عهدة محطة [${warehouseName}]`,
                 message: `تم اعتماد تسوية الوردية وتوريد ${cashAmount} ر.س للخزينة بنجاح بواسطة ${profile?.full_name || 'المحاسب'}.`,
                 type: 'pos'
             }).catch(() => {});
@@ -975,7 +975,7 @@ export function usePosSettlementsLogic() {
             return { success: true };
         },
         onSuccess: () => {
-            showToast("تم اعتماد تسوية عهدة منفذ البيع وتوريد النقدية بنجاح! 🤝✅", "success");
+            showToast("تم اعتماد تسوية عهدة محطة الوقود وتوريد النقدية بنجاح! ⛽🤝", "success");
             setIsSettlementModalOpen(false);
             setSelectedShiftForSettlement(null);
             queryClient.invalidateQueries({ queryKey: ['pos_settlements_shifts'] });
@@ -997,15 +997,15 @@ export function usePosSettlementsLogic() {
         const dataToExport = filteredSettlements.map((item, index) => ({
             'م': index + 1,
             'رقم الوردية': item.shiftNumber,
-            'منفذ البيع': item.warehouseName,
-            'الكاشير / المسؤول': item.cashierName,
+            'محطة الوقود / الخزان': item.warehouseName,
+            'مشغل المحطة / المسؤول': item.cashierName,
             'تاريخ الفتح': new Date(item.openedAt).toLocaleDateString('ar-SA'),
             'تاريخ الإغلاق': item.closedAt ? new Date(item.closedAt).toLocaleDateString('ar-SA') : 'مفتوحة',
             'إجمالي المبيعات': item.totalSales,
             'مبيعات كاش': item.cashSales,
             'مبيعات شبكة (مدى)': item.cardSales,
             'مبيعات آجل': item.creditSales,
-            'تحصيلات المنفذ': item.totalCollections,
+            'تحصيلات المحطة': item.totalCollections,
             'مصروفات الدرج': item.totalExpenses,
             'المطالبة النقدية': item.netCashDue,
             'المورد للخزينة': item.handedOverCash,
@@ -1014,14 +1014,14 @@ export function usePosSettlementsLogic() {
             'لترات الوقود (المضخات)': item.totalLitersSold || 0,
             'مبيعات الوقود بالعدادات': item.meterTotalAmount || 0,
             'فارق العدادات مع الفواتير': item.meterSalesVariance || 0,
-            'مخزون المنفذ المتبقي': item.totalRemainingStock,
+            'مخزون الخزانات المتبقي': item.totalRemainingStock,
             'حالة التسوية': item.settlementStatus === 'settled' ? 'تمت التسوية' : (item.settlementStatus === 'open' ? 'مفتوحة' : 'بانتظار التسوية')
         }));
 
         const ws = XLSX.utils.json_to_sheet(dataToExport);
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "تسويات منافذ البيع");
-        XLSX.writeFile(wb, `تسويات_منافذ_البيع_${new Date().toISOString().split('T')[0]}.xlsx`);
+        XLSX.utils.book_append_sheet(wb, ws, "تسويات محطات الوقود");
+        XLSX.writeFile(wb, `تسويات_محطات_الوقود_${new Date().toISOString().split('T')[0]}.xlsx`);
         showToast("تم تصدير ملف الإكسيل بنجاح 📑", "success");
     };
 

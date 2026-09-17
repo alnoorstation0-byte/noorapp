@@ -82,10 +82,10 @@ export default function ShiftDetailsModal({
             backdropFilter: 'blur(16px)',
             WebkitBackdropFilter: 'blur(16px)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            zIndex: 999999,
+            zIndex: 999999999,
             padding: '15px'
         }}>
-            <style>{`
+            <style dangerouslySetInnerHTML={{ __html: `
                 .shift-det-tab {
                     padding: 9px 18px;
                     border-radius: 12px;
@@ -143,13 +143,43 @@ export default function ShiftDetailsModal({
                         max-height: 94vh !important;
                     }
                 }
+
+                .daylight-theme .print-area-dossier {
+                    background: linear-gradient(135deg, rgba(255, 253, 250, 0.98) 0%, rgba(250, 246, 240, 0.95) 100%) !important;
+                    border-color: rgba(194, 155, 98, 0.35) !important;
+                    box-shadow: 0 25px 60px rgba(44, 26, 18, 0.15) !important;
+                    color: #2C1A12 !important;
+                }
+                .daylight-theme .shift-det-tab:not(.active) {
+                    color: rgba(44, 26, 18, 0.65) !important;
+                }
+                .daylight-theme .shift-kpi-box {
+                    background: #FFFFFF !important;
+                    border: 1px solid rgba(194, 155, 98, 0.25) !important;
+                }
+                .daylight-theme .shift-kpi-box div {
+                    color: #2C1A12 !important;
+                }
+                .daylight-theme .shift-table th {
+                    background: rgba(194, 155, 98, 0.12) !important;
+                    color: #2C1A12 !important;
+                    border-bottom: 1.5px solid rgba(194, 155, 98, 0.25) !important;
+                }
+                .daylight-theme .shift-table td {
+                    border-bottom: 1px solid rgba(194, 155, 98, 0.15) !important;
+                    color: #2C1A12 !important;
+                }
+                .daylight-theme .shift-table tr:hover td {
+                    background: rgba(194, 155, 98, 0.06) !important;
+                }
+
                 @media print {
                     body * { visibility: hidden; }
                     .print-area-dossier, .print-area-dossier * { visibility: visible; }
                     .print-area-dossier { position: absolute; left: 0; top: 0; width: 100%; }
                     .no-print { display: none !important; }
                 }
-            `}</style>
+            ` }} />
 
             <div className="print-area-dossier" style={{
                 background: 'linear-gradient(135deg, rgba(20, 24, 34, 0.98) 0%, rgba(15, 20, 30, 0.98) 100%)',
@@ -190,7 +220,7 @@ export default function ShiftDetailsModal({
                             )}
                         </div>
                         <span style={{ fontSize: '12px', color: '#94A3B8', fontWeight: 700 }}>
-                            {isEn ? 'Approved accounting reference for cash register, sales, invoices, and returnables' : 'مرجع محاسبي معتمد لجرد الصندوق، المبيعات، الفواتير، وفوارغ العبوات'}
+                            {isEn ? 'Approved accounting reference for cash register, sales, invoices, and fuel meters' : 'مرجع محاسبي معتمد لجرد الصندوق، المبيعات، الفواتير، وعدادات الوقود'}
                         </span>
                     </div>
 
@@ -264,11 +294,11 @@ export default function ShiftDetailsModal({
                                 <strong style={{ color: '#F8FAFC', fontSize: '13px' }}>#{String(details.shift_id).slice(-6)}</strong>
                             </div>
                             <div>
-                                <span style={{ color: '#94A3B8', fontWeight: 700, display: 'block' }}>{isEn ? 'Branch / Warehouse:' : 'منفذ البيع / المستودع:'}</span>
+                                <span style={{ color: '#94A3B8', fontWeight: 700, display: 'block' }}>{isEn ? 'Station / Fuel Tank:' : 'محطة الوقود / الخزان:'}</span>
                                 <strong style={{ color: '#00E5FF', fontSize: '13px' }}>{details.warehouse?.name}</strong>
                             </div>
                             <div>
-                                <span style={{ color: '#94A3B8', fontWeight: 700, display: 'block' }}>{isEn ? 'Responsible Rep:' : 'المندوب المسؤول:'}</span>
+                                <span style={{ color: '#94A3B8', fontWeight: 700, display: 'block' }}>{isEn ? 'Station Operator:' : 'مشغل المحطة المسؤول:'}</span>
                                 <strong style={{ color: '#10B981', fontSize: '13px' }}>{details.delegate?.name}</strong>
                             </div>
                             <div>
@@ -419,7 +449,7 @@ export default function ShiftDetailsModal({
                                             </div>
                                             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))', gap: '12px' }}>
                                                 <div className="shift-kpi-box" style={{ background: 'rgba(11, 14, 20, 0.6)' }}>
-                                                    <span style={{ fontSize: '11px', color: '#94A3B8', fontWeight: 700 }}>📦 {isEn ? 'Cost of Goods Sold (COGS):' : 'تكلفة البضاعة المباعة (COGS):'}</span>
+                                                    <span style={{ fontSize: '11px', color: '#94A3B8', fontWeight: 700 }}>⛽ {isEn ? 'Cost of Fuel & Goods Sold (COGS):' : 'تكلفة الوقود والمبيعات (COGS):'}</span>
                                                     <strong style={{ fontSize: '16px', color: '#f87171', fontWeight: 900 }}>
                                                         - {formatCurrency(details.financials.total_cogs || 0)}
                                                     </strong>
@@ -454,24 +484,24 @@ export default function ShiftDetailsModal({
                                     );
                                 })()}
 
-                                {/* مطابقة عهدة العبوات والمستلزمات المستردة */}
+                                {/* مطابقة عدادات ومضخات الوقود المنصرف */}
                                 <div style={{ background: 'rgba(0, 229, 255, 0.05)', border: '1.5px solid rgba(0, 229, 255, 0.2)', borderRadius: '16px', padding: '16px' }}>
                                     <h4 style={{ margin: '0 0 10px 0', fontSize: '14px', color: '#00E5FF', fontWeight: 900 }}>
-                                        🔄 {isEn ? 'Returnables Custody Inventory' : 'جرد عهدة العبوات والمستلزمات المستردة'}
+                                        ⛽ {isEn ? 'Fuel Pump Meters Reconciliation' : 'مطابقة عدادات ومضخات الوقود مع مبيعات الكاشير'}
                                     </h4>
                                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '12px' }}>
                                         <div>
-                                            <span style={{ fontSize: '11px', color: '#94A3B8', display: 'block' }}>{isEn ? 'Bottles Sold:' : 'العبوات المباعة:'}</span>
-                                            <strong style={{ fontSize: '16px', color: '#F8FAFC' }}>{details.bottles.sold} {isEn ? 'Bottles' : 'عبوة'}</strong>
+                                            <span style={{ fontSize: '11px', color: '#94A3B8', display: 'block' }}>{isEn ? 'Total Liters Pumped:' : 'إجمالي اللترات المضخوخة:'}</span>
+                                            <strong style={{ fontSize: '16px', color: '#F8FAFC' }}>{Number(details.financials.total_liters_sold || 0).toLocaleString()} {isEn ? 'L' : 'لتر'}</strong>
                                         </div>
                                         <div>
-                                            <span style={{ fontSize: '11px', color: '#94A3B8', display: 'block' }}>{isEn ? 'Actual Returnables:' : 'الفوارغ المستلمة فعلياً:'}</span>
-                                            <strong style={{ fontSize: '16px', color: '#10B981' }}>{details.bottles.returned} {isEn ? 'Bottles' : 'عبوة'}</strong>
+                                            <span style={{ fontSize: '11px', color: '#94A3B8', display: 'block' }}>{isEn ? 'Pumps Meter Value:' : 'قيمة مبيعات العدادات:'}</span>
+                                            <strong style={{ fontSize: '16px', color: '#00E5FF' }}>{formatCurrency(details.financials.meter_total_amount || 0)}</strong>
                                         </div>
                                         <div>
-                                            <span style={{ fontSize: '11px', color: '#94A3B8', display: 'block' }}>{isEn ? 'Returnables Variance:' : 'عجز / فارق الفوارغ:'}</span>
-                                            <strong style={{ fontSize: '16px', color: details.bottles.shortage === 0 ? '#10B981' : '#f87171' }}>
-                                                {details.bottles.shortage === 0 ? (isEn ? 'Matches perfectly ✅' : 'مطابقة تماماً ✅') : (isEn ? `${details.bottles.shortage} bottles short ⚠️` : `${details.bottles.shortage} عبوة عجز ⚠️`)}
+                                            <span style={{ fontSize: '11px', color: '#94A3B8', display: 'block' }}>{isEn ? 'Meter Sales Variance:' : 'فروقات العدادات والكاشير:'}</span>
+                                            <strong style={{ fontSize: '16px', color: (Number(details.financials.meter_sales_variance || 0) === 0) ? '#10B981' : '#fbbf24' }}>
+                                                {(Number(details.financials.meter_sales_variance || 0) === 0) ? (isEn ? 'Matches perfectly ✅' : 'مطابقة تامة ✅') : formatCurrency(details.financials.meter_sales_variance || 0)}
                                             </strong>
                                         </div>
                                     </div>

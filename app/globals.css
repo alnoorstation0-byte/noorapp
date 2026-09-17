@@ -505,7 +505,7 @@ body.daylight-theme,
   --accent-rgb: 2, 132, 199;
   --terracotta: #EA580C;        /* برتقالي دافئ نهاري */
   --terracotta-rgb: 234, 88, 12;
-  --bg-main: #F1F5F9;           /* تيتانيوم قطبي فاتح */
+  --bg-main: #F8FAFC;           /* تيتانيوم قطبي فاتح وناصع */
   --surface: #FFFFFF;           /* أسطح بيضاء ناصعة */
   --success: #059669;           /* أخضر زمردي نهاري */
   --success-rgb: 5, 150, 105;
@@ -516,8 +516,8 @@ body.daylight-theme,
   --info: #0284C7;              /* أزرق للمعلومات */
 
   /* 🔮 زجاج الرؤية النهارية (Daylight Glassmorphism) */
-  --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.94) 0%, rgba(243, 247, 252, 0.85) 100%);
-  --glass-surface: rgba(255, 255, 255, 0.92);
+  --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(248, 250, 252, 0.9) 100%);
+  --glass-surface: rgba(255, 255, 255, 0.94);
   --glass-border: 1px solid rgba(2, 132, 199, 0.22);
   --glass-border-color: rgba(2, 132, 199, 0.22);
   --glass-blur: blur(24px) saturate(180%);
@@ -541,7 +541,7 @@ body.daylight-theme,
 
 .daylight-theme body,
 body.daylight-theme {
-  background-color: #F1F5F9 !important;
+  background-color: #F8FAFC !important;
   color: #0F172A !important;
 }
 
@@ -979,4 +979,519 @@ body.daylight-theme {
   background: #EF4444 !important;
   color: #FFFFFF !important;
 }
+
+/* ==========================================================================
+   🛡️ ضمان ظهور كافة النوافذ المنبثقة فوق الجداول والمحتوى دائماً
+   ========================================================================== */
+.warm-portal-overlay-fullscreen,
+.print-modal-overlay,
+.jv-modal-overlay,
+.thermal-modal-overlay,
+.shortcuts-modal-overlay,
+.pos-numpad-overlay,
+.smart-action-modal-overlay,
+.security-modal-overlay,
+.modal-overlay,
+.blur-modal-overlay,
+.secure-action-delete-modal-overlay,
+.scanner-modal-overlay,
+.live-preview-overlay {
+  position: fixed !important;
+  inset: 0 !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 999999999 !important;
+  isolation: isolate !important;
+  pointer-events: auto !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+/* ☀️ ==========================================================================
+   🏜️ نظام النمط النهاري الصحراوي الموحد (Desert Glassmorphism Daylight Suite)
+   يضمن تحويل كافة الجداول والحاويات والبطاقات إلى طراز الزجاج الصحراوي النقي
+   ========================================================================== */
+
+.daylight-theme,
+[data-theme="daylight"] {
+  --bg-main: #FDFBF7 !important;
+  --surface: #FFFFFF !important;
+  --primary: #C29B62 !important;
+  --accent: #C29B62 !important;
+  --terracotta: #A8573C !important;
+  --success: #4E734F !important;
+  --text-main: #2C1A12 !important;
+  --text-muted: rgba(44, 26, 18, 0.65) !important;
+  --glass-bg: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.90) 100%) !important;
+  --glass-border: 1px solid rgba(194, 155, 98, 0.3) !important;
+  --card-shadow: 0 4px 20px rgba(44, 26, 18, 0.08) !important;
+  --hover-shadow: 0 10px 25px rgba(168, 87, 60, 0.15) !important;
+  --table-header-bg: rgba(194, 155, 98, 0.1) !important;
+  --table-hover: rgba(194, 155, 98, 0.06) !important;
+  --table-border: rgba(194, 155, 98, 0.2) !important;
+}
+
+/* 🏷️ الحاويات والبطاقات الشاملة (Universal Glass Containers & Cards) */
+.daylight-theme .desert-glass,
+.daylight-theme .glass-card,
+.daylight-theme .glass-panel,
+.daylight-theme .glass-container,
+.daylight-theme .command-card,
+.daylight-theme .aqua-glass-card,
+.daylight-theme .desert-form-card,
+.daylight-theme .summary-card,
+.daylight-theme .source-breakdown-card,
+.daylight-theme .cashflows-filters,
+.daylight-theme .tb-filter-bar,
+.daylight-theme .itemcard-header,
+.daylight-theme .itemcard-filters,
+.daylight-theme .inv-val-table-card,
+.daylight-theme .reorder-table-card,
+.daylight-theme .reorder-kpi-card,
+.daylight-theme .sales-chart-card,
+.daylight-theme .audit-stat-card,
+.daylight-theme .section-container,
+.daylight-theme .data-table-container,
+.daylight-theme .stat-card,
+.daylight-theme .vat-card,
+.daylight-theme .net-card,
+.daylight-theme .table-glass-container,
+.daylight-theme .settle-page-header,
+.daylight-theme .return-sec-card,
+.daylight-theme .shift-card-item,
+.daylight-theme .shift-kpi-box,
+.daylight-theme .inv-stat-card,
+.daylight-theme .apple-glass-filter-bar,
+.daylight-theme .filter-bar,
+.daylight-theme .recent-tx-card,
+.daylight-theme .tank-card-interactive,
+.daylight-theme .pump-status-card,
+.daylight-theme .op-action-btn,
+.daylight-theme .command-card-item,
+.daylight-theme .fp-table-card {
+  background: linear-gradient(135deg, rgba(255, 253, 250, 0.96) 0%, rgba(250, 246, 240, 0.92) 100%) !important;
+  backdrop-filter: blur(24px) saturate(160%) !important;
+  -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
+  border: 1px solid rgba(194, 155, 98, 0.3) !important;
+  box-shadow: 0 4px 20px rgba(44, 26, 18, 0.08) !important;
+  color: #2C1A12 !important;
+}
+
+.daylight-theme .desert-glass:hover,
+.daylight-theme .glass-card:hover,
+.daylight-theme .summary-card:hover,
+.daylight-theme .source-breakdown-card:hover,
+.daylight-theme .audit-stat-card:hover,
+.daylight-theme .aqua-glass-card:hover {
+  box-shadow: 0 10px 25px rgba(168, 87, 60, 0.15) !important;
+  border-color: rgba(194, 155, 98, 0.5) !important;
+}
+
+/* 📊 القواعد العامة لكافة الجداول (Universal Tables in Daylight) */
+.daylight-theme table {
+  background: transparent !important;
+  color: #2C1A12 !important;
+}
+
+.daylight-theme table thead,
+.daylight-theme .rawasi-printable-table thead,
+.daylight-theme .tree-thead,
+.daylight-theme .station-table-clean thead {
+  background: rgba(194, 155, 98, 0.1) !important;
+}
+
+.daylight-theme table thead th,
+.daylight-theme th,
+.daylight-theme .rawasi-printable-table th,
+.daylight-theme .tree-thead th,
+.daylight-theme .child-table th,
+.daylight-theme .fp-table th,
+.daylight-theme .tb-table thead th,
+.daylight-theme .itemcard-table th,
+.daylight-theme .inv-val-table th,
+.daylight-theme .reorder-table th,
+.daylight-theme .aqua-table th,
+.daylight-theme .data-table th,
+.daylight-theme .settle-table th,
+.daylight-theme .invoice-items-table th,
+.daylight-theme .return-table th,
+.daylight-theme .shift-table th,
+.daylight-theme .station-table-clean th {
+  background: rgba(194, 155, 98, 0.1) !important;
+  color: #2C1A12 !important;
+  font-weight: 900 !important;
+  border-bottom: 2px solid rgba(194, 155, 98, 0.3) !important;
+  border-top: none !important;
+}
+
+.daylight-theme table tbody tr,
+.daylight-theme .rawasi-printable-table tbody tr,
+.daylight-theme .tree-table tbody tr,
+.daylight-theme .child-table tbody tr,
+.daylight-theme .fp-table tbody tr,
+.daylight-theme .tb-table tbody tr,
+.daylight-theme .itemcard-table tbody tr,
+.daylight-theme .inv-val-table tbody tr,
+.daylight-theme .reorder-table tbody tr,
+.daylight-theme .aqua-table tbody tr,
+.daylight-theme .data-table tbody tr,
+.daylight-theme .settle-table tbody tr,
+.daylight-theme .invoice-items-table tbody tr,
+.daylight-theme .return-table tbody tr,
+.daylight-theme .shift-table tbody tr,
+.daylight-theme .station-table-clean tbody tr {
+  background: rgba(255, 255, 255, 0.8) !important;
+  border-bottom: 1px solid rgba(194, 155, 98, 0.18) !important;
+  color: #2C1A12 !important;
+  transition: all 0.2s ease !important;
+}
+
+.daylight-theme table tbody tr:nth-child(even),
+.daylight-theme .rawasi-printable-table tbody tr:nth-child(even),
+.daylight-theme .itemcard-table tbody tr:nth-child(even),
+.daylight-theme .inv-val-table tbody tr:nth-child(even),
+.daylight-theme .reorder-table tbody tr:nth-child(even) {
+  background: rgba(253, 251, 247, 0.9) !important;
+}
+
+.daylight-theme table tbody tr:hover,
+.daylight-theme .rawasi-printable-table tbody tr:hover,
+.daylight-theme .tree-table tbody tr:hover,
+.daylight-theme .child-table tbody tr:hover,
+.daylight-theme .fp-table tbody tr:hover,
+.daylight-theme .tb-table tbody tr:hover,
+.daylight-theme .itemcard-table tbody tr:hover,
+.daylight-theme .inv-val-table tbody tr:hover,
+.daylight-theme .reorder-table tbody tr:hover,
+.daylight-theme .aqua-table tbody tr:hover,
+.daylight-theme .data-table tbody tr:hover,
+.daylight-theme .settle-table tbody tr:hover,
+.daylight-theme .invoice-items-table tbody tr:hover,
+.daylight-theme .return-table tbody tr:hover,
+.daylight-theme .shift-table tbody tr:hover,
+.daylight-theme .station-table-clean tbody tr:hover,
+.daylight-theme .table-row-hover:hover {
+  background: rgba(194, 155, 98, 0.08) !important;
+  box-shadow: 0 2px 10px rgba(44, 26, 18, 0.05) !important;
+}
+
+.daylight-theme table td,
+.daylight-theme td,
+.daylight-theme .rawasi-printable-table td,
+.daylight-theme .child-table td,
+.daylight-theme .fp-table td,
+.daylight-theme .tb-table tbody td,
+.daylight-theme .itemcard-table td,
+.daylight-theme .inv-val-table td,
+.daylight-theme .reorder-table td,
+.daylight-theme .aqua-table td,
+.daylight-theme .data-table td,
+.daylight-theme .settle-table td,
+.daylight-theme .invoice-items-table td,
+.daylight-theme .return-table td,
+.daylight-theme .shift-table td,
+.daylight-theme .station-table-clean td {
+  color: #2C1A12 !important;
+  border-bottom: 1px solid rgba(194, 155, 98, 0.15) !important;
+}
+
+/* 📋 أوعية الجداول وحاوياتها (Table Containers & Wrappers) */
+.daylight-theme .rawasi-table-wrapper,
+.daylight-theme .cashflows-table-wrapper,
+.daylight-theme .fp-table-wrapper,
+.daylight-theme .child-tree-container,
+.daylight-theme .table-scroll-wrap {
+  background: linear-gradient(135deg, rgba(255, 253, 250, 0.96) 0%, rgba(250, 246, 240, 0.90) 100%) !important;
+  border: 1px solid rgba(194, 155, 98, 0.3) !important;
+  box-shadow: 0 6px 20px rgba(44, 26, 18, 0.06) !important;
+  border-radius: 16px !important;
+}
+
+/* 🌲 شجرة الحسابات (Accounts Tree Rows & Headers in Daylight) */
+.daylight-theme .acc-row {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(250, 247, 242, 0.9) 100%) !important;
+  border: 1px solid rgba(194, 155, 98, 0.3) !important;
+  box-shadow: 0 2px 8px rgba(44, 26, 18, 0.05) !important;
+  color: #2C1A12 !important;
+}
+
+.daylight-theme .acc-row.root-node {
+  background: linear-gradient(135deg, rgba(255, 253, 250, 0.98) 0%, rgba(245, 240, 230, 0.95) 100%) !important;
+  border: 1.5px solid rgba(194, 155, 98, 0.45) !important;
+  box-shadow: 0 4px 12px rgba(44, 26, 18, 0.08) !important;
+}
+
+.daylight-theme .acc-row.child-node {
+  background: rgba(255, 255, 255, 0.85) !important;
+}
+
+.daylight-theme .acc-row:hover {
+  border-color: #C29B62 !important;
+  background: #FFFFFF !important;
+  box-shadow: 0 6px 16px rgba(168, 87, 60, 0.12) !important;
+}
+
+.daylight-theme .acc-row.selected {
+  background: rgba(194, 155, 98, 0.15) !important;
+  border-color: #C29B62 !important;
+}
+
+.daylight-theme .acc-name-text {
+  color: #2C1A12 !important;
+}
+
+.daylight-theme .acc-code-badge {
+  background: rgba(194, 155, 98, 0.15) !important;
+  color: #A8573C !important;
+}
+
+.daylight-theme .table-header {
+  background: rgba(194, 155, 98, 0.12) !important;
+  border: 1px solid rgba(194, 155, 98, 0.3) !important;
+  color: #2C1A12 !important;
+}
+
+.daylight-theme .table-header-title {
+  color: #2C1A12 !important;
+}
+
+.daylight-theme .entry-line {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid rgba(194, 155, 98, 0.25) !important;
+  border-right: 3px solid #C29B62 !important;
+  box-shadow: 0 1px 4px rgba(44, 26, 18, 0.05) !important;
+}
+
+.daylight-theme .entry-line-desc {
+  color: #2C1A12 !important;
+}
+
+.daylight-theme .entry-line-date {
+  background: rgba(194, 155, 98, 0.12) !important;
+  color: #2C1A12 !important;
+}
+
+.daylight-theme .mobile-accounts-toolbar,
+.daylight-theme .accounts-selection-bar {
+  background: linear-gradient(135deg, rgba(255, 253, 250, 0.96) 0%, rgba(250, 246, 240, 0.92) 100%) !important;
+  border: 1px solid rgba(194, 155, 98, 0.35) !important;
+  box-shadow: 0 4px 15px rgba(44, 26, 18, 0.08) !important;
+}
+
+.daylight-theme .mobile-search-input {
+  background: #FFFFFF !important;
+  border: 1px solid rgba(194, 155, 98, 0.35) !important;
+  color: #2C1A12 !important;
+}
+
+/* 🌊 التدفقات النقدية (Cashflows Tree Table & Filter) */
+.daylight-theme .master-group-row {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(250, 247, 242, 0.9) 100%) !important;
+  box-shadow: 0 2px 8px rgba(44, 26, 18, 0.05) !important;
+}
+
+.daylight-theme .master-group-row:hover {
+  background: #FFFFFF !important;
+  box-shadow: 0 6px 16px rgba(168, 87, 60, 0.12) !important;
+}
+
+.daylight-theme .master-group-row td {
+  color: #2C1A12 !important;
+  border-bottom: 1px solid rgba(194, 155, 98, 0.2) !important;
+}
+
+.daylight-theme .child-tree-container {
+  background: rgba(253, 251, 247, 0.95) !important;
+  border-bottom: 2px solid rgba(194, 155, 98, 0.3) !important;
+}
+
+.daylight-theme .child-table {
+  background: #FFFFFF !important;
+  border: 1px solid rgba(194, 155, 98, 0.3) !important;
+}
+
+.daylight-theme .arrow-icon {
+  background: rgba(194, 155, 98, 0.15) !important;
+  color: #C29B62 !important;
+}
+
+.daylight-theme .arrow-expanded {
+  background: #C29B62 !important;
+  color: #FFFFFF !important;
+}
+
+.daylight-theme .view-toggle-btn {
+  color: rgba(44, 26, 18, 0.7) !important;
+}
+
+.daylight-theme .view-toggle-btn.active {
+  background: #C29B62 !important;
+  color: #FFFFFF !important;
+}
+
+.daylight-theme .view-toggle-btn:not(.active):hover {
+  background: rgba(194, 155, 98, 0.12) !important;
+  color: #2C1A12 !important;
+}
+
+.daylight-theme .filter-input,
+.daylight-theme .search-box,
+.daylight-theme .glass-input-field {
+  background: #FFFFFF !important;
+  border: 1.5px solid rgba(194, 155, 98, 0.35) !important;
+  color: #2C1A12 !important;
+}
+
+.daylight-theme .filter-input:focus,
+.daylight-theme .search-box:focus,
+.daylight-theme .glass-input-field:focus {
+  border-color: #C29B62 !important;
+  box-shadow: 0 0 0 3px rgba(194, 155, 98, 0.2) !important;
+}
+
+/* ⚖️ ميزان المراجعة (Trial Balance) */
+.daylight-theme .tb-table {
+  background: #FFFFFF !important;
+}
+
+.daylight-theme .tb-date-group {
+  background: rgba(253, 251, 247, 0.95) !important;
+  border: 1px solid rgba(194, 155, 98, 0.35) !important;
+}
+
+.daylight-theme .tb-date-group input {
+  color: #2C1A12 !important;
+}
+
+.daylight-theme .tb-totals {
+  background-color: rgba(194, 155, 98, 0.12) !important;
+}
+
+.daylight-theme .tb-totals td {
+  border-top: 2px solid #C29B62 !important;
+  color: #2C1A12 !important;
+}
+
+/* 🕵️ الرادار المحاسبي (Audit) */
+.daylight-theme .err-row {
+  border-bottom: 1px dashed rgba(194, 155, 98, 0.25) !important;
+  color: #2C1A12 !important;
+}
+
+.daylight-theme .err-row:hover {
+  background: rgba(194, 155, 98, 0.08) !important;
+}
+
+/* 🏷️ حقول الإدخال والاختيار الشاملة (Universal Inputs, Selects, Textareas) */
+.daylight-theme input,
+.daylight-theme select,
+.daylight-theme textarea {
+  background: #FFFFFF !important;
+  border: 1px solid rgba(194, 155, 98, 0.35) !important;
+  color: #2C1A12 !important;
+}
+
+.daylight-theme input:focus,
+.daylight-theme select:focus,
+.daylight-theme textarea:focus {
+  border-color: #C29B62 !important;
+  box-shadow: 0 0 0 3px rgba(194, 155, 98, 0.2) !important;
+  background: #FFFFFF !important;
+}
+
+.daylight-theme select option {
+  background: #FFFFFF !important;
+  color: #2C1A12 !important;
+}
+
+.daylight-theme .stat-box {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border: 1px solid rgba(194, 155, 98, 0.25) !important;
+  color: #2C1A12 !important;
+}
+
+.daylight-theme .stat-box-title {
+  color: rgba(44, 26, 18, 0.65) !important;
+}
+
+.daylight-theme .stat-box-value {
+  color: #2C1A12 !important;
+}
+
+.daylight-theme .stat-box.highlight {
+  background: linear-gradient(135deg, rgba(194, 155, 98, 0.15), rgba(168, 87, 60, 0.15)) !important;
+  border-color: #C29B62 !important;
+  box-shadow: 0 4px 15px rgba(194, 155, 98, 0.2) !important;
+}
+
+.daylight-theme .stat-box.highlight .stat-box-title,
+.daylight-theme .stat-box.highlight .stat-box-value {
+  color: #A8573C !important;
+}
+
+/* 🏷️ شريط تبويبات التسويات والمودال (Tabs & Filters) */
+.daylight-theme .aqua-filter-tab:not(.active),
+.daylight-theme .aqua-tab-btn:not(.active) {
+  background: rgba(255, 255, 255, 0.85) !important;
+  color: rgba(44, 26, 18, 0.7) !important;
+  border-color: rgba(194, 155, 98, 0.3) !important;
+}
+
+.daylight-theme .aqua-filter-tab:not(.active):hover,
+.daylight-theme .aqua-tab-btn:not(.active):hover {
+  background: #FFFFFF !important;
+  color: #2C1A12 !important;
+  border-color: #C29B62 !important;
+}
+
+.daylight-theme .aqua-filter-tab.active,
+.daylight-theme .aqua-tab-btn.active {
+  background: linear-gradient(135deg, #C29B62 0%, #A8573C 100%) !important;
+  color: #FFFFFF !important;
+  border-color: #C29B62 !important;
+  box-shadow: 0 4px 12px rgba(168, 87, 60, 0.25) !important;
+}
+
+/* 🏷️ شريط فحص الباركود */
+.daylight-theme .barcode-scan-container {
+  background: rgba(253, 251, 247, 0.95) !important;
+  border: 1.5px dashed rgba(194, 155, 98, 0.45) !important;
+}
+
+/* 🏷️ النصوص والعناوين الإحصائية */
+.daylight-theme .summary-val,
+.daylight-theme .stat-value,
+.daylight-theme .kpi-val-highlight {
+  color: #2C1A12 !important;
+}
+
+.daylight-theme .summary-label,
+.daylight-theme .stat-title,
+.daylight-theme .kpi-sub-label,
+.daylight-theme .card-section-title {
+  color: rgba(44, 26, 18, 0.7) !important;
+}
+
+.daylight-theme .card-section-title {
+  border-bottom-color: rgba(194, 155, 98, 0.3) !important;
+}
+
+.daylight-theme .card-section-title span.badge {
+  background: rgba(194, 155, 98, 0.15) !important;
+  color: #A8573C !important;
+}
+
+/* 🏷️ زر إدراج الصنف في المودال */
+.daylight-theme .btn-add-line {
+  background: linear-gradient(135deg, #C29B62 0%, #A8573C 100%) !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 4px 12px rgba(168, 87, 60, 0.25) !important;
+}
+
+
 

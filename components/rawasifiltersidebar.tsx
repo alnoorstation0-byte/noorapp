@@ -115,7 +115,7 @@ export default function RawasiFilterSidebar({
 
   return (
     <>
-      <style>{`
+      <style dangerouslySetInnerHTML={{ __html: `
         .filter-sidebar-v3, .filter-sidebar-v3 * {
           box-sizing: border-box;
         }
@@ -680,7 +680,84 @@ export default function RawasiFilterSidebar({
           }
         }
 
-      `}</style>
+        /* ☀️ وضع الرؤية النهارية للوحة التحكم الجانبية (Daylight Sidebar) */
+        .daylight-theme .filter-sidebar-v3 {
+          background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.94) 100%) !important;
+          border-color: rgba(2, 132, 199, 0.25) !important;
+          box-shadow: 0 15px 45px rgba(15, 23, 42, 0.12), 0 0 20px rgba(2, 132, 199, 0.08) !important;
+          color: #0F172A !important;
+        }
+        .daylight-theme .sidebar-header-bar {
+          background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(241, 245, 249, 0.92) 100%) !important;
+          border-bottom-color: rgba(2, 132, 199, 0.2) !important;
+        }
+        .daylight-theme .sidebar-main-title {
+          color: #0F172A !important;
+        }
+        .daylight-theme .sidebar-sub-badge {
+          background: rgba(2, 132, 199, 0.1) !important;
+          color: #0284C7 !important;
+          border-color: rgba(2, 132, 199, 0.25) !important;
+        }
+        .daylight-theme .sidebar-header-action-btn {
+          background: rgba(241, 245, 249, 0.9) !important;
+          border-color: rgba(203, 213, 225, 0.8) !important;
+          color: #0F172A !important;
+        }
+        .daylight-theme .sidebar-header-action-btn:hover {
+          background: #FFFFFF !important;
+          border-color: #0284C7 !important;
+        }
+        .daylight-theme .sidebar-search-box {
+          background: #FFFFFF !important;
+          border-color: rgba(203, 213, 225, 0.9) !important;
+        }
+        .daylight-theme .sidebar-search-box:focus-within {
+          border-color: #0284C7 !important;
+          box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.18) !important;
+        }
+        .daylight-theme .sidebar-search-input {
+          color: #0F172A !important;
+        }
+        .daylight-theme .sidebar-section-card {
+          background: rgba(255, 255, 255, 0.9) !important;
+          border-color: rgba(226, 232, 240, 0.9) !important;
+          box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04) !important;
+        }
+        .daylight-theme .sidebar-section-title-tag {
+          color: #0284C7 !important;
+        }
+        .daylight-theme .sidebar-date-input {
+          background: #FFFFFF !important;
+          border-color: rgba(203, 213, 225, 0.9) !important;
+          color: #0F172A !important;
+        }
+        .daylight-theme .sidebar-date-input:focus {
+          border-color: #0284C7 !important;
+          box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.18) !important;
+        }
+        .daylight-theme .sidebar-date-tag {
+          background: rgba(2, 132, 199, 0.1) !important;
+          border-color: rgba(2, 132, 199, 0.25) !important;
+          color: #0284C7 !important;
+        }
+        .daylight-theme .date-preset-pill {
+          background: rgba(241, 245, 249, 0.9) !important;
+          border-color: rgba(203, 213, 225, 0.8) !important;
+          color: #475569 !important;
+        }
+        .daylight-theme .date-preset-pill.active {
+          background: #0284C7 !important;
+          color: #FFFFFF !important;
+          border-color: #0284C7 !important;
+        }
+        .daylight-theme .filter-toggle-tab-v3 {
+          background: rgba(255, 255, 255, 0.95) !important;
+          border-color: rgba(2, 132, 199, 0.3) !important;
+          color: #0284C7 !important;
+          box-shadow: -2px 0 12px rgba(15, 23, 42, 0.1) !important;
+        }
+      `}} />
 
       {isMobile && isOpen && (
         <div 

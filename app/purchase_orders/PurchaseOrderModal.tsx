@@ -168,7 +168,7 @@ export default function PurchaseOrderModal({ isOpen, onClose, items, initialData
         title={initialData ? 'تعديل أمر الشراء 📝' : 'أمر شراء جديد 🛒'}
         width="880px"
     >
-      <style>{`
+      <style dangerouslySetInnerHTML={{ __html: `
         .po-tax-banner {
           background: rgba(255,255,255,0.45);
           padding: 12px 16px;
@@ -354,7 +354,7 @@ export default function PurchaseOrderModal({ isOpen, onClose, items, initialData
             font-size: 13px !important;
           }
         }
-      `}</style>
+      `}} />
 
       {/* 1. إعدادات الضريبة العامة */}
       <div className="po-tax-banner">

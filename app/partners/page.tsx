@@ -1,5 +1,6 @@
 "use client";
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { supabase } from '@/lib/supabase';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/lib/toast-context';
@@ -11,7 +12,7 @@ import RawasiSidebarManager from '@/components/RawasiSidebarManager';
 import RawasiSmartTable from '@/components/rawasismarttable';
 import TranslatableInput from '@/components/TranslatableInput';
 
-const partnerTypes = ['مورد', 'عميل', 'موظف', 'أخرى', 'مندوب 🚚'];
+const partnerTypes = ['مورد', 'عميل', 'موظف', 'أخرى', 'مشغل محطة ⛽'];
 
 function usePartnersLogic() {
     const queryClient = useQueryClient();
@@ -47,7 +48,11 @@ function usePartnersLogic() {
     const displayedPartners = useMemo(() => {
         let res = partners;
         if (filterType !== 'الكل') {
-            res = res.filter(p => p.partner_type === filterType);
+            if (filterType === 'مشغل محطة ⛽') {
+                res = res.filter(p => p.partner_type === 'مشغل محطة ⛽' || p.partner_type === 'مندوب 🚚' || p.partner_type === 'مندوب' || p.partner_type === 'مشغل');
+            } else {
+                res = res.filter(p => p.partner_type === filterType);
+            }
         }
         if (globalSearch) {
             const lower = globalSearch.toLowerCase();
@@ -135,6 +140,11 @@ function usePartnersLogic() {
 
 export default function PartnersPage() {
     const logic = usePartnersLogic();
+    const [mounted, setMounted] = useState(false);
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
     const columns = useMemo(() => [
         { 
@@ -155,7 +165,7 @@ export default function PartnersPage() {
             if (row.partner_type === 'مورد') { bg = '#fee2e2'; c = '#dc2626'; }
             if (row.partner_type === 'عميل') { bg = '#dcfce7'; c = '#16a34a'; }
             if (row.partner_type === 'موظف') { bg = '#e0e7ff'; c = '#4f46e5'; }
-            if (row.partner_type === 'مندوب 🚚') { bg = '#fef9c3'; c = '#ca8a04'; }
+            if (row.partner_type === 'مشغل محطة ⛽' || row.partner_type === 'مندوب 🚚' || row.partner_type === 'مشغل' || row.partner_type === 'مندوب') { bg = '#fef9c3'; c = '#ca8a04'; }
             return <span style={{ background: bg, color: c, padding: '4px 8px', borderRadius: '8px', fontSize: '11px', fontWeight: 900 }}>{row.partner_type}</span>;
           }
         },
@@ -217,7 +227,7 @@ export default function PartnersPage() {
                         <div>
                             <label className="filter-label">تصفية حسب النوع</label>
                             <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap' }}>
-                                {['الكل', 'مورد', 'عميل', 'موظف', 'مندوب 🚚'].map(t => (
+                                {['الكل', 'مورد', 'عميل', 'موظف', 'مشغل محطة ⛽'].map(t => (
                                     <button 
                                         key={t}
                                         onClick={() => logic.setFilterType(t)}
@@ -246,8 +256,23 @@ export default function PartnersPage() {
                     .btn-icon.delete:hover { background: #fee2e2; }
 
                     /* Modal Styles */
-                    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 20px; }
-                    .modal-content { background: white; border-radius: 24px; width: 100%; max-width: 520px; padding: 30px; box-shadow: 0 25px 50px -12px rgba(0,0,0,0.25); animation: zoomIn 0.3s cubic-bezier(0.165, 0.84, 0.44, 1); }
+                    .modal-overlay { 
+                        position: fixed !important; 
+                        inset: 0 !important; 
+                        top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
+                        width: 100vw !important; height: 100vh !important;
+                        background: rgba(15, 23, 42, 0.82) !important; 
+                        backdrop-filter: blur(12px) !important; 
+                        -webkit-backdrop-filter: blur(12px) !important;
+                        z-index: 999999999 !important; 
+                        isolation: isolate !important;
+                        pointer-events: auto !important;
+                        display: flex !important; 
+                        align-items: center !important; 
+                        justify-content: center !important; 
+                        padding: 20px !important; 
+                    }
+                    .modal-content { background: white; border-radius: 24px; width: 100%; max-width: 520px; padding: 30px; box-shadow: 0 25px 60px rgba(0,0,0,0.35); animation: zoomIn 0.3s cubic-bezier(0.165, 0.84, 0.44, 1); }
                     @keyframes zoomIn { from { transform: scale(0.95); opacity: 0; } to { transform: scale(1); opacity: 1; } }
                     .form-group { margin-bottom: 15px; }
                     .form-label { display: block; font-size: 12px; font-weight: 800; color: #475569; margin-bottom: 5px; }
@@ -270,7 +295,7 @@ export default function PartnersPage() {
                 )}
             </MasterPage>
 
-            {logic.isModalOpen && (
+            {logic.isModalOpen && mounted && typeof document !== 'undefined' && createPortal(
                 <div className="modal-overlay" onClick={() => logic.setIsModalOpen(false)}>
                     <div className="modal-content" onClick={e => e.stopPropagation()}>
                         <h2 style={{ margin: '0 0 20px 0', color: THEME.primary, fontSize: '20px', fontWeight: 900 }}>
@@ -354,7 +379,8 @@ export default function PartnersPage() {
                             <button className="btn-cancel" onClick={() => logic.setIsModalOpen(false)}>إلغاء</button>
                         </div>
                     </div>
-                </div>
+                </div>,
+                document.body
             )}
         </div>
     );

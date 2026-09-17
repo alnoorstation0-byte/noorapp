@@ -2,25 +2,28 @@ import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-// قاموس محلي سريع لمصطلحات الصيدلة الوقودة والمحاسبة كخط دفاع أول
+// قاموس محلي سريع لمصطلحات محطات الوقود والمحروقات والمحاسبة كخط دفاع أول
 const LOCAL_DICTIONARY: Record<string, { en: string; ar: string }> = {
     'وقود': { en: 'Fuel', ar: 'وقود' },
-    'منتجات': { en: 'Products', ar: 'منتجات' },
-    'كرتون': { en: 'Carton', ar: 'كرتون' },
-    'قارورة': { en: 'Bottle', ar: 'قارورة' },
-    'جالون': { en: 'Gallon', ar: 'جالون' },
-    'محطات النور للوقود': { en: 'Al-Noor Gas Stations Station', ar: 'محطات النور للوقود' },
+    'محطة وقود': { en: 'Gas Station', ar: 'محطة وقود' },
+    'مشغل': { en: 'Operator', ar: 'مشغل' },
+    'مشغل المحطة': { en: 'Station Operator', ar: 'مشغل المحطة' },
+    'خزان وقود': { en: 'Fuel Tank', ar: 'خزان وقود' },
+    'صهريج': { en: 'Fuel Tanker', ar: 'صهريج' },
+    'لتر': { en: 'Liter', ar: 'لتر' },
+    'بنزين 91': { en: 'Gasoline 91', ar: 'بنزين 91' },
+    'بنزين 95': { en: 'Gasoline 95', ar: 'بنزين 95' },
+    'ديزل': { en: 'Diesel', ar: 'ديزل' },
+    'محطات النور للوقود': { en: 'Al-Noor Gas Stations', ar: 'محطات النور للوقود' },
     'مؤسسة': { en: 'Establishment', ar: 'مؤسسة' },
     'شركة': { en: 'Company', ar: 'شركة' },
     'عميل': { en: 'Customer', ar: 'عميل' },
     'مورد': { en: 'Supplier', ar: 'مورد' },
-    'مندوب': { en: 'Representative / Delegate', ar: 'مندوب' },
     'موظف': { en: 'Employee', ar: 'موظف' },
     'كاشير': { en: 'Cashier', ar: 'كاشير' },
     'فرع': { en: 'Branch', ar: 'فرع' },
-    'منفذ بيع': { en: 'Sales Outlet', ar: 'منفذ بيع' },
-    'المستودع الرئيسي': { en: 'Main Warehouse', ar: 'المستودع الرئيسي' },
-    'فوارغ': { en: 'Empty Bottles', ar: 'فوارغ' }
+    'المستودع الرئيسي': { en: 'Main Fuel Depot', ar: 'المستودع الرئيسي' },
+    'خزانات الوقود': { en: 'Fuel Tanks', ar: 'خزانات الوقود' }
 };
 
 export async function POST(request: Request) {

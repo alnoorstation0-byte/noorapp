@@ -51,14 +51,13 @@ export function useExpensesLogic() {
     const [disburseProgress, setDisburseProgress] = useState({ current: 0, total: 0, isActive: false });
     const [rowActionLoadingId, setRowActionLoadingId] = useState<string | null>(null);
 
-    // 🚀 القيمة الافتراضية أصبحت "آجل" تماشياً مع التحديث المحاسبي، وتم إضافة حقول الربط الجديدة
+    // 🚀 القيمة الافتراضية أصبحت "آجل" تماشياً مع التحديث المحاسبي
     const defaultExp = { 
-        exp_date: new Date().toISOString().split('T')[0], main_category: '', sub_contractor: '', site_ref: '',       
+        exp_date: new Date().toISOString().split('T')[0], main_category: '',       
         creditor_account: '', description: '', payee_name: '', payment_method: 'آجل', payment_account: '', 
         employee_name: '', quantity: 1, unit_price: 0, vat_amount: 0, discount_amount: 0, discount_account: '', 
         notes: '', invoice_image: null, is_auto_distributed: false, expense_number: '',
-        // 👇 الحقول الجديدة الخاصة بالربط مع أوامر التشغيل والموردين
-        payee_id: null, job_order_id: null, is_deducted_from_contractor: false 
+        payee_id: null
     };
     const [currentExpense, setCurrentExpense] = useState<any>(defaultExp);
 
@@ -142,28 +141,22 @@ export function useExpensesLogic() {
     const supportDataQuery = useQuery({
         queryKey: ['expenses_support_data'],
         queryFn: async () => {
-            const [part, acc, fleet, vehicles] = await Promise.all([
+            const [part, acc] = await Promise.all([
                 supabase.from('partners').select('id, name, partner_type'),
-                supabase.from('accounts').select('id, code, name'),
-                supabase.from('fleet_operations').select('id, operation_number, operation_date, description, vehicle:fleet_vehicles(plate_number), driver:partners(name)').neq('status', 'مغلق').neq('status', 'closed').order('operation_date', { ascending: false }),
-                supabase.from('fleet_vehicles').select('id, plate_number, vehicle_model')
+                supabase.from('accounts').select('id, code, name')
             ]);
             
             const partnersData = part.data || [];
-            const formattedFleet = fleet.data?.map((op: any) => ({
-                id: op.id,
-                name: `🚚 ${op.operation_number} | ${op.driver?.name ? `مندوب: ${op.driver.name}` : 'بدون مندوب'} | ${op.vehicle?.plate_number ? `سيارة: ${op.vehicle.plate_number}` : ''} ${op.description ? `(${op.description})` : ''}`
-            })) || [];
 
             return {
                 projects: [],
                 contractors: partnersData.filter(p => p.partner_type === 'مورد'),
-                payees: partnersData.filter(p => p.partner_type === 'مورد' || p.partner_type === 'مندوب'),
+                payees: partnersData.filter(p => p.partner_type === 'مورد' || p.partner_type === 'مشغل' || p.partner_type?.includes('مشغل') || p.partner_type === 'مندوب'),
                 accounts_raw: acc.data || [], 
                 accounts: (acc.data || []).map(a => ({ id: a.id, code: a.code, name: `${a.code} - ${a.name}` })),
                 boqItems: [],
-                fleetOperations: formattedFleet,
-                fleetVehicles: vehicles.data || []
+                fleetOperations: [],
+                fleetVehicles: []
             };
         },
         staleTime: 1000 * 60 * 5,
@@ -185,7 +178,7 @@ export function useExpensesLogic() {
     // 🚀 3. الفلترة الذكية
     const { filteredData: allFiltered, setFilter, customFilters, globalSearch, setGlobalSearch } = useSmartFilter(
         expenses, 
-        ['payee_name', 'sub_contractor', 'description', 'notes', 'site_ref', 'creditor_account', 'main_category'], 
+        ['payee_name', 'description', 'notes', 'creditor_account', 'main_category'], 
         'exp_date' 
     );
 
@@ -213,15 +206,13 @@ export function useExpensesLogic() {
     const totalPages = Math.ceil(finalFilteredExpenses.length / rowsPerPage) || 1;
     
     const historicalData = useMemo(() => {
-        const sites = new Set<string>(), contractors = new Set<string>(), payees = new Set<string>(), descriptions = new Set<string>(), notes = new Set<string>();
+        const payees = new Set<string>(), descriptions = new Set<string>(), notes = new Set<string>();
         expenses.forEach(exp => {
-            if (exp.site_ref) sites.add(exp.site_ref);
-            if (exp.sub_contractor) contractors.add(exp.sub_contractor);
             if (exp.payee_name) payees.add(exp.payee_name);
             if (exp.description) descriptions.add(exp.description);
             if (exp.notes) notes.add(exp.notes);
         });
-        return { sites: Array.from(sites), contractors: Array.from(contractors), payees: Array.from(payees), descriptions: Array.from(descriptions), notes: Array.from(notes) };
+        return { sites: [], contractors: [], payees: Array.from(payees), descriptions: Array.from(descriptions), notes: Array.from(notes) };
     }, [expenses]);
 
     const { isProcessing } = useUniversalPosting('expenses', 'expenses', 'post_expenses_bulk');
@@ -249,8 +240,6 @@ export function useExpensesLogic() {
                 p_id: editingId || null,
                 p_exp_date: passedRecord.exp_date, 
                 p_main_category: passedRecord.main_category, 
-                p_sub_contractor: passedRecord.sub_contractor || null, 
-                p_site_ref: passedRecord.site_ref || null, 
                 p_creditor_account: passedRecord.creditor_account, 
                 p_description: finalDescription, 
                 p_payee_name: passedRecord.payee_name || null, 
@@ -266,19 +255,15 @@ export function useExpensesLogic() {
                 p_invoice_image: passedRecord.invoice_image || null, 
                 p_lines_data: passedRecord.lines_data || [], 
                 p_is_auto_distributed: passedRecord.is_auto_distributed || false,
-                
-                p_payee_id: passedRecord.payee_id || null,
-                p_job_order_id: passedRecord.job_order_id || null,
-                p_is_deducted_from_contractor: passedRecord.is_deducted_from_contractor || false
+                p_payee_id: passedRecord.payee_id || null
             };
 
             const { data, error } = await supabase.rpc('save_expense_with_settlement', payload);
             if (error) throw error;
             if (data && data.success === false) throw new Error(data.error);
 
-            // 🚀 حفظ fleet_operation_id و shift_id بشكل منفصل
+            // 🚀 حفظ shift_id بشكل منفصل إن وجد
             let updates: any = {};
-            if (passedRecord.fleet_operation_id !== undefined) updates.fleet_operation_id = passedRecord.fleet_operation_id || null;
             if (passedRecord.shift_id !== undefined) updates.shift_id = passedRecord.shift_id || null;
 
             if (Object.keys(updates).length > 0 && data.expense_number) {
@@ -517,8 +502,6 @@ export function useExpensesLogic() {
                                 status: 'معتمد',
                                 is_posted: true,
                                 created_by: session.user.id,
-                                related_expense_id: exp.id,
-                                fleet_operation_id: exp.fleet_operation_id || null,
                                 shift_id: exp.shift_id || null
                             }).select('id').single();
 

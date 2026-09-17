@@ -18,7 +18,7 @@ export default function InventoryValuationPage() {
 
     return (
         <div className="inv-val-container" style={{ padding: '20px', minHeight: '100vh', background: `linear-gradient(135deg, ${THEME.primary} 0%, #0a192f 100%)`, fontFamily: 'Tajawal, sans-serif', direction: 'rtl', maxWidth: '100vw', overflowX: 'hidden', boxSizing: 'border-box' }}>
-            <style>{`
+            <style dangerouslySetInnerHTML={{ __html: `
                 @media (max-width: 768px) {
                     .inv-val-container { padding: 10px 8px !important; }
                     .inv-val-header { padding: 15px !important; border-radius: 16px !important; }
@@ -31,17 +31,46 @@ export default function InventoryValuationPage() {
                     .inv-val-table { min-width: 600px !important; }
                     .inv-val-table th, .inv-val-table td { padding: 8px 10px !important; font-size: 11px !important; }
                 }
-            `}</style>
+                .daylight-theme .inv-val-container { background: #FDFBF7 !important; }
+                .daylight-theme .inv-val-header { 
+                    background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.90) 100%) !important; 
+                    border: 1px solid rgba(194, 155, 98, 0.3) !important; 
+                    box-shadow: 0 4px 20px rgba(44, 26, 18, 0.08) !important; 
+                }
+                .daylight-theme .inv-val-header h1 { color: #2C1A12 !important; }
+                .daylight-theme .inv-val-header p { color: rgba(44, 26, 18, 0.7) !important; }
+                .daylight-theme .inv-val-header input { 
+                    background: #FFFFFF !important; 
+                    border-color: rgba(194, 155, 98, 0.35) !important; 
+                    color: #2C1A12 !important; 
+                }
+                .daylight-theme .inv-val-kpi-card { 
+                    background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.90) 100%) !important; 
+                    border: 1px solid rgba(194, 155, 98, 0.3) !important; 
+                    box-shadow: 0 4px 15px rgba(44, 26, 18, 0.08) !important; 
+                }
+                .daylight-theme .inv-val-kpi-card div:nth-child(2) { color: #2C1A12 !important; }
+                .daylight-theme .inv-val-table-card { 
+                    background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.90) 100%) !important; 
+                    border: 1px solid rgba(194, 155, 98, 0.3) !important; 
+                    box-shadow: 0 8px 30px rgba(44, 26, 18, 0.08) !important; 
+                }
+                .daylight-theme .inv-val-table { color: #2C1A12 !important; }
+                .daylight-theme .inv-val-table thead { background: rgba(194, 155, 98, 0.12) !important; }
+                .daylight-theme .inv-val-table th { color: #2C1A12 !important; border-bottom: 1px solid rgba(194, 155, 98, 0.25) !important; }
+                .daylight-theme .inv-val-table td { border-bottom: 1px solid rgba(194, 155, 98, 0.15) !important; color: #2C1A12 !important; }
+                .daylight-theme .inv-val-table tr:hover { background: rgba(194, 155, 98, 0.06) !important; }
+            `}} />
             {/* Header */}
             <div className="inv-val-header" style={{ background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(20px)', borderRadius: '24px', padding: '30px', marginBottom: '25px', border: '1px solid rgba(255,255,255,0.1)', boxShadow: '0 20px 40px rgba(0,0,0,0.2)' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
                     <div>
                         <h1 style={{ color: 'white', margin: '0 0 10px 0', fontSize: '32px', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '15px' }}>
-                            <span style={{ background: `linear-gradient(45deg, ${THEME.accent}, #fde047)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>تقييم المخزون (Inventory Valuation)</span>
-                            <span style={{ fontSize: '24px' }}>💵</span>
+                            <span style={{ background: `linear-gradient(45deg, ${THEME.accent}, #fde047)`, WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>تقييم مخزون الوقود والمستودعات</span>
+                            <span style={{ fontSize: '24px' }}>⛽</span>
                         </h1>
                         <p style={{ color: '#94a3b8', margin: 0, fontSize: '15px', fontWeight: 500 }}>
-                            يعرض قيمة البضاعة الحالية كرقم مالي (الكمية × متوسط التكلفة).
+                            يعرض تقييم كميات الوقود والمنتجات المخزنة بالخزانات والمستودعات كرقم مالي (الكمية × متوسط التكلفة).
                         </p>
                     </div>
                     
@@ -79,7 +108,7 @@ export default function InventoryValuationPage() {
                             <div style={{ color: 'white', fontSize: '36px', fontWeight: 900 }}>{formatCurrency(totalInventoryValue)}</div>
                         </div>
                         <div className="inv-val-kpi-card" style={{ background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.2))', border: '1px solid rgba(16, 185, 129, 0.3)', padding: '25px', borderRadius: '24px', textAlign: 'center' }}>
-                            <div style={{ color: '#6ee7b7', fontSize: '14px', fontWeight: 900, marginBottom: '8px' }}>إجمالي الوحدات المادية 📦</div>
+                            <div style={{ color: '#6ee7b7', fontSize: '14px', fontWeight: 900, marginBottom: '8px' }}>إجمالي كميات الوقود والوحدات ⛽</div>
                             <div style={{ color: 'white', fontSize: '36px', fontWeight: 900 }}>{totalPhysicalUnits.toLocaleString()}</div>
                         </div>
                         <div className="inv-val-kpi-card" style={{ background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(217, 119, 6, 0.2))', border: '1px solid rgba(245, 158, 11, 0.3)', padding: '25px', borderRadius: '24px', textAlign: 'center' }}>
@@ -96,7 +125,7 @@ export default function InventoryValuationPage() {
                                     <tr>
                                         <th style={{ padding: '20px', fontSize: '14px', color: THEME.accentLight, borderBottom: '1px solid rgba(255,255,255,0.1)' }}>كود الصنف 🔑</th>
                                         <th style={{ padding: '20px', fontSize: '14px', color: THEME.accentLight, borderBottom: '1px solid rgba(255,255,255,0.1)' }}>اسم الصنف 🏷️</th>
-                                        <th style={{ padding: '20px', fontSize: '14px', color: THEME.accentLight, borderBottom: '1px solid rgba(255,255,255,0.1)' }}>الكمية الحالية 📦</th>
+                                        <th style={{ padding: '20px', fontSize: '14px', color: THEME.accentLight, borderBottom: '1px solid rgba(255,255,255,0.1)' }}>الكمية الحالية (لتر/وحدة) ⛽</th>
                                         <th style={{ padding: '20px', fontSize: '14px', color: THEME.accentLight, borderBottom: '1px solid rgba(255,255,255,0.1)' }}>متوسط التكلفة 💲</th>
                                         <th style={{ padding: '20px', fontSize: '14px', color: '#fde047', borderBottom: '1px solid rgba(255,255,255,0.1)' }}>إجمالي القيمة 💵</th>
                                     </tr>
