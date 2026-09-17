@@ -43,6 +43,19 @@ export default function StatementPrintModal({
         return () => { document.body.style.overflow = 'auto'; };
     }, [isOpen]);
 
+    // ⌨️ إغلاق المودال بزر Escape
+    useEffect(() => {
+        if (!isOpen) return;
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                onClose();
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isOpen, onClose]);
+
     if (!isOpen || !mounted) return null;
 
     const handlePrint = () => {
@@ -249,16 +262,26 @@ export default function StatementPrintModal({
             </div>
 
             <style>{`
-                .print-modal-overlay { position: fixed; inset: 0; background: rgba(44, 34, 27, 0.85); backdrop-filter: blur(8px); z-index: 9999999; display: flex; justify-content: center; align-items: flex-start; overflow-y: auto; padding: 40px 20px; direction: rtl; }
+                .print-modal-overlay { position: fixed; inset: 0; background: rgba(11, 14, 20, 0.88); backdrop-filter: blur(16px); z-index: 9999999; display: flex; justify-content: center; align-items: flex-start; overflow-y: auto; padding: 40px 20px; direction: rtl; }
                 .print-modal-content { width: 100%; max-width: 900px; animation: fadeIn 0.3s ease-out; }
                 
                 @keyframes fadeIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-                .controls-bar { display: flex; justify-content: space-between; margin-bottom: 20px; background: white; border: 1px solid rgba(40, 145, 200, 0.3); padding: 15px 25px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); position: sticky; top: 10px; z-index: 10; }
-                .btn-print { background: linear-gradient(135deg, #2891C8 0%, #a48141 100%); color: white; border: none; padding: 12px 24px; border-radius: 12px; font-weight: 900; font-size: 16px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 15px rgba(40, 145, 200, 0.3); }
+                .controls-bar { display: flex; justify-content: space-between; margin-bottom: 20px; background: #141822; border: 1px solid rgba(0, 229, 255, 0.25); padding: 15px 25px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); position: sticky; top: 10px; z-index: 10; flex-wrap: wrap; gap: 10px; }
+                .btn-print { background: linear-gradient(135deg, #00E5FF 0%, #0284C7 100%); color: #0B0E14; border: none; padding: 10px 20px; border-radius: 12px; font-weight: 900; font-size: 14px; cursor: pointer; transition: 0.2s; box-shadow: 0 4px 15px rgba(0, 229, 255, 0.3); display: inline-flex; align-items: center; justify-content: center; min-height: 44px; }
                 .btn-print:hover { transform: translateY(-2px); filter: brightness(1.1); }
-                .btn-close { background: #fdfaf6; color: #4a3b32; border: 1px solid #2891C8; padding: 12px 24px; border-radius: 12px; font-weight: 900; font-size: 16px; cursor: pointer; transition: 0.2s; }
-                .btn-close:hover { background: #eaddcf; }
+                .btn-close { background: rgba(255, 255, 255, 0.06); color: #94A3B8; border: 1px solid rgba(255, 255, 255, 0.15); padding: 10px 20px; border-radius: 12px; font-weight: 900; font-size: 14px; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; justify-content: center; min-height: 44px; }
+                .btn-close:hover { background: rgba(255, 255, 255, 0.12); color: #F8FAFC; }
+
+                @media (max-width: 768px) {
+                    .print-modal-overlay { padding: 15px 10px !important; }
+                    .controls-bar { padding: 10px 14px; border-radius: 16px; justify-content: center; width: 100%; }
+                    .btn-print, .btn-close { flex: 1; padding: 8px 12px; font-size: 13px; }
+                    .a4-paper { padding: 20px 14px !important; border-radius: 14px !important; min-height: auto !important; width: 95vw !important; }
+                    .print-header { flex-direction: column !important; text-align: center; gap: 10px; }
+                    .partner-info-box { flex-direction: column !important; gap: 10px; }
+                    .summary-print-grid { grid-template-columns: 1fr 1fr !important; gap: 8px !important; }
+                }
 
                 /* 🚀 Thermal Styles */
                 .thermal-preview-box {

@@ -313,14 +313,14 @@ export default function EmployeeProfilePage() {
             {!isKpiOnly && (
             <div className="profile-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '35px', background: 'rgba(255,255,255,0.4)', padding: '25px', borderRadius: '30px', border: '1px solid rgba(255,255,255,0.6)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '25px' }}>
-                    <div style={{ width: '90px', height: '90px', borderRadius: '25px', background: 'rgba(255,255,255,0.8)', border: `4px solid white`, overflow: 'hidden', boxShadow: '0 10px 25px rgba(0,0,0,0.1)' }}>
+                    <div style={{ width: '90px', height: '90px', borderRadius: '25px', background: 'rgba(20, 24, 34, 0.9)', border: '2px solid rgba(0, 229, 255, 0.4)', overflow: 'hidden', boxShadow: '0 0 25px rgba(0, 229, 255, 0.25)' }}>
                         {avatarImg ? <img src={avatarImg} style={{width:'100%', height:'100%', objectFit:'cover'}} alt="Avatar" /> : <div style={{width:'100%', height:'100%', display:'flex', alignItems:'center', justifyContent:'center', fontSize:'35px'}}>👤</div>}
                     </div>
                     <div>
-                        <h1 style={{ margin: 0, color: THEME.primary, fontWeight: 900, fontSize: '28px' }}>مرحباً، {displayName} 👷‍♂️</h1>
-                        <p style={{ margin: '5px 0 8px 0', color: THEME.accent, fontSize: '15px', fontWeight: 900 }}>{profession}</p>
+                        <h1 style={{ margin: 0, color: '#F8FAFC', fontWeight: 900, fontSize: '28px' }}>مرحباً، {displayName} 👷‍♂️</h1>
+                        <p style={{ margin: '5px 0 8px 0', color: '#00E5FF', fontSize: '15px', fontWeight: 900 }}>{profession}</p>
                         <div style={{ display: 'flex', gap: '10px' }}>
-                            <span style={{ fontSize: '11px', background: 'white', color: '#64748b', padding: '4px 10px', borderRadius: '8px', fontWeight: 900, border: '1px solid rgba(40, 145, 200, 0.15)' }}>
+                            <span style={{ fontSize: '11px', background: 'rgba(0, 229, 255, 0.1)', color: '#00E5FF', padding: '4px 12px', borderRadius: '8px', fontWeight: 900, border: '1px solid rgba(0, 229, 255, 0.25)' }}>
                                 🆔 {usernamePhone}
                             </span>
                         </div>
@@ -328,9 +328,9 @@ export default function EmployeeProfilePage() {
                 </div>
                 
                 <div style={{ display: 'flex', gap: '15px' }}>
-                    <button onClick={() => setIsSettingsOpen(true)} style={{ background: 'white', border: '1px solid rgba(40, 145, 200, 0.15)', padding: '12px 25px', borderRadius: '15px', fontWeight: 900, cursor: 'pointer', color: THEME.primary, transition: '0.3s', boxShadow: '0 4px 10px rgba(0,0,0,0.05)' }}>⚙️ الإعدادات</button>
-                    <div onClick={markAllNotificationsAsRead} style={{ position: 'relative', background: THEME.primary, color: 'white', padding: '12px 20px', borderRadius: '15px', cursor: 'pointer', boxShadow: `0 8px 20px ${THEME.primary}40` }}>
-                        🔔 {(notifications || []).length > 0 && <span style={{ position: 'absolute', top: '-5px', left: '-5px', background: THEME.danger || '#ef4444', color: 'white', fontSize: '10px', width: '22px', height: '22px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid white', fontWeight: 900 }}>{notifications.length}</span>}
+                    <button onClick={() => setIsSettingsOpen(true)} style={{ background: 'rgba(20, 24, 34, 0.85)', border: '1px solid rgba(0, 229, 255, 0.3)', padding: '12px 25px', borderRadius: '14px', fontWeight: 900, cursor: 'pointer', color: '#F8FAFC', transition: '0.3s', boxShadow: '0 4px 20px rgba(0,0,0,0.3)' }}>⚙️ الإعدادات</button>
+                    <div onClick={markAllNotificationsAsRead} style={{ position: 'relative', background: 'linear-gradient(135deg, #00E5FF 0%, #0284C7 100%)', color: '#07090D', padding: '12px 20px', borderRadius: '14px', cursor: 'pointer', boxShadow: '0 0 20px rgba(0, 229, 255, 0.4)' }}>
+                        🔔 {(notifications || []).length > 0 && <span style={{ position: 'absolute', top: '-5px', left: '-5px', background: '#EF4444', color: 'white', fontSize: '10px', width: '22px', height: '22px', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '2px solid #0B0E14', fontWeight: 900 }}>{notifications.length}</span>}
                     </div>
                 </div>
             </div>
@@ -338,7 +338,7 @@ export default function EmployeeProfilePage() {
 
             <div className={!isKpiOnly ? "card-base" : ""}>
                 {!isKpiOnly && (
-                <div className="tabs-container" style={{ display: 'flex', borderBottom: '1px solid rgba(0,0,0,0.05)', background: 'rgba(255,255,255,0.4)', padding: '15px', gap: '10px', overflowX: 'auto' }}>
+                <div className="tabs-container" style={{ display: 'flex', borderBottom: '1px solid rgba(255,255,255,0.08)', background: 'rgba(20, 24, 34, 0.8)', padding: '15px', gap: '10px', overflowX: 'auto' }}>
                     <button className={`tab-btn ${activeTab === 'tasks' ? 'active' : ''}`} onClick={() => setActiveTab('tasks')}>📋 المهام</button>
                     <button className={`tab-btn ${activeTab === 'report' ? 'active' : ''}`} onClick={() => setActiveTab('report')}>📑 المبيعات</button>
                     <button className={`tab-btn ${activeTab === 'daily_fin' ? 'active' : ''}`} onClick={() => setActiveTab('daily_fin')}>💰 ملخص مالي</button>
@@ -598,24 +598,24 @@ export default function EmployeeProfilePage() {
 
                                 {/* تفصيل المبيعات لكل صنف */}
                                 {(monthlyKPIs?.itemBreakdown || []).length > 0 && (
-                                    <div style={{ marginTop: '40px', background: 'rgba(252, 248, 241, 0.8)', padding: '25px', borderRadius: '20px', border: `1px solid ${THEME.accent}` }}>
-                                        <h4 style={{ color: THEME.accent, margin: '0 0 20px 0', fontSize: '18px', fontWeight: 900 }}>📋 تفصيل التقييم حسب الصنف</h4>
+                                    <div style={{ marginTop: '40px', background: 'linear-gradient(135deg, rgba(20, 24, 34, 0.95) 0%, rgba(11, 14, 20, 0.9) 100%)', padding: '25px', borderRadius: '20px', border: '1px solid rgba(0, 229, 255, 0.25)', boxShadow: '0 8px 30px rgba(0,0,0,0.35)' }}>
+                                        <h4 style={{ color: '#00E5FF', margin: '0 0 20px 0', fontSize: '18px', fontWeight: 900 }}>📋 تفصيل التقييم حسب الصنف</h4>
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
                                             {(monthlyKPIs.itemBreakdown).map((b: any, idx: number) => (
-                                                <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'white', padding: '15px 20px', borderRadius: '15px', border: '1px solid rgba(40, 145, 200, 0.2)' }}>
+                                                <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: 'rgba(11, 14, 20, 0.7)', padding: '15px 20px', borderRadius: '15px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
                                                     <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
-                                                        <div style={{ background: `rgba(${b.percentage >= 100 ? '16, 185, 129' : b.percentage >= 80 ? '245, 158, 11' : '239, 68, 68'}, 0.1)`, color: b.percentage >= 100 ? THEME.success : b.percentage >= 80 ? '#f59e0b' : THEME.danger, width: '50px', height: '50px', borderRadius: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', fontWeight: 900, fontSize: '16px' }}>
+                                                        <div style={{ background: `rgba(${b.percentage >= 100 ? '16, 185, 129' : b.percentage >= 80 ? '245, 158, 11' : '239, 68, 68'}, 0.15)`, color: b.percentage >= 100 ? '#10B981' : b.percentage >= 80 ? '#F59E0B' : '#EF4444', width: '50px', height: '50px', borderRadius: '12px', display: 'flex', justifyContent: 'center', alignItems: 'center', fontWeight: 900, fontSize: '16px' }}>
                                                             {b.percentage}%
                                                         </div>
                                                         <div>
-                                                            <h5 style={{ margin: 0, color: THEME.brand.coffee, fontSize: '16px', fontWeight: 900 }}>{b.item}</h5>
-                                                            <p style={{ margin: '5px 0 0 0', color: '#64748b', fontSize: '13px', fontWeight: 700 }}>النسبة تعكس التارجت المسجلة في الموازنة</p>
+                                                            <h5 style={{ margin: 0, color: '#F8FAFC', fontSize: '16px', fontWeight: 900 }}>{b.item}</h5>
+                                                            <p style={{ margin: '5px 0 0 0', color: '#94A3B8', fontSize: '13px', fontWeight: 700 }}>النسبة تعكس التارجت المسجلة في الموازنة</p>
                                                         </div>
                                                     </div>
                                                     <div style={{ textAlign: 'left', direction: 'ltr' }}>
-                                                        <span style={{ fontWeight: 900, color: THEME.success, fontSize: '20px' }}>{b.totalProd}</span>
-                                                        <span style={{ color: 'rgba(40, 145, 200, 0.2)', margin: '0 5px', fontSize: '18px' }}>/</span>
-                                                        <span style={{ fontWeight: 900, color: THEME.danger, fontSize: '20px' }}>{b.totalTareeha}</span>
+                                                        <span style={{ fontWeight: 900, color: '#10B981', fontSize: '20px' }}>{b.totalProd}</span>
+                                                        <span style={{ color: 'rgba(255, 255, 255, 0.2)', margin: '0 5px', fontSize: '18px' }}>/</span>
+                                                        <span style={{ fontWeight: 900, color: '#EF4444', fontSize: '20px' }}>{b.totalTareeha}</span>
                                                     </div>
                                                 </div>
                                             ))}
@@ -625,16 +625,16 @@ export default function EmployeeProfilePage() {
 
                                 {/* قائمة الحضور حسب الشهر */}
                                 {(monthlyKPIs?.attendanceBreakdown || []).length > 0 && (
-                                    <div style={{ marginTop: '20px', background: 'rgba(241, 245, 249, 0.8)', padding: '25px', borderRadius: '20px', border: `1px solid rgba(40, 145, 200, 0.2)` }}>
-                                        <h4 style={{ color: THEME.primary, margin: '0 0 20px 0', fontSize: '18px', fontWeight: 900 }}>🗓️ تفصيل الحضور حسب الشهر</h4>
+                                    <div style={{ marginTop: '20px', background: 'linear-gradient(135deg, rgba(20, 24, 34, 0.95) 0%, rgba(11, 14, 20, 0.9) 100%)', padding: '25px', borderRadius: '20px', border: '1px solid rgba(0, 229, 255, 0.25)', boxShadow: '0 8px 30px rgba(0,0,0,0.35)' }}>
+                                        <h4 style={{ color: '#00E5FF', margin: '0 0 20px 0', fontSize: '18px', fontWeight: 900 }}>🗓️ تفصيل الحضور حسب الشهر</h4>
                                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(250px, 1fr))', gap: '15px' }}>
                                             {(monthlyKPIs.attendanceBreakdown).map((m: any, idx: number) => (
-                                                <div key={idx} style={{ background: 'white', padding: '15px', borderRadius: '15px', border: '1px solid rgba(40, 145, 200, 0.15)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                <div key={idx} style={{ background: 'rgba(11, 14, 20, 0.7)', padding: '15px', borderRadius: '15px', border: '1px solid rgba(255, 255, 255, 0.08)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                                                     <div>
-                                                        <h5 style={{ margin: 0, color: '#334155', fontSize: '15px', fontWeight: 900 }}>{m.month}</h5>
-                                                        <p style={{ margin: '5px 0 0 0', color: '#64748b', fontSize: '13px', fontWeight: 700 }}>حضر <strong style={{color: THEME.primary}}>{m.daysWorked}</strong> يوم من أصل {m.expectedDays || 26}</p>
+                                                        <h5 style={{ margin: 0, color: '#F8FAFC', fontSize: '15px', fontWeight: 900 }}>{m.month}</h5>
+                                                        <p style={{ margin: '5px 0 0 0', color: '#94A3B8', fontSize: '13px', fontWeight: 700 }}>حضر <strong style={{color: '#00E5FF'}}>{m.daysWorked}</strong> يوم من أصل {m.expectedDays || 26}</p>
                                                     </div>
-                                                    <div style={{ background: `rgba(${m.percentage >= 100 ? '16, 185, 129' : m.percentage >= 80 ? '245, 158, 11' : '239, 68, 68'}, 0.1)`, color: m.percentage >= 100 ? THEME.success : m.percentage >= 80 ? '#f59e0b' : THEME.danger, padding: '8px 12px', borderRadius: '10px', fontWeight: 900, fontSize: '16px' }}>
+                                                    <div style={{ background: `rgba(${m.percentage >= 100 ? '16, 185, 129' : m.percentage >= 80 ? '245, 158, 11' : '239, 68, 68'}, 0.15)`, color: m.percentage >= 100 ? '#10B981' : m.percentage >= 80 ? '#F59E0B' : '#EF4444', padding: '8px 12px', borderRadius: '10px', fontWeight: 900, fontSize: '16px' }}>
                                                         {m.percentage}%
                                                     </div>
                                                 </div>

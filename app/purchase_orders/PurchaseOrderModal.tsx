@@ -286,7 +286,7 @@ export default function PurchaseOrderModal({ isOpen, onClose, items, initialData
           .po-mobile-item-badge {
             font-size: 12px !important;
             font-weight: 900 !important;
-            color: #1C73AB !important;
+            color: #00E5FF !important;
             display: flex !important;
             align-items: center !important;
             gap: 6px !important;

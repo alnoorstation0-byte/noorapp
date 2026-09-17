@@ -225,7 +225,7 @@ export default function SystemHealthRadar() {
     const getSeverityColor = (sev: string) => {
         if (sev === 'high') return '#ef4444';
         if (sev === 'medium') return '#f59e0b';
-        return '#1C73AB';
+        return '#00E5FF';
     };
 
     return (

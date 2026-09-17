@@ -9,6 +9,7 @@ import { useUnreadCounts } from '@/hooks/useUnreadCounts';
 import { useRealtimeListener } from '@/lib/useRealtimeSync';
 import { useRouter, usePathname } from 'next/navigation';
 import { useLanguage } from '@/lib/LanguageContext';
+import { useThemeMode } from '@/lib/ThemeContext';
 import { toast } from 'react-hot-toast';
 
 const PAGE_TITLES_EN: Record<string, string> = {
@@ -145,6 +146,7 @@ function getTranslatedSubtitle(rawSub: string | undefined, lang: 'ar' | 'en'): s
 
 export default function MasterPage({ title, subtitle, children, headerContent, icon, className }: any) {
   const { language, toggleLanguage, isRtl } = useLanguage();
+  const { themeMode, toggleTheme, isDaylight } = useThemeMode();
   const router = useRouter();
   const pathname = usePathname();
   const [userProfile, setUserProfile] = useState<any>(null);
@@ -465,9 +467,10 @@ html, body {
 }
 .nav-group { display: flex; gap: 6px; margin-right: 12px; border-right: 1px solid rgba(0, 229, 255, 0.15); padding-right: 12px; }
 
-/* 🌐 زر تبديل اللغة ووضع الأداء */
+/* 🌐 زر تبديل اللغة ووضع الأداء والرؤية النهارية */
 .lang-switcher-pill,
-.perf-switcher-pill {
+.perf-switcher-pill,
+.theme-switcher-pill {
     display: inline-flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -492,7 +495,8 @@ html, body {
     flex-shrink: 0 !important;
 }
 .lang-switcher-pill:hover,
-.perf-switcher-pill:hover {
+.perf-switcher-pill:hover,
+.theme-switcher-pill:hover {
     background: rgba(26, 32, 46, 1) !important;
     border-color: #00E5FF !important;
     color: #00E5FF !important;
@@ -503,6 +507,11 @@ html, body {
     background: linear-gradient(135deg, rgba(0, 229, 255, 0.2) 0%, rgba(0, 140, 200, 0.1) 100%) !important;
     border-color: #00E5FF !important;
     color: #00E5FF !important;
+}
+.theme-switcher-pill.daylight-active {
+    background: linear-gradient(135deg, rgba(234, 88, 12, 0.18) 0%, rgba(2, 132, 199, 0.12) 100%) !important;
+    border-color: rgba(234, 88, 12, 0.5) !important;
+    color: #EA580C !important;
 }
 
 .header-action-btn {
@@ -737,7 +746,8 @@ html, body {
   }
   
   .lang-switcher-pill,
-  .perf-switcher-pill {
+  .perf-switcher-pill,
+  .theme-switcher-pill {
     height: 34px !important;
     padding: 0 8px !important;
     font-size: 11px !important;
@@ -748,7 +758,8 @@ html, body {
     width: auto !important;
   }
   
-  .perf-switcher-pill .perf-text {
+  .perf-switcher-pill .perf-text,
+  .theme-switcher-pill .theme-text {
     display: none !important;
   }
   
@@ -870,6 +881,21 @@ html, body {
                 <span className="perf-text">{lowGraphics ? (language === 'en' ? 'Fast' : 'أداء سريع') : (language === 'en' ? 'Glass' : 'زجاجي')}</span>
              </button>
 
+              {/* ☀️/🌙 زر تبديل الرؤية النهارية / الليلية (Direct Day/Night Switcher) */}
+              <button
+                 type="button"
+                 onClick={toggleTheme}
+                 className={`theme-switcher-pill ${isDaylight ? 'daylight-active' : ''}`}
+                 title={isDaylight 
+                   ? (language === 'en' ? 'Switch to Night Vision' : 'التحويل إلى الرؤية الليلية') 
+                   : (language === 'en' ? 'Switch to Daylight Vision' : 'التحويل إلى الرؤية النهارية')}
+              >
+                 <span style={{ fontSize: '13px', lineHeight: 1 }}>{isDaylight ? '🌙' : '☀️'}</span>
+                 <span className="theme-text">{isDaylight 
+                   ? (language === 'en' ? 'Night' : 'ليلي') 
+                   : (language === 'en' ? 'Daylight' : 'نهاري')}</span>
+              </button>
+
               {/* Notifications & Pending Alert */}
               {pendingTotalCount > 0 && (
                   <button 
@@ -915,7 +941,7 @@ html, body {
               </span>
             </div>
             <div className="avatar-frame">
-              <img src={userProfile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(userProfile?.displayName || 'U')}&background=A1D6E2&color=122946&bold=true`} alt="Avatar" />
+              <img src={userProfile?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(userProfile?.displayName || 'U')}&background=00E5FF&color=0B0E14&bold=true`} alt="Avatar" />
               <div className="active-dot"></div>
             </div>
           </div>
@@ -931,6 +957,12 @@ html, body {
               {lowGraphics 
                 ? (language === 'en' ? 'Switch to Glass Mode' : 'التحويل للمظهر الزجاجي الفاخر') 
                 : (language === 'en' ? 'Fast Performance Mode' : 'وضع الأداء السريع (تخفيف الجرافيك)')}
+            </div>
+            <div className="drop-item" onClick={() => { setIsMenuOpen(false); toggleTheme(); }}>
+              <span>{isDaylight ? '🌙' : '☀️'}</span> 
+              {isDaylight 
+                ? (language === 'en' ? 'Switch to Night Vision' : 'التحويل إلى الرؤية الليلية') 
+                : (language === 'en' ? 'Switch to Daylight Vision' : 'التحويل إلى الرؤية النهارية')}
             </div>
             <div className="drop-item" onClick={() => router.push('/settings')}><span>⚙️</span> {language === 'en' ? 'System Settings' : 'الإعدادات'}</div>
             <div className="drop-item logout" onClick={handleLogout}><span>🚪</span> {language === 'en' ? 'Logout' : 'خروج'}</div>

@@ -207,12 +207,20 @@ export async function GET(
                 total_expenses: totalExpenses,
                 gross_profit: grossProfit,
                 net_profit: netProfit,
-                profit_margin: profitMargin
+                profit_margin: profitMargin,
+                total_liters_sold: Number(shift.total_liters_sold || 0),
+                meter_total_amount: Number(shift.meter_total_amount || 0),
+                meter_sales_variance: Number(shift.meter_sales_variance || 0)
+            },
+            fuel_meters: {
+                total_liters_sold: Number(shift.total_liters_sold || 0),
+                meter_total_amount: Number(shift.meter_total_amount || 0),
+                meter_sales_variance: Number(shift.meter_sales_variance || 0)
             },
             bottles: {
-                sold: Number(shift.bottles_sold || 0),
-                returned: Number(shift.bottles_returned || 0),
-                shortage: Number(shift.bottles_shortage || 0)
+                sold: 0,
+                returned: 0,
+                shortage: 0
             },
             invoices_count: (invoices || []).length,
             invoices: (invoices || []).map((inv: any) => ({

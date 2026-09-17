@@ -2,46 +2,62 @@ export const ar = {
     // Menu Groups
     menu_group_home: "الرئيسية والملخصات",
     menu_group_sales: "التشغيل والمبيعات",
-    menu_group_inventory: "المستودع",
+    menu_group_inventory: "المستودع وخزانات الوقود",
     menu_group_finance: "الحسابات والمالية",
-    menu_group_partners: "العملاء والمندوبين",
+    menu_group_partners: "العملاء والشركاء",
     menu_group_system: "النظام والتقارير",
 
-    // Menu Items
-    menu_dashboard: "لوحة القيادة",
+    // Menu Items - الرئيسية والملخصات
+    menu_dashboard: "لوحة القيادة والتحكم",
     menu_global_summary: "الملخص العام",
+    menu_kpis: "مؤشرات الأداء التشغيلي",
+    menu_profit_dashboard: "أرباح ومؤشرات المحطة",
+
+    // Menu Items - التشغيل والمبيعات
     menu_pos: "شاشة الكاشير (POS)",
     menu_pos_dashboard: "أرباح منافذ البيع",
-    menu_pos_settlements: "تسوية عهد منافذ البيع",
-    menu_fleet_operations: "رحلات التشغيل",
+    menu_pos_settlements: "تسوية الورديات والعدادات",
     menu_invoices: "الفواتير والمبيعات",
-    menu_inventory: "الأصناف",
-    menu_purchase_orders: "أوامر الشراء",
-    menu_warehouses: "المستودعات",
-    menu_inventory_transactions: "حركات المخزون",
+    menu_sales_analysis: "تحليل المبيعات",
+
+    // Menu Items - المستودع وخزانات الوقود
+    menu_inventory: "الأصناف وخزانات الوقود",
+    menu_item_card: "بطاقة الصنف والحركة",
+    menu_reorder_alerts: "تنبيهات حدود الطلب والنواقص",
+    menu_inventory_valuation: "تقييم المخزون",
+    menu_purchase_orders: "أوامر الشراء والتوريد",
+    menu_warehouses: "المستودعات والخزانات",
+    menu_inventory_transactions: "حركات المخزون والتوريد",
+
+    // Menu Items - الحسابات والمالية
     menu_receipts: "سندات القبض",
     menu_payments: "سندات الصرف",
-    menu_expenses: "المصروفات",
-    menu_journal: "دفتر اليومية",
+    menu_expenses: "المصروفات التشغيلية",
+    menu_journal: "دفتر اليومية العامة",
     menu_manual_journals: "القيود اليدوية",
     menu_accounts: "شجرة الحسابات",
-    menu_ledger: "دفتر الأستاذ",
+    menu_ledger: "دفتر الأستاذ العام",
     menu_trialbalance: "ميزان المراجعة",
     menu_financial_center: "المركز المالي",
     menu_financial_statements: "القوائم المالية",
+    menu_financialplan: "الموازنة والخطة المالية",
     menu_cashflows: "التدفقات النقدية",
-    menu_partners: "دليل العملاء",
-    menu_partner_balances: "أرصدة العملاء",
-    menu_delegate_debts: "ذمم المناديب",
-    menu_delegate_settlements: "تسويات العهد",
-    menu_statement: "كشف حساب",
+    menu_vat_return: "الإقرار الضريبي (15%)",
+
+    // Menu Items - العملاء والشركاء
+    menu_partners: "دليل العملاء والشركاء",
+    menu_partner_balances: "أرصدة العملاء والشركاء",
+    menu_statement: "كشف حساب تفصيلي",
+    menu_ar_aging: "أعمار الديون والتحصيل",
+
+    // Menu Items - النظام والتقارير
     menu_reports: "التقارير الشاملة",
-    menu_import: "استيراد البيانات",
-    menu_promotions: "العروض الترويجية",
-    menu_audit: "المراجعة والتدقيق",
-    menu_fleet: "إدارة السيارات",
-    menu_payroll: "الرواتب والأجور",
-    menu_settings: "إعدادات النظام",
+    menu_audit: "المراجعة وسجل العمليات",
+    menu_payroll: "مسيرات الرواتب والأجور",
+    menu_settings: "إعدادات النظام والنسخ",
+    menu_permissions: "مصفوفة الصلاحيات والرتب",
+    menu_notifications: "مركز التنبيهات",
+    menu_profile: "الملف الشخصي",
 
     // Common Actions & UI
     app_title: "محطات النور للوقود - نظام الإدارة الموحد",
@@ -76,7 +92,11 @@ export const ar = {
     success: "نجاح",
     error: "خطأ",
     translate: "ترجمة (AR ⇋ EN)",
-    translating: "جاري الترجمة..."
+    translating: "جاري الترجمة...",
+    theme_daylight: "الرؤية النهارية",
+    theme_night: "الرؤية الليلية",
+    theme_toggle_daylight: "التحويل إلى الرؤية النهارية",
+    theme_toggle_night: "التحويل إلى الرؤية الليلية"
 };
 
 export type LocaleKeys = keyof typeof ar;

@@ -9,15 +9,15 @@ import { tafqeet, formatCurrency } from '@/lib/helpers';
 import LoadingScreen from '@/components/LoadingScreen';
 
 const THEME = {
-  primary: '#0f172a',    
-  accent: '#ca8a04',     
-  success: '#059669',    
-  ruby: '#e11d48',       
-  warning: '#d97706',
-  slate: 'rgba(255, 255, 255, 0.6)',
-  border: 'rgba(40, 145, 200, 0.15)',
-  textMain: '#334155',
-  textMuted: '#64748b'
+  primary: '#00E5FF',    
+  accent: '#F59E0B',     
+  success: '#10B981',    
+  ruby: '#EF4444',       
+  warning: '#F59E0B',
+  slate: 'rgba(20, 24, 34, 0.85)',
+  border: 'rgba(0, 229, 255, 0.2)',
+  textMain: '#F8FAFC',
+  textMuted: '#94A3B8'
 };
 
 export default function PayrollPage() {
@@ -28,7 +28,7 @@ export default function PayrollPage() {
       key="sync_labor"
       onClick={logic.importLaborLogs} 
       disabled={logic.isSaving}
-      style={{ padding: '12px', borderRadius: '8px', border: 'none', background: '#2563eb', color: 'white', fontWeight: '900', cursor: logic.isSaving ? 'not-allowed' : 'pointer', width: '100%', opacity: logic.isSaving ? 0.7 : 1, marginBottom: '8px', boxShadow: '0 4px 6px rgba(37,99,235,0.2)' }}
+      style={{ padding: '12px', borderRadius: '12px', border: 'none', background: 'linear-gradient(135deg, #00E5FF 0%, #0284C7 100%)', color: '#07090D', fontWeight: 900, cursor: logic.isSaving ? 'not-allowed' : 'pointer', width: '100%', opacity: logic.isSaving ? 0.7 : 1, marginBottom: '10px', boxShadow: '0 0 15px rgba(0, 229, 255, 0.3)' }}
     >
       🔄 مزامنة (يوميات، غرامات، مسحوبات)
     </button>,
@@ -36,7 +36,7 @@ export default function PayrollPage() {
     <button 
       key="print_payroll"
       onClick={() => window.print()}
-      style={{ padding: '12px', borderRadius: '8px', border: `1px solid ${THEME.border}`, background: THEME.slate, color: THEME.textMain, fontWeight: 'bold', cursor: 'pointer', width: '100%', marginBottom: '8px' }}
+      style={{ padding: '12px', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.15)', background: 'rgba(255, 255, 255, 0.05)', color: '#F8FAFC', fontWeight: 900, cursor: 'pointer', width: '100%', marginBottom: '10px', transition: '0.2s' }}
     >
       🖨️ طباعة المسير الرسمي
     </button>,
@@ -44,7 +44,7 @@ export default function PayrollPage() {
     <button 
       key="export_excel"
       onClick={logic.exportToExcel}
-      style={{ padding: '12px', borderRadius: '8px', border: `1px solid ${THEME.border}`, background: THEME.slate, color: THEME.textMain, fontWeight: 'bold', cursor: 'pointer', width: '100%', marginBottom: '15px' }}
+      style={{ padding: '12px', borderRadius: '12px', border: '1px solid rgba(16, 185, 129, 0.3)', background: 'rgba(16, 185, 129, 0.15)', color: '#10B981', fontWeight: 900, cursor: 'pointer', width: '100%', marginBottom: '15px', transition: '0.2s' }}
     >
       📊 تصدير Excel
     </button>,
@@ -53,7 +53,7 @@ export default function PayrollPage() {
       key="save_db"
       onClick={logic.savePayrollToDB} 
       disabled={logic.isSaving}
-      style={{ padding: '12px', borderRadius: '8px', border: 'none', background: THEME.success, color: 'white', fontWeight: 'bold', cursor: logic.isSaving ? 'not-allowed' : 'pointer', width: '100%', opacity: logic.isSaving ? 0.7 : 1, marginBottom: '8px' }}
+      style={{ padding: '12px', borderRadius: '12px', border: 'none', background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)', color: '#07090D', fontWeight: 900, cursor: logic.isSaving ? 'not-allowed' : 'pointer', width: '100%', opacity: logic.isSaving ? 0.7 : 1, marginBottom: '10px', boxShadow: '0 0 15px rgba(16, 185, 129, 0.3)' }}
     >
       {logic.isSaving ? '⏳ جاري الحفظ...' : '💾 حفظ المسير بالسجلات'}
     </button>,
@@ -62,7 +62,7 @@ export default function PayrollPage() {
       key="post_journal"
       onClick={logic.postToJournal} 
       disabled={logic.isSaving}
-      style={{ padding: '12px', borderRadius: '8px', border: 'none', background: THEME.accent, color: 'white', fontWeight: 'bold', cursor: logic.isSaving ? 'not-allowed' : 'pointer', width: '100%', opacity: logic.isSaving ? 0.7 : 1 }}
+      style={{ padding: '12px', borderRadius: '12px', border: 'none', background: 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)', color: '#07090D', fontWeight: 900, cursor: logic.isSaving ? 'not-allowed' : 'pointer', width: '100%', opacity: logic.isSaving ? 0.7 : 1, boxShadow: '0 0 15px rgba(245, 158, 11, 0.3)' }}
     >
       📝 ترحيل لليومية العامة
     </button>
@@ -270,16 +270,16 @@ export default function PayrollPage() {
         
         <div style={{ flex: 1, overflowX: 'auto' }}>
           
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px', alignItems: 'center', background: 'white', padding: '15px 20px', borderRadius: '12px', marginBottom: '20px', border: `1px solid ${THEME.border}`, boxShadow: '0 2px 4px rgba(0,0,0,0.02)' }}>
-            <div style={{ fontWeight: '900', color: THEME.primary, fontSize: '15px', minWidth: '130px' }}>📅 خيارات المسير:</div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: '15px', alignItems: 'center', background: 'rgba(20, 24, 34, 0.85)', backdropFilter: 'blur(20px)', padding: '16px 22px', borderRadius: '16px', marginBottom: '25px', border: '1px solid rgba(0, 229, 255, 0.2)', boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}>
+            <div style={{ fontWeight: 900, color: '#00E5FF', fontSize: '15px', minWidth: '130px' }}>📅 خيارات المسير:</div>
             
-            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: THEME.slate, padding: '5px 15px', borderRadius: '8px' }}>
-              <label style={{ fontSize: '13px', color: THEME.textMuted, fontWeight: 'bold' }}>تاريخ قطع المسحوبات:</label>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(11, 14, 20, 0.8)', padding: '6px 14px', borderRadius: '10px', border: '1px solid rgba(0, 229, 255, 0.25)' }}>
+              <label style={{ fontSize: '13px', color: '#94A3B8', fontWeight: 800 }}>تاريخ قطع المسحوبات:</label>
               <input 
                 type="date" 
                 value={logic.cutoffDate} 
                 onChange={e => logic.setCutoffDate(e.target.value)} 
-                style={{ padding: '6px 10px', borderRadius: '6px', border: `1px solid ${THEME.border}`, fontWeight: 'bold', outline: 'none', color: THEME.ruby }}
+                style={{ padding: '4px 8px', borderRadius: '6px', border: 'none', fontWeight: 800, outline: 'none', color: '#EF4444', backgroundColor: 'transparent' }}
               />
             </div>
 
@@ -287,16 +287,16 @@ export default function PayrollPage() {
               type="button"
               onClick={() => logic.setFilterActiveOnly(!logic.filterActiveOnly)}
               style={{
-                padding: '8px 16px',
-                borderRadius: '8px',
-                border: `1px solid ${logic.filterActiveOnly ? THEME.success : THEME.border}`,
-                background: logic.filterActiveOnly ? THEME.success : 'white',
-                color: logic.filterActiveOnly ? 'white' : THEME.textMain,
-                fontWeight: '900',
+                padding: '9px 18px',
+                borderRadius: '10px',
+                border: `1px solid ${logic.filterActiveOnly ? 'rgba(16, 185, 129, 0.4)' : 'rgba(255, 255, 255, 0.15)'}`,
+                background: logic.filterActiveOnly ? 'rgba(16, 185, 129, 0.2)' : 'rgba(255, 255, 255, 0.05)',
+                color: logic.filterActiveOnly ? '#10B981' : '#F8FAFC',
+                fontWeight: 900,
                 fontSize: '13px',
                 cursor: 'pointer',
                 transition: 'all 0.2s ease',
-                boxShadow: logic.filterActiveOnly ? '0 2px 4px rgba(5,150,105,0.2)' : 'none'
+                boxShadow: logic.filterActiveOnly ? '0 0 15px rgba(16, 185, 129, 0.25)' : 'none'
               }}
             >
               {logic.filterActiveOnly ? '✔️ عرض العمال النشطين فقط' : '👷 فلترة العمال النشطين (الذين عملوا)'}
@@ -312,22 +312,22 @@ export default function PayrollPage() {
             </div>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '15px', marginBottom: '25px' }}>
-            <div style={{ background: 'white', padding: '20px', borderRadius: '12px', borderBottom: `4px solid ${THEME.primary}`, boxShadow: '0 4px 6px rgba(0,0,0,0.02)' }}>
-              <div style={{ fontSize: '13px', color: THEME.textMuted, fontWeight: 'bold' }}>الكوادر المعروضة</div>
-              <div style={{ fontSize: '24px', fontWeight: '900', color: THEME.primary }}>{logic.filteredRecords.length}</div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', marginBottom: '25px' }}>
+            <div style={{ background: 'linear-gradient(135deg, rgba(20, 24, 34, 0.95) 0%, rgba(11, 14, 20, 0.9) 100%)', padding: '20px', borderRadius: '16px', border: '1px solid rgba(0, 229, 255, 0.25)', boxShadow: '0 8px 24px rgba(0,0,0,0.3)' }}>
+              <div style={{ fontSize: '13px', color: '#94A3B8', fontWeight: 800, marginBottom: '6px' }}>الكوادر المعروضة</div>
+              <div style={{ fontSize: '26px', fontWeight: 900, color: '#00E5FF' }}>{logic.filteredRecords.length} <span style={{ fontSize: '14px', color: '#94A3B8' }}>كادر</span></div>
             </div>
-            <div style={{ background: 'white', padding: '20px', borderRadius: '12px', borderBottom: `4px solid ${THEME.primary}`, boxShadow: '0 4px 6px rgba(0,0,0,0.02)' }}>
-              <div style={{ fontSize: '13px', color: THEME.textMuted, fontWeight: 'bold' }}>إجمالي الاستحقاقات (الأساسي)</div>
-              <div style={{ fontSize: '24px', fontWeight: '900', color: THEME.primary }}>{formatCurrency(logic.totals.current_net + logic.totals.deductions + logic.totals.extended_advances)}</div>
+            <div style={{ background: 'linear-gradient(135deg, rgba(20, 24, 34, 0.95) 0%, rgba(11, 14, 20, 0.9) 100%)', padding: '20px', borderRadius: '16px', border: '1px solid rgba(0, 229, 255, 0.25)', boxShadow: '0 8px 24px rgba(0,0,0,0.3)' }}>
+              <div style={{ fontSize: '13px', color: '#94A3B8', fontWeight: 800, marginBottom: '6px' }}>إجمالي الاستحقاقات (الأساسي)</div>
+              <div style={{ fontSize: '26px', fontWeight: 900, color: '#00E5FF' }}>{formatCurrency(logic.totals.current_net + logic.totals.deductions + logic.totals.extended_advances)}</div>
             </div>
-            <div style={{ background: 'white', padding: '20px', borderRadius: '12px', borderBottom: `4px solid ${THEME.ruby}`, boxShadow: '0 4px 6px rgba(0,0,0,0.02)' }}>
-              <div style={{ fontSize: '13px', color: THEME.textMuted, fontWeight: 'bold' }}>إجمالي الخصم والمسحوبات</div>
-              <div style={{ fontSize: '24px', fontWeight: '900', color: THEME.ruby }}>{formatCurrency(logic.totals.deductions + logic.totals.extended_advances)}</div>
+            <div style={{ background: 'linear-gradient(135deg, rgba(20, 24, 34, 0.95) 0%, rgba(11, 14, 20, 0.9) 100%)', padding: '20px', borderRadius: '16px', border: '1px solid rgba(239, 68, 68, 0.3)', boxShadow: '0 8px 24px rgba(0,0,0,0.3)' }}>
+              <div style={{ fontSize: '13px', color: '#94A3B8', fontWeight: 800, marginBottom: '6px' }}>إجمالي الخصم والمسحوبات</div>
+              <div style={{ fontSize: '26px', fontWeight: 900, color: '#EF4444' }}>{formatCurrency(logic.totals.deductions + logic.totals.extended_advances)}</div>
             </div>
-            <div style={{ background: THEME.success, color: 'white', padding: '20px', borderRadius: '12px', borderBottom: `4px solid ${THEME.accent}`, boxShadow: '0 4px 6px rgba(0,0,0,0.05)' }}>
-              <div style={{ fontSize: '13px', color: '#ecfdf5', fontWeight: 'bold' }}>إجمالي المراد صرفه فعلياً 💵</div>
-              <div style={{ fontSize: '24px', fontWeight: '900' }}>{formatCurrency(logic.totals.amount_to_pay || 0)}</div>
+            <div style={{ background: 'linear-gradient(135deg, rgba(16, 185, 129, 0.18) 0%, rgba(20, 24, 34, 0.95) 100%)', padding: '20px', borderRadius: '16px', border: '1px solid rgba(16, 185, 129, 0.4)', boxShadow: '0 8px 24px rgba(0,0,0,0.3)' }}>
+              <div style={{ fontSize: '13px', color: '#94A3B8', fontWeight: 800, marginBottom: '6px' }}>إجمالي المراد صرفه فعلياً 💵</div>
+              <div style={{ fontSize: '26px', fontWeight: 900, color: '#10B981' }}>{formatCurrency(logic.totals.amount_to_pay || 0)}</div>
             </div>
           </div>
 

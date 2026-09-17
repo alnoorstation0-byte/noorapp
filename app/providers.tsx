@@ -27,23 +27,23 @@ export default function Providers({ children }: { children: React.ReactNode }) {
                 toastOptions={{
                     duration: 4000, // مدة ظهور الرسالة
                     style: {
-                        background: '#122946', // لون القهوة الداكن
-                        color: '#fff',
-                        borderRadius: '15px',
+                        background: '#141822', // Dark Titanium Command Center
+                        color: '#F8FAFC',
+                        borderRadius: '16px',
                         fontFamily: "'Cairo', sans-serif",
                         fontWeight: 700,
-                        border: '1px solid #2891C8', // إطار ذهبي أنيق
-                        boxShadow: '0 10px 25px rgba(0,0,0,0.2)'
+                        border: '1px solid rgba(0, 229, 255, 0.3)', // Electric Cyan
+                        boxShadow: '0 10px 25px rgba(0,0,0,0.5)',
                     },
                     success: {
-                        iconTheme: { primary: '#166534', secondary: '#fff' }, // لون النجاح الأخضر
+                        iconTheme: { primary: '#10B981', secondary: '#0B0E14' }, // Emerald
                     },
                     error: {
-                        iconTheme: { primary: '#be123c', secondary: '#fff' }, // لون الخطأ الأحمر
+                        iconTheme: { primary: '#EF4444', secondary: '#0B0E14' }, // Ruby Alert
                     },
                     loading: {
-                        iconTheme: { primary: '#2891C8', secondary: '#fff' }, // لون التحميل الذهبي
-                    }
+                        iconTheme: { primary: '#00E5FF', secondary: '#0B0E14' }, // Electric Cyan
+                    },
                 }}
             />
 

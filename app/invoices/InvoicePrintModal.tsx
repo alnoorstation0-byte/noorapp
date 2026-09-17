@@ -282,8 +282,8 @@ export default function InvoicePrintModal({
                 .print-modal-overlay {
                     position: fixed !important; 
                     inset: 0 !important;
-                    background: rgba(18, 41, 70, 0.88) !important; 
-                    backdrop-filter: blur(10px) !important; 
+                    background: rgba(11, 14, 20, 0.88) !important; 
+                    backdrop-filter: blur(16px) !important; 
                     z-index: 999999999 !important;
                     display: flex !important; 
                     flex-direction: column !important; 
@@ -298,10 +298,11 @@ export default function InvoicePrintModal({
                     display: flex !important; 
                     gap: 12px !important; 
                     margin-bottom: 25px !important;
-                    background: white !important; 
+                    background: rgba(20, 24, 34, 0.95) !important; 
+                    border: 1px solid rgba(0, 229, 255, 0.3) !important;
                     padding: 12px 25px !important; 
                     border-radius: 50px !important;
-                    box-shadow: 0 10px 30px rgba(0,0,0,0.3) !important;
+                    box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important;
                     position: sticky !important; 
                     top: 20px !important; 
                     z-index: 1000000000 !important; 
@@ -316,9 +317,11 @@ export default function InvoicePrintModal({
                     font-size: 14px; 
                     cursor: pointer; 
                     transition: 0.2s; 
-                    display: flex;
-                    align-items: center;
+                    display: flex; 
+                    align-items: center; 
+                    justify-content: center;
                     gap: 6px;
+                    min-height: 44px;
                 }
                 .action-btn:hover { 
                     transform: translateY(-2px); 
@@ -329,6 +332,17 @@ export default function InvoicePrintModal({
                 .action-btn.whatsapp:hover { background: #20ba59; }
                 .action-btn.format-switch { background: #f59e0b; color: white; }
                 .action-btn.close { background: rgba(239, 68, 68, 0.15); color: #EF4444; border: 1px solid rgba(239, 68, 68, 0.3); }
+
+                @media (max-width: 768px) {
+                    .print-modal-overlay { padding: 15px 10px !important; }
+                    .print-actions-bar { padding: 10px 14px !important; border-radius: 20px !important; width: 100%; justify-content: center; gap: 8px !important; }
+                    .action-btn { padding: 10px 12px; font-size: 13px; min-height: 44px; flex: 1; }
+                    .a4-preview-box { width: 95vw !important; padding: 12px 10px !important; min-height: auto !important; border-radius: 16px !important; }
+                    .inv-header { grid-template-columns: 1fr !important; text-align: center; gap: 10px; }
+                    .header-qr, .header-logo { justify-content: center; }
+                    .info-grid { grid-template-columns: 1fr !important; gap: 10px; }
+                    .inv-footer-flex { flex-direction: column !important; gap: 20px; }
+                }
 
                 /* نافذة الواتساب المنبثقة */
                 .wa-modal-box {

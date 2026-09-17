@@ -21,8 +21,8 @@ const getSupabaseAdmin = () => createClient(
 
 // الترتيب الصارم لحذف الحركات والعمليات (الأبناء أولاً لمنع تعارض Foreign Keys)
 const TRANSACTION_TABLES_ORDER = [
-    'vehicle_inventory',        // عهد سيارات التوزيع
-    'inventory_transactions',   // حركات المخزون
+    'shift_pump_readings',      // قراءات عدادات المضخات للوردية
+    'inventory_transactions',   // حركات المخزون والوقود
     'journal_lines',            // أسطر قيود اليومية
     'journal_headers',          // ترويسات قيود اليومية
     'manual_journals',          // القيود اليدوية
@@ -31,9 +31,7 @@ const TRANSACTION_TABLES_ORDER = [
     'expenses',                 // المصروفات
     'invoices',                 // فواتير المبيعات
     'cash_flows',               // التدفقات النقدية
-    'pos_shifts',               // 🔒 سجل الورديات
-    'fleet_operations',         // 🚚 أوامر تشغيل الرحلات
-    'journal_errors'            // أخطاء القيود
+    'pos_shifts'                // 🔒 سجل الورديات
 ];
 
 export async function POST(req: Request) {
@@ -60,7 +58,7 @@ export async function POST(req: Request) {
                 }
             }
 
-            // 2. تصفير أرصدة المخزون وعهد الفوارغ (للإبقاء على الأصناف والعملاء والمستودعات)
+            // 2. تصفير أرصدة المخزون والخزانات (للإبقاء على الأصناف والعملاء والخزانات)
             try {
                 await admin.from('warehouse_inventory').update({ quantity: 0 }).neq('id', '00000000-0000-0000-0000-000000000000');
             } catch (e: any) {
@@ -73,20 +71,12 @@ export async function POST(req: Request) {
                 console.warn('Reset inventory_items warning:', e?.message);
             }
 
-            try {
-                await admin.from('partners').update({ bottle_custody: 0 }).neq('id', '00000000-0000-0000-0000-000000000000');
-            } catch (e: any) {
-                console.warn('Reset partners bottle custody warning:', e?.message);
-            }
-
             // 3. إذا كان المطلوب إعادة ضبط المصنع الشاملة
             if (action === 'factory_reset') {
                 const extraTables = [
                     'notifications',
-                    'user_requests',
-                    'user_tasks',
                     'payroll_slips',
-                    'fleet_vehicles',
+                    'fuel_pumps',
                     'partners',
                     'inventory_items'
                 ];

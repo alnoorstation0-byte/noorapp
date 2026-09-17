@@ -34,21 +34,21 @@ export default function PurchaseOrdersPage() {
 
   const columns = [
     { key: 'transaction_number', header: 'رقم الأمر',
-      render: (row: any) => <span style={{ fontWeight: 'bold', color: '#1C73AB' }}>{row.transaction_number}</span>
+      render: (row: any) => <span style={{ fontWeight: 900, color: '#00E5FF' }}>{row.transaction_number}</span>
     },
     { key: 'transaction_date', header: 'التاريخ',
-      render: (row: any) => new Date(row.transaction_date).toLocaleDateString('ar-SA')
+      render: (row: any) => <span style={{ color: '#94A3B8' }}>{new Date(row.transaction_date).toLocaleDateString('ar-SA')}</span>
     },
     { key: 'partner', header: 'المورد',
-      render: (row: any) => <span style={{ fontWeight: 900, color: '#334155' }}>{row.partners?.name || '-'}</span>
+      render: (row: any) => <span style={{ fontWeight: 900, color: '#F8FAFC' }}>{row.partners?.name || '-'}</span>
     },
     { key: 'item', header: 'الأصناف المشتراة',
       render: (row: any) => (
         <div>
            {row.items?.map((item: any, i: number) => (
                <div key={i} style={{ marginBottom: '4px' }}>
-                  <span style={{ fontWeight: 'bold', color: '#122946' }}>{item.inventory_items?.name}</span>
-                  <span style={{ fontSize: '11px', color: '#64748b', marginRight: '5px' }}>({item.quantity} {item.inventory_items?.unit || 'حبة'})</span>
+                  <span style={{ fontWeight: 800, color: '#F8FAFC' }}>{item.inventory_items?.name}</span>
+                  <span style={{ fontSize: '11px', color: '#94A3B8', marginRight: '5px' }}>({item.quantity} {item.inventory_items?.unit || 'حبة'})</span>
                </div>
            ))}
         </div>
@@ -56,15 +56,16 @@ export default function PurchaseOrdersPage() {
     },
     { key: 'amount', header: 'الإجمالي',
       render: (row: any) => {
-        return <span style={{ fontWeight: 900, color: '#16a34a' }}>{formatCurrency(row.total_amount)}</span>;
+        return <span style={{ fontWeight: 900, color: '#10B981' }}>{formatCurrency(row.total_amount)}</span>;
       }
     },
     { key: 'status', header: 'الحالة',
       render: (row: any) => (
         <span style={{ 
-            background: (['approved', 'معتمد', 'مرحل'].includes(row.status)) ? '#dcfce7' : '#fef9c3', 
-            color: (['approved', 'معتمد', 'مرحل'].includes(row.status)) ? '#166534' : '#854d0e',
-            padding: '4px 10px', borderRadius: '12px', fontSize: '11px', fontWeight: 'bold' 
+            background: (['approved', 'معتمد', 'مرحل'].includes(row.status)) ? 'rgba(16, 185, 129, 0.15)' : 'rgba(245, 158, 11, 0.15)', 
+            color: (['approved', 'معتمد', 'مرحل'].includes(row.status)) ? '#10B981' : '#F59E0B',
+            border: `1px solid ${(['approved', 'معتمد', 'مرحل'].includes(row.status)) ? 'rgba(16, 185, 129, 0.3)' : 'rgba(245, 158, 11, 0.3)'}`,
+            padding: '4px 10px', borderRadius: '12px', fontSize: '11px', fontWeight: 800 
         }}>
             {(['approved', 'معتمد', 'مرحل'].includes(row.status)) ? 'مستلم ✅' : 'قيد الانتظار ⏳'}
         </span>

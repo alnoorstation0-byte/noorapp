@@ -457,240 +457,216 @@ export default function PosSettlementsPage() {
                                     return (
                                         <tr key={item.id || idx} className="aqua-table-row">
                                             {/* Shift & Outlet */}
-                                            <td style={{ padding: '18px 20px' }}>
-                                                <div style={{
-                                                    background: 'rgba(28, 115, 171, 0.1)',
-                                                    color: '#1C73AB',
-                                                    padding: '4px 10px',
-                                                    borderRadius: '8px',
-                                                    display: 'inline-block',
-                                                    fontWeight: 900,
-                                                    fontSize: '13px'
-                                                }}>
-                                                    {item.shiftNumber}
-                                                </div>
-                                                <div style={{ fontSize: '13px', color: '#122946', marginTop: '5px', fontWeight: 900 }}>
-                                                    🏢 {item.warehouseName}
-                                                </div>
-                                                {item.warehouseLocation && (
-                                                    <div style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>
-                                                        📍 {item.warehouseLocation}
-                                                    </div>
-                                                )}
-                                            </td>
+                                             <td style={{ padding: '18px 20px' }}>
+                                                 <div style={{
+                                                     background: 'rgba(0, 229, 255, 0.1)',
+                                                     color: '#00E5FF',
+                                                     padding: '4px 10px',
+                                                     borderRadius: '8px',
+                                                     display: 'inline-block',
+                                                     fontWeight: 900,
+                                                     fontSize: '13px',
+                                                     border: '1px solid rgba(0, 229, 255, 0.25)'
+                                                 }}>
+                                                     {item.shiftNumber}
+                                                 </div>
+                                                 <div style={{ fontSize: '13px', color: '#F8FAFC', marginTop: '5px', fontWeight: 900 }}>
+                                                     🏢 {item.warehouseName}
+                                                 </div>
+                                                 {item.warehouseLocation && (
+                                                     <div style={{ fontSize: '11px', color: '#94A3B8', marginTop: '2px' }}>
+                                                         📍 {item.warehouseLocation}
+                                                     </div>
+                                                 )}
+                                             </td>
 
-                                            {/* Date */}
-                                            <td style={{ padding: '18px 20px', fontWeight: 700, whiteSpace: 'nowrap' }}>
-                                                <div>{formatDate(item.openedAt)}</div>
-                                                <div style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>
-                                                    {item.closedAt ? `إغلاق: ${new Date(item.closedAt).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })}` : 'مفتوحة 🟢'}
-                                                </div>
-                                            </td>
+                                             {/* Date */}
+                                             <td style={{ padding: '18px 20px', fontWeight: 700, whiteSpace: 'nowrap' }}>
+                                                 <div style={{ color: '#F8FAFC' }}>{formatDate(item.openedAt)}</div>
+                                                 <div style={{ fontSize: '11px', color: '#94A3B8', marginTop: '2px' }}>
+                                                     {item.closedAt ? `إغلاق: ${new Date(item.closedAt).toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' })}` : 'مفتوحة 🟢'}
+                                                 </div>
+                                             </td>
 
-                                            {/* Cashier */}
-                                            <td style={{ padding: '18px 20px' }}>
-                                                <div style={{ fontWeight: 900, color: '#122946', fontSize: '14px' }}>
-                                                    {item.cashierName}
-                                                </div>
-                                                {item.cashierPhone && (
-                                                    <div style={{ fontSize: '11px', color: '#1C73AB', marginTop: '3px' }}>
-                                                        📞 {item.cashierPhone}
-                                                    </div>
-                                                )}
-                                            </td>
+                                             {/* Cashier */}
+                                             <td style={{ padding: '18px 20px' }}>
+                                                 <div style={{ fontWeight: 900, color: '#F8FAFC', fontSize: '14px' }}>
+                                                     {item.cashierName}
+                                                 </div>
+                                                 {item.cashierPhone && (
+                                                     <div style={{ fontSize: '11px', color: '#00E5FF', marginTop: '3px' }}>
+                                                         📞 {item.cashierPhone}
+                                                     </div>
+                                                 )}
+                                             </td>
 
-                                            {/* Sales */}
-                                            <td style={{ padding: '18px 20px', textAlign: 'center' }}>
-                                                <div style={{ fontWeight: 900, color: '#1C73AB', fontSize: '15px' }}>
-                                                    {formatCurrency(item.totalSales)}
-                                                </div>
-                                                <div style={{ fontSize: '11px', color: '#64748b', marginTop: '3px' }}>
-                                                    كاش: {formatCurrency(item.cashSales)} | شبكة: {formatCurrency(item.cardSales)}
-                                                </div>
-                                            </td>
+                                             {/* Sales */}
+                                             <td style={{ padding: '18px 20px', textAlign: 'center' }}>
+                                                 <div style={{ fontWeight: 900, color: '#00E5FF', fontSize: '15px' }}>
+                                                     {formatCurrency(item.totalSales)}
+                                                 </div>
+                                                 <div style={{ fontSize: '11px', color: '#94A3B8', marginTop: '3px' }}>
+                                                     كاش: {formatCurrency(item.cashSales)} | شبكة: {formatCurrency(item.cardSales)}
+                                                 </div>
+                                             </td>
 
-                                            {/* Expenses */}
-                                            <td style={{ padding: '18px 20px', textAlign: 'center', fontWeight: 800, color: '#ef4444' }}>
-                                                {item.totalExpenses > 0 ? formatCurrency(item.totalExpenses) : '---'}
-                                            </td>
+                                             {/* Expenses */}
+                                             <td style={{ padding: '18px 20px', textAlign: 'center', fontWeight: 800, color: '#ef4444' }}>
+                                                 {item.totalExpenses > 0 ? formatCurrency(item.totalExpenses) : '---'}
+                                             </td>
 
-                                            {/* Net Cash Due */}
-                                            <td style={{ padding: '18px 20px', textAlign: 'center', fontWeight: 900, color: '#b45309', fontSize: '15px' }}>
-                                                {formatCurrency(item.netCashDue)}
-                                            </td>
+                                             {/* Net Cash */}
+                                             <td style={{ padding: '18px 20px', textAlign: 'center', fontWeight: 900, color: '#10B981' }}>
+                                                 {formatCurrency(item.netCashExpected)}
+                                             </td>
 
-                                            {/* Handed Over Cash */}
-                                            <td style={{ padding: '18px 20px', textAlign: 'center', fontWeight: 900, color: '#16a34a', fontSize: '15px' }}>
-                                                {formatCurrency(item.handedOverCash)}
-                                            </td>
+                                             {/* Cash Remitted */}
+                                             <td style={{ padding: '18px 20px', textAlign: 'center', fontWeight: 800 }}>
+                                                 {isSettled ? (
+                                                     <span style={{ color: '#10B981', fontWeight: 900 }}>{formatCurrency(item.settlementCashReceived)}</span>
+                                                 ) : (
+                                                     <span style={{ color: '#94A3B8' }}>---</span>
+                                                 )}
+                                             </td>
 
-                                            {/* Variance */}
-                                            <td style={{ padding: '18px 20px', textAlign: 'center' }}>
-                                                <div style={{
-                                                    fontWeight: 900,
-                                                    fontSize: '14px',
-                                                    color: item.remainingCashCustody <= 0 ? '#16a34a' : '#ef4444'
-                                                }}>
-                                                    {item.remainingCashCustody <= 0 ? (
-                                                        item.shortageOverage > 0 ? `+${formatCurrency(item.shortageOverage)} زيادة` : '0.00 ر.س متطابق'
-                                                    ) : (
-                                                        `-${formatCurrency(item.remainingCashCustody)} عجز/معلق`
-                                                    )}
-                                                </div>
-                                            </td>
+                                             {/* Variance */}
+                                             <td style={{ padding: '18px 20px', textAlign: 'center' }}>
+                                                 {isSettled ? (
+                                                     <span style={{
+                                                         color: variance < 0 ? '#ef4444' : (variance > 0 ? '#10b981' : '#94a3b8'),
+                                                         fontWeight: 900
+                                                     }}>
+                                                         {variance === 0 ? 'مطابق ✅' : formatCurrency(variance)}
+                                                     </span>
+                                                 ) : (
+                                                     <span style={{ color: '#94a3b8' }}>---</span>
+                                                 )}
+                                             </td>
 
-                                            {/* Fuel Pump Meters & Variance */}
-                                            <td style={{ padding: '18px 20px', textAlign: 'center' }}>
-                                                <div style={{ fontSize: '12px', fontWeight: 800, color: '#122946' }}>
-                                                    ⛽ {Number(item.totalLitersSold || 0).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} لتر
-                                                </div>
-                                                <div style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>
-                                                    قيمة: {formatCurrency(item.meterTotalAmount || 0)}
-                                                </div>
-                                                {Number(item.meterTotalAmount || 0) > 0 && (
-                                                    <div style={{ 
-                                                        marginTop: '4px',
-                                                        fontSize: '10px', 
-                                                        fontWeight: 900,
-                                                        padding: '2px 6px',
-                                                        borderRadius: '6px',
-                                                        display: 'inline-block',
-                                                        background: Math.abs(item.meterSalesVariance || 0) <= 5 ? 'rgba(22, 163, 74, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-                                                        color: Math.abs(item.meterSalesVariance || 0) <= 5 ? '#16a34a' : '#ef4444'
-                                                    }}>
-                                                        {Math.abs(item.meterSalesVariance || 0) <= 5 
-                                                            ? '✅ مطابق' 
-                                                            : (item.meterSalesVariance || 0) > 0 
-                                                                ? `⚠️ فرق +${Number(item.meterSalesVariance).toFixed(1)} ر.س` 
-                                                                : `ℹ️ فرق -${Math.abs(Number(item.meterSalesVariance)).toFixed(1)} ر.س`}
-                                                    </div>
-                                                )}
-                                            </td>
+                                             {/* Status */}
+                                             <td style={{ padding: '18px 20px', textAlign: 'center' }}>
+                                                 {isSettled ? (
+                                                     <span style={{
+                                                         background: 'rgba(16, 185, 129, 0.15)',
+                                                         color: '#10B981',
+                                                         padding: '6px 14px',
+                                                         borderRadius: '50px',
+                                                         fontWeight: 900,
+                                                         fontSize: '12px',
+                                                         border: '1px solid rgba(16, 185, 129, 0.3)'
+                                                     }}>
+                                                         تمت التسوية ✅
+                                                     </span>
+                                                 ) : isPartial ? (
+                                                     <span style={{
+                                                         background: 'rgba(0, 229, 255, 0.15)',
+                                                         color: '#00E5FF',
+                                                         padding: '6px 14px',
+                                                         borderRadius: '50px',
+                                                         fontWeight: 900,
+                                                         fontSize: '12px',
+                                                         border: '1px solid rgba(0, 229, 255, 0.3)'
+                                                     }}>
+                                                         تسوية جزئية 🔄
+                                                     </span>
+                                                 ) : isOpenShift ? (
+                                                     <span style={{
+                                                         background: 'rgba(59, 130, 246, 0.15)',
+                                                         color: '#60A5FA',
+                                                         padding: '6px 14px',
+                                                         borderRadius: '50px',
+                                                         fontWeight: 900,
+                                                         fontSize: '12px',
+                                                         border: '1px solid rgba(59, 130, 246, 0.3)'
+                                                     }}>
+                                                         وردية نشطة 🟢
+                                                     </span>
+                                                 ) : (
+                                                     <span style={{
+                                                         background: 'rgba(245, 158, 11, 0.15)',
+                                                         color: '#F59E0B',
+                                                         padding: '6px 14px',
+                                                         borderRadius: '50px',
+                                                         fontWeight: 900,
+                                                         fontSize: '12px',
+                                                         border: '1px solid rgba(245, 158, 11, 0.3)'
+                                                     }}>
+                                                         بانتظار التسوية ⏳
+                                                     </span>
+                                                 )}
+                                             </td>
 
-                                            {/* Status Badge */}
-                                            <td style={{ padding: '18px 20px', textAlign: 'center' }}>
-                                                {isSettled ? (
-                                                    <span style={{
-                                                        background: 'rgba(22, 163, 74, 0.15)',
-                                                        color: '#16a34a',
-                                                        padding: '6px 14px',
-                                                        borderRadius: '50px',
-                                                        fontWeight: 900,
-                                                        fontSize: '12px',
-                                                        border: '1px solid rgba(22, 163, 74, 0.3)'
-                                                    }}>
-                                                        تمت التسوية ✅
-                                                    </span>
-                                                ) : isPartial ? (
-                                                    <span style={{
-                                                        background: 'rgba(40, 145, 200, 0.15)',
-                                                        color: '#1C73AB',
-                                                        padding: '6px 14px',
-                                                        borderRadius: '50px',
-                                                        fontWeight: 900,
-                                                        fontSize: '12px',
-                                                        border: '1px solid rgba(40, 145, 200, 0.3)'
-                                                    }}>
-                                                        تسوية جزئية 🔄
-                                                    </span>
-                                                ) : isOpenShift ? (
-                                                    <span style={{
-                                                        background: 'rgba(59, 130, 246, 0.15)',
-                                                        color: '#2563eb',
-                                                        padding: '6px 14px',
-                                                        borderRadius: '50px',
-                                                        fontWeight: 900,
-                                                        fontSize: '12px',
-                                                        border: '1px solid rgba(59, 130, 246, 0.3)'
-                                                    }}>
-                                                        وردية نشطة 🟢
-                                                    </span>
-                                                ) : (
-                                                    <span style={{
-                                                        background: 'rgba(245, 158, 11, 0.15)',
-                                                        color: '#b45309',
-                                                        padding: '6px 14px',
-                                                        borderRadius: '50px',
-                                                        fontWeight: 900,
-                                                        fontSize: '12px',
-                                                        border: '1px solid rgba(245, 158, 11, 0.3)'
-                                                    }}>
-                                                        بانتظار التسوية ⏳
-                                                    </span>
-                                                )}
-                                            </td>
+                                             {/* Actions */}
+                                             <td style={{ padding: '18px 20px', textAlign: 'center' }}>
+                                                 <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
+                                                     {/* Settle button */}
+                                                     <button
+                                                         type="button"
+                                                         onClick={() => {
+                                                             setSelectedShiftForSettlement(item);
+                                                             setIsSettlementModalOpen(true);
+                                                         }}
+                                                         style={{
+                                                             padding: '7px 14px',
+                                                             borderRadius: '12px',
+                                                             border: 'none',
+                                                             background: isSettled ? 'rgba(0, 229, 255, 0.12)' : 'linear-gradient(135deg, #00E5FF 0%, #00B4D8 100%)',
+                                                             color: isSettled ? '#00E5FF' : '#0B0E14',
+                                                             fontWeight: 900,
+                                                             fontSize: '12px',
+                                                             cursor: 'pointer',
+                                                             boxShadow: isSettled ? 'none' : '0 4px 12px rgba(0, 229, 255, 0.25)',
+                                                             display: 'flex',
+                                                             alignItems: 'center',
+                                                             gap: '6px',
+                                                             transition: 'all 0.2s'
+                                                         }}
+                                                         title="تسوية العهدة النقدية وتوريد الخزينة"
+                                                     >
+                                                         <span>{isSettled ? 'تعديل التسوية' : '🤝 تسوية العهدة'}</span>
+                                                     </button>
 
-                                            {/* Actions */}
-                                            <td style={{ padding: '18px 20px', textAlign: 'center' }}>
-                                                <div style={{ display: 'flex', gap: '8px', justifyContent: 'center' }}>
-                                                    {/* Settle button */}
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => {
-                                                            setSelectedShiftForSettlement(item);
-                                                            setIsSettlementModalOpen(true);
-                                                        }}
-                                                        style={{
-                                                            padding: '7px 14px',
-                                                            borderRadius: '12px',
-                                                            border: 'none',
-                                                            background: isSettled ? 'rgba(28, 115, 171, 0.12)' : 'linear-gradient(135deg, #1C73AB 0%, #2891C8 100%)',
-                                                            color: isSettled ? '#1C73AB' : '#FFFFFF',
-                                                            fontWeight: 800,
-                                                            fontSize: '12px',
-                                                            cursor: 'pointer',
-                                                            boxShadow: isSettled ? 'none' : '0 4px 12px rgba(28, 115, 171, 0.25)',
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            gap: '6px',
-                                                            transition: 'all 0.2s'
-                                                        }}
-                                                        title="تسوية العهدة النقدية وتوريد الخزينة"
-                                                    >
-                                                        <span>{isSettled ? 'تعديل التسوية' : '🤝 تسوية العهدة'}</span>
-                                                    </button>
-
-                                                    {/* Print clearance button */}
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => {
-                                                            setSelectedShiftForPrint(item);
-                                                            setIsPrintModalOpen(true);
-                                                        }}
-                                                        style={{
-                                                            padding: '7px 12px',
-                                                            borderRadius: '12px',
-                                                            border: '1px solid rgba(28, 115, 171, 0.25)',
-                                                            background: 'rgba(255, 255, 255, 0.8)',
-                                                            color: '#1C73AB',
-                                                            fontWeight: 800,
-                                                            fontSize: '12px',
-                                                            cursor: 'pointer',
-                                                            display: 'flex',
-                                                            alignItems: 'center',
-                                                            gap: '4px'
-                                                        }}
-                                                        title="طباعة سند تسوية ومخالصة عهدة منفذ بيع"
-                                                    >
-                                                        <span>🖨️</span>
-                                                        <span>سند</span>
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    );
-                                }) : (
-                                    <tr>
-                                        <td colSpan={11} style={{ padding: '80px 20px', textAlign: 'center', color: '#1C73AB' }}>
-                                            <div style={{ fontSize: '48px', marginBottom: '12px' }}>🏪</div>
-                                            <div style={{ fontSize: '18px', fontWeight: 900, color: '#122946' }}>
-                                                لا توجد ورديات أو منافذ بيع مطابقة لخيارات البحث المحددة
-                                            </div>
-                                            <p style={{ fontSize: '13px', color: '#64748b', marginTop: '6px' }}>
-                                                جرب تغيير فترة التاريخ أو المنفذ المختار لعرض كافة الورديات.
-                                            </p>
-                                        </td>
-                                    </tr>
+                                                     {/* Print clearance button */}
+                                                     <button
+                                                         type="button"
+                                                         onClick={() => {
+                                                             setSelectedShiftForPrint(item);
+                                                             setIsPrintModalOpen(true);
+                                                         }}
+                                                         style={{
+                                                             padding: '7px 12px',
+                                                             borderRadius: '12px',
+                                                             border: '1px solid rgba(0, 229, 255, 0.25)',
+                                                             background: 'rgba(30, 41, 59, 0.6)',
+                                                             color: '#00E5FF',
+                                                             fontWeight: 800,
+                                                             fontSize: '12px',
+                                                             cursor: 'pointer',
+                                                             display: 'flex',
+                                                             alignItems: 'center',
+                                                             gap: '4px'
+                                                         }}
+                                                         title="طباعة سند تسوية ومخالصة عهدة منفذ بيع"
+                                                     >
+                                                         <span>🖨️</span>
+                                                         <span>سند</span>
+                                                     </button>
+                                                 </div>
+                                             </td>
+                                         </tr>
+                                     );
+                                 }) : (
+                                     <tr>
+                                         <td colSpan={11} style={{ padding: '80px 20px', textAlign: 'center', color: '#94A3B8' }}>
+                                             <div style={{ fontSize: '48px', marginBottom: '12px' }}>🏪</div>
+                                             <div style={{ fontSize: '18px', fontWeight: 900, color: '#F8FAFC' }}>
+                                                 لا توجد ورديات أو منافذ بيع مطابقة لخيارات البحث المحددة
+                                             </div>
+                                             <p style={{ fontSize: '13px', color: '#94A3B8', marginTop: '6px' }}>
+                                                 جرب تغيير فترة التاريخ أو المنفذ المختار لعرض كافة الورديات.
+                                             </p>
+                                         </td>
+                                     </tr>
                                 )}
                             </tbody>
                         </table>

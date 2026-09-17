@@ -18,6 +18,7 @@ import GlobalAutoSelectNumber from './GlobalAutoSelectNumber';
 import { THEME } from '@/lib/theme'; 
 import { RealtimeSyncProvider } from '@/lib/useRealtimeSync';
 import { LanguageProvider } from '@/lib/LanguageContext';
+import { ThemeProvider } from '@/lib/ThemeContext';
 
 export default function AppClientProviders({ children }: { children: React.ReactNode }) {
     return (
@@ -30,6 +31,7 @@ export default function AppClientProviders({ children }: { children: React.React
                 zIndex={99999} 
             />
             <GlobalErrorBoundary>
+                <ThemeProvider>
                 <LanguageProvider>
                 <QueryProvider>
                     <Providers>
@@ -58,6 +60,7 @@ export default function AppClientProviders({ children }: { children: React.React
                     </Providers>
                 </QueryProvider>
                 </LanguageProvider>
+                </ThemeProvider>
             </GlobalErrorBoundary>
         </>
     );

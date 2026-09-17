@@ -1,6 +1,7 @@
 "use client";
 import { useLanguage } from '@/lib/LanguageContext';
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { supabase } from '@/lib/supabase';
 
 export default function ShiftDetailsModal({
@@ -15,10 +16,27 @@ export default function ShiftDetailsModal({
     const { language } = useLanguage();
     const isEn = language === 'en';
 
+    const [mounted, setMounted] = useState(false);
     const [loading, setLoading] = useState(true);
     const [details, setDetails] = useState<any>(null);
     const [error, setError] = useState<string | null>(null);
     const [activeTab, setActiveTab] = useState<'financial' | 'items' | 'invoices'>('financial');
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    useEffect(() => {
+        if (!isOpen) return;
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                onClose();
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isOpen, onClose]);
 
     useEffect(() => {
         if (isOpen && shiftId) {
@@ -55,10 +73,10 @@ export default function ShiftDetailsModal({
         window.print();
     };
 
-    if (!isOpen) return null;
+    if (!isOpen || !mounted) return null;
 
-    return (
-        <div style={{
+    return createPortal(
+        <div className="warm-portal-overlay-fullscreen" style={{
             position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
             background: 'rgba(11, 14, 20, 0.85)',
             backdropFilter: 'blur(16px)',
@@ -110,6 +128,20 @@ export default function ShiftDetailsModal({
                 }
                 .shift-table tr:hover td {
                     background: rgba(0, 229, 255, 0.04);
+                }
+                @media (max-width: 768px) {
+                    .shift-det-tab {
+                        padding: 8px 12px;
+                        font-size: 12px;
+                        min-height: 44px;
+                        flex: 1;
+                        text-align: center;
+                    }
+                    .print-area-dossier {
+                        padding: 16px 14px !important;
+                        border-radius: 18px !important;
+                        max-height: 94vh !important;
+                    }
                 }
                 @media print {
                     body * { visibility: hidden; }
@@ -558,6 +590,7 @@ export default function ShiftDetailsModal({
                     </div>
                 ) : null}
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }

@@ -139,25 +139,25 @@ export default function MasterDashboard() {
 
                 {/* العمود الأيسر: الإجراءات والرقابة */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '25px' }}>
-                    <GlassContainer style={{ background: 'linear-gradient(135deg, rgba(28, 115, 171, 0.08) 0%, rgba(18, 41, 70, 0.03) 100%)', border: '1px solid rgba(28, 115, 171, 0.2)' }}>
+                    <GlassContainer style={{ background: 'linear-gradient(135deg, rgba(20, 24, 34, 0.95) 0%, rgba(15, 20, 30, 0.85) 100%)', border: '1px solid rgba(0, 229, 255, 0.25)' }}>
                         <h3 style={{ color: THEME.primary, display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '20px' }}>
                             <span style={{ fontSize: '24px' }}>🛡️</span> 
                             رادار الرقابة المالية
                         </h3>
                         <div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid rgba(28, 115, 171, 0.15)' }}>
-                                <span style={{ fontWeight: 800, color: '#475569' }}>قيود يتيمة (بلا مرجع)</span>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid rgba(0, 229, 255, 0.15)' }}>
+                                <span style={{ fontWeight: 800, color: '#94A3B8' }}>قيود يتيمة (بلا مرجع)</span>
                                 <span style={{ color: summary.audit.orphans > 0 ? THEME.danger : THEME.success, fontWeight: 900, fontSize: '18px' }}>{summary.audit.orphans}</span>
                             </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid rgba(28, 115, 171, 0.15)' }}>
-                                <span style={{ fontWeight: 800, color: '#475569' }}>حركات غير متزنة</span>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', padding: '12px 0', borderBottom: '1px solid rgba(0, 229, 255, 0.15)' }}>
+                                <span style={{ fontWeight: 800, color: '#94A3B8' }}>حركات غير متزنة</span>
                                 <span style={{ color: summary.audit.unbalanced > 0 ? THEME.danger : THEME.success, fontWeight: 900, fontSize: '18px' }}>{summary.audit.unbalanced}</span>
                             </div>
                         </div>
                     </GlassContainer>
 
                     <GlassContainer>
-                        <h3>⚡ وصول سريع</h3>
+                        <h3 style={{ color: '#F8FAFC' }}>⚡ وصول سريع</h3>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '15px', marginTop: '15px' }}>
                             <QuickAction icon="📝" label="قيد جديد" href="/journal" />
                             <QuickAction icon="🚚" label="رحلة توزيع" href="/fleet_operations" />
@@ -177,22 +177,28 @@ function KPICard({ title, value, icon, color, isCurrency = true }: any) {
     return (
         <div className="kpi-card fade-in-up" style={{ 
             borderRight: `4px solid ${color}`,
-            background: 'linear-gradient(135deg, rgba(255,255,255,0.9), rgba(255,255,255,0.6))',
-            backdropFilter: 'blur(10px)',
+            background: 'linear-gradient(135deg, rgba(20, 24, 34, 0.95) 0%, rgba(15, 20, 30, 0.85) 100%)',
+            backdropFilter: 'blur(20px)',
             borderRadius: '16px',
             padding: '20px',
-            boxShadow: '0 10px 30px rgba(0,0,0,0.05)',
-            border: '1px solid rgba(255,255,255,0.8)',
+            boxShadow: '0 10px 30px rgba(0,0,0,0.4)',
+            border: '1px solid rgba(0, 229, 255, 0.2)',
             transition: 'all 0.3s ease'
         }}
-        onMouseEnter={(e) => e.currentTarget.style.transform = 'translateY(-5px)'}
-        onMouseLeave={(e) => e.currentTarget.style.transform = 'translateY(0)'}
+        onMouseEnter={(e) => {
+            e.currentTarget.style.transform = 'translateY(-5px)';
+            e.currentTarget.style.borderColor = 'rgba(0, 229, 255, 0.4)';
+        }}
+        onMouseLeave={(e) => {
+            e.currentTarget.style.transform = 'translateY(0)';
+            e.currentTarget.style.borderColor = 'rgba(0, 229, 255, 0.2)';
+        }}
         >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '13px', fontWeight: 800, color: '#475569' }}>{title}</span>
-                <span style={{ fontSize: '24px', opacity: 0.8, filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.1))' }}>{icon}</span>
+                <span style={{ fontSize: '13px', fontWeight: 800, color: '#94A3B8' }}>{title}</span>
+                <span style={{ fontSize: '24px', opacity: 0.9 }}>{icon}</span>
             </div>
-            <h2 style={{ color: color, marginTop: '15px', fontSize: '28px', fontWeight: 900, textShadow: '0 2px 10px rgba(0,0,0,0.05)' }}>
+            <h2 style={{ color: color, marginTop: '15px', fontSize: '28px', fontWeight: 900, textShadow: '0 0 20px currentColor' }}>
                 {isCurrency ? formatCurrency(value) : value}
             </h2>
         </div>
@@ -203,11 +209,11 @@ function ProgressBar({ label, percentage, color }: any) {
     const safePercent = Math.min(percentage, 100);
     return (
         <div style={{ marginBottom: '15px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginBottom: '5px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '13px', marginBottom: '5px', color: '#F8FAFC' }}>
                 <span>{label}</span>
                 <span style={{ fontWeight: 900 }}>{percentage.toFixed(1)}%</span>
             </div>
-            <div style={{ width: '100%', height: '8px', background: 'rgba(40, 145, 200, 0.15)', borderRadius: '10px' }}>
+            <div style={{ width: '100%', height: '8px', background: 'rgba(0, 229, 255, 0.12)', borderRadius: '10px' }}>
                 <div style={{ width: `${safePercent}%`, height: '100%', background: color, borderRadius: '10px', transition: '1s' }}></div>
             </div>
         </div>
@@ -221,30 +227,30 @@ function QuickAction({ icon, label, href }: any) {
             onClick={() => href && router.push(href)}
             className="btn" 
             style={{ 
-                background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(255, 255, 255, 0.5))', 
-                border: '1px solid rgba(40, 145, 200, 0.2)', 
+                background: 'rgba(20, 24, 34, 0.85)', 
+                border: '1px solid rgba(0, 229, 255, 0.2)', 
                 color: THEME.primary, 
                 padding: '20px 15px', 
                 flexDirection: 'column',
                 borderRadius: '16px',
-                boxShadow: '0 8px 20px rgba(0,0,0,0.04)',
+                boxShadow: '0 8px 20px rgba(0,0,0,0.3)',
                 cursor: 'pointer',
                 transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
                 gap: '8px'
             }}
             onMouseEnter={(e) => {
                 e.currentTarget.style.transform = 'translateY(-3px)';
-                e.currentTarget.style.boxShadow = '0 12px 25px rgba(40,145,200,0.15)';
-                e.currentTarget.style.borderColor = THEME.primary;
+                e.currentTarget.style.boxShadow = '0 12px 25px rgba(0, 229, 255, 0.25)';
+                e.currentTarget.style.borderColor = '#00E5FF';
             }}
             onMouseLeave={(e) => {
                 e.currentTarget.style.transform = 'translateY(0)';
-                e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.04)';
-                e.currentTarget.style.borderColor = 'rgba(40, 145, 200, 0.2)';
+                e.currentTarget.style.boxShadow = '0 8px 20px rgba(0,0,0,0.3)';
+                e.currentTarget.style.borderColor = 'rgba(0, 229, 255, 0.2)';
             }}
         >
-            <span style={{ fontSize: '28px', filter: 'drop-shadow(0 2px 4px rgba(40,145,200,0.2))' }}>{icon}</span>
-            <span style={{ fontSize: '14px', fontWeight: 800, color: '#1e293b' }}>{label}</span>
+            <span style={{ fontSize: '28px', filter: 'drop-shadow(0 2px 8px rgba(0, 229, 255, 0.3))' }}>{icon}</span>
+            <span style={{ fontSize: '14px', fontWeight: 800, color: '#F8FAFC' }}>{label}</span>
         </div>
     );
 }

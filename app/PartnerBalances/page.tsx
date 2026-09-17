@@ -645,29 +645,29 @@ export default function PartnerBalancesPage() {
 
                         {/* 🚀 زراير التقسيم (Pagination) */}
                         {filteredData.length > 0 && (
-                            <div className="no-print pb-pagination" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '20px', background: 'white', padding: '15px', borderRadius: '12px', border: '1px solid rgba(40, 145, 200, 0.15)' }}>
-                                <div style={{ fontSize: '14px', fontWeight: 900, color: '#475569' }}>
-                                    الحسابات المعروضة: <span style={{ color: THEME.primary || '#3b82f6' }}>{filteredData.length}</span> حساب
+                            <div className="no-print pb-pagination" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '20px', background: 'rgba(20, 24, 34, 0.85)', backdropFilter: 'blur(20px)', padding: '16px 22px', borderRadius: '16px', border: '1px solid rgba(0, 229, 255, 0.2)', boxShadow: '0 8px 30px rgba(0,0,0,0.3)' }}>
+                                <div style={{ fontSize: '14px', fontWeight: 900, color: '#94A3B8' }}>
+                                    الحسابات المعروضة: <span style={{ color: '#00E5FF' }}>{filteredData.length}</span> حساب
                                 </div>
                                 <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                                     <button 
                                         onClick={() => setCurrentPage(p => p - 1)} disabled={currentPage === 1}
-                                        style={{ padding: '8px 20px', borderRadius: '8px', border: 'none', background: currentPage === 1 ? 'rgba(255, 255, 255, 0.4)' : (THEME.primary || '#3b82f6'), color: currentPage === 1 ? '#475569' : 'white', cursor: currentPage === 1 ? 'not-allowed' : 'pointer', fontWeight: 900, transition: '0.2s' }}
+                                        style={{ padding: '9px 20px', borderRadius: '10px', border: '1px solid rgba(255, 255, 255, 0.12)', background: currentPage === 1 ? 'rgba(255, 255, 255, 0.04)' : 'rgba(20, 24, 34, 0.9)', color: currentPage === 1 ? '#64748B' : '#F8FAFC', cursor: currentPage === 1 ? 'not-allowed' : 'pointer', fontWeight: 900, transition: '0.2s' }}
                                     >السابق</button>
                                     
-                                    <span style={{ padding: '8px 20px', background: 'rgba(255, 255, 255, 0.6)', borderRadius: '8px', fontWeight: 900, border: '1px solid rgba(40, 145, 200, 0.15)', color: '#1e293b' }}>
+                                    <span style={{ padding: '9px 20px', background: 'rgba(0, 229, 255, 0.12)', borderRadius: '10px', fontWeight: 900, border: '1px solid rgba(0, 229, 255, 0.3)', color: '#00E5FF', fontSize: '13.5px' }}>
                                         صفحة {currentPage} من {totalPages}
                                     </span>
                                     
                                     <button 
                                         onClick={() => setCurrentPage(p => p + 1)} disabled={currentPage === totalPages}
-                                        style={{ padding: '8px 20px', borderRadius: '8px', border: 'none', background: currentPage === totalPages ? 'rgba(255, 255, 255, 0.4)' : (THEME.primary || '#3b82f6'), color: currentPage === totalPages ? '#475569' : 'white', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer', fontWeight: 900, transition: '0.2s' }}
+                                        style={{ padding: '9px 20px', borderRadius: '10px', border: '1px solid rgba(255, 255, 255, 0.12)', background: currentPage === totalPages ? 'rgba(255, 255, 255, 0.04)' : 'rgba(20, 24, 34, 0.9)', color: currentPage === totalPages ? '#64748B' : '#F8FAFC', cursor: currentPage === totalPages ? 'not-allowed' : 'pointer', fontWeight: 900, transition: '0.2s' }}
                                     >التالي</button>
                                 </div>
                             </div>
                         )}
                         {filteredData.length === 0 && (
-                            <div style={{ textAlign: 'center', padding: '30px', color: '#475569', fontWeight: 900, background: 'white', borderRadius: '12px', marginTop: '20px' }}>
+                            <div style={{ textAlign: 'center', padding: '40px', color: '#94A3B8', fontWeight: 900, background: 'rgba(20, 24, 34, 0.85)', borderRadius: '16px', marginTop: '20px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
                                 ❌ لا توجد حسابات أو حركات مطابقة للبحث في الفترة المحددة
                             </div>
                         )}

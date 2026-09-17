@@ -73,16 +73,16 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
           top: 24px; 
           left: 50%; 
           transform: translateX(-50%);
-          background: rgba(18, 41, 70, 0.95); /* Deep Ocean Navy */
-          backdrop-filter: blur(15px) saturate(200%);
-          -webkit-backdrop-filter: blur(15px) saturate(200%);
+          background: rgba(20, 24, 34, 0.96); /* Dark Titanium Command Center */
+          backdrop-filter: blur(20px) saturate(180%);
+          -webkit-backdrop-filter: blur(20px) saturate(180%);
           padding: 14px 28px; 
-          border-radius: 12px;
-          box-shadow: 0 10px 30px rgba(40,145,200,0.3), inset 0 1px 1px rgba(255,255,255,0.1);
-          border: 1px solid rgba(127,212,227,0.3);
-          font-size: 15px; 
-          font-weight: 700; 
-          color: #ffffff;
+          border-radius: 14px;
+          box-shadow: 0 12px 35px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 229, 255, 0.2);
+          border: 1px solid rgba(0, 229, 255, 0.3);
+          font-size: 14px; 
+          font-weight: 800; 
+          color: #F8FAFC;
           z-index: 9999999999;
           display: flex; 
           align-items: center; 
@@ -93,10 +93,10 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
           justify-content: center;
         }
         
-        .apple-global-toast.success { border-bottom: 3px solid #7FD4E3; color: #E0F7FA; }
-        .apple-global-toast.error { border-bottom: 3px solid #ff3b30; color: #ffe5e5; }
-        .apple-global-toast.warning { border-bottom: 3px solid #ff9500; color: #fff3e0; }
-        .apple-global-toast.info { border-bottom: 3px solid #2891C8; color: #e1f5fe; }
+        .apple-global-toast.success { border-bottom: 3px solid #10B981; color: #10B981; }
+        .apple-global-toast.error { border-bottom: 3px solid #EF4444; color: #EF4444; }
+        .apple-global-toast.warning { border-bottom: 3px solid #F59E0B; color: #F59E0B; }
+        .apple-global-toast.info { border-bottom: 3px solid #00E5FF; color: #00E5FF; }
 
         @keyframes slideDownToast {
           0% { top: -50px; opacity: 0; transform: translateX(-50%) scale(0.9); }

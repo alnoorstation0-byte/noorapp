@@ -1,5 +1,6 @@
 "use client";
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { QRCodeSVG } from 'qrcode.react';
 import { generateZatcaQR } from '@/lib/zatca_qr';
 import { supabase } from '@/lib/supabase';
@@ -19,7 +20,12 @@ interface ThermalReceiptModalProps {
 }
 
 export default function ThermalReceiptModal({ isOpen, onClose, record, onOpenA4 }: ThermalReceiptModalProps) {
+    const [mounted, setMounted] = useState(false);
     const [qrData, setQrData] = useState('');
+
+    useEffect(() => {
+        setMounted(true);
+    }, []);
     const [customerDetails, setCustomerDetails] = useState<any>(null);
     const [delegateDetails, setDelegateDetails] = useState<any>(null);
     const [warehouseDetails, setWarehouseDetails] = useState<any>(null);
@@ -210,7 +216,7 @@ export default function ThermalReceiptModal({ isOpen, onClose, record, onOpenA4 
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [isOpen, isWhatsAppDialog, onClose, handlePrint]);
 
-    if (!isOpen || !record) return null;
+    if (!isOpen || !mounted || !record) return null;
 
     const invoiceDate = record.date ? new Date(record.date) : new Date();
     const formattedDate = invoiceDate.toLocaleDateString('ar-SA', { year: 'numeric', month: '2-digit', day: '2-digit' });
@@ -222,12 +228,12 @@ export default function ThermalReceiptModal({ isOpen, onClose, record, onOpenA4 
     const outletName = warehouseDetails?.name || (record.warehouse?.name ? record.warehouse.name : 'المنفذ الرئيسي');
     const cashierName = creatorDetails?.fullName || 'كاشير الفرع';
 
-    return (
+    return createPortal(
         <div className="thermal-modal-overlay">
             <style dangerouslySetInnerHTML={{__html: `
                 .thermal-modal-overlay {
                     position: fixed; inset: 0; width: 100%; height: 100%;
-                    background: rgba(18, 41, 70, 0.85); backdrop-filter: blur(10px);
+                    background: rgba(11, 14, 20, 0.88); backdrop-filter: blur(16px);
                     display: flex; justify-content: flex-start; align-items: center; z-index: 999999999;
                     flex-direction: column; padding: 25px 15px; overflow-y: auto;
                     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -244,7 +250,21 @@ export default function ThermalReceiptModal({ isOpen, onClose, record, onOpenA4 
                 .thermal-actions button {
                     padding: 10px 20px; border: none; border-radius: 12px; cursor: pointer;
                     font-weight: 800; font-size: 14px; transition: all 0.2s ease;
-                    display: flex; align-items: center; gap: 6px;
+                    display: flex; align-items: center; justify-content: center; gap: 6px;
+                    min-height: 44px;
+                }
+                @media (max-width: 768px) {
+                    .thermal-actions {
+                        padding: 10px 14px;
+                        border-radius: 20px;
+                        width: 100%;
+                        gap: 8px;
+                    }
+                    .thermal-actions button {
+                        flex: 1;
+                        padding: 8px 10px;
+                        font-size: 13px;
+                    }
                 }
                 .thermal-actions button:hover {
                     transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.15);
@@ -676,6 +696,7 @@ export default function ThermalReceiptModal({ isOpen, onClose, record, onOpenA4 
                 </div>
 
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }

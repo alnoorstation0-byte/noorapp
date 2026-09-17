@@ -753,8 +753,8 @@ export default function RawasiFilterSidebar({
                 effectiveSummary
               ) : (
                 <div className="sidebar-empty-summary-card">
-                  <div style={{ fontSize: '13px', fontWeight: 800, color: '#122946' }}>{title}</div>
-                  <div style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>
+                  <div style={{ fontSize: '13px', fontWeight: 800, color: '#F8FAFC' }}>{title}</div>
+                  <div style={{ fontSize: '11px', color: '#94A3B8', marginTop: '2px' }}>
                     {language === 'en' ? 'Use search and date filters below to manage records' : 'استخدم أدوات البحث وتصفية التاريخ أدناه للتنقل وإدارة السجلات'}
                   </div>
                 </div>

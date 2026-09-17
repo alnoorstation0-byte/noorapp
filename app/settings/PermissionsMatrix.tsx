@@ -80,15 +80,15 @@ export default function PermissionsMatrix() {
                 <button 
                     onClick={() => router.push('/team')}
                     style={{
-                        background: 'linear-gradient(135deg, #1C73AB, #2891C8)',
-                        color: 'white',
+                        background: 'linear-gradient(135deg, #00E5FF 0%, #00B4D8 100%)',
+                        color: '#0B0E14',
                         border: 'none',
                         padding: '10px 18px',
                         borderRadius: '12px',
                         cursor: 'pointer',
                         fontWeight: 900,
                         fontSize: '13px',
-                        boxShadow: '0 4px 15px rgba(28, 115, 171, 0.25)',
+                        boxShadow: '0 4px 15px rgba(0, 229, 255, 0.35)',
                         transition: '0.2s',
                         display: 'inline-flex',
                         alignItems: 'center',

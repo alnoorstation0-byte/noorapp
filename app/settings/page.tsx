@@ -3,17 +3,17 @@ import React, { useState, useMemo } from 'react';
 import dynamic from 'next/dynamic';
 
 const PermissionsMatrix = dynamic(() => import('./PermissionsMatrix'), { 
-  loading: () => <div style={{ textAlign: 'center', padding: '40px', fontWeight: 800, color: '#1C73AB' }}>⏳ جاري تحميل مصفوفة الصلاحيات...</div>,
+  loading: () => <div style={{ textAlign: 'center', padding: '40px', fontWeight: 800, color: '#00E5FF' }}>⏳ جاري تحميل مصفوفة الصلاحيات...</div>,
   ssr: false 
 });
 
 const SystemHealthRadar = dynamic(() => import('./SystemHealthRadar'), { 
-  loading: () => <div style={{ textAlign: 'center', padding: '40px', fontWeight: 800, color: '#1C73AB' }}>⏳ جاري فحص سلامة النظام...</div>,
+  loading: () => <div style={{ textAlign: 'center', padding: '40px', fontWeight: 800, color: '#00E5FF' }}>⏳ جاري فحص سلامة النظام...</div>,
   ssr: false 
 });
 
 const AuditLogs = dynamic(() => import('./AuditLogs'), { 
-  loading: () => <div style={{ textAlign: 'center', padding: '40px', fontWeight: 800, color: '#1C73AB' }}>⏳ جاري تحميل سجل المراقبة...</div>,
+  loading: () => <div style={{ textAlign: 'center', padding: '40px', fontWeight: 800, color: '#00E5FF' }}>⏳ جاري تحميل سجل المراقبة...</div>,
   ssr: false 
 });
 import RawasiSidebarManager from '@/components/RawasiSidebarManager'; 
@@ -370,7 +370,7 @@ export default function SettingsPage() {
         <div className="sidebar-summary-glass">
           <div className="icon-pulse">📥</div>
           <p className="summary-title">{isEn ? 'Smart Data Restore' : 'استعادة وترحيل البيانات'}</p>
-          <h3 className="summary-value" style={{ fontSize: '13px', marginTop: '6px', color: '#1C73AB', wordBreak: 'break-all' }}>
+          <h3 className="summary-value" style={{ fontSize: '13px', marginTop: '6px', color: '#00E5FF', wordBreak: 'break-all' }}>
             {selectedFile ? selectedFile.name : (isEn ? 'No file selected' : 'لم يتم اختيار ملف')}
           </h3>
         </div>
@@ -390,8 +390,8 @@ export default function SettingsPage() {
       summary = (
         <div className="sidebar-summary-glass critical">
           <div className="icon-pulse">🚨</div>
-          <p className="summary-title" style={{ color: '#b91c1c' }}>{isEn ? 'Danger Zone' : 'العمليات الحساسة'}</p>
-          <h3 className="summary-value" style={{ fontSize: '13px', color: '#991b1b', marginTop: '6px' }}>
+          <p className="summary-title" style={{ color: '#EF4444' }}>{isEn ? 'Danger Zone' : 'العمليات الحساسة'}</p>
+          <h3 className="summary-value" style={{ fontSize: '13px', color: '#EF4444', marginTop: '6px' }}>
             {isEn ? 'Destructive Actions' : 'تصفير وإعادة تهيئة'}
           </h3>
         </div>
@@ -400,7 +400,7 @@ export default function SettingsPage() {
       summary = (
         <div className="sidebar-summary-glass info">
           <div className="icon-pulse">🛡️</div>
-          <p className="summary-title" style={{color: '#1C73AB'}}>{isEn ? 'System Protected' : 'النظام محمي ومؤمن'}</p>
+          <p className="summary-title" style={{color: '#00E5FF'}}>{isEn ? 'System Protected' : 'النظام محمي ومؤمن'}</p>
         </div>
       );
     }
@@ -436,12 +436,12 @@ export default function SettingsPage() {
         {/* 1. تبويب تصدير النسخ الاحتياطية */}
         {activeTab === 'backup' && (
           <GlassContainer>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', borderBottom: '2px solid rgba(255, 255, 255, 0.5)', paddingBottom: '12px', flexWrap: 'wrap', gap: '10px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px', borderBottom: '1px solid rgba(0, 229, 255, 0.2)', paddingBottom: '12px', flexWrap: 'wrap', gap: '10px' }}>
               <div>
-                <h2 style={{ fontSize: '16px', color: THEME.primary, margin: '0 0 4px 0', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <h2 style={{ fontSize: '16px', color: '#F8FAFC', margin: '0 0 4px 0', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span>📦</span> {isEn ? 'Export Database Backup & Reports' : 'تصدير النسخ الاحتياطية والتقارير'}
                 </h2>
-                <p style={{ margin: 0, fontSize: '12px', color: '#64748b', fontWeight: 700 }}>
+                <p style={{ margin: 0, fontSize: '12px', color: '#94A3B8', fontWeight: 700 }}>
                   {isEn ? 'Select tables to export as a formatted multi-sheet Excel workbook or a PostgreSQL script.' : 'حدد الجداول المراد استخراجها كتقرير Excel احترافي منسق أو كسكريبت SQL.'}
                 </p>
               </div>
@@ -461,8 +461,8 @@ export default function SettingsPage() {
             <div className="cinematic-scroll" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '14px', maxHeight: '520px', overflowY: 'auto', paddingRight: '4px' }}>
               {TABLE_GROUPS.map((group) => (
                 <div key={group.id} className="group-card">
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', borderBottom: '1px solid rgba(40, 145, 200, 0.15)', paddingBottom: '6px' }}>
-                    <h3 style={{ margin: 0, fontSize: '12.5px', color: THEME.primary, fontWeight: 900 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px', borderBottom: '1px solid rgba(0, 229, 255, 0.15)', paddingBottom: '6px' }}>
+                    <h3 style={{ margin: 0, fontSize: '12.5px', color: '#00E5FF', fontWeight: 900 }}>
                       {isEn ? group.nameEn : group.nameAr}
                     </h3>
                     <button onClick={() => selectGroup(group.tables.map(t => t.id))} className="link-btn">
@@ -473,7 +473,7 @@ export default function SettingsPage() {
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '5px' }}>
                     {group.tables.map(table => (
                       <div key={table.id} className={`table-row ${selectedTables.includes(table.id) ? 'selected' : ''}`}>
-                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: 800, color: '#334155', flex: 1 }}>
+                        <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer', fontSize: '12px', fontWeight: 800, color: '#F8FAFC', flex: 1 }}>
                           <input 
                             type="checkbox" 
                             className="custom-checkbox" 
@@ -495,18 +495,18 @@ export default function SettingsPage() {
             </div>
 
             {/* أزرار سريعة للشاشات المتجاوبة والجوال */}
-            <div style={{ display: 'flex', gap: '10px', marginTop: '18px', paddingTop: '14px', borderTop: '1px solid rgba(40,145,200,0.15)', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', gap: '10px', marginTop: '18px', paddingTop: '14px', borderTop: '1px solid rgba(0, 229, 255, 0.15)', flexWrap: 'wrap' }}>
               <button 
                 onClick={handleExportExcel} 
                 disabled={selectedCount === 0 || isProcessing}
-                style={{ flex: 1, minWidth: '160px', padding: '12px', background: 'linear-gradient(135deg, #10b981, #059669)', color: 'white', border: 'none', borderRadius: '12px', fontWeight: 900, fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                style={{ flex: 1, minWidth: '160px', padding: '12px', background: 'linear-gradient(135deg, #10B981, #059669)', color: '#0B0E14', border: 'none', borderRadius: '12px', fontWeight: 900, fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
               >
                 📊 {isEn ? 'Export Formatted Excel' : 'تصدير Excel احترافي'}
               </button>
               <button 
                 onClick={handleExportSQL} 
                 disabled={selectedCount === 0 || isProcessing}
-                style={{ flex: 1, minWidth: '160px', padding: '12px', background: 'linear-gradient(135deg, #1C73AB, #2891C8)', color: 'white', border: 'none', borderRadius: '12px', fontWeight: 900, fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
+                style={{ flex: 1, minWidth: '160px', padding: '12px', background: 'linear-gradient(135deg, #00E5FF, #0284C7)', color: '#0B0E14', border: 'none', borderRadius: '12px', fontWeight: 900, fontSize: '13px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}
               >
                 💾 {isEn ? 'Export SQL Script' : 'تصدير سكريبت SQL'}
               </button>
@@ -517,11 +517,11 @@ export default function SettingsPage() {
         {/* 2. تبويب استعادة البيانات الذكية */}
         {activeTab === 'restore' && (
           <GlassContainer>
-            <div style={{ marginBottom: '18px', borderBottom: '2px solid rgba(255, 255, 255, 0.5)', paddingBottom: '12px' }}>
-              <h2 style={{ fontSize: '16px', color: THEME.primary, margin: '0 0 4px 0', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <div style={{ marginBottom: '18px', borderBottom: '1px solid rgba(0, 229, 255, 0.2)', paddingBottom: '12px' }}>
+              <h2 style={{ fontSize: '16px', color: '#F8FAFC', margin: '0 0 4px 0', fontWeight: 900, display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <span>🔄</span> {isEn ? 'Smart Data Restore & Migration' : 'استعادة البيانات الذكية (Restore)'}
               </h2>
-              <p style={{ margin: 0, fontSize: '12px', color: '#64748b', fontWeight: 700, lineHeight: 1.5 }}>
+              <p style={{ margin: 0, fontSize: '12px', color: '#94A3B8', fontWeight: 700, lineHeight: 1.5 }}>
                 {isEn 
                   ? 'Upload your backup file (.xlsx or .sql). The engine will automatically detect format, preserve dependencies, and perform safe upsert.' 
                   : 'ارفع ملف النسخة الاحتياطية سواء كان ملف Excel (.xlsx) أو ملف SQL (.sql)، وسيقوم المحرك باستعادته آلياً مع مطابقة الحقول وحمايتها.'}
@@ -532,7 +532,7 @@ export default function SettingsPage() {
               {isProcessing ? (
                 <div style={{ width: '100%', padding: '20px 0' }}>
                   <div className="loading-spinner">⚙️</div>
-                  <div style={{ fontSize: '13px', fontWeight: 900, color: THEME.primary, marginTop: '10px' }}>
+                  <div style={{ fontSize: '13px', fontWeight: 900, color: '#00E5FF', marginTop: '10px' }}>
                     {statusMsg.text || (isEn ? 'Processing and restoring data...' : 'جاري معالجة واستعادة البيانات...')}
                   </div>
                 </div>
@@ -540,10 +540,10 @@ export default function SettingsPage() {
                 <>
                   <div style={{ fontSize: '42px' }}>{selectedFile ? '📑' : '📂'}</div>
                   <div>
-                    <div style={{ fontSize: '15px', fontWeight: 900, color: selectedFile ? '#059669' : THEME.primary, marginBottom: '4px' }}>
+                    <div style={{ fontSize: '15px', fontWeight: 900, color: selectedFile ? '#10B981' : '#F8FAFC', marginBottom: '4px' }}>
                       {selectedFile ? selectedFile.name : (isEn ? 'Drag and drop or browse backup file' : 'اسحب أو اختر ملف النسخة الاحتياطية')}
                     </div>
-                    <div style={{ fontSize: '11.5px', color: '#475569', fontWeight: 700 }}>
+                    <div style={{ fontSize: '11.5px', color: '#94A3B8', fontWeight: 700 }}>
                       {selectedFile ? `${isEn ? 'Size:' : 'الحجم:'} ${(selectedFile.size / 1024).toFixed(1)} KB` : (isEn ? 'Supports .xlsx, .xls and .sql files' : 'يدعم صيغ .xlsx أو .sql')}
                     </div>
                   </div>
@@ -575,11 +575,11 @@ export default function SettingsPage() {
               </button>
             )}
 
-            <div style={{ background: 'rgba(255,255,255,0.7)', border: '1px solid rgba(40,145,200,0.2)', padding: '14px 16px', borderRadius: '14px', marginTop: '18px' }}>
-              <div style={{ color: THEME.primary, fontWeight: 900, fontSize: '12.5px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+            <div style={{ background: 'rgba(20, 24, 34, 0.7)', border: '1px solid rgba(0, 229, 255, 0.2)', padding: '14px 16px', borderRadius: '14px', marginTop: '18px' }}>
+              <div style={{ color: '#00E5FF', fontWeight: 900, fontSize: '12.5px', display: 'flex', alignItems: 'center', gap: '6px' }}>
                 <span>💡</span> {isEn ? 'Smart Restore Capabilities' : 'مميزات الاستعادة الذكية'}
               </div>
-              <ul style={{ fontSize: '11.5px', color: '#475569', margin: '6px 0 0 0', paddingRight: isEn ? '0' : '18px', paddingLeft: isEn ? '18px' : '0', lineHeight: 1.6, fontWeight: 700 }}>
+              <ul style={{ fontSize: '11.5px', color: '#94A3B8', margin: '6px 0 0 0', paddingRight: isEn ? '0' : '18px', paddingLeft: isEn ? '18px' : '0', lineHeight: 1.6, fontWeight: 700 }}>
                 <li>{isEn ? 'Automatically identifies multi-sheet Excel files or PostgreSQL dump scripts.' : 'يتعرف آلياً على الملف سواء كان Excel متعدد الصفحات أو سكريبت SQL.'}</li>
                 <li>{isEn ? 'Applies collision protection (Upsert) to avoid duplicate primary key collisions.' : 'يطبق الحماية ضد التكرار (Upsert) لمنع ازدواجية المعرفات والبيانات.'}</li>
                 <li>{isEn ? 'Orders table insertion hierarchically to respect foreign key constraints.' : 'يراعي ترتيب التبعيات والمفتاح الخارجي لمنع أي تعارض في القيود.'}</li>
@@ -594,10 +594,10 @@ export default function SettingsPage() {
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', marginBottom: '16px' }}>
               <span style={{ fontSize: '26px' }}>🛡️</span>
               <div>
-                <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 900, color: '#991b1b' }}>
+                <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 900, color: '#EF4444' }}>
                   {isEn ? 'System Reset & Maintenance Zone' : 'منطقة العمليات الحساسة وإعادة التهيئة'}
                 </h3>
-                <p style={{ margin: 0, fontSize: '12px', color: '#b91c1c', fontWeight: 700 }}>
+                <p style={{ margin: 0, fontSize: '12px', color: '#F87171', fontWeight: 700 }}>
                   {isEn ? 'High-security administrative controls to purge transactions or reset to initial setup.' : 'تحكم دقيق لتنظيف النظام وتصفير الحركات قبل بدء دورة تشغيل جديدة.'}
                 </p>
               </div>
@@ -608,12 +608,12 @@ export default function SettingsPage() {
               {/* البطاقة الأولى: مسح القيود وتصفير الحركات فقط */}
               <div className="danger-card warning-level">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-                  <div style={{ fontWeight: 900, fontSize: '14px', color: '#b45309' }}>
+                  <div style={{ fontWeight: 900, fontSize: '14px', color: '#F59E0B' }}>
                     🧹 {isEn ? 'Wipe Transactions & Reset Balances' : 'مسح القيود وتصفير الحركات'}
                   </div>
                   <span className="badge-safe">{isEn ? 'Preserves Masters' : 'يحافظ على الأساسيات'}</span>
                 </div>
-                <p style={{ fontSize: '11.5px', color: '#78350f', lineHeight: 1.5, margin: '0 0 15px 0', fontWeight: 700 }}>
+                <p style={{ fontSize: '11.5px', color: '#CBD5E1', lineHeight: 1.5, margin: '0 0 15px 0', fontWeight: 700 }}>
                   {isEn 
                     ? 'Deletes all invoices, vouchers, journal entries, expenses, POS shifts, and fleet trip dispatches. Resets inventory and bottle custodies to 0. Keeps Chart of Accounts, Customers, Vendors, Warehouses, and Items intact.' 
                     : 'يحذف الفواتير، سندات القبض والصرف، القيود المحاسبية، المصروفات، سجل الورديات (نقاط البيع)، أوامر تشغيل الرحلات (الأسطول)، والتدفقات، ويصفر أرصدة المخزون وعهد الفوارغ. ويحافظ تماماً على شجرة الحسابات، العملاء، الموردين، المستودعات، والأصناف.'}
@@ -630,12 +630,12 @@ export default function SettingsPage() {
               {/* البطاقة الثانية: إعادة ضبط المصنع الشاملة */}
               <div className="danger-card critical-level">
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '8px' }}>
-                  <div style={{ fontWeight: 900, fontSize: '14px', color: '#991b1b' }}>
+                  <div style={{ fontWeight: 900, fontSize: '14px', color: '#EF4444' }}>
                     🚨 {isEn ? 'Full Factory Reset' : 'إعادة ضبط المصنع الشاملة'}
                   </div>
                   <span className="badge-critical">{isEn ? 'Critical Action' : 'إجراء كلي وحرج'}</span>
                 </div>
-                <p style={{ fontSize: '11.5px', color: '#7f1d1d', lineHeight: 1.5, margin: '0 0 15px 0', fontWeight: 700 }}>
+                <p style={{ fontSize: '11.5px', color: '#CBD5E1', lineHeight: 1.5, margin: '0 0 15px 0', fontWeight: 700 }}>
                   {isEn 
                     ? 'Full reinitialization to day-one state. Deletes all transactions and custom data including customers and extra items, retaining only the system administrator account and core chart of accounts.' 
                     : 'إعادة تهيئة كاملة للنظام كأول يوم تشغيل. يحذف كافة العمليات والبيانات المدخلة بما فيها العملاء والأصناف والسيارات الإضافية، مع الإبقاء فقط على حساب مدير النظام الحالي وشجرة الحسابات الأساسية.'}
@@ -674,26 +674,26 @@ export default function SettingsPage() {
               {confirmModalType === 'clear' ? '⚠️' : '🚨'}
             </div>
             
-            <h2 style={{ margin: '0 0 8px 0', fontSize: '17px', fontWeight: 900, color: confirmModalType === 'clear' ? '#b45309' : '#dc2626' }}>
+            <h2 style={{ margin: '0 0 8px 0', fontSize: '17px', fontWeight: 900, color: confirmModalType === 'clear' ? '#F59E0B' : '#EF4444' }}>
               {confirmModalType === 'clear' 
                 ? (isEn ? 'Confirm Wipe Transactions' : 'تأكيد مسح القيود وتصفير الحركات') 
                 : (isEn ? 'Confirm Factory Reset' : 'تأكيد إعادة ضبط المصنع الشاملة')}
             </h2>
 
-            <p style={{ fontSize: '12px', color: '#475569', lineHeight: 1.6, margin: '0 0 14px 0', fontWeight: 700 }}>
+            <p style={{ fontSize: '12px', color: '#CBD5E1', lineHeight: 1.6, margin: '0 0 14px 0', fontWeight: 700 }}>
               {confirmModalType === 'clear' ? (
                 <>
                   {isEn ? (
                     <>
                       You are about to delete all <strong>invoices, vouchers, journal entries, expenses, shifts, and routes</strong> and reset stock balances.
                       <br/>
-                      <span style={{ color: '#059669', fontWeight: 900 }}>✅ Customers, products, warehouses, and accounts will NOT be deleted.</span>
+                      <span style={{ color: '#10B981', fontWeight: 900 }}>✅ Customers, products, warehouses, and accounts will NOT be deleted.</span>
                     </>
                   ) : (
                     <>
                       أنت على وشك حذف جميع <strong>الفواتير، السندات، القيود المحاسبية، المصروفات، والورديات</strong> وتصفير أرصدة المخزون.
                       <br/>
-                      <span style={{ color: '#059669', fontWeight: 900 }}>✅ لن يتم حذف العملاء، الأصناف، شجرة الحسابات، أو المستودعات.</span>
+                      <span style={{ color: '#10B981', fontWeight: 900 }}>✅ لن يتم حذف العملاء، الأصناف، شجرة الحسابات، أو المستودعات.</span>
                     </>
                   )}
                 </>
@@ -703,25 +703,25 @@ export default function SettingsPage() {
                     <>
                       You are about to execute a <strong>Full Factory Reset</strong>. ALL system data, transactions, and custom partners will be permanently wiped!
                       <br/>
-                      <span style={{ color: '#dc2626', fontWeight: 900 }}>⛔ This action is irreversible!</span>
+                      <span style={{ color: '#EF4444', fontWeight: 900 }}>⛔ This action is irreversible!</span>
                     </>
                   ) : (
                     <>
                       أنت على وشك <strong>إعادة ضبط المصنع الشاملة</strong>. سيتم مسح كافة البيانات والعمليات والعملاء والأصناف بالكامل!
                       <br/>
-                      <span style={{ color: '#dc2626', fontWeight: 900 }}>⛔ هذا الإجراء لا يمكن التراجع عنه نهائياً!</span>
+                      <span style={{ color: '#EF4444', fontWeight: 900 }}>⛔ هذا الإجراء لا يمكن التراجع عنه نهائياً!</span>
                     </>
                   )}
                 </>
               )}
             </p>
 
-            <div style={{ background: '#f8fafc', padding: '12px', borderRadius: '12px', border: '1px dashed #cbd5e1', marginBottom: '15px' }}>
-              <label style={{ fontSize: '12px', fontWeight: 900, color: '#334155', display: 'block', marginBottom: '6px' }}>
+            <div style={{ background: 'rgba(11, 14, 20, 0.8)', padding: '12px', borderRadius: '12px', border: '1px dashed rgba(255, 255, 255, 0.15)', marginBottom: '15px' }}>
+              <label style={{ fontSize: '12px', fontWeight: 900, color: '#F8FAFC', display: 'block', marginBottom: '6px' }}>
                 {isEn 
                   ? `To confirm, please type: ` 
                   : `للتأكيد، يرجى كتابة عبارة: `}
-                <span style={{ color: '#dc2626', fontWeight: 900 }}>
+                <span style={{ color: '#EF4444', fontWeight: 900 }}>
                   ({confirmModalType === 'clear' ? (isEn ? 'clear or مسح القيود' : 'مسح القيود') : (isEn ? 'reset or ضبط المصنع' : 'ضبط المصنع')})
                 </span>
               </label>
@@ -774,81 +774,82 @@ export default function SettingsPage() {
           gap: 8px;
           padding: 10px 18px; 
           border-radius: 14px; 
-          border: 1px solid rgba(40, 145, 200, 0.2); 
+          border: 1px solid rgba(255, 255, 255, 0.08); 
           font-weight: 900; 
           font-size: 13px; 
           cursor: pointer; 
           transition: 0.2s; 
-          background: rgba(255, 255, 255, 0.7); 
-          color: #64748b; 
+          background: rgba(20, 24, 34, 0.8); 
+          color: #94A3B8; 
           white-space: nowrap; 
           backdrop-filter: blur(10px);
           flex-shrink: 0;
         }
         .tab-btn:hover { 
-          background: rgba(255, 255, 255, 0.95); 
-          color: #1C73AB; 
+          background: rgba(30, 36, 50, 0.95); 
+          color: #00E5FF; 
+          border-color: rgba(0, 229, 255, 0.3);
           transform: translateY(-2px); 
         }
         .tab-btn.active { 
-          background: linear-gradient(135deg, #1C73AB, #2891C8); 
-          color: white; 
-          border-color: #1C73AB; 
-          box-shadow: 0 4px 15px rgba(28, 115, 171, 0.25); 
+          background: linear-gradient(135deg, rgba(0, 229, 255, 0.2), rgba(0, 229, 255, 0.05)); 
+          color: #00E5FF; 
+          border-color: #00E5FF; 
+          box-shadow: 0 0 15px rgba(0, 229, 255, 0.25); 
         }
 
         .group-card { 
-          background: rgba(255, 255, 255, 0.6); 
+          background: rgba(20, 24, 34, 0.85); 
           padding: 12px; 
           border-radius: 14px; 
-          border: 1px solid rgba(255, 255, 255, 0.8); 
-          box-shadow: 0 4px 15px rgba(28, 115, 171, 0.04);
+          border: 1px solid rgba(255, 255, 255, 0.08); 
+          box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
         }
         .table-row { 
           display: flex; 
           justify-content: space-between; 
           align-items: center; 
           padding: 7px 10px; 
-          background: white; 
+          background: rgba(11, 14, 20, 0.7); 
           border-radius: 9px; 
           margin-top: 4px; 
-          border: 1px solid rgba(40, 145, 200, 0.15); 
+          border: 1px solid rgba(255, 255, 255, 0.06); 
           transition: 0.2s; 
         }
         .table-row.selected { 
-          border-color: #2891C8; 
-          background: rgba(40, 145, 200, 0.05); 
+          border-color: rgba(0, 229, 255, 0.5); 
+          background: rgba(0, 229, 255, 0.08); 
         }
         .table-row:hover { 
-          border-color: #1C73AB; 
+          border-color: rgba(0, 229, 255, 0.3); 
         }
         .custom-checkbox { 
           width: 16px; 
           height: 16px; 
           cursor: pointer; 
-          accent-color: #1C73AB; 
+          accent-color: #00E5FF; 
         }
 
         .btn-action-small {
-          background: rgba(255, 255, 255, 0.8); 
-          border: 1px solid rgba(40, 145, 200, 0.2); 
+          background: rgba(20, 24, 34, 0.8); 
+          border: 1px solid rgba(0, 229, 255, 0.25); 
           padding: 6px 12px; 
           border-radius: 8px; 
           cursor: pointer; 
           font-weight: 800; 
-          color: #1C73AB; 
+          color: #00E5FF; 
           font-size: 11px;
           transition: 0.2s;
         }
         .btn-action-small:hover { 
-          background: #1C73AB; 
-          color: white; 
+          background: #00E5FF; 
+          color: #0B0E14; 
         }
 
         .link-btn { 
           background: none; 
           border: none; 
-          color: #0284c7; 
+          color: #00E5FF; 
           cursor: pointer; 
           font-weight: 800; 
           font-size: 11px; 
@@ -860,16 +861,16 @@ export default function SettingsPage() {
         .badge-master {
           font-size: 9.5px; 
           font-weight: 800; 
-          background: #e0f2fe; 
-          color: #0369a1;
+          background: rgba(0, 229, 255, 0.12); 
+          color: #00E5FF;
           padding: 2px 6px; 
           border-radius: 6px; 
-          border: 1px solid #bae6fd;
+          border: 1px solid rgba(0, 229, 255, 0.3);
         }
 
         .premium-dropzone { 
-          background: rgba(255, 255, 255, 0.6); 
-          border: 2px dashed rgba(40, 145, 200, 0.3); 
+          background: rgba(20, 24, 34, 0.6); 
+          border: 2px dashed rgba(0, 229, 255, 0.3); 
           border-radius: 18px; 
           padding: 25px 20px; 
           text-align: center; 
@@ -882,18 +883,18 @@ export default function SettingsPage() {
           align-items: center; 
         }
         .premium-dropzone:hover { 
-          background: white; 
-          border-color: #1C73AB; 
+          background: rgba(20, 24, 34, 0.9); 
+          border-color: #00E5FF; 
         }
         .premium-dropzone.has-file { 
-          background: #f0fdf4; 
-          border-color: #10b981; 
+          background: rgba(16, 185, 129, 0.08); 
+          border-color: #10B981; 
           border-style: solid; 
         }
         .premium-dropzone.uploading { 
           pointer-events: none; 
           opacity: 0.8; 
-          border-color: #1C73AB; 
+          border-color: #00E5FF; 
         }
         
         .loading-spinner { 
@@ -901,8 +902,8 @@ export default function SettingsPage() {
           animation: spin 2s linear infinite; 
         }
         .btn-premium-upload { 
-          background: linear-gradient(135deg, #1C73AB, #2891C8); 
-          color: white; 
+          background: linear-gradient(135deg, #00E5FF, #0284C7); 
+          color: #0B0E14; 
           padding: 12px; 
           border-radius: 12px; 
           border: none; 
@@ -912,7 +913,7 @@ export default function SettingsPage() {
           transition: 0.2s; 
           width: 100%; 
           margin-top: 12px; 
-          box-shadow: 0 4px 15px rgba(28, 115, 171, 0.25);
+          box-shadow: 0 4px 15px rgba(0, 229, 255, 0.25);
         }
         .btn-premium-upload:hover { 
           transform: translateY(-2px); 
@@ -920,15 +921,15 @@ export default function SettingsPage() {
         }
 
         .sidebar-summary-glass { 
-          background: rgba(255,255,255,0.85); 
+          background: rgba(20, 24, 34, 0.9); 
           padding: 16px; 
           border-radius: 18px; 
           text-align: center; 
-          border: 1px solid rgba(40, 145, 200, 0.2); 
-          box-shadow: 0 4px 20px rgba(28, 115, 171, 0.08);
+          border: 1px solid rgba(0, 229, 255, 0.2); 
+          box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
         }
         .sidebar-summary-glass.critical {
-          background: rgba(254, 242, 242, 0.9);
+          background: rgba(35, 18, 22, 0.9);
           border-color: rgba(239, 68, 68, 0.3);
         }
         .sidebar-summary-glass .icon-pulse { 
@@ -938,14 +939,14 @@ export default function SettingsPage() {
         .summary-title { 
           margin: 0; 
           font-size: 11.5px; 
-          color: #64748b; 
+          color: #94A3B8; 
           font-weight: 800; 
         }
         .summary-value { 
           margin: 4px 0 0 0; 
           font-weight: 900; 
           font-size: 22px; 
-          color: #122946; 
+          color: #F8FAFC; 
         }
 
         .btn-premium-glass { 
@@ -964,10 +965,12 @@ export default function SettingsPage() {
           transition: 0.2s; 
         }
         .btn-premium-glass.excel { 
-          background: linear-gradient(135deg, #10b981, #059669); 
+          background: linear-gradient(135deg, #10B981, #059669); 
+          color: #0B0E14;
         }
         .btn-premium-glass.sql { 
-          background: linear-gradient(135deg, #1C73AB, #2891C8); 
+          background: linear-gradient(135deg, #00E5FF, #0284C7); 
+          color: #0B0E14;
         }
         .btn-premium-glass:hover:not(.disabled) { 
           transform: translateY(-2px); 
@@ -987,63 +990,63 @@ export default function SettingsPage() {
           margin-top: 12px; 
         }
         .status-alert.loading { 
-          background: #eff6ff; 
-          color: #1d4ed8; 
-          border: 1px solid #bfdbfe; 
+          background: rgba(0, 229, 255, 0.1); 
+          color: #00E5FF; 
+          border: 1px solid rgba(0, 229, 255, 0.25); 
         }
         .status-alert.success { 
-          background: #f0fdf4; 
-          color: #15803d; 
-          border: 1px solid #bbf7d0; 
+          background: rgba(16, 185, 129, 0.1); 
+          color: #10B981; 
+          border: 1px solid rgba(16, 185, 129, 0.25); 
         }
         .status-alert.error { 
-          background: #fef2f2; 
-          color: #b91c1c; 
-          border: 1px solid #fecaca; 
+          background: rgba(239, 68, 68, 0.1); 
+          color: #EF4444; 
+          border: 1px solid rgba(239, 68, 68, 0.25); 
         }
 
         /* منطقة العمليات الحساسة */
         .danger-zone-container {
-          background: rgba(254, 242, 242, 0.7);
-          border: 1.5px solid rgba(239, 68, 68, 0.3);
+          background: rgba(25, 12, 16, 0.85);
+          border: 1.5px solid rgba(239, 68, 68, 0.35);
           border-radius: 20px;
           padding: 20px;
-          backdrop-filter: blur(10px);
+          backdrop-filter: blur(16px);
         }
         .danger-card {
-          background: white;
+          background: rgba(20, 24, 34, 0.95);
           padding: 16px;
           border-radius: 16px;
           display: flex;
           flex-direction: column;
           justify-content: space-between;
-          border: 1px solid rgba(0,0,0,0.06);
-          box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          box-shadow: 0 4px 15px rgba(0,0,0,0.3);
         }
         .danger-card.warning-level { 
-          border-top: 4px solid #f59e0b; 
+          border-top: 4px solid #F59E0B; 
         }
         .danger-card.critical-level { 
-          border-top: 4px solid #ef4444; 
+          border-top: 4px solid #EF4444; 
         }
 
         .badge-safe {
           font-size: 10px; 
           font-weight: 800; 
-          background: #fef3c7; 
-          color: #b45309;
+          background: rgba(245, 158, 11, 0.15); 
+          color: #F59E0B;
           padding: 2px 8px; 
           border-radius: 12px; 
-          border: 1px solid #fde68a;
+          border: 1px solid rgba(245, 158, 11, 0.3);
         }
         .badge-critical {
           font-size: 10px; 
           font-weight: 800; 
-          background: #fee2e2; 
-          color: #b91c1c;
+          background: rgba(239, 68, 68, 0.15); 
+          color: #EF4444;
           padding: 2px 8px; 
           border-radius: 12px; 
-          border: 1px solid #fca5a5;
+          border: 1px solid rgba(239, 68, 68, 0.3);
         }
 
         .btn-danger {
@@ -1057,30 +1060,30 @@ export default function SettingsPage() {
           transition: 0.2s;
         }
         .btn-danger.warning { 
-          background: #fffbeb; 
-          color: #b45309; 
-          border: 1.5px solid #f59e0b; 
+          background: rgba(245, 158, 11, 0.15); 
+          color: #F59E0B; 
+          border: 1.5px solid #F59E0B; 
         }
         .btn-danger.warning:hover { 
-          background: #f59e0b; 
-          color: white; 
+          background: #F59E0B; 
+          color: #0B0E14; 
         }
         .btn-danger.critical { 
-          background: #fef2f2; 
-          color: #dc2626; 
-          border: 1.5px solid #ef4444; 
+          background: rgba(239, 68, 68, 0.15); 
+          color: #EF4444; 
+          border: 1.5px solid #EF4444; 
         }
         .btn-danger.critical:hover { 
-          background: #dc2626; 
-          color: white; 
+          background: #EF4444; 
+          color: #FFFFFF; 
         }
 
         /* نافذة التأكيد الأمني */
         .security-modal-overlay {
           position: fixed; 
           inset: 0;
-          background: rgba(18, 41, 70, 0.88);
-          backdrop-filter: blur(10px);
+          background: rgba(11, 14, 20, 0.88);
+          backdrop-filter: blur(16px);
           display: flex; 
           align-items: center; 
           justify-content: center;
@@ -1088,29 +1091,32 @@ export default function SettingsPage() {
           padding: 16px;
         }
         .security-modal-card {
-          background: white; 
+          background: #141822; 
           border-radius: 20px;
           padding: 22px; 
           max-width: 440px; 
           width: 100%;
           text-align: center; 
-          box-shadow: 0 25px 50px rgba(0,0,0,0.4);
+          border: 1px solid rgba(239, 68, 68, 0.3);
+          box-shadow: 0 25px 50px rgba(0,0,0,0.7);
           animation: fadeUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
         }
         .security-input {
           width: 100%; 
           padding: 10px; 
-          border: 2px solid #cbd5e1;
+          background: #0B0E14;
+          border: 1.5px solid rgba(255, 255, 255, 0.15);
           border-radius: 8px; 
           font-size: 14px; 
           font-weight: 900;
           text-align: center; 
+          color: #F8FAFC;
           outline: none; 
           margin-top: 5px;
           box-sizing: border-box;
         }
         .security-input:focus { 
-          border-color: #dc2626; 
+          border-color: #EF4444; 
         }
         .btn-confirm-action {
           flex: 1; 
@@ -1124,14 +1130,14 @@ export default function SettingsPage() {
           transition: 0.2s;
         }
         .btn-confirm-action.warning { 
-          background: #d97706; 
+          background: #D97706; 
         }
         .btn-confirm-action.warning:disabled { 
           opacity: 0.4; 
           cursor: not-allowed; 
         }
         .btn-confirm-action.critical { 
-          background: #dc2626; 
+          background: #EF4444; 
         }
         .btn-confirm-action.critical:disabled { 
           opacity: 0.4; 
@@ -1140,11 +1146,15 @@ export default function SettingsPage() {
         .btn-cancel-action {
           padding: 11px 18px; 
           border-radius: 10px; 
-          border: 1px solid #cbd5e1;
-          background: white; 
-          color: #475569; 
+          border: 1px solid rgba(255, 255, 255, 0.12);
+          background: rgba(255, 255, 255, 0.06); 
+          color: #94A3B8; 
           font-weight: 800; 
           cursor: pointer;
+        }
+        .btn-cancel-action:hover {
+          background: rgba(255, 255, 255, 0.12);
+          color: #F8FAFC;
         }
 
         @media (max-width: 768px) {

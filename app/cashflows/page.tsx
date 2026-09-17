@@ -89,13 +89,12 @@ const MultiSelectDropdown = ({ options, selected, onChange, placeholder, title, 
                     </div>
                 </div>
             )}
-            <style>{`
+            <style dangerouslySetInnerHTML={{ __html: `
                 .custom-scrollbar::-webkit-scrollbar { width: 6px; }
                 .custom-scrollbar::-webkit-scrollbar-track { background: rgba(11, 14, 20, 0.5); border-radius: 4px; }
                 .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0, 229, 255, 0.3); border-radius: 4px; }
-            `}</style>
-                .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #475569; }
-            `}</style>
+                .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: #00E5FF; }
+            ` }} />
         </div>
     );
 };
@@ -303,7 +302,7 @@ export default function CashFlowsPage() {
         <div className="clean-page" style={{ background: 'transparent', minHeight: '100vh', paddingBottom: '50px' }}>
             <MasterPage title="التدفقات النقدية (Cash Flows)" subtitle="مراقبة حركات السيولة، المقبوضات، والمدفوعات بشكل لحظي وتجميعي">
                 
-                <style>{`
+                <style dangerouslySetInnerHTML={{ __html: `
                     .summary-card { background: rgba(20, 24, 34, 0.85); backdrop-filter: blur(20px); border-radius: 20px; padding: 25px; flex: 1; border: 1px solid rgba(0, 229, 255, 0.2); position: relative; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.3); transition: all 0.3s ease; }
                     .summary-card:hover { transform: translateY(-3px); box-shadow: 0 15px 40px rgba(0,0,0,0.4); border-color: rgba(0, 229, 255, 0.4); }
                     .summary-card::after { content: ''; position: absolute; top: 0; right: 0; width: 100%; height: 5px; }
@@ -364,7 +363,7 @@ export default function CashFlowsPage() {
                         .cashflows-pagination { flex-direction: column !important; gap: 12px !important; padding: 12px !important; align-items: stretch !important; text-align: center !important; }
                         .cashflows-pagination > div { justify-content: center !important; }
                     }
-                `}</style>
+                ` }} />
 
                 {/* 📊 بطاقات الملخص الرئيسية */}
                 <div style={{ display: 'flex', gap: '20px', marginBottom: '15px', flexWrap: 'wrap' }}>

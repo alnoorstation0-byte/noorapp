@@ -115,7 +115,7 @@ export default function VATReturnPage() {
 
               {/* الرسم البياني (Chart) */}
               <div className="vat-card vat-chart-container" style={{ marginTop: '20px', padding: '30px', textAlign: 'right', display: 'flex', flexDirection: 'column' }}>
-              <h3 style={{ margin: '0 0 25px 0', color: '#122946', fontWeight: 900, fontSize: '20px', display: 'flex', alignItems: 'center' }}>
+              <h3 style={{ margin: '0 0 25px 0', color: '#F8FAFC', fontWeight: 900, fontSize: '20px', display: 'flex', alignItems: 'center' }}>
                 <span style={{ fontSize: '26px', marginLeft: '12px' }}>📊</span> التحليل البياني للضريبة
               </h3>
               <div style={{ height: '350px', width: '100%', direction: 'ltr' }}>
@@ -140,8 +140,8 @@ export default function VATReturnPage() {
                       </linearGradient>
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" opacity={0.15} vertical={false} />
-                    <XAxis dataKey="name" tick={{ fill: '#475569', fontWeight: 900, fontSize: 13 }} axisLine={false} tickLine={false} />
-                    <YAxis tick={{ fill: '#475569', fontWeight: 900, fontSize: 12 }} axisLine={false} tickLine={false} tickFormatter={(val) => val.toLocaleString()} />
+                    <XAxis dataKey="name" tick={{ fill: '#94A3B8', fontWeight: 900, fontSize: 13 }} axisLine={false} tickLine={false} />
+                    <YAxis tick={{ fill: '#94A3B8', fontWeight: 900, fontSize: 12 }} axisLine={false} tickLine={false} tickFormatter={(val) => val.toLocaleString()} />
                     <Tooltip 
                       formatter={(value: any) => [`${formatCurrency(Number(value) || 0)}`, 'قيمة الضريبة']} 
                       cursor={{ fill: 'rgba(0,0,0,0.02)' }}

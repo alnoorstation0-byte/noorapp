@@ -42,15 +42,8 @@ export async function recalculatePosShift(shiftId: string) {
       .eq('shift_id', shiftId)
       .neq('status', 'ملغي');
 
-    // 4. جلب الأصناف الخاضعة لعهدة العبوات والمستلزمات
-    const { data: retItems } = await supabase
-      .from('inventory_items')
-      .select('id')
-      .eq('is_returnable_bottle', true);
-    const retSet = new Set((retItems || []).map(r => r.id));
-
     let cashSales = 0, cardSales = 0, creditSales = 0;
-    let bottlesSold = 0;
+    let totalLiters = 0;
 
     (invoices || []).forEach(inv => {
       const amt = Number(inv.total_amount || 0);
@@ -69,9 +62,7 @@ export async function recalculatePosShift(shiftId: string) {
       }
 
       lines.forEach((line: any) => {
-        if (line.is_returnable_bottle || retSet.has(line.item_id || line.id)) {
-          bottlesSold += Number(line.quantity || line.qty || 0);
-        }
+        totalLiters += Number(line.quantity || line.qty || 0);
       });
     });
 
@@ -100,7 +91,6 @@ export async function recalculatePosShift(shiftId: string) {
     const expectedCash = startingCash + cashSales + standaloneCashReceipts - cashExpenses;
     const actualCash = Number(shift.actual_cash || 0);
     const shortageOverage = (shift.status === 'closed' || actualCash > 0) ? (actualCash - expectedCash) : 0;
-    const bottlesShortage = bottlesSold - Number(shift.bottles_returned || 0);
 
     // تحديث جدول pos_shifts
     await supabase.from('pos_shifts').update({
@@ -111,8 +101,7 @@ export async function recalculatePosShift(shiftId: string) {
       total_expenses: totalExpenses,
       expected_cash: expectedCash,
       shortage_overage: shortageOverage,
-      bottles_sold: bottlesSold,
-      bottles_shortage: bottlesShortage
+      total_liters_sold: totalLiters
     }).eq('id', shiftId);
 
     emitTableChange('pos_shifts');

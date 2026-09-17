@@ -702,7 +702,7 @@ function PosItemNumpadModal({
 
                     {/* Desktop Keyboard Shortcuts Hint (hidden on mobile) */}
                     <div className="pos-desktop-kbd-hint">
-                        <span>{isEn ? '⌨️ Keyboard: Numbers for Qty | ' : '⌨️ لوحة المفاتيح: الأرقام للكمية | '}<strong style={{ color: '#1C73AB' }}>Enter</strong> {isEn ? 'to Add | ' : 'للإضافة | '}<strong style={{ color: '#1C73AB' }}>Tab</strong> {isEn ? 'to Switch | ' : 'للتبديل | '}<strong style={{ color: '#1C73AB' }}>Esc</strong> {isEn ? 'to Cancel' : 'للإلغاء'}</span>
+                        <span>{isEn ? '⌨️ Keyboard: Numbers for Qty | ' : '⌨️ لوحة المفاتيح: الأرقام للكمية | '}<strong style={{ color: '#00E5FF' }}>Enter</strong> {isEn ? 'to Add | ' : 'للإضافة | '}<strong style={{ color: '#00E5FF' }}>Tab</strong> {isEn ? 'to Switch | ' : 'للتبديل | '}<strong style={{ color: '#00E5FF' }}>Esc</strong> {isEn ? 'to Cancel' : 'للإلغاء'}</span>
                     </div>
 
                 </div>
@@ -817,7 +817,7 @@ export default function PosPage() {
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                             <div className="summary-glass-card" style={{ padding: '10px', textAlign: 'center' }}>
                                 <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#64748b' }}>{isEn ? 'Cart Items 🛒' : 'أصناف السلة 🛒'}</span>
-                                <div className="val" style={{ fontSize: '18px', fontWeight: 900, color: '#1C73AB' }}>
+                                <div className="val" style={{ fontSize: '18px', fontWeight: 900, color: '#00E5FF' }}>
                                     {logic.cart.length}
                                 </div>
                             </div>
@@ -1999,9 +1999,9 @@ export default function PosPage() {
                                 style={{
                                     padding: '9px 14px',
                                     borderRadius: '12px',
-                                    border: '1.5px solid rgba(28, 115, 171, 0.3)',
-                                    background: 'rgba(255, 255, 255, 0.85)',
-                                    color: '#1C73AB',
+                                    border: '1.5px solid rgba(0, 229, 255, 0.3)',
+                                    background: 'rgba(20, 24, 34, 0.85)',
+                                    color: '#00E5FF',
                                     fontWeight: 800,
                                     fontSize: '12px',
                                     cursor: 'pointer',
@@ -2049,9 +2049,9 @@ export default function PosPage() {
                             type="button"
                             onClick={() => logic.setIsOpenShiftsDrawerOpen(true)}
                             style={{
-                                background: 'rgba(255, 255, 255, 0.75)',
-                                border: '1.5px solid rgba(28, 115, 171, 0.3)',
-                                color: '#1C73AB',
+                                background: 'rgba(20, 24, 34, 0.85)',
+                                border: '1.5px solid rgba(0, 229, 255, 0.3)',
+                                color: '#00E5FF',
                                 padding: '8px 14px',
                                 borderRadius: '12px',
                                 fontSize: '12px',
@@ -2460,14 +2460,14 @@ export default function PosPage() {
                                         {/* Row 1: Item Name + Custody Badge + Remove Button */}
                                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '8px' }}>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: '6px', flexWrap: 'wrap', flex: 1, minWidth: 0 }}>
-                                                <span style={{ fontWeight: 900, fontSize: '13.5px', color: '#122946', wordBreak: 'break-word' }}>
+                                                <span style={{ fontWeight: 900, fontSize: '13.5px', color: '#F8FAFC', wordBreak: 'break-word' }}>
                                                     {item.name}
                                                 </span>
                                                 {item.is_returnable_bottle && (
                                                     <span style={{
-                                                        background: 'rgba(40, 145, 200, 0.12)',
-                                                        color: '#1C73AB',
-                                                        border: '1px solid rgba(40, 145, 200, 0.28)',
+                                                        background: 'rgba(0, 229, 255, 0.12)',
+                                                        color: '#00E5FF',
+                                                        border: '1px solid rgba(0, 229, 255, 0.28)',
                                                         borderRadius: '6px',
                                                         padding: '1px 6px',
                                                         fontSize: '10px',

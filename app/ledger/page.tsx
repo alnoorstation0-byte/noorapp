@@ -114,9 +114,9 @@ export default function AccountLedger() {
         <button 
           onClick={() => window.print()}
           style={{ 
-            padding: '14px 25px', borderRadius: '14px', border: 'none', 
-            background: THEME.coffeeDark, color: THEME.goldAccent, 
-            fontWeight: 900, cursor: 'pointer', height: '52px'
+            padding: '14px 25px', borderRadius: '14px', border: '1px solid rgba(0, 229, 255, 0.3)', 
+            background: 'rgba(255, 255, 255, 0.05)', color: '#00E5FF', 
+            fontWeight: 900, cursor: 'pointer', height: '52px', transition: '0.2s'
           }}
         >
           🖨️ طباعة الكشف
@@ -125,7 +125,7 @@ export default function AccountLedger() {
 
       {/* الجدول الماسي */}
       {!logic.selectedAccountId ? (
-          <div className="no-print" style={{ textAlign: 'center', padding: '100px', color: '#475569', background: 'white', borderRadius: '24px', fontWeight: 900 }}>
+          <div className="no-print" style={{ textAlign: 'center', padding: '100px 30px', color: '#94A3B8', background: 'rgba(20, 24, 34, 0.85)', backdropFilter: 'blur(20px)', borderRadius: '24px', fontWeight: 900, border: '1px solid rgba(0, 229, 255, 0.2)', boxShadow: '0 8px 32px rgba(0,0,0,0.3)' }}>
              👆 يرجى اختيار حساب من القائمة أعلاه لعرض كشف الحساب.
           </div>
       ) : (

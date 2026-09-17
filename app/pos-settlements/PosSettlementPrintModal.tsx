@@ -1,5 +1,6 @@
 "use client";
-import React, { useRef } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { formatCurrency, formatDate } from '@/lib/helpers';
 
 interface PosSettlementPrintModalProps {
@@ -14,8 +15,31 @@ export default function PosSettlementPrintModal({
     shift
 }: PosSettlementPrintModalProps) {
     const printRef = useRef<HTMLDivElement>(null);
+    const [mounted, setMounted] = useState(false);
 
-    if (!isOpen || !shift) return null;
+    useEffect(() => {
+        setMounted(true);
+    }, []);
+
+    // ⌨️ إغلاق المودال بزر Escape
+    useEffect(() => {
+        if (!isOpen) return;
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                e.stopPropagation();
+                onClose();
+            } else if ((e.ctrlKey || e.metaKey) && (e.key === 'p' || e.key === 'P')) {
+                e.preventDefault();
+                e.stopPropagation();
+                window.print();
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isOpen, onClose]);
+
+    if (!isOpen || !shift || !mounted) return null;
 
     const handlePrint = () => {
         window.print();
@@ -25,21 +49,35 @@ export default function PosSettlementPrintModal({
     const handedOver = Number(shift.handedOverCash || shift.actualCash || 0);
     const variance = Number(shift.shortageOverage || 0);
 
-    return (
-        <div style={{
+    return createPortal(
+        <div className="warm-portal-overlay-fullscreen" onClick={onClose} style={{
             position: 'fixed',
             inset: 0,
             zIndex: 999999,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '20px',
-            backgroundColor: 'rgba(18, 41, 70, 0.7)',
+            padding: '16px',
+            backgroundColor: 'rgba(11, 14, 20, 0.88)',
             backdropFilter: 'blur(20px)',
             WebkitBackdropFilter: 'blur(20px)',
             direction: 'rtl'
         }}>
             <style>{`
+                @media (max-width: 768px) {
+                    .pos-settlement-print-box {
+                        width: 95vw !important;
+                        max-width: 95vw !important;
+                        max-height: 94vh !important;
+                        border-radius: 18px !important;
+                    }
+                    .pos-print-content {
+                        padding: 18px 14px !important;
+                    }
+                    .print-modal-topbar {
+                        padding: 12px 16px !important;
+                    }
+                }
                 @media print {
                     body * {
                         visibility: hidden !important;
@@ -64,21 +102,23 @@ export default function PosSettlementPrintModal({
                 }
             `}</style>
 
-            <div style={{
+            <div className="pos-settlement-print-box" onClick={(e) => e.stopPropagation()} style={{
                 background: '#ffffff',
-                borderRadius: '26px',
+                borderRadius: '24px',
                 width: '100%',
                 maxWidth: '850px',
                 maxHeight: '92vh',
                 display: 'flex',
                 flexDirection: 'column',
-                boxShadow: '0 25px 60px rgba(0, 0, 0, 0.3)',
-                overflow: 'hidden'
+                boxShadow: '0 25px 60px rgba(0, 0, 0, 0.5)',
+                overflow: 'hidden',
+                border: '1px solid rgba(0, 229, 255, 0.3)'
             }}>
                 {/* Modal Top Bar */}
-                <div className="no-print" style={{
-                    padding: '16px 24px',
-                    background: 'linear-gradient(135deg, #1C73AB 0%, #2891C8 100%)',
+                <div className="no-print print-modal-topbar" style={{
+                    padding: '14px 24px',
+                    background: 'linear-gradient(135deg, #141822 0%, #1A2234 100%)',
+                    borderBottom: '1px solid rgba(0, 229, 255, 0.25)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
@@ -86,42 +126,47 @@ export default function PosSettlementPrintModal({
                 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <span style={{ fontSize: '20px' }}>🖨️</span>
-                        <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 900 }}>
+                        <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 900, color: '#F8FAFC' }}>
                             معاينة وطباعة سند تسوية ومخالصة عهدة منفذ بيع
                         </h3>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <button
+                            type="button"
                             onClick={handlePrint}
                             style={{
                                 padding: '8px 20px',
-                                borderRadius: '50px',
+                                borderRadius: '12px',
                                 border: 'none',
-                                background: '#16a34a',
-                                color: '#ffffff',
+                                background: 'linear-gradient(135deg, #00E5FF 0%, #0284C7 100%)',
+                                color: '#0B0E14',
                                 fontWeight: 900,
                                 fontSize: '13px',
                                 cursor: 'pointer',
                                 display: 'flex',
                                 alignItems: 'center',
                                 gap: '6px',
-                                boxShadow: '0 4px 12px rgba(22, 163, 74, 0.3)'
+                                boxShadow: '0 4px 15px rgba(0, 229, 255, 0.35)'
                             }}
                         >
                             <span>🖨️ طباعة السند (A4)</span>
                         </button>
                         <button
+                            type="button"
                             onClick={onClose}
                             style={{
-                                width: '32px',
-                                height: '32px',
-                                borderRadius: '50%',
-                                border: 'none',
-                                background: 'rgba(255, 255, 255, 0.2)',
-                                color: '#ffffff',
+                                width: '34px',
+                                height: '34px',
+                                borderRadius: '10px',
+                                border: '1px solid rgba(239, 68, 68, 0.3)',
+                                background: 'rgba(239, 68, 68, 0.15)',
+                                color: '#f87171',
                                 fontSize: '16px',
                                 fontWeight: 900,
-                                cursor: 'pointer'
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
                             }}
                         >
                             ✕
@@ -383,6 +428,7 @@ export default function PosSettlementPrintModal({
                     </div>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }

@@ -37,12 +37,12 @@ export default function InvoiceAgingDashboard({ summary }: { summary: any }) {
       {/* 1. العنوان وإجمالي المتأخرات */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
         <div>
-          <h2 style={{ margin: 0, color: '#122946', fontSize: '20px', fontWeight: 900 }}>📊 تحليل أعمار الديون</h2>
-          <p style={{ margin: '5px 0 0', color: '#64748b', fontSize: '13px' }}>إجمالي الأرصدة المفتوحة: <strong>{formatCurrency(summary.totalRemaining)}</strong></p>
+          <h2 style={{ margin: 0, color: '#F8FAFC', fontSize: '20px', fontWeight: 900 }}>📊 تحليل أعمار الديون</h2>
+          <p style={{ margin: '5px 0 0', color: '#94A3B8', fontSize: '13px' }}>إجمالي الأرصدة المفتوحة: <strong style={{ color: '#00E5FF' }}>{formatCurrency(summary.totalRemaining)}</strong></p>
         </div>
         <div style={{ background: 'rgba(239, 68, 68, 0.1)', padding: '10px 15px', borderRadius: '10px', border: '1px solid rgba(239, 68, 68, 0.3)' }}>
-          <span style={{ color: '#991b1b', fontSize: '12px', fontWeight: 'bold', display: 'block' }}>إجمالي المتأخرات</span>
-          <span style={{ color: '#ef4444', fontSize: '18px', fontWeight: 900 }}>{formatCurrency(summary.totalOverdue)}</span>
+          <span style={{ color: '#EF4444', fontSize: '12px', fontWeight: 'bold', display: 'block' }}>إجمالي المتأخرات</span>
+          <span style={{ color: '#EF4444', fontSize: '18px', fontWeight: 900 }}>{formatCurrency(summary.totalOverdue)}</span>
         </div>
       </div>
 
@@ -50,8 +50,8 @@ export default function InvoiceAgingDashboard({ summary }: { summary: any }) {
       <div style={{ 
         display: 'flex', width: '100%', height: '24px', 
         borderRadius: '12px', overflow: 'hidden', 
-        background: 'rgba(40, 145, 200, 0.15)', marginBottom: '20px',
-        boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.1)'
+        background: 'rgba(0, 229, 255, 0.12)', marginBottom: '20px',
+        boxShadow: 'inset 0 2px 4px rgba(0,0,0,0.3)'
       }}>
         {aging.current > 0 && <div style={{ width: getWidth(aging.current), background: colors.current, transition: 'width 0.5s ease' }} title="جاري" />}
         {aging.days_1_30 > 0 && <div style={{ width: getWidth(aging.days_1_30), background: colors.days_1_30, transition: 'width 0.5s ease' }} title="1-30 يوم" />}
@@ -78,9 +78,9 @@ function AgingCard({ title, amount, color }: { title: string, amount: number, co
   if (amount === 0) return null; // لو الفئة دي مفيهاش فلوس، مش هنعرض المربع بتاعها عشان الزحمة
   
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', padding: '10px', background: 'rgba(255,255,255,0.5)', borderRadius: '8px', borderLeft: `4px solid ${color}` }}>
-      <span style={{ fontSize: '11px', color: '#64748b', fontWeight: 'bold' }}>{title}</span>
-      <span style={{ fontSize: '14px', color: '#1e293b', fontWeight: 900 }}>{formatCurrency(amount)}</span>
+    <div style={{ display: 'flex', flexDirection: 'column', padding: '10px', background: 'rgba(20, 24, 34, 0.85)', borderRadius: '8px', border: '1px solid rgba(255,255,255,0.06)', borderLeft: `4px solid ${color}` }}>
+      <span style={{ fontSize: '11px', color: '#94A3B8', fontWeight: 'bold' }}>{title}</span>
+      <span style={{ fontSize: '14px', color: '#F8FAFC', fontWeight: 900 }}>{formatCurrency(amount)}</span>
     </div>
   );
 }

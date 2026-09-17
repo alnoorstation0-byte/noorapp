@@ -72,7 +72,7 @@ export default function ArAgingPage() {
             </div>
 
             {isLoading ? (
-                <div style={{ padding: '50px', textAlign: 'center', color: '#122946', fontWeight: 900, fontSize: '20px' }}>جاري الحساب...</div>
+                <div style={{ padding: '50px', textAlign: 'center', color: '#00E5FF', fontWeight: 900, fontSize: '20px' }}>جاري الحساب...</div>
             ) : (
                 <>
                     {/* Global Totals Row */}

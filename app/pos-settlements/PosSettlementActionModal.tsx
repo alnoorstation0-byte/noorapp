@@ -1,5 +1,6 @@
 "use client";
 import React, { useState, useEffect, useMemo } from 'react';
+import { createPortal } from 'react-dom';
 import { formatCurrency, formatDate } from '@/lib/helpers';
 import { ACC } from '@/lib/account-ids';
 
@@ -22,6 +23,9 @@ export default function PosSettlementActionModal({
     onExecuteSettlement,
     isSubmitting
 }: PosSettlementActionModalProps) {
+    const [mounted, setMounted] = useState(false);
+    useEffect(() => setMounted(true), []);
+
     const [activeTab, setActiveTab] = useState<'cash' | 'pumps' | 'inventory' | 'preview'>('cash');
 
     // Form States
@@ -164,127 +168,190 @@ export default function PosSettlementActionModal({
         onExecuteSettlement(payload);
     };
 
-    if (!isOpen || !shift) return null;
+    // ⌨️ إغلاق المودال بزر Escape
+    useEffect(() => {
+        if (!isOpen) return;
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                e.stopPropagation();
+                if (!isSubmitting) onClose();
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isOpen, isSubmitting, onClose]);
 
-    return (
-        <div style={{
+    if (!isOpen || !shift || !mounted) return null;
+
+    return createPortal(
+        <div className="warm-portal-overlay-fullscreen" onClick={onClose} style={{
             position: 'fixed',
             inset: 0,
-            zIndex: 99999,
+            zIndex: 99999999,
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
-            padding: '20px',
-            backgroundColor: 'rgba(18, 41, 70, 0.65)',
-            backdropFilter: 'blur(20px)',
-            WebkitBackdropFilter: 'blur(20px)',
+            padding: '16px',
+            backgroundColor: 'rgba(11, 14, 20, 0.88)',
+            backdropFilter: 'blur(20px) saturate(160%)',
+            WebkitBackdropFilter: 'blur(20px) saturate(160%)',
             direction: 'rtl'
         }}>
-            <div style={{
-                background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(245, 250, 255, 0.94) 100%)',
-                backdropFilter: 'blur(40px) saturate(200%)',
-                WebkitBackdropFilter: 'blur(40px) saturate(200%)',
-                border: '1.5px solid rgba(255, 255, 255, 0.95)',
-                borderRadius: '30px',
-                width: '100%',
-                maxWidth: '920px',
-                maxHeight: '92vh',
-                display: 'flex',
-                flexDirection: 'column',
-                boxShadow: '0 25px 65px rgba(28, 115, 171, 0.28), inset 0 2px 3px rgba(255, 255, 255, 1)',
-                overflow: 'hidden',
-                animation: 'modalSlideUp 0.3s ease-out'
-            }}>
+            <div 
+                className="pos-settlement-modal-box glass-modal-container"
+                onClick={(e) => e.stopPropagation()}
+                style={{
+                    background: 'linear-gradient(135deg, rgba(20, 24, 34, 0.98) 0%, rgba(11, 14, 20, 0.95) 100%)',
+                    backdropFilter: 'blur(30px) saturate(180%)',
+                    WebkitBackdropFilter: 'blur(30px) saturate(180%)',
+                    border: '1px solid rgba(0, 229, 255, 0.3)',
+                    borderRadius: '24px',
+                    width: '100%',
+                    maxWidth: '920px',
+                    maxHeight: '92vh',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    boxShadow: '0 25px 65px rgba(0, 0, 0, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+                    overflow: 'hidden',
+                    animation: 'modalSlideUp 0.3s ease-out'
+                }}
+            >
                 <style>{`
                     @keyframes modalSlideUp {
                         from { opacity: 0; transform: translateY(25px) scale(0.97); }
                         to { opacity: 1; transform: translateY(0) scale(1); }
                     }
                     .aqua-tab-btn {
-                        padding: 12px 20px;
-                        border-radius: 14px;
+                        padding: 10px 18px;
+                        border-radius: 12px;
                         font-weight: 800;
                         font-size: 13px;
                         cursor: pointer;
-                        border: none;
+                        border: 1px solid transparent;
                         transition: all 0.25s ease;
                         display: flex;
                         align-items: center;
                         gap: 8px;
+                        white-space: nowrap;
                     }
                     .aqua-tab-btn.active {
-                        background: linear-gradient(135deg, #1C73AB 0%, #2891C8 100%);
-                        color: #ffffff;
-                        box-shadow: 0 4px 15px rgba(28, 115, 171, 0.3);
+                        background: linear-gradient(135deg, #00E5FF 0%, #00B4D8 100%);
+                        color: #0B0E14;
+                        border-color: #00E5FF;
+                        box-shadow: 0 4px 15px rgba(0, 229, 255, 0.35);
                     }
                     .aqua-tab-btn:not(.active) {
-                        background: rgba(28, 115, 171, 0.08);
-                        color: #1C73AB;
+                        background: rgba(30, 41, 59, 0.6);
+                        color: #94A3B8;
+                        border: 1px solid rgba(255, 255, 255, 0.05);
                     }
                     .aqua-tab-btn:not(.active):hover {
-                        background: rgba(28, 115, 171, 0.16);
+                        background: rgba(30, 41, 59, 0.9);
+                        color: #F8FAFC;
                     }
                     .field-input {
                         width: 100%;
                         padding: 11px 16px;
-                        border-radius: 14px;
-                        border: 1px solid rgba(28, 115, 171, 0.25);
-                        background: rgba(255, 255, 255, 0.85);
+                        border-radius: 12px;
+                        border: 1px solid rgba(0, 229, 255, 0.2);
+                        background: rgba(11, 14, 20, 0.7);
                         font-size: 14px;
                         font-weight: 700;
-                        color: #122946;
+                        color: #F8FAFC;
                         outline: none;
                         transition: all 0.2s;
                         box-sizing: border-box;
                     }
                     .field-input:focus {
-                        border-color: #1C73AB;
-                        box-shadow: 0 0 0 3px rgba(28, 115, 171, 0.18);
+                        border-color: #00E5FF;
+                        background: rgba(20, 24, 34, 0.95);
+                        box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.25);
+                    }
+
+                    @media (max-width: 768px) {
+                        .pos-settlement-modal-box {
+                            width: 95vw !important;
+                            max-width: 95vw !important;
+                            max-height: 94vh !important;
+                            border-radius: 18px !important;
+                        }
+                        .pos-settlement-header {
+                            padding: 14px 16px !important;
+                        }
+                        .pos-settlement-header h2 {
+                            font-size: 16px !important;
+                        }
+                        .pos-settlement-tabs {
+                            padding: 10px 12px !important;
+                            gap: 6px !important;
+                        }
+                        .aqua-tab-btn {
+                            padding: 8px 12px !important;
+                            font-size: 11.5px !important;
+                        }
+                        .pos-settlement-body {
+                            padding: 16px 14px !important;
+                        }
+                        .settlement-summary-grid {
+                            grid-template-columns: repeat(2, 1fr) !important;
+                            gap: 8px !important;
+                        }
+                        .settlement-actions-footer {
+                            padding: 12px 14px !important;
+                            flex-direction: column !important;
+                            gap: 10px !important;
+                        }
+                        .settlement-actions-footer button {
+                            width: 100% !important;
+                            min-height: 44px !important;
+                        }
                     }
                 `}</style>
 
                 {/* Header */}
-                <div style={{
-                    padding: '24px 30px',
-                    borderBottom: '1px solid rgba(28, 115, 171, 0.12)',
+                <div className="pos-settlement-header" style={{
+                    padding: '20px 24px',
+                    borderBottom: '1px solid rgba(0, 229, 255, 0.15)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    background: 'linear-gradient(135deg, rgba(28, 115, 171, 0.08) 0%, rgba(40, 145, 200, 0.03) 100%)'
+                    background: 'rgba(20, 24, 34, 0.95)'
                 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
                         <div style={{
                             width: '48px',
                             height: '48px',
                             borderRadius: '16px',
-                            background: 'linear-gradient(135deg, #1C73AB 0%, #2891C8 100%)',
+                            background: 'linear-gradient(135deg, #00E5FF 0%, #00B4D8 100%)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                             fontSize: '24px',
-                            color: '#fff',
-                            boxShadow: '0 8px 20px rgba(28, 115, 171, 0.25)'
+                            color: '#0B0E14',
+                            boxShadow: '0 8px 20px rgba(0, 229, 255, 0.3)'
                         }}>
                             🏪
                         </div>
                         <div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 900, color: '#122946' }}>
+                                <h2 style={{ margin: 0, fontSize: '20px', fontWeight: 900, color: '#F8FAFC' }}>
                                     تسوية عهدة منفذ [{shift.warehouseName}]
                                 </h2>
                                 <span style={{
-                                    background: 'rgba(28, 115, 171, 0.12)',
-                                    color: '#1C73AB',
+                                    background: 'rgba(0, 229, 255, 0.1)',
+                                    color: '#00E5FF',
                                     padding: '3px 10px',
                                     borderRadius: '50px',
                                     fontSize: '12px',
-                                    fontWeight: 800
+                                    fontWeight: 800,
+                                    border: '1px solid rgba(0, 229, 255, 0.25)'
                                 }}>
                                     {shift.shiftNumber}
                                 </span>
                             </div>
-                            <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#64748b', fontWeight: 600 }}>
-                                الكاشير / المسؤول: <b style={{ color: '#122946' }}>{shift.cashierName}</b> | تاريخ الفتح: {formatDate(shift.openedAt)}
+                            <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: '#94A3B8', fontWeight: 600 }}>
+                                الكاشير / المسؤول: <b style={{ color: '#00E5FF' }}>{shift.cashierName}</b> | تاريخ الفتح: {formatDate(shift.openedAt)}
                             </p>
                         </div>
                     </div>
@@ -296,9 +363,9 @@ export default function PosSettlementActionModal({
                             width: '38px',
                             height: '38px',
                             borderRadius: '50%',
-                            border: '1px solid rgba(28, 115, 171, 0.2)',
-                            background: 'rgba(255, 255, 255, 0.8)',
-                            color: '#1C73AB',
+                            border: '1px solid rgba(255, 255, 255, 0.1)',
+                            background: 'rgba(30, 41, 59, 0.6)',
+                            color: '#94A3B8',
                             fontSize: '18px',
                             fontWeight: 900,
                             cursor: 'pointer',
@@ -315,10 +382,10 @@ export default function PosSettlementActionModal({
                 {/* Tabs Navigation */}
                 <div style={{
                     padding: '14px 30px',
-                    borderBottom: '1px solid rgba(28, 115, 171, 0.08)',
+                    borderBottom: '1px solid rgba(0, 229, 255, 0.1)',
                     display: 'flex',
                     gap: '10px',
-                    background: 'rgba(255, 255, 255, 0.5)',
+                    background: 'rgba(11, 14, 20, 0.6)',
                     overflowX: 'auto'
                 }}>
                     <button
@@ -345,7 +412,7 @@ export default function PosSettlementActionModal({
                         <span>📦</span>
                         <span>جرد ومخزون المنفذ</span>
                         {totalInventoryReturnQty > 0 && (
-                            <span style={{ background: '#fff', color: '#1C73AB', padding: '1px 6px', borderRadius: '20px', fontSize: '11px', fontWeight: 900 }}>
+                            <span style={{ background: '#00E5FF', color: '#0B0E14', padding: '1px 6px', borderRadius: '20px', fontSize: '11px', fontWeight: 900 }}>
                                 {totalInventoryReturnQty}
                             </span>
                         )}
@@ -372,41 +439,41 @@ export default function PosSettlementActionModal({
                                 gap: '14px',
                                 marginBottom: '24px'
                             }}>
-                                <div style={{ background: 'rgba(255, 255, 255, 0.8)', padding: '14px 18px', borderRadius: '18px', border: '1px solid rgba(28, 115, 171, 0.15)' }}>
-                                    <div style={{ fontSize: '11px', fontWeight: 800, color: '#64748b' }}>العهدة الافتتاحية 💵</div>
-                                    <div style={{ fontSize: '18px', fontWeight: 900, color: '#122946', marginTop: '4px' }}>
+                                <div style={{ background: 'rgba(20, 24, 34, 0.95)', padding: '14px 18px', borderRadius: '18px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
+                                    <div style={{ fontSize: '11px', fontWeight: 800, color: '#94A3B8' }}>العهدة الافتتاحية 💵</div>
+                                    <div style={{ fontSize: '18px', fontWeight: 900, color: '#F8FAFC', marginTop: '4px' }}>
                                         {formatCurrency(shift.startingCash)}
                                     </div>
                                 </div>
-                                <div style={{ background: 'rgba(28, 115, 171, 0.08)', padding: '14px 18px', borderRadius: '18px', border: '1px solid rgba(28, 115, 171, 0.2)' }}>
-                                    <div style={{ fontSize: '11px', fontWeight: 800, color: '#1C73AB' }}>المبيعات النقدية (كاش) 💰</div>
-                                    <div style={{ fontSize: '18px', fontWeight: 900, color: '#1C73AB', marginTop: '4px' }}>
+                                <div style={{ background: 'rgba(20, 24, 34, 0.95)', padding: '14px 18px', borderRadius: '18px', border: '1px solid rgba(0, 229, 255, 0.25)' }}>
+                                    <div style={{ fontSize: '11px', fontWeight: 800, color: '#00E5FF' }}>المبيعات النقدية (كاش) 💰</div>
+                                    <div style={{ fontSize: '18px', fontWeight: 900, color: '#00E5FF', marginTop: '4px' }}>
                                         {formatCurrency(shift.cashSales)}
                                     </div>
                                 </div>
-                                <div style={{ background: 'rgba(255, 255, 255, 0.8)', padding: '14px 18px', borderRadius: '18px', border: '1px solid rgba(28, 115, 171, 0.15)' }}>
-                                    <div style={{ fontSize: '11px', fontWeight: 800, color: '#64748b' }}>مبيعات الشبكة (مدى) 💳</div>
-                                    <div style={{ fontSize: '18px', fontWeight: 900, color: '#122946', marginTop: '4px' }}>
+                                <div style={{ background: 'rgba(20, 24, 34, 0.95)', padding: '14px 18px', borderRadius: '18px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
+                                    <div style={{ fontSize: '11px', fontWeight: 800, color: '#94A3B8' }}>مبيعات الشبكة (مدى) 💳</div>
+                                    <div style={{ fontSize: '18px', fontWeight: 900, color: '#F8FAFC', marginTop: '4px' }}>
                                         {formatCurrency(shift.cardSales)}
                                     </div>
                                 </div>
                                 {Number(shift.totalCollections || 0) > 0 && (
-                                    <div style={{ background: 'rgba(2, 132, 199, 0.08)', padding: '14px 18px', borderRadius: '18px', border: '1px solid rgba(2, 132, 199, 0.2)' }}>
-                                        <div style={{ fontSize: '11px', fontWeight: 800, color: '#0284c7' }}>تحصيلات إضافية (+) 📥</div>
-                                        <div style={{ fontSize: '18px', fontWeight: 900, color: '#0284c7', marginTop: '4px' }}>
+                                    <div style={{ background: 'rgba(20, 24, 34, 0.95)', padding: '14px 18px', borderRadius: '18px', border: '1px solid rgba(0, 229, 255, 0.25)' }}>
+                                        <div style={{ fontSize: '11px', fontWeight: 800, color: '#38BDF8' }}>تحصيلات إضافية (+) 📥</div>
+                                        <div style={{ fontSize: '18px', fontWeight: 900, color: '#00E5FF', marginTop: '4px' }}>
                                             {formatCurrency(shift.totalCollections)}
                                         </div>
                                     </div>
                                 )}
-                                <div style={{ background: 'rgba(239, 68, 68, 0.08)', padding: '14px 18px', borderRadius: '18px', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
-                                    <div style={{ fontSize: '11px', fontWeight: 800, color: '#ef4444' }}>مصروفات الدرج (-) 💸</div>
-                                    <div style={{ fontSize: '18px', fontWeight: 900, color: '#ef4444', marginTop: '4px' }}>
+                                <div style={{ background: 'rgba(20, 24, 34, 0.95)', padding: '14px 18px', borderRadius: '18px', border: '1px solid rgba(239, 68, 68, 0.25)' }}>
+                                    <div style={{ fontSize: '11px', fontWeight: 800, color: '#EF4444' }}>مصروفات الدرج (-) 💸</div>
+                                    <div style={{ fontSize: '18px', fontWeight: 900, color: '#EF4444', marginTop: '4px' }}>
                                         {formatCurrency(shift.totalExpenses)}
                                     </div>
                                 </div>
-                                <div style={{ background: 'rgba(245, 158, 11, 0.12)', padding: '14px 18px', borderRadius: '18px', border: '1.5px solid rgba(245, 158, 11, 0.3)' }}>
-                                    <div style={{ fontSize: '11px', fontWeight: 900, color: '#b45309' }}>المطالبة النقدية للدرج ⚖️</div>
-                                    <div style={{ fontSize: '20px', fontWeight: 900, color: '#b45309', marginTop: '4px' }}>
+                                <div style={{ background: 'rgba(20, 24, 34, 0.95)', padding: '14px 18px', borderRadius: '18px', border: '1.5px solid rgba(245, 158, 11, 0.35)' }}>
+                                    <div style={{ fontSize: '11px', fontWeight: 900, color: '#F59E0B' }}>المطالبة النقدية للدرج ⚖️</div>
+                                    <div style={{ fontSize: '20px', fontWeight: 900, color: '#F59E0B', marginTop: '4px' }}>
                                         {formatCurrency(netCashDue)}
                                     </div>
                                 </div>
@@ -414,20 +481,20 @@ export default function PosSettlementActionModal({
 
                             {/* Handover & Safe Selection */}
                             <div style={{
-                                background: 'rgba(255, 255, 255, 0.85)',
+                                background: 'rgba(20, 24, 34, 0.95)',
                                 padding: '22px 24px',
                                 borderRadius: '22px',
-                                border: '1px solid rgba(28, 115, 171, 0.15)',
+                                border: '1px solid rgba(0, 229, 255, 0.2)',
                                 marginBottom: '20px'
                             }}>
-                                <h3 style={{ margin: '0 0 16px 0', fontSize: '16px', fontWeight: 900, color: '#122946' }}>
+                                <h3 style={{ margin: '0 0 16px 0', fontSize: '16px', fontWeight: 900, color: '#F8FAFC' }}>
                                     📥 إثبات توريد النقدية إلى الخزينة المركزية أو البنك
                                 </h3>
 
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px' }}>
                                     {/* Date */}
                                     <div>
-                                        <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#1C73AB', marginBottom: '6px' }}>
+                                        <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#94A3B8', marginBottom: '6px' }}>
                                             تاريخ التوريد والتسوية 📅
                                         </label>
                                         <input
@@ -440,7 +507,7 @@ export default function PosSettlementActionModal({
 
                                     {/* Safe / Bank Selection */}
                                     <div>
-                                        <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#1C73AB', marginBottom: '6px' }}>
+                                        <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#94A3B8', marginBottom: '6px' }}>
                                             إيداع إلى حساب (الخزينة / البنك) 🏦
                                         </label>
                                         <select
@@ -458,7 +525,7 @@ export default function PosSettlementActionModal({
 
                                     {/* Actual Cash Handed Over */}
                                     <div>
-                                        <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#1C73AB', marginBottom: '6px' }}>
+                                        <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#94A3B8', marginBottom: '6px' }}>
                                             المبلغ المورد والمحصور فعلياً (ر.س) 💵
                                         </label>
                                         <input
@@ -467,7 +534,7 @@ export default function PosSettlementActionModal({
                                             value={actualCashHandedOver}
                                             onChange={(e) => setActualCashHandedOver(Math.max(0, Number(e.target.value) || 0))}
                                             className="field-input"
-                                            style={{ fontSize: '16px', fontWeight: 900, color: '#16a34a' }}
+                                            style={{ fontSize: '16px', fontWeight: 900, color: '#10B981' }}
                                         />
                                     </div>
                                 </div>
@@ -477,8 +544,8 @@ export default function PosSettlementActionModal({
                                     marginTop: '20px',
                                     padding: '16px 20px',
                                     borderRadius: '16px',
-                                    background: isShortage ? 'rgba(239, 68, 68, 0.08)' : (isOverage ? 'rgba(22, 163, 74, 0.08)' : 'rgba(28, 115, 171, 0.08)'),
-                                    border: `1px solid ${isShortage ? 'rgba(239, 68, 68, 0.3)' : (isOverage ? 'rgba(22, 163, 74, 0.3)' : 'rgba(28, 115, 171, 0.2)')}`,
+                                    background: isShortage ? 'rgba(239, 68, 68, 0.1)' : (isOverage ? 'rgba(16, 185, 129, 0.1)' : 'rgba(0, 229, 255, 0.1)'),
+                                    border: `1px solid ${isShortage ? 'rgba(239, 68, 68, 0.35)' : (isOverage ? 'rgba(16, 185, 129, 0.35)' : 'rgba(0, 229, 255, 0.25)')}`,
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'space-between',
@@ -486,10 +553,10 @@ export default function PosSettlementActionModal({
                                     gap: '12px'
                                 }}>
                                     <div>
-                                        <div style={{ fontSize: '13px', fontWeight: 800, color: isShortage ? '#ef4444' : (isOverage ? '#16a34a' : '#1C73AB') }}>
+                                        <div style={{ fontSize: '13px', fontWeight: 800, color: isShortage ? '#EF4444' : (isOverage ? '#10B981' : '#00E5FF') }}>
                                             {isShortage ? '⚠️ يوجد عجز في الصندوق بمقدار:' : (isOverage ? '🎉 توجد زيادة نقدية في الصندوق بمقدار:' : '✅ الصندوق متطابق 100% بدون أي فروقات')}
                                         </div>
-                                        <div style={{ fontSize: '20px', fontWeight: 900, color: isShortage ? '#ef4444' : (isOverage ? '#16a34a' : '#16a34a'), marginTop: '2px' }}>
+                                        <div style={{ fontSize: '20px', fontWeight: 900, color: isShortage ? '#EF4444' : (isOverage ? '#10B981' : '#10B981'), marginTop: '2px' }}>
                                             {formatCurrency(Math.abs(cashVariance))}
                                         </div>
                                     </div>
@@ -497,7 +564,7 @@ export default function PosSettlementActionModal({
                                     {/* Action on Shortage */}
                                     {isShortage && (
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                            <span style={{ fontSize: '12px', fontWeight: 800, color: '#122946' }}>معالجة العجز:</span>
+                                            <span style={{ fontSize: '12px', fontWeight: 800, color: '#F8FAFC' }}>معالجة العجز:</span>
                                             <select
                                                 value={shortageAction}
                                                 onChange={(e) => setShortageAction(e.target.value as any)}
@@ -519,7 +586,7 @@ export default function PosSettlementActionModal({
                     {activeTab === 'pumps' && (
                         <div>
                             <div style={{
-                                background: 'rgba(255, 255, 255, 0.85)',
+                                background: 'rgba(20, 24, 34, 0.95)',
                                 padding: '22px 24px',
                                 borderRadius: '22px',
                                 border: '1px solid rgba(0, 229, 255, 0.25)',
@@ -639,17 +706,17 @@ export default function PosSettlementActionModal({
                     {activeTab === 'inventory' && (
                         <div>
                             <div style={{
-                                background: 'rgba(255, 255, 255, 0.85)',
+                                background: 'rgba(20, 24, 34, 0.95)',
                                 padding: '22px 24px',
                                 borderRadius: '22px',
-                                border: '1px solid rgba(28, 115, 171, 0.15)'
+                                border: '1px solid rgba(0, 229, 255, 0.2)'
                             }}>
                                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-                                    <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 900, color: '#122946' }}>
+                                    <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 900, color: '#F8FAFC' }}>
                                         📦 بضاعة ومخزون منفذ البيع وإرجاع الفائض
                                     </h3>
-                                    <div style={{ fontSize: '12px', fontWeight: 700, color: '#64748b' }}>
-                                        إجمالي الرصيد بالمنفذ: <b style={{ color: '#1C73AB' }}>{shift.totalRemainingStock} حبة</b>
+                                    <div style={{ fontSize: '12px', fontWeight: 700, color: '#94A3B8' }}>
+                                        إجمالي الرصيد بالمنفذ: <b style={{ color: '#00E5FF' }}>{shift.totalRemainingStock} حبة</b>
                                     </div>
                                 </div>
 
@@ -657,27 +724,27 @@ export default function PosSettlementActionModal({
                                     <div style={{ overflowX: 'auto' }}>
                                         <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
                                             <thead>
-                                                <tr style={{ background: 'rgba(28, 115, 171, 0.08)', borderBottom: '1.5px solid rgba(28, 115, 171, 0.15)' }}>
-                                                    <th style={{ padding: '10px 14px', textAlign: 'right', color: '#1C73AB', fontWeight: 800 }}>الصنف</th>
-                                                    <th style={{ padding: '10px 14px', textAlign: 'center', color: '#122946', fontWeight: 800 }}>الرصيد الحالي</th>
-                                                    <th style={{ padding: '10px 14px', textAlign: 'center', color: '#16a34a', fontWeight: 800 }}>المباع بالوردية</th>
-                                                    <th style={{ padding: '10px 14px', textAlign: 'center', color: '#1C73AB', fontWeight: 800 }}>إرجاع للمستودع الرئيسي 🚚</th>
-                                                    <th style={{ padding: '10px 14px', textAlign: 'center', color: '#f59e0b', fontWeight: 800 }}>تالف / هالك ⚠️</th>
-                                                    <th style={{ padding: '10px 14px', textAlign: 'center', color: '#ef4444', fontWeight: 800 }}>عجز جرد ❌</th>
-                                                    <th style={{ padding: '10px 14px', textAlign: 'right', color: '#64748b', fontWeight: 800 }}>ملاحظات</th>
+                                                <tr style={{ background: 'rgba(11, 14, 20, 0.8)', borderBottom: '1.5px solid rgba(0, 229, 255, 0.25)' }}>
+                                                    <th style={{ padding: '10px 14px', textAlign: 'right', color: '#00E5FF', fontWeight: 800 }}>الصنف</th>
+                                                    <th style={{ padding: '10px 14px', textAlign: 'center', color: '#F8FAFC', fontWeight: 800 }}>الرصيد الحالي</th>
+                                                    <th style={{ padding: '10px 14px', textAlign: 'center', color: '#10B981', fontWeight: 800 }}>المباع بالوردية</th>
+                                                    <th style={{ padding: '10px 14px', textAlign: 'center', color: '#00E5FF', fontWeight: 800 }}>إرجاع للمستودع الرئيسي 🚚</th>
+                                                    <th style={{ padding: '10px 14px', textAlign: 'center', color: '#F59E0B', fontWeight: 800 }}>تالف / هالك ⚠️</th>
+                                                    <th style={{ padding: '10px 14px', textAlign: 'center', color: '#EF4444', fontWeight: 800 }}>عجز جرد ❌</th>
+                                                    <th style={{ padding: '10px 14px', textAlign: 'right', color: '#94A3B8', fontWeight: 800 }}>ملاحظات</th>
                                                 </tr>
                                             </thead>
                                             <tbody>
                                                 {returnRows.map((row, idx) => (
-                                                    <tr key={row.itemId || idx} style={{ borderBottom: '1px solid rgba(28, 115, 171, 0.06)' }}>
-                                                        <td style={{ padding: '12px 14px', fontWeight: 800, color: '#122946' }}>
+                                                    <tr key={row.itemId || idx} style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                                                        <td style={{ padding: '12px 14px', fontWeight: 800, color: '#F8FAFC' }}>
                                                             {row.itemName}
-                                                            <div style={{ fontSize: '10px', color: '#64748b' }}>تكلفة: {formatCurrency(row.costPrice)}</div>
+                                                            <div style={{ fontSize: '10px', color: '#94A3B8' }}>تكلفة: {formatCurrency(row.costPrice)}</div>
                                                         </td>
-                                                        <td style={{ padding: '12px 14px', textAlign: 'center', fontWeight: 900, color: '#122946' }}>
+                                                        <td style={{ padding: '12px 14px', textAlign: 'center', fontWeight: 900, color: '#F8FAFC' }}>
                                                             {row.currentStock} {row.unit}
                                                         </td>
-                                                        <td style={{ padding: '12px 14px', textAlign: 'center', fontWeight: 900, color: '#16a34a' }}>
+                                                        <td style={{ padding: '12px 14px', textAlign: 'center', fontWeight: 900, color: '#10B981' }}>
                                                             {row.soldQty}
                                                         </td>
                                                         <td style={{ padding: '12px 14px', textAlign: 'center' }}>
@@ -687,7 +754,7 @@ export default function PosSettlementActionModal({
                                                                 max={row.currentStock}
                                                                 value={row.returnQty}
                                                                 onChange={(e) => handleUpdateRow(idx, 'returnQty', Number(e.target.value) || 0)}
-                                                                style={{ width: '70px', padding: '6px 8px', borderRadius: '8px', border: '1px solid rgba(28, 115, 171, 0.3)', textAlign: 'center', fontWeight: 800 }}
+                                                                style={{ width: '70px', padding: '6px 8px', borderRadius: '8px', border: '1px solid rgba(0, 229, 255, 0.3)', background: 'rgba(11, 14, 20, 0.7)', color: '#00E5FF', textAlign: 'center', fontWeight: 800 }}
                                                             />
                                                         </td>
                                                         <td style={{ padding: '12px 14px', textAlign: 'center' }}>
@@ -696,7 +763,7 @@ export default function PosSettlementActionModal({
                                                                 min="0"
                                                                 value={row.wasteQty}
                                                                 onChange={(e) => handleUpdateRow(idx, 'wasteQty', Number(e.target.value) || 0)}
-                                                                style={{ width: '70px', padding: '6px 8px', borderRadius: '8px', border: '1px solid rgba(245, 158, 11, 0.3)', textAlign: 'center', fontWeight: 800, color: '#b45309' }}
+                                                                style={{ width: '70px', padding: '6px 8px', borderRadius: '8px', border: '1px solid rgba(245, 158, 11, 0.3)', background: 'rgba(11, 14, 20, 0.7)', textAlign: 'center', fontWeight: 800, color: '#F59E0B' }}
                                                             />
                                                         </td>
                                                         <td style={{ padding: '12px 14px', textAlign: 'center' }}>
@@ -705,7 +772,7 @@ export default function PosSettlementActionModal({
                                                                 min="0"
                                                                 value={row.shortageQty}
                                                                 onChange={(e) => handleUpdateRow(idx, 'shortageQty', Number(e.target.value) || 0)}
-                                                                style={{ width: '70px', padding: '6px 8px', borderRadius: '8px', border: '1px solid rgba(239, 68, 68, 0.3)', textAlign: 'center', fontWeight: 800, color: '#ef4444' }}
+                                                                style={{ width: '70px', padding: '6px 8px', borderRadius: '8px', border: '1px solid rgba(239, 68, 68, 0.3)', background: 'rgba(11, 14, 20, 0.7)', textAlign: 'center', fontWeight: 800, color: '#EF4444' }}
                                                             />
                                                         </td>
                                                         <td style={{ padding: '12px 14px' }}>
@@ -714,7 +781,7 @@ export default function PosSettlementActionModal({
                                                                 placeholder="ملاحظات التسوية..."
                                                                 value={row.notes || ''}
                                                                 onChange={(e) => handleUpdateRow(idx, 'notes', e.target.value)}
-                                                                style={{ width: '130px', padding: '6px 8px', borderRadius: '8px', border: '1px solid rgba(28, 115, 171, 0.2)', fontSize: '11px' }}
+                                                                style={{ width: '130px', padding: '6px 8px', borderRadius: '8px', border: '1px solid rgba(255, 255, 255, 0.1)', background: 'rgba(11, 14, 20, 0.7)', color: '#F8FAFC', fontSize: '11px' }}
                                                             />
                                                         </td>
                                                     </tr>
@@ -723,7 +790,7 @@ export default function PosSettlementActionModal({
                                         </table>
                                     </div>
                                 ) : (
-                                    <div style={{ padding: '30px', textAlign: 'center', color: '#64748b', fontSize: '13px' }}>
+                                    <div style={{ padding: '30px', textAlign: 'center', color: '#94A3B8', fontSize: '13px' }}>
                                         لا توجد أصناف مسجلة حالياً في هذا المستودع.
                                     </div>
                                 )}
@@ -735,85 +802,85 @@ export default function PosSettlementActionModal({
                     {activeTab === 'preview' && (
                         <div>
                             <div style={{
-                                background: 'rgba(255, 255, 255, 0.85)',
+                                background: 'rgba(20, 24, 34, 0.95)',
                                 padding: '22px 24px',
                                 borderRadius: '22px',
-                                border: '1px solid rgba(28, 115, 171, 0.15)',
+                                border: '1px solid rgba(0, 229, 255, 0.2)',
                                 marginBottom: '20px'
                             }}>
-                                <h3 style={{ margin: '0 0 14px 0', fontSize: '16px', fontWeight: 900, color: '#122946' }}>
+                                <h3 style={{ margin: '0 0 14px 0', fontSize: '16px', fontWeight: 900, color: '#F8FAFC' }}>
                                     ⚖️ معاينة القيد المحاسبي المتولد آلياً (القيد المزدوج)
                                 </h3>
 
                                 <div style={{ overflowX: 'auto', marginBottom: '18px' }}>
                                     <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px' }}>
                                         <thead>
-                                            <tr style={{ background: 'rgba(28, 115, 171, 0.08)', borderBottom: '1.5px solid rgba(28, 115, 171, 0.15)' }}>
-                                                <th style={{ padding: '10px 14px', textAlign: 'right', color: '#1C73AB', fontWeight: 800 }}>الحساب المحاسبي</th>
-                                                <th style={{ padding: '10px 14px', textAlign: 'right', color: '#122946', fontWeight: 800 }}>البيان والتوضيح</th>
-                                                <th style={{ padding: '10px 14px', textAlign: 'center', color: '#16a34a', fontWeight: 800 }}>مدين (Debit)</th>
-                                                <th style={{ padding: '10px 14px', textAlign: 'center', color: '#ef4444', fontWeight: 800 }}>دائن (Credit)</th>
+                                            <tr style={{ background: 'rgba(11, 14, 20, 0.8)', borderBottom: '1.5px solid rgba(0, 229, 255, 0.25)' }}>
+                                                <th style={{ padding: '10px 14px', textAlign: 'right', color: '#00E5FF', fontWeight: 800 }}>الحساب المحاسبي</th>
+                                                <th style={{ padding: '10px 14px', textAlign: 'right', color: '#F8FAFC', fontWeight: 800 }}>البيان والتوضيح</th>
+                                                <th style={{ padding: '10px 14px', textAlign: 'center', color: '#10B981', fontWeight: 800 }}>مدين (Debit)</th>
+                                                <th style={{ padding: '10px 14px', textAlign: 'center', color: '#EF4444', fontWeight: 800 }}>دائن (Credit)</th>
                                             </tr>
                                         </thead>
                                         <tbody>
                                             {/* Debit Safe */}
-                                            <tr style={{ borderBottom: '1px solid rgba(28, 115, 171, 0.08)' }}>
-                                                <td style={{ padding: '12px 14px', fontWeight: 800, color: '#122946' }}>
+                                            <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                                                <td style={{ padding: '12px 14px', fontWeight: 800, color: '#F8FAFC' }}>
                                                     حـ/ الخزينة الرئيسية أو البنك ({accounts.find(a => a.id === selectedSafeAcc)?.code || '122'})
                                                 </td>
-                                                <td style={{ padding: '12px 14px', color: '#1e293b', fontSize: '12px' }}>
+                                                <td style={{ padding: '12px 14px', color: '#94A3B8', fontSize: '12px' }}>
                                                     توريد نقدية للخزينة من عهدة منفذ [{shift.warehouseName}] | {shift.shiftNumber} | المسئول: {shift.cashierName}{shift.cashierPhone ? ` (${shift.cashierPhone})` : ''}
                                                 </td>
-                                                <td style={{ padding: '12px 14px', textAlign: 'center', fontWeight: 900, color: '#16a34a' }}>
+                                                <td style={{ padding: '12px 14px', textAlign: 'center', fontWeight: 900, color: '#10B981' }}>
                                                     {formatCurrency(actualCashHandedOver)}
                                                 </td>
-                                                <td style={{ padding: '12px 14px', textAlign: 'center', color: '#64748b' }}>0.00 ر.س</td>
+                                                <td style={{ padding: '12px 14px', textAlign: 'center', color: '#64748B' }}>0.00 ر.س</td>
                                             </tr>
 
                                             {/* Credit Custody */}
-                                            <tr style={{ borderBottom: '1px solid rgba(28, 115, 171, 0.08)' }}>
-                                                <td style={{ padding: '12px 14px', fontWeight: 800, color: '#122946' }}>
+                                            <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                                                <td style={{ padding: '12px 14px', fontWeight: 800, color: '#F8FAFC' }}>
                                                     حـ/ عهدة موظفين ونقاط بيع (125) - {shift.cashierName}
                                                 </td>
-                                                <td style={{ padding: '12px 14px', color: '#1e293b', fontSize: '12px' }}>
+                                                <td style={{ padding: '12px 14px', color: '#94A3B8', fontSize: '12px' }}>
                                                     إخلاء عهدة كاشير منفذ [{shift.warehouseName}] بالتوريد للخزينة | {shift.shiftNumber} | المسئول: {shift.cashierName}
                                                 </td>
-                                                <td style={{ padding: '12px 14px', textAlign: 'center', color: '#64748b' }}>0.00 ر.س</td>
-                                                <td style={{ padding: '12px 14px', textAlign: 'center', fontWeight: 900, color: '#ef4444' }}>
+                                                <td style={{ padding: '12px 14px', textAlign: 'center', color: '#64748B' }}>0.00 ر.س</td>
+                                                <td style={{ padding: '12px 14px', textAlign: 'center', fontWeight: 900, color: '#EF4444' }}>
                                                     {formatCurrency(actualCashHandedOver)}
                                                 </td>
                                             </tr>
 
-                                            {/* Shortage row if applicable (Balanced Double Entry) */}
+                                            {/* Shortage row if applicable */}
                                             {isShortage && shortageAction !== 'none' && (
                                                 <>
-                                                    <tr style={{ borderBottom: '1px solid rgba(28, 115, 171, 0.08)', background: 'rgba(239, 68, 68, 0.04)' }}>
-                                                        <td style={{ padding: '12px 14px', fontWeight: 800, color: '#ef4444' }}>
+                                                    <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)', background: 'rgba(239, 68, 68, 0.06)' }}>
+                                                        <td style={{ padding: '12px 14px', fontWeight: 800, color: '#EF4444' }}>
                                                             {shortageAction === 'debt_on_cashier' ? `حـ/ سلف وذمم موظفين ومناديب (128) - ${shift.cashierName}` : 'حـ/ تسويات وفروق هللات ومصروف عجز الصندوق (527)'}
                                                         </td>
-                                                        <td style={{ padding: '12px 14px', color: '#ef4444', fontSize: '12px' }}>
+                                                        <td style={{ padding: '12px 14px', color: '#FCA5A5', fontSize: '12px' }}>
                                                             {shortageAction === 'debt_on_cashier' 
                                                                 ? `إثبات عجز عهدة صندوق منفذ [${shift.warehouseName}] كذمة مستحقة على الكاشير ${shift.cashierName}` 
                                                                 : `تسجيل فروقات/عجز تسوية صندوق منفذ [${shift.warehouseName}] كمصروف`}
                                                         </td>
-                                                        <td style={{ padding: '12px 14px', textAlign: 'center', fontWeight: 900, color: '#16a34a' }}>
+                                                        <td style={{ padding: '12px 14px', textAlign: 'center', fontWeight: 900, color: '#10B981' }}>
                                                             {formatCurrency(Math.abs(cashVariance))}
                                                         </td>
-                                                        <td style={{ padding: '12px 14px', textAlign: 'center', color: '#64748b' }}>
+                                                        <td style={{ padding: '12px 14px', textAlign: 'center', color: '#64748B' }}>
                                                             0.00 ر.س
                                                         </td>
                                                     </tr>
-                                                    <tr style={{ borderBottom: '1px solid rgba(28, 115, 171, 0.08)', background: 'rgba(239, 68, 68, 0.04)' }}>
-                                                        <td style={{ padding: '12px 14px', fontWeight: 800, color: '#ef4444' }}>
+                                                    <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)', background: 'rgba(239, 68, 68, 0.06)' }}>
+                                                        <td style={{ padding: '12px 14px', fontWeight: 800, color: '#EF4444' }}>
                                                             حـ/ عهدة موظفين ونقاط بيع (125) - {shift.cashierName}
                                                         </td>
-                                                        <td style={{ padding: '12px 14px', color: '#ef4444', fontSize: '12px' }}>
+                                                        <td style={{ padding: '12px 14px', color: '#FCA5A5', fontSize: '12px' }}>
                                                             إقفال عجز عهدة صندوق منفذ [{shift.warehouseName}] {shortageAction === 'debt_on_cashier' ? `بذمة الكاشير ${shift.cashierName}` : 'كمصروف تسوية'}
                                                         </td>
-                                                        <td style={{ padding: '12px 14px', textAlign: 'center', color: '#64748b' }}>
+                                                        <td style={{ padding: '12px 14px', textAlign: 'center', color: '#64748B' }}>
                                                             0.00 ر.س
                                                         </td>
-                                                        <td style={{ padding: '12px 14px', textAlign: 'center', fontWeight: 900, color: '#ef4444' }}>
+                                                        <td style={{ padding: '12px 14px', textAlign: 'center', fontWeight: 900, color: '#EF4444' }}>
                                                             {formatCurrency(Math.abs(cashVariance))}
                                                         </td>
                                                     </tr>
@@ -821,14 +888,14 @@ export default function PosSettlementActionModal({
                                             )}
                                         </tbody>
                                         <tfoot>
-                                            <tr style={{ background: 'rgba(28, 115, 171, 0.04)', fontWeight: 900 }}>
-                                                <td colSpan={2} style={{ padding: '12px 14px', color: '#122946' }}>
+                                            <tr style={{ background: 'rgba(11, 14, 20, 0.6)', fontWeight: 900 }}>
+                                                <td colSpan={2} style={{ padding: '12px 14px', color: '#F8FAFC' }}>
                                                     إجمالي اتزان القيد ⚖️
                                                 </td>
-                                                <td style={{ padding: '12px 14px', textAlign: 'center', color: '#16a34a' }}>
+                                                <td style={{ padding: '12px 14px', textAlign: 'center', color: '#10B981' }}>
                                                     {formatCurrency(actualCashHandedOver + (isShortage && shortageAction !== 'none' ? Math.abs(cashVariance) : 0))}
                                                 </td>
-                                                <td style={{ padding: '12px 14px', textAlign: 'center', color: '#ef4444' }}>
+                                                <td style={{ padding: '12px 14px', textAlign: 'center', color: '#EF4444' }}>
                                                     {formatCurrency(actualCashHandedOver + (isShortage && shortageAction !== 'none' ? Math.abs(cashVariance) : 0))}
                                                 </td>
                                             </tr>
@@ -838,7 +905,7 @@ export default function PosSettlementActionModal({
 
                                 {/* Notes Input */}
                                 <div>
-                                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#1C73AB', marginBottom: '6px' }}>
+                                    <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#94A3B8', marginBottom: '6px' }}>
                                         ملاحظات التسوية والمخالصة العامة ✍️
                                     </label>
                                     <textarea
@@ -858,11 +925,11 @@ export default function PosSettlementActionModal({
                 {/* Footer Buttons */}
                 <div style={{
                     padding: '18px 30px',
-                    borderTop: '1px solid rgba(28, 115, 171, 0.12)',
+                    borderTop: '1px solid rgba(0, 229, 255, 0.15)',
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'space-between',
-                    background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(240, 248, 255, 0.9) 100%)'
+                    background: 'rgba(20, 24, 34, 0.98)'
                 }}>
                     <button
                         type="button"
@@ -871,9 +938,9 @@ export default function PosSettlementActionModal({
                         style={{
                             padding: '10px 22px',
                             borderRadius: '50px',
-                            border: '1px solid rgba(28, 115, 171, 0.25)',
-                            background: 'rgba(255, 255, 255, 0.8)',
-                            color: '#1C73AB',
+                            border: '1px solid rgba(255, 255, 255, 0.1)',
+                            background: 'rgba(30, 41, 59, 0.6)',
+                            color: '#94A3B8',
                             fontWeight: 800,
                             fontSize: '13px',
                             cursor: 'pointer'
@@ -895,12 +962,12 @@ export default function PosSettlementActionModal({
                                     padding: '11px 26px',
                                     borderRadius: '50px',
                                     border: 'none',
-                                    background: 'linear-gradient(135deg, #1C73AB 0%, #2891C8 100%)',
-                                    color: '#fff',
+                                    background: 'linear-gradient(135deg, #00E5FF 0%, #00B4D8 100%)',
+                                    color: '#0B0E14',
                                     fontWeight: 900,
                                     fontSize: '13px',
                                     cursor: 'pointer',
-                                    boxShadow: '0 6px 20px rgba(28, 115, 171, 0.3)'
+                                    boxShadow: '0 6px 20px rgba(0, 229, 255, 0.3)'
                                 }}
                             >
                                 التالي ⬅️
@@ -914,12 +981,12 @@ export default function PosSettlementActionModal({
                                     padding: '12px 30px',
                                     borderRadius: '50px',
                                     border: 'none',
-                                    background: 'linear-gradient(135deg, #16a34a 0%, #22c55e 100%)',
-                                    color: '#fff',
+                                    background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+                                    color: '#FFFFFF',
                                     fontWeight: 900,
                                     fontSize: '14px',
                                     cursor: 'pointer',
-                                    boxShadow: '0 6px 20px rgba(22, 163, 74, 0.35)',
+                                    boxShadow: '0 6px 20px rgba(16, 185, 129, 0.35)',
                                     display: 'flex',
                                     alignItems: 'center',
                                     gap: '8px'
@@ -931,6 +998,7 @@ export default function PosSettlementActionModal({
                     </div>
                 </div>
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }

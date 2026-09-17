@@ -18,36 +18,34 @@ export const SYSTEM_TABLES: TableMeta[] = [
     // 1. المبيعات ونقاط البيع والتشغيل
     {
         id: 'invoices',
-        name: 'فواتير المبيعات ونقاط البيع',
+        name: 'فواتير مبيعات الوقود ونقاط البيع',
         group: '🛒 المبيعات والتشغيل',
         isMaster: false,
-        columns: ['id', 'invoice_number', 'date', 'partner_id', 'client_name', 'total_amount', 'taxable_amount', 'tax_amount', 'materials_discount', 'payment_method', 'paid_amount', 'status', 'warehouse_id', 'delegate_id', 'lines_data', 'shift_id', 'fleet_operation_id', 'created_at'],
+        columns: ['id', 'invoice_number', 'date', 'partner_id', 'client_name', 'total_amount', 'taxable_amount', 'tax_amount', 'payment_method', 'paid_amount', 'status', 'warehouse_id', 'delegate_id', 'lines_data', 'shift_id', 'created_at'],
         labels: {
             id: 'معرف الفاتورة',
             invoice_number: 'رقم الفاتورة (Invoice No)',
             date: 'تاريخ الإصدار (Date)',
-            client_name: 'اسم العميل (Customer)',
+            client_name: 'اسم العميل / المركبة (Customer)',
             total_amount: 'الإجمالي شامل الضريبة (Total)',
             taxable_amount: 'الخاضع للضريبة (Subtotal)',
             tax_amount: 'ضريبة 15% (VAT)',
-            materials_discount: 'الخصم التجاري (Discount)',
             payment_method: 'طريقة الدفع (Payment Method)',
             paid_amount: 'المبلغ المسدد (Paid)',
             status: 'حالة الفاتورة (Status)',
-            lines_data: 'تفاصيل الأصناف المباعة (Items Summary)',
-            warehouse_id: 'معرف المنفذ/المستودع',
-            delegate_id: 'معرف المندوب',
+            lines_data: 'تفاصيل الأصناف والوقود المباع (Items Summary)',
+            warehouse_id: 'معرف الخزان/المستودع',
+            delegate_id: 'معرف المندوب/الكاشير',
             shift_id: 'معرف الوردية',
-            fleet_operation_id: 'معرف الرحلة',
             created_at: 'وقت الإنشاء'
         }
     },
     {
         id: 'pos_shifts',
-        name: 'ورديات نقاط البيع والصناديق',
+        name: 'ورديات نقاط بيع ومضخات الوقود',
         group: '🛒 المبيعات والتشغيل',
         isMaster: false,
-        columns: ['id', 'opened_at', 'closed_at', 'warehouse_id', 'delegate_id', 'user_id', 'starting_cash', 'total_sales', 'total_cash_sales', 'total_card_sales', 'total_credit_sales', 'total_expenses', 'expected_cash', 'actual_cash', 'shortage_overage', 'status', 'bottles_sold', 'bottles_returned', 'bottles_shortage'],
+        columns: ['id', 'opened_at', 'closed_at', 'warehouse_id', 'delegate_id', 'user_id', 'starting_cash', 'total_sales', 'total_cash_sales', 'total_card_sales', 'total_credit_sales', 'total_liters_sold', 'meter_total_amount', 'meter_sales_variance', 'total_expenses', 'expected_cash', 'actual_cash', 'shortage_overage', 'status'],
         labels: {
             id: 'رقم الوردية (Shift ID)',
             opened_at: 'وقت الفتح (Opened At)',
@@ -57,14 +55,15 @@ export const SYSTEM_TABLES: TableMeta[] = [
             total_cash_sales: 'مبيعات الكاش (Cash Sales)',
             total_card_sales: 'مبيعات الشبكة (Card Sales)',
             total_credit_sales: 'مبيعات الآجل (Credit Sales)',
+            total_liters_sold: 'إجمالي اللترات المباعة (Total Liters)',
+            meter_total_amount: 'إجمالي مبيعات العدادات (Meters Total)',
+            meter_sales_variance: 'فروقات العدادات (Meters Variance)',
             total_expenses: 'المصروفات (Expenses)',
             expected_cash: 'النقدية المتوقعة (Expected Cash)',
             actual_cash: 'النقدية الفعلية (Actual Cash)',
             shortage_overage: 'العجز / الزيادة (Shortage/Overage)',
             status: 'حالة الوردية (Status)',
-            bottles_sold: 'فوارغ مباعة (Bottles Sold)',
-            bottles_returned: 'فوارغ مرتجعة (Bottles Returned)',
-            warehouse_id: 'معرف المستودع',
+            warehouse_id: 'معرف المستودع/الخزان',
             delegate_id: 'معرف المندوب'
         }
     },
@@ -90,24 +89,40 @@ export const SYSTEM_TABLES: TableMeta[] = [
         }
     },
     {
-        id: 'fleet_operations',
-        name: 'تشغيل ورحلات الأسطول والسيارات',
+        id: 'fuel_pumps',
+        name: 'مضخات وطلمبات الوقود',
+        group: '🛒 المبيعات والتشغيل',
+        isMaster: true,
+        columns: ['id', 'pump_number', 'pump_name', 'fuel_type', 'unit_price', 'current_meter', 'warehouse_id', 'is_active', 'created_at'],
+        labels: {
+            id: 'معرف المضخة',
+            pump_number: 'رقم المضخة (Pump No)',
+            pump_name: 'اسم المضخة (Pump Name)',
+            fuel_type: 'نوع الوقود (91 / 95 / ديزل)',
+            unit_price: 'سعر اللتر الرسمي',
+            current_meter: 'العداد التراكمي الحالي (Liters)',
+            warehouse_id: 'الخزان المغذي',
+            is_active: 'حالة التشغيل (Active)',
+            created_at: 'تاريخ الإضافة'
+        }
+    },
+    {
+        id: 'shift_pump_readings',
+        name: 'قراءات عدادات المضخات للورديات',
         group: '🛒 المبيعات والتشغيل',
         isMaster: false,
-        columns: ['id', 'operation_number', 'operation_date', 'vehicle_id', 'driver_id', 'warehouse_id', 'total_sales', 'total_expenses', 'inventory_cost', 'net_profit', 'status', 'start_km', 'end_km', 'notes'],
+        columns: ['id', 'shift_id', 'pump_id', 'start_reading', 'end_reading', 'liters_pumped', 'unit_price', 'expected_amount', 'variance_liters', 'notes'],
         labels: {
-            id: 'معرف الرحلة',
-            operation_number: 'رقم العملية (Operation No)',
-            operation_date: 'تاريخ العملية (Date)',
-            total_sales: 'إجمالي المبيعات (Sales)',
-            total_expenses: 'المصروفات (Expenses)',
-            inventory_cost: 'تكلفة البضاعة (COGS)',
-            net_profit: 'صافي الربح (Net Profit)',
-            status: 'حالة العملية (Status)',
-            start_km: 'عداد البداية (Start KM)',
-            end_km: 'عداد النهاية (End KM)',
-            vehicle_id: 'معرف السيارة',
-            driver_id: 'معرف السائق'
+            id: 'معرف القراءة',
+            shift_id: 'معرف الوردية',
+            pump_id: 'معرف المضخة',
+            start_reading: 'قراءة بداية الوردية',
+            end_reading: 'قراءة نهاية الوردية',
+            liters_pumped: 'اللترات المنصرفة فعلياً',
+            unit_price: 'سعر اللتر',
+            expected_amount: 'المبيعات المتوقعة من العداد',
+            variance_liters: 'فروق اللترات',
+            notes: 'ملاحظات'
         }
     },
 
@@ -133,7 +148,7 @@ export const SYSTEM_TABLES: TableMeta[] = [
         name: 'المصروفات العامة والتشغيلية',
         group: '💰 المالية والمحاسبة',
         isMaster: false,
-        columns: ['id', 'expense_number', 'exp_date', 'main_category', 'description', 'total_price', 'vat_amount', 'paid_amount', 'payment_method', 'payee_name', 'status', 'creditor_account', 'payment_account', 'shift_id', 'fleet_operation_id', 'notes', 'created_at'],
+        columns: ['id', 'expense_number', 'exp_date', 'main_category', 'description', 'total_price', 'vat_amount', 'paid_amount', 'payment_method', 'payee_name', 'status', 'creditor_account', 'payment_account', 'shift_id', 'notes', 'created_at'],
         labels: {
             id: 'معرف المصروف',
             expense_number: 'رقم المصروف (Expense No)',
@@ -174,7 +189,7 @@ export const SYSTEM_TABLES: TableMeta[] = [
         name: 'رؤوس القيود اليومية',
         group: '💰 المالية والمحاسبة',
         isMaster: false,
-        columns: ['id', 'entry_date', 'description', 'status', 'v_type', 'reference_id', 'fleet_operation_id', 'created_at'],
+        columns: ['id', 'entry_date', 'description', 'status', 'v_type', 'reference_id', 'created_at'],
         labels: {
             id: 'معرف القيد',
             entry_date: 'تاريخ القيد (Date)',
@@ -237,70 +252,72 @@ export const SYSTEM_TABLES: TableMeta[] = [
         }
     },
 
-    // 3. المخزون والمستودعات والأسطول
+    // 3. المخزون وخزانات الوقود والمستودعات
     {
         id: 'inventory_items',
-        name: 'كتالوج الأصناف والأسعار وتكلفة المخزون',
-        group: '📦 المخزون والأسطول',
+        name: 'كتالوج أصناف الوقود والزيوت والمبيعات',
+        group: '📦 المخزون وخزانات الوقود',
         isMaster: true,
-        columns: ['id', 'code', 'name', 'unit', 'default_price', 'suggested_price', 'cost_price', 'current_quantity', 'reorder_level', 'is_returnable_bottle', 'item_type', 'is_active', 'created_at'],
+        columns: ['id', 'code', 'name', 'category', 'fuel_type', 'unit', 'default_price', 'suggested_price', 'cost_price', 'current_quantity', 'reorder_level', 'is_active', 'created_at'],
         labels: {
             id: 'معرف الصنف',
             code: 'كود الصنف (Item Code)',
             name: 'اسم الصنف (Item Name)',
-            unit: 'الوحدة (Unit)',
+            category: 'التصنيف (وقود / زيوت / تموينات / خدمات)',
+            fuel_type: 'نوع الوقود (91 / 95 / ديزل)',
+            unit: 'الوحدة (لتر / حبة / علبة)',
             default_price: 'سعر البيع (Default Price)',
             suggested_price: 'السعر المقترح',
             cost_price: 'سعر التكلفة (Cost Price)',
             current_quantity: 'الرصيد المتاح (Current Qty)',
             reorder_level: 'حد إعادة الطلب (Reorder Level)',
-            is_returnable_bottle: 'صنف فوارغ راجع',
             is_active: 'نشط (Active)',
             created_at: 'تاريخ الإضافة'
         }
     },
     {
         id: 'warehouses',
-        name: 'المستودعات ومنافذ البيع وسيارات التوزيع',
-        group: '📦 المخزون والأسطول',
+        name: 'خزانات الوقود ومستودعات التموينات',
+        group: '📦 المخزون وخزانات الوقود',
         isMaster: true,
-        columns: ['id', 'name', 'type', 'is_active', 'delegate_id', 'vehicle_id', 'phone', 'location', 'description', 'created_at'],
+        columns: ['id', 'name', 'type', 'fuel_type', 'tank_capacity_liters', 'is_active', 'delegate_id', 'phone', 'location', 'description', 'created_at'],
         labels: {
-            id: 'معرف المستودع',
-            name: 'اسم المنفذ/المستودع (Name)',
-            type: 'النوع (warehouse / vehicle / branch)',
+            id: 'معرف الخزان/المستودع',
+            name: 'اسم الخزان / المستودع (Name)',
+            type: 'النوع (خزان وقود / تموينات / رئيسي)',
+            fuel_type: 'نوع الوقود المخزن',
+            tank_capacity_liters: 'السعة القصوى باللترات',
             is_active: 'نشط (Active)',
-            delegate_id: 'معرف المندوب المسؤول',
-            vehicle_id: 'معرف السيارة',
+            delegate_id: 'المشرف المسؤول',
             phone: 'رقم الهاتف',
             location: 'الموقع'
         }
     },
     {
         id: 'warehouse_inventory',
-        name: 'أرصدة المخزون بالمستودعات',
-        group: '📦 المخزون والأسطول',
+        name: 'أرصدة المخزون بالخزانات والمستودعات',
+        group: '📦 المخزون وخزانات الوقود',
         isMaster: false,
         columns: ['id', 'warehouse_id', 'item_id', 'quantity', 'updated_at'],
         labels: {
             id: 'المعرف',
-            warehouse_id: 'معرف المستودع',
-            item_id: 'معرف الصنف',
+            warehouse_id: 'معرف الخزان/المستودع',
+            item_id: 'معرف الصنف/الوقود',
             quantity: 'الكمية المتوفرة (Quantity)',
             updated_at: 'تاريخ آخر تحديث'
         }
     },
     {
         id: 'inventory_transactions',
-        name: 'سجل حركات المخزون والمبيعات',
-        group: '📦 المخزون والأسطول',
+        name: 'سجل حركات توريد وصرف الوقود والمخزون',
+        group: '📦 المخزون وخزانات الوقود',
         isMaster: false,
-        columns: ['id', 'transaction_number', 'transaction_date', 'type', 'quantity', 'item_id', 'warehouse_id', 'unit_price', 'total_price', 'status', 'invoice_id', 'shift_id', 'fleet_operation_id', 'notes', 'created_at'],
+        columns: ['id', 'transaction_number', 'transaction_date', 'type', 'quantity', 'item_id', 'warehouse_id', 'unit_price', 'total_price', 'status', 'invoice_id', 'shift_id', 'notes', 'created_at'],
         labels: {
             id: 'معرف الحركة',
             transaction_number: 'رقم الحركة (Tx Number)',
             transaction_date: 'التاريخ (Date)',
-            type: 'نوع الحركة (Type)',
+            type: 'نوع الحركة (توريد صهريج / بيع / تحويل)',
             quantity: 'الكمية (Quantity)',
             unit_price: 'سعر الوحدة (Unit Price)',
             total_price: 'الإجمالي (Total)',
@@ -308,40 +325,24 @@ export const SYSTEM_TABLES: TableMeta[] = [
             notes: 'ملاحظات'
         }
     },
-    {
-        id: 'fleet_vehicles',
-        name: 'أسطول السيارات والشاحنات',
-        group: '📦 المخزون والأسطول',
-        isMaster: true,
-        columns: ['id', 'plate_number', 'vehicle_model', 'driver_id', 'status', 'created_at'],
-        labels: {
-            id: 'معرف المركبة',
-            plate_number: 'رقم اللوحة (Plate Number)',
-            vehicle_model: 'موديل السيارة (Model)',
-            driver_id: 'معرف السائق الافتراضي',
-            status: 'الحالة (Status)'
-        }
-    },
 
     // 4. الشركاء والعملاء والموارد البشرية
     {
         id: 'partners',
-        name: 'دليل الشركاء (عملاء، موردين، مناديب، موظفين)',
+        name: 'دليل الشركاء (عملاء، شركات النقل، موردو الوقود، موظفون)',
         group: '👥 الشركاء والموارد البشرية',
         isMaster: true,
-        columns: ['id', 'code', 'name', 'partner_type', 'phone', 'vat_number', 'address', 'bottle_custody', 'credit_limit', 'credit_days', 'route_name', 'is_active', 'created_at'],
+        columns: ['id', 'code', 'name', 'partner_type', 'phone', 'vat_number', 'address', 'credit_limit', 'credit_days', 'is_active', 'created_at'],
         labels: {
             id: 'معرف الشريك',
             code: 'كود الشريك (Code)',
-            name: 'اسم الشريك / العميل (Name)',
-            partner_type: 'نوع الشريك (عميل / مورد / مندوب / موظف)',
+            name: 'اسم الشريك / العميل / المورد (Name)',
+            partner_type: 'نوع الشريك (عميل / مورد وقود / ناقل / موظف)',
             phone: 'رقم الهاتف (Phone)',
             vat_number: 'الرقم الضريبي (VAT No)',
             address: 'العنوان (Address)',
-            bottle_custody: 'عهدة الفوارغ (Bottle Custody)',
             credit_limit: 'حد الائتمان (Credit Limit)',
             credit_days: 'فترة السداد بالأيام (Credit Days)',
-            route_name: 'خط السير (Route)',
             is_active: 'نشط (Active)'
         }
     },
@@ -402,10 +403,10 @@ export const RESTORE_DEPENDENCY_ORDER = [
     'partners',
     'warehouses',
     'inventory_items',
+    'fuel_pumps',
     'warehouse_inventory',
-    'fleet_vehicles',
-    'fleet_operations',
     'pos_shifts',
+    'shift_pump_readings',
     'invoices',
     'receipt_vouchers',
     'payment_vouchers',
@@ -422,7 +423,7 @@ export const RESTORE_DEPENDENCY_ORDER = [
 
 // ترتيب الحذف عند مسح الحركات والقيود (الأبناء أولاً لمنع أخطاء Foreign Keys)
 export const CLEAR_TRANSACTIONS_ORDER = [
-    'vehicle_inventory',
+    'shift_pump_readings',
     'inventory_transactions',
     'journal_lines',
     'journal_headers',
@@ -432,8 +433,7 @@ export const CLEAR_TRANSACTIONS_ORDER = [
     'expenses',
     'invoices',
     'cash_flows',
-    'pos_shifts',
-    'fleet_operations'
+    'pos_shifts'
 ];
 
 // =========================================================================
@@ -984,15 +984,10 @@ export async function clearTransactionsOnly(
             }
         }
 
-        // مسح أخطاء القيود إن وجدت
-        try {
-            await supabase.from('journal_errors').delete().neq('id', '00000000-0000-0000-0000-000000000000');
-        } catch(e){}
-
         // تصفير الأرصدة المتراكمة مع الحفاظ على الكتالوج والشركاء
-        onProgress?.('🔄 جاري تصفير أرصدة المخزون وعهد الفوارغ...');
+        onProgress?.('🔄 جاري تصفير أرصدة المخزون والخزانات...');
         
-        // 1. تصفير أرصدة المستودعات
+        // 1. تصفير أرصدة المستودعات والخزانات
         try {
             await supabase.from('warehouse_inventory').update({ quantity: 0 }).neq('id', '00000000-0000-0000-0000-000000000000');
         } catch(e){}
@@ -1000,11 +995,6 @@ export async function clearTransactionsOnly(
         // 2. تصفير الكميات في كتالوج الأصناف
         try {
             await supabase.from('inventory_items').update({ current_quantity: 0 }).neq('id', '00000000-0000-0000-0000-000000000000');
-        } catch(e){}
-
-        // 3. تصفير عهد الفوارغ للعملاء والمناديب
-        try {
-            await supabase.from('partners').update({ bottle_custody: 0 }).neq('id', '00000000-0000-0000-0000-000000000000');
         } catch(e){}
 
         onProgress?.('✅ تم مسح جميع القيود والعمليات وتصفير الحركات بنجاح مع الاحتفاظ بكافة الأساسيات!');

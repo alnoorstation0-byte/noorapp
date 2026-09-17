@@ -33,13 +33,13 @@ export default function PaymentVoucherModal({
     const headerExtraInfo = (
         <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
             {record.voucher_number && (
-                <div style={{ fontSize: '13px', color: '#64748b', fontWeight: 800 }}>
-                    رقم السند: <span style={{ color: THEME.goldAccent }}>{record.voucher_number}</span>
+                <div style={{ fontSize: '13px', color: '#94A3B8', fontWeight: 800 }}>
+                    رقم السند: <span style={{ color: '#00E5FF' }}>{record.voucher_number}</span>
                 </div>
             )}
-            <div style={{ textAlign: 'left', background: '#fef2f2', padding: '10px 20px', borderRadius: '16px', border: `1px solid ${THEME.danger}30` }}>
-                <div style={{ fontSize: '11px', color: THEME.danger, fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.5px' }}>مبلغ السند</div>
-                <div style={{ color: THEME.danger, fontWeight: 900, fontSize: '24px' }}>{formatCurrency(amountToPay)}</div>
+            <div style={{ textAlign: 'left', background: 'rgba(239, 68, 68, 0.15)', padding: '10px 20px', borderRadius: '16px', border: '1px solid rgba(239, 68, 68, 0.35)' }}>
+                <div style={{ fontSize: '11px', color: '#EF4444', fontWeight: 900, textTransform: 'uppercase', letterSpacing: '0.5px' }}>مبلغ السند</div>
+                <div style={{ color: '#EF4444', fontWeight: 900, fontSize: '24px' }}>{formatCurrency(amountToPay)}</div>
             </div>
         </div>
     );
@@ -111,10 +111,10 @@ export default function PaymentVoucherModal({
                     </div>
                     
                     <div style={{ zIndex: 30, position: 'relative', marginTop: '10px' }}>
-                        <label style={{ fontSize: '13px', fontWeight: 900, color: THEME.primary, display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '8px' }}>🚚 رحلة التوزيع (أمر تشغيل اختياري)</label>
+                        <label style={{ fontSize: '13px', fontWeight: 900, color: '#00E5FF', display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '8px' }}>🚚 رحلة التوزيع (أمر تشغيل اختياري)</label>
                         <select 
                             className="glass-input" 
-                            style={{ appearance: 'auto', width: '100%', padding: '10px', borderRadius: '14px', border: '1.5px solid rgba(40, 145, 200, 0.15)', background: 'white', fontWeight: 700, color: '#1e293b' }}
+                            style={{ appearance: 'auto', width: '100%', padding: '10px', borderRadius: '14px', border: '1px solid rgba(0, 229, 255, 0.25)', background: 'rgba(11, 14, 20, 0.8)', fontWeight: 700, color: '#F8FAFC' }}
                             value={record?.fleet_operation_id || ''} 
                             onChange={e => setRecord({...record, fleet_operation_id: e.target.value})}
                         >
@@ -128,17 +128,17 @@ export default function PaymentVoucherModal({
 
                 {/* 📊 عرض رصيد العامل/المستفيد ونسبة السداد اللحظية */}
                 {record.payee_id && (
-                    <div style={{ background: 'white', padding: '12px', borderRadius: '16px', marginBottom: '15px', border: `1px solid ${THEME.goldAccent}50`, boxShadow: '0 4px 15px rgba(0,0,0,0.03)', animation: 'modalEntrance 0.3s ease-out' }}>
+                    <div style={{ background: 'rgba(11, 14, 20, 0.7)', padding: '14px 18px', borderRadius: '16px', marginBottom: '15px', border: '1px solid rgba(0, 229, 255, 0.25)', boxShadow: '0 4px 20px rgba(0,0,0,0.3)', animation: 'modalEntrance 0.3s ease-out' }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <span style={{ fontSize: '13px', fontWeight: 900, color: '#64748b' }}>الرصيد المتبقي للمستفيد قبل الصرف:</span>
+                            <span style={{ fontSize: '13px', fontWeight: 900, color: '#94A3B8' }}>الرصيد المتبقي للمستفيد قبل الصرف:</span>
                             {isBalanceLoading ? (
-                                <span style={{ fontSize: '14px', fontWeight: 900, color: '#475569' }}>⏳ جاري الحساب...</span>
+                                <span style={{ fontSize: '14px', fontWeight: 900, color: '#00E5FF' }}>⏳ جاري الحساب...</span>
                             ) : (
                                 <div style={{ textAlign: 'left' }}>
-                                    <span style={{ fontSize: '22px', fontWeight: 900, color: partnerBalance > 0 ? THEME.danger : partnerBalance < 0 ? THEME.success : '#64748b' }}>
+                                    <span style={{ fontSize: '22px', fontWeight: 900, color: partnerBalance > 0 ? '#EF4444' : partnerBalance < 0 ? '#10B981' : '#94A3B8' }}>
                                         {formatCurrency(Math.abs(partnerBalance))} 
                                     </span>
-                                    <span style={{ fontSize: '12px', marginRight: '8px', fontWeight: 800, color: partnerBalance > 0 ? THEME.danger : partnerBalance < 0 ? THEME.success : '#64748b' }}>
+                                    <span style={{ fontSize: '12px', marginRight: '8px', fontWeight: 800, color: partnerBalance > 0 ? '#EF4444' : partnerBalance < 0 ? '#10B981' : '#94A3B8' }}>
                                         {partnerBalance > 0 ? '(مستحق له)' : partnerBalance < 0 ? '(مدين - عليه)' : 'مُصَفَّر'}
                                     </span>
                                 </div>
@@ -199,9 +199,9 @@ export default function PaymentVoucherModal({
                 {/* 📝 طريقة الدفع والبيان */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px', marginBottom: '10px' }}>
                     <div>
-                        <label style={{ fontSize: '13px', fontWeight: 900, color: '#64748b', display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '8px' }}>💳 طريقة الدفع</label>
+                        <label style={{ fontSize: '13px', fontWeight: 900, color: '#94A3B8', display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '8px' }}>💳 طريقة الدفع</label>
                         <select 
-                            style={{ width: '100%', padding: '10px', borderRadius: '14px', border: '1.5px solid rgba(40, 145, 200, 0.15)', background: 'white', fontWeight: 700, color: '#1e293b', outline: 'none', cursor: 'pointer' }} 
+                            style={{ width: '100%', padding: '10px', borderRadius: '14px', border: '1px solid rgba(0, 229, 255, 0.25)', background: 'rgba(11, 14, 20, 0.8)', fontWeight: 700, color: '#F8FAFC', outline: 'none', cursor: 'pointer' }} 
                             value={record.payment_method || 'تحويل بنكي'} 
                             onChange={e => setRecord({...record, payment_method: e.target.value})} 
                         >
@@ -214,11 +214,11 @@ export default function PaymentVoucherModal({
 
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '10px', marginBottom: '15px' }}>
                     <div>
-                        <label style={{ fontSize: '13px', fontWeight: 900, color: '#64748b', display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '8px' }}>🔢 رقم المرجع (حوالة / شيك)</label>
+                        <label style={{ fontSize: '13px', fontWeight: 900, color: '#94A3B8', display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '8px' }}>🔢 رقم المرجع (حوالة / شيك)</label>
                         <input 
                             type="text" 
                             placeholder="رقم المرجع..." 
-                            style={{ width: '100%', padding: '10px', borderRadius: '14px', border: '1.5px solid rgba(40, 145, 200, 0.15)', background: '#fff', fontWeight: 700, color: '#1e293b', outline: 'none' }} 
+                            style={{ width: '100%', padding: '10px', borderRadius: '14px', border: '1px solid rgba(0, 229, 255, 0.25)', background: 'rgba(11, 14, 20, 0.8)', fontWeight: 700, color: '#F8FAFC', outline: 'none' }} 
                             value={record.reference_number || record.reference_no || ''} 
                             onChange={e => setRecord({...record, reference_number: e.target.value, reference_no: e.target.value})} 
                         />
@@ -234,10 +234,10 @@ export default function PaymentVoucherModal({
                 </div>
 
                 {/* 🔘 أزرار الأكشن */}
-                <div style={{ display: 'flex', gap: '15px', marginTop: '15px', borderTop: '1px solid rgba(255, 255, 255, 0.4)', paddingTop: '15px' }}>
+                <div style={{ display: 'flex', gap: '15px', marginTop: '15px', borderTop: '1px solid rgba(255, 255, 255, 0.1)', paddingTop: '15px' }}>
                     <button 
                         onClick={onClose} 
-                        style={{ flex: 1, padding: '12px', borderRadius: '12px', border: '2px solid rgba(40, 145, 200, 0.15)', background: 'white', color: '#64748b', fontWeight: 900, cursor: 'pointer', fontSize: '15px', transition: '0.2s' }}
+                        style={{ flex: 1, padding: '12px', borderRadius: '12px', border: '1px solid rgba(255, 255, 255, 0.15)', background: 'rgba(255, 255, 255, 0.05)', color: '#F8FAFC', fontWeight: 900, cursor: 'pointer', fontSize: '15px', transition: '0.2s' }}
                     >
                         إلغاء
                     </button>

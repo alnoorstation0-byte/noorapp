@@ -178,9 +178,9 @@ export default function AuditLogs() {
             render: (row: any) => (
                 <button 
                     onClick={() => setSelectedLog(row)}
-                    style={{ background: 'white', border: '1px solid rgba(40, 145, 200, 0.2)', padding: '6px 12px', borderRadius: '8px', cursor: 'pointer', fontWeight: 800, transition: '0.2s' }}
-                    onMouseOver={(e) => e.currentTarget.style.borderColor = THEME.primary}
-                    onMouseOut={(e) => e.currentTarget.style.borderColor = 'rgba(40, 145, 200, 0.2)'}
+                    style={{ background: 'rgba(0, 229, 255, 0.12)', border: '1px solid rgba(0, 229, 255, 0.3)', color: '#00E5FF', padding: '6px 14px', borderRadius: '10px', cursor: 'pointer', fontWeight: 900, transition: '0.2s' }}
+                    onMouseOver={(e) => e.currentTarget.style.borderColor = '#00E5FF'}
+                    onMouseOut={(e) => e.currentTarget.style.borderColor = 'rgba(0, 229, 255, 0.3)'}
                 >
                     🔍 عرض السجل
                 </button>
@@ -198,14 +198,14 @@ export default function AuditLogs() {
 
         return (
             <div style={{ overflowX: 'auto', paddingBottom: '10px' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px', direction: 'ltr', textAlign: 'left', minWidth: 'max-content' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '13px', direction: 'ltr', textAlign: 'left', minWidth: 'max-content', color: '#F8FAFC' }}>
                     <thead>
-                        <tr style={{ background: 'rgba(255, 255, 255, 0.6)', borderBottom: '2px solid rgba(40, 145, 200, 0.15)' }}>
-                            <th style={{ padding: '10px', background: 'rgba(40, 145, 200, 0.15)', position: 'sticky', left: 0, zIndex: 2, borderRight: '1px solid rgba(40, 145, 200, 0.2)' }}>الحالة (State)</th>
+                        <tr style={{ background: 'rgba(20, 24, 34, 0.95)', borderBottom: '1px solid rgba(0, 229, 255, 0.2)' }}>
+                            <th style={{ padding: '10px', background: 'rgba(0, 229, 255, 0.12)', color: '#00E5FF', position: 'sticky', left: 0, zIndex: 2, borderRight: '1px solid rgba(0, 229, 255, 0.2)' }}>الحالة (State)</th>
                             {allKeys.map(key => {
                                 const isChanged = JSON.stringify(o[key] ?? 'null') !== JSON.stringify(n[key] ?? 'null');
                                 return (
-                                    <th key={key} style={{ padding: '10px', fontWeight: 800, color: isChanged ? '#f59e0b' : '#475569', borderRight: '1px solid rgba(40, 145, 200, 0.15)' }}>
+                                    <th key={key} style={{ padding: '10px', fontWeight: 800, color: isChanged ? '#F59E0B' : '#94A3B8', borderRight: '1px solid rgba(255, 255, 255, 0.08)' }}>
                                         {key} {isChanged && '🔄'}
                                     </th>
                                 );
@@ -213,14 +213,14 @@ export default function AuditLogs() {
                         </tr>
                     </thead>
                     <tbody>
-                        <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.4)', background: 'white' }}>
-                            <td style={{ padding: '10px', fontWeight: 900, color: '#22c55e', background: '#f0fdf4', position: 'sticky', left: 0, zIndex: 1, borderRight: '1px solid rgba(40, 145, 200, 0.2)' }}>القيد (New)</td>
+                        <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.08)', background: 'rgba(11, 14, 20, 0.8)' }}>
+                            <td style={{ padding: '10px', fontWeight: 900, color: '#10B981', background: 'rgba(16, 185, 129, 0.12)', position: 'sticky', left: 0, zIndex: 1, borderRight: '1px solid rgba(0, 229, 255, 0.2)' }}>القيد (New)</td>
                             {allKeys.map(key => {
                                 const oldVal = JSON.stringify(o[key] ?? 'null');
                                 const newVal = JSON.stringify(n[key] ?? 'null');
                                 const isChanged = oldVal !== newVal;
                                 return (
-                                    <td key={key} style={{ padding: '10px', fontFamily: 'monospace', color: isChanged ? '#22c55e' : '#64748b', fontWeight: isChanged ? 900 : 500, borderRight: '1px solid rgba(255, 255, 255, 0.4)', background: isChanged ? '#fefce8' : 'transparent' }}>
+                                    <td key={key} style={{ padding: '10px', fontFamily: 'monospace', color: isChanged ? '#10B981' : '#94A3B8', fontWeight: isChanged ? 900 : 500, borderRight: '1px solid rgba(255, 255, 255, 0.05)', background: isChanged ? 'rgba(245, 158, 11, 0.12)' : 'transparent' }}>
                                         {n[key] !== undefined ? newVal : '-'}
                                     </td>
                                 );
@@ -257,24 +257,24 @@ export default function AuditLogs() {
                     </p>
                 </div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
-                    <div style={{ background: 'rgba(255, 255, 255, 0.75)', border: '1px solid rgba(28, 115, 171, 0.2)', padding: '6px 14px', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
-                        <span style={{ fontSize: '11.5px', fontWeight: 800, color: '#64748b' }}>
+                    <div style={{ background: 'rgba(20, 24, 34, 0.95)', border: '1px solid rgba(0, 229, 255, 0.2)', padding: '6px 14px', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '6px' }}>
+                        <span style={{ fontSize: '11.5px', fontWeight: 800, color: '#94A3B8' }}>
                             {isEn ? 'Total:' : 'إجمالي الحركات:'}
                         </span>
-                        <span style={{ fontSize: '16px', fontWeight: 900, color: THEME.primary }}>{filteredLogs.length}</span>
+                        <span style={{ fontSize: '16px', fontWeight: 900, color: '#00E5FF' }}>{filteredLogs.length}</span>
                     </div>
                     <button 
                         onClick={fetchLogs} 
                         style={{ 
-                            background: 'linear-gradient(135deg, #1C73AB, #2891C8)', 
-                            color: 'white', 
+                            background: 'linear-gradient(135deg, #00E5FF 0%, #00B4D8 100%)', 
+                            color: '#0B0E14', 
                             border: 'none', 
                             padding: '8px 16px', 
                             borderRadius: '12px', 
                             cursor: 'pointer', 
                             fontWeight: 900,
                             fontSize: '12.5px',
-                            boxShadow: '0 2px 8px rgba(28, 115, 171, 0.2)'
+                            boxShadow: '0 2px 10px rgba(0, 229, 255, 0.3)'
                         }}
                     >
                         🔄 {isEn ? 'Refresh' : 'تحديث السجل'}
@@ -300,39 +300,40 @@ export default function AuditLogs() {
                     <div style={{ 
                         display: 'grid', 
                         gridTemplateColumns: 'repeat(auto-fit, minmax(140px, 1fr))', 
-                        gap: '10px', 
-                        background: 'rgba(255, 255, 255, 0.7)', 
-                        backdropFilter: 'blur(15px)',
-                        padding: '14px', 
+                        gap: '12px', 
+                        background: 'rgba(20, 24, 34, 0.85)', 
+                        backdropFilter: 'blur(20px)',
+                        padding: '16px', 
                         borderRadius: '16px', 
-                        border: '1px solid rgba(28, 115, 171, 0.15)' 
+                        border: '1px solid rgba(0, 229, 255, 0.2)',
+                        boxShadow: '0 8px 32px rgba(0,0,0,0.3)'
                     }}>
                         <div>
-                            <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, color: '#64748b', marginBottom: '4px' }}>
+                            <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, color: '#94A3B8', marginBottom: '4px' }}>
                                 {isEn ? 'User' : 'المستخدم'}
                             </label>
-                            <select value={filterUser} onChange={(e) => setFilterUser(e.target.value)} style={{ width: '100%', padding: '8px 10px', borderRadius: '10px', border: '1px solid rgba(28, 115, 171, 0.2)', fontSize: '12px', background: 'white' }}>
+                            <select value={filterUser} onChange={(e) => setFilterUser(e.target.value)} style={{ width: '100%', padding: '9px 12px', borderRadius: '10px', border: '1px solid rgba(0, 229, 255, 0.25)', fontSize: '12px', background: 'rgba(11, 14, 20, 0.8)', color: '#F8FAFC', outline: 'none' }}>
                                 <option value="">{isEn ? 'All Users' : 'الكل (All)'}</option>
                                 {uniqueUsers.map((user: string) => <option key={user} value={user}>{user}</option>)}
                             </select>
                         </div>
                         <div>
-                            <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, color: '#64748b', marginBottom: '4px' }}>
+                            <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, color: '#94A3B8', marginBottom: '4px' }}>
                                 {isEn ? 'Table' : 'الجدول'}
                             </label>
-                            <select value={filterTable} onChange={(e) => setFilterTable(e.target.value)} style={{ width: '100%', padding: '8px 10px', borderRadius: '10px', border: '1px solid rgba(28, 115, 171, 0.2)', fontSize: '12px', background: 'white' }}>
+                            <select value={filterTable} onChange={(e) => setFilterTable(e.target.value)} style={{ width: '100%', padding: '9px 12px', borderRadius: '10px', border: '1px solid rgba(0, 229, 255, 0.25)', fontSize: '12px', background: 'rgba(11, 14, 20, 0.8)', color: '#F8FAFC', outline: 'none' }}>
                                 <option value="">{isEn ? 'All Tables' : 'الكل (All)'}</option>
                                 {uniqueTables.map((table: string) => <option key={table} value={table}>{table}</option>)}
                             </select>
                         </div>
                         <div>
-                            <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, color: '#64748b', marginBottom: '4px' }}>
+                            <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, color: '#94A3B8', marginBottom: '4px' }}>
                                 {isEn ? 'Action' : 'نوع العملية'}
                             </label>
                             <select
                                 value={filterAction}
                                 onChange={(e) => setFilterAction(e.target.value)}
-                                style={{ width: '100%', padding: '8px 10px', borderRadius: '10px', border: '1px solid rgba(28, 115, 171, 0.2)', fontSize: '12px', background: 'white' }}
+                                style={{ width: '100%', padding: '9px 12px', borderRadius: '10px', border: '1px solid rgba(0, 229, 255, 0.25)', fontSize: '12px', background: 'rgba(11, 14, 20, 0.8)', color: '#F8FAFC', outline: 'none' }}
                             >
                                 <option value="">{isEn ? 'All Actions' : 'الكل (All)'}</option>
                                 {uniqueActions.map((action: string) => {
@@ -342,21 +343,21 @@ export default function AuditLogs() {
                             </select>
                         </div>
                         <div>
-                            <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, color: '#64748b', marginBottom: '4px' }}>
+                            <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, color: '#94A3B8', marginBottom: '4px' }}>
                                 {isEn ? 'Date' : 'التاريخ'}
                             </label>
-                            <input type="date" value={filterDate} onChange={(e) => setFilterDate(e.target.value)} style={{ width: '100%', padding: '7px 10px', borderRadius: '10px', border: '1px solid rgba(28, 115, 171, 0.2)', fontSize: '12px', background: 'white', fontFamily: 'inherit', boxSizing: 'border-box' }} />
+                            <input type="date" value={filterDate} onChange={(e) => setFilterDate(e.target.value)} style={{ width: '100%', padding: '8px 12px', borderRadius: '10px', border: '1px solid rgba(0, 229, 255, 0.25)', fontSize: '12px', background: 'rgba(11, 14, 20, 0.8)', color: '#F8FAFC', outline: 'none', fontFamily: 'inherit', boxSizing: 'border-box' }} />
                         </div>
                         {(filterUser || filterTable || filterAction || filterDate) && (
                             <div style={{ display: 'flex', alignItems: 'flex-end' }}>
-                                <button onClick={() => { setFilterUser(''); setFilterTable(''); setFilterAction(''); setFilterDate(''); }} style={{ width: '100%', padding: '8px', borderRadius: '10px', border: 'none', background: '#ef4444', color: 'white', fontWeight: 800, fontSize: '12px', cursor: 'pointer' }}>
+                                <button onClick={() => { setFilterUser(''); setFilterTable(''); setFilterAction(''); setFilterDate(''); }} style={{ width: '100%', padding: '9px', borderRadius: '10px', border: 'none', background: 'rgba(239, 68, 68, 0.2)', borderStyle: 'solid', borderWidth: '1px', borderColor: 'rgba(239, 68, 68, 0.4)', color: '#EF4444', fontWeight: 900, fontSize: '12px', cursor: 'pointer', transition: '0.2s' }}>
                                     {isEn ? 'Clear ✕' : 'مسح الفلاتر ✕'}
                                 </button>
                             </div>
                         )}
                     </div>
 
-                    <div style={{ background: 'rgba(255, 255, 255, 0.75)', backdropFilter: 'blur(20px)', padding: '16px', borderRadius: '20px', boxShadow: '0 8px 32px rgba(28, 115, 171, 0.05)', border: '1px solid rgba(255, 255, 255, 0.8)' }}>
+                    <div style={{ background: 'rgba(20, 24, 34, 0.85)', backdropFilter: 'blur(20px)', padding: '16px', borderRadius: '20px', boxShadow: '0 8px 32px rgba(0,0,0,0.3)', border: '1px solid rgba(0, 229, 255, 0.2)' }}>
                         <RawasiSmartTable 
                             data={filteredLogs} 
                             columns={columns} 
@@ -375,28 +376,28 @@ export default function AuditLogs() {
 
             {/* 🔍 Details Modal */}
             {mounted && selectedLog && createPortal(
-                <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 999999, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(15, 23, 42, 0.8)', backdropFilter: 'blur(10px)' }} onClick={() => setSelectedLog(null)} />
+                <div style={{ position: 'fixed', top: 0, left: 0, width: '100vw', height: '100vh', zIndex: 999999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '20px' }}>
+                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(7, 9, 13, 0.8)', backdropFilter: 'blur(16px)' }} onClick={() => setSelectedLog(null)} />
                     
-                    <div style={{ background: 'white', width: '900px', maxWidth: '95vw', maxHeight: '90vh', borderRadius: '24px', zIndex: 10, display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 25px 50px rgba(0,0,0,0.3)' }}>
-                        <div style={{ padding: '25px', borderBottom: '1px solid rgba(40, 145, 200, 0.15)', background: 'rgba(255, 255, 255, 0.6)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <div style={{ background: 'linear-gradient(135deg, rgba(20, 24, 34, 0.98) 0%, rgba(11, 14, 20, 0.95) 100%)', width: '900px', maxWidth: '95vw', maxHeight: '90vh', borderRadius: '24px', zIndex: 10, display: 'flex', flexDirection: 'column', overflow: 'hidden', boxShadow: '0 25px 70px rgba(0,0,0,0.7)', border: '1px solid rgba(0, 229, 255, 0.25)' }}>
+                        <div style={{ padding: '25px', borderBottom: '1px solid rgba(255, 255, 255, 0.1)', background: 'rgba(11, 14, 20, 0.7)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                             <div>
-                                <h3 style={{ margin: 0, fontWeight: 900, color: THEME.primary, fontSize: '20px' }}>تفاصيل العملية 🕵️‍♂️</h3>
-                                <p style={{ margin: '5px 0 0', fontSize: '13px', color: '#64748b' }}>معرف السجل: {selectedLog.id}</p>
+                                <h3 style={{ margin: 0, fontWeight: 900, color: '#00E5FF', fontSize: '20px' }}>تفاصيل العملية 🕵️‍♂️</h3>
+                                <p style={{ margin: '5px 0 0', fontSize: '13px', color: '#94A3B8' }}>معرف السجل: {selectedLog.id}</p>
                             </div>
-                            <button onClick={() => setSelectedLog(null)} style={{ background: 'white', border: '1px solid rgba(40, 145, 200, 0.2)', borderRadius: '50%', width: '35px', height: '35px', cursor: 'pointer', fontWeight: 900 }}>✕</button>
+                            <button onClick={() => setSelectedLog(null)} style={{ background: 'rgba(255, 255, 255, 0.06)', border: '1px solid rgba(255, 255, 255, 0.12)', borderRadius: '50%', width: '35px', height: '35px', cursor: 'pointer', fontWeight: 900, color: '#94A3B8' }}>✕</button>
                         </div>
 
                         <div style={{ padding: '25px', overflowY: 'auto', flex: 1 }}>
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '15px', marginBottom: '25px', background: 'rgba(255, 255, 255, 0.4)', padding: '15px', borderRadius: '16px' }}>
-                                <div><span style={{ display: 'block', fontSize: '11px', color: '#64748b', fontWeight: 800 }}>الجدول:</span><span style={{ fontWeight: 900 }}>{selectedLog.table_name}</span></div>
-                                <div><span style={{ display: 'block', fontSize: '11px', color: '#64748b', fontWeight: 800 }}>العملية:</span><span style={{ fontWeight: 900 }}>{selectedLog.action}</span></div>
-                                <div><span style={{ display: 'block', fontSize: '11px', color: '#64748b', fontWeight: 800 }}>الوقت:</span><span style={{ fontWeight: 900, direction: 'ltr', display: 'inline-block' }}>{formatDate(selectedLog.created_at, true)}</span></div>
-                                <div><span style={{ display: 'block', fontSize: '11px', color: '#64748b', fontWeight: 800 }}>بواسطة:</span><span style={{ fontWeight: 900 }}>{selectedLog.profiles?.full_name || 'System'}</span></div>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))', gap: '15px', marginBottom: '25px', background: 'rgba(11, 14, 20, 0.7)', padding: '18px', borderRadius: '16px', border: '1px solid rgba(255, 255, 255, 0.08)' }}>
+                                <div><span style={{ display: 'block', fontSize: '11px', color: '#94A3B8', fontWeight: 800 }}>الجدول:</span><span style={{ fontWeight: 900, color: '#00E5FF' }}>{selectedLog.table_name}</span></div>
+                                <div><span style={{ display: 'block', fontSize: '11px', color: '#94A3B8', fontWeight: 800 }}>العملية:</span><span style={{ fontWeight: 900, color: '#F8FAFC' }}>{selectedLog.action}</span></div>
+                                <div><span style={{ display: 'block', fontSize: '11px', color: '#94A3B8', fontWeight: 800 }}>الوقت:</span><span style={{ fontWeight: 900, direction: 'ltr', display: 'inline-block', color: '#F8FAFC' }}>{formatDate(selectedLog.created_at, true)}</span></div>
+                                <div><span style={{ display: 'block', fontSize: '11px', color: '#94A3B8', fontWeight: 800 }}>بواسطة:</span><span style={{ fontWeight: 900, color: '#10B981' }}>{selectedLog.profiles?.full_name || 'System'}</span></div>
                             </div>
 
-                            <h4 style={{ fontWeight: 900, marginBottom: '15px', color: THEME.brand.coffee }}>مقارنة البيانات الدقيقة (Data Diff)</h4>
-                            <div style={{ border: '1px solid rgba(40, 145, 200, 0.15)', borderRadius: '12px', overflow: 'hidden' }}>
+                            <h4 style={{ fontWeight: 900, marginBottom: '15px', color: '#00E5FF' }}>مقارنة البيانات الدقيقة (Data Diff)</h4>
+                            <div style={{ border: '1px solid rgba(0, 229, 255, 0.2)', borderRadius: '12px', overflow: 'hidden' }}>
                                 {renderDiff(selectedLog.old_data, selectedLog.new_data)}
                             </div>
                         </div>

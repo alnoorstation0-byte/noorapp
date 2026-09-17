@@ -32,8 +32,7 @@ export default function ManualJournalsPage() {
         amount: '',
         debit_account_id: '',
         credit_account_id: '',
-        partner_id: '',
-        job_order_id: ''
+        partner_id: ''
     });
 
     const openModal = (j: any = null) => {
@@ -48,8 +47,7 @@ export default function ManualJournalsPage() {
                 amount: j.amount,
                 debit_account_id: j.debit_account_id,
                 credit_account_id: j.credit_account_id,
-                partner_id: j.partner_id || '',
-                job_order_id: j.job_order_id || ''
+                partner_id: j.partner_id || ''
             });
             setEditingVoucher(j);
         } else {
@@ -59,8 +57,7 @@ export default function ManualJournalsPage() {
                 amount: '',
                 debit_account_id: '',
                 credit_account_id: '',
-                partner_id: '',
-                job_order_id: ''
+                partner_id: ''
             });
             setEditingVoucher(null);
         }
@@ -362,20 +359,6 @@ export default function ManualJournalsPage() {
                                         initialDisplay={(logic.state.partners || []).find((p:any) => p.id === formData.partner_id)?.name || ''}
                                         onSelect={(val: any) => setFormData({...formData, partner_id: val?.id || ''})}
                                         placeholder="بدون شريك"
-                                    />
-                                </div>
-
-                                <div className="glass-input-group" style={{ flex: 1 }}>
-                                    <label style={{ color: '#00E5FF', fontWeight: 800 }}>أمر الشغل (اختياري) 📝</label>
-                                    <SmartCombo 
-                                        table="job_orders"
-                                        displayCol="order_number"
-                                        searchCols="order_number,notes"
-                                        initialDisplay={formData.job_order_id ? 'أمر شغل مرتبط' : ''}
-                                        customQuery={(q: any) => q.select('*, boq_budget:boq_budget_id(work_item)')}
-                                        displayFormat={(item: any) => `${item.order_number} - ${item.boq_budget?.work_item || 'بدون صنف'}`}
-                                        onSelect={(val: any) => setFormData({...formData, job_order_id: val?.id || ''})}
-                                        placeholder="بدون أمر شغل"
                                     />
                                 </div>
                             </div>

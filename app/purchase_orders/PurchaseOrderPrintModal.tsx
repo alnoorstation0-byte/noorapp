@@ -12,6 +12,18 @@ export default function PurchaseOrderPrintModal({ isOpen, onClose, record }: any
         setMounted(true);
     }, []);
 
+    useEffect(() => {
+        if (!isOpen) return;
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                onClose();
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isOpen, onClose]);
+
     if (!isOpen || !mounted || !record) return null;
 
     const printInvoice = () => {
@@ -30,8 +42,8 @@ export default function PurchaseOrderPrintModal({ isOpen, onClose, record }: any
             <style>{`
                 .print-modal-overlay { 
                     position: fixed !important; inset: 0 !important; 
-                    background: rgba(18, 41, 70, 0.90) !important; 
-                    backdrop-filter: blur(10px) !important; 
+                    background: rgba(11, 14, 20, 0.88) !important; 
+                    backdrop-filter: blur(16px) !important; 
                     z-index: 999999999 !important; 
                     display: flex !important; flex-direction: column !important; 
                     align-items: center !important; justify-content: flex-start !important; 
@@ -40,14 +52,23 @@ export default function PurchaseOrderPrintModal({ isOpen, onClose, record }: any
                 }
 
                 .print-actions-bar {
-                    display: flex !important; gap: 15px !important; margin-bottom: 25px !important;
-                    background: white !important; padding: 15px 30px !important; border-radius: 50px !important;
-                    box-shadow: 0 10px 30px rgba(0,0,0,0.3) !important; position: sticky !important; 
+                    display: flex !important; gap: 12px !important; margin-bottom: 25px !important;
+                    background: rgba(20, 24, 34, 0.95) !important; border: 1px solid rgba(0, 229, 255, 0.3) !important;
+                    padding: 12px 26px !important; border-radius: 50px !important;
+                    box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important; position: sticky !important; 
                     top: 20px !important; z-index: 1000000000 !important; 
+                    flex-wrap: wrap !important; justify-content: center !important;
                 }
-                .action-btn { padding: 12px 25px; border-radius: 10px; border: none; font-weight: 900; font-size: 16px; cursor: pointer; transition: 0.2s; }
-                .action-btn.print { background: linear-gradient(135deg, #2891C8, #7FD4E3); color: #122946; }
-                .action-btn.close { background: #fee2e2; color: #dc2626; }
+                .action-btn { padding: 10px 20px; border-radius: 12px; border: none; font-weight: 900; font-size: 14px; cursor: pointer; transition: 0.2s; display: inline-flex; align-items: center; justify-content: center; min-height: 44px; }
+                .action-btn.print { background: linear-gradient(135deg, #00E5FF, #0284C7); color: #0B0E14; box-shadow: 0 4px 12px rgba(0, 229, 255, 0.25); }
+                .action-btn.close { background: rgba(239, 68, 68, 0.15); color: #EF4444; border: 1px solid rgba(239, 68, 68, 0.3); }
+
+                @media (max-width: 768px) {
+                    .print-modal-overlay { padding: 15px 10px !important; }
+                    .print-actions-bar { padding: 10px 14px !important; border-radius: 20px !important; width: 100%; justify-content: center; gap: 8px !important; }
+                    .action-btn { padding: 10px 12px; font-size: 13px; min-height: 44px; flex: 1; }
+                    .a4-preview-box { width: 95vw !important; padding: 14px 12px !important; min-height: auto !important; border-radius: 16px !important; }
+                }
 
                 /* 🚀 Thermal Styles */
                 .thermal-preview-box {

@@ -164,19 +164,50 @@ export default function AquaModalWrapper({ isOpen, onClose, onConfirm, title, ic
                 @media (max-width: 768px) {
                     .modal-kbd-badge { display: none !important; }
                     .glass-modal-container {
-                        width: 95% !important;
-                        padding: 20px !important;
-                        max-height: 95vh !important;
+                        width: 95vw !important;
+                        max-width: 95vw !important;
+                        padding: 16px 14px !important;
+                        max-height: 94vh !important;
+                        border-radius: 20px !important;
                     }
-                    .modal-header-title { flex-direction: column; align-items: flex-start !important; gap: 15px; }
-                    .modal-header-title h2 { font-size: 20px !important; }
-                    .responsive-form-grid { grid-template-columns: 1fr !important; gap: 15px !important; }
+                    .modal-header-title { 
+                        flex-direction: row !important; 
+                        align-items: center !important; 
+                        justify-content: space-between !important; 
+                        gap: 10px !important; 
+                        padding-bottom: 12px !important;
+                        margin-bottom: 12px !important;
+                    }
+                    .modal-header-title h2 { font-size: 17px !important; }
+                    .responsive-form-grid { grid-template-columns: 1fr !important; gap: 12px !important; }
                     .responsive-form-grid > div { grid-column: span 1 !important; }
-                    .responsive-summary-grid { grid-template-columns: 1fr 1fr !important; gap: 12px !important; padding: 15px !important; }
-                    .responsive-summary-grid > div { padding: 10px !important; }
-                    .responsive-summary-grid div:nth-child(2) { font-size: 16px !important; }
-                    .responsive-actions { flex-direction: column !important; gap: 10px !important; margin-top: 20px !important; }
-                    .responsive-actions button { width: 100% !important; padding: 14px !important; }
+                    .responsive-summary-grid { grid-template-columns: 1fr 1fr !important; gap: 10px !important; padding: 12px !important; }
+                    .responsive-summary-grid > div { padding: 8px !important; }
+                    .responsive-summary-grid div:nth-child(2) { font-size: 15px !important; }
+                    .responsive-actions { flex-direction: column !important; gap: 10px !important; margin-top: 15px !important; }
+                    .responsive-actions button { width: 100% !important; min-height: 44px !important; padding: 12px !important; }
+                }
+
+                .btn-modal-close {
+                    background: rgba(239, 68, 68, 0.12);
+                    color: #ef4444;
+                    border: 1px solid rgba(239, 68, 68, 0.25);
+                    width: 38px;
+                    height: 38px;
+                    min-width: 38px;
+                    border-radius: 12px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    cursor: pointer;
+                    font-size: 17px;
+                    font-weight: 900;
+                    transition: all 0.2s ease;
+                }
+                .btn-modal-close:hover {
+                    background: rgba(239, 68, 68, 0.25);
+                    border-color: #ef4444;
+                    transform: scale(1.05);
                 }
             `}</style>
 
@@ -190,7 +221,7 @@ export default function AquaModalWrapper({ isOpen, onClose, onConfirm, title, ic
                 
                 <div className="modal-header-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px', borderBottom: '1px solid rgba(0, 229, 255, 0.25)', paddingBottom: '15px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-                        <h2 style={{ color: '#F8FAFC', fontWeight: 900, margin: 0, fontSize: '24px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <h2 style={{ color: '#F8FAFC', fontWeight: 900, margin: 0, fontSize: '22px', display: 'flex', alignItems: 'center', gap: '10px' }}>
                             {icon && <span>{icon}</span>}
                             <span>{title}</span>
                         </h2>
@@ -199,16 +230,13 @@ export default function AquaModalWrapper({ isOpen, onClose, onConfirm, title, ic
                         </span>
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
                         {headerExtra}
-                        <button onClick={onClose} style={{
-                            background: 'rgba(239, 68, 68, 0.1)', color: '#ef4444',
-                            border: 'none', width: '35px', height: '35px', borderRadius: '50%',
-                            display: 'flex', alignItems: 'center', justifyContent: 'center',
-                            cursor: 'pointer', fontSize: '18px', transition: '0.3s'
-                        }}
-                        onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.2)'}
-                        onMouseLeave={(e) => e.currentTarget.style.background = 'rgba(239, 68, 68, 0.1)'}
+                        <button 
+                            type="button"
+                            onClick={onClose} 
+                            className="btn-modal-close"
+                            title="إغلاق (Esc)"
                         >
                             ✕
                         </button>

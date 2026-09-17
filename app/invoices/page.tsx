@@ -521,31 +521,32 @@ export default function InvoicesPage() {
           width: 32px !important;
           height: 32px !important;
           border-radius: 8px !important;
-          border: 1px solid rgba(255, 255, 255, 0.6) !important;
-          background: rgba(255, 255, 255, 0.75) !important;
+          border: 1px solid rgba(255, 255, 255, 0.1) !important;
+          background: rgba(30, 41, 59, 0.6) !important;
           cursor: pointer !important;
           display: inline-flex !important;
           align-items: center !important;
           justify-content: center !important;
           font-size: 14px !important;
           transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1) !important;
-          box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+          box-shadow: 0 2px 6px rgba(0,0,0,0.2);
         }
         .inv-row-btn:hover {
           transform: translateY(-2px);
-          background: #ffffff !important;
-          box-shadow: 0 4px 12px rgba(28, 115, 171, 0.15);
+          background: rgba(20, 24, 34, 0.95) !important;
+          border-color: rgba(0, 229, 255, 0.4) !important;
+          box-shadow: 0 4px 12px rgba(0, 229, 255, 0.25);
         }
         .inv-row-btn.delete { color: #ef4444; }
-        .inv-row-btn.delete:hover { background: #fee2e2 !important; border-color: #fca5a5 !important; }
-        .inv-row-btn.pay { color: #059669; }
-        .inv-row-btn.pay:hover { background: #ecfdf5 !important; border-color: #6ee7b7 !important; }
-        .inv-row-btn.print { color: #1e293b; }
-        .inv-row-btn.print:hover { background: #f1f5f9 !important; border-color: #cbd5e1 !important; }
-        .inv-row-btn.edit { color: #0284c7; }
-        .inv-row-btn.edit:hover { background: #f0f9ff !important; border-color: #7dd3fc !important; }
-        .inv-row-btn.return { color: #dc2626; }
-        .inv-row-btn.return:hover { background: #fee2e2 !important; border-color: #fca5a5 !important; }
+        .inv-row-btn.delete:hover { background: rgba(239, 68, 68, 0.2) !important; border-color: #ef4444 !important; }
+        .inv-row-btn.pay { color: #10b981; }
+        .inv-row-btn.pay:hover { background: rgba(16, 185, 129, 0.2) !important; border-color: #10b981 !important; }
+        .inv-row-btn.print { color: #f8fafc; }
+        .inv-row-btn.print:hover { background: rgba(0, 229, 255, 0.2) !important; border-color: #00e5ff !important; }
+        .inv-row-btn.edit { color: #00e5ff; }
+        .inv-row-btn.edit:hover { background: rgba(0, 229, 255, 0.2) !important; border-color: #00e5ff !important; }
+        .inv-row-btn.return { color: #f59e0b; }
+        .inv-row-btn.return:hover { background: rgba(245, 158, 11, 0.2) !important; border-color: #f59e0b !important; }
 
         /* 📊 كروت KPI المودرن */
         .invoice-kpi-grid {
@@ -555,9 +556,9 @@ export default function InvoicesPage() {
           margin-bottom: 5px;
         }
         .invoice-kpi-card {
-          background: rgba(255, 255, 255, 0.65);
-          backdrop-filter: blur(25px) saturate(190%);
-          border: 1px solid rgba(255, 255, 255, 0.6);
+          background: rgba(20, 24, 34, 0.95);
+          backdrop-filter: blur(24px) saturate(180%);
+          border: 1px solid rgba(0, 229, 255, 0.18);
           border-radius: 18px;
           padding: 14px 18px;
           display: flex;
@@ -565,20 +566,20 @@ export default function InvoicesPage() {
           gap: 14px;
           cursor: pointer;
           transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
-          box-shadow: 0 6px 20px rgba(28, 115, 171, 0.05);
+          box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
           position: relative;
           overflow: hidden;
         }
         .invoice-kpi-card:hover {
           transform: translateY(-3px);
-          background: rgba(255, 255, 255, 0.88);
-          box-shadow: 0 10px 25px rgba(28, 115, 171, 0.12);
-          border-color: rgba(40, 145, 200, 0.45);
+          background: rgba(26, 32, 46, 0.95);
+          box-shadow: 0 12px 30px rgba(0, 229, 255, 0.15);
+          border-color: rgba(0, 229, 255, 0.4);
         }
         .invoice-kpi-card.active-filter {
-          border-color: #1C73AB;
-          background: rgba(255, 255, 255, 0.95);
-          box-shadow: 0 8px 24px rgba(28, 115, 171, 0.18);
+          border-color: #00E5FF;
+          background: rgba(26, 32, 46, 0.98);
+          box-shadow: 0 8px 24px rgba(0, 229, 255, 0.25);
         }
         .kpi-icon-bubble {
           width: 46px;
@@ -590,24 +591,24 @@ export default function InvoicesPage() {
           font-size: 20px;
           flex-shrink: 0;
         }
-        .kpi-icon-bubble.blue { background: rgba(28, 115, 171, 0.12); color: #1C73AB; }
-        .kpi-icon-bubble.green { background: rgba(34, 197, 94, 0.12); color: #16a34a; }
-        .kpi-icon-bubble.amber { background: rgba(245, 158, 11, 0.12); color: #d97706; }
-        .kpi-icon-bubble.red { background: rgba(239, 68, 68, 0.12); color: #dc2626; }
+        .kpi-icon-bubble.blue { background: rgba(0, 229, 255, 0.12); color: #00E5FF; }
+        .kpi-icon-bubble.green { background: rgba(16, 185, 129, 0.12); color: #10B981; }
+        .kpi-icon-bubble.amber { background: rgba(245, 158, 11, 0.12); color: #F59E0B; }
+        .kpi-icon-bubble.red { background: rgba(239, 68, 68, 0.12); color: #EF4444; }
         .kpi-content { display: flex; flex-direction: column; min-width: 0; }
-        .kpi-label { font-size: 11.5px; font-weight: 700; color: #64748b; margin-bottom: 2px; }
+        .kpi-label { font-size: 11.5px; font-weight: 700; color: #94a3b8; margin-bottom: 2px; }
         .kpi-value { font-size: 19px; font-weight: 900; line-height: 1.2; letter-spacing: -0.3px; }
-        .kpi-value.text-blue { color: #1C73AB; }
-        .kpi-value.text-green { color: #16a34a; }
-        .kpi-value.text-amber { color: #d97706; }
-        .kpi-value.text-red { color: #ef4444; }
-        .kpi-sub { font-size: 11px; font-weight: 700; color: #94a3b8; margin-top: 3px; }
+        .kpi-value.text-blue { color: #00E5FF; }
+        .kpi-value.text-green { color: #10B981; }
+        .kpi-value.text-amber { color: #F59E0B; }
+        .kpi-value.text-red { color: #EF4444; }
+        .kpi-sub { font-size: 11px; font-weight: 700; color: #64748b; margin-top: 3px; }
 
         /* 🎛️ شريط التبويبات والبحث السريع */
         .invoices-toolbar-card {
-          background: rgba(255, 255, 255, 0.65);
+          background: rgba(20, 24, 34, 0.95);
           backdrop-filter: blur(20px);
-          border: 1px solid rgba(255, 255, 255, 0.6);
+          border: 1px solid rgba(0, 229, 255, 0.2);
           border-radius: 18px;
           padding: 10px 14px;
           display: flex;
@@ -615,7 +616,7 @@ export default function InvoicesPage() {
           justify-content: space-between;
           gap: 12px;
           flex-wrap: wrap;
-          box-shadow: 0 4px 15px rgba(28, 115, 171, 0.04);
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
         }
         .filter-tabs-wrapper {
           display: flex;
@@ -631,43 +632,43 @@ export default function InvoicesPage() {
           gap: 6px;
           padding: 7px 14px;
           border-radius: 12px;
-          border: 1px solid rgba(255, 255, 255, 0.7);
-          background: rgba(255, 255, 255, 0.6);
+          border: 1px solid rgba(255, 255, 255, 0.08);
+          background: rgba(30, 41, 59, 0.6);
           font-size: 12px;
           font-weight: 800;
-          color: #475569;
+          color: #94A3B8;
           cursor: pointer;
           transition: all 0.2s;
           white-space: nowrap;
         }
         .filter-tab-pill:hover {
-          background: rgba(255, 255, 255, 0.9);
-          color: #0f172a;
+          background: rgba(30, 41, 59, 0.9);
+          color: #F8FAFC;
           transform: translateY(-1px);
         }
         .filter-tab-pill.active {
-          background: #1C73AB;
-          color: white;
-          border-color: #1C73AB;
-          box-shadow: 0 4px 14px rgba(28, 115, 171, 0.3);
+          background: linear-gradient(135deg, #00E5FF 0%, #00B4D8 100%);
+          color: #0B0E14;
+          border-color: #00E5FF;
+          box-shadow: 0 4px 14px rgba(0, 229, 255, 0.35);
         }
         .filter-tab-pill.active .tab-count {
-          background: rgba(255, 255, 255, 0.25);
-          color: white;
+          background: rgba(11, 14, 20, 0.2);
+          color: #0B0E14;
         }
         .tab-count {
           padding: 2px 7px;
           border-radius: 8px;
           font-size: 10.5px;
           font-weight: 900;
-          background: rgba(0, 0, 0, 0.06);
-          color: #475569;
+          background: rgba(255, 255, 255, 0.08);
+          color: #94A3B8;
         }
         .filter-tab-pill .dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; }
-        .filter-tab-pill .dot.green { background: #22c55e; }
-        .filter-tab-pill .dot.amber { background: #f59e0b; }
-        .filter-tab-pill .dot.blue { background: #0284c7; }
-        .filter-tab-pill .dot.red { background: #ef4444; }
+        .filter-tab-pill .dot.green { background: #10B981; }
+        .filter-tab-pill .dot.amber { background: #F59E0B; }
+        .filter-tab-pill .dot.blue { background: #00E5FF; }
+        .filter-tab-pill .dot.red { background: #EF4444; }
 
         .toolbar-actions-group {
           display: flex;
@@ -685,20 +686,20 @@ export default function InvoicesPage() {
           height: 38px;
           width: 220px;
           border-radius: 12px;
-          border: 1px solid rgba(28, 115, 171, 0.2);
-          background: rgba(255, 255, 255, 0.85);
+          border: 1px solid rgba(0, 229, 255, 0.2);
+          background: rgba(11, 14, 20, 0.7);
           padding: 0 12px 0 32px;
           font-size: 12px;
           font-weight: 700;
-          color: #1e293b;
+          color: #F8FAFC;
           outline: none;
           transition: all 0.2s;
         }
         .quick-search-input:focus {
-          border-color: #1C73AB;
+          border-color: #00E5FF;
           width: 250px;
-          box-shadow: 0 0 0 3px rgba(28, 115, 171, 0.15);
-          background: white;
+          box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.25);
+          background: rgba(20, 24, 34, 0.95);
         }
         .search-icon {
           position: absolute;

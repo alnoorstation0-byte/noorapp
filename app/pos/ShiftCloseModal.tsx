@@ -2,6 +2,7 @@
 "use client";
 import { useLanguage } from '@/lib/LanguageContext';
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { supabase } from '@/lib/supabase';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useToast } from '@/lib/toast-context';
@@ -16,6 +17,9 @@ export default function ShiftCloseModal({
     warehouses = [],
     delegates = []
 }: any) {
+    const [mounted, setMounted] = useState(false);
+    useEffect(() => setMounted(true), []);
+
     const { language } = useLanguage();
     const isEn = language === 'en';
 
@@ -255,20 +259,20 @@ export default function ShiftCloseModal({
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [isOpen, onClose, actualCash, closeShiftMutation]);
 
-    if (!isOpen) return null;
+    if (!isOpen || !mounted) return null;
 
     if (!activeShift) {
-        return (
-            <div style={{
+        return createPortal(
+            <div className="warm-portal-overlay-fullscreen" onClick={onClose} style={{
                 position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-                background: 'rgba(11, 14, 20, 0.85)',
+                background: 'rgba(11, 14, 20, 0.88)',
                 backdropFilter: 'blur(16px)',
                 WebkitBackdropFilter: 'blur(16px)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                zIndex: 99999,
+                zIndex: 9999999,
                 padding: '15px'
             }}>
-                <div style={{
+                <div className="glass-modal-container" onClick={(e) => e.stopPropagation()} style={{
                     background: 'linear-gradient(135deg, rgba(20, 24, 34, 0.98) 0%, rgba(15, 20, 30, 0.98) 100%)',
                     backdropFilter: 'blur(32px) saturate(180%)',
                     WebkitBackdropFilter: 'blur(32px) saturate(180%)',
@@ -303,21 +307,22 @@ export default function ShiftCloseModal({
                         {isEn ? 'Got it' : 'حسناً، فهمت'}
                     </button>
                 </div>
-            </div>
+            </div>,
+            document.body
         );
     }
 
-    return (
-        <div style={{
+    return createPortal(
+        <div className="warm-portal-overlay-fullscreen" onClick={onClose} style={{
             position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-            background: 'rgba(11, 14, 20, 0.85)',
+            background: 'rgba(11, 14, 20, 0.88)',
             backdropFilter: 'blur(16px)',
             WebkitBackdropFilter: 'blur(16px)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
-            zIndex: 99999,
+            zIndex: 9999999,
             padding: '15px'
         }}>
-            <div style={{
+            <div className="glass-modal-container" onClick={(e) => e.stopPropagation()} style={{
                 background: 'linear-gradient(135deg, rgba(20, 24, 34, 0.98) 0%, rgba(15, 20, 30, 0.98) 100%)',
                 backdropFilter: 'blur(32px) saturate(180%)',
                 WebkitBackdropFilter: 'blur(32px) saturate(180%)',
@@ -708,6 +713,7 @@ export default function ShiftCloseModal({
                     </div>
                 )}
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }

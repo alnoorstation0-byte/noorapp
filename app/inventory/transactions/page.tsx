@@ -405,69 +405,72 @@ export default function InventoryTransactionsPage() {
             }}>
               {/* بطاقة التوالف */}
               <div style={{
-                background: 'rgba(255, 255, 255, 0.8)',
-                border: '1px solid rgba(239, 68, 68, 0.25)',
+                background: 'rgba(20, 24, 34, 0.95)',
+                border: '1px solid rgba(239, 68, 68, 0.35)',
                 borderRadius: '16px',
                 padding: '16px',
-                backdropFilter: 'blur(10px)',
+                backdropFilter: 'blur(20px)',
+                boxShadow: '0 10px 25px rgba(0,0,0,0.4)',
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '6px'
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '13px', fontWeight: 800, color: '#991b1b' }}>خسائر التوالف والهدر</span>
+                  <span style={{ fontSize: '13px', fontWeight: 800, color: '#F87171' }}>خسائر التوالف والهدر</span>
                   <span style={{ fontSize: '20px' }}>🗑️</span>
                 </div>
-                <div style={{ fontSize: '20px', fontWeight: 900, color: '#dc2626' }}>
+                <div style={{ fontSize: '20px', fontWeight: 900, color: '#EF4444' }}>
                   {(logic.stats?.wasteCost || 0).toLocaleString()} ر.س
                 </div>
-                <div style={{ fontSize: '11px', color: '#64748b', fontWeight: 700 }}>
+                <div style={{ fontSize: '11px', color: '#94A3B8', fontWeight: 700 }}>
                   إجمالي الكميات التالفة: {logic.stats?.wasteQty || 0} وحدة
                 </div>
               </div>
 
               {/* بطاقة الفوارغ المسترجعة */}
               <div style={{
-                background: 'rgba(255, 255, 255, 0.8)',
-                border: '1px solid rgba(2, 132, 199, 0.25)',
+                background: 'rgba(20, 24, 34, 0.95)',
+                border: '1px solid rgba(0, 229, 255, 0.35)',
                 borderRadius: '16px',
                 padding: '16px',
-                backdropFilter: 'blur(10px)',
+                backdropFilter: 'blur(20px)',
+                boxShadow: '0 10px 25px rgba(0,0,0,0.4)',
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '6px'
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '13px', fontWeight: 800, color: '#0369a1' }}>فوارغ الجالونات المسترجعة</span>
+                  <span style={{ fontSize: '13px', fontWeight: 800, color: '#38BDF8' }}>فوارغ الجالونات المسترجعة</span>
                   <span style={{ fontSize: '20px' }}>🔄</span>
                 </div>
-                <div style={{ fontSize: '20px', fontWeight: 900, color: '#0284c7' }}>
+                <div style={{ fontSize: '20px', fontWeight: 900, color: '#00E5FF' }}>
                   {(logic.stats?.emptyReturnQty || 0).toLocaleString()} جالون / عبوة
                 </div>
-                <div style={{ fontSize: '11px', color: '#64748b', fontWeight: 700 }}>
+                <div style={{ fontSize: '11px', color: '#94A3B8', fontWeight: 700 }}>
                   تم استلامها وإعادتها لدورة التعبئة
                 </div>
               </div>
 
               {/* بطاقة الحركات المعلقة */}
               <div style={{
-                background: 'rgba(255, 255, 255, 0.8)',
-                border: '1px solid rgba(245, 158, 11, 0.25)',
+                background: 'rgba(20, 24, 34, 0.95)',
+                border: '1px solid rgba(245, 158, 11, 0.35)',
                 borderRadius: '16px',
                 padding: '16px',
-                backdropFilter: 'blur(10px)',
+                backdropFilter: 'blur(20px)',
+                boxShadow: '0 10px 25px rgba(0,0,0,0.4)',
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '6px'
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '13px', fontWeight: 800, color: '#92400e' }}>حركات قيد الانتظار</span>
+                  <span style={{ fontSize: '13px', fontWeight: 800, color: '#FBBF24' }}>حركات قيد الانتظار</span>
                   <span style={{ fontSize: '20px' }}>⏳</span>
                 </div>
-                <div style={{ fontSize: '20px', fontWeight: 900, color: '#d97706' }}>
+                <div style={{ fontSize: '20px', fontWeight: 900, color: '#F59E0B' }}>
                   {logic.stats?.pendingCount || 0} حركة
                 </div>
-                <div style={{ fontSize: '11px', color: '#64748b', fontWeight: 700 }}>
+                <div style={{ fontSize: '11px', color: '#94A3B8', fontWeight: 700 }}>
                   تحتاج اعتماد لتوليد القيود المحاسبية
                 </div>
               </div>
@@ -476,9 +479,9 @@ export default function InventoryTransactionsPage() {
             {/* لوحة الفلاتر */}
             <div className="apple-glass-filter-bar">
               <div style={{ flex: 1, minWidth: '200px' }}>
-                <label style={{ fontSize: '11px', color: '#475569', marginBottom: '6px', display: 'block', fontWeight: 900 }}>بحث عام</label>
+                <label style={{ fontSize: '11px', color: '#94A3B8', marginBottom: '6px', display: 'block', fontWeight: 900 }}>بحث عام</label>
                 <input 
-                  type="text"
+                  type="text" 
                   placeholder="بحث برقم الحركة، الصنف، المورد..." 
                   className="glass-input-field" 
                   value={logic.globalSearch} 
@@ -486,11 +489,12 @@ export default function InventoryTransactionsPage() {
                 />
               </div>
               <div>
-                <label style={{ fontSize: '11px', color: '#475569', marginBottom: '6px', display: 'block', fontWeight: 900 }}>نوع الحركة</label>
+                <label style={{ fontSize: '11px', color: '#94A3B8', marginBottom: '6px', display: 'block', fontWeight: 900 }}>نوع الحركة</label>
                 <select 
                   className="glass-input-field" 
                   value={logic.filterType} 
                   onChange={e => logic.setFilterType(e.target.value)}
+                  style={{ background: '#141822', color: '#F8FAFC' }}
                 >
                   <option value="all">الكل</option>
                   <option value="in">🟢 استلام (In)</option>
@@ -500,7 +504,7 @@ export default function InventoryTransactionsPage() {
                 </select>
               </div>
               <div>
-                <label style={{ fontSize: '11px', color: '#475569', marginBottom: '6px', display: 'block', fontWeight: 900 }}>من تاريخ</label>
+                <label style={{ fontSize: '11px', color: '#94A3B8', marginBottom: '6px', display: 'block', fontWeight: 900 }}>من تاريخ</label>
                 <input 
                   type="date" 
                   className="glass-input-field" 
@@ -509,7 +513,7 @@ export default function InventoryTransactionsPage() {
                 />
               </div>
               <div>
-                <label style={{ fontSize: '11px', color: '#475569', marginBottom: '6px', display: 'block', fontWeight: 900 }}>إلى تاريخ</label>
+                <label style={{ fontSize: '11px', color: '#94A3B8', marginBottom: '6px', display: 'block', fontWeight: 900 }}>إلى تاريخ</label>
                 <input 
                   type="date" 
                   className="glass-input-field" 
@@ -667,9 +671,9 @@ export default function InventoryTransactionsPage() {
                   type="button"
                   onClick={() => setReceivingTx(null)}
                   style={{
-                    background: 'rgba(255, 255, 255, 0.8)',
-                    color: '#64748b',
-                    border: '1px solid rgba(0,0,0,0.1)',
+                    background: 'rgba(30, 41, 59, 0.6)',
+                    color: '#94A3B8',
+                    border: '1px solid rgba(255, 255, 255, 0.1)',
                     borderRadius: '12px',
                     padding: '12px 18px',
                     fontWeight: 800,
@@ -699,34 +703,34 @@ export default function InventoryTransactionsPage() {
 
         <style>{`
           .apple-glass-filter-bar {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(15px);
-            -webkit-backdrop-filter: blur(15px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
+            background: rgba(20, 24, 34, 0.95);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 229, 255, 0.2);
             border-radius: 20px;
             padding: 20px;
             display: flex;
             flex-wrap: wrap;
             gap: 15px;
             align-items: flex-end;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.05);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
           }
           .glass-input-field { 
             width: 100%; 
             padding: 10px 12px; 
             border-radius: 12px; 
-            background: rgba(255, 255, 255, 0.65); 
-            border: 1px solid rgba(255, 255, 255, 0.8); 
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+            background: rgba(11, 14, 20, 0.7); 
+            border: 1px solid rgba(0, 229, 255, 0.2); 
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
             outline: none; 
             font-weight: 700; 
-            color: #1e293b; 
+            color: #F8FAFC; 
             transition: all 0.2s; 
           }
           .glass-input-field:focus { 
-            background: #ffffff; 
-            border-color: ${THEME.accent}; 
-            box-shadow: 0 0 0 4px rgba(202, 138, 4, 0.15); 
+            background: rgba(20, 24, 34, 0.95); 
+            border-color: #00E5FF; 
+            box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.25); 
           }
         `}</style>
       </MasterPage>

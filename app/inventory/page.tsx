@@ -28,14 +28,14 @@ export default function InventoryPage() {
     { key: 'name', label: 'اسم الصنف', type: 'text', 
       render: (row: any) => (
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-          <span style={{ fontWeight: 900, color: '#0f172a' }}>{row.name}</span>
+          <span style={{ fontWeight: 900, color: '#F8FAFC' }}>{row.name}</span>
           {row.is_returnable_bottle && (
             <span style={{
               fontSize: '11px',
               fontWeight: 800,
-              color: '#1C73AB',
-              background: 'rgba(40, 145, 200, 0.12)',
-              border: '1px solid rgba(40, 145, 200, 0.35)',
+              color: '#00E5FF',
+              background: 'rgba(0, 229, 255, 0.12)',
+              border: '1px solid rgba(0, 229, 255, 0.3)',
               padding: '2px 8px',
               borderRadius: '8px',
               display: 'inline-flex',
@@ -239,21 +239,21 @@ export default function InventoryPage() {
         summary={
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
             <div className="summary-glass-card">
-              <span style={{ fontSize: '11px', fontWeight: 800, color: '#64748b' }}>إجمالي الأصناف بالمستودع 📦</span>
-              <div className="val" style={{ fontSize: '20px', fontWeight: 900, color: '#1C73AB' }}>
+              <span style={{ fontSize: '11px', fontWeight: 800, color: '#94A3B8' }}>إجمالي الأصناف بالمستودع 📦</span>
+              <div className="val" style={{ fontSize: '20px', fontWeight: 900, color: '#00E5FF' }}>
                 {logic.items?.length || 0} صنف
               </div>
             </div>
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
               <div className="summary-glass-card" style={{ padding: '10px', textAlign: 'center' }}>
-                <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#b91c1c' }}>تحت حد الطلب ⚠️</span>
-                <div className="val" style={{ fontSize: '17px', fontWeight: 900, color: '#ef4444' }}>
+                <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#F87171' }}>تحت حد الطلب ⚠️</span>
+                <div className="val" style={{ fontSize: '17px', fontWeight: 900, color: '#EF4444' }}>
                   {logic.items?.filter((it: any) => (Number(it.available_qty) || 0) <= (Number(it.reorder_level) || 0)).length || 0}
                 </div>
               </div>
               <div className="summary-glass-card" style={{ padding: '10px', textAlign: 'center' }}>
-                <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#4E734F' }}>معفي ضريبياً 🌿</span>
-                <div className="val" style={{ fontSize: '17px', fontWeight: 900, color: '#4E734F' }}>
+                <span style={{ fontSize: '10.5px', fontWeight: 800, color: '#10B981' }}>معفي ضريبياً 🌿</span>
+                <div className="val" style={{ fontSize: '17px', fontWeight: 900, color: '#10B981' }}>
                   {logic.items?.filter((it: any) => Number(it.tax_rate) === 0).length || 0}
                 </div>
               </div>

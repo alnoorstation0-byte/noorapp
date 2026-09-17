@@ -47,13 +47,26 @@ export default function RootLayout({
           __html: `
             (function() {
               try {
-                var saved = localStorage.getItem('lowGraphicsMode');
-                if (saved === 'true') {
+                var savedMode = localStorage.getItem('lowGraphicsMode');
+                if (savedMode === 'true') {
                   document.documentElement.classList.add('low-graphics-mode');
-                  window.addEventListener('DOMContentLoaded', function() {
-                    if (document.body) document.body.classList.add('low-graphics-mode');
-                  });
                 }
+                var savedTheme = localStorage.getItem('noor_theme_mode');
+                if (savedTheme === 'daylight') {
+                  document.documentElement.classList.add('daylight-theme');
+                  document.documentElement.setAttribute('data-theme', 'daylight');
+                }
+                window.addEventListener('DOMContentLoaded', function() {
+                  if (savedMode === 'true' && document.body) {
+                    document.body.classList.add('low-graphics-mode');
+                  }
+                  if (savedTheme === 'daylight' && document.body) {
+                    document.body.classList.add('daylight-theme');
+                    document.body.setAttribute('data-theme', 'daylight');
+                    document.body.style.backgroundColor = '#F1F5F9';
+                    document.body.style.color = '#0F172A';
+                  }
+                });
               } catch(e) {}
             })();
           `
@@ -65,12 +78,12 @@ export default function RootLayout({
           position: 'relative', 
           minHeight: '100vh', 
           margin: 0, 
-          backgroundColor: '#0B0E14', // تيتانيوم داكن
+          backgroundColor: '#0B0E14', // تيتانيوم داكن افتراضي
           color: '#F8FAFC',           // نصوص بيضاء ساطعة
         }}
       >
         
-        {/* 🚀 ستايل خلفية مركز القيادة والتحكم (Command Center Titanium Radial Glow) */}
+        {/* 🚀 ستايل خلفية مركز القيادة والتحكم (Command Center Titanium Radial Glow & Daylight Pearl) */}
         <style dangerouslySetInnerHTML={{__html: `
           .bg-master-container {
             position: fixed; inset: 0; z-index: -4; 
@@ -81,6 +94,7 @@ export default function RootLayout({
             overflow: hidden;
             pointer-events: none;
             transform: translateZ(0);
+            transition: background 0.3s ease;
           }
           .bg-glass-tint {
             position: absolute; inset: 0; z-index: -3;
@@ -92,6 +106,7 @@ export default function RootLayout({
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             transform: translateZ(0);
+            transition: background 0.3s ease;
           }
           @media (max-width: 768px) {
             .bg-glass-tint {
@@ -104,7 +119,32 @@ export default function RootLayout({
             width: 45vw; max-width: 500px; opacity: 0.03; z-index: -2;
             pointer-events: none; user-select: none;
             filter: drop-shadow(0 0 30px rgba(0, 229, 255, 0.15));
+            transition: opacity 0.3s ease, filter 0.3s ease;
           }
+
+          /* ☀️ خلفية الرؤية النهارية (Daylight Mode Background) */
+          .daylight-theme body, body.daylight-theme {
+            background-color: #F1F5F9 !important;
+            color: #0F172A !important;
+          }
+          .daylight-theme .bg-master-container {
+            background: 
+              radial-gradient(circle at 10% 15%, rgba(2, 132, 199, 0.07) 0%, transparent 50%),
+              radial-gradient(circle at 90% 85%, rgba(234, 88, 12, 0.05) 0%, transparent 50%),
+              #F1F5F9 !important; 
+          }
+          .daylight-theme .bg-glass-tint {
+            background: radial-gradient(
+              circle at 50% 50%, 
+              rgba(255, 255, 255, 0.4) 0%, 
+              rgba(241, 245, 249, 0.85) 100% 
+            ) !important;
+          }
+          .daylight-theme .watermark-bg {
+            opacity: 0.04 !important;
+            filter: drop-shadow(0 0 30px rgba(2, 132, 199, 0.12)) !important;
+          }
+
           @media print { .no-print { display: none !important; } }
         `}} />
 

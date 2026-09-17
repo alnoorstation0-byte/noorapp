@@ -146,7 +146,8 @@ export function useManualJournalsLogic() {
 
             // تحويل النصوص الفارغة إلى null لتجنب خطأ UUID في قاعدة البيانات
             if (!payload.partner_id) payload.partner_id = null;
-            if (!payload.job_order_id) payload.job_order_id = null;
+            delete payload.job_order_id;
+            delete payload.project_id;
 
             if (payload.id) {
                 const { error } = await supabase.from('manual_journals').update(payload).eq('id', payload.id);

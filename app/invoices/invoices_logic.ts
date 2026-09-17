@@ -129,36 +129,6 @@ export function useInvoicesLogic() {
         });
     }, [rawInvoices, partnersMap, accountsMap]);
 
-    const { data: projects = [], isLoading: isProjLoading } = useQuery({
-        queryKey: ['job_orders'],
-        queryFn: async () => {
-            const { data, error } = await supabase.from('job_orders').select('*').eq('status', 'قيد التنفيذ');
-            if (error) throw error;
-            return data || [];
-        }
-    });
-
-    const { data: fleetOperations = [] } = useQuery({
-        queryKey: ['fleet_operations_open'],
-        queryFn: async () => {
-            const { data, error } = await supabase
-                .from('fleet_operations')
-                .select('id, operation_number, operation_date, status, vehicle_id, driver_id, description, vehicle:fleet_vehicles(plate_number), driver:partners(name)')
-                .neq('status', 'مغلق')
-                .neq('status', 'closed')
-                .order('operation_date', { ascending: false });
-            if (error) throw error;
-            return data?.map((op:any) => ({
-                id: op.id,
-                operation_number: op.operation_number,
-                status: op.status,
-                vehicle_id: op.vehicle_id,
-                driver_id: op.driver_id,
-                name: `🚚 ${op.operation_number} | ${op.driver?.name ? `مندوب: ${op.driver.name}` : 'بدون مندوب'} | ${op.vehicle?.plate_number ? `سيارة: ${op.vehicle.plate_number}` : ''} ${op.description ? `(${op.description})` : ''}`
-            })) || [];
-        }
-    });
-
     const { data: warehouses = [] } = useQuery({
         queryKey: ['warehouses'],
         queryFn: async () => {
@@ -371,23 +341,17 @@ export function useInvoicesLogic() {
                 partner_id: cleanId(record.partner_id),
                 client_name: record.client_name, 
                 description: record.description, 
-                materials_discount: Number(record.materials_discount) || 0, 
                 taxable_amount: Number(record.taxable_amount) || 0,
                 tax_amount: Number(record.tax_amount) || 0, 
-                guarantee_percent: Number(record.guarantee_percent) || 0,
-                guarantee_amount: Number(record.guarantee_amount) || 0, 
                 total_amount: Number(record.total_amount) || 0,
                 debit_account_id: cleanId(record.debit_account_id), 
                 credit_account_id: cleanId(record.credit_account_id),
-                materials_acc_id: cleanId(record.materials_acc_id), 
-                guarantee_acc_id: cleanId(record.guarantee_acc_id),
                 tax_acc_id: cleanId(record.tax_acc_id) || '990c949c-5f32-40d7-8d36-5fe45a6c892c', 
                 status: record.status || 'معلق', 
                 due_in_days: Number(record.due_in_days) || 0,
                 due_date: record.due_date, 
                 paid_amount: Number(record.paid_amount) || 0, 
                 skip_zatca: record.skip_zatca || false,
-                fleet_operation_id: cleanId(record.fleet_operation_id),
                 warehouse_id: cleanId(record.warehouse_id),
                 delegate_id: cleanId(record.delegate_id),
                 payment_method: record.payment_method || 'آجل',

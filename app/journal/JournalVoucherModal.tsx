@@ -1,5 +1,6 @@
 "use client";
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { THEME } from '@/lib/theme';
 import { formatCurrency } from '@/lib/helpers';
 
@@ -16,7 +17,25 @@ export default function JournalVoucherModal({
   lines,
   headerId
 }: JournalVoucherModalProps) {
-  if (!isOpen || !lines || lines.length === 0) return null;
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        e.preventDefault();
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isOpen, onClose]);
+
+  if (!isOpen || !mounted || !lines || lines.length === 0) return null;
 
   // Filter lines if specific headerId is passed
   const voucherLines = headerId ? lines.filter(l => l.header_id === headerId) : lines;
@@ -35,14 +54,14 @@ export default function JournalVoucherModal({
     window.print();
   };
 
-  return (
-    <div className="jv-modal-overlay" onClick={onClose}>
+  return createPortal(
+    <div className="jv-modal-overlay warm-portal-overlay-fullscreen" onClick={onClose}>
       <div className="jv-modal-box" onClick={(e) => e.stopPropagation()}>
         {/* Top actions (Screen only) */}
         <div className="jv-screen-actions no-print">
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{ fontSize: '20px' }}>📓</span>
-            <span style={{ fontWeight: 900, color: '#122946', fontSize: '16px' }}>
+            <span style={{ fontWeight: 900, color: '#F8FAFC', fontSize: '16px' }}>
               {isSingleHeader ? 'سند قيد اليومية' : 'كشف قيود اليومية المحددة'}
             </span>
           </div>
@@ -199,9 +218,9 @@ export default function JournalVoucherModal({
           left: 0;
           right: 0;
           bottom: 0;
-          background: rgba(18, 41, 70, 0.65);
-          backdrop-filter: blur(12px);
-          -webkit-backdrop-filter: blur(12px);
+          background: rgba(11, 14, 20, 0.85);
+          backdrop-filter: blur(16px);
+          -webkit-backdrop-filter: blur(16px);
           z-index: 999999;
           display: flex;
           align-items: center;
@@ -444,9 +463,37 @@ export default function JournalVoucherModal({
           margin-bottom: 35px;
         }
 
-        .jv-sign-line {
-          border-bottom: 1px dashed #94a3b8;
-          width: 100%;
+        @media (max-width: 768px) {
+          .jv-modal-box {
+            width: 95vw !important;
+            max-height: 94vh !important;
+            border-radius: 18px !important;
+          }
+          .jv-screen-actions {
+            padding: 10px 14px !important;
+            flex-wrap: wrap !important;
+            gap: 8px !important;
+          }
+          .jv-btn-print, .jv-btn-close {
+            min-height: 44px;
+            padding: 8px 14px;
+            flex: 1;
+            justify-content: center;
+          }
+          .jv-paper-container {
+            padding: 16px 12px !important;
+          }
+          .jv-meta-grid {
+            grid-template-columns: 1fr !important;
+            gap: 8px !important;
+          }
+          .jv-header {
+            flex-direction: column !important;
+            gap: 12px !important;
+          }
+          .jv-header-title-box {
+            text-align: right !important;
+          }
         }
 
         /* 🖨️ Print Styles */
@@ -474,6 +521,7 @@ export default function JournalVoucherModal({
           }
         }
       `}</style>
-    </div>
+    </div>,
+    document.body
   );
 }

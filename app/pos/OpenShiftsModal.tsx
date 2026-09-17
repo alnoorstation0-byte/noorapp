@@ -1,6 +1,7 @@
 "use client";
 import { useLanguage } from '@/lib/LanguageContext';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 
 export default function OpenShiftsModal({
     isOpen,
@@ -15,11 +16,28 @@ export default function OpenShiftsModal({
 }: any) {
     const { language } = useLanguage();
     const isEn = language === 'en';
+    const [mounted, setMounted] = useState(false);
 
-    if (!isOpen) return null;
+    useEffect(() => {
+        setMounted(true);
+    }, []);
 
-    return (
-        <div style={{
+    useEffect(() => {
+        if (!isOpen) return;
+        const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                onClose();
+            }
+        };
+        window.addEventListener('keydown', handleKeyDown);
+        return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [isOpen, onClose]);
+
+    if (!isOpen || !mounted) return null;
+
+    return createPortal(
+        <div className="warm-portal-overlay-fullscreen" style={{
             position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
             background: 'rgba(11, 14, 20, 0.85)',
             backdropFilter: 'blur(16px)',
@@ -57,16 +75,40 @@ export default function OpenShiftsModal({
                     border: none;
                     border-radius: 12px;
                     padding: 10px 18px;
+                    min-height: 44px;
                     font-size: 13px;
                     font-weight: 800;
                     cursor: pointer;
                     transition: all 0.2s ease;
                     white-space: nowrap;
                     box-shadow: 0 4px 12px rgba(0, 229, 255, 0.25);
+                    display: inline-flex;
+                    align-items: center;
+                    justify-content: center;
                 }
                 .btn-switch-shift:hover {
                     transform: scale(1.03);
                     background: linear-gradient(135deg, #0284C7 0%, #00E5FF 100%);
+                }
+                @media (max-width: 768px) {
+                    .shift-card-item {
+                        flex-direction: column;
+                        align-items: stretch;
+                        gap: 12px;
+                        padding: 14px;
+                    }
+                    .shift-card-item > div:last-child {
+                        display: flex;
+                        justify-content: stretch;
+                        gap: 8px;
+                        width: 100%;
+                    }
+                    .shift-card-item > div:last-child > button,
+                    .shift-card-item > div:last-child > span {
+                        flex: 1;
+                        text-align: center;
+                        justify-content: center;
+                    }
                 }
             `}</style>
 
@@ -281,6 +323,7 @@ export default function OpenShiftsModal({
                     </div>
                 )}
             </div>
-        </div>
+        </div>,
+        document.body
     );
 }

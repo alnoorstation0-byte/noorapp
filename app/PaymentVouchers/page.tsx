@@ -237,13 +237,13 @@ export default function PaymentVouchersPage() {
                   type="button"
                   className="table-action-btn edit-btn" 
                   style={{
-                    background: 'linear-gradient(135deg, #1C73AB 0%, #2891C8 100%)',
-                    color: 'white',
+                    background: 'linear-gradient(135deg, #00E5FF 0%, #00B4D8 100%)',
+                    color: '#0B0E14',
                     border: 'none',
                     borderRadius: '8px',
                     padding: '5px 8px',
                     fontSize: '11px',
-                    fontWeight: 800,
+                    fontWeight: 900,
                     cursor: 'pointer',
                     display: 'inline-flex',
                     alignItems: 'center',
@@ -307,9 +307,9 @@ export default function PaymentVouchersPage() {
               onClick={(e) => { e.stopPropagation(); setPrintData(row); setIsPrintModalOpen(true); }} 
               className="table-action-btn"
               style={{ 
-                background: 'rgba(255, 255, 255, 0.7)', 
-                border: '1px solid rgba(28, 115, 171, 0.2)', 
-                color: '#1C73AB',
+                background: 'rgba(30, 41, 59, 0.6)', 
+                border: '1px solid rgba(0, 229, 255, 0.3)', 
+                color: '#00E5FF',
                 padding: '5px 8px', 
                 borderRadius: '8px', 
                 cursor: 'pointer', 
@@ -467,10 +467,10 @@ export default function PaymentVouchersPage() {
 
       {/* 🚀 المودال الجديد للتصحيح المجمع */}
       {mounted && logic.state.isBulkFixModalOpen && createPortal(
-          <div style={{ position: 'fixed', inset: 0, zIndex: 999999999, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', background: 'rgba(15, 23, 42, 0.85)', backdropFilter: 'blur(10px)', padding: '50px 20px', overflowY: 'auto' }}>
+          <div style={{ position: 'fixed', inset: 0, zIndex: 999999999, display: 'flex', alignItems: 'flex-start', justifyContent: 'center', background: 'rgba(7, 9, 13, 0.8)', backdropFilter: 'blur(16px)', padding: '50px 20px', overflowY: 'auto' }}>
               <div style={{ position: 'fixed', inset: 0 }} onClick={() => logic.actions.setIsBulkFixModalOpen(false)} />
-              <div className="cinematic-scroll" style={{ background: 'white', borderRadius: '32px', width: '100%', maxWidth: '600px', padding: '40px', position: 'relative', zIndex: 10, margin: 'auto', boxShadow: '0 50px 100px -20px rgba(0,0,0,0.5)' }}>
-                  <h2 style={{ fontWeight: 900, textAlign: 'center', marginBottom: '30px', color: THEME.primary, fontSize: '24px' }}>🛠️ تصحيح الحسابات لـ ({logic.state.selectedIds.length}) سند معلق</h2>
+              <div className="cinematic-scroll" style={{ background: 'linear-gradient(135deg, rgba(20, 24, 34, 0.98) 0%, rgba(11, 14, 20, 0.95) 100%)', border: '1px solid rgba(0, 229, 255, 0.25)', borderRadius: '24px', width: '100%', maxWidth: '600px', padding: '40px', position: 'relative', zIndex: 10, margin: 'auto', boxShadow: '0 25px 70px rgba(0,0,0,0.7)' }}>
+                  <h2 style={{ fontWeight: 900, textAlign: 'center', marginBottom: '30px', color: '#00E5FF', fontSize: '22px' }}>🛠️ تصحيح الحسابات لـ ({logic.state.selectedIds.length}) سند معلق</h2>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: '25px', zIndex: 50, position: 'relative' }}>
                       <div style={{ zIndex: 60, position: 'relative' }}>
                           <SmartCombo 
@@ -506,10 +506,10 @@ export default function PaymentVouchersPage() {
                       </div>
                   </div>
                   <div style={{ display: 'flex', gap: '15px', marginTop: '40px' }}>
-                      <button onClick={logic.actions.handleBulkFixSave} disabled={logic.isLoading} style={{ flex: 2, padding: '18px', borderRadius: '16px', background: THEME.info, color: 'white', fontWeight: 900, border: 'none', cursor: 'pointer', fontSize: '16px' }}>
+                      <button onClick={logic.actions.handleBulkFixSave} disabled={logic.isLoading} style={{ flex: 2, padding: '16px', borderRadius: '14px', background: 'linear-gradient(135deg, #00E5FF 0%, #0284C7 100%)', color: '#07090D', fontWeight: 900, border: 'none', cursor: 'pointer', fontSize: '16px', boxShadow: '0 0 20px rgba(0, 229, 255, 0.35)' }}>
                           {logic.isLoading ? '⏳ جاري الحفظ...' : '✅ تطبيق التعديلات'}
                       </button>
-                      <button onClick={()=>logic.actions.setIsBulkFixModalOpen(false)} style={{ flex: 1, padding: '18px', borderRadius: '16px', border: '2px solid rgba(40, 145, 200, 0.15)', background: 'white', color: '#64748b', fontWeight: 900, cursor: 'pointer', fontSize: '16px' }}>إلغاء</button>
+                      <button onClick={()=>logic.actions.setIsBulkFixModalOpen(false)} style={{ flex: 1, padding: '16px', borderRadius: '14px', border: '1px solid rgba(255, 255, 255, 0.15)', background: 'rgba(255, 255, 255, 0.05)', color: '#F8FAFC', fontWeight: 900, cursor: 'pointer', fontSize: '16px' }}>إلغاء</button>
                   </div>
               </div>
           </div>,

@@ -297,11 +297,11 @@ export default function ReceiptVouchersPage() {
             {mounted && logic.isBulkFixModalOpen && createPortal(
                 <div style={{
                     position: 'fixed', inset: 0, zIndex: 999999, display: 'flex', alignItems: 'center', justifyContent: 'center', 
-                    background: 'rgba(44, 34, 30, 0.5)', backdropFilter: 'blur(10px)', direction: 'rtl'
+                    background: 'rgba(7, 9, 13, 0.8)', backdropFilter: 'blur(16px)', direction: 'rtl', padding: '20px'
                 }}>
-                    <div className="cinematic-scroll" style={{ background: 'white', borderRadius: '24px', width: '100%', maxWidth: '500px', padding: '30px', boxShadow: '0 25px 50px -12px rgba(0,0,0,0.5)', zIndex: 10 }}>
-                        <h3 style={{ margin: '0 0 10px 0', color: THEME.brand.coffee, fontWeight: 900 }}>🛠️ التصحيح المجمع للحسابات</h3>
-                        <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '20px', fontWeight: 800 }}>
+                    <div className="cinematic-scroll" style={{ background: 'linear-gradient(135deg, rgba(20, 24, 34, 0.98) 0%, rgba(11, 14, 20, 0.95) 100%)', border: '1px solid rgba(0, 229, 255, 0.25)', borderRadius: '24px', width: '100%', maxWidth: '500px', padding: '32px', boxShadow: '0 25px 70px rgba(0,0,0,0.7)', zIndex: 10 }}>
+                        <h3 style={{ margin: '0 0 10px 0', color: '#00E5FF', fontWeight: 900, fontSize: '20px' }}>🛠️ التصحيح المجمع للحسابات</h3>
+                        <p style={{ fontSize: '13px', color: '#94A3B8', marginBottom: '20px', fontWeight: 800 }}>
                             سيتم تطبيق التعديلات على ({logic.selectedIds.length}) سند مسودة.
                         </p>
                         
@@ -320,11 +320,11 @@ export default function ReceiptVouchersPage() {
                             />
                         </div>
 
-                        <div style={{ display: 'flex', gap: '10px', marginTop: '30px' }}>
-                            <button onClick={logic.handleBulkFixSave} disabled={logic.isSaving} style={{ flex: 2, background: THEME.brand.gold, color: 'white', border: 'none', padding: '14px', borderRadius: '12px', fontWeight: 900, cursor: 'pointer', transition: '0.2s' }}>
+                        <div style={{ display: 'flex', gap: '12px', marginTop: '30px' }}>
+                            <button onClick={logic.handleBulkFixSave} disabled={logic.isSaving} style={{ flex: 2, background: 'linear-gradient(135deg, #00E5FF 0%, #0284C7 100%)', color: '#07090D', border: 'none', padding: '14px', borderRadius: '12px', fontWeight: 900, cursor: 'pointer', transition: '0.2s', boxShadow: '0 0 20px rgba(0, 229, 255, 0.35)' }}>
                                 {logic.isSaving ? '⏳ جاري الحفظ...' : '💾 تطبيق التعديل'}
                             </button>
-                            <button onClick={() => logic.setIsBulkFixModalOpen(false)} style={{ flex: 1, background: 'rgba(255, 255, 255, 0.4)', color: '#64748b', border: 'none', padding: '14px', borderRadius: '12px', fontWeight: 900, cursor: 'pointer', transition: '0.2s' }}>
+                            <button onClick={() => logic.setIsBulkFixModalOpen(false)} style={{ flex: 1, background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.15)', color: '#F8FAFC', padding: '14px', borderRadius: '12px', fontWeight: 900, cursor: 'pointer', transition: '0.2s' }}>
                                 إلغاء
                             </button>
                         </div>

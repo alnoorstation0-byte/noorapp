@@ -488,3 +488,495 @@ input:focus, select:focus, textarea:focus {
 .low-graphics-mode * {
   -webkit-overflow-scrolling: touch;
 }
+
+/* ==========================================================================
+   ☀️ وضع الرؤية النهارية لمحطات النور (Daylight Command Center Theme)
+   نفس الفلسفة الزجاجية المتقنة (Glassmorphism) ولكن بوضوح فائق لضوء النهار
+   ========================================================================== */
+html.daylight-theme,
+body.daylight-theme,
+[data-theme="daylight"] {
+  color-scheme: light !important;
+
+  /* ☀️ لوحة ألوان الرؤية النهارية */
+  --primary: #0284C7;           /* أزرق بترولي ناصع وعالي التباين */
+  --primary-rgb: 2, 132, 199;
+  --accent: #0284C7;            /* أزرق نهاري رئيسي */
+  --accent-rgb: 2, 132, 199;
+  --terracotta: #EA580C;        /* برتقالي دافئ نهاري */
+  --terracotta-rgb: 234, 88, 12;
+  --bg-main: #F1F5F9;           /* تيتانيوم قطبي فاتح */
+  --surface: #FFFFFF;           /* أسطح بيضاء ناصعة */
+  --success: #059669;           /* أخضر زمردي نهاري */
+  --success-rgb: 5, 150, 105;
+
+  --white: #FFFFFF;
+  --danger: #DC2626;            /* أحمر صريح للتحذيرات */
+  --warning: #EA580C;           /* برتقالي للإنذارات */
+  --info: #0284C7;              /* أزرق للمعلومات */
+
+  /* 🔮 زجاج الرؤية النهارية (Daylight Glassmorphism) */
+  --glass-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.94) 0%, rgba(243, 247, 252, 0.85) 100%);
+  --glass-surface: rgba(255, 255, 255, 0.92);
+  --glass-border: 1px solid rgba(2, 132, 199, 0.22);
+  --glass-border-color: rgba(2, 132, 199, 0.22);
+  --glass-blur: blur(24px) saturate(180%);
+  --input-bg: rgba(255, 255, 255, 0.95);
+
+  /* 🔤 النصوص والطباعة */
+  --text-main: #0F172A;         /* كحلي فاحم فائق التباين تحت أشعة الشمس */
+  --text-muted: #475569;        /* نصوص ثانوية مقروءة وواضحة */
+
+  /* ⚡ الظلال النهارية الهادئة */
+  --card-shadow: 0 8px 24px rgba(15, 23, 42, 0.06), 0 1px 2px rgba(15, 23, 42, 0.04), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+  --hover-shadow: 0 14px 32px rgba(2, 132, 199, 0.16), 0 2px 6px rgba(15, 23, 42, 0.06);
+  --glow-accent: 0 0 18px rgba(2, 132, 199, 0.25);
+  --glow-orange: 0 0 18px rgba(234, 88, 12, 0.25);
+
+  /* 📊 الجداول والقوائم */
+  --table-hover: rgba(2, 132, 199, 0.06);
+  --table-border: rgba(226, 232, 240, 0.9);
+  --table-header-bg: rgba(2, 132, 199, 0.08);
+}
+
+.daylight-theme body,
+body.daylight-theme {
+  background-color: #F1F5F9 !important;
+  color: #0F172A !important;
+}
+
+/* بطاقات وزجاج الرؤية النهارية */
+.daylight-theme .desert-glass,
+.daylight-theme .glass-card,
+.daylight-theme .glass-panel,
+.daylight-theme .command-card,
+.daylight-theme .glass-container,
+.daylight-theme [class*="card"] {
+  background: var(--glass-bg) !important;
+  border: var(--glass-border) !important;
+  box-shadow: var(--card-shadow) !important;
+  color: #0F172A !important;
+}
+
+.daylight-theme .desert-glass:hover,
+.daylight-theme .glass-card:hover,
+.daylight-theme .command-card:hover {
+  box-shadow: var(--hover-shadow) !important;
+  border-color: rgba(2, 132, 199, 0.45) !important;
+}
+
+/* أزرار الرؤية النهارية المعتمدة */
+.daylight-theme .btn-main-glass.gold,
+.daylight-theme .btn-main-glass.primary,
+.daylight-theme .desert-btn-primary {
+  background: linear-gradient(135deg, #0284C7 0%, #0369A1 100%) !important;
+  color: #FFFFFF !important;
+  border: 1px solid rgba(2, 132, 199, 0.7) !important;
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.3) !important;
+}
+.daylight-theme .btn-main-glass.gold:hover,
+.daylight-theme .btn-main-glass.primary:hover,
+.daylight-theme .desert-btn-primary:hover {
+  box-shadow: 0 6px 20px rgba(2, 132, 199, 0.45) !important;
+  filter: brightness(1.06) !important;
+}
+
+.daylight-theme .btn-main-glass.white,
+.daylight-theme .btn-main-glass.secondary,
+.daylight-theme .desert-btn-glass {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(243, 247, 252, 0.9) 100%) !important;
+  color: #0F172A !important;
+  border: 1px solid rgba(203, 213, 225, 0.8) !important;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.05) !important;
+}
+.daylight-theme .btn-main-glass.white:hover,
+.daylight-theme .btn-main-glass.secondary:hover,
+.daylight-theme .desert-btn-glass:hover {
+  background: #FFFFFF !important;
+  border-color: #0284C7 !important;
+  color: #0284C7 !important;
+}
+
+.daylight-theme .btn-main-glass.blue {
+  background: linear-gradient(135deg, rgba(2, 132, 199, 0.12) 0%, rgba(2, 132, 199, 0.04) 100%) !important;
+  color: #0284C7 !important;
+  border: 1px solid rgba(2, 132, 199, 0.35) !important;
+}
+
+.daylight-theme .btn-main-glass.green,
+.daylight-theme .btn-main-glass.success {
+  background: linear-gradient(135deg, #059669 0%, #047857 100%) !important;
+  color: #FFFFFF !important;
+  border: 1px solid rgba(5, 150, 105, 0.6) !important;
+  box-shadow: 0 4px 14px rgba(5, 150, 105, 0.3) !important;
+}
+
+.daylight-theme .btn-main-glass.yellow,
+.daylight-theme .btn-main-glass.warning {
+  background: linear-gradient(135deg, #EA580C 0%, #C2410C 100%) !important;
+  color: #FFFFFF !important;
+  border: 1px solid rgba(234, 88, 12, 0.6) !important;
+  box-shadow: 0 4px 14px rgba(234, 88, 12, 0.3) !important;
+}
+
+.daylight-theme .btn-main-glass.red,
+.daylight-theme .btn-main-glass.danger {
+  background: linear-gradient(135deg, #DC2626 0%, #B91C1C 100%) !important;
+  color: #FFFFFF !important;
+  border: 1px solid rgba(220, 38, 38, 0.6) !important;
+  box-shadow: 0 4px 14px rgba(220, 38, 38, 0.3) !important;
+}
+
+/* أزرار إجراءات الجداول */
+.daylight-theme .table-action-btn {
+  background: rgba(241, 245, 249, 0.95) !important;
+  border-color: rgba(203, 213, 225, 0.8) !important;
+  color: #0F172A !important;
+}
+.daylight-theme .table-action-btn:hover {
+  background: #FFFFFF !important;
+  border-color: #0284C7 !important;
+  color: #0284C7 !important;
+}
+
+/* حقول الإدخال النهارية */
+.daylight-theme input,
+.daylight-theme select,
+.daylight-theme textarea {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid rgba(203, 213, 225, 0.9) !important;
+  color: #0F172A !important;
+}
+.daylight-theme input:focus,
+.daylight-theme select:focus,
+.daylight-theme textarea:focus {
+  background: #FFFFFF !important;
+  border-color: #0284C7 !important;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.2) !important;
+}
+
+/* شريط التمرير النهاري */
+.daylight-theme ::-webkit-scrollbar-track {
+  background: #F1F5F9 !important;
+}
+.daylight-theme ::-webkit-scrollbar-thumb {
+  background: rgba(2, 132, 199, 0.35) !important;
+}
+.daylight-theme ::-webkit-scrollbar-thumb:hover {
+  background: rgba(2, 132, 199, 0.65) !important;
+}
+
+/* النصوص والألوان الإضافية */
+.daylight-theme .text-desert-title {
+  color: #0F172A !important;
+}
+.daylight-theme .text-desert-muted {
+  color: #475569 !important;
+}
+.daylight-theme .neon-glow-cyan {
+  text-shadow: 0 0 10px rgba(2, 132, 199, 0.3) !important;
+  color: #0284C7 !important;
+}
+.daylight-theme .neon-glow-orange {
+  text-shadow: 0 0 10px rgba(234, 88, 12, 0.3) !important;
+  color: #EA580C !important;
+}
+.daylight-theme .border-neon-cyan {
+  border-color: rgba(2, 132, 199, 0.35) !important;
+  box-shadow: 0 0 15px rgba(2, 132, 199, 0.12) !important;
+}
+.daylight-theme .border-neon-orange {
+  border-color: rgba(234, 88, 12, 0.35) !important;
+  box-shadow: 0 0 15px rgba(234, 88, 12, 0.12) !important;
+}
+
+/* ترويسة MasterPage والقوائم العلوية */
+.daylight-theme .master-header {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(243, 247, 252, 0.9) 100%) !important;
+  border-color: rgba(2, 132, 199, 0.22) !important;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06) !important;
+}
+.daylight-theme .master-header h1 {
+  color: #0F172A !important;
+}
+.daylight-theme .master-header p {
+  color: #475569 !important;
+}
+.daylight-theme .lang-switcher-pill,
+.daylight-theme .perf-switcher-pill,
+.daylight-theme .theme-switcher-pill,
+.daylight-theme .header-action-btn {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(203, 213, 225, 0.8) !important;
+  color: #0F172A !important;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.05) !important;
+}
+.daylight-theme .lang-switcher-pill:hover,
+.daylight-theme .perf-switcher-pill:hover,
+.daylight-theme .theme-switcher-pill:hover,
+.daylight-theme .header-action-btn:hover {
+  background: #FFFFFF !important;
+  border-color: #0284C7 !important;
+  color: #0284C7 !important;
+}
+.daylight-theme .imperial-trigger {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border-color: rgba(203, 213, 225, 0.8) !important;
+}
+.daylight-theme .imperial-trigger .u-name {
+  color: #0F172A !important;
+}
+.daylight-theme .imperial-trigger .u-role {
+  color: #0284C7 !important;
+}
+.daylight-theme .supreme-dropdown {
+  background: rgba(255, 255, 255, 0.97) !important;
+  border-color: rgba(2, 132, 199, 0.25) !important;
+  box-shadow: 0 12px 35px rgba(15, 23, 42, 0.15) !important;
+  color: #0F172A !important;
+}
+.daylight-theme .supreme-dropdown .drop-item {
+  color: #0F172A !important;
+}
+.daylight-theme .supreme-dropdown .drop-item:hover {
+  background: rgba(2, 132, 199, 0.08) !important;
+  color: #0284C7 !important;
+}
+
+/* السايد بار الجانبي (Sidebar) */
+.daylight-theme .sidebar-container,
+.daylight-theme nav[style*="background: linear-gradient(180deg, #0F1218"] {
+  background: linear-gradient(180deg, #FFFFFF 0%, #F1F5F9 100%) !important;
+  border-left-color: rgba(2, 132, 199, 0.18) !important;
+  box-shadow: -6px 0 30px rgba(15, 23, 42, 0.08) !important;
+}
+
+/* النوافذ المنبثقة (Modals) */
+.daylight-theme .glass-modal-container {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(248, 250, 252, 0.95) 100%) !important;
+  border: 1px solid rgba(2, 132, 199, 0.25) !important;
+  box-shadow: 0 25px 60px rgba(15, 23, 42, 0.18), 0 0 30px rgba(2, 132, 199, 0.1) !important;
+}
+.daylight-theme .modal-header-title {
+  border-color: rgba(2, 132, 199, 0.18) !important;
+}
+.daylight-theme .modal-header-title h2 {
+  color: #0F172A !important;
+}
+.daylight-theme .glass-input-field {
+  background: #FFFFFF !important;
+  border-color: rgba(203, 213, 225, 0.9) !important;
+  color: #0F172A !important;
+}
+.daylight-theme .glass-input-field:focus {
+  background: #FFFFFF !important;
+  border-color: #0284C7 !important;
+  box-shadow: 0 0 0 3px rgba(2, 132, 199, 0.2) !important;
+}
+.daylight-theme .btn-glass-save {
+  background: linear-gradient(135deg, #0284C7 0%, #0369A1 100%) !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 4px 15px rgba(2, 132, 199, 0.35) !important;
+}
+.daylight-theme .btn-glass-cancel {
+  background: rgba(241, 245, 249, 0.9) !important;
+  color: #475569 !important;
+  border-color: rgba(203, 213, 225, 0.8) !important;
+}
+.daylight-theme .btn-glass-cancel:hover {
+  background: #FFFFFF !important;
+  color: #0F172A !important;
+}
+.daylight-theme .modal-kbd-badge {
+  background: rgba(2, 132, 199, 0.08) !important;
+  border-color: rgba(2, 132, 199, 0.25) !important;
+  color: #0284C7 !important;
+}
+
+/* الجداول الذكية (Smart Tables) */
+.daylight-theme table thead tr {
+  background: rgba(2, 132, 199, 0.08) !important;
+}
+.daylight-theme table thead th {
+  color: #0369A1 !important;
+  border-bottom: 2px solid rgba(2, 132, 199, 0.2) !important;
+}
+.daylight-theme table tbody tr {
+  background: rgba(255, 255, 255, 0.75) !important;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8) !important;
+  color: #0F172A !important;
+}
+.daylight-theme table tbody tr:nth-child(even) {
+  background: rgba(248, 250, 252, 0.85) !important;
+}
+.daylight-theme table tbody tr:hover {
+  background: rgba(2, 132, 199, 0.06) !important;
+}
+.daylight-theme table td {
+  color: #0F172A !important;
+}
+
+/* مركز القيادة والتحكم الموحد (Command Center Hub & Floating Navigation) */
+.daylight-theme .admin-header-glass {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(243, 247, 252, 0.95) 100%) !important;
+  border: 1px solid rgba(2, 132, 199, 0.25) !important;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.08) !important;
+}
+.daylight-theme .admin-header-glass .brand-title {
+  color: #0F172A !important;
+}
+.daylight-theme .admin-header-glass .brand-subtitle {
+  color: #0284C7 !important;
+}
+.daylight-theme .brand-logo-wrap {
+  background: rgba(2, 132, 199, 0.08) !important;
+  border-color: rgba(2, 132, 199, 0.3) !important;
+  box-shadow: 0 0 12px rgba(2, 132, 199, 0.12) !important;
+}
+.daylight-theme .group-section {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(248, 250, 252, 0.92) 100%) !important;
+  border: 1px solid rgba(2, 132, 199, 0.2) !important;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.05) !important;
+}
+.daylight-theme .group-header {
+  color: #0284C7 !important;
+  border-bottom: 2px solid rgba(2, 132, 199, 0.2) !important;
+}
+.daylight-theme .nav-card {
+  background: rgba(255, 255, 255, 0.9) !important;
+  border: 1px solid rgba(203, 213, 225, 0.8) !important;
+  box-shadow: 0 3px 10px rgba(15, 23, 42, 0.05) !important;
+  color: #0F172A !important;
+}
+.daylight-theme .nav-card:hover {
+  background: #FFFFFF !important;
+  border-color: #0284C7 !important;
+  box-shadow: 0 8px 25px rgba(2, 132, 199, 0.2) !important;
+}
+.daylight-theme .nav-card.active {
+  background: linear-gradient(135deg, rgba(2, 132, 199, 0.12) 0%, rgba(255, 255, 255, 0.98) 100%) !important;
+  border: 2px solid #0284C7 !important;
+  box-shadow: 0 8px 24px rgba(2, 132, 199, 0.2) !important;
+}
+.daylight-theme .nav-card-left .icon-wrapper {
+  background: rgba(2, 132, 199, 0.1) !important;
+  border: 1px solid rgba(2, 132, 199, 0.25) !important;
+  color: #0284C7 !important;
+}
+.daylight-theme .nav-title {
+  color: #0F172A !important;
+}
+.daylight-theme .desert-bottom-dock {
+  background: rgba(255, 255, 255, 0.96) !important;
+  border-color: rgba(2, 132, 199, 0.25) !important;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12) !important;
+}
+.daylight-theme .dock-item {
+  color: #64748B !important;
+}
+.daylight-theme .dock-item.active {
+  color: #0284C7 !important;
+  background: rgba(2, 132, 199, 0.1) !important;
+}
+.daylight-theme .dock-item.active::after {
+  background: #0284C7 !important;
+  box-shadow: 0 0 6px #0284C7 !important;
+}
+.daylight-theme .fab-main {
+  background: linear-gradient(135deg, #0284C7 0%, #0369A1 100%) !important;
+  border: 2px solid rgba(255, 255, 255, 0.8) !important;
+  box-shadow: 0 8px 25px rgba(2, 132, 199, 0.4) !important;
+}
+
+/* ☀️ نوافذ المودال بالوضع النهاري (Daylight Modal Overrides & Glassmorphism) */
+.daylight-theme .warm-portal-overlay-fullscreen,
+.daylight-theme .print-modal-overlay,
+.daylight-theme .jv-modal-overlay,
+.daylight-theme .thermal-modal-overlay {
+  background: rgba(15, 23, 42, 0.45) !important;
+  backdrop-filter: blur(16px) saturate(140%) !important;
+  -webkit-backdrop-filter: blur(16px) saturate(140%) !important;
+}
+
+.daylight-theme .print-actions-bar,
+.daylight-theme .thermal-actions,
+.daylight-theme .controls-bar,
+.daylight-theme .jv-screen-actions {
+  background: rgba(255, 255, 255, 0.96) !important;
+  border: 1px solid rgba(2, 132, 199, 0.3) !important;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12) !important;
+  color: #0F172A !important;
+}
+
+.daylight-theme .action-btn.close,
+.daylight-theme .btn-close,
+.daylight-theme .jv-btn-close {
+  background: #FEE2E2 !important;
+  color: #DC2626 !important;
+  border: 1px solid #FECACA !important;
+}
+
+.daylight-theme .action-btn.close:hover,
+.daylight-theme .btn-close:hover,
+.daylight-theme .jv-btn-close:hover {
+  background: #FCA5A5 !important;
+  color: #991B1B !important;
+}
+
+.daylight-theme .action-btn.print,
+.daylight-theme .btn-print,
+.daylight-theme .btn-print-thermal,
+.daylight-theme .jv-btn-print {
+  background: linear-gradient(135deg, #0284C7 0%, #0369A1 100%) !important;
+  color: #FFFFFF !important;
+  box-shadow: 0 4px 14px rgba(2, 132, 199, 0.3) !important;
+}
+
+.daylight-theme .desert-form-card,
+.daylight-theme .aqua-glass-card,
+.daylight-theme .return-sec-card,
+.daylight-theme .shift-card-item,
+.daylight-theme .shift-kpi-box {
+  background: rgba(255, 255, 255, 0.95) !important;
+  border: 1px solid rgba(203, 213, 225, 0.8) !important;
+  box-shadow: 0 4px 15px rgba(15, 23, 42, 0.05) !important;
+  color: #0F172A !important;
+}
+
+.daylight-theme .shift-card-item:hover {
+  border-color: #0284C7 !important;
+  box-shadow: 0 8px 25px rgba(2, 132, 199, 0.18) !important;
+  background: #FFFFFF !important;
+}
+
+.daylight-theme .shift-card-item.active {
+  border: 2px solid #059669 !important;
+  background: rgba(16, 185, 129, 0.08) !important;
+}
+
+.daylight-theme .shift-table th {
+  background: rgba(2, 132, 199, 0.08) !important;
+  color: #0284C7 !important;
+  border-bottom: 1.5px solid rgba(2, 132, 199, 0.25) !important;
+}
+
+.daylight-theme .shift-table td {
+  color: #0F172A !important;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8) !important;
+}
+
+.daylight-theme .shift-table tr:hover td {
+  background: rgba(2, 132, 199, 0.05) !important;
+}
+
+.daylight-theme .btn-modal-close {
+  background: rgba(239, 68, 68, 0.1) !important;
+  color: #DC2626 !important;
+  border: 1px solid rgba(239, 68, 68, 0.25) !important;
+}
+
+.daylight-theme .btn-modal-close:hover {
+  background: #EF4444 !important;
+  color: #FFFFFF !important;
+}
+

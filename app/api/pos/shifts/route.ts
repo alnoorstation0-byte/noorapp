@@ -129,9 +129,9 @@ export async function GET(request: Request) {
                 total_cash_sales: totalCash,
                 total_card_sales: totalCard,
                 total_credit_sales: totalCredit,
-                bottles_sold: Number(s.bottles_sold || 0),
-                bottles_returned: Number(s.bottles_returned || 0),
-                bottles_shortage: Number(s.bottles_shortage || 0),
+                total_liters_sold: Number(s.total_liters_sold || 0),
+                meter_total_amount: Number(s.meter_total_amount || 0),
+                meter_sales_variance: Number(s.meter_sales_variance || 0),
                 invoices_count: invoiceCounts[s.id] || 0
             };
         });

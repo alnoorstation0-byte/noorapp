@@ -20,9 +20,12 @@ import {
   FileText, 
   Package, 
   ArrowUpRight,
-  Zap
+  Zap,
+  Sun,
+  Moon
 } from 'lucide-react';
 import { toast } from 'react-hot-toast';
+import { useThemeMode } from '@/lib/ThemeContext';
 
 export default function LayoutClient({ children }: { children: React.ReactNode }) {
   const router = useRouter();
@@ -46,6 +49,7 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
   const unreadCounts = useUnreadCounts();
   const { onlineUsers, onlineCount } = usePresence();
   const { t, language, dir, isRtl } = useLanguage();
+  const { themeMode, toggleTheme, isDaylight } = useThemeMode();
 
   const [lowGraphics, setLowGraphics] = useState(false);
 
@@ -307,7 +311,7 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
   }
 
   if (!mounted || !isInitialized || loading) {
-    return <LoadingScreen message="جاري تهيئة نظام محطات النور للوقود..." />; 
+    return <LoadingScreen message={language === 'en' ? "Initializing Al-Noor Gas Stations Command Center..." : "جاري تهيئة مركز قيادة محطات النور للوقود..."} />; 
   }
 
   // فلترة القوائم حسب الصلاحيات
@@ -317,13 +321,17 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
     switch(menuId) {
       case 'dashboard': return can('dashboard', 'view');
       case 'global_summary': return can('dashboard', 'view') || can('reports', 'view');
+      case 'kpis': return can('dashboard', 'view') || can('reports', 'view');
+      case 'profit_dashboard': return can('dashboard', 'view') || can('reports', 'view');
       case 'pos': return can('pos', 'view') || can('invoices', 'create') || can('invoices', 'view');
       case 'pos_dashboard': return can('pos', 'view') || can('reports', 'view') || can('invoices', 'view');
       case 'pos_settlements': return can('pos', 'view') || can('receipts', 'view');
-      case 'fleet_operations': return can('fleet_operations', 'view') || can('fleet', 'view');
-      case 'service_operations': return can('fleet_operations', 'view') || can('invoices', 'view');
       case 'invoices': return can('invoices', 'view');
+      case 'sales_analysis': return can('invoices', 'view') || can('reports', 'view');
       case 'inventory': return can('inventory', 'view');
+      case 'item_card': return can('inventory', 'view');
+      case 'reorder_alerts': return can('inventory', 'view');
+      case 'inventory_valuation': return can('inventory', 'view') || can('accounts', 'view');
       case 'purchase_orders': return can('inventory', 'view') || can('expenses', 'view');
       case 'warehouses': return can('inventory', 'view');
       case 'inventory_transactions': return can('inventory', 'view');
@@ -337,20 +345,20 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
       case 'trialbalance': case 'trial_balance': return can('accounts', 'view') || can('reports', 'view');
       case 'financial_center': return can('accounts', 'view') || can('reports', 'view');
       case 'financial_statements': return can('accounts', 'view') || can('reports', 'view');
+      case 'financialplan': return can('accounts', 'view') || can('reports', 'view');
       case 'cashflows': return can('accounts', 'view') || can('reports', 'view');
+      case 'vat_return': return can('accounts', 'view') || can('reports', 'view');
       case 'partners': return can('partners', 'view');
       case 'partner_balances': return can('partners', 'view') || can('reports', 'view');
-      case 'delegate_debts': return can('partners', 'view') || can('fleet_operations', 'view');
-      case 'delegate_settlements': return can('partners', 'view') || can('fleet_operations', 'view');
       case 'statement': return can('partners', 'view') || can('accounts', 'view');
+      case 'ar_aging': return can('partners', 'view') || can('reports', 'view');
       case 'reports': return can('reports', 'view');
-      case 'import': return can('settings', 'view');
-      case 'promotions': return can('invoices', 'view') || can('settings', 'view');
       case 'audit': return can('settings', 'view') || can('reports', 'view');
-      case 'fleet': return can('fleet_operations', 'view') || can('fleet', 'view');
       case 'payroll': return can('expenses', 'view') || can('settings', 'view');
       case 'settings': return can('settings', 'view');
-      case 'team': return can('settings', 'view') || can('team', 'view');
+      case 'permissions': return can('settings', 'view');
+      case 'notifications': return true;
+      case 'profile': return true;
       default: return true; 
     }
   };
@@ -360,8 +368,10 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
   const groupKeyMap: Record<string, string> = {
     "الرئيسية والملخصات": "menu_group_home",
     "التشغيل والمبيعات": "menu_group_sales",
+    "المستودع وخزانات الوقود": "menu_group_inventory",
     "المستودع": "menu_group_inventory",
     "الحسابات والمالية": "menu_group_finance",
+    "العملاء والشركاء": "menu_group_partners",
     "العملاء والمندوبين": "menu_group_partners",
     "النظام والتقارير": "menu_group_system",
   };
@@ -377,7 +387,7 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
 
   const currentPageTitle = currentMenuItem 
     ? (t('menu_' + currentMenuItem.id) || currentMenuItem.title)
-    : (t('menu_dashboard') || 'الرئيسية');
+    : (t('menu_dashboard') || (language === 'en' ? 'Command Dashboard' : 'لوحة القيادة والتحكم'));
 
   // إجمالي الإشعارات غير المقروءة
   const totalUnread = (unreadCounts?.invoices || 0) + (unreadCounts?.orders || 0);
@@ -805,7 +815,7 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
         onTouchMove={onTouchMove}
         onTouchEnd={onTouchEnd}
         onClick={handleClick}
-        title="القائمة العائمة (يمكنك سحبها وتحريكها في أي مكان)"
+        title={language === 'en' ? "Quick Command Hub (Draggable)" : "مركز القيادة السريع (يمكنك سحب الزر وتحريكه في أي مكان)"}
       >
         <img src="/logo.png" alt="Noor Gas Station" className="fab-logo" />
       </div>
@@ -827,9 +837,9 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
                 <img src="/logo.png" alt="Noor Gas Station" className="brand-logo-img" />
               </div>
               <div className="brand-text-block">
-                <span className="brand-title">محطات النور للوقود</span>
+                <span className="brand-title">{language === 'en' ? 'Al-Noor Gas Stations' : 'محطات النور للوقود'}</span>
                 <span className="brand-subtitle">
-                  {language === 'en' ? `Management Portal | ${role === 'super_admin' ? 'Super Admin' : 'Staff'}` : `بوابة الإدارة الشاملة | ${role === 'super_admin' ? 'مدير النظام' : 'صلاحيات مستخدم'}`}
+                  {language === 'en' ? `Unified Command Center | ${role === 'super_admin' ? 'Super Admin' : 'Staff'}` : `مركز القيادة والتحكم الموحد | ${role === 'super_admin' ? 'مدير النظام' : 'صلاحيات مستخدم'}`}
                 </span>
               </div>
             </div>
@@ -837,8 +847,24 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
               <div className="online-status-chip">
                 <span className="online-dot-pulse"></span>
-                <span>{language === 'en' ? `${onlineCount} Online` : `${onlineCount} متصل`}</span>
+                <span>{language === 'en' ? `${onlineCount} Online` : `${onlineCount} متصل الآن`}</span>
               </div>
+
+              <button 
+                onClick={toggleTheme}
+                className="btn-logout-header"
+                style={{ 
+                  color: isDaylight ? '#EA580C' : '#F59E0B', 
+                  background: isDaylight ? 'rgba(234, 88, 12, 0.15)' : 'rgba(245, 158, 11, 0.15)',
+                  borderColor: isDaylight ? 'rgba(234, 88, 12, 0.4)' : 'rgba(245, 158, 11, 0.35)'
+                }}
+                title={isDaylight ? (language === 'en' ? 'Switch to Night Vision' : 'التبديل إلى الرؤية الليلية') : (language === 'en' ? 'Switch to Daylight Vision' : 'التبديل إلى الرؤية النهارية')}
+              >
+                {isDaylight ? <Moon size={15} /> : <Sun size={15} />}
+                <span style={{ display: typeof window !== 'undefined' && window.innerWidth <= 768 ? 'none' : 'inline' }}>
+                  {isDaylight ? (language === 'en' ? 'Night' : 'رؤية ليلية') : (language === 'en' ? 'Daylight' : 'رؤية نهارية')}
+                </span>
+              </button>
 
               <button 
                 onClick={toggleLowGraphics}
@@ -848,7 +874,7 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
                   background: lowGraphics ? 'rgba(0, 229, 255, 0.15)' : 'rgba(255, 255, 255, 0.06)',
                   borderColor: lowGraphics ? 'rgba(0, 229, 255, 0.4)' : 'rgba(255, 255, 255, 0.1)'
                 }}
-                title={language === 'en' ? 'Performance Mode' : 'وضع الأداء السريع (للجوالات القديمة)'}
+                title={language === 'en' ? 'Performance Mode (Optimized for mobile)' : 'وضع الأداء السريع (تسريع الاستجابة للجوالات والأجهزة الضعيفة)'}
               >
                 <Zap size={15} />
                 <span style={{ display: typeof window !== 'undefined' && window.innerWidth <= 768 ? 'none' : 'inline' }}>
@@ -856,7 +882,7 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
                 </span>
               </button>
 
-              <button className="btn-logout-header" onClick={handleLogout} title="تسجيل الخروج">
+              <button className="btn-logout-header" onClick={handleLogout} title={language === 'en' ? 'Logout' : 'تسجيل الخروج'}>
                 <LogOut size={15} />
                 <span>{language === 'en' ? 'Logout' : 'تسجيل الخروج'}</span>
               </button>
@@ -864,7 +890,7 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
               <button 
                 onClick={() => setIsOpen(false)} 
                 className="btn-close-modal"
-                title="إغلاق القائمة (Esc)"
+                title={language === 'en' ? 'Close Menu (Esc)' : 'إغلاق القائمة (Esc)'}
               >
                 <X size={20} />
               </button>
@@ -899,7 +925,7 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
                             </div>
                           </div>
                           {isActive ? (
-                            <div className="nav-card-active-dot" title="الشاشة المفتوحة حالياً"></div>
+                            <div className="nav-card-active-dot" title={language === 'en' ? 'Current Active Screen' : 'الشاشة النشطة حالياً'}></div>
                           ) : (
                             <ArrowUpRight size={16} color="rgba(0, 229, 255, 0.45)" />
                           )}
@@ -930,7 +956,7 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
                       <span style={{ fontSize: '12.5px', fontWeight: 900, color: '#F8FAFC' }}>{user.full_name}</span>
                       <span style={{ fontSize: '10.5px', color: '#00E5FF', fontWeight: 700 }}>
-                        {language === 'en' ? (user.role === 'super_admin' ? 'Admin' : 'Staff') : (user.role === 'super_admin' ? 'مدير' : 'موظف')}
+                        {language === 'en' ? (user.role === 'super_admin' ? 'Super Admin' : 'Staff') : (user.role === 'super_admin' ? 'مدير النظام' : 'موظف')}
                       </span>
                     </div>
                   </div>
@@ -946,27 +972,28 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
       <div className="desert-bottom-dock no-print">
         <Link href="/Dashboard" prefetch={false} className={`dock-item ${pathname === '/Dashboard' ? 'active' : ''}`}>
           <Home />
-          <span>الرئيسية</span>
+          <span>{language === 'en' ? 'Home' : 'الرئيسية'}</span>
         </Link>
         <Link href="/pos" prefetch={false} className={`dock-item ${pathname === '/pos' ? 'active' : ''}`}>
           <ShoppingBag />
-          <span>الكاشير</span>
+          <span>{language === 'en' ? 'POS' : 'الكاشير'}</span>
         </Link>
         <Link href="/invoices" prefetch={false} className={`dock-item ${pathname === '/invoices' ? 'active' : ''}`}>
           <FileText />
-          <span>الفواتير</span>
+          <span>{language === 'en' ? 'Invoices' : 'الفواتير'}</span>
         </Link>
         <Link href="/inventory" prefetch={false} className={`dock-item ${pathname === '/inventory' ? 'active' : ''}`}>
           <Package />
-          <span>الأصناف</span>
+          <span>{language === 'en' ? 'Tanks' : 'الخزانات'}</span>
         </Link>
         <button 
           onClick={() => setIsOpen(prev => !prev)} 
           className={`dock-item ${isOpen ? 'active' : ''}`}
           style={{ background: 'none', border: 'none', cursor: 'pointer' }}
+          title={language === 'en' ? 'Open Menu' : 'فتح القائمة'}
         >
           <Menu />
-          <span>القائمة</span>
+          <span>{language === 'en' ? 'Menu' : 'القائمة'}</span>
         </button>
       </div>
 
