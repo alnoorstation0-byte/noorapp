@@ -381,6 +381,13 @@ export async function POST(request: Request) {
             throw insertError;
         }
 
+        // ⛽ تهيئة قراءات عدادات المضخات آلياً للوردية الجديدة
+        try {
+            await supabaseAdmin.rpc('get_or_init_shift_pump_readings', { p_shift_id: newShift.id });
+        } catch (pumpErr) {
+            console.warn('Error initializing pump readings:', pumpErr);
+        }
+
         // إرفاق بيانات المستودع والشريك
         const [whR, delR] = await Promise.all([
             supabaseAdmin.from('warehouses').select('id, name, type').eq('id', warehouse_id).maybeSingle(),

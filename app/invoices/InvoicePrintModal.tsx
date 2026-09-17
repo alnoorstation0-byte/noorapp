@@ -207,7 +207,7 @@ export default function InvoicePrintModal({
     const thermalZatcaQr = useMemo(() => {
         if (!record) return '';
         const dateStr = record.date ? `${record.date.split('T')[0]}T12:00:00Z` : new Date().toISOString();
-        return generateZatcaQR('صيدلية تاج المودة البيطرية', '312487477800003', dateStr, totalAmount.toFixed(2), taxAmount.toFixed(2));
+        return generateZatcaQR('محطات النور للوقود', '312487477800003', dateStr, totalAmount.toFixed(2), taxAmount.toFixed(2));
     }, [record, totalAmount, taxAmount]);
 
     // دالة الطباعة
@@ -649,14 +649,14 @@ export default function InvoicePrintModal({
                         </div>
 
                         <div className="header-center">
-                            <h1 style={{ fontSize: '19px', fontWeight: 900, color: '#122946', margin: '0 0 4px 0' }}>صيدلية تاج المودة البيطرية</h1>
-                            <h2 style={{ fontSize: '14px', fontWeight: 900, color: '#2891C8', margin: '0 0 6px 0', letterSpacing: '0.5px' }}>Taj Al-Mawadah Vet Pharmacy</h2>
+                            <h1 style={{ fontSize: '19px', fontWeight: 900, color: '#122946', margin: '0 0 4px 0' }}>محطات النور للوقود</h1>
+                            <h2 style={{ fontSize: '14px', fontWeight: 900, color: '#2891C8', margin: '0 0 6px 0', letterSpacing: '0.5px' }}>Al-Noor Gas Stations Gas Station</h2>
                             <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#334155' }}>الرقم الضريبي (VAT No): 312487477800003</div>
                             <div style={{ fontSize: '12px', fontWeight: 700, color: '#334155', marginTop: '2px' }}>الرقم الموحد (Unified No): 7051013519</div>
                         </div>
 
                         <div className="header-logo">
-                            <img src="/taj_logo.png" alt="شعار صيدلية تاج المودة" />
+                            <img src="/logo.png" alt="شعار محطات النور للوقود" />
                         </div>
                     </div>
 
@@ -837,7 +837,7 @@ export default function InvoicePrintModal({
                     {/* 5️⃣ إقرار الاستلام والتعهد القانوني المعتمد */}
                     <div style={{ marginTop: '10px', border: '1px solid rgba(194,155,98,0.35)', borderRadius: '10px', padding: '8px 12px', background: 'linear-gradient(135deg, rgba(194,155,98,0.06), rgba(168,87,60,0.04))' }}>
                         <p style={{ fontSize: '9px', lineHeight: '1.5', color: '#2C1A12', fontWeight: 600, margin: '0 0 6px 0' }}>
-                            <strong style={{color:'#2C1A12', fontSize: '9.5px'}}>إقرار بالاستلام والسداد:</strong> أقرّ بأنني استلمت البضائع/الخدمات الواردة أعلاه كاملة بحالة سليمة، وأتعهد بسداد قيمتها البالغة <strong style={{color:'#A8573C'}}>{formatCurrencyEn(totalAmount)}</strong>. وفي حال التأخر يحق لصيدلية تاج المودة اتخاذ الإجراءات النظامية أمام المحاكم والجهات المختصة.
+                            <strong style={{color:'#2C1A12', fontSize: '9.5px'}}>إقرار بالاستلام والسداد:</strong> أقرّ بأنني استلمت البضائع/الخدمات الواردة أعلاه كاملة بحالة سليمة، وأتعهد بسداد قيمتها البالغة <strong style={{color:'#A8573C'}}>{formatCurrencyEn(totalAmount)}</strong>. وفي حال التأخر يحق لمحطات النور للوقود اتخاذ الإجراءات النظامية أمام المحاكم والجهات المختصة.
                         </p>
                         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '15px' }}>
                             <div style={{ textAlign: 'center' }}><div style={{ fontSize: '9px', fontWeight: 800, color: 'rgba(44,26,18,0.6)' }}>الاسم والصفة</div><div style={{ borderBottom: '1px solid #C29B62', height: '18px' }}></div></div>
@@ -848,7 +848,7 @@ export default function InvoicePrintModal({
 
                     {/* 6️⃣ الفوتر الثابت أسفل الصفحة */}
                     <div className="inv-footer-contact">
-                        المملكة العربية السعودية &nbsp;|&nbsp; info@taj-mawadah.com &nbsp;|&nbsp; صيدلية تاج المودة البيطرية © {new Date().getFullYear()}
+                        المملكة العربية السعودية &nbsp;|&nbsp; info@alnoor-gas.com &nbsp;|&nbsp; محطات النور للوقود © {new Date().getFullYear()}
                     </div>
 
                 </div>
@@ -857,9 +857,9 @@ export default function InvoicePrintModal({
                 /* المعاينة الثانية: الإيصال الحراري 80mm المتكامل بالشعار وباركود ZATCA      */
                 /* ========================================================================= */
                 <div className="thermal-preview-box">
-                    <img src="/taj_logo.png" alt="Taj Al-Mawadah Logo" className="thermal-logo" />
-                    <div style={{ fontSize: '16px', fontWeight: 900, color: '#000', margin: '2px 0' }}>صيدلية تاج المودة البيطرية</div>
-                    <div style={{ fontSize: '10.5px', fontWeight: 700, letterSpacing: '0.5px' }}>Taj Al-Mawadah Vet Pharmacy</div>
+                    <img src="/logo.png" alt="Al-Noor Gas Stations Logo" className="thermal-logo" />
+                    <div style={{ fontSize: '16px', fontWeight: 900, color: '#000', margin: '2px 0' }}>محطات النور للوقود</div>
+                    <div style={{ fontSize: '10.5px', fontWeight: 700, letterSpacing: '0.5px' }}>Al-Noor Gas Stations Gas Station</div>
                     <div style={{ fontSize: '10.5px', marginTop: '3px' }}>الرقم الضريبي: 312487477800003</div>
                     <div style={{ fontSize: '10px' }}>الرقم الموحد: 7051013519</div>
                     
@@ -990,9 +990,9 @@ export default function InvoicePrintModal({
 
                     <div style={{ fontSize: '10px', marginTop: '6px', color: '#111', lineHeight: '1.4' }}>
                         البضاعة المباعة تستبدل أو ترد خلال 3 أيام بحالتها الأصلية.<br/>
-                        شكراً لتعاملكم مع <strong>صيدلية تاج المودة</strong> 🐎🐪<br/>
-                        خدمة العملاء: info@taj-mawadah.com<br/>
-                        <span style={{ fontSize: '8.5px', color: '#555' }}>تم الإصدار إلكترونياً عبر نظام تاج المودة</span>
+                        شكراً لتعاملكم مع <strong>محطات النور للوقود</strong> ⛽🚗<br/>
+                        خدمة العملاء: info@alnoor-gas.com<br/>
+                        <span style={{ fontSize: '8.5px', color: '#555' }}>تم الإصدار إلكترونياً عبر نظام محطات النور</span>
                     </div>
                 </div>
             )}

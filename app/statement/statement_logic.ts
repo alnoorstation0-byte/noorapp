@@ -310,7 +310,7 @@ export function useStatementLogic() {
                         <body>
                             <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px;">
                                 <div style="text-align: right;">
-                                    <h1 style="margin: 0 0 5px 0; font-size: 22px; font-weight: bold; color: #122946;">صيدلية تاج المودة البيطرية</h1>
+                                    <h1 style="margin: 0 0 5px 0; font-size: 22px; font-weight: bold; color: #122946;">محطات النور للوقود</h1>
                                     <p style="margin: 0; color: #8a7a6b; font-size: 14px; font-weight: bold;">إدارة الحسابات العامة - تقرير أداء مالي</p>
                                 </div>
                                 <div style="text-align: left;">

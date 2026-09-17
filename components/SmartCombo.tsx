@@ -288,8 +288,8 @@ export default function SmartCombo({
     const InputElement = isTextArea ? 'textarea' : 'input';
 
     const dropdownStyle: React.CSSProperties = (isMobile && isMobileBottomSheet) 
-        ? { position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 99999, background: '#fff', borderTopLeftRadius: '24px', borderTopRightRadius: '24px', padding: '20px 15px', maxHeight: '80vh', overflowY: 'auto', boxShadow: '0 -15px 40px rgba(0,0,0,0.15)', animation: 'slideUp 0.3s ease-out' }
-        : { position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 2000, maxHeight: '250px', overflowY: 'auto', background: 'rgba(255, 255, 255, 0.95)', backdropFilter: 'blur(20px)', borderRadius: '16px', padding: '8px', boxShadow: '0 15px 40px rgba(0,0,0,0.12)', border: '1px solid rgba(0,0,0,0.05)', marginTop: '5px' };
+        ? { position: 'fixed', bottom: 0, left: 0, right: 0, zIndex: 99999, background: '#141822', borderTopLeftRadius: '24px', borderTopRightRadius: '24px', padding: '20px 15px', maxHeight: '80vh', overflowY: 'auto', boxShadow: '0 -15px 40px rgba(0,0,0,0.6)', border: '1px solid rgba(0, 229, 255, 0.25)', animation: 'slideUp 0.3s ease-out', color: '#F8FAFC' }
+        : { position: 'absolute', top: '100%', left: 0, right: 0, zIndex: 2000, maxHeight: '250px', overflowY: 'auto', background: 'rgba(20, 24, 34, 0.98)', backdropFilter: 'blur(24px)', borderRadius: '16px', padding: '8px', boxShadow: '0 15px 40px rgba(0,0,0,0.6)', border: '1px solid rgba(0, 229, 255, 0.25)', marginTop: '5px', color: '#F8FAFC' };
 
     const renderListItem = (item: any, index: number, isRecent = false) => {
         const isPrimitive = typeof item !== 'object';
@@ -306,16 +306,16 @@ export default function SmartCombo({
                  className={`smart-drop-item ${isSelected ? 'selected' : ''} ${isHighlighted ? 'highlighted' : ''}`}>
                 
                 {multi && <input type="checkbox" checked={isSelected} readOnly style={{ width: '18px', height: '18px', accentColor: THEME.success, cursor: 'pointer', flexShrink: 0 }} />}
-                {showAvatar && !isPrimitive && <img src={item.avatar_url || `https://ui-avatars.com/api/?name=${displayName}&background=random`} alt="avatar" style={{ width: '28px', height: '28px', borderRadius: '50%', flexShrink: 0, border: '1px solid rgba(40, 145, 200, 0.15)' }} />}
+                {showAvatar && !isPrimitive && <img src={item.avatar_url || `https://ui-avatars.com/api/?name=${displayName}&background=random`} alt="avatar" style={{ width: '28px', height: '28px', borderRadius: '50%', flexShrink: 0, border: '1px solid rgba(0, 229, 255, 0.2)' }} />}
                 
                 <div style={{ wordBreak: 'break-word', flex: 1 }}>
-                    <span style={{ fontWeight: 900, color: THEME.primary, opacity: 0.7, fontSize: '11px', marginLeft: displayCode ? '5px' : '0' }}>
+                    <span style={{ fontWeight: 900, color: THEME.primary, opacity: 0.85, fontSize: '11px', marginLeft: displayCode ? '5px' : '0' }}>
                         {displayCode ? `[${isSensitive ? applyMask(displayCode) : displayCode}] ` : ''}
                     </span> 
                     {isSensitive ? applyMask(displayName) : displayName}
                 </div>
                 
-                {isRecent && <span style={{ fontSize: '10px', color: '#475569' }}>🕒</span>}
+                {isRecent && <span style={{ fontSize: '10px', color: '#94A3B8' }}>🕒</span>}
             </div>
         );
     };
@@ -325,15 +325,15 @@ export default function SmartCombo({
         return (
             <div style={{ position: 'relative', flex: 1, width: '100%', opacity: 0.7 }} title="🔒 ليس لديك صلاحية للوصول لهذا الحقل">
                 {label && (
-                    <label style={{ fontSize: '13px', fontWeight: 900, color: '#64748b', display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '8px' }}>
+                    <label style={{ fontSize: '13px', fontWeight: 900, color: '#94A3B8', display: 'flex', alignItems: 'center', gap: '5px', marginBottom: '8px' }}>
                         {icon && <span>{icon}</span>} {label} 🔒
                     </label>
                 )}
                 <div className="smart-combo-input disabled" style={{ 
-                    background: 'rgba(0,0,0,0.03)', cursor: 'not-allowed', color: '#475569', 
-                    border: '1px dashed rgba(40, 145, 200, 0.2)', minHeight: isTextArea ? '90px' : 'auto', 
+                    background: 'rgba(20, 24, 34, 0.6)', cursor: 'not-allowed', color: '#64748b', 
+                    border: '1px dashed rgba(0, 229, 255, 0.2)', minHeight: isTextArea ? '90px' : 'auto', 
                     display: 'flex', alignItems: isTextArea ? 'flex-start' : 'center',
-                    padding: '14px 15px'
+                    padding: '14px 15px', borderRadius: '12px'
                 }}>
                     {initialDisplay || search || 'محمي ومقفل...'}
                 </div>
@@ -344,14 +344,14 @@ export default function SmartCombo({
     return (
         <div style={{ position: 'relative', flex: 1, width: '100%' }}>
             <style>{`
-                .smart-combo-disabled { background: rgba(0,0,0,0.05); cursor: not-allowed; color: #64748b; border-color: transparent; }
-                .smart-drop-item { padding: 10px; cursor: pointer; border-radius: 10px; font-size: 12px; transition: all 0.1s; display: flex; align-items: center; gap: 8px; color: #334155; }
-                .smart-drop-item:hover { background: rgba(255, 255, 255, 0.6); }
-                .smart-drop-item.highlighted { background: rgba(255, 255, 255, 0.4); border-right: 4px solid ${THEME.primary}; color: ${THEME.primary}; font-weight: 800; }
-                .smart-drop-item.selected { background: ${THEME.success}10; border-right: 4px solid ${THEME.success}; color: ${THEME.success}; font-weight: 800; }
+                .smart-combo-disabled { background: rgba(255,255,255,0.04); cursor: not-allowed; color: #64748b; border-color: transparent; }
+                .smart-drop-item { padding: 10px; cursor: pointer; border-radius: 10px; font-size: 12px; transition: all 0.15s; display: flex; align-items: center; gap: 8px; color: #cbd5e1; }
+                .smart-drop-item:hover { background: rgba(0, 229, 255, 0.12); color: #00E5FF; }
+                .smart-drop-item.highlighted { background: rgba(0, 229, 255, 0.18); border-right: 4px solid ${THEME.primary}; color: #00E5FF; font-weight: 800; }
+                .smart-drop-item.selected { background: rgba(16, 185, 129, 0.18); border-right: 4px solid ${THEME.success}; color: #10B981; font-weight: 800; }
                 .cinematic-scroll::-webkit-scrollbar { width: 6px; }
-                .cinematic-scroll::-webkit-scrollbar-thumb { background: rgba(40, 145, 200, 0.2); border-radius: 10px; }
-                .cinematic-scroll::-webkit-scrollbar-thumb:hover { background: #475569; }
+                .cinematic-scroll::-webkit-scrollbar-thumb { background: rgba(0, 229, 255, 0.2); border-radius: 10px; }
+                .cinematic-scroll::-webkit-scrollbar-thumb:hover { background: #00E5FF; }
                 @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
             `}</style>
 
@@ -394,12 +394,12 @@ export default function SmartCombo({
                 <>
                     <div onClick={() => setShow(false)} style={{ position: 'fixed', inset: 0, zIndex: 1999, background: (isMobile && isMobileBottomSheet) ? 'rgba(0,0,0,0.5)' : 'transparent', backdropFilter: (isMobile && isMobileBottomSheet) ? 'blur(5px)' : 'none' }} />
                     <div ref={listRef} className="cinematic-scroll" style={dropdownStyle}>
-                        {isMobile && isMobileBottomSheet && <div style={{ width: '40px', height: '5px', background: 'rgba(40, 145, 200, 0.2)', borderRadius: '10px', margin: '0 auto 15px auto' }} />}
+                        {isMobile && isMobileBottomSheet && <div style={{ width: '40px', height: '5px', background: 'rgba(0, 229, 255, 0.3)', borderRadius: '10px', margin: '0 auto 15px auto' }} />}
                         {(results?.length || 0) === 0 && (search?.length || 0) > 0 && !isLoading && (
                             <div style={{ padding: '15px', textAlign: 'center' }}>
-                                <p style={{ fontSize: '13px', color: '#64748b', fontWeight: 800, margin: '0 0 10px 0' }}>❌ لا توجد نتائج لـ "<span style={{color: THEME.ruby}}>{search}</span>"</p>
+                                <p style={{ fontSize: '13px', color: '#94A3B8', fontWeight: 800, margin: '0 0 10px 0' }}>❌ لا توجد نتائج لـ "<span style={{color: THEME.danger}}>{search}</span>"</p>
                                 {allowAddNew && onAddNew && hasAddPermission && (
-                                    <button onMouseDown={(e) => { e.preventDefault(); onAddNew(search); setShow(false); }} style={{ background: THEME.success, color: 'white', border: 'none', padding: '10px 20px', borderRadius: '12px', fontWeight: 900, cursor: 'pointer', fontSize: '13px', boxShadow: `0 5px 15px ${THEME.success}40`, width: '100%' }}>
+                                    <button onMouseDown={(e) => { e.preventDefault(); onAddNew(search); setShow(false); }} style={{ background: THEME.success, color: '#0B0E14', border: 'none', padding: '10px 20px', borderRadius: '12px', fontWeight: 900, cursor: 'pointer', fontSize: '13px', boxShadow: `0 5px 15px ${THEME.success}40`, width: '100%' }}>
                                         ➕ إضافة "{search}" كجديد
                                     </button>
                                 )}
@@ -407,9 +407,9 @@ export default function SmartCombo({
                         )}
                         {(results?.length || 0) === 0 && (search?.length || 0) === 0 && showRecent && (recentItems?.length || 0) > 0 && !isLoading && (
                             <div>
-                                <div style={{ fontSize: '11px', color: '#475569', fontWeight: 900, marginBottom: '8px', padding: '0 10px' }}>⏱️ آخر الاختيارات</div>
+                                <div style={{ fontSize: '11px', color: '#94A3B8', fontWeight: 900, marginBottom: '8px', padding: '0 10px' }}>⏱️ آخر الاختيارات</div>
                                 {recentItems.map((item, index) => renderListItem(item, index, true))}
-                                <div style={{ height: '1px', background: 'rgba(255, 255, 255, 0.4)', margin: '10px 0' }} />
+                                <div style={{ height: '1px', background: 'rgba(0, 229, 255, 0.15)', margin: '10px 0' }} />
                             </div>
                         )}
                         {results.length > 0 && results.map((item, index) => renderListItem(item, index, false))}

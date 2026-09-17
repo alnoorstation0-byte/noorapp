@@ -262,7 +262,7 @@ export default function InvoiceFormModal({
             width="1060px"
             headerExtra={zatcaToggle}
         >
-            {/* 🎨 Scoped Desert Glassmorphism Form Styles */}
+            {/* 🎨 Scoped Noor Command Center Glassmorphism Form Styles */}
             <style jsx>{`
                 .invoice-modal-flow {
                     display: flex;
@@ -271,12 +271,12 @@ export default function InvoiceFormModal({
                 }
 
                 .desert-form-card {
-                    background: linear-gradient(135deg, rgba(255, 253, 250, 0.88) 0%, rgba(255, 253, 250, 0.5) 100%);
+                    background: rgba(20, 24, 34, 0.75);
                     backdrop-filter: blur(20px) saturate(160%);
-                    border: 1px solid rgba(194, 155, 98, 0.32);
+                    border: 1px solid rgba(0, 229, 255, 0.2);
                     border-radius: 16px;
                     padding: 16px 18px;
-                    box-shadow: 0 4px 12px rgba(44, 26, 18, 0.05);
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
                 }
 
                 .card-section-title {
@@ -285,18 +285,18 @@ export default function InvoiceFormModal({
                     justify-content: space-between;
                     font-size: 13px;
                     font-weight: 900;
-                    color: #2C1A12;
+                    color: #00E5FF;
                     margin-bottom: 12px;
                     padding-bottom: 8px;
-                    border-bottom: 1px dashed rgba(194, 155, 98, 0.35);
+                    border-bottom: 1px dashed rgba(0, 229, 255, 0.25);
                 }
 
                 .card-section-title span.badge {
                     font-size: 10.5px;
                     padding: 2px 8px;
                     border-radius: 6px;
-                    background: rgba(194, 155, 98, 0.15);
-                    color: #A8573C;
+                    background: rgba(0, 229, 255, 0.15);
+                    color: #00E5FF;
                     font-weight: 800;
                 }
 
@@ -316,7 +316,7 @@ export default function InvoiceFormModal({
                 .form-field-label {
                     font-size: 12px;
                     font-weight: 800;
-                    color: #2C1A12;
+                    color: #94A3B8;
                     display: flex;
                     align-items: center;
                     gap: 6px;
@@ -326,35 +326,35 @@ export default function InvoiceFormModal({
                     height: 42px;
                     width: 100%;
                     border-radius: 12px;
-                    border: 1px solid rgba(194, 155, 98, 0.38);
-                    background: rgba(255, 255, 255, 0.85);
+                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    background: rgba(11, 14, 20, 0.7);
                     padding: 0 12px;
                     font-size: 13px;
                     font-weight: 700;
-                    color: #2C1A12;
+                    color: #F8FAFC;
                     box-sizing: border-box;
                     outline: none;
                     transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
                 }
 
                 .field-input:focus {
-                    background: #ffffff;
-                    border-color: #C29B62;
-                    box-shadow: 0 0 0 3.5px rgba(194, 155, 98, 0.2);
+                    background: rgba(20, 24, 34, 0.95);
+                    border-color: #00E5FF;
+                    box-shadow: 0 0 15px rgba(0, 229, 255, 0.2);
                 }
 
                 .field-input[readonly] {
-                    background: rgba(241, 245, 249, 0.8);
+                    background: rgba(255, 255, 255, 0.04);
                     color: #64748b;
                     cursor: not-allowed;
-                    border-color: rgba(0, 0, 0, 0.08);
+                    border-color: rgba(255, 255, 255, 0.06);
                 }
 
                 .barcode-scan-container {
                     margin-bottom: 12px;
                     padding: 8px 12px;
-                    background: rgba(255, 255, 255, 0.6);
-                    border: 1px dashed rgba(194, 155, 98, 0.4);
+                    background: rgba(20, 24, 34, 0.5);
+                    border: 1px dashed rgba(0, 229, 255, 0.3);
                     border-radius: 12px;
                 }
 
@@ -367,8 +367,8 @@ export default function InvoiceFormModal({
 
                 .btn-add-line {
                     height: 42px;
-                    background: linear-gradient(135deg, #C29B62, #A8573C);
-                    color: white;
+                    background: linear-gradient(135deg, #00E5FF, #0077B6);
+                    color: #0B0E14;
                     border: none;
                     border-radius: 12px;
                     font-weight: 900;
@@ -379,13 +379,13 @@ export default function InvoiceFormModal({
                     justify-content: center;
                     gap: 6px;
                     transition: 0.2s cubic-bezier(0.16, 1, 0.3, 1);
-                    box-shadow: 0 4px 10px rgba(168, 87, 60, 0.25);
+                    box-shadow: 0 4px 10px rgba(0, 229, 255, 0.25);
                     white-space: nowrap;
                 }
 
                 .btn-add-line:hover {
                     transform: translateY(-2px);
-                    box-shadow: 0 6px 16px rgba(168, 87, 60, 0.35);
+                    box-shadow: 0 6px 16px rgba(0, 229, 255, 0.35);
                     filter: brightness(1.05);
                 }
 
@@ -396,8 +396,8 @@ export default function InvoiceFormModal({
                 .table-scroll-wrap {
                     overflow-x: auto;
                     border-radius: 14px;
-                    border: 1px solid rgba(194, 155, 98, 0.25);
-                    background: rgba(255, 255, 255, 0.55);
+                    border: 1px solid rgba(255, 255, 255, 0.08);
+                    background: rgba(15, 20, 30, 0.6);
                     margin-top: 14px;
                 }
 
@@ -409,23 +409,24 @@ export default function InvoiceFormModal({
                 }
 
                 .invoice-items-table th {
-                    background: #2C1A12;
-                    color: #FDFBF7;
+                    background: rgba(11, 14, 20, 0.9);
+                    color: #00E5FF;
                     padding: 10px 12px;
-                    font-weight: 800;
+                    font-weight: 900;
                     font-size: 12px;
                     letter-spacing: 0.2px;
+                    border-bottom: 1px solid rgba(0, 229, 255, 0.2);
                 }
 
                 .invoice-items-table td {
                     padding: 10px 12px;
-                    border-bottom: 1px solid rgba(194, 155, 98, 0.15);
+                    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
                     font-weight: 700;
-                    color: #2C1A12;
+                    color: #F8FAFC;
                 }
 
                 .invoice-items-table tr:hover td {
-                    background: rgba(194, 155, 98, 0.08);
+                    background: rgba(0, 229, 255, 0.05);
                 }
 
                 .table-del-btn {
@@ -456,8 +457,8 @@ export default function InvoiceFormModal({
                 }
 
                 .stat-box {
-                    background: rgba(255, 255, 255, 0.7);
-                    border: 1px solid rgba(194, 155, 98, 0.3);
+                    background: rgba(20, 24, 34, 0.7);
+                    border: 1px solid rgba(255, 255, 255, 0.08);
                     border-radius: 14px;
                     padding: 10px 14px;
                     text-align: center;
@@ -467,30 +468,30 @@ export default function InvoiceFormModal({
                 }
 
                 .stat-box.highlight {
-                    background: linear-gradient(135deg, #2C1A12, #442416);
+                    background: linear-gradient(135deg, rgba(0, 229, 255, 0.2), rgba(0, 119, 182, 0.3));
                     color: white;
-                    border-color: #C29B62;
-                    box-shadow: 0 6px 18px rgba(44, 26, 18, 0.2);
+                    border-color: #00E5FF;
+                    box-shadow: 0 6px 18px rgba(0, 229, 255, 0.2);
                 }
 
                 .stat-box-title {
                     font-size: 11px;
                     font-weight: 800;
-                    color: #64748b;
+                    color: #94A3B8;
                 }
 
                 .stat-box.highlight .stat-box-title {
-                    color: #C29B62;
+                    color: #00E5FF;
                 }
 
                 .stat-box-value {
                     font-size: 17px;
                     font-weight: 900;
-                    color: #2C1A12;
+                    color: #F8FAFC;
                 }
 
                 .stat-box.highlight .stat-box-value {
-                    color: #ffffff;
+                    color: #00E5FF;
                     font-size: 20px;
                 }
 

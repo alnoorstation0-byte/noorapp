@@ -47,11 +47,16 @@ export interface PosSettlementPayload {
     totalExpenses?: number;
     totalCollections?: number;
     startingCash?: number;
-    // Bottles Custody
-    bottlesSold: number;
-    bottlesReturned: number;
-    bottlesShortage: number;
-    returnBottlesToMain: boolean;
+    // Fuel Pumps Reconciliation
+    totalLitersSold?: number;
+    meterTotalAmount?: number;
+    meterSalesVariance?: number;
+    pumpReadings?: any[];
+    // Legacy Custody
+    bottlesSold?: number;
+    bottlesReturned?: number;
+    bottlesShortage?: number;
+    returnBottlesToMain?: boolean;
     // Inventory Settlement
     inventoryReturns: Array<{
         itemId: string;
@@ -254,11 +259,31 @@ export function usePosSettlementsLogic() {
         staleTime: 1000 * 60 * 5
     });
 
+    // 2.5. Fetch Pump Meter Readings for Shifts
+    const pumpReadingsQuery = useQuery({
+        queryKey: ['pos_settlements_pump_readings', dateFrom, dateTo, selectedWarehouseId],
+        queryFn: async () => {
+            const { data, error } = await supabase
+                .from('shift_pump_readings')
+                .select(`
+                    *,
+                    pump:fuel_pumps(id, pump_name, pump_number, fuel_type, unit_price)
+                `);
+            if (error) {
+                console.warn('Error fetching shift pump readings:', error);
+                return [];
+            }
+            return data || [];
+        },
+        staleTime: 0
+    });
+
     // 🔄 Realtime listeners
     useRealtimeListener(
-        ['pos_shifts', 'invoices', 'receipt_vouchers', 'expenses', 'warehouse_inventory'],
+        ['pos_shifts', 'invoices', 'receipt_vouchers', 'expenses', 'warehouse_inventory', 'shift_pump_readings', 'fuel_pumps'],
         () => {
             queryClient.invalidateQueries({ queryKey: ['pos_settlements_shifts'] });
+            queryClient.invalidateQueries({ queryKey: ['pos_settlements_pump_readings'] });
             queryClient.invalidateQueries({ queryKey: ['pos_settlements_invoices'] });
             queryClient.invalidateQueries({ queryKey: ['pos_settlements_receipts'] });
             queryClient.invalidateQueries({ queryKey: ['pos_settlements_expenses'] });
@@ -331,6 +356,25 @@ export function usePosSettlementsLogic() {
                 const list = expensesByShift.get(exp.shift_id) || [];
                 list.push(exp);
                 expensesByShift.set(exp.shift_id, list);
+            }
+        });
+
+        // Group pump readings by shift
+        const pumpReadingsByShift = new Map<string, any[]>();
+        (pumpReadingsQuery.data || []).forEach((pr: any) => {
+            if (pr.shift_id) {
+                const list = pumpReadingsByShift.get(pr.shift_id) || [];
+                list.push({
+                    ...pr,
+                    pump_name: pr.pump?.pump_name || `مضخة ${pr.pump?.pump_number || ''}`,
+                    fuel_type: pr.pump?.fuel_type || 'بنزين',
+                    unit_price: Number(pr.unit_price || pr.pump?.unit_price || 0),
+                    start_reading: Number(pr.start_reading || 0),
+                    end_reading: pr.end_reading !== null && pr.end_reading !== undefined ? Number(pr.end_reading) : null,
+                    liters_pumped: Number(pr.liters_pumped || 0),
+                    expected_amount: Number(pr.expected_amount || 0)
+                });
+                pumpReadingsByShift.set(pr.shift_id, list);
             }
         });
 
@@ -485,6 +529,14 @@ export function usePosSettlementsLogic() {
             const cashierPhone = delData?.phone || profData?.phone_number || '';
             const cashierPartnerId = shift.delegate_id || profData?.linked_partner_id || (partnerMap.has(shift.user_id) ? shift.user_id : null);
 
+            // 11. Fuel Pump Readings & Meter Reconciliation
+            const shiftPumps = pumpReadingsByShift.get(shift.id) || [];
+            const totalLitersSold = Number(shift.total_liters_sold || shiftPumps.reduce((acc: number, p: any) => acc + (p.liters_pumped || 0), 0));
+            const meterTotalAmount = Number(shift.meter_total_amount || shiftPumps.reduce((acc: number, p: any) => acc + (p.expected_amount || 0), 0));
+            const meterSalesVariance = Number(shift.meter_sales_variance !== undefined && shift.meter_sales_variance !== null
+                ? shift.meter_sales_variance
+                : (meterTotalAmount > 0 ? (meterTotalAmount - totalSales) : 0));
+
             return {
                 id: shift.id,
                 shiftNumber: `SH-${shift.id.slice(0, 6).toUpperCase()}`,
@@ -514,7 +566,12 @@ export function usePosSettlementsLogic() {
                 handedOverCash,
                 remainingCashCustody,
                 shortageOverage,
-                // Bottles
+                // Fuel Pumps & Meters
+                totalLitersSold,
+                meterTotalAmount,
+                meterSalesVariance,
+                pumpReadings: shiftPumps,
+                // Bottles (legacy compatibility)
                 startingBottles,
                 bottlesSold,
                 bottlesReturned,
@@ -532,7 +589,7 @@ export function usePosSettlementsLogic() {
                 closingNotes: shift.closing_notes
             };
         });
-    }, [rawShifts, rawInvoices, rawReceipts, rawExpenses, rawInventory, warehousesQuery.data, cashiersQuery.data]);
+    }, [rawShifts, rawInvoices, rawReceipts, rawExpenses, rawInventory, pumpReadingsQuery.data, warehousesQuery.data, cashiersQuery.data]);
 
     // Filtered settlements based on UI controls
     const filteredSettlements = useMemo(() => {
@@ -583,6 +640,9 @@ export function usePosSettlementsLogic() {
             acc.totalShortage += curr.shortageOverage < 0 ? Math.abs(curr.shortageOverage) : 0;
             acc.totalOverage += curr.shortageOverage > 0 ? curr.shortageOverage : 0;
             acc.totalStock += curr.totalRemainingStock;
+            acc.totalLitersSold += (curr.totalLitersSold || 0);
+            acc.meterTotalAmount += (curr.meterTotalAmount || 0);
+            acc.meterSalesVariance += (curr.meterSalesVariance || 0);
             acc.bottlesSold += curr.bottlesSold;
             acc.bottlesReturned += curr.bottlesReturned;
 
@@ -604,6 +664,9 @@ export function usePosSettlementsLogic() {
             totalShortage: 0,
             totalOverage: 0,
             totalStock: 0,
+            totalLitersSold: 0,
+            meterTotalAmount: 0,
+            meterSalesVariance: 0,
             bottlesSold: 0,
             bottlesReturned: 0
         });
@@ -852,25 +915,22 @@ export function usePosSettlementsLogic() {
             }
 
             // ─────────────────────────────────────────────────────────────
-            // 3. BOTTLE RETURNS TO MAIN WAREHOUSE
+            // 3. FUEL PUMP READINGS CONFIRMATION
             // ─────────────────────────────────────────────────────────────
-            if (returnBottlesToMain && bottlesReturned > 0) {
-                const btlTxNumber = `BTL-RET-${Date.now().toString().slice(-6)}`;
+            if (payload.pumpReadings && payload.pumpReadings.length > 0) {
                 try {
-                    await supabase.from('inventory_transactions').insert([{
-                        transaction_number: btlTxNumber,
-                        transaction_date: date,
-                        type: 'transfer',
-                        quantity: bottlesReturned,
-                        item_id: 'c5efa035-c8d5-4d13-bf33-7c7cd854f393',
-                        status: 'approved',
-                        warehouse_id: warehouseId,
-                        destination_warehouse_id: MAIN_WAREHOUSE_ID,
-                        shift_id: shiftId,
-                        notes: `توريد عبوات ومستلزمات مستردة (${bottlesReturned} قارورة) من منفذ ${warehouseName} للمستودع الرئيسي`
-                    }]);
-                } catch (btlErr) {
-                    console.warn("Bottle return insert error:", btlErr);
+                    await supabase.rpc('save_shift_pump_readings', {
+                        p_shift_id: shiftId,
+                        p_readings: payload.pumpReadings.map((p: any) => ({
+                            pump_id: p.pump_id,
+                            start_reading: p.start_reading,
+                            end_reading: p.end_reading,
+                            notes: p.notes || ''
+                        })),
+                        p_update_meters: false
+                    });
+                } catch (pumpErr) {
+                    console.warn("Pump readings save warning during settlement:", pumpErr);
                 }
             }
 
@@ -951,8 +1011,9 @@ export function usePosSettlementsLogic() {
             'المورد للخزينة': item.handedOverCash,
             'فروقات الصندوق (عجز/زيادة)': item.shortageOverage,
             'متبقي العهدة': item.remainingCashCustody,
-            'فوارغ مباعة': item.bottlesSold,
-            'فوارغ مرتجعة': item.bottlesReturned,
+            'لترات الوقود (المضخات)': item.totalLitersSold || 0,
+            'مبيعات الوقود بالعدادات': item.meterTotalAmount || 0,
+            'فارق العدادات مع الفواتير': item.meterSalesVariance || 0,
             'مخزون المنفذ المتبقي': item.totalRemainingStock,
             'حالة التسوية': item.settlementStatus === 'settled' ? 'تمت التسوية' : (item.settlementStatus === 'open' ? 'مفتوحة' : 'بانتظار التسوية')
         }));

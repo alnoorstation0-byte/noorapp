@@ -1,6 +1,6 @@
 /**
  * دالات مساعدة لطباعة ومشاركة الفواتير (A4 والحرارية وواتساب)
- * Taj Al-Mawadah Vet Pharmacy - Invoice Utilities
+ * Al-Noor Gas Stations Gas Station - Invoice Utilities
  */
 
 export interface NormalizedInvoiceLine {
@@ -76,7 +76,7 @@ export function normalizeInvoiceLines(record: any): NormalizedInvoiceLine[] {
     if (result.length === 0) {
         const hasHeaderItem = record.description || Number(record.quantity || 0) > 0 || Number(record.unit_price || 0) > 0;
         if (hasHeaderItem) {
-            const name = record.description || 'مبيعات أدوية ومستلزمات بيطرية';
+            const name = record.description || 'مبيعات منتجات ومستلزمات وقودة';
             const quantity = Number(record.quantity) > 0 ? Number(record.quantity) : 1;
             const unit = record.unit || 'حبة';
             const unit_price = Number(record.unit_price) > 0 
@@ -134,7 +134,7 @@ export function generateInvoiceWhatsAppMessage(record: any, customer: any, lines
     });
 
     const msg = 
-`💧 *صيدلية تاج المودة البيطرية | Taj Al-Mawadah Pharmacy*
+`💧 *محطات النور للوقود | Al-Noor Gas Stations Station*
 ---------------------------------------
 مرحباً بك عزيزنا: *${clientName}*
 يسعدنا تزويدكم بتفاصيل فاتورتكم:
@@ -151,8 +151,8 @@ ${itemsList || '- تفاصيل المبيعات\n'}
 🧾 *ضريبة القيمة المضافة (15%):* ${taxAmount} ر.س
 💎 *الإجمالي النهائي:* ${totalAmount} ر.س
 
-شكراً لتعاملكم مع صيدلية تاج المودة 🐎🐪
-خدمة العملاء: info@taj-mawadah.com`;
+شكراً لتعاملكم مع محطات النور للوقود ⛽🚗
+خدمة العملاء: info@alnoor-gas.com`;
 
     return msg;
 }

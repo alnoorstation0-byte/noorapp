@@ -48,7 +48,7 @@ export default function InvoicesPage() {
   const isAllVisibleSelected = currentVisibleIds.length > 0 && currentVisibleIds.every((id: string) => logic.selectedIds.includes(id));
 
   // =========================================================================
-  // ?? ????? ??????
+  // ?? ????? ?????
   // =========================================================================
   const invoiceColumns = useMemo(() => [
     {
@@ -724,19 +724,19 @@ export default function InvoicesPage() {
           height: 38px;
           padding: 0 16px;
           border-radius: 12px;
-          background: linear-gradient(135deg, #C29B62 0%, #A8573C 100%);
-          color: white;
+          background: linear-gradient(135deg, #00E5FF 0%, #0077B6 100%);
+          color: #0B0E14;
           font-size: 12.5px;
-          font-weight: 800;
-          border: 1px solid rgba(255, 255, 255, 0.3);
+          font-weight: 900;
+          border: none;
           cursor: pointer;
           transition: all 0.2s;
-          box-shadow: 0 4px 14px rgba(168, 87, 60, 0.25);
+          box-shadow: 0 4px 14px rgba(0, 229, 255, 0.3);
           white-space: nowrap;
         }
         .btn-create-invoice:hover {
           transform: translateY(-2px);
-          box-shadow: 0 6px 18px rgba(168, 87, 60, 0.35);
+          box-shadow: 0 6px 18px rgba(0, 229, 255, 0.4);
           filter: brightness(1.08);
         }
 
@@ -747,15 +747,15 @@ export default function InvoicesPage() {
           left: 50%;
           transform: translateX(-50%);
           z-index: 99999;
-          background: rgba(44, 26, 18, 0.94);
+          background: rgba(20, 24, 34, 0.95);
           backdrop-filter: blur(25px) saturate(180%);
-          border: 1px solid rgba(194, 155, 98, 0.35);
+          border: 1px solid rgba(0, 229, 255, 0.35);
           border-radius: 20px;
           padding: 8px 16px;
           display: flex;
           align-items: center;
           gap: 14px;
-          box-shadow: 0 20px 50px rgba(44, 26, 18, 0.35);
+          box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
           animation: floatUp 0.3s cubic-bezier(0.16, 1, 0.3, 1);
           max-width: 95vw;
           flex-wrap: wrap;
@@ -768,11 +768,11 @@ export default function InvoicesPage() {
           display: flex;
           align-items: center;
           gap: 8px;
-          color: white;
+          color: #F8FAFC;
         }
         .batch-badge {
-          background: #C29B62;
-          color: white;
+          background: #00E5FF;
+          color: #0B0E14;
           padding: 3px 9px;
           border-radius: 12px;
           font-size: 12px;

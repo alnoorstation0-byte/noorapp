@@ -4,8 +4,7 @@ import { supabase } from '@/lib/supabase';
 import { useMutation, useQueryClient } from '@tanstack/react-query'; 
 import { useToast } from '@/lib/toast-context'; 
 import { useRealtimeListener } from '@/lib/useRealtimeSync';
-import { syncAllWarehouseBalances, MAIN_WAREHOUSE_ID } from '@/lib/inventory_engine'; 
-import { getLocalExpiryMetadata, saveLocalExpiryMetadata } from '@/app/expiry-alerts/expiry_alerts_logic';
+import { syncAllWarehouseBalances, MAIN_WAREHOUSE_ID } from '@/lib/inventory_engine';
 
 export function useInventoryLogic() {
   const { showToast } = useToast();

@@ -115,7 +115,7 @@ export function usePartnersLogic() {
 
   // 🗑️ دالة الحذف
   const handleDelete = async (id: string) => {
-    if (confirm('هل أنت متأكد من حذف هذا الكيان نهائياً من سجلات صيدلية تاج المودة؟')) {
+    if (confirm('هل أنت متأكد من حذف هذا الكيان نهائياً من سجلات محطات النور للوقود؟')) {
       const { error } = await supabase.from('partners').delete().eq('id', id);
       if (error) showGlobalToast('خطأ في الحذف: ' + error.message, 'warning');
       else fetchPartners();

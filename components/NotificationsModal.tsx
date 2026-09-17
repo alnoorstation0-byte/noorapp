@@ -31,17 +31,17 @@ function formatTimeAgo(dateString: string): string {
 function getNotificationBadge(type: string) {
   switch (type) {
     case 'alert':
-      return { icon: '🚨', label: 'تنبيه حرج', color: '#ef4444', bg: '#fef2f2', border: '#fca5a5' };
+      return { icon: '🚨', label: 'تنبيه حرج', color: '#EF4444', bg: 'rgba(239, 68, 68, 0.15)', border: 'rgba(239, 68, 68, 0.35)' };
     case 'sale':
-      return { icon: '🧾', label: 'مبيعات', color: '#A8573C', bg: 'rgba(168, 87, 60, 0.08)', border: 'rgba(168, 87, 60, 0.25)' };
+      return { icon: '🧾', label: 'مبيعات', color: '#10B981', bg: 'rgba(16, 185, 129, 0.15)', border: 'rgba(16, 185, 129, 0.35)' };
     case 'pos':
-      return { icon: '🛒', label: 'نقاط البيع', color: '#C29B62', bg: 'rgba(194, 155, 98, 0.08)', border: 'rgba(194, 155, 98, 0.25)' };
+      return { icon: '🛒', label: 'نقاط البيع', color: '#00E5FF', bg: 'rgba(0, 229, 255, 0.15)', border: 'rgba(0, 229, 255, 0.35)' };
     case 'finance':
-      return { icon: '💰', label: 'مالية وسندات', color: '#16a34a', bg: '#f0fdf4', border: '#bbf7d0' };
+      return { icon: '💰', label: 'مالية وسندات', color: '#F59E0B', bg: 'rgba(245, 158, 11, 0.15)', border: 'rgba(245, 158, 11, 0.35)' };
     case 'inventory':
-      return { icon: '📦', label: 'مخزون وأسطول', color: '#d97706', bg: '#fffbeb', border: '#fde68a' };
+      return { icon: '📦', label: 'مخزون ووقود', color: '#00E5FF', bg: 'rgba(0, 229, 255, 0.15)', border: 'rgba(0, 229, 255, 0.35)' };
     default:
-      return { icon: '🔔', label: 'نظام عام', color: '#6366f1', bg: '#eef2ff', border: '#c7d2fe' };
+      return { icon: '🔔', label: 'نظام عام', color: '#00E5FF', bg: 'rgba(0, 229, 255, 0.1)', border: 'rgba(0, 229, 255, 0.25)' };
   }
 }
 
@@ -119,8 +119,8 @@ export default function NotificationsModal({ isOpen, onClose }: Props) {
         {/* 📱 بانر تفعيل إشعارات الجوال والمتصفح */}
         {pushPermission !== 'granted' ? (
           <div style={{
-            background: 'linear-gradient(135deg, rgba(194, 155, 98, 0.15) 0%, rgba(168, 87, 60, 0.1) 100%)',
-            border: '1px solid rgba(194, 155, 98, 0.3)',
+            background: 'linear-gradient(135deg, rgba(20, 24, 34, 0.95) 0%, rgba(13, 16, 24, 0.85) 100%)',
+            border: '1px solid rgba(0, 229, 255, 0.25)',
             borderRadius: '16px',
             padding: '12px 18px',
             display: 'flex',
@@ -132,10 +132,10 @@ export default function NotificationsModal({ isOpen, onClose }: Props) {
             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
               <span style={{ fontSize: '24px' }}>📲</span>
               <div>
-                <div style={{ fontWeight: 900, color: '#2C1A12', fontSize: '13px' }}>
+                <div style={{ fontWeight: 900, color: '#F8FAFC', fontSize: '13px' }}>
                   تفعيل إشعارات الجوال والمتصفح الفورية
                 </div>
-                <div style={{ fontSize: '11px', color: 'rgba(44, 26, 18, 0.6)', fontWeight: 700 }}>
+                <div style={{ fontSize: '11px', color: '#94A3B8', fontWeight: 700 }}>
                   احصل على تنبيهات الفواتير، الورديات، والمصروفات فوراً على شاشة هاتفك
                 </div>
               </div>
@@ -143,15 +143,15 @@ export default function NotificationsModal({ isOpen, onClose }: Props) {
             <button
               onClick={handleRequestPush}
               style={{
-                background: 'linear-gradient(135deg, #C29B62, #A8573C)',
-                color: 'white',
+                background: 'linear-gradient(135deg, #00E5FF, #0077B6)',
+                color: '#0B0E14',
                 border: 'none',
                 padding: '8px 16px',
                 borderRadius: '10px',
                 fontSize: '12px',
                 fontWeight: 900,
                 cursor: 'pointer',
-                boxShadow: '0 4px 12px rgba(194, 155, 98, 0.3)',
+                boxShadow: '0 4px 12px rgba(0, 229, 255, 0.3)',
                 transition: '0.2s'
               }}
             >
@@ -160,8 +160,8 @@ export default function NotificationsModal({ isOpen, onClose }: Props) {
           </div>
         ) : (
           <div style={{
-            background: 'rgba(240, 253, 244, 0.7)',
-            border: '1px solid #bbf7d0',
+            background: 'rgba(16, 185, 129, 0.12)',
+            border: '1px solid rgba(16, 185, 129, 0.3)',
             borderRadius: '12px',
             padding: '8px 14px',
             display: 'flex',
@@ -169,10 +169,10 @@ export default function NotificationsModal({ isOpen, onClose }: Props) {
             justifyContent: 'space-between',
             fontSize: '11.5px',
             fontWeight: 800,
-            color: '#15803d'
+            color: '#10B981'
           }}>
             <span>📱 إشعارات الجوال والمتصفح: <strong>مفعلة وتعمل مباشرة بنجاح</strong> ✅</span>
-            <span style={{ fontSize: '10px', background: '#dcfce7', padding: '2px 8px', borderRadius: '8px' }}>Web Push النشط</span>
+            <span style={{ fontSize: '10px', background: 'rgba(16, 185, 129, 0.2)', padding: '2px 8px', borderRadius: '8px' }}>Web Push النشط</span>
           </div>
         )}
 
@@ -185,7 +185,7 @@ export default function NotificationsModal({ isOpen, onClose }: Props) {
               align-items: center;
               flex-wrap: wrap;
               gap: 10px;
-              border-bottom: 1px solid rgba(40, 145, 200, 0.15);
+              border-bottom: 1px solid rgba(0, 229, 255, 0.15);
               padding-bottom: 12px;
             }
             .notif-tabs-wrapper {
@@ -216,20 +216,25 @@ export default function NotificationsModal({ isOpen, onClose }: Props) {
               font-weight: 800 !important;
               cursor: pointer !important;
               transition: all 0.2s ease !important;
-              border: 1px solid rgba(194, 155, 98, 0.25) !important;
-              background: rgba(255, 253, 250, 0.85) !important;
-              color: #2C1A12 !important;
+              border: 1px solid rgba(0, 229, 255, 0.2) !important;
+              background: rgba(20, 24, 34, 0.8) !important;
+              color: #94A3B8 !important;
               height: 38px !important;
               min-height: 38px !important;
               max-height: 38px !important;
               user-select: none !important;
               width: auto !important;
             }
+            .notif-tab-btn:hover {
+              color: #00E5FF !important;
+              border-color: rgba(0, 229, 255, 0.4) !important;
+            }
             .notif-tab-btn.active {
-              background: linear-gradient(135deg, #C29B62, #A8573C) !important;
-              color: white !important;
-              border-color: #C29B62 !important;
-              box-shadow: 0 4px 12px rgba(194, 155, 98, 0.3) !important;
+              background: linear-gradient(135deg, #00E5FF, #0077B6) !important;
+              color: #0B0E14 !important;
+              border-color: #00E5FF !important;
+              box-shadow: 0 4px 12px rgba(0, 229, 255, 0.3) !important;
+              font-weight: 900 !important;
             }
             .notif-tab-btn span {
               white-space: nowrap !important;
@@ -282,7 +287,7 @@ export default function NotificationsModal({ isOpen, onClose }: Props) {
                 max-width: 100% !important;
                 padding: 4px 0 8px 0 !important;
                 order: 2 !important;
-                border-top: 1px dashed rgba(40, 145, 200, 0.2) !important;
+                border-top: 1px dashed rgba(0, 229, 255, 0.2) !important;
                 padding-top: 8px !important;
               }
               .notif-tab-btn {
@@ -343,9 +348,9 @@ export default function NotificationsModal({ isOpen, onClose }: Props) {
                 className="notif-action-btn compact"
                 onClick={markAllAsRead}
                 style={{
-                  background: 'rgba(255,253,250,0.9)',
-                  border: '1px solid rgba(194,155,98,0.3)',
-                  color: '#C29B62'
+                  background: 'rgba(0, 229, 255, 0.12)',
+                  border: '1px solid rgba(0, 229, 255, 0.35)',
+                  color: '#00E5FF'
                 }}
               >
                 <span>✓ قراءة الكل</span>
@@ -357,9 +362,9 @@ export default function NotificationsModal({ isOpen, onClose }: Props) {
               className="notif-action-btn compact"
               onClick={clearReadNotifications}
               style={{
-                background: 'rgba(255,253,250,0.9)',
-                border: '1px solid rgba(239,68,68,0.2)',
-                color: '#dc2626'
+                background: 'rgba(239, 68, 68, 0.12)',
+                border: '1px solid rgba(239, 68, 68, 0.3)',
+                color: '#EF4444'
               }}
             >
               <span>🧹 مسح المقروء</span>
@@ -378,14 +383,14 @@ export default function NotificationsModal({ isOpen, onClose }: Props) {
           <div style={{
             textAlign: 'center',
             padding: '45px 20px',
-            background: 'rgba(255, 253, 250, 0.75)',
+            background: 'rgba(20, 24, 34, 0.7)',
             backdropFilter: 'blur(20px)',
             borderRadius: '20px',
-            border: '2px dashed rgba(194, 155, 98, 0.35)'
+            border: '2px dashed rgba(0, 229, 255, 0.25)'
           }}>
             <div style={{ fontSize: '46px', marginBottom: '10px' }}>📭</div>
-            <div style={{ fontWeight: 900, color: '#2C1A12', fontSize: '16px' }}>لا توجد إشعارات في هذا القسم حالياً</div>
-            <p style={{ color: '#64748b', fontSize: '12px', margin: '6px 0 0 0', fontWeight: 700 }}>
+            <div style={{ fontWeight: 900, color: '#F8FAFC', fontSize: '16px' }}>لا توجد إشعارات في هذا القسم حالياً</div>
+            <p style={{ color: '#94A3B8', fontSize: '12px', margin: '6px 0 0 0', fontWeight: 700 }}>
               سيتم تنبيهك هنا وتصلك إشعارات على جوالك فور حدوث أي عمليات جديدة في النظام!
             </p>
           </div>
@@ -399,12 +404,12 @@ export default function NotificationsModal({ isOpen, onClose }: Props) {
                 <div
                   key={notif.id}
                   style={{
-                    background: notif.is_read ? 'rgba(255, 255, 255, 0.7)' : 'rgba(240, 249, 255, 0.95)',
+                    background: notif.is_read ? 'rgba(20, 24, 34, 0.6)' : 'rgba(20, 24, 34, 0.95)',
                     backdropFilter: 'blur(15px)',
-                    border: `1.5px solid ${notif.is_read ? 'rgba(255, 255, 255, 0.8)' : '#7dd3fc'}`,
+                    border: `1.5px solid ${notif.is_read ? 'rgba(0, 229, 255, 0.15)' : 'rgba(0, 229, 255, 0.45)'}`,
                     borderRadius: '16px',
                     padding: '14px 16px',
-                    boxShadow: notif.is_read ? '0 2px 8px rgba(0,0,0,0.02)' : '0 4px 15px rgba(28, 115, 171, 0.1)',
+                    boxShadow: notif.is_read ? '0 2px 8px rgba(0,0,0,0.3)' : '0 4px 20px rgba(0, 229, 255, 0.15)',
                     display: 'flex',
                     alignItems: 'flex-start',
                     gap: '12px',
@@ -421,8 +426,8 @@ export default function NotificationsModal({ isOpen, onClose }: Props) {
                       width: '8px',
                       height: '8px',
                       borderRadius: '50%',
-                      background: '#0284c7',
-                      boxShadow: '0 0 8px #0284c7'
+                      background: '#00E5FF',
+                      boxShadow: '0 0 8px #00E5FF'
                     }} />
                   )}
 
@@ -461,14 +466,14 @@ export default function NotificationsModal({ isOpen, onClose }: Props) {
                           margin: 0,
                           fontSize: '13.5px',
                           fontWeight: 900,
-                          color: notif.is_read ? '#334155' : '#0f172a',
+                          color: notif.is_read ? '#94A3B8' : '#F8FAFC',
                           letterSpacing: '-0.2px'
                         }}>
                           {notif.title || 'تنبيه نظام'}
                         </h4>
                       </div>
 
-                      <span style={{ fontSize: '11px', color: '#64748b', fontWeight: 700, whiteSpace: 'nowrap' }}>
+                      <span style={{ fontSize: '11px', color: '#64748B', fontWeight: 700, whiteSpace: 'nowrap' }}>
                         {formatTimeAgo(notif.created_at)}
                       </span>
                     </div>
@@ -476,7 +481,7 @@ export default function NotificationsModal({ isOpen, onClose }: Props) {
                     <p style={{
                       margin: '4px 0 10px 0',
                       fontSize: '12px',
-                      color: notif.is_read ? '#64748b' : '#1e293b',
+                      color: notif.is_read ? '#94A3B8' : '#CBD5E1',
                       lineHeight: 1.5,
                       fontWeight: 700
                     }}>
@@ -489,8 +494,8 @@ export default function NotificationsModal({ isOpen, onClose }: Props) {
                         <button
                           onClick={() => handleActionClick(notif)}
                           style={{
-                            background: 'linear-gradient(135deg, #C29B62, #A8573C)',
-                            color: 'white',
+                            background: 'linear-gradient(135deg, #00E5FF, #0077B6)',
+                            color: '#0B0E14',
                             border: 'none',
                             padding: '5px 12px',
                             borderRadius: '8px',
@@ -500,7 +505,8 @@ export default function NotificationsModal({ isOpen, onClose }: Props) {
                             display: 'flex',
                             alignItems: 'center',
                             gap: '4px',
-                            transition: '0.2s'
+                            transition: '0.2s',
+                            boxShadow: '0 2px 8px rgba(0, 229, 255, 0.3)'
                           }}
                         >
                           👁️ الانتقال للعملية
@@ -511,9 +517,9 @@ export default function NotificationsModal({ isOpen, onClose }: Props) {
                         <button
                           onClick={() => markAsRead(notif.id)}
                           style={{
-                            background: 'rgba(255,253,250,0.9)',
-                            border: '1px solid rgba(194,155,98,0.3)',
-                            color: '#C29B62',
+                            background: 'rgba(0, 229, 255, 0.1)',
+                            border: '1px solid rgba(0, 229, 255, 0.3)',
+                            color: '#00E5FF',
                             padding: '4px 10px',
                             borderRadius: '8px',
                             fontSize: '11px',

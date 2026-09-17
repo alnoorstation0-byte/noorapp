@@ -38,7 +38,7 @@ function LoginPageContent() {
           justify-content: center;
           direction: rtl;
           font-family: 'Cairo', sans-serif;
-          background: radial-gradient(circle at 50% 30%, rgba(194, 155, 98, 0.25) 0%, rgba(44, 26, 18, 0.95) 75%), #2C1A12;
+          background: radial-gradient(circle at 50% 25%, rgba(0, 229, 255, 0.12) 0%, rgba(11, 14, 20, 0.98) 70%), #0B0E14;
           position: relative;
           overflow: hidden;
           padding: 20px;
@@ -49,9 +49,9 @@ function LoginPageContent() {
           position: absolute;
           width: 500px;
           height: 500px;
-          background: radial-gradient(circle, rgba(194, 155, 98, 0.2) 0%, transparent 70%);
-          top: -100px;
-          right: -100px;
+          background: radial-gradient(circle, rgba(0, 229, 255, 0.15) 0%, transparent 70%);
+          top: -120px;
+          right: -120px;
           border-radius: 50%;
           pointer-events: none;
         }
@@ -59,11 +59,11 @@ function LoginPageContent() {
         .login-wrapper::after {
           content: '';
           position: absolute;
-          width: 400px;
-          height: 400px;
-          background: radial-gradient(circle, rgba(168, 87, 60, 0.25) 0%, transparent 70%);
-          bottom: -80px;
-          left: -80px;
+          width: 450px;
+          height: 450px;
+          background: radial-gradient(circle, rgba(224, 109, 68, 0.15) 0%, transparent 70%);
+          bottom: -100px;
+          left: -100px;
           border-radius: 50%;
           pointer-events: none;
         }
@@ -71,13 +71,13 @@ function LoginPageContent() {
         .glass-card {
           width: 100%;
           max-width: 460px;
-          background: linear-gradient(135deg, rgba(255, 253, 250, 0.92) 0%, rgba(255, 253, 250, 0.65) 100%);
+          background: linear-gradient(135deg, rgba(20, 24, 34, 0.94) 0%, rgba(13, 16, 24, 0.90) 100%);
           backdrop-filter: blur(24px) saturate(160%);
           -webkit-backdrop-filter: blur(24px) saturate(160%);
-          border: 1px solid rgba(194, 155, 98, 0.4);
+          border: 1px solid rgba(0, 229, 255, 0.25);
           border-radius: 28px;
           padding: 44px 36px;
-          box-shadow: 0 25px 50px rgba(44, 26, 18, 0.35), 0 0 30px rgba(194, 155, 98, 0.15); 
+          box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 229, 255, 0.12); 
           animation: fadeInUp 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
           position: relative;
           z-index: 10;
@@ -98,26 +98,27 @@ function LoginPageContent() {
           width: 100px;
           object-fit: contain;
           border-radius: 50%;
-          border: 2px solid rgba(194, 155, 98, 0.5);
-          padding: 4px;
-          background: #FFFFFF;
-          box-shadow: 0 8px 20px rgba(44, 26, 18, 0.15);
+          border: 2px solid rgba(0, 229, 255, 0.4);
+          padding: 6px;
+          background: rgba(11, 14, 20, 0.85);
+          box-shadow: 0 0 25px rgba(0, 229, 255, 0.3);
           transition: transform 0.3s ease;
         }
         
-        .logo-container img:hover { transform: scale(1.06); }
+        .logo-container img:hover { transform: scale(1.08); }
 
         .cinematic-title {
-          color: #2C1A12;
+          color: #F8FAFC;
           font-weight: 900;
           font-size: 27px;
           text-align: center;
           margin-bottom: 6px;
           letter-spacing: -0.3px;
+          text-shadow: 0 0 15px rgba(0, 229, 255, 0.25);
         }
 
         .cinematic-subtitle {
-          color: rgba(44, 26, 18, 0.65);
+          color: #94A3B8;
           text-align: center;
           font-size: 14.5px;
           font-weight: 700;
@@ -133,9 +134,9 @@ function LoginPageContent() {
           width: 100%;
           padding: 14px 18px;
           border-radius: 14px;
-          border: 1px solid rgba(194, 155, 98, 0.35);
-          background: rgba(255, 253, 250, 0.85);
-          color: #2C1A12;
+          border: 1px solid rgba(0, 229, 255, 0.25);
+          background: rgba(11, 14, 20, 0.7);
+          color: #F8FAFC;
           font-size: 15px;
           font-weight: 700;
           outline: none;
@@ -144,9 +145,9 @@ function LoginPageContent() {
         }
 
         .cinematic-input:focus {
-          background: #FFFFFF;
-          border-color: #C29B62;
-          box-shadow: 0 0 0 3px rgba(194, 155, 98, 0.25);
+          background: rgba(15, 20, 30, 0.95);
+          border-color: #00E5FF;
+          box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.25), 0 0 15px rgba(0, 229, 255, 0.2);
         }
 
         .floating-label {
@@ -154,7 +155,7 @@ function LoginPageContent() {
           right: 18px;
           top: 50%;
           transform: translateY(-50%);
-          color: rgba(44, 26, 18, 0.5);
+          color: #94A3B8;
           font-size: 13.5px;
           font-weight: 700;
           pointer-events: none;
@@ -168,11 +169,11 @@ function LoginPageContent() {
           right: 12px;
           font-size: 11.5px;
           font-weight: 800;
-          color: #A8573C;
-          background: #FDFBF7;
+          color: #00E5FF;
+          background: #141822;
           padding: 2px 8px;
           border-radius: 6px;
-          border: 1px solid rgba(194, 155, 98, 0.3);
+          border: 1px solid rgba(0, 229, 255, 0.3);
         }
 
         .submit-btn {
@@ -180,23 +181,24 @@ function LoginPageContent() {
           padding: 14px;
           border-radius: 14px;
           border: none;
-          background: linear-gradient(135deg, #C29B62 0%, #A8573C 100%);
-          color: #FFFFFF;
+          background: linear-gradient(135deg, #00E5FF 0%, #0088CC 100%);
+          color: #0B0E14;
           font-size: 16px;
           font-weight: 900;
           cursor: pointer;
           transition: all 0.3s ease;
-          box-shadow: 0 6px 18px rgba(168, 87, 60, 0.3);
+          box-shadow: 0 6px 20px rgba(0, 229, 255, 0.35);
           font-family: inherit;
           margin-top: 6px;
         }
 
         .submit-btn:hover:not(:disabled) {
           transform: translateY(-2px);
-          box-shadow: 0 10px 24px rgba(168, 87, 60, 0.4);
+          box-shadow: 0 10px 28px rgba(0, 229, 255, 0.5);
+          filter: brightness(1.05);
         }
         .submit-btn:disabled {
-          opacity: 0.7;
+          opacity: 0.6;
           cursor: not-allowed;
         }
 
@@ -204,7 +206,7 @@ function LoginPageContent() {
           width: 100%;
           background: none;
           border: none;
-          color: rgba(44, 26, 18, 0.7);
+          color: #94A3B8;
           font-family: inherit;
           font-size: 13.5px;
           font-weight: 700;
@@ -212,8 +214,8 @@ function LoginPageContent() {
           cursor: pointer;
           transition: 0.2s;
         }
-        .toggle-btn span { color: #A8573C; text-decoration: underline; font-weight: 800; }
-        .toggle-btn:hover { color: #2C1A12; }
+        .toggle-btn span { color: #00E5FF; text-decoration: underline; font-weight: 800; }
+        .toggle-btn:hover { color: #F8FAFC; }
         
         @media (max-width: 480px) {
           .glass-card { padding: 34px 22px; border-radius: 22px; }
@@ -224,11 +226,11 @@ function LoginPageContent() {
 
       <div className="glass-card">
         <div className="logo-container">
-          <img src="/taj_logo.png" alt="صيدلية تاج المودة" />
+          <img src="/logo.png" alt="Noor Gas Station" />
         </div>
         
-        <h1 className="cinematic-title">صيدلية تاج المودة</h1>
-        <p className="cinematic-subtitle">{isSignUp ? 'إنشاء حساب جديد بالمنظومة' : 'منصة رعاية الخيل والإبل - الإدارة الموحدة'}</p>
+        <h1 className="cinematic-title">محطات النور للوقود</h1>
+        <p className="cinematic-subtitle">{isSignUp ? 'إنشاء حساب جديد بالمنظومة' : 'نورك على الطريق'}</p>
 
         <form onSubmit={handleSubmit}>
           
@@ -288,8 +290,8 @@ function LoginPageContent() {
         </button>
 
         <div style={{ textAlign: 'center', marginTop: '22px' }}>
-          <p style={{ color: 'rgba(44, 26, 18, 0.5)', fontSize: '11.5px', fontWeight: 700 }}>
-            جميع الحقوق محفوظة © {new Date().getFullYear()} <br/> صيدلية تاج المودة البيطرية (رعاية الخيول والإبل)
+          <p style={{ color: '#64748b', fontSize: '11.5px', fontWeight: 700 }}>
+            جميع الحقوق محفوظة © {new Date().getFullYear()} <br/> محطات النور للوقود (إدارة محطات الوقود)
           </p>
         </div>
       </div>
@@ -299,8 +301,9 @@ function LoginPageContent() {
 
 export default function LoginPage() {
   return (
-    <Suspense fallback={<div style={{height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#2C1A12', color: '#FDFBF7'}}>جاري التحميل...</div>}>
+    <Suspense fallback={<div style={{height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#0B0E14', color: '#00E5FF'}}>جاري التحميل...</div>}>
       <LoginPageContent />
     </Suspense>
   );
 }
+

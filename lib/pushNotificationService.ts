@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * 📱🔔 خدمة إشعارات المتصفح والجوال الفورية لصيدلية تاج المودة البيطرية
+ * 📱🔔 خدمة إشعارات المتصفح والجوال الفورية لمحطات النور للوقود
  * تدعم HTML5 Notifications API و Web Push Service Worker مع الاهتزاز والنغمات الصوتية
  */
 
@@ -31,7 +31,7 @@ export async function requestNotificationPermission(): Promise<boolean> {
     if (permission === 'granted') {
       // إرسال إشعار ترحيبي تجريبي للتأكيد
       showBrowserNotification(
-        '✅ تم تفعيل إشعارات صيدلية تاج المودة',
+        '✅ تم تفعيل إشعارات محطات النور للوقود',
         'ستصلك الآن كافة التنبيهات والعمليات المهمة فور حدوثها على جوالك ومتصفحك!',
         { actionUrl: '/notifications' }
       );
@@ -125,8 +125,8 @@ export async function showBrowserNotification(
 
   const notifOptions: any = {
     body,
-    icon: '/taj_logo.png',
-    badge: '/taj_logo.png',
+    icon: '/logo.png',
+    badge: '/logo.png',
     vibrate: [200, 100, 200],
     tag: options?.tag || 'taj_mawadah-system-alert',
     renotify: true,

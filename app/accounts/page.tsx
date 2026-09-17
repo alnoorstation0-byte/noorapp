@@ -169,7 +169,7 @@ export default function HierarchicalLedgerPage() {
   );
 
   return (
-    <MasterPage title="شجرة الحسابات والميزان" subtitle="إدارة المركز المالي ودليل الحسابات - صيدلية تاج المودة">
+    <MasterPage title="شجرة الحسابات والميزان" subtitle="إدارة المركز المالي ودليل الحسابات - محطات النور للوقود">
       
       <div className="floating-stack-layout">
         <div className="warm-depth-glow" />
@@ -367,33 +367,33 @@ export default function HierarchicalLedgerPage() {
 
       <style>{`
         .floating-stack-layout { position: relative; width: 100%; padding: 0 20px 20px 20px; z-index: 5; direction: rtl; box-sizing: border-box; }
-        .warm-depth-glow { position: absolute; inset: 0; background: radial-gradient(circle at 20% 30%, rgba(40, 145, 200, 0.15) 0%, transparent 70%); z-index: -1; pointer-events: none; }
+        .warm-depth-glow { position: absolute; inset: 0; background: radial-gradient(circle at 20% 30%, rgba(0, 229, 255, 0.08) 0%, transparent 70%); z-index: -1; pointer-events: none; }
         .content-container { max-width: 1600px; margin: 0 auto; width: 100%; box-sizing: border-box; }
 
         .glass-master-card {
-          background: rgba(255, 255, 255, 0.7); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
-          border-radius: 30px; border: 1px solid rgba(255, 255, 255, 0.9);
-          box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.08); overflow: hidden;
+          background: rgba(20, 24, 34, 0.75); backdrop-filter: blur(25px); -webkit-backdrop-filter: blur(25px);
+          border-radius: 30px; border: 1px solid rgba(0, 229, 255, 0.2);
+          box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.5); overflow: hidden;
           margin-top: 20px; animation: cardFadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
-        .card-header { padding: 22px 30px; background: rgba(255, 255, 255, 0.3); border-bottom: 1px solid rgba(0,0,0,0.03); }
+        .card-header { padding: 22px 30px; background: rgba(11, 14, 20, 0.6); border-bottom: 1px solid rgba(255, 255, 255, 0.05); }
 
         .table-inner-scroll { padding: 20px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 
-        .summary-glass-card { background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2); padding: 15px; border-radius: 16px; text-align: center; transition: 0.3s; }
-        .glass-input { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1); color: white; font-weight: 800; outline: none; transition: 0.3s; color-scheme: dark; box-sizing: border-box; }
-        .glass-input:focus { background: rgba(255,255,255,0.2); border-color: ${THEME.goldAccent}; }
+        .summary-glass-card { background: rgba(20, 24, 34, 0.6); border: 1px solid rgba(0, 229, 255, 0.2); padding: 15px; border-radius: 16px; text-align: center; transition: 0.3s; }
+        .glass-input { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.1); background: rgba(11, 14, 20, 0.6); color: #F8FAFC; font-weight: 800; outline: none; transition: 0.3s; color-scheme: dark; box-sizing: border-box; }
+        .glass-input:focus { background: rgba(20, 24, 34, 0.9); border-color: #00E5FF; }
 
-        .btn-premium-gold { width: 100%; padding: 16px; border-radius: 16px; background: linear-gradient(135deg, #C29B62, #A8573C); color: white; font-weight: 900; border: none; cursor: pointer; box-shadow: 0 10px 25px rgba(168, 87, 60, 0.3); transition: 0.3s; min-height: 44px; }
-        .btn-premium-gold:hover { transform: translateY(-3px); box-shadow: 0 15px 35px rgba(168, 87, 60, 0.4); filter: brightness(1.1); }
+        .btn-premium-gold { width: 100%; padding: 16px; border-radius: 16px; background: linear-gradient(135deg, #00E5FF, #0077B6); color: #0B0E14; font-weight: 900; border: none; cursor: pointer; box-shadow: 0 10px 25px rgba(0, 229, 255, 0.3); transition: 0.3s; min-height: 44px; }
+        .btn-premium-gold:hover { transform: translateY(-3px); box-shadow: 0 15px 35px rgba(0, 229, 255, 0.4); filter: brightness(1.1); }
 
         .btn-main-glass { width: 100%; padding: 12px; border-radius: 12px; border: none; font-weight: 900; cursor: pointer; transition: 0.3s; font-size: 13px; min-height: 44px; }
-        .btn-main-glass.blue { background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.2); }
-        .btn-main-glass.blue:hover:not(:disabled) { background: #3b82f6; color: white; }
+        .btn-main-glass.blue { background: rgba(0, 229, 255, 0.12); color: #00E5FF; border: 1px solid rgba(0, 229, 255, 0.3); }
+        .btn-main-glass.blue:hover:not(:disabled) { background: #00E5FF; color: #0B0E14; }
         .btn-main-glass.red { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); }
         .btn-main-glass.red:hover:not(:disabled) { background: #ef4444; color: white; }
-        .btn-main-glass.white { background: rgba(255, 255, 255, 0.1); color: white; border: 1px solid rgba(255, 255, 255, 0.2); }
-        .btn-main-glass.white:hover:not(:disabled) { background: white; color: #1e293b; }
+        .btn-main-glass.white { background: rgba(255, 255, 255, 0.05); color: #F8FAFC; border: 1px solid rgba(255, 255, 255, 0.1); }
+        .btn-main-glass.white:hover:not(:disabled) { background: rgba(255, 255, 255, 0.15); color: white; }
         .btn-main-glass:disabled { opacity: 0.5; cursor: not-allowed; }
 
         /* 🖥️ Desktop Header & Rows */
@@ -404,12 +404,12 @@ export default function HierarchicalLedgerPage() {
           gap: 16px;
           padding: 14px 20px;
           font-weight: 900;
-          color: #64748b;
+          color: #94A3B8;
           font-size: 13px;
-          background: rgba(0, 0, 0, 0.02);
+          background: rgba(255, 255, 255, 0.03);
           border-radius: 16px;
           margin-bottom: 12px;
-          border: 1px solid rgba(255, 255, 255, 0.4);
+          border: 1px solid rgba(255, 255, 255, 0.06);
           box-sizing: border-box;
         }
 
@@ -432,7 +432,7 @@ export default function HierarchicalLedgerPage() {
           min-width: 0;
           text-align: right;
           font-weight: 800;
-          color: #122946;
+          color: #F8FAFC;
         }
 
         .table-header-type {
@@ -472,28 +472,28 @@ export default function HierarchicalLedgerPage() {
           gap: 16px;
           padding: 12px 20px;
           cursor: pointer; 
-          border: 1px solid rgba(255, 255, 255, 0.4);
+          border: 1px solid rgba(255, 255, 255, 0.06);
           transition: 0.2s;
-          box-shadow: 0 2px 10px rgba(0,0,0,0.01);
+          box-shadow: 0 2px 10px rgba(0,0,0,0.2);
           box-sizing: border-box;
-          background: white;
+          background: rgba(20, 24, 34, 0.85);
         }
         .acc-row.root-node {
-          background: rgba(15, 23, 42, 0.03); 
-          border: 1px solid rgba(15, 23, 42, 0.1);
+          background: rgba(15, 20, 30, 0.95); 
+          border: 1px solid rgba(0, 229, 255, 0.25);
         }
         .acc-row.child-node {
-          background: white;
+          background: rgba(20, 24, 34, 0.8);
         }
 
         .acc-row:hover {
-          border-color: ${THEME.goldAccent};
+          border-color: #00E5FF;
           transform: translateY(-1px);
-          box-shadow: 0 5px 15px rgba(40, 145, 200, 0.1);
+          box-shadow: 0 5px 20px rgba(0, 229, 255, 0.15);
         }
         .acc-row.selected {
-          background: rgba(40, 145, 200, 0.05);
-          border-color: ${THEME.goldAccent};
+          background: rgba(0, 229, 255, 0.12);
+          border-color: #00E5FF;
         }
 
         .acc-row-main-block {
@@ -515,7 +515,7 @@ export default function HierarchicalLedgerPage() {
           align-self: center !important;
           margin: 0 !important;
           cursor: pointer;
-          accent-color: ${THEME.goldAccent};
+          accent-color: #00E5FF;
         }
 
         .acc-name-info {
@@ -528,7 +528,7 @@ export default function HierarchicalLedgerPage() {
 
         .acc-name-text {
           font-weight: 700;
-          color: ${THEME.primary};
+          color: #F8FAFC;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
@@ -544,10 +544,10 @@ export default function HierarchicalLedgerPage() {
 
         .acc-code-badge {
           font-size: 11px;
-          color: #475569;
+          color: #94A3B8;
           font-weight: 800;
           font-family: monospace;
-          background: rgba(0,0,0,0.05);
+          background: rgba(255, 255, 255, 0.05);
           padding: 2px 7px;
           border-radius: 6px;
           white-space: nowrap;
@@ -575,14 +575,14 @@ export default function HierarchicalLedgerPage() {
           box-sizing: border-box;
         }
         .acc-type-tag.trans {
-          color: #64748b;
-          background: rgba(100, 116, 139, 0.08);
-          border: 1px solid rgba(100, 116, 139, 0.2);
+          color: #94A3B8;
+          background: rgba(148, 163, 184, 0.1);
+          border: 1px solid rgba(148, 163, 184, 0.2);
         }
         .acc-type-tag.summary {
-          color: ${THEME.goldAccent};
-          background: rgba(40, 145, 200, 0.1);
-          border: 1px solid rgba(40, 145, 200, 0.25);
+          color: #00E5FF;
+          background: rgba(0, 229, 255, 0.1);
+          border: 1px solid rgba(0, 229, 255, 0.25);
         }
 
         .acc-expand-arrow {
@@ -592,8 +592,8 @@ export default function HierarchicalLedgerPage() {
           width: 22px;
           height: 22px;
           border-radius: 50%;
-          background: rgba(28, 115, 171, 0.08);
-          color: ${THEME.primary};
+          background: rgba(0, 229, 255, 0.1);
+          color: #00E5FF;
           font-size: 9px;
           flex-shrink: 0;
           cursor: pointer;
@@ -612,24 +612,24 @@ export default function HierarchicalLedgerPage() {
           text-align: center;
         }
         .acc-stat-box.debit .acc-stat-val {
-          color: ${THEME.success};
+          color: #10B981;
           font-weight: 800;
           font-family: monospace;
           font-size: 13px;
         }
         .acc-stat-box.credit .acc-stat-val {
-          color: ${THEME.danger};
+          color: #EF4444;
           font-weight: 800;
           font-family: monospace;
           font-size: 13px;
         }
         .acc-stat-box.balance .acc-stat-val {
           font-weight: 900;
-          color: ${THEME.primary};
+          color: #00E5FF;
           font-family: monospace;
           font-size: 13px;
-          background: rgba(255, 255, 255, 0.6);
-          border: 1px solid rgba(0,0,0,0.06);
+          background: rgba(0, 229, 255, 0.08);
+          border: 1px solid rgba(0, 229, 255, 0.25);
           padding: 4px 10px;
           border-radius: 8px;
           display: inline-block;
@@ -637,9 +637,9 @@ export default function HierarchicalLedgerPage() {
           box-sizing: border-box;
         }
         .acc-stat-box.root-balance .acc-stat-val {
-          color: white;
-          background: ${THEME.primary};
-          border-color: ${THEME.primary};
+          color: #0B0E14;
+          background: #00E5FF;
+          border-color: #00E5FF;
         }
 
         .acc-stat-label {
@@ -654,26 +654,26 @@ export default function HierarchicalLedgerPage() {
 
         /* 📜 Entry lines (Transactions) on Desktop */
         .entry-line { 
-          background: rgba(255, 255, 255, 0.85);
+          background: rgba(15, 20, 30, 0.85);
           margin: 4px 6px 6px 6px;
           padding: 8px 12px; 
           border-radius: 9px;
-          border-right: 3px solid ${THEME.goldAccent};
+          border-right: 3px solid #00E5FF;
           display: flex;
           align-items: flex-start;
           justify-content: space-between;
           gap: 12px;
           font-size: 11px;
-          border: 1px solid rgba(28, 115, 171, 0.15);
+          border: 1px solid rgba(255, 255, 255, 0.06);
           box-sizing: border-box;
           max-width: 100%;
-          box-shadow: 0 1px 4px rgba(0, 0, 0, 0.02);
+          box-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
           transition: all 0.2s ease;
         }
         .entry-line:hover {
-          background: rgba(255, 255, 255, 0.98);
-          border-color: rgba(28, 115, 171, 0.3);
-          box-shadow: 0 2px 8px rgba(28, 115, 171, 0.08);
+          background: rgba(20, 24, 34, 0.95);
+          border-color: rgba(0, 229, 255, 0.3);
+          box-shadow: 0 2px 8px rgba(0, 229, 255, 0.1);
         }
         .entry-line-top {
           display: flex;
@@ -684,12 +684,12 @@ export default function HierarchicalLedgerPage() {
         }
         .entry-line-date {
           font-weight: 700;
-          color: #475569;
+          color: #94A3B8;
           font-family: monospace;
           font-size: 10.5px;
           width: 78px;
           flex-shrink: 0;
-          background: rgba(0, 0, 0, 0.04);
+          background: rgba(255, 255, 255, 0.05);
           padding: 2px 6px;
           border-radius: 5px;
           text-align: center;
@@ -697,13 +697,13 @@ export default function HierarchicalLedgerPage() {
           margin-top: 1px;
         }
         .entry-line-desc {
-          color: #1e293b;
+          color: #E2E8F0;
           font-weight: 600;
           font-size: 11px;
           line-height: 1.45;
           flex: 1;
           min-width: 0;
-          white-space: normal; /* 🚀 إظهار كامل النص دون بتر */
+          white-space: normal;
           word-break: break-word;
         }
         .entry-line-values {
@@ -726,14 +726,14 @@ export default function HierarchicalLedgerPage() {
           white-space: nowrap;
         }
         .entry-stat-chip.text-success { 
-          color: #16a34a; 
-          background: rgba(22, 163, 74, 0.08); 
-          border: 1px solid rgba(22, 163, 74, 0.2); 
+          color: #10B981; 
+          background: rgba(16, 185, 129, 0.12); 
+          border: 1px solid rgba(16, 185, 129, 0.3); 
         }
         .entry-stat-chip.text-danger { 
-          color: #ef4444; 
-          background: rgba(239, 68, 68, 0.08); 
-          border: 1px solid rgba(239, 68, 68, 0.2); 
+          color: #EF4444; 
+          background: rgba(239, 68, 68, 0.12); 
+          border: 1px solid rgba(239, 68, 68, 0.3); 
         }
         .entry-stat-label { 
           display: inline; 
@@ -747,21 +747,21 @@ export default function HierarchicalLedgerPage() {
 
         .cinematic-scroll::-webkit-scrollbar { width: 6px; }
         .cinematic-scroll::-webkit-scrollbar-track { background: transparent; }
-        .cinematic-scroll::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 10px; }
+        .cinematic-scroll::-webkit-scrollbar-thumb { background: rgba(0, 229, 255, 0.2); border-radius: 10px; }
 
         /* 🎯 Dedicated Selection Action Bar (Desktop & Mobile) */
         .accounts-selection-bar {
           display: flex;
           align-items: center;
           justify-content: space-between;
-          background: linear-gradient(135deg, rgba(40, 145, 200, 0.12), rgba(28, 115, 171, 0.18));
-          border: 1.5px solid rgba(40, 145, 200, 0.35);
+          background: linear-gradient(135deg, rgba(0, 229, 255, 0.15), rgba(20, 24, 34, 0.9));
+          border: 1.5px solid rgba(0, 229, 255, 0.35);
           border-radius: 14px;
           padding: 10px 16px;
           margin-top: 14px;
           backdrop-filter: blur(10px);
           -webkit-backdrop-filter: blur(10px);
-          box-shadow: 0 4px 15px rgba(28, 115, 171, 0.08);
+          box-shadow: 0 4px 15px rgba(0, 229, 255, 0.1);
           animation: selectionSlideDown 0.25s cubic-bezier(0.16, 1, 0.3, 1);
           width: 100%;
           box-sizing: border-box;
@@ -784,18 +784,18 @@ export default function HierarchicalLedgerPage() {
         .selection-badge {
           font-size: 12px;
           font-weight: 900;
-          color: #C29B62;
-          background: rgba(255, 255, 255, 0.85);
+          color: #00E5FF;
+          background: rgba(0, 229, 255, 0.15);
           padding: 4px 10px;
           border-radius: 8px;
-          border: 1px solid rgba(194, 155, 98, 0.25);
+          border: 1px solid rgba(0, 229, 255, 0.3);
           white-space: nowrap;
         }
 
         .selection-account-name {
           font-size: 13px;
           font-weight: 800;
-          color: #122946;
+          color: #F8FAFC;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
@@ -828,13 +828,14 @@ export default function HierarchicalLedgerPage() {
         }
 
         .selection-action-btn.edit {
-          background: linear-gradient(135deg, #2563eb, #1d4ed8);
-          color: white;
-          box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+          background: linear-gradient(135deg, #00E5FF, #0077B6);
+          color: #0B0E14;
+          font-weight: 900;
+          box-shadow: 0 4px 12px rgba(0, 229, 255, 0.3);
         }
         .selection-action-btn.edit:hover:not(:disabled) {
           transform: translateY(-1px);
-          box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
+          box-shadow: 0 6px 16px rgba(0, 229, 255, 0.4);
         }
         .selection-action-btn.edit:disabled {
           opacity: 0.5;
@@ -854,9 +855,9 @@ export default function HierarchicalLedgerPage() {
         }
 
         .selection-action-btn.clear {
-          background: rgba(100, 116, 139, 0.12);
-          color: #475569;
-          border: 1px solid rgba(100, 116, 139, 0.25);
+          background: rgba(255, 255, 255, 0.08);
+          color: #94A3B8;
+          border: 1px solid rgba(255, 255, 255, 0.15);
           padding: 7px 12px;
         }
         .selection-action-btn.clear:hover {
@@ -947,18 +948,18 @@ export default function HierarchicalLedgerPage() {
             width: 100% !important;
             padding: 10px 38px 10px 34px !important;
             border-radius: 12px !important;
-            border: 1px solid rgba(28, 115, 171, 0.2) !important;
-            background: rgba(255, 255, 255, 0.85) !important;
+            border: 1px solid rgba(0, 229, 255, 0.2) !important;
+            background: rgba(20, 24, 34, 0.85) !important;
             font-size: 13px !important;
             font-weight: 700 !important;
-            color: #1e293b !important;
+            color: #F8FAFC !important;
             outline: none !important;
             box-sizing: border-box !important;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.02) !important;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.3) !important;
           }
           .mobile-search-input:focus {
-            background: white !important;
-            border-color: #C29B62 !important;
+            background: rgba(20, 24, 34, 0.95) !important;
+            border-color: #00E5FF !important;
           }
           .mobile-search-icon {
             position: absolute !important;
@@ -974,7 +975,7 @@ export default function HierarchicalLedgerPage() {
             left: 10px !important;
             top: 50% !important;
             transform: translateY(-50%) !important;
-            background: rgba(0,0,0,0.06) !important;
+            background: rgba(255, 255, 255, 0.08) !important;
             border: none !important;
             width: 22px !important;
             height: 22px !important;
@@ -982,7 +983,7 @@ export default function HierarchicalLedgerPage() {
             display: flex !important;
             align-items: center !important;
             justify-content: center !important;
-            color: #64748b !important;
+            color: #94A3B8 !important;
             font-size: 11px !important;
             cursor: pointer !important;
           }
@@ -1005,19 +1006,19 @@ export default function HierarchicalLedgerPage() {
             font-size: 12px !important;
             font-weight: 800 !important;
             white-space: nowrap !important;
-            border: 1px solid rgba(194, 155, 98, 0.3) !important;
-            background: rgba(255, 255, 255, 0.8) !important;
-            color: #2C1A12 !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            background: rgba(20, 24, 34, 0.8) !important;
+            color: #F8FAFC !important;
             cursor: pointer !important;
             min-height: 40px !important;
             touch-action: manipulation !important;
             flex-shrink: 0 !important;
           }
           .mobile-action-pill.primary {
-            background: linear-gradient(135deg, #C29B62, #A8573C) !important;
-            color: white !important;
+            background: linear-gradient(135deg, #00E5FF, #0077B6) !important;
+            color: #0B0E14 !important;
             border: none !important;
-            box-shadow: 0 4px 10px rgba(168, 87, 60, 0.25) !important;
+            box-shadow: 0 4px 10px rgba(0, 229, 255, 0.3) !important;
           }
 
           /* 🎯 Dedicated Selection Bar (Mobile Layout) */
@@ -1040,68 +1041,54 @@ export default function HierarchicalLedgerPage() {
             display: flex !important;
           }
           .selection-account-name {
-            max-width: 160px !important;
+            max-width: calc(100vw - 150px) !important;
             font-size: 12px !important;
           }
           .selection-bar-actions {
             width: 100% !important;
             display: grid !important;
-            grid-template-columns: 1fr 1fr 42px !important;
+            grid-template-columns: 1fr 1fr 40px !important;
             gap: 6px !important;
-            align-items: center !important;
           }
           .selection-action-btn {
             width: 100% !important;
-            min-height: 42px !important;
-            font-size: 13px !important;
-            padding: 8px 6px !important;
-            justify-content: center !important;
+            padding: 6px 10px !important;
+            font-size: 12px !important;
+            min-height: 36px !important;
           }
           .selection-action-btn.clear {
-            width: 42px !important;
-            min-height: 42px !important;
+            width: auto !important;
             padding: 0 !important;
-            font-size: 14px !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
           }
 
           .mobile-only { display: inline-flex !important; }
           .desktop-only { display: none !important; }
 
-          /* 4. Adaptive Indentation on Mobile */
+          /* 4. Tree Nodes / Rows (Acc Row) Mobile Re-architecture */
           .account-node-wrapper {
-            margin-right: calc(var(--node-depth, 0) * 6px) !important;
-            border-right: calc(var(--node-depth, 0) > 0 ? 1.5px : 0px) dashed rgba(40, 145, 200, 0.25) !important;
-            padding-right: calc(var(--node-depth, 0) > 0 ? 4px : 0px) !important;
-            max-width: 100% !important;
-            box-sizing: border-box !important;
+            margin-right: calc(var(--node-depth, 0) * 8px) !important;
           }
 
-          /* 5. Transform account row into a mobile card */
           .acc-row {
-            display: flex !important;
+            padding: 10px 10px !important;
+            gap: 8px !important;
+            border-radius: 12px !important;
+            margin-bottom: 6px !important;
             flex-direction: column !important;
             align-items: stretch !important;
-            padding: 10px 12px !important;
-            gap: 8px !important;
-            border-radius: 16px !important;
-            margin-bottom: 8px !important;
-            background: rgba(255, 255, 255, 0.95) !important;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.03) !important;
-            max-width: 100% !important;
-            box-sizing: border-box !important;
-            overflow: hidden !important;
           }
           .acc-row.root-node {
             background: rgba(248, 250, 252, 0.95) !important;
           }
 
           .acc-row-main-block {
+            width: 100% !important;
             display: flex !important;
             align-items: center !important;
-            gap: 10px !important;
-            width: 100% !important;
-            max-width: 100% !important;
-            box-sizing: border-box !important;
+            gap: 8px !important;
           }
 
           .custom-checkbox {
@@ -1118,39 +1105,30 @@ export default function HierarchicalLedgerPage() {
           }
 
           .acc-name-info {
-            display: flex !important;
-            flex-direction: column !important;
-            align-items: flex-start !important;
-            gap: 3px !important;
             flex: 1 !important;
             min-width: 0 !important;
+            display: flex !important;
+            flex-direction: column !important;
+            gap: 2px !important;
           }
 
           .acc-name-text {
             font-size: 13px !important;
-            font-weight: 800 !important;
             line-height: 1.3 !important;
-            display: block !important;
-            max-width: 100% !important;
-            white-space: nowrap !important;
-            overflow: hidden !important;
-            text-overflow: ellipsis !important;
-            color: #122946 !important;
+            color: #F8FAFC !important;
           }
 
           .acc-code-row {
             display: flex !important;
             align-items: center !important;
             gap: 6px !important;
-            flex-wrap: wrap !important;
-            margin-top: 1px !important;
           }
 
           .acc-code-badge {
             font-size: 10px !important;
-            padding: 1px 6px !important;
-            border-radius: 4px !important;
-            white-space: nowrap !important;
+            padding: 1px 5px !important;
+            color: #94A3B8 !important;
+            background: rgba(255, 255, 255, 0.05) !important;
           }
 
           .acc-type-pill {
@@ -1162,10 +1140,9 @@ export default function HierarchicalLedgerPage() {
           }
 
           .acc-type-tag {
-            font-size: 10px !important;
-            padding: 2px 7px !important;
-            border-radius: 6px !important;
-            white-space: nowrap !important;
+            font-size: 9.5px !important;
+            padding: 1px 5px !important;
+            border-radius: 4px !important;
             display: inline-flex !important;
             align-items: center !important;
             justify-content: center !important;
@@ -1180,8 +1157,8 @@ export default function HierarchicalLedgerPage() {
             width: 28px !important;
             height: 28px !important;
             border-radius: 50% !important;
-            background: rgba(194, 155, 98, 0.12) !important;
-            color: #C29B62 !important;
+            background: rgba(0, 229, 255, 0.15) !important;
+            color: #00E5FF !important;
             font-size: 10px !important;
             flex-shrink: 0 !important;
             cursor: pointer !important;
@@ -1192,10 +1169,10 @@ export default function HierarchicalLedgerPage() {
             display: grid !important;
             grid-template-columns: 1fr 1fr 1.15fr !important;
             gap: 6px !important;
-            background: rgba(241, 245, 249, 0.6) !important;
+            background: rgba(15, 20, 30, 0.6) !important;
             padding: 6px 8px !important;
             border-radius: 10px !important;
-            border: 1px solid rgba(226, 232, 240, 0.8) !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
             width: 100% !important;
             box-sizing: border-box !important;
             overflow: hidden !important;
@@ -1256,7 +1233,8 @@ export default function HierarchicalLedgerPage() {
             flex-direction: column !important;
             gap: 6px !important;
             border-radius: 8px !important;
-            background: rgba(255, 255, 255, 0.92) !important;
+            background: rgba(15, 20, 30, 0.9) !important;
+            border: 1px solid rgba(255, 255, 255, 0.06) !important;
             font-size: 10.5px !important;
             max-width: 100% !important;
             box-sizing: border-box !important;
@@ -1277,7 +1255,7 @@ export default function HierarchicalLedgerPage() {
             min-width: 0 !important;
             font-size: 10.5px !important;
             line-height: 1.4 !important;
-            color: #1e293b !important;
+            color: #CBD5E1 !important;
           }
 
           .entry-line-date {
@@ -1286,13 +1264,15 @@ export default function HierarchicalLedgerPage() {
             flex-shrink: 0 !important;
             width: auto !important;
             margin-top: 1px !important;
+            background: rgba(255, 255, 255, 0.05) !important;
+            color: #94A3B8 !important;
           }
 
           .entry-line-values {
             display: flex !important;
             justify-content: flex-end !important;
             gap: 6px !important;
-            border-top: 1px dashed rgba(0,0,0,0.06) !important;
+            border-top: 1px dashed rgba(255, 255, 255, 0.08) !important;
             padding-top: 4px !important;
             width: 100% !important;
           }

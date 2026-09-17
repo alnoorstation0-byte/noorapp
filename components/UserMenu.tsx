@@ -98,7 +98,7 @@ export default function UserCard() {
 
             {/* 🎨 نفس ستايلاتك العظمة بالظبط مع تعديل بسيط للموبايل في الآخر */}
             <style>{`
-                /* 🚀 1. التموضع والحركة السينمائية الأسطورية */
+                /* 🚀 1. التموضع والحركة السينمائية */
                 .imperial-wrapper { 
                     position: relative; 
                     z-index: 99999;
@@ -107,60 +107,60 @@ export default function UserCard() {
 
                 @keyframes grandFloat {
                     0%, 100% { transform: translateY(0) rotate(0deg); }
-                    50% { transform: translateY(-5px) rotate(1deg); } /* قللت الحركة شوية عشان السايد بار */
+                    50% { transform: translateY(-4px) rotate(0.5deg); }
                 }
 
-                /* 🟢 2. الزرار العملاق (أكبر حجم في السيستم) */
+                /* 🟢 2. الزرار الرئيسي لملف المستخدم */
                 .imperial-trigger {
-                    display: flex; align-items: center; gap: 20px;
-                    background: rgba(255, 255, 255, 0.95);
-                    backdrop-filter: blur(40px);
-                    padding: 10px 30px 10px 15px; 
+                    display: flex; align-items: center; gap: 16px;
+                    background: rgba(20, 24, 34, 0.85);
+                    backdrop-filter: blur(24px);
+                    padding: 8px 24px 8px 12px; 
                     border-radius: 100px;
-                    border: 3px solid rgba(255,255,255,0.8);
+                    border: 1.5px solid rgba(0, 229, 255, 0.25);
                     cursor: pointer; 
-                    transition: all 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
-                    box-shadow: 0 20px 50px rgba(0,0,0,0.1), 
-                                0 0 30px rgba(40, 145, 200, 0.15);
+                    transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+                    box-shadow: 0 10px 30px rgba(0,0,0,0.5), inset 0 0 10px rgba(0, 229, 255, 0.05);
                 }
                 .imperial-trigger:hover, .imperial-trigger.active { 
-                    transform: scale(1.05); 
-                    border-color: ${THEME.goldAccent};
-                    box-shadow: 0 30px 80px rgba(40, 145, 200, 0.25);
+                    transform: scale(1.03); 
+                    border-color: #00E5FF;
+                    box-shadow: 0 15px 40px rgba(0, 229, 255, 0.2), 0 0 20px rgba(0, 229, 255, 0.15);
                 }
                 
-                /* 👤 3. النصوص الملكية */
+                /* 👤 3. النصوص ومعلومات المستخدم */
                 .imperial-info { display: flex; flex-direction: column; text-align: right; }
                 .u-name-grand { 
-                    font-size: 22px; 
-                    font-weight: 1000; 
-                    color: #0f172a; 
+                    font-size: 18px; 
+                    font-weight: 900; 
+                    color: #F8FAFC; 
                     white-space: nowrap; 
-                    letter-spacing: -1px;
-                    line-height: 1;
+                    letter-spacing: -0.5px;
+                    line-height: 1.2;
                 }
                 .u-badge-grand { 
-                    font-size: 13px; font-weight: 900; 
-                    color: white; 
-                    background: linear-gradient(135deg, #C29B62 0%, #A8573C 100%);
-                    padding: 6px 15px; border-radius: 15px; 
-                    margin-top: 6px; display: flex; align-items: center; gap: 8px;
+                    font-size: 11.5px; font-weight: 800; 
+                    color: #00E5FF; 
+                    background: rgba(0, 229, 255, 0.12);
+                    border: 1px solid rgba(0, 229, 255, 0.35);
+                    padding: 4px 12px; border-radius: 20px; 
+                    margin-top: 4px; display: flex; align-items: center; gap: 6px;
                     width: fit-content; align-self: flex-end;
-                    box-shadow: 0 10px 20px rgba(168, 87, 60, 0.25);
+                    box-shadow: 0 2px 8px rgba(0, 229, 255, 0.1);
                 }
 
-                /* 📸 4. صورة الصقر */
-                .avatar-frame-grand { position: relative; width: 75px; height: 75px; flex-shrink: 0; }
+                /* 📸 4. صورة المستخدم والتوهج النيوني */
+                .avatar-frame-grand { position: relative; width: 62px; height: 62px; flex-shrink: 0; }
                 .avatar-frame-grand img { 
                     width: 100%; height: 100%; 
                     border-radius: 50%; object-fit: cover; 
-                    border: 4px solid white; 
+                    border: 2px solid #00E5FF; 
                     position: relative; z-index: 2;
-                    box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+                    box-shadow: 0 8px 20px rgba(0,0,0,0.5);
                 }
                 .magical-glow {
-                    position: absolute; inset: -10px;
-                    background: conic-gradient(from 0deg, transparent, ${THEME.goldAccent}, transparent);
+                    position: absolute; inset: -6px;
+                    background: conic-gradient(from 0deg, transparent, rgba(0, 229, 255, 0.8), transparent);
                     border-radius: 50%;
                     animation: rotateGlow 3s linear infinite;
                     z-index: 1; opacity: 0.6;
@@ -170,56 +170,56 @@ export default function UserCard() {
                     to { transform: rotate(360deg); }
                 }
                 .active-pulse-grand { 
-                    position: absolute; bottom: 5px; right: 5px; 
-                    width: 20px; height: 20px; 
-                    background: #10b981; 
-                    border: 4px solid white; border-radius: 50%; 
-                    box-shadow: 0 0 20px rgba(16, 185, 129, 0.8);
+                    position: absolute; bottom: 3px; right: 3px; 
+                    width: 16px; height: 16px; 
+                    background: #10B981; 
+                    border: 3px solid #141822; border-radius: 50%; 
+                    box-shadow: 0 0 12px rgba(16, 185, 129, 0.9);
                     z-index: 3;
                 }
 
-                /* 🔽 5. القائمة المنسدلة (Supreme Menu) */
+                /* 🔽 5. القائمة المنسدلة (Command Menu) */
                 .imperial-dropdown {
-                    position: absolute; top: 110%; left: 0; width: 340px;
-                    background: rgba(255, 255, 255, 0.98);
+                    position: absolute; top: 115%; left: 0; width: 320px;
+                    background: rgba(20, 24, 34, 0.98);
                     backdrop-filter: blur(30px);
-                    border-radius: 40px; padding: 25px;
-                    box-shadow: 0 40px 100px rgba(0,0,0,0.3);
-                    border: 2px solid rgba(40, 145, 200, 0.2);
+                    border-radius: 24px; padding: 20px;
+                    box-shadow: 0 30px 80px rgba(0,0,0,0.8), 0 0 25px rgba(0, 229, 255, 0.15);
+                    border: 1px solid rgba(0, 229, 255, 0.25);
                     z-index: 100000; 
                     transform-origin: top left;
-                    animation: supremeShow 0.6s cubic-bezier(0.68, -0.6, 0.32, 1.6);
+                    animation: supremeShow 0.4s cubic-bezier(0.16, 1, 0.3, 1);
                 }
                 @keyframes supremeShow {
-                    from { opacity: 0; transform: scale(0.5) rotate(-10deg) translateY(-40px); }
-                    to { opacity: 1; transform: scale(1) rotate(0) translateY(0); }
+                    from { opacity: 0; transform: scale(0.9) translateY(-20px); }
+                    to { opacity: 1; transform: scale(1) translateY(0); }
                 }
 
-                .dropdown-title-c { padding-bottom: 20px; text-align: right; }
-                .dropdown-title-c p { margin: 0; font-weight: 1000; font-size: 18px; color: #0f172a; }
-                .dropdown-title-c small { color: ${THEME.goldAccent}; font-weight: 800; font-size: 13px; }
+                .dropdown-title-c { padding-bottom: 16px; text-align: right; }
+                .dropdown-title-c p { margin: 0; font-weight: 900; font-size: 16px; color: #F8FAFC; }
+                .dropdown-title-c small { color: #00E5FF; font-weight: 800; font-size: 12px; }
 
                 .dropdown-link-g {
-                    display: flex; align-items: center; gap: 20px;
-                    padding: 18px 25px; border-radius: 25px;
-                    font-size: 16px; font-weight: 900; color: #475569;
-                    cursor: pointer; transition: 0.3s; direction: rtl;
+                    display: flex; align-items: center; gap: 16px;
+                    padding: 14px 20px; border-radius: 16px;
+                    font-size: 14.5px; font-weight: 800; color: #94A3B8;
+                    cursor: pointer; transition: 0.2s; direction: rtl;
                 }
                 .dropdown-link-g:hover { 
-                    background: rgba(255, 255, 255, 0.6); color: ${THEME.goldAccent}; 
-                    transform: translateX(-15px) scale(1.05); 
+                    background: rgba(0, 229, 255, 0.1); color: #00E5FF; 
+                    transform: translateX(-8px); 
                 }
-                .logout-grand { color: #ef4444 !important; background: #fff1f2; margin-top: 20px; }
-                .logout-grand:hover { background: #ef4444 !important; color: white !important; }
+                .logout-grand { color: #EF4444 !important; background: rgba(239, 68, 68, 0.12); margin-top: 14px; }
+                .logout-grand:hover { background: #EF4444 !important; color: #0B0E14 !important; }
                 
-                .imperial-divider { height: 3px; background: rgba(255, 255, 255, 0.4); margin: 15px 0; border-radius: 10px; }
-                .skeleton-grand { width: 280px; height: 100px; background: rgba(238, 238, 238, 0.5); border-radius: 100px; animation: pulse 2s infinite; }
+                .imperial-divider { height: 1px; background: rgba(0, 229, 255, 0.15); margin: 12px 0; }
+                .skeleton-grand { width: 240px; height: 75px; background: rgba(20, 24, 34, 0.6); border: 1px solid rgba(0, 229, 255, 0.15); border-radius: 100px; animation: pulse 2s infinite; }
 
-                /* 📱 6. التجاوب مع الموبايل (إخفاء النص وترك الصورة السيادية فقط) */
+                /* 📱 6. التجاوب مع الموبايل */
                 @media (max-width: 768px) {
                     .hidden-on-mobile-text { display: none !important; }
-                    .imperial-trigger { padding: 5px; gap: 0; border-radius: 50%; border: none; background: transparent; box-shadow: none; }
-                    .avatar-frame-grand { width: 55px; height: 55px; }
+                    .imperial-trigger { padding: 4px; gap: 0; border-radius: 50%; border: none; background: transparent; box-shadow: none; }
+                    .avatar-frame-grand { width: 50px; height: 50px; }
                     .imperial-dropdown { width: 280px; left: auto; right: -10px; transform-origin: top right; }
                 }
             `}</style>

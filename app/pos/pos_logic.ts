@@ -8,7 +8,7 @@ import { SALES_ACCOUNTS, CASH_ACCOUNTS, ACC } from '@/lib/account-ids';
 import { syncAllWarehouseBalances } from '@/lib/inventory_engine';
 import { notifyInvoiceCreated } from '@/lib/notificationService';
 import { distributeManualDiscount, applyPromotions, Promotion, PosCartItem } from '@/lib/promotions_engine';
-import { getLocalExpiryMetadata } from '@/app/expiry-alerts/expiry_alerts_logic';
+
 
 
 export function usePosLogic() {
@@ -321,7 +321,7 @@ export function usePosLogic() {
                 catalog = catData || [];
             }
 
-            const localExp = getLocalExpiryMetadata();
+            
             const today = new Date();
             today.setHours(0, 0, 0, 0);
 
@@ -352,14 +352,8 @@ export function usePosLogic() {
                 const isCritical = availableQty <= reorderLvl;
                 const isNear = availableQty > reorderLvl && availableQty <= reorderLvl * 1.5;
 
-                const cachedMeta = localExp[item.id] || {};
-                const expiryDate = item.expiry_date || cachedMeta.expiry_date || null;
-                const batchNum = item.batch_number || cachedMeta.batch_number || null;
-                const alertDays = Number(item.alert_before_days || cachedMeta.alert_before_days || 30);
-
-                let daysLeft: number | null = null;
-                let isExpired = false;
-                let isNearExpiry = false;
+                
+                const expiryDate = null; let isNearExpiry = false; let isExpired = false; let daysLeft = 0;
 
                 if (expiryDate) {
                     const exp = new Date(expiryDate);
@@ -386,7 +380,7 @@ export function usePosLogic() {
                     isNearLow: isNear,
                     is_returnable_bottle: Boolean(item.is_returnable_bottle),
                     tax_rate: (item.tax_rate !== undefined && item.tax_rate !== null) ? Number(item.tax_rate) : 15,
-                    expiry_date: expiryDate,
+                    
                     batch_number: batchNum,
                     alert_before_days: alertDays,
                     days_left: daysLeft,

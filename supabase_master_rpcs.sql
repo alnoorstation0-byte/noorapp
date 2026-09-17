@@ -142,8 +142,8 @@ CREATE OR REPLACE VIEW public.boq_budget_distinct AS
 SELECT 
     jo.id,
     jo.id AS project_id,
-    COALESCE(jo.job_order_number, jo.id::text) AS work_item,
-    COALESCE(jo.job_order_number || ' - ' || jo.description, jo.id::text) AS display_name
+    COALESCE(jo.order_number, jo.id::text) AS work_item,
+    COALESCE(jo.order_number || ' - ' || COALESCE(jo.notes, ''), jo.id::text) AS display_name
 FROM public.job_orders jo;
 
 -- ------------------------------------------------------------------------------

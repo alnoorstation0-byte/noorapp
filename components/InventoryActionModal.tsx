@@ -8,7 +8,7 @@ import { THEME } from '@/lib/theme';
 import SearchableSelect from './SearchableSelect';
 import { BarcodeCameraButton } from './BarcodeScannerWidget';
 import { executeApproveTransaction, syncAllWarehouseBalances } from '@/lib/inventory_engine';
-import { saveLocalExpiryMetadata } from '@/app/expiry-alerts/expiry_alerts_logic';
+
 
 const generateBatchNumber = () => {
   const d = new Date();
@@ -425,7 +425,7 @@ export default function InventoryActionModal({ isOpen, onClose, actionType, onSu
                   onChange={e => setFormData({ ...formData, waste_reason: e.target.value })}
                   style={{ width: '100%', padding: '10px', border: '1.5px solid #f87171' }}
                 >
-                  <option value="كسر عبوة / قارورة">كسر عبوة دواء أو قارورة فارغة</option>
+                  <option value="كسر عبوة / قارورة">كسر عبوة منتج أو قارورة فارغة</option>
                   <option value="تلف كرتون أو تسريب">تلف كرتون علاج أو تسريب عبوة</option>
                   <option value="عيب تصنيع أو غطاء غير محكم">عيب تصنيع أو غطاء غير محكم</option>
                   <option value="تلف أثناء النقل والتوزيع">تلف أثناء نقل وتوزيع البضاعة</option>

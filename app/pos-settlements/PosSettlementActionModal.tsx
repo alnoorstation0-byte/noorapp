@@ -22,7 +22,7 @@ export default function PosSettlementActionModal({
     onExecuteSettlement,
     isSubmitting
 }: PosSettlementActionModalProps) {
-    const [activeTab, setActiveTab] = useState<'cash' | 'bottles' | 'inventory' | 'preview'>('cash');
+    const [activeTab, setActiveTab] = useState<'cash' | 'pumps' | 'inventory' | 'preview'>('cash');
 
     // Form States
     const [settlementDate, setSettlementDate] = useState(new Date().toISOString().split('T')[0]);
@@ -31,10 +31,25 @@ export default function PosSettlementActionModal({
     const [shortageAction, setShortageAction] = useState<'debt_on_cashier' | 'shortage_expense' | 'rounding' | 'none'>('debt_on_cashier');
     const [settlementNotes, setSettlementNotes] = useState<string>('');
 
-    // Bottles
+    // Fuel Pumps
+    const [pumps, setPumps] = useState<Array<{
+        id?: string;
+        pump_id: string;
+        pump_number?: string;
+        pump_name?: string;
+        fuel_type?: string;
+        unit_price: number;
+        start_reading: number;
+        end_reading: number | null;
+        liters_pumped: number;
+        expected_amount: number;
+        notes?: string;
+    }>>([]);
+
+    // Legacy Bottles
     const [bottlesReturned, setBottlesReturned] = useState<number>(0);
     const [bottlesShortage, setBottlesShortage] = useState<number>(0);
-    const [returnBottlesToMain, setReturnBottlesToMain] = useState<boolean>(true);
+    const [returnBottlesToMain, setReturnBottlesToMain] = useState<boolean>(false);
 
     // Inventory return rows
     const [returnRows, setReturnRows] = useState<Array<{
@@ -62,10 +77,13 @@ export default function PosSettlementActionModal({
             const defaultCash = Math.max(0, Number(shift.remainingCashCustody !== undefined ? shift.remainingCashCustody : shift.netCashDue || 0));
             setActualCashHandedOver(defaultCash);
 
-            // Bottles
+            // Fuel Pumps
+            setPumps(Array.isArray(shift.pumpReadings) ? shift.pumpReadings : []);
+
+            // Bottles (legacy)
             setBottlesReturned(Number(shift.bottlesReturned || 0));
             setBottlesShortage(Number(shift.bottlesShortage || 0));
-            setReturnBottlesToMain(true);
+            setReturnBottlesToMain(false);
 
             // Populate inventory items
             const rows = (shift.outletInventoryItems || []).map((item: any) => ({
@@ -131,10 +149,14 @@ export default function PosSettlementActionModal({
             totalExpenses: shift.totalExpenses,
             totalCollections: shift.totalCollections,
             startingCash: shift.startingCash,
-            bottlesSold: shift.bottlesSold,
-            bottlesReturned,
-            bottlesShortage,
-            returnBottlesToMain,
+            totalLitersSold: shift.totalLitersSold,
+            meterTotalAmount: shift.meterTotalAmount,
+            meterSalesVariance: shift.meterSalesVariance,
+            pumpReadings: pumps,
+            bottlesSold: 0,
+            bottlesReturned: 0,
+            bottlesShortage: 0,
+            returnBottlesToMain: false,
             inventoryReturns: returnRows,
             notes: settlementNotes
         };
@@ -309,11 +331,11 @@ export default function PosSettlementActionModal({
                     </button>
                     <button
                         type="button"
-                        className={`aqua-tab-btn ${activeTab === 'bottles' ? 'active' : ''}`}
-                        onClick={() => setActiveTab('bottles')}
+                        className={`aqua-tab-btn ${activeTab === 'pumps' ? 'active' : ''}`}
+                        onClick={() => setActiveTab('pumps')}
                     >
-                        <span>💧</span>
-                        <span>عهدة العبوات والمستلزمات</span>
+                        <span>⛽</span>
+                        <span>عدادات المضخات والوقود</span>
                     </button>
                     <button
                         type="button"
@@ -493,85 +515,122 @@ export default function PosSettlementActionModal({
                         </div>
                     )}
 
-                    {/* TAB 2: BOTTLES CUSTODY */}
-                    {activeTab === 'bottles' && (
+                    {/* TAB 2: FUEL PUMP METERS */}
+                    {activeTab === 'pumps' && (
                         <div>
                             <div style={{
                                 background: 'rgba(255, 255, 255, 0.85)',
                                 padding: '22px 24px',
                                 borderRadius: '22px',
-                                border: '1px solid rgba(28, 115, 171, 0.15)',
+                                border: '1px solid rgba(194, 155, 98, 0.3)',
                                 marginBottom: '20px'
                             }}>
-                                <h3 style={{ margin: '0 0 16px 0', fontSize: '16px', fontWeight: 900, color: '#122946' }}>
-                                    💧 مطابقة وتسوية عهدة العبوات والمستلزمات بالمنفذ
-                                </h3>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+                                    <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 900, color: '#2C1A12' }}>
+                                        ⛽ جرد ومطابقة عدادات مضخات المحروقات
+                                    </h3>
+                                    <span style={{ fontSize: '12px', color: '#64748b' }}>
+                                        مقارنة كمية الوقود المضخوخ مع إجمالي الفواتير الصادرة
+                                    </span>
+                                </div>
 
+                                {/* KPIs Row */}
                                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '14px', marginBottom: '20px' }}>
-                                    <div style={{ background: 'rgba(28, 115, 171, 0.08)', padding: '14px 16px', borderRadius: '16px' }}>
-                                        <div style={{ fontSize: '11px', fontWeight: 800, color: '#1C73AB' }}>رصيد فوارغ البداية 📦</div>
+                                    <div style={{ background: 'rgba(194, 155, 98, 0.08)', padding: '14px 16px', borderRadius: '16px', border: '1px solid rgba(194, 155, 98, 0.2)' }}>
+                                        <div style={{ fontSize: '11px', fontWeight: 800, color: '#C29B62' }}>إجمالي اللترات المباعة ⛽</div>
+                                        <div style={{ fontSize: '18px', fontWeight: 900, color: '#2C1A12', marginTop: '4px' }}>
+                                            {Number(shift.totalLitersSold || 0).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 2 })} لتر
+                                        </div>
+                                    </div>
+                                    <div style={{ background: 'rgba(194, 155, 98, 0.08)', padding: '14px 16px', borderRadius: '16px', border: '1px solid rgba(194, 155, 98, 0.2)' }}>
+                                        <div style={{ fontSize: '11px', fontWeight: 800, color: '#C29B62' }}>قيمة الوقود بالعدادات 💰</div>
+                                        <div style={{ fontSize: '18px', fontWeight: 900, color: '#2C1A12', marginTop: '4px' }}>
+                                            {formatCurrency(shift.meterTotalAmount || 0)}
+                                        </div>
+                                    </div>
+                                    <div style={{ background: 'rgba(28, 115, 171, 0.08)', padding: '14px 16px', borderRadius: '16px', border: '1px solid rgba(28, 115, 171, 0.2)' }}>
+                                        <div style={{ fontSize: '11px', fontWeight: 800, color: '#1C73AB' }}>إجمالي مبيعات الكاشير 🧾</div>
                                         <div style={{ fontSize: '18px', fontWeight: 900, color: '#122946', marginTop: '4px' }}>
-                                            {shift.startingBottles} قارورة
+                                            {formatCurrency(shift.totalSales || 0)}
                                         </div>
                                     </div>
-                                    <div style={{ background: 'rgba(28, 115, 171, 0.08)', padding: '14px 16px', borderRadius: '16px' }}>
-                                        <div style={{ fontSize: '11px', fontWeight: 800, color: '#1C73AB' }}>عبوات ومستلزمات مباعة 🛒</div>
-                                        <div style={{ fontSize: '18px', fontWeight: 900, color: '#1C73AB', marginTop: '4px' }}>
-                                            {shift.bottlesSold} قارورة
+                                    <div style={{ 
+                                        background: Math.abs(shift.meterSalesVariance || 0) <= 5 ? 'rgba(22, 163, 74, 0.08)' : 'rgba(239, 68, 68, 0.08)', 
+                                        padding: '14px 16px', 
+                                        borderRadius: '16px', 
+                                        border: `1px solid ${Math.abs(shift.meterSalesVariance || 0) <= 5 ? 'rgba(22, 163, 74, 0.25)' : 'rgba(239, 68, 68, 0.25)'}` 
+                                    }}>
+                                        <div style={{ fontSize: '11px', fontWeight: 800, color: Math.abs(shift.meterSalesVariance || 0) <= 5 ? '#16a34a' : '#ef4444' }}>
+                                            فارق المطابقة (عدادات - فواتير) ⚖️
                                         </div>
-                                    </div>
-                                    <div style={{ background: 'rgba(22, 163, 74, 0.08)', padding: '14px 16px', borderRadius: '16px' }}>
-                                        <div style={{ fontSize: '11px', fontWeight: 800, color: '#16a34a' }}>فوارغ مستلمة من العملاء 🔄</div>
-                                        <div style={{ fontSize: '18px', fontWeight: 900, color: '#16a34a', marginTop: '4px' }}>
-                                            {shift.bottlesReturned} قارورة
-                                        </div>
-                                    </div>
-                                    <div style={{ background: 'rgba(245, 158, 11, 0.08)', padding: '14px 16px', borderRadius: '16px' }}>
-                                        <div style={{ fontSize: '11px', fontWeight: 800, color: '#b45309' }}>الرصيد الفعلي المتوقع ⚖️</div>
-                                        <div style={{ fontSize: '18px', fontWeight: 900, color: '#b45309', marginTop: '4px' }}>
-                                            {shift.expectedBottles} قارورة
+                                        <div style={{ fontSize: '18px', fontWeight: 900, color: Math.abs(shift.meterSalesVariance || 0) <= 5 ? '#16a34a' : '#ef4444', marginTop: '4px' }}>
+                                            {Math.abs(shift.meterSalesVariance || 0) <= 5 
+                                                ? '✅ مطابق تماماً' 
+                                                : `${(shift.meterSalesVariance || 0) > 0 ? '+' : ''}${formatCurrency(shift.meterSalesVariance || 0)}`}
                                         </div>
                                     </div>
                                 </div>
 
-                                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '16px' }}>
-                                    <div>
-                                        <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#1C73AB', marginBottom: '6px' }}>
-                                            الفوارغ المرتجعة الموردة للمستودع 🔄
-                                        </label>
-                                        <input
-                                            type="number"
-                                            value={bottlesReturned}
-                                            onChange={(e) => setBottlesReturned(Math.max(0, Number(e.target.value) || 0))}
-                                            className="field-input"
-                                        />
-                                    </div>
-                                    <div>
-                                        <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#1C73AB', marginBottom: '6px' }}>
-                                            عجز الفوارغ المفقودة (إن وُجد) ⚠️
-                                        </label>
-                                        <input
-                                            type="number"
-                                            value={bottlesShortage}
-                                            onChange={(e) => setBottlesShortage(Math.max(0, Number(e.target.value) || 0))}
-                                            className="field-input"
-                                            style={{ color: '#ef4444' }}
-                                        />
-                                    </div>
-                                </div>
+                                {/* Pump Readings Table */}
+                                {pumps.length > 0 ? (
+                                    <div style={{ overflowX: 'auto' }}>
+                                        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '12px' }}>
+                                            <thead>
+                                                <tr style={{ background: 'rgba(194, 155, 98, 0.08)', borderBottom: '1.5px solid rgba(194, 155, 98, 0.2)' }}>
+                                                    <th style={{ padding: '10px 14px', textAlign: 'right', color: '#2C1A12' }}>المضخة</th>
+                                                    <th style={{ padding: '10px 14px', textAlign: 'center', color: '#2C1A12' }}>نوع الوقود</th>
+                                                    <th style={{ padding: '10px 14px', textAlign: 'center', color: '#2C1A12' }}>سعر اللتر</th>
+                                                    <th style={{ padding: '10px 14px', textAlign: 'center', color: '#64748b' }}>قراءة البداية</th>
+                                                    <th style={{ padding: '10px 14px', textAlign: 'center', color: '#A8573C' }}>قراءة النهاية</th>
+                                                    <th style={{ padding: '10px 14px', textAlign: 'center', color: '#2C1A12' }}>اللترات المضخوخة</th>
+                                                    <th style={{ padding: '10px 14px', textAlign: 'center', color: '#C29B62' }}>القيمة المتوقعة</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {pumps.map((p, pIdx) => {
+                                                    const isOctane91 = p.fuel_type?.includes('91');
+                                                    const isOctane95 = p.fuel_type?.includes('95');
+                                                    const badgeBg = isOctane91 ? '#dcfce7' : isOctane95 ? '#fee2e2' : '#fef3c7';
+                                                    const badgeColor = isOctane91 ? '#15803d' : isOctane95 ? '#b91c1c' : '#b45309';
 
-                                <div style={{ marginTop: '16px', display: 'flex', alignItems: 'center', gap: '10px' }}>
-                                    <input
-                                        type="checkbox"
-                                        id="returnBottles"
-                                        checked={returnBottlesToMain}
-                                        onChange={(e) => setReturnBottlesToMain(e.target.checked)}
-                                        style={{ width: '18px', height: '18px', cursor: 'pointer' }}
-                                    />
-                                    <label htmlFor="returnBottles" style={{ fontSize: '13px', fontWeight: 800, color: '#122946', cursor: 'pointer' }}>
-                                        نقل الفوارغ المستلمة ({bottlesReturned} قارورة) آلياً إلى عهدة المستودع الرئيسي 🚚
-                                    </label>
-                                </div>
+                                                    return (
+                                                        <tr key={p.pump_id || pIdx} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                                                            <td style={{ padding: '10px 14px', fontWeight: 800 }}>
+                                                                ⛽ {p.pump_name || `مضخة #${p.pump_number}`}
+                                                            </td>
+                                                            <td style={{ padding: '10px 14px', textAlign: 'center' }}>
+                                                                <span style={{ fontSize: '11px', fontWeight: 800, padding: '2px 8px', borderRadius: '6px', background: badgeBg, color: badgeColor }}>
+                                                                    {p.fuel_type}
+                                                                </span>
+                                                            </td>
+                                                            <td style={{ padding: '10px 14px', textAlign: 'center', fontWeight: 700 }}>
+                                                                {Number(p.unit_price || 0).toFixed(2)} ر.س
+                                                            </td>
+                                                            <td style={{ padding: '10px 14px', textAlign: 'center', fontWeight: 700, color: '#64748b' }}>
+                                                                {Number(p.start_reading || 0).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 2 })}
+                                                            </td>
+                                                            <td style={{ padding: '10px 14px', textAlign: 'center', fontWeight: 800, color: '#A8573C' }}>
+                                                                {p.end_reading !== null && p.end_reading !== undefined
+                                                                    ? Number(p.end_reading).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 2 })
+                                                                    : '—'}
+                                                            </td>
+                                                            <td style={{ padding: '10px 14px', textAlign: 'center', fontWeight: 900, color: '#2C1A12' }}>
+                                                                {Number(p.liters_pumped || 0).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 2 })} لتر
+                                                            </td>
+                                                            <td style={{ padding: '10px 14px', textAlign: 'center', fontWeight: 900, color: '#C29B62' }}>
+                                                                {formatCurrency(Number(p.expected_amount || 0))}
+                                                            </td>
+                                                        </tr>
+                                                    );
+                                                })}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                ) : (
+                                    <div style={{ textAlign: 'center', padding: '24px', color: '#64748b', fontSize: '13px' }}>
+                                        لم يتم تسجيل قراءات مضخات مفصلة لهذه الوردية.
+                                    </div>
+                                )}
                             </div>
                         </div>
                     )}
@@ -828,8 +887,8 @@ export default function PosSettlementActionModal({
                             <button
                                 type="button"
                                 onClick={() => {
-                                    if (activeTab === 'cash') setActiveTab('bottles');
-                                    else if (activeTab === 'bottles') setActiveTab('inventory');
+                                    if (activeTab === 'cash') setActiveTab('pumps');
+                                    else if (activeTab === 'pumps') setActiveTab('inventory');
                                     else if (activeTab === 'inventory') setActiveTab('preview');
                                 }}
                                 style={{

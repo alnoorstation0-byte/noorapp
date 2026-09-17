@@ -471,7 +471,7 @@ export async function exportToProfessionalExcel(
             const sheetRows: any[][] = [];
 
             // سطر 1: البانر الرئيسي للشعار والشركة
-            sheetRows.push([`💧 صيدلية تاج المودة البيطرية | Taj Al-Mawadah Vet Pharmacy - تقرير: ${tableMeta.name}`]);
+            sheetRows.push([`💧 محطات النور للوقود | Al-Noor Gas Stations Gas Station - تقرير: ${tableMeta.name}`]);
             // سطر 2: الميتا داتا والتاريخ
             sheetRows.push([`تاريخ التصدير: ${exportTimestamp} | إجمالي السجلات: ${data?.length || 0} | كود الجدول البرمجي: ${tableId}`]);
             // سطر 3: فاصل فارغ
@@ -560,7 +560,7 @@ export async function exportToProfessionalExcel(
             XLSX.utils.book_append_sheet(workbook, worksheet, safeSheetName);
         }
 
-        const fileName = `Taj Al-Mawadah_ERP_Report_${new Date().toISOString().split('T')[0]}.xlsx`;
+        const fileName = `Al-Noor Gas Stations_ERP_Report_${new Date().toISOString().split('T')[0]}.xlsx`;
         XLSX.writeFile(workbook, fileName);
         onProgress?.('✅ تم تصدير ملف الإكسل الشامل بنجاح!');
         return { success: true };
@@ -593,9 +593,9 @@ export async function exportToSQL(
 
         let sqlContent = 
 `-- =========================================================================
--- Taj Al-Mawadah Pharmacy ERP Database Backup (PostgreSQL Format)
+-- Al-Noor Gas Stations Station ERP Database Backup (PostgreSQL Format)
 -- Generated at: ${new Date().toISOString()}
--- Company: صيدلية تاج المودة البيطرية | Taj Al-Mawadah Vet Pharmacy
+-- Company: محطات النور للوقود | Al-Noor Gas Stations Gas Station
 -- =========================================================================
 
 SET client_encoding = 'UTF8';
@@ -662,7 +662,7 @@ COMMIT;
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
         link.href = url;
-        link.download = `Taj Al-Mawadah_Backup_${new Date().toISOString().split('T')[0]}.sql`;
+        link.download = `Al-Noor Gas Stations_Backup_${new Date().toISOString().split('T')[0]}.sql`;
         link.click();
         URL.revokeObjectURL(url);
 

@@ -347,10 +347,10 @@ export default function PayrollPage() {
          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: `4px solid ${THEME.primary}`, paddingBottom: '20px', marginBottom: '25px' }}>
             <div>
                
-               <p style={{ margin: '8px 0 0 0', fontWeight: 700, fontSize: '14px', color: THEME.textMuted }}>صيدلية تاج المودة البيطرية | عن شهر ({logic.selectedMonth} / {logic.selectedYear})</p>
+               <p style={{ margin: '8px 0 0 0', fontWeight: 700, fontSize: '14px', color: THEME.textMuted }}>محطات النور للوقود | عن شهر ({logic.selectedMonth} / {logic.selectedYear})</p>
                <p style={{ margin: '4px 0 0 0', fontWeight: 600, fontSize: '12px', color: THEME.ruby }}>تاريخ القطع للمسحوبات: {logic.cutoffDate}</p>
             </div>
-            <img src="/taj_logo.png" alt="Company Logo" style={{ height: '60px', objectFit: 'contain' }} />
+            <img src="/logo.png" alt="Company Logo" style={{ height: '60px', objectFit: 'contain' }} />
          </div>
 
          <table className="print-table">

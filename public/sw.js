@@ -72,14 +72,14 @@ self.addEventListener('push', (event) => {
   try {
     data = event.data ? event.data.json() : {};
   } catch (e) {
-    data = { title: 'صيدلية تاج المودة', body: event.data ? event.data.text() : 'إشعار جديد' };
+    data = { title: 'محطات النور للوقود', body: event.data ? event.data.text() : 'إشعار جديد' };
   }
 
-  const title = data.title || 'إشعار جديد | صيدلية تاج المودة';
+  const title = data.title || 'إشعار جديد | محطات النور للوقود';
   const options = {
     body: data.body || data.message || '',
-    icon: '/taj_logo.png',
-    badge: '/taj_logo.png',
+    icon: '/logo.png',
+    badge: '/logo.png',
     vibrate: [200, 100, 200],
     data: {
       url: data.url || data.actionUrl || '/notifications',

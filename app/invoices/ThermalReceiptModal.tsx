@@ -152,7 +152,7 @@ export default function ThermalReceiptModal({ isOpen, onClose, record, onOpenA4 
             const totalStr = totalAmount.toFixed(2);
             const vatStr = taxAmount.toFixed(2);
             
-            const qr = generateZatcaQR('صيدلية تاج المودة البيطرية', '312487477800003', dateStr, totalStr, vatStr);
+            const qr = generateZatcaQR('محطات النور للوقود', '312487477800003', dateStr, totalStr, vatStr);
             setQrData(qr);
         }
     }, [record, totalAmount, taxAmount]);
@@ -234,10 +234,11 @@ export default function ThermalReceiptModal({ isOpen, onClose, record, onOpenA4 
                 }
 
                 .thermal-actions {
-                    display: flex; gap: 12px; background: rgba(255, 255, 255, 0.95);
-                    padding: 12px 25px; border-radius: 50px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+                    display: flex; gap: 12px; background: rgba(20, 24, 34, 0.95);
+                    padding: 12px 25px; border-radius: 50px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
                     position: sticky; top: 15px; z-index: 10000; margin-bottom: 20px;
-                    border: 1px solid rgba(255,255,255,0.8);
+                    border: 1px solid rgba(0, 229, 255, 0.3);
+                    backdrop-filter: blur(20px);
                     flex-wrap: wrap; justify-content: center;
                 }
                 .thermal-actions button {
@@ -249,8 +250,10 @@ export default function ThermalReceiptModal({ isOpen, onClose, record, onOpenA4 
                     transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.15);
                 }
                 .btn-print-thermal { 
-                    background: linear-gradient(135deg, #C29B62, #A8573C); 
-                    color: white; 
+                    background: linear-gradient(135deg, #00E5FF, #0077B6); 
+                    color: #0B0E14; 
+                    font-weight: 900;
+                    box-shadow: 0 4px 12px rgba(0, 229, 255, 0.3);
                 }
                 .btn-whatsapp { 
                     background: #25D366; 
@@ -265,8 +268,9 @@ export default function ThermalReceiptModal({ isOpen, onClose, record, onOpenA4 
                     color: white; 
                 }
                 .btn-close { 
-                    background: #fee2e2; 
-                    color: #dc2626; 
+                    background: rgba(239, 68, 68, 0.15); 
+                    color: #EF4444; 
+                    border: 1px solid rgba(239, 68, 68, 0.3);
                 }
                 
                 /* صندوق إيصال الـ 80 ملم الحراري */
@@ -511,9 +515,9 @@ export default function ThermalReceiptModal({ isOpen, onClose, record, onOpenA4 
             <div className="thermal-receipt-container">
                 
                 {/* 1. الشعار والترويسة */}
-                <img src="/taj_logo.png" alt="Taj Al-Mawadah Logo" className="thermal-logo" />
-                <div style={{ fontSize: '16px', fontWeight: 900, color: '#000', margin: '2px 0' }}>صيدلية تاج المودة البيطرية</div>
-                <div style={{ fontSize: '10.5px', fontWeight: 700, letterSpacing: '0.5px' }}>Taj Al-Mawadah Vet Pharmacy</div>
+                <img src="/logo.png" alt="Al-Noor Gas Stations Logo" className="thermal-logo" />
+                <div style={{ fontSize: '16px', fontWeight: 900, color: '#000', margin: '2px 0' }}>محطات النور للوقود</div>
+                <div style={{ fontSize: '10.5px', fontWeight: 700, letterSpacing: '0.5px' }}>Al-Noor Gas Stations Gas Station</div>
                 <div style={{ fontSize: '10.5px', marginTop: '3px' }}>الرقم الضريبي: 312487477800003</div>
                 <div style={{ fontSize: '10px' }}>الرقم الموحد: 7051013519</div>
                 
@@ -666,9 +670,9 @@ export default function ThermalReceiptModal({ isOpen, onClose, record, onOpenA4 
                 {/* 6. التذييل والشروط */}
                 <div style={{ fontSize: '10px', marginTop: '6px', color: '#111', lineHeight: '1.4' }}>
                     البضاعة المباعة تستبدل أو ترد خلال 3 أيام بحالتها الأصلية.<br/>
-                    شكراً لتعاملكم مع <strong>صيدلية تاج المودة</strong> 🐎🐪<br/>
-                    خدمة العملاء: info@taj-mawadah.com<br/>
-                    <span style={{ fontSize: '8.5px', color: '#555' }}>تم الإصدار إلكترونياً عبر نظام تاج المودة</span>
+                    شكراً لتعاملكم مع <strong>محطات النور للوقود</strong> ⛽🚗<br/>
+                    خدمة العملاء: info@alnoor-gas.com<br/>
+                    <span style={{ fontSize: '8.5px', color: '#555' }}>تم الإصدار إلكترونياً عبر نظام محطات النور</span>
                 </div>
 
             </div>

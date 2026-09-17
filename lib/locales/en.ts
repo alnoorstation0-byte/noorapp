@@ -46,7 +46,7 @@ export const en: Record<LocaleKeys, string> = {
     menu_settings: "System Settings",
 
     // Common Actions & UI
-    app_title: "El-Taj Al-Mawadah Pharmacy - Unified ERP",
+    app_title: "El-Al-Noor Gas Stations Station - Unified ERP",
     lang_switch: "العربية",
     current_lang: "English",
     search: "Search...",

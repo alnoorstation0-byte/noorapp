@@ -420,9 +420,9 @@ export default function FinancialPlanPage() {
          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: `4px solid ${THEME.primary}`, paddingBottom: '12px', marginBottom: '25px' }}>
             <div>
                
-               <p style={{ margin: '6px 0 0 0', fontWeight: 800, fontSize: '14px', color: THEME.textMain }}>صيدلية تاج المودة البيطرية | كشف تفصيلي لشهر: ({monthNameArabic} / {logic.selectedYear})</p>
+               <p style={{ margin: '6px 0 0 0', fontWeight: 800, fontSize: '14px', color: THEME.textMain }}>محطات النور للوقود | كشف تفصيلي لشهر: ({monthNameArabic} / {logic.selectedYear})</p>
             </div>
-            <img src="/taj_logo.png" alt=" RY Logo" style={{ height: '55px', objectFit: 'contain' }} />
+            <img src="/logo.png" alt=" RY Logo" style={{ height: '55px', objectFit: 'contain' }} />
          </div>
 
          {/* جدول الإيرادات الورقي */}

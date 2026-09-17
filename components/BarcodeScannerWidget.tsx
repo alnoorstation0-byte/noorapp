@@ -76,9 +76,9 @@ export default function BarcodeScannerWidget({
             padding: '11px 40px 11px 16px',
             fontSize: '13px',
             borderRadius: '12px',
-            border: '1.5px solid rgba(28, 115, 171, 0.25)',
-            background: 'rgba(255, 255, 255, 0.85)',
-            color: '#122946',
+            border: '1.5px solid rgba(0, 229, 255, 0.25)',
+            background: 'rgba(20, 24, 34, 0.85)',
+            color: '#F8FAFC',
             fontWeight: 700,
             outline: 'none',
             boxSizing: 'border-box',
@@ -86,7 +86,7 @@ export default function BarcodeScannerWidget({
           }}
           autoFocus
         />
-        <span style={{ position: 'absolute', right: '12px', fontSize: '18px', opacity: 0.6, pointerEvents: 'none' }}>
+        <span style={{ position: 'absolute', right: '12px', fontSize: '18px', opacity: 0.7, pointerEvents: 'none' }}>
           🏷️
         </span>
         {manualInput && (
@@ -106,10 +106,10 @@ export default function BarcodeScannerWidget({
               padding: '4px 10px',
               borderRadius: '8px',
               border: 'none',
-              background: '#C29B62',
-              color: '#fff',
+              background: '#00E5FF',
+              color: '#0B0E14',
               fontSize: '11px',
-              fontWeight: 800,
+              fontWeight: 900,
               cursor: 'pointer'
             }}
           >
@@ -126,11 +126,11 @@ export default function BarcodeScannerWidget({
           setIsCameraOpen(true); 
         }}
         style={{ 
-          background: 'linear-gradient(135deg, #C29B62 0%, #A8573C 100%)', 
-          color: 'white', 
+          background: 'linear-gradient(135deg, #00E5FF 0%, #0077B6 100%)', 
+          color: '#0B0E14', 
           padding: '0 16px', 
           borderRadius: '12px',
-          border: '1px solid rgba(255, 255, 255, 0.4)',
+          border: '1px solid rgba(0, 229, 255, 0.4)',
           display: 'inline-flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -138,10 +138,10 @@ export default function BarcodeScannerWidget({
           height: '42px',
           minWidth: '46px',
           cursor: 'pointer',
-          boxShadow: '0 4px 12px rgba(28, 115, 171, 0.25)',
+          boxShadow: '0 4px 15px rgba(0, 229, 255, 0.3)',
           transition: 'all 0.2s ease',
           fontSize: '13px',
-          fontWeight: 800,
+          fontWeight: 900,
           whiteSpace: 'nowrap'
         }}
         title="فتح كاميرا قارئ الباركود الاحترافية"
@@ -204,18 +204,18 @@ export function BarcodeCameraButton({
         className={className}
         title={title}
         style={{
-          background: 'linear-gradient(135deg, #C29B62 0%, #A8573C 100%)',
-          color: 'white',
+          background: 'linear-gradient(135deg, #00E5FF 0%, #0077B6 100%)',
+          color: '#0B0E14',
           borderRadius: '12px',
-          border: '1px solid rgba(255, 255, 255, 0.4)',
+          border: '1px solid rgba(0, 229, 255, 0.4)',
           display: 'inline-flex',
           alignItems: 'center',
           justifyContent: 'center',
           gap: '6px',
           cursor: 'pointer',
-          boxShadow: '0 4px 12px rgba(194, 155, 98, 0.3)',
+          boxShadow: '0 4px 15px rgba(0, 229, 255, 0.3)',
           transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)',
-          fontWeight: 800,
+          fontWeight: 900,
           whiteSpace: 'nowrap',
           flexShrink: 0,
           ...sizeStyles,
@@ -223,11 +223,11 @@ export function BarcodeCameraButton({
         }}
         onMouseEnter={(e) => {
           e.currentTarget.style.transform = 'translateY(-2px)';
-          e.currentTarget.style.boxShadow = '0 6px 18px rgba(28, 115, 171, 0.38)';
+          e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 229, 255, 0.45)';
         }}
         onMouseLeave={(e) => {
           e.currentTarget.style.transform = 'none';
-          e.currentTarget.style.boxShadow = '0 4px 12px rgba(28, 115, 171, 0.25)';
+          e.currentTarget.style.boxShadow = '0 4px 15px rgba(0, 229, 255, 0.3)';
         }}
       >
         <span style={{ fontSize: size === 'sm' ? '15px' : '18px' }}>📷</span>
@@ -319,7 +319,7 @@ export function ProfessionalBarcodeModal({
       html5QrCodeRef.current = scanner;
       isStoppedRef.current = false;
 
-      // Config specifically calibrated for veterinary packages & items (wide 1D linear barcode)
+      // Config specifically calibrated for fuel packages & items (wide 1D linear barcode)
       const config = {
         fps: 15,
         qrbox: (viewfinderWidth: number, viewfinderHeight: number) => {
@@ -474,13 +474,13 @@ export function ProfessionalBarcodeModal({
       `}</style>
 
       <div style={{
-        background: 'rgba(255, 255, 255, 0.95)',
+        background: 'rgba(20, 24, 34, 0.98)',
         borderRadius: '26px',
         padding: '24px',
         width: '100%',
         maxWidth: '460px',
-        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.35)',
-        border: '1px solid rgba(255, 255, 255, 0.8)',
+        boxShadow: '0 25px 60px rgba(0, 0, 0, 0.8), 0 0 25px rgba(0, 229, 255, 0.15)',
+        border: '1px solid rgba(0, 229, 255, 0.25)',
         position: 'relative',
         display: 'flex',
         flexDirection: 'column',
@@ -493,16 +493,16 @@ export function ProfessionalBarcodeModal({
           alignItems: 'center',
           width: '100%',
           marginBottom: '16px',
-          borderBottom: '1px solid rgba(28, 115, 171, 0.12)',
+          borderBottom: '1px solid rgba(0, 229, 255, 0.15)',
           paddingBottom: '12px'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
             <span style={{ fontSize: '22px' }}>📷</span>
             <div>
-              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 900, color: '#122946' }}>
+              <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 900, color: '#F8FAFC' }}>
                 قارئ الباركود الذكي
               </h3>
-              <p style={{ margin: 0, fontSize: '11px', color: '#64748b', fontWeight: 700 }}>
+              <p style={{ margin: 0, fontSize: '11px', color: '#94A3B8', fontWeight: 700 }}>
                 وجّه الكاميرا إلى كود الصنف أو الكرتونة
               </p>
             </div>
@@ -516,8 +516,8 @@ export function ProfessionalBarcodeModal({
               height: '34px',
               borderRadius: '50%',
               border: 'none',
-              background: 'rgba(239, 68, 68, 0.1)',
-              color: '#ef4444',
+              background: 'rgba(239, 68, 68, 0.12)',
+              color: '#EF4444',
               fontSize: '16px',
               fontWeight: 900,
               cursor: 'pointer',
@@ -543,9 +543,9 @@ export function ProfessionalBarcodeModal({
             type="button"
             onClick={() => setIsContinuousMode(!isContinuousMode)}
             style={{
-              background: isContinuousMode ? 'rgba(16, 185, 129, 0.15)' : 'rgba(100, 116, 139, 0.12)',
-              color: isContinuousMode ? '#059669' : '#475569',
-              border: `1.5px solid ${isContinuousMode ? '#10b981' : '#cbd5e1'}`,
+              background: isContinuousMode ? 'rgba(16, 185, 129, 0.15)' : 'rgba(255, 255, 255, 0.05)',
+              color: isContinuousMode ? '#10B981' : '#94A3B8',
+              border: `1.5px solid ${isContinuousMode ? '#10B981' : 'rgba(255, 255, 255, 0.12)'}`,
               borderRadius: '10px',
               padding: '5px 12px',
               fontSize: '11px',
@@ -562,13 +562,13 @@ export function ProfessionalBarcodeModal({
 
           {scanCount > 0 && (
             <span style={{
-              background: '#ecfdf5',
-              color: '#059669',
-              border: '1px solid #10b981',
+              background: 'rgba(16, 185, 129, 0.15)',
+              color: '#10B981',
+              border: '1px solid #10B981',
               borderRadius: '10px',
               padding: '3px 10px',
               fontSize: '11px',
-              fontWeight: 800
+              fontWeight: 900
             }}>
               ✅ تم مسح {scanCount} صنف
             </span>
@@ -638,13 +638,13 @@ export function ProfessionalBarcodeModal({
                 type="button"
                 onClick={() => startCamera({ facingMode: 'environment' })}
                 style={{
-                  background: '#C29B62',
-                  color: 'white',
+                  background: '#00E5FF',
+                  color: '#0B0E14',
                   border: 'none',
                   padding: '8px 18px',
                   borderRadius: '10px',
                   fontSize: '12px',
-                  fontWeight: 800,
+                  fontWeight: 900,
                   cursor: 'pointer'
                 }}
               >
@@ -668,16 +668,16 @@ export function ProfessionalBarcodeModal({
               <div style={{
                 width: '78%',
                 height: '52%',
-                border: '2px dashed rgba(194, 155, 98, 0.7)',
+                border: '2px dashed rgba(0, 229, 255, 0.6)',
                 borderRadius: '16px',
                 position: 'relative',
                 animation: 'reticleGlow 2.5s infinite ease-in-out'
               }}>
                 {/* Reticle Corner Brackets */}
-                <div style={{ position: 'absolute', top: '-3px', right: '-3px', width: '18px', height: '18px', borderTop: '4px solid #C29B62', borderRight: '4px solid #C29B62', borderTopRightRadius: '10px' }} />
-                <div style={{ position: 'absolute', top: '-3px', left: '-3px', width: '18px', height: '18px', borderTop: '4px solid #C29B62', borderLeft: '4px solid #C29B62', borderTopLeftRadius: '10px' }} />
-                <div style={{ position: 'absolute', bottom: '-3px', right: '-3px', width: '18px', height: '18px', borderBottom: '4px solid #C29B62', borderRight: '4px solid #C29B62', borderBottomRightRadius: '10px' }} />
-                <div style={{ position: 'absolute', bottom: '-3px', left: '-3px', width: '18px', height: '18px', borderBottom: '4px solid #C29B62', borderLeft: '4px solid #C29B62', borderBottomLeftRadius: '10px' }} />
+                <div style={{ position: 'absolute', top: '-3px', right: '-3px', width: '18px', height: '18px', borderTop: '4px solid #00E5FF', borderRight: '4px solid #00E5FF', borderTopRightRadius: '10px' }} />
+                <div style={{ position: 'absolute', top: '-3px', left: '-3px', width: '18px', height: '18px', borderTop: '4px solid #00E5FF', borderLeft: '4px solid #00E5FF', borderTopLeftRadius: '10px' }} />
+                <div style={{ position: 'absolute', bottom: '-3px', right: '-3px', width: '18px', height: '18px', borderBottom: '4px solid #00E5FF', borderRight: '4px solid #00E5FF', borderBottomRightRadius: '10px' }} />
+                <div style={{ position: 'absolute', bottom: '-3px', left: '-3px', width: '18px', height: '18px', borderBottom: '4px solid #00E5FF', borderLeft: '4px solid #00E5FF', borderBottomLeftRadius: '10px' }} />
 
                 {/* Animated Glowing Laser Line */}
                 <div style={{
@@ -685,8 +685,8 @@ export function ProfessionalBarcodeModal({
                   left: '4%',
                   right: '4%',
                   height: '3px',
-                  background: 'linear-gradient(90deg, transparent, #A8573C, #C29B62, transparent)',
-                  boxShadow: '0 0 12px 2px #A8573C',
+                  background: 'linear-gradient(90deg, transparent, #00E5FF, #67E8F9, transparent)',
+                  boxShadow: '0 0 14px 2px #00E5FF',
                   borderRadius: '3px',
                   animation: 'laserSweep 2s infinite ease-in-out'
                 }} />
@@ -702,12 +702,12 @@ export function ProfessionalBarcodeModal({
               left: '50%',
               transform: 'translateX(-50%)',
               background: 'rgba(16, 185, 129, 0.95)',
-              color: '#fff',
+              color: '#0B0E14',
               padding: '6px 16px',
               borderRadius: '20px',
               fontSize: '12px',
               fontWeight: 900,
-              boxShadow: '0 4px 15px rgba(0,0,0,0.35)',
+              boxShadow: '0 4px 15px rgba(0,0,0,0.5)',
               zIndex: 25,
               display: 'flex',
               alignItems: 'center',
@@ -736,11 +736,11 @@ export function ProfessionalBarcodeModal({
               style={{
                 padding: '8px 16px',
                 borderRadius: '12px',
-                border: '1.5px solid rgba(194, 155, 98, 0.3)',
-                background: torchOn ? '#C29B62' : 'rgba(194, 155, 98, 0.12)',
-                color: torchOn ? '#fff' : '#2C1A12',
+                border: '1.5px solid rgba(0, 229, 255, 0.3)',
+                background: torchOn ? '#00E5FF' : 'rgba(0, 229, 255, 0.12)',
+                color: torchOn ? '#0B0E14' : '#F8FAFC',
                 fontSize: '12px',
-                fontWeight: 800,
+                fontWeight: 900,
                 cursor: 'pointer',
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -758,11 +758,11 @@ export function ProfessionalBarcodeModal({
               style={{
                 padding: '8px 16px',
                 borderRadius: '12px',
-                border: '1.5px solid rgba(194, 155, 98, 0.3)',
-                background: 'rgba(194, 155, 98, 0.12)',
-                color: '#2C1A12',
+                border: '1.5px solid rgba(0, 229, 255, 0.3)',
+                background: 'rgba(0, 229, 255, 0.12)',
+                color: '#F8FAFC',
                 fontSize: '12px',
-                fontWeight: 800,
+                fontWeight: 900,
                 cursor: 'pointer',
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -779,7 +779,7 @@ export function ProfessionalBarcodeModal({
           width: '100%',
           marginTop: '16px',
           paddingTop: '14px',
-          borderTop: '1px dashed rgba(194, 155, 98, 0.25)',
+          borderTop: '1px dashed rgba(0, 229, 255, 0.25)',
           display: 'flex',
           gap: '8px'
         }}>
@@ -800,12 +800,12 @@ export function ProfessionalBarcodeModal({
               flex: 1,
               padding: '10px 14px',
               borderRadius: '12px',
-              border: '1px solid rgba(194, 155, 98, 0.3)',
+              border: '1px solid rgba(0, 229, 255, 0.25)',
               fontSize: '12px',
               fontWeight: 700,
               outline: 'none',
-              background: '#FDFBF7',
-              color: '#2C1A12'
+              background: 'rgba(11, 14, 20, 0.85)',
+              color: '#F8FAFC'
             }}
           />
           <button
@@ -821,10 +821,10 @@ export function ProfessionalBarcodeModal({
               padding: '10px 16px',
               borderRadius: '12px',
               border: 'none',
-              background: '#C29B62',
-              color: '#fff',
+              background: '#00E5FF',
+              color: '#0B0E14',
               fontSize: '12px',
-              fontWeight: 800,
+              fontWeight: 900,
               cursor: 'pointer'
             }}
           >
@@ -842,12 +842,12 @@ export function ProfessionalBarcodeModal({
             padding: '12px 16px',
             borderRadius: '12px',
             border: 'none',
-            background: 'linear-gradient(135deg, #4E734F 0%, #3d5b3e 100%)',
-            color: '#fff',
+            background: 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+            color: '#0B0E14',
             fontSize: '13px',
-            fontWeight: 800,
+            fontWeight: 900,
             cursor: 'pointer',
-            boxShadow: '0 4px 12px rgba(78, 115, 79, 0.25)',
+            boxShadow: '0 4px 15px rgba(16, 185, 129, 0.35)',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',

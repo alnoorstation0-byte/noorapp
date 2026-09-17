@@ -21,17 +21,17 @@ export default function OpenShiftsModal({
     return (
         <div style={{
             position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-            background: 'rgba(15, 23, 42, 0.65)',
-            backdropFilter: 'blur(12px)',
-            WebkitBackdropFilter: 'blur(12px)',
+            background: 'rgba(11, 14, 20, 0.85)',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             zIndex: 99999,
             padding: '15px'
         }}>
             <style>{`
                 .shift-card-item {
-                    background: rgba(255, 255, 255, 0.85);
-                    border: 1.5px solid rgba(28, 115, 171, 0.18);
+                    background: rgba(20, 24, 34, 0.7);
+                    border: 1.5px solid rgba(0, 229, 255, 0.18);
                     border-radius: 18px;
                     padding: 16px;
                     display: flex;
@@ -39,21 +39,21 @@ export default function OpenShiftsModal({
                     align-items: center;
                     gap: 15px;
                     transition: all 0.25s ease;
-                    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+                    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
                 }
                 .shift-card-item:hover {
                     transform: translateY(-3px);
-                    border-color: #C29B62;
-                    box-shadow: 0 8px 25px rgba(168, 87, 60, 0.15);
-                    background: rgba(255, 255, 255, 0.98);
+                    border-color: #00E5FF;
+                    box-shadow: 0 8px 25px rgba(0, 229, 255, 0.2);
+                    background: rgba(25, 30, 44, 0.9);
                 }
                 .shift-card-item.active {
-                    border: 2px solid #4E734F;
-                    background: rgba(240, 253, 244, 0.95);
+                    border: 2px solid #10B981;
+                    background: rgba(16, 185, 129, 0.1);
                 }
                 .btn-switch-shift {
-                    background: linear-gradient(135deg, #C29B62 0%, #A8573C 100%);
-                    color: white;
+                    background: linear-gradient(135deg, #00E5FF 0%, #0284C7 100%);
+                    color: #0B0E14;
                     border: none;
                     border-radius: 12px;
                     padding: 10px 18px;
@@ -62,19 +62,19 @@ export default function OpenShiftsModal({
                     cursor: pointer;
                     transition: all 0.2s ease;
                     white-space: nowrap;
-                    box-shadow: 0 4px 12px rgba(168, 87, 60, 0.25);
+                    box-shadow: 0 4px 12px rgba(0, 229, 255, 0.25);
                 }
                 .btn-switch-shift:hover {
                     transform: scale(1.03);
-                    background: linear-gradient(135deg, #A8573C 0%, #C29B62 100%);
+                    background: linear-gradient(135deg, #0284C7 0%, #00E5FF 100%);
                 }
             `}</style>
 
             <div style={{
-                background: 'rgba(255, 255, 255, 0.96)',
-                backdropFilter: 'blur(40px) saturate(200%)',
-                WebkitBackdropFilter: 'blur(40px) saturate(200%)',
-                border: '1px solid rgba(255, 255, 255, 0.8)',
+                background: 'linear-gradient(135deg, rgba(20, 24, 34, 0.98) 0%, rgba(15, 20, 30, 0.98) 100%)',
+                backdropFilter: 'blur(32px) saturate(180%)',
+                WebkitBackdropFilter: 'blur(32px) saturate(180%)',
+                border: '1px solid rgba(0, 229, 255, 0.25)',
                 borderRadius: '24px',
                 width: '95vw',
                 maxWidth: '620px',
@@ -83,16 +83,16 @@ export default function OpenShiftsModal({
                 padding: '28px 24px',
                 textAlign: 'right',
                 direction: 'rtl',
-                boxShadow: '0 25px 60px rgba(0, 0, 0, 0.35)',
+                boxShadow: '0 25px 60px rgba(0, 0, 0, 0.65), 0 0 25px rgba(0, 229, 255, 0.1)',
                 position: 'relative'
             }}>
                 {/* Header */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(0,0,0,0.08)', paddingBottom: '14px', marginBottom: '16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(255,255,255,0.08)', paddingBottom: '14px', marginBottom: '16px' }}>
                     <div>
-                        <h2 style={{ color: '#1C73AB', margin: 0, fontSize: '20px', fontWeight: 900 }}>
+                        <h2 style={{ color: '#00E5FF', margin: 0, fontSize: '20px', fontWeight: 900 }}>
                             📋 {isEn ? 'Currently Active Shifts in System' : 'الورديات النشطة حالياً بالنظام'} ({openShifts.length})
                         </h2>
-                        <span style={{ fontSize: '12px', color: '#64748b', fontWeight: 700 }}>
+                        <span style={{ fontSize: '12px', color: '#94A3B8', fontWeight: 700 }}>
                             {isEn ? 'Each rep and branch has an independent shift' : 'لكل مندوب ولكل مستودع وردية مستقلة تماماً'}
                         </span>
                     </div>
@@ -100,9 +100,9 @@ export default function OpenShiftsModal({
                         onClick={onClose} 
                         type="button"
                         style={{ 
-                            background: '#fee2e2', 
-                            color: '#ef4444', 
-                            border: 'none', 
+                            background: 'rgba(239, 68, 68, 0.15)', 
+                            color: '#f87171', 
+                            border: '1px solid rgba(239, 68, 68, 0.3)', 
                             width: '34px', 
                             height: '34px', 
                             borderRadius: '50%', 
@@ -119,12 +119,12 @@ export default function OpenShiftsModal({
                 </div>
 
                 {openShifts.length === 0 ? (
-                    <div style={{ textAlign: 'center', padding: '40px 20px', color: '#64748b' }}>
+                    <div style={{ textAlign: 'center', padding: '40px 20px', color: '#94A3B8' }}>
                         <div style={{ fontSize: '48px', marginBottom: '10px' }}>📦</div>
-                        <h3 style={{ fontSize: '16px', fontWeight: 900, color: '#1C73AB', marginBottom: '6px' }}>
+                        <h3 style={{ fontSize: '16px', fontWeight: 900, color: '#00E5FF', marginBottom: '6px' }}>
                             {isEn ? 'No active shifts currently' : 'لا توجد أي وردية نشطة حالياً'}
                         </h3>
-                        <p style={{ fontSize: '13px', color: '#94a3b8', marginBottom: '20px' }}>
+                        <p style={{ fontSize: '13px', color: '#64748b', marginBottom: '20px' }}>
                             {isEn ? 'You can select a branch and a rep, then click open new shift to start.' : 'يمكنك اختيار منفذ البيع والمندوب ثم الضغط على فتح وردية جديدة للبدء.'}
                         </p>
                         <button
@@ -160,17 +160,17 @@ export default function OpenShiftsModal({
                                                 width: '10px', 
                                                 height: '10px', 
                                                 borderRadius: '50%', 
-                                                background: '#16a34a',
-                                                boxShadow: '0 0 8px #16a34a',
+                                                background: '#10B981',
+                                                boxShadow: '0 0 8px #10B981',
                                                 display: 'inline-block' 
                                             }}></span>
-                                            <strong style={{ color: '#0f172a', fontSize: '15px', fontWeight: 900 }}>
+                                            <strong style={{ color: '#F8FAFC', fontSize: '15px', fontWeight: 900 }}>
                                                 {wh?.name || (isEn ? 'Unknown Branch' : 'مستودع غير محدد')}
                                             </strong>
                                             {wh?.type === 'vehicle' && (
                                                 <span style={{ 
-                                                    background: '#e0f2fe', 
-                                                    color: '#0284c7', 
+                                                    background: 'rgba(0, 229, 255, 0.15)', 
+                                                    color: '#00E5FF', 
                                                     fontSize: '10px', 
                                                     fontWeight: 800, 
                                                     padding: '2px 8px', 
@@ -181,23 +181,23 @@ export default function OpenShiftsModal({
                                             )}
                                         </div>
 
-                                        <div style={{ fontSize: '13px', color: '#475569', display: 'flex', gap: '15px', flexWrap: 'wrap', marginTop: '2px' }}>
+                                        <div style={{ fontSize: '13px', color: '#94A3B8', display: 'flex', gap: '15px', flexWrap: 'wrap', marginTop: '2px' }}>
                                             <span>
-                                                👤 <strong style={{ color: del ? '#16a34a' : '#64748b' }}>
+                                                👤 <strong style={{ color: del ? '#10B981' : '#64748b' }}>
                                                     {del?.name || (isEn ? 'Direct Sales' : 'مبيعات مباشرة')}
                                                 </strong>
                                             </span>
                                             <span>
-                                                💵 {isEn ? 'Opening Cash:' : 'العهدة:'} <strong>{Number(shift.starting_cash || 0).toFixed(2)} {isEn ? 'SAR' : 'ريال'}</strong>
+                                                💵 {isEn ? 'Opening Cash:' : 'العهدة:'} <strong style={{ color: '#F8FAFC' }}>{Number(shift.starting_cash || 0).toFixed(2)} {isEn ? 'SAR' : 'ريال'}</strong>
                                             </span>
                                             <span>
-                                                🕒 {isEn ? 'Opened:' : 'الفتح:'} <strong>
+                                                🕒 {isEn ? 'Opened:' : 'الفتح:'} <strong style={{ color: '#F8FAFC' }}>
                                                     {shift.opened_at ? new Date(shift.opened_at).toLocaleTimeString('ar-EG', { hour: '2-digit', minute: '2-digit' }) : '—'}
                                                 </strong>
                                             </span>
                                         </div>
 
-                                        <div style={{ fontSize: '11px', color: '#94a3b8' }}>
+                                        <div style={{ fontSize: '11px', color: '#64748b' }}>
                                             {isEn ? 'Shift ID:' : 'رقم الوردية:'} #{String(shift.id).slice(-6)}
                                         </div>
                                     </div>
@@ -208,9 +208,9 @@ export default function OpenShiftsModal({
                                                 type="button"
                                                 onClick={() => onViewDetails(shift.id)}
                                                 style={{
-                                                    background: 'rgba(28, 115, 171, 0.08)',
-                                                    color: '#1C73AB',
-                                                    border: '1.5px solid rgba(28, 115, 171, 0.25)',
+                                                    background: 'rgba(0, 229, 255, 0.08)',
+                                                    color: '#00E5FF',
+                                                    border: '1.5px solid rgba(0, 229, 255, 0.25)',
                                                     padding: '9px 12px',
                                                     borderRadius: '12px',
                                                     fontWeight: 800,
@@ -227,8 +227,9 @@ export default function OpenShiftsModal({
                                         )}
                                         {isCurrent ? (
                                             <span style={{ 
-                                                background: '#dcfce7', 
-                                                color: '#16a34a', 
+                                                background: 'rgba(16, 185, 129, 0.15)', 
+                                                color: '#10B981', 
+                                                border: '1px solid rgba(16, 185, 129, 0.3)',
                                                 fontWeight: 900, 
                                                 fontSize: '12px', 
                                                 padding: '8px 14px', 
@@ -262,9 +263,9 @@ export default function OpenShiftsModal({
                                     onOpenNewShift();
                                 }}
                                 style={{
-                                    background: 'transparent',
-                                    border: '1.5px dashed #1C73AB',
-                                    color: '#1C73AB',
+                                    background: 'rgba(0, 229, 255, 0.05)',
+                                    border: '1.5px dashed rgba(0, 229, 255, 0.4)',
+                                    color: '#00E5FF',
                                     padding: '12px',
                                     borderRadius: '14px',
                                     width: '100%',

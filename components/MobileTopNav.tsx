@@ -27,19 +27,19 @@ export default function MobileTopNav({ title, subtitle }: MobileTopNavProps) {
                         justify-content: space-between;
                         gap: 10px;
                         padding: 10px 14px;
-                        background: linear-gradient(135deg, rgba(255, 253, 250, 0.9) 0%, rgba(255, 253, 250, 0.7) 100%);
-                        backdrop-filter: blur(20px);
-                        border-bottom: 1px solid rgba(194, 155, 98, 0.3);
+                        background: linear-gradient(135deg, rgba(20, 24, 34, 0.95) 0%, rgba(15, 20, 30, 0.9) 100%);
+                        backdrop-filter: blur(24px) saturate(160%);
+                        border-bottom: 1px solid rgba(0, 229, 255, 0.25);
                         position: sticky;
                         top: 0;
                         z-index: 1000;
                         border-radius: 0 0 16px 16px;
                         margin: -10px -10px 14px -10px;
-                        box-shadow: 0 4px 14px rgba(44, 26, 18, 0.06);
+                        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
                         box-sizing: border-box;
                     }
                     .mobile-menu-btn {
-                        background: linear-gradient(135deg, #C29B62 0%, #A8573C 100%);
+                        background: linear-gradient(135deg, #00E5FF 0%, #0077B6 100%);
                         border: none;
                         border-radius: 9px;
                         width: 34px;
@@ -48,9 +48,10 @@ export default function MobileTopNav({ title, subtitle }: MobileTopNavProps) {
                         display: flex;
                         align-items: center;
                         justify-content: center;
-                        color: white;
+                        color: #0B0E14;
                         font-size: 16px;
-                        box-shadow: 0 3px 8px rgba(168, 87, 60, 0.25);
+                        font-weight: 900;
+                        box-shadow: 0 2px 10px rgba(0, 229, 255, 0.35);
                         cursor: pointer;
                         transition: 0.2s;
                         flex-shrink: 0;
@@ -61,8 +62,8 @@ export default function MobileTopNav({ title, subtitle }: MobileTopNavProps) {
 
             <div className="mobile-top-nav">
                 <div style={{ minWidth: 0, flex: '1 1 auto', overflow: 'hidden' }}>
-                    <h1 title={title} style={{ margin: 0, fontSize: '14.5px', fontWeight: 800, color: '#2C1A12', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', lineHeight: 1.25 }}>{title}</h1>
-                    {subtitle && <p title={subtitle} style={{ margin: 0, fontSize: '10.5px', color: 'rgba(44, 26, 18, 0.6)', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', lineHeight: 1.2 }}>{subtitle}</p>}
+                    <h1 title={title} style={{ margin: 0, fontSize: '14.5px', fontWeight: 900, color: '#F8FAFC', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', lineHeight: 1.25 }}>{title}</h1>
+                    {subtitle && <p title={subtitle} style={{ margin: 0, fontSize: '10.5px', color: '#94A3B8', fontWeight: 600, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis', lineHeight: 1.2 }}>{subtitle}</p>}
                 </div>
                 <button className="mobile-menu-btn" onClick={handleToggleSidebar}>
                     ☰

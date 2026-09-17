@@ -25,17 +25,17 @@ function formatTimeAgo(dateString: string): string {
 function getNotificationBadge(type: string) {
   switch (type) {
     case 'alert':
-      return { icon: '🚨', label: 'تنبيه حرج', color: '#ef4444', bg: '#fef2f2', border: '#fca5a5' };
+      return { icon: '🚨', label: 'تنبيه حرج', color: '#EF4444', bg: 'rgba(239, 68, 68, 0.15)', border: 'rgba(239, 68, 68, 0.35)' };
     case 'sale':
-      return { icon: '🧾', label: 'مبيعات', color: '#1C73AB', bg: '#eff6ff', border: '#bfdbfe' };
+      return { icon: '🧾', label: 'مبيعات', color: '#10B981', bg: 'rgba(16, 185, 129, 0.15)', border: 'rgba(16, 185, 129, 0.35)' };
     case 'pos':
-      return { icon: '🛒', label: 'نقاط البيع', color: '#0284c7', bg: '#f0f9ff', border: '#bae6fd' };
+      return { icon: '🛒', label: 'نقاط البيع', color: '#00E5FF', bg: 'rgba(0, 229, 255, 0.15)', border: 'rgba(0, 229, 255, 0.35)' };
     case 'finance':
-      return { icon: '💰', label: 'مالية وسندات', color: '#16a34a', bg: '#f0fdf4', border: '#bbf7d0' };
+      return { icon: '💰', label: 'مالية وسندات', color: '#F59E0B', bg: 'rgba(245, 158, 11, 0.15)', border: 'rgba(245, 158, 11, 0.35)' };
     case 'inventory':
-      return { icon: '📦', label: 'مخزون وأسطول', color: '#d97706', bg: '#fffbeb', border: '#fde68a' };
+      return { icon: '📦', label: 'مخزون ووقود', color: '#00E5FF', bg: 'rgba(0, 229, 255, 0.15)', border: 'rgba(0, 229, 255, 0.35)' };
     default:
-      return { icon: '🔔', label: 'نظام عام', color: '#6366f1', bg: '#eef2ff', border: '#c7d2fe' };
+      return { icon: '🔔', label: 'نظام عام', color: '#00E5FF', bg: 'rgba(0, 229, 255, 0.1)', border: 'rgba(0, 229, 255, 0.25)' };
   }
 }
 
@@ -110,8 +110,8 @@ export default function NotificationsPage() {
                 <button
                   onClick={handleRequestPush}
                   style={{
-                    background: 'linear-gradient(135deg, #C29B62, #A8573C)',
-                    color: 'white',
+                    background: 'linear-gradient(135deg, #00E5FF, #0077B6)',
+                    color: '#0B0E14',
                     border: 'none',
                     padding: '8px 16px',
                     borderRadius: '10px',
@@ -120,13 +120,14 @@ export default function NotificationsPage() {
                     cursor: 'pointer',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '6px'
+                    gap: '6px',
+                    boxShadow: '0 2px 10px rgba(0, 229, 255, 0.35)'
                   }}
                 >
                   <span>📲</span> تفعيل إشعارات الجوال
                 </button>
               ) : (
-                <span style={{ fontSize: '11px', fontWeight: 800, color: '#16a34a', background: '#f0fdf4', padding: '6px 12px', borderRadius: '10px', border: '1px solid #bbf7d0' }}>
+                <span style={{ fontSize: '11px', fontWeight: 800, color: '#10B981', background: 'rgba(16, 185, 129, 0.12)', padding: '6px 12px', borderRadius: '10px', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
                   📱 إشعارات الجوال مفعلة ✅
                 </span>
               )}
@@ -135,9 +136,9 @@ export default function NotificationsPage() {
                 onClick={toggleSound}
                 title={isSoundOn ? 'كتم الصوت' : 'تشغيل الصوت'}
                 style={{
-                  background: isSoundOn ? '#f0fdf4' : '#fef2f2',
-                  border: `1px solid ${isSoundOn ? '#bbf7d0' : '#fecaca'}`,
-                  color: isSoundOn ? '#16a34a' : '#dc2626',
+                  background: isSoundOn ? 'rgba(16, 185, 129, 0.15)' : 'rgba(239, 68, 68, 0.15)',
+                  border: `1px solid ${isSoundOn ? 'rgba(16, 185, 129, 0.35)' : 'rgba(239, 68, 68, 0.35)'}`,
+                  color: isSoundOn ? '#10B981' : '#EF4444',
                   padding: '8px 12px',
                   borderRadius: '10px',
                   cursor: 'pointer',
@@ -152,9 +153,9 @@ export default function NotificationsPage() {
                 <button
                   onClick={markAllAsRead}
                   style={{
-                    background: 'white',
-                    border: '1px solid rgba(40,145,200,0.3)',
-                    color: '#1C73AB',
+                    background: 'rgba(20, 24, 34, 0.8)',
+                    border: '1px solid rgba(0, 229, 255, 0.3)',
+                    color: '#00E5FF',
                     padding: '8px 14px',
                     borderRadius: '10px',
                     fontSize: '12px',
@@ -169,9 +170,9 @@ export default function NotificationsPage() {
               <button
                 onClick={clearReadNotifications}
                 style={{
-                  background: 'white',
-                  border: '1px solid rgba(239,68,68,0.3)',
-                  color: '#dc2626',
+                  background: 'rgba(239, 68, 68, 0.1)',
+                  border: '1px solid rgba(239, 68, 68, 0.3)',
+                  color: '#EF4444',
                   padding: '8px 14px',
                   borderRadius: '10px',
                   fontSize: '12px',
@@ -195,7 +196,7 @@ export default function NotificationsPage() {
                 scrollbar-width: none;
                 padding-bottom: 5px;
                 margin-top: 18px;
-                border-top: 1px solid rgba(40, 145, 200, 0.15);
+                border-top: 1px solid rgba(255, 255, 255, 0.08);
                 padding-top: 15px;
                 width: 100%;
               }
@@ -217,20 +218,24 @@ export default function NotificationsPage() {
                 font-weight: 900 !important;
                 cursor: pointer !important;
                 transition: 0.2s !important;
-                border: 1px solid rgba(194, 155, 98, 0.25) !important;
-                background: white !important;
-                color: #2C1A12 !important;
+                border: 1px solid rgba(255, 255, 255, 0.08) !important;
+                background: rgba(20, 24, 34, 0.8) !important;
+                color: #94A3B8 !important;
                 height: 38px !important;
                 min-height: 38px !important;
                 max-height: 38px !important;
                 user-select: none !important;
                 width: auto !important;
               }
+              .notif-tab-btn:hover {
+                color: #F8FAFC !important;
+                border-color: rgba(0, 229, 255, 0.3) !important;
+              }
               .notif-tab-btn.active {
-                background: linear-gradient(135deg, #C29B62, #A8573C) !important;
-                color: white !important;
-                border-color: #C29B62 !important;
-                box-shadow: 0 4px 12px rgba(168, 87, 60, 0.25) !important;
+                background: linear-gradient(135deg, rgba(0, 229, 255, 0.25), rgba(0, 229, 255, 0.1)) !important;
+                color: #00E5FF !important;
+                border-color: rgba(0, 229, 255, 0.5) !important;
+                box-shadow: 0 0 15px rgba(0, 229, 255, 0.2) !important;
               }
               .notif-tab-btn span {
                 white-space: nowrap !important;
@@ -263,8 +268,8 @@ export default function NotificationsPage() {
                   <span>{cat.label}</span>
                   {cat.count !== undefined && cat.count > 0 && (
                     <span style={{
-                      background: activeCategory === cat.id ? 'rgba(255,255,255,0.25)' : cat.id === 'unread' ? '#ef4444' : '#e2e8f0',
-                      color: activeCategory === cat.id || cat.id === 'unread' ? 'white' : '#334155',
+                      background: activeCategory === cat.id ? 'rgba(0, 229, 255, 0.25)' : cat.id === 'unread' ? '#EF4444' : 'rgba(255, 255, 255, 0.1)',
+                      color: activeCategory === cat.id ? '#00E5FF' : cat.id === 'unread' ? 'white' : '#94A3B8',
                       fontSize: '10px',
                       padding: '2px 7px',
                       borderRadius: '10px',
@@ -283,14 +288,14 @@ export default function NotificationsPage() {
         {isLoading ? (
           <div style={{ textAlign: 'center', padding: '50px' }}>
             <div style={{ fontSize: '36px', animation: 'spin 1s linear infinite', marginBottom: '12px' }}>⚙️</div>
-            <div style={{ fontWeight: 900, color: THEME.primary, fontSize: '14px' }}>جاري تحميل الإشعارات المباشرة...</div>
+            <div style={{ fontWeight: 900, color: '#00E5FF', fontSize: '14px' }}>جاري تحميل الإشعارات المباشرة...</div>
           </div>
         ) : filteredNotifications.length === 0 ? (
           <GlassContainer>
             <div style={{ textAlign: 'center', padding: '50px 20px' }}>
               <div style={{ fontSize: '50px', marginBottom: '12px' }}>📭</div>
-              <div style={{ fontWeight: 900, color: '#1C73AB', fontSize: '18px' }}>لا توجد إشعارات حالياً في هذا القسم</div>
-              <p style={{ color: '#64748b', fontSize: '13px', margin: '8px 0 0 0', fontWeight: 700 }}>
+              <div style={{ fontWeight: 900, color: '#00E5FF', fontSize: '18px' }}>لا توجد إشعارات حالياً في هذا القسم</div>
+              <p style={{ color: '#94A3B8', fontSize: '13px', margin: '8px 0 0 0', fontWeight: 700 }}>
                 النظام في حالة سكون ممتازة! ستظهر هنا وتصلك إشعارات على هاتفك فور تسجيل أي فواتير أو حركات جديدة.
               </p>
             </div>
@@ -305,12 +310,12 @@ export default function NotificationsPage() {
                 <div
                   key={notif.id}
                   style={{
-                    background: notif.is_read ? 'rgba(255, 255, 255, 0.75)' : 'rgba(240, 249, 255, 0.98)',
+                    background: notif.is_read ? 'rgba(20, 24, 34, 0.65)' : 'rgba(20, 24, 34, 0.95)',
                     backdropFilter: 'blur(15px)',
-                    border: `1.5px solid ${notif.is_read ? 'rgba(255, 255, 255, 0.8)' : '#7dd3fc'}`,
+                    border: notif.is_read ? '1px solid rgba(255, 255, 255, 0.08)' : '1px solid rgba(0, 229, 255, 0.35)',
                     borderRadius: '18px',
                     padding: '16px 20px',
-                    boxShadow: notif.is_read ? '0 2px 10px rgba(0,0,0,0.02)' : '0 4px 20px rgba(28, 115, 171, 0.12)',
+                    boxShadow: notif.is_read ? '0 2px 10px rgba(0,0,0,0.2)' : '0 4px 20px rgba(0, 229, 255, 0.12)',
                     display: 'flex',
                     alignItems: 'flex-start',
                     gap: '15px',
@@ -325,8 +330,8 @@ export default function NotificationsPage() {
                       width: '9px',
                       height: '9px',
                       borderRadius: '50%',
-                      background: '#0284c7',
-                      boxShadow: '0 0 10px #0284c7'
+                      background: '#00E5FF',
+                      boxShadow: '0 0 10px #00E5FF'
                     }} />
                   )}
 
@@ -363,13 +368,13 @@ export default function NotificationsPage() {
                           margin: 0,
                           fontSize: '15px',
                           fontWeight: 900,
-                          color: notif.is_read ? '#334155' : '#0f172a'
+                          color: notif.is_read ? '#94A3B8' : '#F8FAFC'
                         }}>
                           {notif.title || 'إشعار نظام'}
                         </h4>
                       </div>
 
-                      <span style={{ fontSize: '11.5px', color: '#64748b', fontWeight: 700, whiteSpace: 'nowrap' }}>
+                      <span style={{ fontSize: '11.5px', color: '#64748B', fontWeight: 700, whiteSpace: 'nowrap' }}>
                         {formatTimeAgo(notif.created_at)}
                       </span>
                     </div>
@@ -377,7 +382,7 @@ export default function NotificationsPage() {
                     <p style={{
                       margin: '4px 0 12px 0',
                       fontSize: '13px',
-                      color: notif.is_read ? '#64748b' : '#1e293b',
+                      color: notif.is_read ? '#64748B' : '#CBD5E1',
                       lineHeight: 1.6,
                       fontWeight: 700
                     }}>
@@ -389,8 +394,8 @@ export default function NotificationsPage() {
                         <button
                           onClick={() => handleActionClick(notif)}
                           style={{
-                            background: 'linear-gradient(135deg, #C29B62, #A8573C)',
-                            color: 'white',
+                            background: 'linear-gradient(135deg, #00E5FF, #00B4D8)',
+                            color: '#0B0E14',
                             border: 'none',
                             padding: '6px 14px',
                             borderRadius: '10px',
@@ -399,7 +404,8 @@ export default function NotificationsPage() {
                             cursor: 'pointer',
                             display: 'flex',
                             alignItems: 'center',
-                            gap: '5px'
+                            gap: '5px',
+                            boxShadow: '0 0 12px rgba(0, 229, 255, 0.3)'
                           }}
                         >
                           👁️ الانتقال إلى العملية
@@ -410,9 +416,9 @@ export default function NotificationsPage() {
                         <button
                           onClick={() => markAsRead(notif.id)}
                           style={{
-                            background: 'white',
-                            border: '1px solid rgba(40,145,200,0.25)',
-                            color: '#1C73AB',
+                            background: 'rgba(255, 255, 255, 0.05)',
+                            border: '1px solid rgba(0, 229, 255, 0.25)',
+                            color: '#00E5FF',
                             padding: '5px 12px',
                             borderRadius: '8px',
                             fontSize: '11.5px',
@@ -430,13 +436,13 @@ export default function NotificationsPage() {
                         style={{
                           background: 'none',
                           border: 'none',
-                          color: '#94a3b8',
+                          color: '#64748B',
                           fontSize: '14px',
                           cursor: 'pointer',
                           padding: '4px 8px'
                         }}
-                        onMouseOver={(e) => (e.currentTarget.style.color = '#ef4444')}
-                        onMouseOut={(e) => (e.currentTarget.style.color = '#94a3b8')}
+                        onMouseOver={(e) => (e.currentTarget.style.color = '#EF4444')}
+                        onMouseOut={(e) => (e.currentTarget.style.color = '#64748B')}
                       >
                         🗑️
                       </button>

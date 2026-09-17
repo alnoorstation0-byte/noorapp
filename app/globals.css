@@ -3,38 +3,40 @@
 @tailwind utilities;
 
 :root {
-  /* 🏜️ لوحة الألوان الصحراوية (Desert Core Palette) */
-  --primary: #2C1A12;           /* بني الخيام الداكن - Deep Tent Brown */
-  --primary-rgb: 44, 26, 18;
-  --accent: #C29B62;            /* رملي ذهبي - Golden Sand */
-  --accent-rgb: 194, 155, 98;
-  --terracotta: #A8573C;        /* طوبي دافئ - Terracotta Clay */
-  --terracotta-rgb: 168, 87, 60;
-  --bg-main: #FDFBF7;           /* كثبان لؤلؤية - Dune Pearl */
-  --success: #4E734F;           /* أخضر الواحة - Oasis Green */
-  --success-rgb: 78, 115, 79;
+  /* 🚀 لوحة ألوان مركز القيادة (Command Center Dark Palette) */
+  --primary: #00E5FF;           /* أزرق نيون (Electric Cyan) */
+  --primary-rgb: 0, 229, 255;
+  --accent: #00E5FF;            /* أزرق نيون رئيسي */
+  --accent-rgb: 0, 229, 255;
+  --terracotta: #E06D44;        /* برتقالي التيراكوتا (Terracotta Orange) */
+  --terracotta-rgb: 224, 109, 68;
+  --bg-main: #0B0E14;           /* تيتانيوم داكن (Dark Titanium Space Grey) */
+  --surface: #141822;           /* أسطح التيتانيوم الداكنة */
+  --success: #10B981;           /* أخضر نيون زمردي (Neon Emerald) */
+  --success-rgb: 16, 185, 129;
   
-  --white: #ffffff;
-  --danger: #A8573C;            /* Terracotta للتحذيرات والأخطاء */
-  --warning: #C29B62;           /* رملي ذهبي */
-  --info: #3B82F6;
+  --white: #F8FAFC;
+  --danger: #EF4444;            /* أحمر نيون للتحذيرات الحرجة */
+  --warning: #E06D44;           /* برتقالي التيراكوتا للإنذارات */
+  --info: #00E5FF;              /* أزرق نيون للمعلومات */
 
-  /* 🏜️ تأثيرات الزجاج الصحراوي (Desert Glass Effects) */
-  --glass-bg: linear-gradient(135deg, rgba(255, 253, 250, 0.8) 0%, rgba(255, 253, 250, 0.45) 100%);
-  --glass-surface: rgba(255, 253, 250, 0.85);
-  --glass-border: 1px solid rgba(194, 155, 98, 0.3);
-  --glass-border-color: rgba(194, 155, 98, 0.3);
-  --glass-blur: blur(20px) saturate(150%);
-  --input-bg: rgba(255, 253, 250, 0.7);
+  /* 🔮 تأثيرات زجاج مركز القيادة (Command Center Glass Effects) */
+  --glass-bg: linear-gradient(135deg, rgba(20, 24, 34, 0.85) 0%, rgba(13, 16, 24, 0.75) 100%);
+  --glass-surface: rgba(20, 24, 34, 0.88);
+  --glass-border: 1px solid rgba(0, 229, 255, 0.2);
+  --glass-border-color: rgba(0, 229, 255, 0.2);
+  --glass-blur: blur(24px) saturate(160%);
+  --input-bg: rgba(18, 22, 30, 0.85);
 
   /* 🔤 النصوص والطباعة */
-  --text-main: #2C1A12;
-  --text-muted: rgba(44, 26, 18, 0.6);
+  --text-main: #F8FAFC;
+  --text-muted: #94A3B8;
 
-  /* 🏺 الظلال الرملية (Sand Box Shadows) */
-  --card-shadow: 0 4px 6px rgba(44, 26, 18, 0.08);
-  --hover-shadow: 0 10px 15px rgba(168, 87, 60, 0.15);
-  --glow-accent: 0 8px 20px rgba(194, 155, 98, 0.3);
+  /* ⚡ الظلال والتوهج النيوني (Neon Glow Shadows) */
+  --card-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5), inset 0 0 12px rgba(0, 229, 255, 0.04);
+  --hover-shadow: 0 12px 32px rgba(0, 229, 255, 0.25), inset 0 0 16px rgba(0, 229, 255, 0.08);
+  --glow-accent: 0 0 20px rgba(0, 229, 255, 0.45);
+  --glow-orange: 0 0 20px rgba(224, 109, 68, 0.45);
 
   /* 📐 انحناءات الحواف (Radius) */
   --radius-lg: 16px;
@@ -42,9 +44,9 @@
   --radius-pill: 100px;
 
   /* 📊 الجداول والقوائم */
-  --table-hover: rgba(194, 155, 98, 0.08);
-  --table-border: rgba(194, 155, 98, 0.25);
-  --table-header-bg: rgba(194, 155, 98, 0.12);
+  --table-hover: rgba(0, 229, 255, 0.08);
+  --table-border: rgba(0, 229, 255, 0.15);
+  --table-header-bg: rgba(0, 229, 255, 0.08);
 
   --apple-transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -53,6 +55,7 @@ html {
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
   scroll-behavior: smooth;
+  color-scheme: dark;
 }
 
 button, a, input, select, textarea {
@@ -74,12 +77,12 @@ body {
 
 @media (max-width: 768px) {
   :root {
-    --glass-blur: blur(10px) saturate(130%);
+    --glass-blur: blur(12px) saturate(140%);
   }
 }
 
-/* 🏜️ فئات الزجاج الصحراوي الموحدة (Desert Glass Classes) */
-.desert-glass, .glass-card, .glass-panel {
+/* 🔮 فئات زجاج مركز القيادة الموحدة (Command Center Glass Classes) */
+.desert-glass, .glass-card, .glass-panel, .command-card {
   background: var(--glass-bg) !important;
   backdrop-filter: var(--glass-blur) !important;
   -webkit-backdrop-filter: var(--glass-blur) !important;
@@ -89,10 +92,10 @@ body {
   transition: var(--apple-transition);
 }
 
-.desert-glass:hover, .glass-card:hover {
+.desert-glass:hover, .glass-card:hover, .command-card:hover {
   box-shadow: var(--hover-shadow) !important;
-  transform: translateY(-4px);
-  border-color: rgba(194, 155, 98, 0.5) !important;
+  transform: translateY(-3px);
+  border-color: rgba(0, 229, 255, 0.45) !important;
 }
 
 /* 🔘 حزمة الأزرار الصحراوية الموحدة (Desert Glassmorphism Button Suite) */
@@ -127,75 +130,81 @@ body {
   transform: scale(0.98) !important;
 }
 
-/* 🌟 الأزرار الذهبية والرئيسية (Primary / Gold) */
+/* 🌟 أزرار النيون ومركز القيادة (Command Center Primary / Neon) */
 .btn-main-glass.gold, 
 .btn-main-glass.primary,
 .desert-btn-primary {
-  background: linear-gradient(135deg, #C29B62 0%, #A8573C 100%) !important;
-  color: #FFFFFF !important;
-  border: 1px solid rgba(194, 155, 98, 0.5) !important;
-  box-shadow: 0 4px 14px rgba(194, 155, 98, 0.35) !important;
+  background: linear-gradient(135deg, #00E5FF 0%, #0099CC 100%) !important;
+  color: #07090D !important;
+  border: 1px solid rgba(0, 229, 255, 0.7) !important;
+  box-shadow: 0 0 15px rgba(0, 229, 255, 0.4) !important;
+  font-weight: 900 !important;
 }
 .btn-main-glass.gold:hover,
 .btn-main-glass.primary:hover,
 .desert-btn-primary:hover {
-  box-shadow: 0 8px 22px rgba(168, 87, 60, 0.35) !important;
+  box-shadow: 0 0 25px rgba(0, 229, 255, 0.7) !important;
+  filter: brightness(1.1) !important;
 }
 
-/* ⚪ أزرار الزجاج الأبيض الثانوية (Secondary / White) */
+/* ⚪ أزرار الزجاج الثانوي الداكن (Secondary / Command Dark Glass) */
 .btn-main-glass.white,
 .btn-main-glass.secondary,
 .desert-btn-glass {
-  background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(255, 253, 250, 0.75) 100%) !important;
-  color: #2C1A12 !important;
-  border: 1px solid rgba(194, 155, 98, 0.35) !important;
-  box-shadow: 0 3px 8px rgba(44, 26, 18, 0.05) !important;
+  background: linear-gradient(135deg, rgba(26, 31, 44, 0.9) 0%, rgba(18, 22, 30, 0.8) 100%) !important;
+  color: #F8FAFC !important;
+  border: 1px solid rgba(255, 255, 255, 0.15) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3) !important;
 }
 .btn-main-glass.white:hover,
 .btn-main-glass.secondary:hover,
 .desert-btn-glass:hover {
-  background: #FFFFFF !important;
-  border-color: #C29B62 !important;
-  color: #A8573C !important;
+  background: rgba(30, 36, 50, 0.95) !important;
+  border-color: #00E5FF !important;
+  color: #00E5FF !important;
 }
 
 /* 🌿 أزرار النجاح والاعتماد والترحيل (Success / Green) */
 .btn-main-glass.green,
 .btn-main-glass.success {
-  background: linear-gradient(135deg, #4E734F 0%, #3D5C3E 100%) !important;
+  background: linear-gradient(135deg, #10B981 0%, #059669 100%) !important;
   color: #FFFFFF !important;
-  border: 1px solid rgba(78, 115, 79, 0.5) !important;
-  box-shadow: 0 4px 14px rgba(78, 115, 79, 0.3) !important;
+  border: 1px solid rgba(16, 185, 129, 0.6) !important;
+  box-shadow: 0 0 15px rgba(16, 185, 129, 0.35) !important;
 }
 .btn-main-glass.green:hover,
 .btn-main-glass.success:hover {
-  box-shadow: 0 8px 20px rgba(78, 115, 79, 0.4) !important;
+  box-shadow: 0 0 22px rgba(16, 185, 129, 0.5) !important;
 }
 
-/* 🔵 أزرار العمليات والقيود (Blue / Deep Brown) */
+/* 🔵 أزرار العمليات والقيود (Blue / Cyan Dark) */
 .btn-main-glass.blue {
-  background: linear-gradient(135deg, #2C1A12 0%, #4A2E20 100%) !important;
-  color: #FFFFFF !important;
-  border: 1px solid rgba(194, 155, 98, 0.4) !important;
-  box-shadow: 0 4px 14px rgba(44, 26, 18, 0.25) !important;
+  background: linear-gradient(135deg, #1A2234 0%, #101624 100%) !important;
+  color: #00E5FF !important;
+  border: 1px solid rgba(0, 229, 255, 0.4) !important;
+  box-shadow: 0 0 12px rgba(0, 229, 255, 0.2) !important;
 }
 
-/* ⚠️ أزرار التحذير والتأجيل (Warning / Yellow) */
+/* ⚠️ أزرار التحذير والتأجيل (Warning / Terracotta Orange) */
 .btn-main-glass.yellow,
 .btn-main-glass.warning {
-  background: linear-gradient(135deg, #D97706 0%, #B45309 100%) !important;
+  background: linear-gradient(135deg, #E06D44 0%, #C44E26 100%) !important;
   color: #FFFFFF !important;
-  border: 1px solid rgba(217, 119, 6, 0.5) !important;
-  box-shadow: 0 4px 14px rgba(217, 119, 6, 0.3) !important;
+  border: 1px solid rgba(224, 109, 68, 0.6) !important;
+  box-shadow: 0 0 15px rgba(224, 109, 68, 0.4) !important;
+}
+.btn-main-glass.yellow:hover,
+.btn-main-glass.warning:hover {
+  box-shadow: 0 0 25px rgba(224, 109, 68, 0.6) !important;
 }
 
 /* 🔴 أزرار الحذف والرفض (Danger / Red) */
 .btn-main-glass.red,
 .btn-main-glass.danger {
-  background: linear-gradient(135deg, #A8573C 0%, #DC2626 100%) !important;
+  background: linear-gradient(135deg, #EF4444 0%, #B91C1C 100%) !important;
   color: #FFFFFF !important;
-  border: 1px solid rgba(220, 38, 38, 0.4) !important;
-  box-shadow: 0 4px 14px rgba(220, 38, 38, 0.25) !important;
+  border: 1px solid rgba(239, 68, 68, 0.5) !important;
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.35) !important;
 }
 
 /* 📊 أزرار إجراءات الجداول (Table Action Buttons) */
@@ -211,19 +220,22 @@ body {
   justify-content: center !important;
   gap: 4px !important;
   transition: all 0.2s ease !important;
-  border: 1px solid transparent !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  background: rgba(255, 255, 255, 0.05) !important;
+  color: #F8FAFC !important;
 }
 .table-action-btn:hover {
   transform: translateY(-1.5px) !important;
-  filter: brightness(1.08) !important;
+  filter: brightness(1.15) !important;
+  border-color: #00E5FF !important;
 }
 
 /* ✏️ حقول الإدخال */
 input, select, textarea {
-  background: var(--input-bg);
-  border: var(--glass-border);
+  background: rgba(18, 22, 30, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: var(--radius-md);
-  color: var(--text-main);
+  color: #F8FAFC;
   padding: 10px 14px;
   font-family: inherit;
   transition: var(--apple-transition);
@@ -231,25 +243,26 @@ input, select, textarea {
 
 input:focus, select:focus, textarea:focus {
   outline: none;
-  background: #FFFFFF;
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(194, 155, 98, 0.25);
+  background: rgba(24, 29, 40, 0.95);
+  border-color: #00E5FF;
+  box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.25), 0 0 15px rgba(0, 229, 255, 0.25);
 }
 
-/* 📜 شريط التمرير الرملي الأنيق */
+/* 📜 شريط التمرير السيبراني المضيء */
 ::-webkit-scrollbar {
   width: 7px;
   height: 7px;
 }
 ::-webkit-scrollbar-track {
-  background: rgba(44, 26, 18, 0.03);
+  background: rgba(11, 14, 20, 0.95);
 }
 ::-webkit-scrollbar-thumb {
-  background: rgba(194, 155, 98, 0.4);
+  background: rgba(0, 229, 255, 0.35);
   border-radius: 10px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(168, 87, 60, 0.7);
+  background: rgba(0, 229, 255, 0.7);
+  box-shadow: 0 0 10px rgba(0, 229, 255, 0.5);
 }
 
 /* Utilities */
@@ -262,11 +275,25 @@ input:focus, select:focus, textarea:focus {
     scrollbar-width: none;
   }
   .text-desert-title {
-    color: #2C1A12;
+    color: #F8FAFC;
     font-weight: 900;
   }
   .text-desert-muted {
-    color: rgba(44, 26, 18, 0.6);
+    color: #94A3B8;
+  }
+  .neon-glow-cyan {
+    text-shadow: 0 0 12px rgba(0, 229, 255, 0.6);
+  }
+  .neon-glow-orange {
+    text-shadow: 0 0 12px rgba(224, 109, 68, 0.6);
+  }
+  .border-neon-cyan {
+    border-color: rgba(0, 229, 255, 0.4);
+    box-shadow: 0 0 15px rgba(0, 229, 255, 0.2);
+  }
+  .border-neon-orange {
+    border-color: rgba(224, 109, 68, 0.4);
+    box-shadow: 0 0 15px rgba(224, 109, 68, 0.2);
   }
 }
 

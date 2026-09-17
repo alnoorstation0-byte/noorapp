@@ -4,7 +4,7 @@ import MasterPage from '@/components/MasterPage';
 import { THEME } from '@/lib/theme';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
-import ProfileEditorModal from '@/app/team/profileeditormodal';
+
 
 interface RoleDefinition {
     id: string;

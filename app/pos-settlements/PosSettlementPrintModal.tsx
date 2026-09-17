@@ -142,7 +142,7 @@ export default function PosSettlementPrintModal({
                     }}>
                         <div>
                             <h1 style={{ margin: '0 0 4px 0', fontSize: '22px', fontWeight: 900, color: '#1C73AB' }}>
-                                صيدلية تاج المودة البيطرية
+                                محطات النور للوقود
                             </h1>
                             <div style={{ fontSize: '12px', color: '#64748b', fontWeight: 700 }}>
                                 مبيعات الجملة والتجزئة ومنافذ التوزيع المعتمدة
@@ -274,33 +274,62 @@ export default function PosSettlementPrintModal({
                         </table>
                     </div>
 
-                    {/* Section 3: Bottles Custody */}
+                    {/* Section 3: Fuel Pump Meters & Reconciliation */}
                     <div style={{ marginBottom: '20px' }}>
-                        <h4 style={{ margin: '0 0 8px 0', fontSize: '13px', fontWeight: 900, color: '#1C73AB', borderRight: '3px solid #1C73AB', paddingRight: '8px' }}>
-                            ثالثاً: عهدة العبوات والمستلزمات
+                        <h4 style={{ margin: '0 0 8px 0', fontSize: '13px', fontWeight: 900, color: '#C29B62', borderRight: '3px solid #C29B62', paddingRight: '8px' }}>
+                            ثالثاً: جرد ومطابقة عدادات مضخات المحروقات (المضخوخ مقابل الفواتير)
                         </h4>
-                        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '8px', textAlign: 'center', fontSize: '11px', background: '#f8fafc', padding: '10px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
-                            <div>
-                                <span style={{ color: '#64748b' }}>فوارغ البداية:</span>
-                                <div style={{ fontWeight: 800, fontSize: '13px', marginTop: '2px' }}>{shift.startingBottles}</div>
+                        {Array.isArray(shift.pumpReadings) && shift.pumpReadings.length > 0 ? (
+                            <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '11px', border: '1px solid #e2e8f0' }}>
+                                <thead>
+                                    <tr style={{ background: '#f1f5f9', borderBottom: '1.5px solid #cbd5e1' }}>
+                                        <th style={{ padding: '6px 10px', textAlign: 'right' }}>المضخة</th>
+                                        <th style={{ padding: '6px 10px', textAlign: 'center' }}>نوع الوقود</th>
+                                        <th style={{ padding: '6px 10px', textAlign: 'center' }}>قراءة البداية</th>
+                                        <th style={{ padding: '6px 10px', textAlign: 'center' }}>قراءة النهاية</th>
+                                        <th style={{ padding: '6px 10px', textAlign: 'center' }}>المضخوخ (لتر)</th>
+                                        <th style={{ padding: '6px 10px', textAlign: 'center' }}>سعر اللتر</th>
+                                        <th style={{ padding: '6px 10px', textAlign: 'center' }}>القيمة المقدرة</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {shift.pumpReadings.map((p: any, idx: number) => (
+                                        <tr key={idx} style={{ borderBottom: '1px solid #f1f5f9' }}>
+                                            <td style={{ padding: '6px 10px', fontWeight: 800 }}>⛽ {p.pump_name || `مضخة #${p.pump_number}`}</td>
+                                            <td style={{ padding: '6px 10px', textAlign: 'center' }}>{p.fuel_type}</td>
+                                            <td style={{ padding: '6px 10px', textAlign: 'center', color: '#64748b' }}>{Number(p.start_reading || 0).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 2 })}</td>
+                                            <td style={{ padding: '6px 10px', textAlign: 'center', fontWeight: 700 }}>{p.end_reading !== null && p.end_reading !== undefined ? Number(p.end_reading).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 2 }) : '—'}</td>
+                                            <td style={{ padding: '6px 10px', textAlign: 'center', fontWeight: 800 }}>{Number(p.liters_pumped || 0).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 2 })}</td>
+                                            <td style={{ padding: '6px 10px', textAlign: 'center' }}>{Number(p.unit_price || 0).toFixed(2)} ر.س</td>
+                                            <td style={{ padding: '6px 10px', textAlign: 'center', fontWeight: 800, color: '#C29B62' }}>{formatCurrency(Number(p.expected_amount || 0))}</td>
+                                        </tr>
+                                    ))}
+                                    <tr style={{ background: '#f8fafc', fontWeight: 900, borderTop: '1.5px solid #cbd5e1' }}>
+                                        <td colSpan={4} style={{ padding: '6px 10px' }}>الإجمالي الكلي للعدادات والمطابقة مع الفواتير</td>
+                                        <td style={{ padding: '6px 10px', textAlign: 'center', color: '#2C1A12' }}>{Number(shift.totalLitersSold || 0).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 2 })} لتر</td>
+                                        <td style={{ padding: '6px 10px', textAlign: 'center' }}>—</td>
+                                        <td style={{ padding: '6px 10px', textAlign: 'center', color: '#C29B62' }}>{formatCurrency(Number(shift.meterTotalAmount || 0))}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        ) : (
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '8px', textAlign: 'center', fontSize: '11px', background: '#f8fafc', padding: '10px', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                                <div>
+                                    <span style={{ color: '#64748b' }}>إجمالي اللترات المباعة:</span>
+                                    <div style={{ fontWeight: 800, fontSize: '13px', marginTop: '2px' }}>{Number(shift.totalLitersSold || 0).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 2 })} لتر</div>
+                                </div>
+                                <div>
+                                    <span style={{ color: '#C29B62' }}>قيمة الوقود بالعدادات:</span>
+                                    <div style={{ fontWeight: 800, fontSize: '13px', marginTop: '2px', color: '#C29B62' }}>{formatCurrency(shift.meterTotalAmount || 0)}</div>
+                                </div>
+                                <div>
+                                    <span style={{ color: '#1C73AB' }}>فارق العدادات مع الفواتير:</span>
+                                    <div style={{ fontWeight: 800, fontSize: '13px', marginTop: '2px', color: Math.abs(shift.meterSalesVariance || 0) <= 5 ? '#16a34a' : '#ef4444' }}>
+                                        {Math.abs(shift.meterSalesVariance || 0) <= 5 ? '✅ مطابق تماماً' : formatCurrency(shift.meterSalesVariance || 0)}
+                                    </div>
+                                </div>
                             </div>
-                            <div>
-                                <span style={{ color: '#1C73AB' }}>فوارغ مباعة:</span>
-                                <div style={{ fontWeight: 800, fontSize: '13px', marginTop: '2px', color: '#1C73AB' }}>{shift.bottlesSold}</div>
-                            </div>
-                            <div>
-                                <span style={{ color: '#16a34a' }}>فوارغ مستلمة (مرتجع):</span>
-                                <div style={{ fontWeight: 800, fontSize: '13px', marginTop: '2px', color: '#16a34a' }}>{shift.bottlesReturned}</div>
-                            </div>
-                            <div>
-                                <span style={{ color: '#b45309' }}>الرصيد المتبقي بالمنفذ:</span>
-                                <div style={{ fontWeight: 800, fontSize: '13px', marginTop: '2px', color: '#b45309' }}>{shift.expectedBottles}</div>
-                            </div>
-                            <div>
-                                <span style={{ color: '#ef4444' }}>عجز الفوارغ:</span>
-                                <div style={{ fontWeight: 800, fontSize: '13px', marginTop: '2px', color: '#ef4444' }}>{shift.bottlesShortage}</div>
-                            </div>
-                        </div>
+                        )}
                     </div>
 
                     {/* Clearance Statement */}

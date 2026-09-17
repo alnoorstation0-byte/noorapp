@@ -103,47 +103,47 @@ export default function AquaModalWrapper({ isOpen, onClose, onConfirm, title, ic
                     position: fixed !important;
                     top: 0 !important; left: 0 !important; right: 0 !important; bottom: 0 !important;
                     width: 100vw !important; height: 100vh !important;
-                    background: radial-gradient(circle at center, rgba(40, 145, 200, 0.3) 0%, rgba(18, 41, 70, 0.9) 100%) !important;
-                    backdrop-filter: blur(8px) !important;
-                    -webkit-backdrop-filter: blur(8px) !important;
+                    background: rgba(11, 14, 20, 0.85) !important;
+                    backdrop-filter: blur(20px) saturate(160%) !important;
+                    -webkit-backdrop-filter: blur(20px) saturate(160%) !important;
                     display: flex !important; align-items: center !important; justify-content: center !important;
-                    z-index: 999999999 !important;
+                    zIndex: 999999999 !important;
                 }
 
                 .cinematic-scroll::-webkit-scrollbar { width: 6px; }
                 .cinematic-scroll::-webkit-scrollbar-track { background: transparent; }
-                .cinematic-scroll::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 10px; }
-                .cinematic-scroll::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.3); }
+                .cinematic-scroll::-webkit-scrollbar-thumb { background: rgba(0, 229, 255, 0.2); border-radius: 10px; }
+                .cinematic-scroll::-webkit-scrollbar-thumb:hover { background: rgba(0, 229, 255, 0.4); }
 
                 .glass-input-field {
                     width: 100%; padding: 8px 10px; border-radius: 12px;
-                    background: rgba(255, 255, 255, 0.65);
-                    border: 1px solid rgba(255, 255, 255, 0.8);
-                    box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+                    background: rgba(11, 14, 20, 0.8);
+                    border: 1px solid rgba(0, 229, 255, 0.25);
+                    box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.3);
                     outline: none; transition: all 0.2s;
-                    font-weight: 700; color: #1e293b;
+                    font-weight: 700; color: #F8FAFC;
                 }
                 .glass-input-field:focus {
-                    background: #ffffff; border-color: ${THEME.accent};
-                    box-shadow: 0 0 0 4px rgba(202, 138, 4, 0.15);
+                    background: rgba(15, 20, 30, 0.95); border-color: #00E5FF;
+                    box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.2), 0 0 15px rgba(0, 229, 255, 0.15);
                 }
                 
                 .btn-glass-save {
-                    background: linear-gradient(135deg, ${THEME.accent}, ${THEME.terracotta});
-                    color: white; border: none; padding: 12px 20px; border-radius: 12px;
+                    background: linear-gradient(135deg, #00E5FF 0%, #0088CC 100%);
+                    color: #0B0E14; border: none; padding: 12px 20px; border-radius: 12px;
                     font-weight: 900; font-size: 14px; cursor: pointer; transition: 0.3s;
-                    box-shadow: 0 4px 15px rgba(194, 155, 98, 0.35);
+                    box-shadow: 0 4px 15px rgba(0, 229, 255, 0.35);
                 }
-                .btn-glass-save:hover:not(:disabled) { transform: translateY(-3px); filter: brightness(1.05); box-shadow: 0 8px 20px rgba(168, 87, 60, 0.35); }
+                .btn-glass-save:hover:not(:disabled) { transform: translateY(-2px); filter: brightness(1.08); box-shadow: 0 8px 24px rgba(0, 229, 255, 0.5); }
                 .btn-glass-save:active:not(:disabled) { transform: scale(0.98); }
-                .btn-glass-save:disabled { opacity: 0.7; cursor: not-allowed; }
+                .btn-glass-save:disabled { opacity: 0.6; cursor: not-allowed; }
 
                 .btn-glass-cancel {
-                    background: rgba(255, 253, 250, 0.7);
-                    color: #2C1A12; border: 1px solid rgba(194, 155, 98, 0.3); padding: 12px 20px; border-radius: 12px;
+                    background: rgba(20, 24, 34, 0.8);
+                    color: #94A3B8; border: 1px solid rgba(255, 255, 255, 0.1); padding: 12px 20px; border-radius: 12px;
                     font-weight: 900; font-size: 14px; cursor: pointer; transition: 0.3s;
                 }
-                .btn-glass-cancel:hover { background: rgba(255, 253, 250, 0.95); transform: translateY(-2px); border-color: ${THEME.accent}; }
+                .btn-glass-cancel:hover { background: rgba(26, 32, 46, 1); color: #F8FAFC; transform: translateY(-2px); border-color: rgba(0, 229, 255, 0.3); }
 
                 @keyframes modalScaleUp { 0% { transform: scale(0.95); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 
@@ -152,12 +152,12 @@ export default function AquaModalWrapper({ isOpen, onClose, onConfirm, title, ic
                     align-items: center;
                     gap: 6px;
                     padding: 4px 10px;
-                    background: rgba(194, 155, 98, 0.12);
-                    border: 1px solid rgba(194, 155, 98, 0.3);
+                    background: rgba(0, 229, 255, 0.1);
+                    border: 1px solid rgba(0, 229, 255, 0.25);
                     border-radius: 8px;
                     font-size: 11px;
                     font-weight: 800;
-                    color: ${THEME.terracotta};
+                    color: #00E5FF;
                     white-space: nowrap;
                 }
 
@@ -181,16 +181,16 @@ export default function AquaModalWrapper({ isOpen, onClose, onConfirm, title, ic
             `}</style>
 
             <div ref={containerRef} className="cinematic-scroll glass-modal-container" onClick={(e) => e.stopPropagation()} style={{ 
-                width: width, maxHeight: '95vh', background: 'linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(255, 253, 250, 0.85) 100%)', 
+                width: width, maxHeight: '95vh', background: 'linear-gradient(135deg, rgba(20, 24, 34, 0.96) 0%, rgba(13, 16, 24, 0.92) 100%)', 
                 backdropFilter: 'blur(24px) saturate(160%)', borderRadius: '24px', padding: '20px 25px', 
-                boxShadow: '0 20px 40px rgba(44, 26, 18, 0.15)', overflowY: 'auto', direction: 'rtl',
-                border: '1px solid rgba(194, 155, 98, 0.35)',
+                boxShadow: '0 25px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 229, 255, 0.12)', overflowY: 'auto', direction: 'rtl',
+                border: '1px solid rgba(0, 229, 255, 0.3)',
                 animation: 'modalScaleUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)'
             }}>
                 
-                <div className="modal-header-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px', borderBottom: `2px solid ${THEME.accent}50`, paddingBottom: '15px' }}>
+                <div className="modal-header-title" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px', borderBottom: '1px solid rgba(0, 229, 255, 0.25)', paddingBottom: '15px' }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-                        <h2 style={{ color: THEME.primary, fontWeight: 900, margin: 0, fontSize: '24px', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <h2 style={{ color: '#F8FAFC', fontWeight: 900, margin: 0, fontSize: '24px', display: 'flex', alignItems: 'center', gap: '10px' }}>
                             {icon && <span>{icon}</span>}
                             <span>{title}</span>
                         </h2>

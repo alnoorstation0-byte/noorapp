@@ -3,7 +3,7 @@ const path = require('path');
 const fs = require('fs');
 
 async function processLogo() {
-  const logoPath = path.join(__dirname, '..', 'public', 'taj_logo.png');
+  const logoPath = path.join(__dirname, '..', 'public', 'logo.png');
   const backupPath = path.join(__dirname, '..', 'public', 'taj_logo.backup.png');
 
   if (!fs.existsSync(backupPath)) {

@@ -40,7 +40,8 @@ export default function PosSettlementsPage() {
 
     return (
         <div style={{
-            background: '#F4F1EE',
+            background: '#0B0E14',
+            color: '#F8FAFC',
             minHeight: '100vh',
             padding: '30px 24px',
             direction: 'rtl',
@@ -49,28 +50,30 @@ export default function PosSettlementsPage() {
             boxSizing: 'border-box'
         }}>
             <style>{`
-                /* Desert Glassmorphism Theme Styles */
+                /* Noor Command Center Theme Styles */
                 .aqua-glass-card {
-                    background: linear-gradient(135deg, rgba(255, 253, 250, 0.85) 0%, rgba(255, 253, 250, 0.5) 100%) !important;
+                    background: linear-gradient(135deg, rgba(20, 24, 34, 0.88) 0%, rgba(13, 16, 24, 0.78) 100%) !important;
                     backdrop-filter: blur(24px) saturate(160%) !important;
                     -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
-                    border: 1px solid rgba(194, 155, 98, 0.3) !important;
-                    border-radius: 24px !important;
-                    box-shadow: 0 4px 15px rgba(44, 26, 18, 0.08) !important;
+                    border: 1px solid rgba(0, 229, 255, 0.2) !important;
+                    border-radius: 20px !important;
+                    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5) !important;
                     transition: all 0.3s cubic-bezier(0.165, 0.84, 0.44, 1) !important;
+                    color: #F8FAFC !important;
                 }
                 .aqua-glass-card:hover {
-                    transform: translateY(-4px) !important;
-                    box-shadow: 0 10px 20px rgba(168, 87, 60, 0.15) !important;
+                    transform: translateY(-3px) !important;
+                    border-color: rgba(0, 229, 255, 0.45) !important;
+                    box-shadow: 0 12px 35px rgba(0, 229, 255, 0.2) !important;
                 }
                 .aqua-btn-primary {
-                    background: linear-gradient(135deg, #C29B62 0%, #A8573C 100%) !important;
-                    color: #FFFFFF !important;
-                    border: 1px solid rgba(255, 255, 255, 0.3) !important;
+                    background: linear-gradient(135deg, #00E5FF 0%, #0099CC 100%) !important;
+                    color: #07090D !important;
+                    border: 1px solid rgba(0, 229, 255, 0.7) !important;
                     border-radius: 12px !important;
-                    font-weight: 800 !important;
+                    font-weight: 900 !important;
                     cursor: pointer !important;
-                    box-shadow: 0 4px 12px rgba(194, 155, 98, 0.35) !important;
+                    box-shadow: 0 0 15px rgba(0, 229, 255, 0.4) !important;
                     transition: all 0.3s ease !important;
                     display: inline-flex !important;
                     align-items: center !important;
@@ -80,15 +83,15 @@ export default function PosSettlementsPage() {
                 }
                 .aqua-btn-primary:hover {
                     transform: translateY(-2px) !important;
-                    box-shadow: 0 8px 18px rgba(168, 87, 60, 0.3) !important;
-                    filter: brightness(1.05) !important;
+                    box-shadow: 0 0 25px rgba(0, 229, 255, 0.65) !important;
+                    filter: brightness(1.1) !important;
                 }
                 .aqua-table-row {
                     transition: all 0.2s ease !important;
-                    border-bottom: 1px solid rgba(194, 155, 98, 0.12) !important;
+                    border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
                 }
                 .aqua-table-row:hover {
-                    background: rgba(194, 155, 98, 0.08) !important;
+                    background: rgba(0, 229, 255, 0.06) !important;
                 }
                 .aqua-filter-tab {
                     padding: 9px 18px !important;
@@ -101,18 +104,19 @@ export default function PosSettlementsPage() {
                     white-space: nowrap !important;
                 }
                 .aqua-filter-tab.active {
-                    background: #2C1A12 !important;
-                    color: #FDFBF7 !important;
-                    box-shadow: 0 4px 15px rgba(44, 26, 18, 0.2) !important;
+                    background: linear-gradient(135deg, #00E5FF 0%, #0099CC 100%) !important;
+                    color: #07090D !important;
+                    box-shadow: 0 0 15px rgba(0, 229, 255, 0.4) !important;
                 }
                 .aqua-filter-tab:not(.active) {
-                    background: rgba(255, 253, 250, 0.7) !important;
-                    color: #2C1A12 !important;
-                    border-color: rgba(194, 155, 98, 0.25) !important;
+                    background: rgba(20, 24, 34, 0.7) !important;
+                    color: #94A3B8 !important;
+                    border-color: rgba(0, 229, 255, 0.15) !important;
                 }
                 .aqua-filter-tab:not(.active):hover {
-                    background: rgba(255, 253, 250, 0.95) !important;
-                    border-color: #C29B62 !important;
+                    background: rgba(26, 32, 46, 0.9) !important;
+                    border-color: #00E5FF !important;
+                    color: #F8FAFC !important;
                 }
 
                 @media (max-width: 768px) {
@@ -128,13 +132,13 @@ export default function PosSettlementsPage() {
 
             {/* Top Hero Banner */}
             <div className="settle-page-header" style={{
-                background: 'linear-gradient(135deg, rgba(255, 253, 250, 0.9) 0%, rgba(255, 253, 250, 0.6) 100%)',
+                background: 'linear-gradient(135deg, rgba(20, 24, 34, 0.92) 0%, rgba(13, 16, 24, 0.85) 100%)',
                 backdropFilter: 'blur(24px) saturate(160%)',
                 WebkitBackdropFilter: 'blur(24px) saturate(160%)',
                 borderRadius: '24px',
                 padding: '30px 35px',
-                border: '1px solid rgba(194, 155, 98, 0.3)',
-                boxShadow: '0 8px 25px rgba(44, 26, 18, 0.08)',
+                border: '1px solid rgba(0, 229, 255, 0.25)',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.6), inset 0 0 15px rgba(0, 229, 255, 0.05)',
                 marginBottom: '30px'
             }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '20px' }}>
@@ -143,34 +147,35 @@ export default function PosSettlementsPage() {
                             width: '64px',
                             height: '64px',
                             borderRadius: '20px',
-                            background: 'linear-gradient(135deg, #C29B62 0%, #A8573C 100%)',
+                            background: 'linear-gradient(135deg, #00E5FF 0%, #0077B6 100%)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
-                            fontSize: '32px',
-                            boxShadow: '0 8px 20px rgba(194, 155, 98, 0.35)',
-                            color: '#fff'
+                            fontSize: '30px',
+                            boxShadow: '0 0 20px rgba(0, 229, 255, 0.4)',
+                            color: '#07090D'
                         }}>
-                            🏪
+                            ⛽
                         </div>
                         <div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
-                                <h1 style={{ margin: 0, fontSize: '28px', fontWeight: 900, color: '#2C1A12', letterSpacing: '-0.5px' }}>
-                                    تسوية عهد منافذ البيع وإغلاق الورديات
+                                <h1 style={{ margin: 0, fontSize: '26px', fontWeight: 900, color: '#F8FAFC', letterSpacing: '-0.5px' }}>
+                                    تسويات الورديات ومطابقة عدادات الوقود
                                 </h1>
                                 <span style={{
-                                    background: 'rgba(194, 155, 98, 0.15)',
-                                    color: '#A8573C',
+                                    background: 'rgba(0, 229, 255, 0.12)',
+                                    color: '#00E5FF',
+                                    border: '1px solid rgba(0, 229, 255, 0.3)',
                                     padding: '4px 12px',
                                     borderRadius: '50px',
                                     fontSize: '12px',
                                     fontWeight: 900
                                 }}>
-                                    Desert Glassmorphism 🏜️
+                                    مركز القيادة ⚡
                                 </span>
                             </div>
-                            <p style={{ margin: '6px 0 0 0', fontSize: '14px', color: 'rgba(44, 26, 18, 0.7)', fontWeight: 700 }}>
-                                المطابقة النقدية لدرج الصناديق، توريد الإيرادات للخزينة، تسوية العبوات والمستلزمات، جرد مخزون المنافذ، وإصدار سندات المخالصة الرسمية.
+                            <p style={{ margin: '6px 0 0 0', fontSize: '13.5px', color: '#94A3B8', fontWeight: 700 }}>
+                                المطابقة النقدية لدرج الصناديق، توريد إيرادات مبيعات الوقود، مطابقة عدادات المضخات اللحظية، وتحديث مخزون الخزانات.
                             </p>
                         </div>
                     </div>
@@ -209,15 +214,15 @@ export default function PosSettlementsPage() {
                                 width: '100%',
                                 padding: '11px 20px 11px 40px',
                                 borderRadius: '50px',
-                                border: '1px solid rgba(28, 115, 171, 0.25)',
-                                background: 'rgba(255, 255, 255, 0.85)',
+                                border: '1px solid rgba(0, 229, 255, 0.25)',
+                                background: 'rgba(18, 22, 30, 0.85)',
                                 fontSize: '13px',
                                 fontWeight: 700,
-                                color: '#122946',
+                                color: '#F8FAFC',
                                 outline: 'none'
                             }}
                         />
-                        <span style={{ position: 'absolute', left: '16px', top: '11px', fontSize: '16px', color: '#1C73AB' }}>🔍</span>
+                        <span style={{ position: 'absolute', left: '16px', top: '11px', fontSize: '16px', color: '#00E5FF' }}>🔍</span>
                     </div>
 
                     {/* Outlet / Warehouse Selector */}
@@ -229,11 +234,11 @@ export default function PosSettlementsPage() {
                                 width: '100%',
                                 padding: '11px 16px',
                                 borderRadius: '50px',
-                                border: '1px solid rgba(28, 115, 171, 0.25)',
-                                background: 'rgba(255, 255, 255, 0.85)',
+                                border: '1px solid rgba(0, 229, 255, 0.25)',
+                                background: 'rgba(18, 22, 30, 0.85)',
                                 fontSize: '13px',
                                 fontWeight: 700,
-                                color: '#122946',
+                                color: '#F8FAFC',
                                 outline: 'none'
                             }}
                         >
@@ -256,11 +261,11 @@ export default function PosSettlementsPage() {
                                 width: '100%',
                                 padding: '10px 14px',
                                 borderRadius: '50px',
-                                border: '1px solid rgba(28, 115, 171, 0.25)',
-                                background: 'rgba(255, 255, 255, 0.85)',
+                                border: '1px solid rgba(0, 229, 255, 0.25)',
+                                background: 'rgba(18, 22, 30, 0.85)',
                                 fontSize: '12px',
                                 fontWeight: 700,
-                                color: '#122946',
+                                color: '#F8FAFC',
                                 outline: 'none'
                             }}
                         />
@@ -276,11 +281,11 @@ export default function PosSettlementsPage() {
                                 width: '100%',
                                 padding: '10px 14px',
                                 borderRadius: '50px',
-                                border: '1px solid rgba(28, 115, 171, 0.25)',
-                                background: 'rgba(255, 255, 255, 0.85)',
+                                border: '1px solid rgba(0, 229, 255, 0.25)',
+                                background: 'rgba(18, 22, 30, 0.85)',
                                 fontSize: '12px',
                                 fontWeight: 700,
-                                color: '#122946',
+                                color: '#F8FAFC',
                                 outline: 'none'
                             }}
                         />
@@ -329,91 +334,91 @@ export default function PosSettlementsPage() {
             }}>
                 {/* KPI 1: Shifts */}
                 <div className="aqua-glass-card" style={{ padding: '22px 24px', position: 'relative', overflow: 'hidden' }}>
-                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: '#1C73AB' }}></div>
+                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: '#00E5FF' }}></div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontSize: '13px', fontWeight: 800, color: '#1C73AB' }}>ورديات ومنافذ البيع 🏪</span>
+                        <span style={{ fontSize: '13px', fontWeight: 800, color: '#00E5FF' }}>ورديات ومنافذ البيع 🏪</span>
                         <span style={{ fontSize: '20px' }}>📦</span>
                     </div>
-                    <div style={{ fontSize: '32px', fontWeight: 900, color: '#122946', margin: '10px 0 6px 0' }}>
+                    <div style={{ fontSize: '32px', fontWeight: 900, color: '#F8FAFC', margin: '10px 0 6px 0', fontFamily: 'monospace' }}>
                         {totals.totalShifts}
                     </div>
-                    <div style={{ fontSize: '12px', fontWeight: 700, color: '#64748b' }}>
-                        <span style={{ color: '#f59e0b' }}>{totals.pendingShifts} بانتظار التسوية</span> | <span style={{ color: '#16a34a' }}>{totals.settledShifts} مسواة</span>
+                    <div style={{ fontSize: '12px', fontWeight: 700, color: '#94A3B8' }}>
+                        <span style={{ color: '#E06D44' }}>{totals.pendingShifts} بانتظار التسوية</span> | <span style={{ color: '#10B981' }}>{totals.settledShifts} مسواة</span>
                     </div>
                 </div>
 
                 {/* KPI 2: Total Sales */}
                 <div className="aqua-glass-card" style={{ padding: '22px 24px', position: 'relative', overflow: 'hidden' }}>
-                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: '#2891C8' }}></div>
+                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: '#00E5FF' }}></div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontSize: '13px', fontWeight: 800, color: '#1C73AB' }}>إجمالي المبيعات 📈</span>
+                        <span style={{ fontSize: '13px', fontWeight: 800, color: '#00E5FF' }}>إجمالي المبيعات 📈</span>
                         <span style={{ fontSize: '20px' }}>💰</span>
                     </div>
-                    <div style={{ fontSize: '28px', fontWeight: 900, color: '#1C73AB', margin: '10px 0 6px 0' }}>
+                    <div style={{ fontSize: '28px', fontWeight: 900, color: '#00E5FF', margin: '10px 0 6px 0', textShadow: '0 0 12px rgba(0, 229, 255, 0.4)' }}>
                         {formatCurrency(totals.totalSales)}
                     </div>
-                    <div style={{ fontSize: '12px', fontWeight: 700, color: '#64748b' }}>
-                        كاش: <b style={{ color: '#122946' }}>{formatCurrency(totals.cashSales)}</b> | شبكة: <b>{formatCurrency(totals.cardSales)}</b>
+                    <div style={{ fontSize: '12px', fontWeight: 700, color: '#94A3B8' }}>
+                        كاش: <b style={{ color: '#F8FAFC' }}>{formatCurrency(totals.cashSales)}</b> | شبكة: <b>{formatCurrency(totals.cardSales)}</b>
                     </div>
                 </div>
 
                 {/* KPI 3: Drawer Cash Due */}
                 <div className="aqua-glass-card" style={{ padding: '22px 24px', position: 'relative', overflow: 'hidden' }}>
-                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: '#f59e0b' }}></div>
+                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: '#E06D44' }}></div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontSize: '13px', fontWeight: 800, color: '#b45309' }}>المطالبة النقدية للدرج 💵</span>
+                        <span style={{ fontSize: '13px', fontWeight: 800, color: '#E06D44' }}>المطالبة النقدية للدرج 💵</span>
                         <span style={{ fontSize: '20px' }}>⚖️</span>
                     </div>
-                    <div style={{ fontSize: '28px', fontWeight: 900, color: '#b45309', margin: '10px 0 6px 0' }}>
+                    <div style={{ fontSize: '28px', fontWeight: 900, color: '#E06D44', margin: '10px 0 6px 0', textShadow: '0 0 12px rgba(224, 109, 68, 0.35)' }}>
                         {formatCurrency(totals.totalNetCashDue)}
                     </div>
-                    <div style={{ fontSize: '12px', fontWeight: 700, color: '#64748b' }}>
+                    <div style={{ fontSize: '12px', fontWeight: 700, color: '#94A3B8' }}>
                         (بداية + مبيعات كاش + تحصيلات) - مصروفات
                     </div>
                 </div>
 
                 {/* KPI 4: Handed Over Cash */}
                 <div className="aqua-glass-card" style={{ padding: '22px 24px', position: 'relative', overflow: 'hidden' }}>
-                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: '#16a34a' }}></div>
+                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: '#10B981' }}></div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontSize: '13px', fontWeight: 800, color: '#16a34a' }}>المورد للخزينة ✅</span>
+                        <span style={{ fontSize: '13px', fontWeight: 800, color: '#10B981' }}>المورد للخزينة ✅</span>
                         <span style={{ fontSize: '20px' }}>🏦</span>
                     </div>
-                    <div style={{ fontSize: '28px', fontWeight: 900, color: '#16a34a', margin: '10px 0 6px 0' }}>
+                    <div style={{ fontSize: '28px', fontWeight: 900, color: '#10B981', margin: '10px 0 6px 0', textShadow: '0 0 12px rgba(16, 185, 129, 0.4)' }}>
                         {formatCurrency(totals.totalHandedOverCash)}
                     </div>
-                    <div style={{ fontSize: '12px', fontWeight: 700, color: '#64748b' }}>
+                    <div style={{ fontSize: '12px', fontWeight: 700, color: '#94A3B8' }}>
                         سندات قبض مقيدة بالخزينة المركزية
                     </div>
                 </div>
 
                 {/* KPI 5: Remaining Cash Custody / Shortages */}
                 <div className="aqua-glass-card" style={{ padding: '22px 24px', position: 'relative', overflow: 'hidden' }}>
-                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: '#ef4444' }}></div>
+                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: '#EF4444' }}></div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontSize: '13px', fontWeight: 800, color: '#ef4444' }}>فروقات الصندوق / العجز ⚠️</span>
+                        <span style={{ fontSize: '13px', fontWeight: 800, color: '#EF4444' }}>فروقات الصندوق / العجز ⚠️</span>
                         <span style={{ fontSize: '20px' }}>⏳</span>
                     </div>
-                    <div style={{ fontSize: '28px', fontWeight: 900, color: totals.totalRemainingCash > 0 ? '#ef4444' : '#16a34a', margin: '10px 0 6px 0' }}>
+                    <div style={{ fontSize: '28px', fontWeight: 900, color: totals.totalRemainingCash > 0 ? '#EF4444' : '#10B981', margin: '10px 0 6px 0' }}>
                         {formatCurrency(totals.totalRemainingCash)}
                     </div>
-                    <div style={{ fontSize: '12px', fontWeight: 700, color: '#64748b' }}>
+                    <div style={{ fontSize: '12px', fontWeight: 700, color: '#94A3B8' }}>
                         صافي المبالغ المعلقة بذمة الكاشير
                     </div>
                 </div>
 
-                {/* KPI 6: Bottles & Stock */}
+                {/* KPI 6: Fuel Pumps & Meter Reconciliation */}
                 <div className="aqua-glass-card" style={{ padding: '22px 24px', position: 'relative', overflow: 'hidden' }}>
-                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: '#7FD4E3' }}></div>
+                    <div style={{ position: 'absolute', top: 0, left: 0, right: 0, height: '4px', background: '#00E5FF' }}></div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontSize: '13px', fontWeight: 800, color: '#1C73AB' }}>فوارغ ومخزون المنفذ 🔄</span>
-                        <span style={{ fontSize: '20px' }}>💧</span>
+                        <span style={{ fontSize: '13px', fontWeight: 800, color: '#00E5FF' }}>كميات ومطابقة الوقود ⛽</span>
+                        <span style={{ fontSize: '20px' }}>⛽</span>
                     </div>
-                    <div style={{ fontSize: '28px', fontWeight: 900, color: '#122946', margin: '10px 0 6px 0' }}>
-                        {totals.totalStock} <span style={{ fontSize: '16px', fontWeight: 700, color: '#64748b' }}>حبة</span>
+                    <div style={{ fontSize: '28px', fontWeight: 900, color: '#F8FAFC', margin: '10px 0 6px 0', fontFamily: 'monospace' }}>
+                        {Number(totals.totalLitersSold || 0).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} <span style={{ fontSize: '16px', fontWeight: 700, color: '#94A3B8' }}>لتر</span>
                     </div>
-                    <div style={{ fontSize: '12px', fontWeight: 700, color: '#64748b' }}>
-                        مرتجع فوارغ: <b style={{ color: '#16a34a' }}>{totals.bottlesReturned}</b> | مباع: <b>{totals.bottlesSold}</b>
+                    <div style={{ fontSize: '12px', fontWeight: 700, color: '#94A3B8' }}>
+                        قيمة العدادات: <b style={{ color: '#00E5FF' }}>{formatCurrency(totals.meterTotalAmount || 0)}</b> | فارق: <b style={{ color: (totals.meterSalesVariance || 0) > 5 ? '#EF4444' : '#10B981' }}>{formatCurrency(totals.meterSalesVariance || 0)}</b>
                     </div>
                 </div>
             </div>
@@ -421,26 +426,26 @@ export default function PosSettlementsPage() {
             {/* Settlements Table Card */}
             <div className="aqua-glass-card" style={{ overflow: 'hidden', padding: 0 }}>
                 {isLoading ? (
-                    <div style={{ padding: '80px', textAlign: 'center', color: '#1C73AB', fontWeight: 800, fontSize: '18px' }}>
+                    <div style={{ padding: '80px', textAlign: 'center', color: '#00E5FF', fontWeight: 800, fontSize: '18px' }}>
                         <div style={{ fontSize: '40px', marginBottom: '15px', animation: 'spin 1.5s infinite linear' }}>⏳</div>
                         جاري تحميل ومطابقة عهد منافذ البيع والورديات...
                     </div>
                 ) : (
                     <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
-                        <table className="settle-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right', fontSize: '13px', color: '#122946' }}>
-                            <thead style={{ background: 'rgba(28, 115, 171, 0.08)', borderBottom: '1.5px solid rgba(28, 115, 171, 0.15)' }}>
+                        <table className="settle-table" style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'right', fontSize: '13px', color: '#F8FAFC' }}>
+                            <thead style={{ background: 'rgba(0, 229, 255, 0.08)', borderBottom: '1.5px solid rgba(0, 229, 255, 0.2)' }}>
                                 <tr>
-                                    <th style={{ padding: '18px 20px', color: '#1C73AB', fontWeight: 900 }}>الوردية والمنفذ 🏪</th>
-                                    <th style={{ padding: '18px 20px', color: '#1C73AB', fontWeight: 900 }}>التاريخ 📅</th>
-                                    <th style={{ padding: '18px 20px', color: '#1C73AB', fontWeight: 900 }}>الكاشير / المسؤول 👤</th>
-                                    <th style={{ padding: '18px 20px', color: '#122946', fontWeight: 900, textAlign: 'center' }}>المبيعات 💰</th>
-                                    <th style={{ padding: '18px 20px', color: '#ef4444', fontWeight: 900, textAlign: 'center' }}>مصروفات الدرج (-)</th>
-                                    <th style={{ padding: '18px 20px', color: '#b45309', fontWeight: 900, textAlign: 'center' }}>المطالبة النقدية 💵</th>
-                                    <th style={{ padding: '18px 20px', color: '#16a34a', fontWeight: 900, textAlign: 'center' }}>المورد للخزينة ✅</th>
-                                    <th style={{ padding: '18px 20px', color: '#122946', fontWeight: 900, textAlign: 'center' }}>فروقات الصندوق ⚠️</th>
-                                    <th style={{ padding: '18px 20px', color: '#1C73AB', fontWeight: 900, textAlign: 'center' }}>العبوات والمستلزمات 📦</th>
-                                    <th style={{ padding: '18px 20px', color: '#122946', fontWeight: 900, textAlign: 'center' }}>حالة التسوية</th>
-                                    <th style={{ padding: '18px 20px', color: '#1C73AB', fontWeight: 900, textAlign: 'center' }}>الإجراءات</th>
+                                    <th style={{ padding: '18px 20px', color: '#00E5FF', fontWeight: 900 }}>الوردية والمنفذ 🏪</th>
+                                    <th style={{ padding: '18px 20px', color: '#00E5FF', fontWeight: 900 }}>التاريخ 📅</th>
+                                    <th style={{ padding: '18px 20px', color: '#00E5FF', fontWeight: 900 }}>الكاشير / المسؤول 👤</th>
+                                    <th style={{ padding: '18px 20px', color: '#F8FAFC', fontWeight: 900, textAlign: 'center' }}>المبيعات 💰</th>
+                                    <th style={{ padding: '18px 20px', color: '#EF4444', fontWeight: 900, textAlign: 'center' }}>مصروفات الدرج (-)</th>
+                                    <th style={{ padding: '18px 20px', color: '#E06D44', fontWeight: 900, textAlign: 'center' }}>المطالبة النقدية 💵</th>
+                                    <th style={{ padding: '18px 20px', color: '#10B981', fontWeight: 900, textAlign: 'center' }}>المورد للخزينة ✅</th>
+                                    <th style={{ padding: '18px 20px', color: '#F8FAFC', fontWeight: 900, textAlign: 'center' }}>فروقات الصندوق ⚠️</th>
+                                    <th style={{ padding: '18px 20px', color: '#00E5FF', fontWeight: 900, textAlign: 'center' }}>عدادات الوقود (المضخات) ⛽</th>
+                                    <th style={{ padding: '18px 20px', color: '#F8FAFC', fontWeight: 900, textAlign: 'center' }}>حالة التسوية</th>
+                                    <th style={{ padding: '18px 20px', color: '#00E5FF', fontWeight: 900, textAlign: 'center' }}>الإجراءات</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -534,14 +539,32 @@ export default function PosSettlementsPage() {
                                                 </div>
                                             </td>
 
-                                            {/* Bottles */}
+                                            {/* Fuel Pump Meters & Variance */}
                                             <td style={{ padding: '18px 20px', textAlign: 'center' }}>
                                                 <div style={{ fontSize: '12px', fontWeight: 800, color: '#122946' }}>
-                                                    مرتجع: <b style={{ color: '#16a34a' }}>{item.bottlesReturned}</b>
+                                                    ⛽ {Number(item.totalLitersSold || 0).toLocaleString('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 })} لتر
                                                 </div>
                                                 <div style={{ fontSize: '11px', color: '#64748b', marginTop: '2px' }}>
-                                                    مباع: {item.bottlesSold} | متبقي: {item.expectedBottles}
+                                                    قيمة: {formatCurrency(item.meterTotalAmount || 0)}
                                                 </div>
+                                                {Number(item.meterTotalAmount || 0) > 0 && (
+                                                    <div style={{ 
+                                                        marginTop: '4px',
+                                                        fontSize: '10px', 
+                                                        fontWeight: 900,
+                                                        padding: '2px 6px',
+                                                        borderRadius: '6px',
+                                                        display: 'inline-block',
+                                                        background: Math.abs(item.meterSalesVariance || 0) <= 5 ? 'rgba(22, 163, 74, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                                                        color: Math.abs(item.meterSalesVariance || 0) <= 5 ? '#16a34a' : '#ef4444'
+                                                    }}>
+                                                        {Math.abs(item.meterSalesVariance || 0) <= 5 
+                                                            ? '✅ مطابق' 
+                                                            : (item.meterSalesVariance || 0) > 0 
+                                                                ? `⚠️ فرق +${Number(item.meterSalesVariance).toFixed(1)} ر.س` 
+                                                                : `ℹ️ فرق -${Math.abs(Number(item.meterSalesVariance)).toFixed(1)} ر.س`}
+                                                    </div>
+                                                )}
                                             </td>
 
                                             {/* Status Badge */}

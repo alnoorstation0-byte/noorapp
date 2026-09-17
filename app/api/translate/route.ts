@@ -2,14 +2,14 @@ import { NextResponse } from 'next/server';
 
 export const dynamic = 'force-dynamic';
 
-// قاموس محلي سريع لمصطلحات الصيدلة البيطرية والمحاسبة كخط دفاع أول
+// قاموس محلي سريع لمصطلحات الصيدلة الوقودة والمحاسبة كخط دفاع أول
 const LOCAL_DICTIONARY: Record<string, { en: string; ar: string }> = {
-    'بيطري': { en: 'Veterinary', ar: 'بيطري' },
-    'أدوية': { en: 'Medicines', ar: 'أدوية' },
+    'وقود': { en: 'Fuel', ar: 'وقود' },
+    'منتجات': { en: 'Products', ar: 'منتجات' },
     'كرتون': { en: 'Carton', ar: 'كرتون' },
     'قارورة': { en: 'Bottle', ar: 'قارورة' },
     'جالون': { en: 'Gallon', ar: 'جالون' },
-    'صيدلية تاج المودة': { en: 'Taj Al-Mawadah Pharmacy', ar: 'صيدلية تاج المودة' },
+    'محطات النور للوقود': { en: 'Al-Noor Gas Stations Station', ar: 'محطات النور للوقود' },
     'مؤسسة': { en: 'Establishment', ar: 'مؤسسة' },
     'شركة': { en: 'Company', ar: 'شركة' },
     'عميل': { en: 'Customer', ar: 'عميل' },

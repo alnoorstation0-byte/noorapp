@@ -141,7 +141,7 @@ function PartnerStatementContent() {
 
     return (
         <div className="clean-page">
-            <MasterPage icon="📑" title="كشف حساب الشركاء" subtitle="تحليل مالي ملكي بنظام صيدلية تاج المودة">
+            <MasterPage icon="📑" title="كشف حساب الشركاء" subtitle="تحليل مالي ملكي بنظام محطات النور للوقود">
                 
                 <RawasiSidebarManager actions={sidebarActions} watchDeps={[logic.partnerId, logic.isExportingAll]} />
 

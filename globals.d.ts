@@ -1,4 +1,4 @@
-// Global types declarations for Taj Al-Mawadah App
+// Global types declarations for Al-Noor Gas Stations App
 
 declare global {
   function showGlobalToast(message: string, type?: 'success' | 'error' | 'warning' | 'info'): void;

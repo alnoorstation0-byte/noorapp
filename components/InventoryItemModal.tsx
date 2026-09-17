@@ -227,7 +227,7 @@ export default function InventoryItemModal({ isOpen, onClose, currentRecord, set
             <TranslatableInput
               label="اسم الصنف / المنتج"
               required
-              placeholder="مثال: أدوية ومكملات وفيتامينات للخيول والإبل..."
+              placeholder="مثال: منتجات ومكملات وفيتامينات للخيول والشاحنات..."
               value={formData.name || ''} 
               onChange={val => updateField('name', val)} 
               inputClassName="item-modal-input"

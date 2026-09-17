@@ -672,46 +672,46 @@ export default function JournalPage() {
           />
 
           <style>{`
-            .btn-main-glass { width: 100%; padding: 14px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.8); backdrop-filter: blur(15px); font-weight: 900; cursor: pointer; transition: 0.2s; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+            .btn-main-glass { width: 100%; padding: 14px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1); backdrop-filter: blur(15px); font-weight: 900; cursor: pointer; transition: 0.2s; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 8px; }
             .btn-main-glass.red { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); }
             .btn-main-glass:hover { transform: translateY(-3px); filter: brightness(1.1); box-shadow: 0 4px 10px rgba(239, 68, 68, 0.1); }
             
-            .summary-glass-card { background: rgba(255, 255, 255, 0.6); backdrop-filter: blur(10px); padding: 20px; border-radius: 20px; border: 1px solid rgba(255, 255, 255, 0.9); margin-bottom: 25px; box-shadow: 0 4px 15px rgba(44, 26, 18, 0.05); }
+            .summary-glass-card { background: rgba(20, 24, 34, 0.75); backdrop-filter: blur(20px); padding: 20px; border-radius: 20px; border: 1px solid rgba(0, 229, 255, 0.2); margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4); }
             
-            .filter-label { color: #2C1A12; font-size: 11px; font-weight: 900; display: block; margin-bottom: 8px; }
-            .filter-input-glass { width: 100%; padding: 12px; border-radius: 12px; border: 1.5px solid rgba(194, 155, 98, 0.25); background: white; color: #2C1A12; outline: none; font-family: inherit; font-weight: 800; font-size: 13px; transition: 0.3s; box-shadow: inset 0 2px 4px rgba(0,0,0,0.02); }
-            .filter-input-glass:focus { border-color: #C29B62; box-shadow: 0 0 0 3px rgba(194, 155, 98, 0.2); }
-            .filter-input-glass::-webkit-calendar-picker-indicator { cursor: pointer; opacity: 0.6; }
+            .filter-label { color: #94A3B8; font-size: 11px; font-weight: 900; display: block; margin-bottom: 8px; }
+            .filter-input-glass { width: 100%; padding: 12px; border-radius: 12px; border: 1.5px solid rgba(255, 255, 255, 0.1); background: rgba(11, 14, 20, 0.7); color: #F8FAFC; outline: none; font-family: inherit; font-weight: 800; font-size: 13px; transition: 0.3s; box-shadow: inset 0 2px 4px rgba(0,0,0,0.3); }
+            .filter-input-glass:focus { border-color: #00E5FF; box-shadow: 0 0 15px rgba(0, 229, 255, 0.2); }
+            .filter-input-glass::-webkit-calendar-picker-indicator { cursor: pointer; opacity: 0.7; filter: invert(0.8); }
             .filter-input-glass::-webkit-calendar-picker-indicator:hover { opacity: 1; }
             
             .custom-select { appearance: auto; cursor: pointer; }
-            .custom-select option { background: white; color: #2C1A12; font-weight: 900; }
+            .custom-select option { background: #141822; color: #F8FAFC; font-weight: 900; }
 
-            .filter-btn { flex: 1; padding: 10px; border-radius: 10px; background: white; color: #C29B62; border: 1px solid rgba(194, 155, 98, 0.3); font-weight: 900; cursor: pointer; font-size: 11px; transition: 0.3s; }
-            .filter-btn.active { background: #C29B62; color: white; box-shadow: 0 4px 10px rgba(194, 155, 98, 0.25); border-color: #C29B62; }
+            .filter-btn { flex: 1; padding: 10px; border-radius: 10px; background: rgba(20, 24, 34, 0.8); color: #94A3B8; border: 1px solid rgba(255, 255, 255, 0.1); font-weight: 900; cursor: pointer; font-size: 11px; transition: 0.3s; }
+            .filter-btn.active { background: linear-gradient(135deg, rgba(0, 229, 255, 0.25), rgba(0, 229, 255, 0.1)); color: #00E5FF; box-shadow: 0 0 15px rgba(0, 229, 255, 0.2); border-color: rgba(0, 229, 255, 0.5); }
             
             .badge-glass { padding: 4px 10px; border-radius: 8px; font-size: 11px; font-weight: 900; display: inline-block; }
-            .badge-glass.green { background: #ecfdf5; color: #4E734F; border: 1px solid #a7f3d0; }
-            .badge-glass.yellow { background: #fff7ed; color: #d97706; border: 1px solid #fde68a; }
+            .badge-glass.green { background: rgba(16, 185, 129, 0.15); color: #10B981; border: 1px solid rgba(16, 185, 129, 0.3); }
+            .badge-glass.yellow { background: rgba(245, 158, 11, 0.15); color: #F59E0B; border: 1px solid rgba(245, 158, 11, 0.3); }
             
-            .pagination-container { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 15px; background: rgba(255, 255, 255, 0.6); border-radius: 16px; border: 1px solid white; box-shadow: 0 4px 15px rgba(44, 26, 18, 0.05); }
-            .btn-pagination { background: white; color: #C29B62; border: 1px solid rgba(194, 155, 98, 0.3); padding: 10px 20px; border-radius: 12px; font-weight: 900; cursor: pointer; transition: 0.3s; }
-            .btn-pagination:hover:not(:disabled) { background: #C29B62; color: white; border-color: #C29B62; }
-            .btn-pagination:disabled { opacity: 0.5; cursor: not-allowed; background: #f1f5f9; color: #94a3b8; border-color: #e2e8f0; }
+            .pagination-container { display: flex; justify-content: space-between; align-items: center; margin-top: 20px; padding: 15px; background: rgba(20, 24, 34, 0.75); border-radius: 16px; border: 1px solid rgba(0, 229, 255, 0.2); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4); }
+            .btn-pagination { background: rgba(20, 24, 34, 0.9); color: #00E5FF; border: 1px solid rgba(0, 229, 255, 0.3); padding: 10px 20px; border-radius: 12px; font-weight: 900; cursor: pointer; transition: 0.3s; }
+            .btn-pagination:hover:not(:disabled) { background: #00E5FF; color: #0B0E14; border-color: #00E5FF; box-shadow: 0 0 15px rgba(0, 229, 255, 0.3); }
+            .btn-pagination:disabled { opacity: 0.4; cursor: not-allowed; background: rgba(255, 255, 255, 0.05); color: #64748B; border-color: rgba(255, 255, 255, 0.08); }
 
-            /* 🎯 Journal Selection Bar (Desert Glassmorphism) */
+            /* 🎯 Journal Selection Bar (Noor Command Center) */
             .journal-selection-bar {
               display: flex;
               align-items: center;
               justify-content: space-between;
-              background: linear-gradient(135deg, rgba(255, 253, 250, 0.9), rgba(253, 246, 237, 0.8));
-              border: 1.5px solid rgba(194, 155, 98, 0.35);
+              background: linear-gradient(135deg, rgba(0, 229, 255, 0.15), rgba(20, 24, 34, 0.95));
+              border: 1.5px solid rgba(0, 229, 255, 0.35);
               border-radius: 14px;
               padding: 10px 16px;
               margin-top: 14px;
               backdrop-filter: blur(10px);
               -webkit-backdrop-filter: blur(10px);
-              box-shadow: 0 4px 15px rgba(44, 26, 18, 0.08);
+              box-shadow: 0 4px 20px rgba(0, 229, 255, 0.15);
               animation: journalSelectionSlideDown 0.25s cubic-bezier(0.16, 1, 0.3, 1);
               width: 100%;
               box-sizing: border-box;
@@ -734,18 +734,18 @@ export default function JournalPage() {
             .selection-badge {
               font-size: 12px;
               font-weight: 900;
-              color: #C29B62;
-              background: rgba(255, 255, 255, 0.85);
+              color: #00E5FF;
+              background: rgba(0, 229, 255, 0.15);
               padding: 5px 12px;
               border-radius: 8px;
-              border: 1px solid rgba(194, 155, 98, 0.25);
+              border: 1px solid rgba(0, 229, 255, 0.3);
               white-space: nowrap;
             }
 
             .selection-header-name {
               font-size: 12px;
               font-weight: 800;
-              color: #122946;
+              color: #F8FAFC;
               white-space: nowrap;
               overflow: hidden;
               text-overflow: ellipsis;
@@ -789,7 +789,7 @@ export default function JournalPage() {
 
             .selection-action-btn.unpost {
               background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.25) 100%);
-              color: #b45309;
+              color: #F59E0B;
               border: 1px solid rgba(245, 158, 11, 0.4);
             }
             .selection-action-btn.unpost:hover:not(:disabled) {
@@ -799,9 +799,10 @@ export default function JournalPage() {
             }
 
             .selection-action-btn.print {
-              background: linear-gradient(135deg, #C29B62, #A8573C);
-              color: white;
-              box-shadow: 0 4px 12px rgba(168, 87, 60, 0.25);
+              background: linear-gradient(135deg, #00E5FF, #0077B6);
+              color: #0B0E14;
+              font-weight: 900;
+              box-shadow: 0 4px 12px rgba(0, 229, 255, 0.3);
             }
             .selection-action-btn.print:hover:not(:disabled) {
               filter: brightness(1.1);
@@ -821,14 +822,14 @@ export default function JournalPage() {
             }
 
             .selection-action-btn.clear {
-              background: #f1f5f9;
-              color: #64748b;
-              border: 1px solid #cbd5e1;
+              background: rgba(255, 255, 255, 0.08);
+              color: #94A3B8;
+              border: 1px solid rgba(255, 255, 255, 0.15);
               padding: 7px 10px;
             }
             .selection-action-btn.clear:hover {
-              background: #e2e8f0;
-              color: #1e293b;
+              background: rgba(255, 255, 255, 0.15);
+              color: #F8FAFC;
             }
             .selection-action-btn:disabled {
               opacity: 0.5;
@@ -863,17 +864,17 @@ export default function JournalPage() {
             }
             .btn-row-action.unpost {
               background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.2) 100%);
-              color: #b45309;
+              color: #F59E0B;
               border: 1px solid rgba(245, 158, 11, 0.4);
             }
             .btn-row-action.print {
-              background: linear-gradient(135deg, rgba(194, 155, 98, 0.15) 0%, rgba(168, 87, 60, 0.15) 100%);
-              color: #C29B62;
-              border: 1px solid rgba(194, 155, 98, 0.3);
+              background: rgba(0, 229, 255, 0.12);
+              color: #00E5FF;
+              border: 1px solid rgba(0, 229, 255, 0.3);
             }
             .btn-row-action.print:hover:not(:disabled) {
-              background: #C29B62;
-              color: white;
+              background: #00E5FF;
+              color: #0B0E14;
             }
             .btn-row-action.delete {
               background: linear-gradient(135deg, rgba(239, 68, 68, 0.12) 0%, rgba(220, 38, 38, 0.2) 100%);
@@ -924,7 +925,7 @@ export default function JournalPage() {
             <>
               {logic.pendingJournalsCount > 0 && (
                 <div style={{
-                  background: 'linear-gradient(135deg, rgba(254, 243, 199, 0.95) 0%, rgba(255, 237, 213, 0.95) 100%)',
+                  background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(20, 24, 34, 0.95) 100%)',
                   border: '1px solid rgba(245, 158, 11, 0.4)',
                   borderRadius: '16px',
                   padding: '12px 20px',
@@ -932,17 +933,17 @@ export default function JournalPage() {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  boxShadow: '0 4px 15px rgba(245, 158, 11, 0.1)',
+                  boxShadow: '0 4px 15px rgba(0, 0, 0, 0.3)',
                   flexWrap: 'wrap',
                   gap: '10px'
                 }}>
                   <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                     <span style={{ fontSize: '24px' }}>⚠️</span>
                     <div>
-                      <div style={{ fontWeight: 900, color: '#92400e', fontSize: '14px' }}>
+                      <div style={{ fontWeight: 900, color: '#F59E0B', fontSize: '14px' }}>
                         تنبيه القيود: يوجد ({logic.pendingJournalsCount}) قيد يومية مسودة / قيد الانتظار لم يتم ترحيلها بعد!
                       </div>
-                      <div style={{ fontSize: '12px', color: '#b45309', fontWeight: 700 }}>
+                      <div style={{ fontSize: '12px', color: '#FCD34D', fontWeight: 700 }}>
                         القيود المسودة لا تؤثر على الأرصدة الختامية حتى يتم ترحيلها.
                       </div>
                     </div>

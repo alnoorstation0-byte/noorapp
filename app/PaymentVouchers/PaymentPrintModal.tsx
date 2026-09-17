@@ -160,11 +160,11 @@ export default function PaymentPrintModal({ isOpen, onClose, record }: any) {
                     <div className="inv-header">
                         <div style={{width: '180px'}}></div>
                         <div className="header-center">
-                        <h1 style={{ fontSize: '20px', fontWeight: 900, color: '#122946', margin: '0 0 4px 0' }}>صيدلية تاج المودة البيطرية</h1>
-                        <h2 style={{ fontSize: '14px', fontWeight: 700, color: '#2891C8', margin: '0 0 8px 0' }}>Taj Al-Mawadah Vet Pharmacy</h2>
+                        <h1 style={{ fontSize: '20px', fontWeight: 900, color: '#122946', margin: '0 0 4px 0' }}>محطات النور للوقود</h1>
+                        <h2 style={{ fontSize: '14px', fontWeight: 700, color: '#2891C8', margin: '0 0 8px 0' }}>Al-Noor Gas Stations Gas Station</h2>
                         <div style={{ fontSize: '13px', fontWeight: 700, color: '#334155' }}>الرقم الضريبي: 312487477800003</div>
                     </div>
-                    <div className="header-logo"><img src="/taj_logo.png" alt="شعار صيدلية تاج المودة" /></div>
+                    <div className="header-logo"><img src="/logo.png" alt="شعار محطات النور للوقود" /></div>
                 </div>
 
                 <div className="inv-title-box">
@@ -215,12 +215,12 @@ export default function PaymentPrintModal({ isOpen, onClose, record }: any) {
                 </div>
 
                 <div className="inv-footer-contact">
-                    المملكة العربية السعودية &nbsp;|&nbsp; info@taj-mawadah.com &nbsp;|&nbsp; صيدلية تاج المودة © {new Date().getFullYear()}
+                    المملكة العربية السعودية &nbsp;|&nbsp; info@alnoor-gas.com &nbsp;|&nbsp; محطات النور للوقود © {new Date().getFullYear()}
                 </div>
             </div>
             ) : (
                 <div className="thermal-preview-box">
-                    <div style={{ fontSize: '18px', fontWeight: 900, marginBottom: '5px' }}>صيدلية تاج المودة البيطرية</div>
+                    <div style={{ fontSize: '18px', fontWeight: 900, marginBottom: '5px' }}>محطات النور للوقود</div>
                     <div>سند صرف | Payment Voucher</div>
                     <div style={{ borderBottom: '1px dashed #000', margin: '10px 0' }}></div>
                     
@@ -248,7 +248,7 @@ export default function PaymentPrintModal({ isOpen, onClose, record }: any) {
 
                     <div style={{ fontSize: '11px', marginTop: '10px', textAlign: 'center' }}>
                         المعتمد: {creatorInfo?.fullName || '---'}<br/>
-                        تم الإصدار عبر نظام تاج المودة
+                        تم الإصدار عبر نظام محطات النور
                     </div>
                 </div>
             )}

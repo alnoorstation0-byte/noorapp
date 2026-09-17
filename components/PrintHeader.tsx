@@ -14,12 +14,12 @@ export default function PrintHeader({ title, subtitle, showDate = true }: PrintH
                 {/* Logo & Company Name */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                     <img 
-                        src="/taj_logo.png" 
-                        alt="صيدلية تاج المودة" 
+                        src="/logo.png" 
+                        alt="محطات النور للوقود" 
                         style={{ width: '60px', height: '60px', objectFit: 'contain', borderRadius: '8px' }} 
                     />
                     <div>
-                        <h2 style={{ margin: 0, fontSize: '24px', color: '#000' }}>صيدلية تاج المودة البيطرية</h2>
+                        <h2 style={{ margin: 0, fontSize: '24px', color: '#000' }}>محطات النور للوقود</h2>
                         <div style={{ fontSize: '14px', color: '#555', marginTop: '4px' }}>
                             الرقم الضريبي: 300000000000003
                         </div>

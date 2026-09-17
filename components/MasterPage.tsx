@@ -88,15 +88,15 @@ const PAGE_TITLES_EN: Record<string, string> = {
   "التواصل الداخلي": "Internal Communications",
   "مركز الإشعارات والتنبيهات المباشرة": "Notifications Center",
   "الصفحة الرئيسية": "Home Portal",
-  "صيدلية تاج المودة البيطرية": "Taj Al-Mawadah Vet Pharmacy",
-  "صيدلية تاج المودة": "Taj Al-Mawadah Pharmacy",
-  "صيدلية تاج المودة البيطرية": "Taj Al-Mawadah Vet Pharmacy",
+  "محطات النور للوقود": "Al-Noor Gas Stations Gas Station",
+  "محطات النور للوقود": "Al-Noor Gas Stations Station",
+  "محطات النور للوقود": "Al-Noor Gas Stations Gas Station",
   "نظام إدارة الموارد": "ERP Management System"
 };
 
 const SUBTITLES_EN: Record<string, string> = {
-  "صيدلية تاج المودة البيطرية": "Taj Al-Mawadah Unified Vet System",
-  "بوابة الإدارة المركزية لصيدلية تاج المودة": "Taj Al-Mawadah Central Management Portal",
+  "محطات النور للوقود": "Al-Noor Gas Stations Unified Gas System",
+  "بوابة الإدارة المركزية لمحطات النور للوقود": "Al-Noor Gas Stations Central Management Portal",
   "إدارة وتتبع بيانات العملاء والموردين والمناديب والوظائف": "Manage partners, clients, suppliers, delegates and job roles",
   "إدارة ومتابعة فواتير المبيعات وضريبة القيمة المضافة": "Track sales invoices and VAT compliance",
   "إدارة دليل الأصناف والباركود والتسعير ومستويات الأمان": "Manage item catalog, barcodes, pricing, and safety stock",
@@ -118,7 +118,7 @@ const SUBTITLES_EN: Record<string, string> = {
   "متابعة حركة المناديب والمبيعات والتكاليف الخاصة بكل رحلة": "Monitor delegate movements, sales, and trip expenses",
   "نظرة شاملة لعمليات البيع والتوزيع والمحاسبة": "Comprehensive overview of sales, distribution, and accounting",
   "الرسائل والمحادثات بين فرق العمل": "Team communication and messaging portal",
-  "بوابة الإدارة المركزية لصيدلية تاج المودة": "Central Management Portal - El-Taj Al-Mawadah Pharmacy",
+  "بوابة الإدارة المركزية لمحطات النور للوقود": "Central Management Portal - El-Al-Noor Gas Stations Station",
   "تحديد الرتب وتوزيع صلاحيات الوصول للمنصة بأمان": "Roles definition and secure platform access distribution"
 };
 
@@ -134,7 +134,7 @@ function getTranslatedTitle(rawTitle: string, lang: 'ar' | 'en'): string {
 }
 
 function getTranslatedSubtitle(rawSub: string | undefined, lang: 'ar' | 'en'): string {
-  if (!rawSub) return lang === 'en' ? 'Taj Al-Mawadah Vet Pharmacy' : 'صيدلية تاج المودة البيطرية';
+  if (!rawSub) return lang === 'en' ? 'Al-Noor Gas Stations Gas Station' : 'محطات النور للوقود';
   if (lang !== 'en') return rawSub;
   if (SUBTITLES_EN[rawSub]) return SUBTITLES_EN[rawSub];
   for (const [k, v] of Object.entries(SUBTITLES_EN)) {
@@ -407,34 +407,34 @@ html, body {
 .imperial-trigger { 
     display: flex; align-items: center; gap: 12px; 
     padding: 10px 15px; border-radius: 22px; 
-    background: linear-gradient(135deg, rgba(255, 253, 250, 0.85) 0%, rgba(255, 253, 250, 0.55) 100%);
+    background: linear-gradient(135deg, rgba(20, 24, 34, 0.88) 0%, rgba(13, 16, 24, 0.75) 100%);
     cursor: pointer; transition: 0.3s; 
-    border: 1px solid rgba(194, 155, 98, 0.35); 
-    box-shadow: 0 4px 6px rgba(44, 26, 18, 0.08);
+    border: 1px solid rgba(0, 229, 255, 0.25); 
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
     backdrop-filter: blur(24px) saturate(160%);
     -webkit-backdrop-filter: blur(24px) saturate(160%);
 }
 .imperial-trigger:hover { 
-    background: rgba(255, 253, 250, 0.95); 
+    background: rgba(24, 29, 40, 0.95); 
     transform: translateY(-2px); 
-    border-color: rgba(194, 155, 98, 0.6); 
-    box-shadow: 0 10px 15px rgba(168, 87, 60, 0.15); 
+    border-color: rgba(0, 229, 255, 0.6); 
+    box-shadow: 0 0 20px rgba(0, 229, 255, 0.25); 
 }
 
 .u-info-text { display: flex; flex-direction: column; text-align: right; margin-right: 5px; }
-.u-name { font-size: 16px; font-weight: 800; color: #2C1A12; letter-spacing: -0.3px; line-height: 1.2; }
-.u-role { font-size: 12px; font-weight: 700; color: #C29B62; margin-top: 2px; }
+.u-name { font-size: 15px; font-weight: 800; color: #F8FAFC; letter-spacing: -0.3px; line-height: 1.2; }
+.u-role { font-size: 11.5px; font-weight: 700; color: #00E5FF; margin-top: 2px; }
 
-.avatar-frame { position: relative; width: 55px; height: 55px; }
-.avatar-frame img { width: 100%; height: 100%; border-radius: 50%; border: 2px solid rgba(194, 155, 98, 0.4); object-fit: cover; box-shadow: 0 4px 10px rgba(44,26,18,0.1); }
-.active-dot { position: absolute; bottom: 3px; right: 3px; width: 12px; height: 12px; background: #4E734F; border: 2px solid white; border-radius: 50%; box-shadow: 0 0 8px rgba(78, 115, 79, 0.4); }
+.avatar-frame { position: relative; width: 50px; height: 50px; }
+.avatar-frame img { width: 100%; height: 100%; border-radius: 50%; border: 2px solid rgba(0, 229, 255, 0.4); object-fit: cover; box-shadow: 0 0 12px rgba(0, 229, 255, 0.2); }
+.active-dot { position: absolute; bottom: 2px; right: 2px; width: 11px; height: 11px; background: #10B981; border: 2px solid #0B0E14; border-radius: 50%; box-shadow: 0 0 8px #10B981; }
 
 .supreme-dropdown {
-    position: fixed; width: 200px; 
-    background: linear-gradient(135deg, rgba(255, 253, 250, 0.96) 0%, rgba(255, 253, 250, 0.85) 100%); 
+    position: fixed; width: 210px; 
+    background: linear-gradient(135deg, rgba(20, 24, 34, 0.96) 0%, rgba(13, 16, 24, 0.92) 100%); 
     border-radius: 20px;
-    padding: 8px; box-shadow: 0 20px 45px rgba(44, 26, 18, 0.14);
-    border: 1px solid rgba(194, 155, 98, 0.35); z-index: 999999;
+    padding: 8px; box-shadow: 0 20px 45px rgba(0, 0, 0, 0.7);
+    border: 1px solid rgba(0, 229, 255, 0.25); z-index: 999999;
     transform-origin: top left;
     animation: supremeShow 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
     backdrop-filter: blur(24px) saturate(160%);
@@ -442,30 +442,30 @@ html, body {
 }
 @keyframes supremeShow { from { opacity: 0; transform: translateY(-10px) scale(0.95); } to { opacity: 1; transform: translateY(0) scale(1); } }
 
-.drop-item { display: flex; align-items: center; gap: 10px; padding: 10px 15px; border-radius: 12px; font-size: 13px; font-weight: 800; color: #2C1A12; cursor: pointer; transition: 0.2s; direction: rtl; }
-.drop-item:hover { background: rgba(194, 155, 98, 0.15); color: #A8573C; }
-.drop-item.logout { color: #A8573C; border-top: 1px solid rgba(194, 155, 98, 0.2); margin-top: 5px; border-radius: 0 0 12px 12px; }
-.drop-item.logout:hover { background: rgba(168, 87, 60, 0.1); }
+.drop-item { display: flex; align-items: center; gap: 10px; padding: 10px 15px; border-radius: 12px; font-size: 13px; font-weight: 800; color: #F8FAFC; cursor: pointer; transition: 0.2s; direction: rtl; }
+.drop-item:hover { background: rgba(0, 229, 255, 0.12); color: #00E5FF; }
+.drop-item.logout { color: #EF4444; border-top: 1px solid rgba(255, 255, 255, 0.1); margin-top: 5px; border-radius: 0 0 12px 12px; }
+.drop-item.logout:hover { background: rgba(239, 68, 68, 0.15); color: #EF4444; }
 
 .nav-btn-glass {
-    width: 40px; height: 40px; border-radius: 12px;
-    background: linear-gradient(135deg, rgba(255, 253, 250, 0.85) 0%, rgba(255, 253, 250, 0.5) 100%); 
+    width: 38px; height: 38px; border-radius: 12px;
+    background: linear-gradient(135deg, rgba(20, 24, 34, 0.85) 0%, rgba(13, 16, 24, 0.7) 100%); 
     backdrop-filter: blur(24px) saturate(160%);
     -webkit-backdrop-filter: blur(24px) saturate(160%);
-    border: 1px solid rgba(194, 155, 98, 0.3);
+    border: 1px solid rgba(0, 229, 255, 0.2);
     display: flex; align-items: center; justify-content: center;
     cursor: pointer; transition: 0.3s;
-    box-shadow: 0 4px 6px rgba(44, 26, 18, 0.08);
-    color: #2C1A12; font-size: 18px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    color: #00E5FF; font-size: 17px;
 }
 .nav-btn-glass:hover {
-    background: rgba(255, 253, 250, 1); transform: translateY(-2px);
-    border-color: #C29B62; color: #A8573C;
-    box-shadow: 0 10px 15px rgba(168, 87, 60, 0.15);
+    background: rgba(26, 32, 46, 1); transform: translateY(-2px);
+    border-color: #00E5FF; color: #00E5FF;
+    box-shadow: 0 0 15px rgba(0, 229, 255, 0.35);
 }
-.nav-group { display: flex; gap: 6px; margin-right: 12px; border-right: 1px solid rgba(194, 155, 98, 0.2); padding-right: 12px; }
+.nav-group { display: flex; gap: 6px; margin-right: 12px; border-right: 1px solid rgba(0, 229, 255, 0.15); padding-right: 12px; }
 
-/* 🌐 زر تبديل اللغة الحصين (Unbreakable Language Switcher) */
+/* 🌐 زر تبديل اللغة ووضع الأداء */
 .lang-switcher-pill,
 .perf-switcher-pill {
     display: inline-flex !important;
@@ -481,50 +481,50 @@ html, body {
     font-weight: 900 !important;
     white-space: nowrap !important;
     word-break: keep-all !important;
-    background: linear-gradient(135deg, rgba(255, 253, 250, 0.85) 0%, rgba(255, 253, 250, 0.55) 100%) !important;
+    background: linear-gradient(135deg, rgba(20, 24, 34, 0.85) 0%, rgba(13, 16, 24, 0.7) 100%) !important;
     backdrop-filter: blur(24px) saturate(160%) !important;
     -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
-    border: 1.5px solid rgba(194, 155, 98, 0.3) !important;
-    color: #2C1A12 !important;
+    border: 1px solid rgba(0, 229, 255, 0.25) !important;
+    color: #F8FAFC !important;
     cursor: pointer !important;
     transition: all 0.25s cubic-bezier(0.165, 0.84, 0.44, 1) !important;
-    box-shadow: 0 4px 6px rgba(44, 26, 18, 0.06) !important;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3) !important;
     flex-shrink: 0 !important;
 }
 .lang-switcher-pill:hover,
 .perf-switcher-pill:hover {
-    background: white !important;
-    border-color: #C29B62 !important;
-    color: #A8573C !important;
+    background: rgba(26, 32, 46, 1) !important;
+    border-color: #00E5FF !important;
+    color: #00E5FF !important;
     transform: translateY(-1.5px) !important;
-    box-shadow: 0 8px 15px rgba(168, 87, 60, 0.15) !important;
+    box-shadow: 0 0 15px rgba(0, 229, 255, 0.3) !important;
 }
 .perf-switcher-pill.active {
-    background: linear-gradient(135deg, rgba(194, 155, 98, 0.25) 0%, rgba(168, 87, 60, 0.15) 100%) !important;
-    border-color: #C29B62 !important;
-    color: #A8573C !important;
+    background: linear-gradient(135deg, rgba(0, 229, 255, 0.2) 0%, rgba(0, 140, 200, 0.1) 100%) !important;
+    border-color: #00E5FF !important;
+    color: #00E5FF !important;
 }
 
 .header-action-btn {
     width: 38px !important; height: 38px !important;
     border-radius: 12px !important;
-    background: linear-gradient(135deg, rgba(255, 253, 250, 0.85) 0%, rgba(255, 253, 250, 0.55) 100%) !important;
+    background: linear-gradient(135deg, rgba(20, 24, 34, 0.85) 0%, rgba(13, 16, 24, 0.7) 100%) !important;
     backdrop-filter: blur(24px) saturate(160%) !important;
     -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
-    border: 1px solid rgba(194, 155, 98, 0.3) !important;
+    border: 1px solid rgba(0, 229, 255, 0.2) !important;
     display: flex !important; align-items: center !important; justify-content: center !important;
     cursor: pointer !important; transition: 0.25s !important;
-    box-shadow: 0 4px 6px rgba(44, 26, 18, 0.06) !important;
-    color: #2C1A12 !important; font-size: 18px !important;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3) !important;
+    color: #F8FAFC !important; font-size: 17px !important;
     position: relative !important; flex-shrink: 0 !important;
     text-decoration: none !important;
 }
 .header-action-btn:hover {
-    background: white !important;
-    color: #A8573C !important;
-    border-color: #C29B62 !important;
+    background: rgba(26, 32, 46, 1) !important;
+    color: #00E5FF !important;
+    border-color: #00E5FF !important;
     transform: translateY(-1.5px) !important;
-    box-shadow: 0 8px 15px rgba(168, 87, 60, 0.15) !important;
+    box-shadow: 0 0 15px rgba(0, 229, 255, 0.3) !important;
 }
 
 .badge-counter {
@@ -578,11 +578,11 @@ html, body {
   align-items: center !important;
   justify-content: space-between !important;
   gap: 12px !important;
-  background: linear-gradient(135deg, rgba(255, 253, 250, 0.88) 0%, rgba(255, 253, 250, 0.6) 100%) !important;
+  background: linear-gradient(135deg, rgba(20, 24, 34, 0.92) 0%, rgba(13, 16, 24, 0.85) 100%) !important;
   backdrop-filter: blur(24px) saturate(160%) !important;
   -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
-  border: 1px solid rgba(194, 155, 98, 0.3) !important;
-  box-shadow: 0 4px 14px rgba(44, 26, 18, 0.05) !important;
+  border: 1px solid rgba(0, 229, 255, 0.25) !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5) !important;
   box-sizing: border-box !important;
   width: 100% !important;
   flex-wrap: nowrap !important;
@@ -610,7 +610,7 @@ html, body {
   margin: 0 !important;
   font-size: 15.5px !important;
   font-weight: 800 !important;
-  color: #2C1A12 !important;
+  color: #F8FAFC !important;
   letter-spacing: -0.2px !important;
   white-space: nowrap !important;
   overflow: hidden !important;
@@ -622,7 +622,7 @@ html, body {
 .master-page-subheading {
   margin: 0 !important;
   font-size: 11px !important;
-  color: rgba(44, 26, 18, 0.6) !important;
+  color: #94A3B8 !important;
   font-weight: 600 !important;
   white-space: nowrap !important;
   overflow: hidden !important;
@@ -636,12 +636,12 @@ html, body {
   height: 36px !important;
   min-width: 36px !important;
   border-radius: 10px !important;
-  background: linear-gradient(135deg, rgba(255, 253, 250, 0.95), rgba(194, 155, 98, 0.2)) !important;
-  border: 1px solid rgba(194, 155, 98, 0.3) !important;
+  background: linear-gradient(135deg, rgba(20, 24, 34, 0.95), rgba(0, 229, 255, 0.15)) !important;
+  border: 1px solid rgba(0, 229, 255, 0.3) !important;
   display: flex !important;
   align-items: center !important;
   justify-content: center !important;
-  box-shadow: 0 2px 8px rgba(44, 26, 18, 0.06) !important;
+  box-shadow: 0 0 15px rgba(0, 229, 255, 0.15) !important;
   flex-shrink: 0 !important;
 }
 .header-icon span {
@@ -824,22 +824,22 @@ html, body {
         <div className="header-side" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
           {headerContent}
           
-          <div className="header-actions" style={{ display: 'flex', flexDirection: 'row', gap: '6px', alignItems: 'center', borderRight: isRtl ? '2px solid rgba(194, 155, 98, 0.2)' : 'none', borderLeft: !isRtl ? '2px solid rgba(194, 155, 98, 0.2)' : 'none', paddingRight: isRtl ? '10px' : '0', paddingLeft: !isRtl ? '10px' : '0' }}>
+          <div className="header-actions" style={{ display: 'flex', flexDirection: 'row', gap: '6px', alignItems: 'center', borderRight: isRtl ? '2px solid rgba(0, 229, 255, 0.2)' : 'none', borderLeft: !isRtl ? '2px solid rgba(0, 229, 255, 0.2)' : 'none', paddingRight: isRtl ? '10px' : '0', paddingLeft: !isRtl ? '10px' : '0' }}>
              
              {/* Desktop Nav Arrows & Shortcuts Button */}
-             <div className="nav-group" style={{ display: 'flex', gap: '4px', margin: 0, border: 'none', background: 'rgba(255, 253, 250, 0.6)', borderRadius: '12px', padding: '3px' }}>
+             <div className="nav-group" style={{ display: 'flex', gap: '4px', margin: 0, border: 'none', background: 'rgba(20, 24, 34, 0.6)', borderRadius: '12px', padding: '3px' }}>
                 <button 
                   onClick={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'F1', bubbles: true }))} 
                   className="nav-btn-glass" 
                   title={language === 'en' ? 'Keyboard Shortcuts (F1)' : 'خريطة اختصارات الكيبورد (F1)'} 
-                  style={{ width: '34px', height: '34px', borderRadius: '9px', fontSize: '15px', background: 'rgba(255, 253, 250, 0.85)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#C29B62' }}
+                  style={{ width: '34px', height: '34px', borderRadius: '9px', fontSize: '15px', background: 'rgba(20, 24, 34, 0.85)', border: '1px solid rgba(0, 229, 255, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#00E5FF' }}
                 >
                   ⌨️
                 </button>
-                <button onClick={() => router.forward()} className="nav-btn-glass" title={language === 'en' ? 'Forward' : 'تقدم للأمام'} style={{ width: '34px', height: '34px', borderRadius: '9px', fontSize: '16px', background: 'rgba(255, 253, 250, 0.85)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#C29B62' }}>
+                <button onClick={() => router.forward()} className="nav-btn-glass" title={language === 'en' ? 'Forward' : 'تقدم للأمام'} style={{ width: '34px', height: '34px', borderRadius: '9px', fontSize: '16px', background: 'rgba(20, 24, 34, 0.85)', border: '1px solid rgba(0, 229, 255, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#00E5FF' }}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6"/></svg>
                 </button>
-                <button onClick={() => router.back()} className="nav-btn-glass" title={language === 'en' ? 'Back' : 'رجوع للخلف'} style={{ width: '34px', height: '34px', borderRadius: '9px', fontSize: '16px', background: 'rgba(255, 253, 250, 0.85)', border: 'none', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#C29B62' }}>
+                <button onClick={() => router.back()} className="nav-btn-glass" title={language === 'en' ? 'Back' : 'رجوع للخلف'} style={{ width: '34px', height: '34px', borderRadius: '9px', fontSize: '16px', background: 'rgba(20, 24, 34, 0.85)', border: '1px solid rgba(0, 229, 255, 0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer', color: '#00E5FF' }}>
                   <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
                 </button>
              </div>
@@ -945,27 +945,27 @@ html, body {
             maxHeight: '85vh',
             overflowY: 'auto',
             padding: '12px',
-            background: 'rgba(255, 255, 255, 0.97)',
+            background: 'linear-gradient(135deg, rgba(20, 24, 34, 0.98) 0%, rgba(13, 16, 24, 0.95) 100%)',
             backdropFilter: 'blur(30px) saturate(200%)',
-            boxShadow: '0 20px 50px rgba(28, 115, 171, 0.25)',
-            border: '1px solid rgba(255, 255, 255, 0.95)',
+            boxShadow: '0 20px 50px rgba(0, 0, 0, 0.8), 0 0 25px rgba(0, 229, 255, 0.15)',
+            border: '1px solid rgba(0, 229, 255, 0.25)',
             borderRadius: '20px',
             zIndex: 999999
           }} 
           onClick={(e) => e.stopPropagation()}
         >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px 10px', borderBottom: '1px solid rgba(194, 155, 98, 0.2)', marginBottom: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px 10px', borderBottom: '1px solid rgba(0, 229, 255, 0.2)', marginBottom: '8px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ fontSize: '14px', fontWeight: 900, color: '#C29B62' }}>🔔 مركز التدقيق والمعلقات</span>
+              <span style={{ fontSize: '14px', fontWeight: 900, color: '#00E5FF' }}>🔔 مركز التدقيق والمعلقات</span>
               <button 
                 onClick={(e) => { e.stopPropagation(); fetchPendingCount(); }}
                 title="تحديث لحظي"
-                style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '13px', padding: '2px 4px', color: '#C29B62' }}
+                style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '13px', padding: '2px 4px', color: '#00E5FF' }}
               >
                 🔄
               </button>
             </div>
-            <span style={{ fontSize: '11px', fontWeight: 800, background: pendingDetails.total > 0 ? '#fee2e2' : '#dcfce7', color: pendingDetails.total > 0 ? '#dc2626' : '#16a34a', padding: '3px 9px', borderRadius: '12px' }}>
+            <span style={{ fontSize: '11px', fontWeight: 800, background: pendingDetails.total > 0 ? 'rgba(239, 68, 68, 0.2)' : 'rgba(16, 185, 129, 0.2)', color: pendingDetails.total > 0 ? '#f87171' : '#34d399', border: `1px solid ${pendingDetails.total > 0 ? 'rgba(239, 68, 68, 0.4)' : 'rgba(16, 185, 129, 0.4)'}`, padding: '3px 9px', borderRadius: '12px' }}>
               {pendingDetails.total > 0 ? `${pendingDetails.total} معلق` : 'لا معلقات ✅'}
             </span>
           </div>

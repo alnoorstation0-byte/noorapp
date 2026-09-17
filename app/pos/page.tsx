@@ -237,24 +237,24 @@ function PosItemNumpadModal({
                     left: 0;
                     right: 0;
                     bottom: 0;
-                    background: rgba(15, 23, 42, 0.65);
+                    background: rgba(11, 14, 20, 0.85);
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     z-index: 9999;
-                    backdrop-filter: blur(10px);
-                    -webkit-backdrop-filter: blur(10px);
+                    backdrop-filter: blur(16px);
+                    -webkit-backdrop-filter: blur(16px);
                     padding: 16px;
                     box-sizing: border-box;
                     direction: rtl;
                 }
                 .pos-numpad-card {
-                    background: rgba(255, 255, 255, 0.98);
+                    background: linear-gradient(135deg, rgba(20, 24, 34, 0.98) 0%, rgba(13, 16, 24, 0.95) 100%);
                     border-radius: 24px;
                     width: 100%;
                     max-width: 410px;
-                    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.35);
-                    border: 1px solid rgba(255, 255, 255, 0.8);
+                    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 229, 255, 0.1);
+                    border: 1px solid rgba(0, 229, 255, 0.25);
                     animation: posCardFadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
                     display: flex;
                     flex-direction: column;
@@ -265,13 +265,14 @@ function PosItemNumpadModal({
                     display: none;
                 }
                 .pos-numpad-header {
-                    background: linear-gradient(135deg, #1C73AB 0%, #2891C8 100%);
-                    padding: 12px 18px;
+                    background: linear-gradient(135deg, rgba(20, 24, 34, 0.98) 0%, rgba(13, 16, 24, 0.95) 100%);
+                    padding: 14px 18px;
                     display: flex;
                     align-items: center;
                     justify-content: space-between;
                     flex-shrink: 0;
                     position: relative;
+                    border-bottom: 1px solid rgba(0, 229, 255, 0.2);
                 }
                 .pos-numpad-body {
                     padding: 14px 16px;
@@ -307,10 +308,10 @@ function PosItemNumpadModal({
                 .pos-key-btn {
                     height: 44px;
                     border-radius: 12px;
-                    border: 1px solid rgba(28, 115, 171, 0.12);
+                    border: 1px solid rgba(0, 229, 255, 0.15);
                     font-weight: 900;
                     cursor: pointer;
-                    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+                    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
                     transition: transform 0.08s, background 0.12s, box-shadow 0.12s, border-color 0.12s;
                     display: flex;
                     align-items: center;
@@ -320,17 +321,18 @@ function PosItemNumpadModal({
                 }
                 .pos-key-btn:active, .pos-key-btn.pos-key-active {
                     transform: scale(0.92) !important;
-                    background: #2891C8 !important;
-                    color: white !important;
-                    border-color: #1C73AB !important;
-                    box-shadow: 0 0 12px rgba(40, 145, 200, 0.5) !important;
+                    background: #00E5FF !important;
+                    color: #0B0E14 !important;
+                    border-color: #00E5FF !important;
+                    box-shadow: 0 0 16px rgba(0, 229, 255, 0.6) !important;
                 }
                 @media (hover: hover) and (pointer: fine) {
                     .pos-key-btn:hover:not(:active):not(.pos-key-active) {
-                        background: #f0f9ff !important;
-                        border-color: #38bdf8 !important;
+                        background: rgba(0, 229, 255, 0.15) !important;
+                        border-color: #00E5FF !important;
+                        color: #00E5FF !important;
                         transform: translateY(-2px);
-                        box-shadow: 0 4px 8px rgba(28, 115, 171, 0.12);
+                        box-shadow: 0 0 12px rgba(0, 229, 255, 0.25);
                     }
                 }
                 .pos-desktop-kbd-hint {
@@ -338,19 +340,19 @@ function PosItemNumpadModal({
                     align-items: center;
                     justify-content: center;
                     padding: 6px 10px;
-                    background: #f8fafc;
-                    border: 1px dashed #cbd5e1;
+                    background: rgba(15, 20, 30, 0.7);
+                    border: 1px dashed rgba(0, 229, 255, 0.25);
                     border-radius: 10px;
                     font-size: 11px;
                     font-weight: 700;
-                    color: #64748b;
+                    color: #94A3B8;
                     margin-top: 4px;
                     text-align: center;
                 }
                 .pos-action-btn-main.pos-btn-active {
                     transform: scale(0.96) !important;
                     filter: brightness(1.15) !important;
-                    box-shadow: 0 0 18px rgba(40, 145, 200, 0.8) !important;
+                    box-shadow: 0 0 20px rgba(0, 229, 255, 0.6) !important;
                 }
                 .pos-quick-btn {
                     width: 32px;
@@ -547,21 +549,21 @@ function PosItemNumpadModal({
                             className="pos-field-box"
                             style={{ 
                                 background: isExceeded
-                                    ? '#fee2e2'
-                                    : (activeField === 'qty' ? 'linear-gradient(135deg,#1C73AB,#2891C8)' : '#f8fafc'), 
+                                    ? 'rgba(239, 68, 68, 0.2)'
+                                    : (activeField === 'qty' ? 'linear-gradient(135deg, rgba(0, 229, 255, 0.25), rgba(0, 136, 204, 0.35))' : 'rgba(15, 20, 30, 0.7)'), 
                                 border: isExceeded
                                     ? '2px solid #ef4444'
-                                    : (activeField === 'qty' ? '2px solid #2891C8' : '1.5px solid #e2e8f0'), 
-                                boxShadow: activeField === 'qty' ? '0 4px 12px rgba(28, 115, 171, 0.25)' : 'none'
+                                    : (activeField === 'qty' ? '2px solid #00E5FF' : '1.5px solid rgba(255, 255, 255, 0.1)'), 
+                                boxShadow: activeField === 'qty' ? '0 0 15px rgba(0, 229, 255, 0.35)' : 'none'
                             }}
                         >
-                            <div style={{ fontSize: '10px', fontWeight: 800, color: isExceeded ? '#dc2626' : (activeField === 'qty' ? 'rgba(255,255,255,0.9)' : '#64748b'), marginBottom: '2px' }}>
+                            <div style={{ fontSize: '10px', fontWeight: 800, color: isExceeded ? '#ef4444' : (activeField === 'qty' ? '#00E5FF' : '#94A3B8'), marginBottom: '2px' }}>
                                 {isExceeded ? (isEn ? '⚠️ Stock Exceeded' : '⚠️ تجاوز المخزون') : (isEn ? 'Requested Qty' : 'الكمية المطلوبة')}
                             </div>
-                            <div className="pos-qty-display" style={{ color: isExceeded ? '#dc2626' : (activeField === 'qty' ? 'white' : '#0f172a') }}>
+                            <div className="pos-qty-display" style={{ color: isExceeded ? '#ef4444' : (activeField === 'qty' ? '#00E5FF' : '#F8FAFC') }}>
                                 {item.selected_qty || 0}
                             </div>
-                            <div style={{ fontSize: '10px', fontWeight: 700, color: isExceeded ? '#dc2626' : (activeField === 'qty' ? 'rgba(255,255,255,0.75)' : '#94a3b8'), marginTop: '1px' }}>
+                            <div style={{ fontSize: '10px', fontWeight: 700, color: isExceeded ? '#ef4444' : (activeField === 'qty' ? '#00E5FF' : '#94A3B8'), marginTop: '1px' }}>
                                 {item.unit || (isEn ? 'Pcs' : 'حبة')}
                             </div>
                         </div>
@@ -571,18 +573,18 @@ function PosItemNumpadModal({
                             onClick={() => switchField('price')}
                             className="pos-field-box"
                             style={{ 
-                                background: activeField === 'price' ? 'linear-gradient(135deg,#16a34a,#10b981)' : '#f8fafc', 
-                                border: activeField === 'price' ? '2px solid #16a34a' : '1.5px solid #e2e8f0', 
-                                boxShadow: activeField === 'price' ? '0 4px 12px rgba(22, 163, 74, 0.25)' : 'none'
+                                background: activeField === 'price' ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.25), rgba(5, 150, 105, 0.35))' : 'rgba(15, 20, 30, 0.7)', 
+                                border: activeField === 'price' ? '2px solid #10B981' : '1.5px solid rgba(255, 255, 255, 0.1)', 
+                                boxShadow: activeField === 'price' ? '0 0 15px rgba(16, 185, 129, 0.35)' : 'none'
                             }}
                         >
-                            <div style={{ fontSize: '10px', fontWeight: 800, color: activeField === 'price' ? 'rgba(255,255,255,0.9)' : '#64748b', marginBottom: '2px' }}>
+                            <div style={{ fontSize: '10px', fontWeight: 800, color: activeField === 'price' ? '#10B981' : '#94A3B8', marginBottom: '2px' }}>
                                 {isTaxInclusive ? (isEn ? 'Price (Tax Inc.)' : 'السعر (شامل الضريبة)') : (isEn ? 'Price (Tax Exc.)' : 'السعر (قبل الضريبة)')}
                             </div>
-                            <div className="pos-price-display" style={{ color: activeField === 'price' ? 'white' : '#16a34a' }}>
+                            <div className="pos-price-display" style={{ color: activeField === 'price' ? '#10B981' : '#10B981' }}>
                                 {Number(item.selected_price || 0).toFixed(2)}
                             </div>
-                            <div style={{ fontSize: '10px', fontWeight: 700, color: activeField === 'price' ? 'rgba(255,255,255,0.75)' : '#94a3b8', marginTop: '1px' }}>
+                            <div style={{ fontSize: '10px', fontWeight: 700, color: activeField === 'price' ? '#10B981' : '#94A3B8', marginTop: '1px' }}>
                                 ريال
                             </div>
                         </div>
@@ -590,7 +592,7 @@ function PosItemNumpadModal({
 
                     {/* Stock Warning Message */}
                     {isExceeded && (
-                        <div style={{ background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', padding: '4px 8px', color: '#b91c1c', fontSize: '11px', fontWeight: 800, textAlign: 'center' }}>
+                        <div style={{ background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.4)', borderRadius: '8px', padding: '4px 8px', color: '#ef4444', fontSize: '11px', fontWeight: 800, textAlign: 'center' }}>
                             {isEn ? `⛔ Qty (${item.selected_qty}) exceeds stock (${item.available_qty})!` : `⛔ الكمية المطلوبة (${item.selected_qty}) تتجاوز الرصيد (${item.available_qty})!`}
                         </div>
                     )}
@@ -601,19 +603,19 @@ function PosItemNumpadModal({
                             type="button"
                             onClick={() => { onUpdateItem({ ...item, selected_qty: Math.max(1, (item.selected_qty || 1) - 1) }); setIsFirstPress(false); }}
                             className="pos-quick-btn"
-                            style={{ background: '#fee2e2', color: '#dc2626' }}
+                            style={{ background: 'rgba(239, 68, 68, 0.2)', color: '#ef4444' }}
                             title={isEn ? 'Decrease by 1' : 'إنقاص الكمية 1'}
                         >
                             −
                         </button>
-                        <span className="pos-quick-label" style={{ fontSize: '12px', color: '#64748b', fontWeight: 800, minWidth: '70px', textAlign: 'center' }}>
+                        <span className="pos-quick-label" style={{ fontSize: '12px', color: '#94A3B8', fontWeight: 800, minWidth: '70px', textAlign: 'center' }}>
                             {isEn ? 'Quick Edit' : 'تعديل سريع'}
                         </span>
                         <button
                             type="button"
                             onClick={() => { const next = (item.selected_qty || 1) + 1; if(next <= (item.available_qty || 999999)) { onUpdateItem({ ...item, selected_qty: next }); setIsFirstPress(false); } }}
                             className="pos-quick-btn"
-                            style={{ background: '#dcfce7', color: '#16a34a' }}
+                            style={{ background: 'rgba(16, 185, 129, 0.2)', color: '#10B981' }}
                             title={isEn ? 'Increase by 1' : 'زيادة الكمية 1'}
                         >
                             +
@@ -631,8 +633,8 @@ function PosItemNumpadModal({
                                     onClick={() => handleNumpad(key)}
                                     className={`pos-key-btn ${isPressed ? 'pos-key-active' : ''}`}
                                     style={{
-                                        background: key === '⌫' ? '#fee2e2' : key === '.' ? '#f0f9ff' : 'linear-gradient(135deg, #ffffff 0%, #f1f5f9 100%)',
-                                        color: key === '⌫' ? '#dc2626' : key === '.' ? '#0284c7' : '#0f172a',
+                                        background: key === '⌫' ? 'rgba(239, 68, 68, 0.18)' : key === '.' ? 'rgba(0, 229, 255, 0.15)' : 'rgba(255, 255, 255, 0.06)',
+                                        color: key === '⌫' ? '#ef4444' : key === '.' ? '#00E5FF' : '#F8FAFC',
                                     }}
                                 >
                                     {key}
@@ -649,9 +651,9 @@ function PosItemNumpadModal({
                             className="pos-action-btn-sub"
                             style={{ 
                                 height: '44px', 
-                                background: '#f8fafc', 
-                                color: '#64748b', 
-                                border: '1px solid #cbd5e1', 
+                                background: 'rgba(255, 255, 255, 0.06)', 
+                                color: '#94A3B8', 
+                                border: '1px solid rgba(255, 255, 255, 0.15)', 
                                 borderRadius: '12px', 
                                 fontWeight: 800, 
                                 fontSize: '13px', 
@@ -669,14 +671,14 @@ function PosItemNumpadModal({
                                 height: '44px', 
                                 background: isExceeded
                                     ? 'linear-gradient(135deg, #ef4444, #991b1b)'
-                                    : 'linear-gradient(135deg,#1C73AB,#2891C8)', 
-                                color: 'white', 
+                                    : 'linear-gradient(135deg, #00E5FF 0%, #0088CC 100%)', 
+                                color: isExceeded ? 'white' : '#0B0E14', 
                                 border: 'none', 
                                 borderRadius: '12px', 
                                 fontWeight: 900, 
                                 fontSize: '13px', 
                                 cursor: isExceeded ? 'not-allowed' : 'pointer', 
-                                boxShadow: isExceeded ? 'none' : '0 4px 15px rgba(28, 115, 171, 0.35)',
+                                boxShadow: isExceeded ? 'none' : '0 0 20px rgba(0, 229, 255, 0.4)',
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'center',
@@ -715,12 +717,12 @@ function getItemIcon(name?: string, unit?: string) {
     if (n.includes('حليب') || n.includes('لبن') || n.includes('milk') || n.includes('زبادي') || n.includes('قشطة')) return '🥛';
     if (n.includes('ماء') || n.includes('مياه') || n.includes('water') || n.includes('شرب')) return '💧';
     if (n.includes('عصير') || n.includes('juice') || n.includes('شراب')) return '🧃';
-    if (n.includes('علاج') || n.includes('دواء') || n.includes('مرهم') || n.includes('pharma') || n.includes('med') || n.includes('مضاد')) return '💊';
+    if (n.includes('علاج') || n.includes('منتج') || n.includes('مرهم') || n.includes('pharma') || n.includes('med') || n.includes('مضاد')) return '💊';
     if (n.includes('شامبو') || n.includes('صابون') || n.includes('زيت') || n.includes('oil') || n.includes('shampoo') || n.includes('كريم')) return '🧴';
     if (n.includes('علف') || n.includes('شعير') || n.includes('قمح') || n.includes('حبوب') || n.includes('feed') || n.includes('نخالة')) return '🌾';
     if (n.includes('حقن') || n.includes('إبر') || n.includes('محقن')) return '💉';
     if (n.includes('فيتامين') || n.includes('مكمل') || n.includes('املاح') || n.includes('بودرة') || n.includes('كالسيوم')) return '🧪';
-    if (n.includes('حذاء') || n.includes('سرج') || n.includes('لجام') || n.includes('حبل') || n.includes('طوق') || n.includes('خيل') || n.includes('حصان')) return '🐎';
+    if (n.includes('حذاء') || n.includes('سرج') || n.includes('لجام') || n.includes('حبل') || n.includes('طوق') || n.includes('سيارات') || n.includes('حصان')) return '⛽';
     if (n.includes('تمر') || n.includes('عسل') || n.includes('غذاء') || n.includes('سكر')) return '🍯';
     if (unit && (unit.includes('كرتون') || unit.includes('شدة') || unit.includes('صندوق') || unit.includes('باكيت'))) return '📦';
     return '🏷️';
@@ -884,12 +886,12 @@ export default function PosPage() {
             <style>{`
                 /* 🎛️ شريط تحكم الكاشير الماسي */
                 .pos-control-bar {
-                    background: rgba(255, 255, 255, 0.72);
+                    background: linear-gradient(135deg, rgba(20, 24, 34, 0.92) 0%, rgba(13, 16, 24, 0.85) 100%);
                     backdrop-filter: blur(25px) saturate(180%);
                     -webkit-backdrop-filter: blur(25px);
-                    border: 1px solid rgba(255, 255, 255, 0.85);
+                    border: 1px solid rgba(0, 229, 255, 0.25);
                     border-radius: 20px;
-                    box-shadow: 0 8px 25px rgba(28, 115, 171, 0.08);
+                    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.5), 0 0 15px rgba(0, 229, 255, 0.08);
                     padding: 12px 20px;
                     margin-bottom: 16px;
                     display: flex;
@@ -922,28 +924,32 @@ export default function PosPage() {
                     border-radius: 12px;
                     font-size: 13px;
                     font-weight: 800;
-                    color: #122946;
-                    background: rgba(255, 255, 255, 0.95);
-                    border: 1.5px solid rgba(28, 115, 171, 0.22);
-                    box-shadow: 0 2px 8px rgba(28, 115, 171, 0.06);
+                    color: #F8FAFC;
+                    background: rgba(15, 20, 30, 0.85);
+                    border: 1.5px solid rgba(0, 229, 255, 0.25);
+                    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
                     outline: none;
                     transition: all 0.2s ease;
                     cursor: pointer;
                     min-height: 42px;
                 }
+                .pos-glass-select option {
+                    background: #141822;
+                    color: #F8FAFC;
+                }
                 .pos-glass-select:focus {
-                    border-color: #1C73AB;
-                    box-shadow: 0 0 0 3px rgba(28, 115, 171, 0.15);
+                    border-color: #00E5FF;
+                    box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.2);
                 }
                 .pos-badge-delegate {
                     font-size: 11px;
                     font-weight: 800;
-                    color: #16a34a;
-                    background: rgba(22, 163, 74, 0.12);
+                    color: #10B981;
+                    background: rgba(16, 185, 129, 0.12);
                     padding: 4px 10px;
                     border-radius: 20px;
                     white-space: nowrap;
-                    border: 1px solid rgba(22, 163, 74, 0.25);
+                    border: 1px solid rgba(16, 185, 129, 0.35);
                 }
                 .pos-shift-group {
                     display: flex;
@@ -960,14 +966,14 @@ export default function PosPage() {
                     font-weight: 800;
                 }
                 .pos-shift-status.open {
-                    background: rgba(22, 163, 74, 0.08);
-                    color: #16a34a;
-                    border: 1px solid rgba(22, 163, 74, 0.25);
+                    background: rgba(16, 185, 129, 0.12);
+                    color: #10B981;
+                    border: 1px solid rgba(16, 185, 129, 0.35);
                 }
                 .pos-shift-status.closed {
-                    background: rgba(100, 116, 139, 0.08);
-                    color: #64748b;
-                    border: 1px solid rgba(100, 116, 139, 0.2);
+                    background: rgba(148, 163, 184, 0.1);
+                    color: #94A3B8;
+                    border: 1px solid rgba(148, 163, 184, 0.2);
                 }
                 .pos-pulse-dot {
                     width: 8px;
@@ -1194,14 +1200,14 @@ export default function PosPage() {
                 .pos-mobile-nav-tabs {
                     display: none;
                     gap: 8px;
-                    background: rgba(255, 253, 250, 0.92);
+                    background: rgba(20, 24, 34, 0.92);
                     backdrop-filter: blur(20px) saturate(160%);
                     -webkit-backdrop-filter: blur(20px) saturate(160%);
                     padding: 6px;
                     border-radius: 16px;
-                    border: 1px solid rgba(194, 155, 98, 0.35);
+                    border: 1px solid rgba(0, 229, 255, 0.25);
                     margin-bottom: 12px;
-                    box-shadow: 0 4px 15px rgba(44, 26, 18, 0.06);
+                    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
                 }
                 .pos-mobile-nav-tab {
                     flex: 1;
@@ -1216,23 +1222,23 @@ export default function PosPage() {
                     justify-content: center;
                     gap: 8px;
                     background: transparent;
-                    color: rgba(44, 26, 18, 0.65);
+                    color: #94A3B8;
                     transition: all 0.2s ease;
                     -webkit-tap-highlight-color: transparent;
                 }
                 .pos-mobile-nav-tab.active {
-                    background: linear-gradient(135deg, #C29B62 0%, #A8573C 100%);
-                    color: white;
-                    box-shadow: 0 4px 14px rgba(168, 87, 60, 0.35);
+                    background: linear-gradient(135deg, #00E5FF 0%, #0088CC 100%);
+                    color: #0B0E14;
+                    box-shadow: 0 4px 14px rgba(0, 229, 255, 0.35);
                 }
                 .pos-mobile-badge {
-                    background: #A8573C;
+                    background: #E06D44;
                     color: white;
                     font-size: 11px;
                     font-weight: 900;
                     padding: 2px 7px;
                     border-radius: 99px;
-                    box-shadow: 0 2px 6px rgba(168, 87, 60, 0.4);
+                    box-shadow: 0 2px 6px rgba(224, 109, 68, 0.4);
                 }
                 .pos-mobile-cart-float {
                     display: none;
@@ -1244,15 +1250,15 @@ export default function PosPage() {
                         left: 14px;
                         right: 14px;
                         z-index: 900;
-                        background: linear-gradient(135deg, #2C1A12 0%, #3D2418 100%);
+                        background: linear-gradient(135deg, #141822 0%, #0B0E14 100%);
                         color: white;
                         border-radius: 18px;
                         padding: 12px 18px;
                         display: flex;
                         align-items: center;
                         justify-content: space-between;
-                        box-shadow: 0 10px 30px rgba(44, 26, 18, 0.5);
-                        border: 1.5px solid rgba(194, 155, 98, 0.45);
+                        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7), 0 0 20px rgba(0, 229, 255, 0.2);
+                        border: 1.5px solid rgba(0, 229, 255, 0.4);
                         cursor: pointer;
                         animation: slideUpFloat 0.3s cubic-bezier(0.165, 0.84, 0.44, 1);
                     }
@@ -1339,12 +1345,12 @@ export default function PosPage() {
                 }
 
                 .items-section, .cart-section {
-                    background: linear-gradient(135deg, rgba(255, 253, 250, 0.88) 0%, rgba(255, 253, 250, 0.6) 100%);
+                    background: linear-gradient(135deg, rgba(20, 24, 34, 0.92) 0%, rgba(13, 16, 24, 0.85) 100%);
                     backdrop-filter: blur(24px) saturate(160%);
                     -webkit-backdrop-filter: blur(24px);
                     border-radius: 22px;
-                    border: 1px solid rgba(194, 155, 98, 0.32);
-                    box-shadow: 0 8px 24px rgba(44, 26, 18, 0.05);
+                    border: 1px solid rgba(0, 229, 255, 0.25);
+                    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 229, 255, 0.06);
                     padding: 18px;
                     display: flex;
                     flex-direction: column;
@@ -1405,10 +1411,10 @@ export default function PosPage() {
 
                 /* 🌟 بطاقة الصنف الصحراوية الزجاجية المتناسقة والمربعة */
                 .pos-item-card {
-                    background: linear-gradient(135deg, rgba(255, 253, 250, 0.96) 0%, rgba(255, 253, 250, 0.72) 100%);
+                    background: linear-gradient(135deg, rgba(25, 30, 42, 0.95) 0%, rgba(16, 20, 30, 0.85) 100%);
                     backdrop-filter: blur(20px) saturate(160%);
                     -webkit-backdrop-filter: blur(20px);
-                    border: 1.5px solid rgba(194, 155, 98, 0.3);
+                    border: 1.5px solid rgba(0, 229, 255, 0.2);
                     border-radius: 14px;
                     padding: 8px 8px 6px 8px;
                     cursor: pointer;
@@ -1417,7 +1423,7 @@ export default function PosPage() {
                     flex-direction: column;
                     justify-content: space-between;
                     position: relative;
-                    box-shadow: 0 3px 8px rgba(44, 26, 18, 0.05);
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
                     aspect-ratio: 1 / 1;
                     min-height: 140px;
                     max-height: 175px;
@@ -1430,8 +1436,8 @@ export default function PosPage() {
 
                 .pos-item-card:hover {
                     transform: translateY(-3px);
-                    border-color: #C29B62;
-                    box-shadow: 0 8px 18px rgba(168, 87, 60, 0.15);
+                    border-color: #00E5FF;
+                    box-shadow: 0 8px 22px rgba(0, 229, 255, 0.25);
                 }
                 .pos-item-card:active {
                     transform: scale(0.97);
@@ -1439,18 +1445,18 @@ export default function PosPage() {
 
                 .pos-item-card.critical {
                     border: 1.5px solid #ef4444;
-                    background: linear-gradient(135deg, rgba(254, 242, 242, 0.95) 0%, rgba(255, 253, 250, 0.85) 100%);
-                    box-shadow: 0 3px 10px rgba(239, 68, 68, 0.12);
+                    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(20, 24, 34, 0.9) 100%);
+                    box-shadow: 0 3px 10px rgba(239, 68, 68, 0.2);
                 }
                 .pos-item-card.expired {
                     border: 1.5px solid #dc2626;
-                    background: linear-gradient(135deg, rgba(254, 226, 226, 0.95) 0%, rgba(254, 242, 242, 0.85) 100%);
-                    box-shadow: 0 3px 12px rgba(220, 38, 38, 0.2);
+                    background: linear-gradient(135deg, rgba(220, 38, 38, 0.2) 0%, rgba(20, 24, 34, 0.9) 100%);
+                    box-shadow: 0 3px 12px rgba(220, 38, 38, 0.3);
                 }
                 .pos-item-card.near-low {
                     border: 1.5px solid #f59e0b;
-                    background: linear-gradient(135deg, rgba(255, 251, 235, 0.95) 0%, rgba(255, 253, 250, 0.85) 100%);
-                    box-shadow: 0 3px 10px rgba(245, 158, 11, 0.1);
+                    background: linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(20, 24, 34, 0.9) 100%);
+                    box-shadow: 0 3px 10px rgba(245, 158, 11, 0.2);
                 }
 
                 /* الصف العلوي لحالة الصنف (محدد بارتفاع ثابت لضمان عدم اهتزاز البطاقات) */
@@ -1475,24 +1481,24 @@ export default function PosPage() {
                     gap: 2px;
                 }
                 .pos-badge-status.critical {
-                    background: #fee2e2;
-                    color: #b91c1c;
-                    border: 1px solid rgba(239, 68, 68, 0.35);
+                    background: rgba(239, 68, 68, 0.2);
+                    color: #ef4444;
+                    border: 1px solid rgba(239, 68, 68, 0.4);
                 }
                 .pos-badge-status.near-low {
-                    background: #fef3c7;
-                    color: #b45309;
-                    border: 1px solid rgba(245, 158, 11, 0.35);
+                    background: rgba(245, 158, 11, 0.2);
+                    color: #f59e0b;
+                    border: 1px solid rgba(245, 158, 11, 0.4);
                 }
                 .pos-badge-status.returnable {
-                    background: rgba(194, 155, 98, 0.16);
-                    color: #A8573C;
-                    border: 1px solid rgba(194, 155, 98, 0.35);
+                    background: rgba(0, 229, 255, 0.15);
+                    color: #00E5FF;
+                    border: 1px solid rgba(0, 229, 255, 0.35);
                 }
                 .pos-badge-status.normal {
-                    background: rgba(44, 26, 18, 0.05);
-                    color: rgba(44, 26, 18, 0.65);
-                    border: 1px solid rgba(44, 26, 18, 0.12);
+                    background: rgba(255, 255, 255, 0.05);
+                    color: #94A3B8;
+                    border: 1px solid rgba(255, 255, 255, 0.12);
                 }
 
                 .pos-card-unit-pill {
@@ -1501,14 +1507,14 @@ export default function PosPage() {
                     gap: 3px;
                     font-size: 9px;
                     font-weight: 800;
-                    color: rgba(44, 26, 18, 0.6);
+                    color: #94A3B8;
                 }
                 .in-stock-dot {
                     width: 5px;
                     height: 5px;
                     border-radius: 50%;
-                    background: #4E734F;
-                    box-shadow: 0 0 4px rgba(78, 115, 79, 0.5);
+                    background: #10B981;
+                    box-shadow: 0 0 6px #10B981;
                 }
                 .out-stock-dot {
                     width: 5px;
@@ -1532,25 +1538,25 @@ export default function PosPage() {
                     width: 26px;
                     height: 26px;
                     border-radius: 7px;
-                    background: rgba(194, 155, 98, 0.14);
-                    border: 1px solid rgba(194, 155, 98, 0.28);
+                    background: rgba(0, 229, 255, 0.12);
+                    border: 1px solid rgba(0, 229, 255, 0.28);
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     font-size: 13px;
-                    color: #C29B62;
+                    color: #00E5FF;
                     margin: 0 auto 2px auto;
                     transition: transform 0.2s ease;
                     flex-shrink: 0;
                 }
                 .pos-item-card:hover .pos-item-avatar {
                     transform: scale(1.08);
-                    background: rgba(194, 155, 98, 0.24);
+                    background: rgba(0, 229, 255, 0.24);
                 }
 
                 .pos-item-name {
                     font-weight: 800;
-                    color: #2C1A12;
+                    color: #F8FAFC;
                     font-size: 11.5px;
                     line-height: 1.25;
                     text-align: center;
@@ -1576,14 +1582,14 @@ export default function PosPage() {
                     display: flex;
                     align-items: center;
                     justify-content: space-between;
-                    background: rgba(44, 26, 18, 0.04);
+                    background: rgba(255, 255, 255, 0.04);
                     padding: 1.5px 5px;
                     border-radius: 5px;
                     font-size: 9.5px;
                     font-weight: 800;
                 }
                 .pos-item-stock-info .stock-label {
-                    color: rgba(44, 26, 18, 0.55);
+                    color: #94A3B8;
                 }
                 .pos-item-stock-info .stock-val {
                     font-weight: 900;
@@ -1597,7 +1603,7 @@ export default function PosPage() {
                 }
                 .pos-item-price-tag .price-num {
                     font-weight: 900;
-                    color: #2C1A12;
+                    color: #00E5FF;
                     font-size: 13px;
                     letter-spacing: -0.2px;
                 }
@@ -1606,22 +1612,22 @@ export default function PosPage() {
                     height: 26px;
                     border-radius: 7px;
                     border: none;
-                    background: linear-gradient(135deg, #C29B62 0%, #A8573C 100%);
-                    color: #ffffff;
+                    background: linear-gradient(135deg, #00E5FF 0%, #0088CC 100%);
+                    color: #0B0E14;
                     display: flex;
                     align-items: center;
                     justify-content: center;
                     font-weight: 900;
                     font-size: 15px;
                     cursor: pointer;
-                    box-shadow: 0 2px 5px rgba(168, 87, 60, 0.28);
+                    box-shadow: 0 2px 5px rgba(0, 229, 255, 0.35);
                     transition: all 0.15s ease;
                     flex-shrink: 0;
                     line-height: 1;
                 }
                 .pos-quick-add-btn:hover {
                     transform: scale(1.08);
-                    box-shadow: 0 3px 8px rgba(168, 87, 60, 0.4);
+                    box-shadow: 0 3px 8px rgba(0, 229, 255, 0.5);
                 }
                 .pos-quick-add-btn:active {
                     transform: scale(0.92);
@@ -1639,31 +1645,31 @@ export default function PosPage() {
                     min-height: 0;
                 }
 
-                /* 🛒 بطاقة الصنف داخل سلة الفاتورة الحالية (Aqua Glassmorphism) */
+                /* 🛒 بطاقة الصنف داخل سلة الفاتورة الحالية */
                 .cart-item {
-                    background: rgba(255, 255, 255, 0.94);
+                    background: rgba(20, 25, 36, 0.92);
                     backdrop-filter: blur(15px);
                     -webkit-backdrop-filter: blur(15px);
-                    border: 1.5px solid rgba(28, 115, 171, 0.14);
+                    border: 1.5px solid rgba(0, 229, 255, 0.2);
                     border-radius: 14px;
                     padding: 8px 12px;
                     display: flex;
                     flex-direction: column;
                     gap: 6px;
-                    box-shadow: 0 2px 8px rgba(28, 115, 171, 0.04);
+                    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
                     transition: all 0.2s ease;
                 }
                 .cart-item:hover {
-                    border-color: rgba(40, 145, 200, 0.4);
-                    box-shadow: 0 6px 20px rgba(28, 115, 171, 0.08);
+                    border-color: rgba(0, 229, 255, 0.45);
+                    box-shadow: 0 6px 20px rgba(0, 229, 255, 0.15);
                     transform: translateY(-1px);
                 }
                 .cart-item-remove-btn {
                     width: 28px;
                     height: 28px;
                     border-radius: 8px;
-                    background: rgba(239, 68, 68, 0.08);
-                    border: 1px solid rgba(239, 68, 68, 0.2);
+                    background: rgba(239, 68, 68, 0.15);
+                    border: 1px solid rgba(239, 68, 68, 0.3);
                     color: #ef4444;
                     cursor: pointer;
                     display: flex;
@@ -1676,8 +1682,8 @@ export default function PosPage() {
                     -webkit-tap-highlight-color: transparent;
                 }
                 .cart-item-remove-btn:hover {
-                    background: #fee2e2;
-                    color: #dc2626;
+                    background: rgba(239, 68, 68, 0.3);
+                    color: #f87171;
                     transform: scale(1.06);
                 }
                 .cart-item-remove-btn:active {
@@ -1691,26 +1697,26 @@ export default function PosPage() {
                     flex-wrap: wrap;
                     gap: 8px;
                     padding-top: 10px;
-                    border-top: 1px dashed rgba(28, 115, 171, 0.16);
+                    border-top: 1px dashed rgba(0, 229, 255, 0.2);
                 }
 
                 .cart-qty-pill {
                     display: inline-flex;
                     align-items: center;
                     direction: ltr;
-                    background: #f1f5f9;
-                    border: 1.5px solid rgba(28, 115, 171, 0.25);
+                    background: rgba(15, 20, 30, 0.85);
+                    border: 1.5px solid rgba(0, 229, 255, 0.25);
                     border-radius: 11px;
                     padding: 2px 3px;
                     height: 36px;
                     box-sizing: border-box;
-                    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.04);
+                    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
                     transition: all 0.2s ease;
                 }
                 .cart-qty-pill:focus-within {
-                    border-color: #2891C8;
-                    background: #ffffff;
-                    box-shadow: 0 0 0 3px rgba(40, 145, 200, 0.15);
+                    border-color: #00E5FF;
+                    background: rgba(15, 20, 30, 0.95);
+                    box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.2);
                 }
                 .cart-qty-btn {
                     width: 28px;
@@ -1729,22 +1735,22 @@ export default function PosPage() {
                     line-height: 1;
                 }
                 .cart-qty-btn.minus {
-                    background: #ffffff;
+                    background: rgba(239, 68, 68, 0.15);
                     color: #ef4444;
-                    box-shadow: 0 1px 3px rgba(239, 68, 68, 0.15);
+                    box-shadow: 0 1px 3px rgba(239, 68, 68, 0.2);
                 }
                 .cart-qty-btn.minus:hover {
-                    background: #fee2e2;
-                    color: #dc2626;
+                    background: rgba(239, 68, 68, 0.3);
+                    color: #fca5a5;
                 }
                 .cart-qty-btn.plus {
-                    background: #ffffff;
-                    color: #1C73AB;
-                    box-shadow: 0 1px 3px rgba(28, 115, 171, 0.15);
+                    background: rgba(0, 229, 255, 0.15);
+                    color: #00E5FF;
+                    box-shadow: 0 1px 3px rgba(0, 229, 255, 0.2);
                 }
                 .cart-qty-btn.plus:hover {
-                    background: #e0f2fe;
-                    color: #0284c7;
+                    background: rgba(0, 229, 255, 0.3);
+                    color: #fff;
                 }
                 .cart-qty-btn:active {
                     transform: scale(0.9);
@@ -1755,7 +1761,7 @@ export default function PosPage() {
                     text-align: center;
                     font-weight: 900;
                     font-size: 15.5px;
-                    color: #122946;
+                    color: #F8FAFC;
                     border: none;
                     background: transparent;
                     outline: none;
@@ -1779,24 +1785,24 @@ export default function PosPage() {
                     align-items: center;
                     justify-content: center;
                     gap: 3px;
-                    background: rgba(28, 115, 171, 0.06);
-                    border: 1.5px solid rgba(28, 115, 171, 0.25);
+                    background: rgba(0, 229, 255, 0.08);
+                    border: 1.5px solid rgba(0, 229, 255, 0.25);
                     border-radius: 11px;
                     padding: 0 8px;
                     height: 36px;
                     box-sizing: border-box;
-                    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03);
+                    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
                     transition: all 0.2s ease;
                 }
                 .cart-unit-price-box:focus-within {
-                    border-color: #2891C8;
-                    background: #ffffff;
-                    box-shadow: 0 0 0 3px rgba(40, 145, 200, 0.15);
+                    border-color: #00E5FF;
+                    background: rgba(15, 20, 30, 0.95);
+                    box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.2);
                 }
                 .cart-price-label {
                     font-size: 12px;
                     font-weight: 800;
-                    color: #475569;
+                    color: #94A3B8;
                     white-space: nowrap;
                 }
                 .cart-price-input {
@@ -1804,7 +1810,7 @@ export default function PosPage() {
                     min-width: 38px;
                     font-size: 15px;
                     font-weight: 900;
-                    color: #1C73AB;
+                    color: #00E5FF;
                     border: none;
                     background: transparent;
                     outline: none;
@@ -1814,7 +1820,7 @@ export default function PosPage() {
                 .cart-currency-badge {
                     font-size: 11.5px;
                     font-weight: 800;
-                    color: #64748b;
+                    color: #94A3B8;
                     white-space: nowrap;
                 }
 
@@ -1828,25 +1834,25 @@ export default function PosPage() {
                 .cart-total-label {
                     font-size: 12px;
                     font-weight: 800;
-                    color: #64748b;
+                    color: #94A3B8;
                 }
                 .cart-total-value {
                     font-size: 16px;
                     font-weight: 900;
-                    color: #16a34a;
+                    color: #10B981;
                     letter-spacing: -0.2px;
                 }
 
                 /* 💳 لوحة السداد وتفاصيل الفاتورة */
                 .checkout-panel {
-                    background: linear-gradient(135deg, rgba(255, 255, 255, 0.96) 0%, rgba(240, 249, 255, 0.92) 100%);
+                    background: linear-gradient(135deg, rgba(20, 24, 34, 0.96) 0%, rgba(13, 16, 24, 0.92) 100%);
                     backdrop-filter: blur(25px) saturate(180%);
                     -webkit-backdrop-filter: blur(25px);
-                    border: 1.5px solid rgba(28, 115, 171, 0.22);
+                    border: 1.5px solid rgba(0, 229, 255, 0.25);
                     border-radius: 18px;
                     padding: 10px 14px;
                     margin-top: 8px;
-                    box-shadow: 0 6px 20px rgba(28, 115, 171, 0.08), inset 0 1px 0 rgba(255, 255, 255, 0.9);
+                    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 229, 255, 0.08);
                     display: flex;
                     flex-direction: column;
                     gap: 7px;
@@ -1858,17 +1864,17 @@ export default function PosPage() {
                     align-items: center;
                     font-size: 12px;
                     font-weight: 700;
-                    color: #64748b;
+                    color: #94A3B8;
                 }
                 .pos-total-banner {
                     display: flex;
                     justify-content: space-between;
                     align-items: center;
-                    background: linear-gradient(135deg, #2C1A12 0%, #3D2419 100%);
-                    border: 1.5px solid rgba(194, 155, 98, 0.45);
+                    background: linear-gradient(135deg, #0B0E14 0%, #141822 100%);
+                    border: 1.5px solid rgba(0, 229, 255, 0.4);
                     border-radius: 13px;
                     padding: 9px 14px;
-                    box-shadow: 0 4px 14px rgba(44, 26, 18, 0.2);
+                    box-shadow: 0 0 20px rgba(0, 229, 255, 0.15);
                 }
             `}</style>
 
@@ -2575,7 +2581,7 @@ export default function PosPage() {
                             {/* Customer & Payment Method (Side by Side) */}
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
                                 <div>
-                                    <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, color: '#2C1A12', marginBottom: '3px' }}>
+                                    <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, color: '#F8FAFC', marginBottom: '3px' }}>
                                         👤 {isEn ? 'Customer:' : 'العميل:'}
                                     </label>
                                     <select 
@@ -2585,10 +2591,10 @@ export default function PosPage() {
                                             height: '35px', 
                                             padding: '4px 8px', 
                                             fontSize: '12px', 
-                                            background: 'rgba(255, 253, 250, 0.95)', 
-                                            color: '#2C1A12', 
+                                            background: 'rgba(15, 20, 30, 0.85)', 
+                                            color: '#F8FAFC', 
                                             fontWeight: 700, 
-                                            border: '1.5px solid rgba(194, 155, 98, 0.35)',
+                                            border: '1.5px solid rgba(0, 229, 255, 0.25)',
                                             borderRadius: '10px'
                                         }}
                                         value={logic.partnerId}
@@ -2602,7 +2608,7 @@ export default function PosPage() {
                                 </div>
 
                                 <div>
-                                    <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, color: '#2C1A12', marginBottom: '3px' }}>
+                                    <label style={{ display: 'block', fontSize: '11px', fontWeight: 800, color: '#F8FAFC', marginBottom: '3px' }}>
                                         💳 {isEn ? 'Payment Method:' : 'طريقة الدفع:'}
                                     </label>
                                     <select 
@@ -2612,10 +2618,10 @@ export default function PosPage() {
                                             height: '35px', 
                                             padding: '4px 8px', 
                                             fontSize: '12px', 
-                                            background: 'rgba(255, 253, 250, 0.95)', 
-                                            color: '#2C1A12', 
+                                            background: 'rgba(15, 20, 30, 0.85)', 
+                                            color: '#F8FAFC', 
                                             fontWeight: 700, 
-                                            border: '1.5px solid rgba(194, 155, 98, 0.35)',
+                                            border: '1.5px solid rgba(0, 229, 255, 0.25)',
                                             borderRadius: '10px'
                                         }}
                                         value={logic.paymentMethod}
@@ -2633,12 +2639,12 @@ export default function PosPage() {
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'space-between',
-                                background: 'rgba(168, 87, 60, 0.05)',
+                                background: 'rgba(224, 109, 68, 0.1)',
                                 padding: '5px 10px',
                                 borderRadius: '10px',
-                                border: '1px solid rgba(168, 87, 60, 0.15)'
+                                border: '1px solid rgba(224, 109, 68, 0.3)'
                             }}>
-                                <span style={{ fontWeight: 800, color: '#A8573C', fontSize: '11.5px' }}>{isEn ? 'Extra Discount:' : 'خصم إضافي:'}</span>
+                                <span style={{ fontWeight: 800, color: '#E06D44', fontSize: '11.5px' }}>{isEn ? 'Extra Discount:' : 'خصم إضافي:'}</span>
                                 <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
                                     <input 
                                         type="number"
@@ -2653,11 +2659,11 @@ export default function PosPage() {
                                             padding: '0 4px',
                                             textAlign: 'center',
                                             borderRadius: '6px',
-                                            border: '1px solid rgba(168, 87, 60, 0.25)',
+                                            border: '1px solid rgba(224, 109, 68, 0.35)',
                                             outline: 'none',
                                             fontWeight: 'bold',
-                                            color: '#A8573C',
-                                            background: '#fff'
+                                            color: '#E06D44',
+                                            background: 'rgba(15, 20, 30, 0.9)'
                                         }}
                                     />
                                     <select 
@@ -2666,13 +2672,13 @@ export default function PosPage() {
                                         style={{
                                             height: '26px',
                                             borderRadius: '6px',
-                                            border: '1px solid rgba(168, 87, 60, 0.25)',
+                                            border: '1px solid rgba(224, 109, 68, 0.35)',
                                             outline: 'none',
                                             fontWeight: 'bold',
                                             fontSize: '11px',
                                             padding: '0 4px',
-                                            background: '#fff',
-                                            color: '#A8573C'
+                                            background: 'rgba(15, 20, 30, 0.9)',
+                                            color: '#E06D44'
                                         }}
                                     >
                                         <option value="amount">{isEn ? 'SAR' : 'ر.س'}</option>
@@ -2686,13 +2692,13 @@ export default function PosPage() {
                                 display: 'flex',
                                 alignItems: 'center',
                                 justifyContent: 'space-between',
-                                background: 'rgba(44, 26, 18, 0.04)',
+                                background: 'rgba(255, 255, 255, 0.04)',
                                 padding: '5px 10px',
                                 borderRadius: '10px',
-                                border: '1px solid rgba(194, 155, 98, 0.22)'
+                                border: '1px solid rgba(0, 229, 255, 0.2)'
                             }}>
-                                <span style={{ fontWeight: 800, color: '#2C1A12', fontSize: '11.5px' }}>{isEn ? 'Calc Method:' : 'طريقة الحساب:'}</span>
-                                <div style={{ display: 'flex', background: 'rgba(255, 253, 250, 0.95)', padding: '2px', borderRadius: '8px', border: '1px solid rgba(194, 155, 98, 0.25)' }}>
+                                <span style={{ fontWeight: 800, color: '#F8FAFC', fontSize: '11.5px' }}>{isEn ? 'Calc Method:' : 'طريقة الحساب:'}</span>
+                                <div style={{ display: 'flex', background: 'rgba(15, 20, 30, 0.85)', padding: '2px', borderRadius: '8px', border: '1px solid rgba(0, 229, 255, 0.25)' }}>
                                     <button 
                                         type="button"
                                         onClick={() => logic.setIsTaxInclusive(true)}
@@ -2703,9 +2709,9 @@ export default function PosPage() {
                                             fontWeight: 800,
                                             borderRadius: '6px',
                                             cursor: 'pointer',
-                                            background: logic.isTaxInclusive ? 'linear-gradient(135deg, #C29B62 0%, #A8573C 100%)' : 'transparent',
-                                            color: logic.isTaxInclusive ? 'white' : 'rgba(44, 26, 18, 0.65)',
-                                            boxShadow: logic.isTaxInclusive ? '0 2px 6px rgba(168, 87, 60, 0.3)' : 'none',
+                                            background: logic.isTaxInclusive ? 'linear-gradient(135deg, #00E5FF 0%, #0088CC 100%)' : 'transparent',
+                                            color: logic.isTaxInclusive ? '#0B0E14' : '#94A3B8',
+                                            boxShadow: logic.isTaxInclusive ? '0 2px 8px rgba(0, 229, 255, 0.4)' : 'none',
                                             transition: '0.2s'
                                         }}
                                     >
@@ -2721,9 +2727,9 @@ export default function PosPage() {
                                             fontWeight: 800,
                                             borderRadius: '6px',
                                             cursor: 'pointer',
-                                            background: !logic.isTaxInclusive ? 'linear-gradient(135deg, #2C1A12 0%, #442A1C 100%)' : 'transparent',
-                                            color: !logic.isTaxInclusive ? 'white' : 'rgba(44, 26, 18, 0.65)',
-                                            boxShadow: !logic.isTaxInclusive ? '0 2px 6px rgba(44, 26, 18, 0.25)' : 'none',
+                                            background: !logic.isTaxInclusive ? 'linear-gradient(135deg, #00E5FF 0%, #0088CC 100%)' : 'transparent',
+                                            color: !logic.isTaxInclusive ? '#0B0E14' : '#94A3B8',
+                                            boxShadow: !logic.isTaxInclusive ? '0 2px 8px rgba(0, 229, 255, 0.4)' : 'none',
                                             transition: '0.2s'
                                         }}
                                     >
@@ -2738,35 +2744,35 @@ export default function PosPage() {
                                 alignItems: 'center',
                                 justifyContent: 'space-between',
                                 padding: '5px 10px',
-                                background: 'rgba(255, 253, 250, 0.85)',
+                                background: 'rgba(15, 20, 30, 0.75)',
                                 borderRadius: '9px',
-                                border: '1px solid rgba(194, 155, 98, 0.25)',
+                                border: '1px solid rgba(0, 229, 255, 0.2)',
                                 fontSize: '11.5px'
                             }}>
                                 <div>
-                                    <span style={{ color: 'rgba(44, 26, 18, 0.6)', fontWeight: 700 }}>{isEn ? 'Subtotal:' : 'المجموع:'} </span>
-                                    <span style={{ fontWeight: 900, color: '#2C1A12' }}>{formatCurrency(logic.cartTotal.subtotal)}</span>
+                                    <span style={{ color: '#94A3B8', fontWeight: 700 }}>{isEn ? 'Subtotal:' : 'المجموع:'} </span>
+                                    <span style={{ fontWeight: 900, color: '#F8FAFC' }}>{formatCurrency(logic.cartTotal.subtotal)}</span>
                                 </div>
                                 {logic.cartTotal.exemptSubtotal > 0 && (
                                     <>
-                                        <div style={{ width: '1px', height: '14px', background: 'rgba(78, 115, 79, 0.3)' }}></div>
+                                        <div style={{ width: '1px', height: '14px', background: 'rgba(16, 185, 129, 0.3)' }}></div>
                                         <div>
-                                            <span style={{ color: '#4E734F', fontWeight: 700 }}>{isEn ? 'Exempt:' : 'معفي:'} </span>
-                                            <span style={{ fontWeight: 900, color: '#4E734F' }}>{formatCurrency(logic.cartTotal.exemptSubtotal)}</span>
+                                            <span style={{ color: '#10B981', fontWeight: 700 }}>{isEn ? 'Exempt:' : 'معفي:'} </span>
+                                            <span style={{ fontWeight: 900, color: '#10B981' }}>{formatCurrency(logic.cartTotal.exemptSubtotal)}</span>
                                         </div>
                                     </>
                                 )}
-                                <div style={{ width: '1px', height: '14px', background: 'rgba(194, 155, 98, 0.3)' }}></div>
+                                <div style={{ width: '1px', height: '14px', background: 'rgba(0, 229, 255, 0.3)' }}></div>
                                 <div>
-                                    <span style={{ color: 'rgba(44, 26, 18, 0.6)', fontWeight: 700 }}>{isEn ? 'VAT:' : 'الضريبة:'} </span>
-                                    <span style={{ fontWeight: 900, color: '#2C1A12' }}>{formatCurrency(logic.cartTotal.tax)}</span>
+                                    <span style={{ color: '#94A3B8', fontWeight: 700 }}>{isEn ? 'VAT:' : 'الضريبة:'} </span>
+                                    <span style={{ fontWeight: 900, color: '#F8FAFC' }}>{formatCurrency(logic.cartTotal.tax)}</span>
                                 </div>
                             </div>
 
-                            {/* الإجمالي المطلوب - Desert Glassmorphism Banner */}
+                            {/* الإجمالي المطلوب - Command Center Banner */}
                             <div className="pos-total-banner">
-                                <span style={{ fontSize: '13.5px', fontWeight: 900, color: '#FDFBF7' }}>{isEn ? 'Grand Total:' : 'الإجمالي المطلوب:'}</span>
-                                <span style={{ fontSize: '20px', fontWeight: 900, color: '#F5DDA4', letterSpacing: '-0.3px', textShadow: '0 0 10px rgba(245, 221, 164, 0.3)' }}>
+                                <span style={{ fontSize: '13.5px', fontWeight: 900, color: '#F8FAFC' }}>{isEn ? 'Grand Total:' : 'الإجمالي المطلوب:'}</span>
+                                <span style={{ fontSize: '20px', fontWeight: 900, color: '#00E5FF', letterSpacing: '-0.3px', textShadow: '0 0 12px rgba(0, 229, 255, 0.5)' }}>
                                     {formatCurrency(logic.cartTotal.total)}
                                 </span>
                             </div>
@@ -2778,19 +2784,19 @@ export default function PosPage() {
                                 return (
                                     <div style={{
                                         padding: '6px 12px',
-                                        background: 'linear-gradient(135deg, rgba(194, 155, 98, 0.14) 0%, rgba(168, 87, 60, 0.08) 100%)',
-                                        border: '1px solid rgba(194, 155, 98, 0.35)',
+                                        background: 'rgba(0, 229, 255, 0.1)',
+                                        border: '1px solid rgba(0, 229, 255, 0.3)',
                                         borderRadius: '10px',
                                         display: 'flex',
                                         alignItems: 'center',
                                         justifyContent: 'space-between',
-                                        boxShadow: '0 2px 8px rgba(168, 87, 60, 0.08)'
+                                        boxShadow: '0 2px 8px rgba(0, 229, 255, 0.1)'
                                     }}>
                                         <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                                             <span style={{ fontSize: '16px' }}>🔄</span>
-                                            <span style={{ fontSize: '11px', fontWeight: 900, color: '#A8573C' }}>{isEn ? 'Returnables Custody:' : 'عهدة فوارغ مستحقة:'}</span>
+                                            <span style={{ fontSize: '11px', fontWeight: 900, color: '#00E5FF' }}>{isEn ? 'Returnables Custody:' : 'عهدة فوارغ مستحقة:'}</span>
                                         </div>
-                                        <span style={{ fontSize: '12px', fontWeight: 900, color: '#2C1A12', background: 'white', padding: '2px 8px', borderRadius: '6px', border: '1px solid rgba(194, 155, 98, 0.35)' }}>
+                                        <span style={{ fontSize: '12px', fontWeight: 900, color: '#F8FAFC', background: 'rgba(15, 20, 30, 0.85)', padding: '2px 8px', borderRadius: '6px', border: '1px solid rgba(0, 229, 255, 0.25)' }}>
                                             {totalReturnable} {isEn ? 'Bottles' : 'عبوة'}
                                         </span>
                                     </div>
@@ -2804,9 +2810,9 @@ export default function PosPage() {
                                     className="btn-main-glass"
                                     style={{ 
                                         width: '100%', marginTop: '3px', 
-                                        background: 'linear-gradient(135deg, #A8573C 0%, #8C3D26 100%)', 
+                                        background: 'linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)', 
                                         color: 'white', fontSize: '14px', fontWeight: 900, padding: '12px 16px',
-                                        boxShadow: '0 4px 16px rgba(168, 87, 60, 0.35)',
+                                        boxShadow: '0 4px 16px rgba(239, 68, 68, 0.35)',
                                         cursor: 'pointer',
                                         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
                                         borderRadius: '13px',
@@ -2826,16 +2832,16 @@ export default function PosPage() {
                                     style={{ 
                                         width: '100%', marginTop: '3px', 
                                         background: logic.cart.length > 0 
-                                            ? 'linear-gradient(135deg, #C29B62 0%, #A8573C 100%)' 
-                                            : 'rgba(44, 26, 18, 0.12)', 
-                                        color: logic.cart.length > 0 ? '#ffffff' : 'rgba(44, 26, 18, 0.4)', 
+                                            ? 'linear-gradient(135deg, #00E5FF 0%, #0088CC 100%)' 
+                                            : 'rgba(255, 255, 255, 0.06)', 
+                                        color: logic.cart.length > 0 ? '#0B0E14' : '#64748b', 
                                         fontSize: '15.5px', fontWeight: 900, padding: '12px 18px',
-                                        boxShadow: logic.cart.length > 0 ? '0 5px 20px rgba(168, 87, 60, 0.38)' : 'none',
+                                        boxShadow: logic.cart.length > 0 ? '0 0 25px rgba(0, 229, 255, 0.45)' : 'none',
                                         cursor: logic.cart.length > 0 && !logic.isCheckingOut ? 'pointer' : 'not-allowed',
                                         display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
                                         borderRadius: '13px',
                                         minHeight: '48px',
-                                        border: logic.cart.length > 0 ? '1px solid rgba(255, 255, 255, 0.25)' : 'none',
+                                        border: logic.cart.length > 0 ? '1px solid rgba(0, 229, 255, 0.3)' : 'none',
                                         transition: 'all 0.2s cubic-bezier(0.16, 1, 0.3, 1)'
                                     }}
                                 >

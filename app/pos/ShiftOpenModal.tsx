@@ -220,66 +220,63 @@ export default function ShiftOpenModal({
     return (
         <div style={{
             position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
-            background: 'rgba(15, 23, 42, 0.65)',
-            backdropFilter: 'blur(12px)',
-            WebkitBackdropFilter: 'blur(12px)',
+            background: 'rgba(11, 14, 20, 0.85)',
+            backdropFilter: 'blur(16px)',
+            WebkitBackdropFilter: 'blur(16px)',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             zIndex: 99999,
             padding: '15px'
         }}>
             <style>{`
                 .aqua-shift-btn {
-                    background: linear-gradient(135deg, #2891C8 0%, #1C73AB 100%);
-                    color: white;
-                    border: 1px solid rgba(255, 255, 255, 0.4);
-                    border-radius: 16px;
+                    background: linear-gradient(135deg, #00E5FF 0%, #0088CC 100%);
+                    color: #0B0E14;
+                    border: none;
+                    border-radius: 14px;
                     width: 100%;
                     padding: 14px;
                     font-size: 16px;
                     font-weight: 900;
                     cursor: pointer;
                     transition: all 0.3s ease;
-                    box-shadow: 0 4px 15px rgba(194, 155, 98, 0.35);
-                    border-radius: 14px;
-                    border: none;
-                    color: #fff;
+                    box-shadow: 0 0 20px rgba(0, 229, 255, 0.4);
                 }
                 .aqua-shift-btn:hover:not(:disabled) {
-                    transform: translateY(-3px);
-                    box-shadow: 0 8px 20px rgba(168, 87, 60, 0.35);
-                    filter: brightness(1.05);
+                    transform: translateY(-2px);
+                    box-shadow: 0 0 25px rgba(0, 229, 255, 0.6);
+                    filter: brightness(1.1);
                 }
                 .aqua-shift-input {
                     width: 100%;
-                    background: rgba(255, 253, 250, 0.9);
-                    border: 2px solid rgba(194, 155, 98, 0.3);
+                    background: rgba(15, 20, 30, 0.85);
+                    border: 2px solid rgba(0, 229, 255, 0.3);
                     border-radius: 14px;
                     padding: 12px;
                     font-size: 24px;
                     font-weight: 900;
                     text-align: center;
-                    color: #2C1A12;
+                    color: #00E5FF;
                     transition: all 0.3s ease;
                     outline: none;
                     box-sizing: border-box;
                 }
                 .aqua-shift-input:focus {
-                    border-color: #C29B62;
-                    box-shadow: 0 0 15px rgba(194, 155, 98, 0.25);
-                    background: #ffffff;
+                    border-color: #00E5FF;
+                    box-shadow: 0 0 15px rgba(0, 229, 255, 0.35);
+                    background: rgba(15, 20, 30, 0.95);
                 }
                 .aqua-glass-card {
-                    background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(255, 253, 250, 0.85) 100%);
+                    background: linear-gradient(135deg, rgba(20, 24, 34, 0.98) 0%, rgba(13, 16, 24, 0.95) 100%);
                     backdrop-filter: blur(24px) saturate(160%);
                     WebkitBackdropFilter: blur(24px) saturate(160%);
-                    border: 1px solid rgba(194, 155, 98, 0.3);
+                    border: 1px solid rgba(0, 229, 255, 0.25);
                     border-radius: 24px;
                     width: 95vw;
                     max-width: 480px;
                     padding: 30px 24px;
                     text-align: right;
-                    box-shadow: 0 15px 40px rgba(44, 26, 18, 0.15);
-                    animation: fadeUp 0.4s ease-out;
+                    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 229, 255, 0.1);
+                    animation: fadeUp 0.35s ease-out;
                     direction: rtl;
                 }
                 @keyframes fadeUp {
@@ -290,18 +287,22 @@ export default function ShiftOpenModal({
                     width: 100%;
                     padding: 10px 14px;
                     border-radius: 12px;
-                    border: 1.5px solid rgba(194, 155, 98, 0.3);
-                    background: rgba(255, 253, 250, 0.9);
+                    border: 1.5px solid rgba(0, 229, 255, 0.25);
+                    background: rgba(15, 20, 30, 0.85);
                     font-size: 13px;
                     font-weight: 700;
-                    color: #2C1A12;
+                    color: #F8FAFC;
                     outline: none;
                     transition: 0.2s;
                     box-sizing: border-box;
                 }
+                .shift-select-field option {
+                    background: #141822;
+                    color: #F8FAFC;
+                }
                 .shift-select-field:focus {
-                    border-color: #C29B62;
-                    box-shadow: 0 0 0 3px rgba(194, 155, 98, 0.15);
+                    border-color: #00E5FF;
+                    box-shadow: 0 0 0 3px rgba(0, 229, 255, 0.2);
                 }
             `}</style>
             
@@ -312,7 +313,7 @@ export default function ShiftOpenModal({
                         type="button"
                         style={{ 
                             position: 'absolute', top: 18, left: 18, 
-                            background: '#fee2e2', border: 'none', 
+                            background: 'rgba(239, 68, 68, 0.15)', border: '1px solid rgba(239, 68, 68, 0.3)', 
                             fontSize: '15px', color: '#ef4444',
                             width: '32px', height: '32px', borderRadius: '50%',
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
@@ -324,16 +325,16 @@ export default function ShiftOpenModal({
                 )}
                 <div style={{ textAlign: 'center', marginBottom: '14px' }}>
                     <div style={{ fontSize: '42px', marginBottom: '4px' }}>💵</div>
-                    <h2 style={{ color: '#2C1A12', margin: 0, fontWeight: 900, fontSize: '21px' }}>{isEn ? 'Open New Shift' : 'فتح وردية جديدة'}</h2>
-                    <p style={{ color: 'rgba(44, 26, 18, 0.6)', margin: '4px 0 0 0', fontWeight: 700, fontSize: '12px' }}>
+                    <h2 style={{ color: '#F8FAFC', margin: 0, fontWeight: 900, fontSize: '21px' }}>{isEn ? 'Open New Shift' : 'فتح وردية جديدة'}</h2>
+                    <p style={{ color: '#94A3B8', margin: '4px 0 0 0', fontWeight: 700, fontSize: '12px' }}>
                         {isEn ? 'Record opening cash and start register' : 'تسجيل العهدة الافتتاحية وبدء تشغيل الصندوق'}
                     </p>
                 </div>
 
                 {/* اختيار وتحديد منفذ البيع والمندوب */}
                 <div style={{
-                    background: 'rgba(194, 155, 98, 0.08)',
-                    border: '1px solid rgba(194, 155, 98, 0.25)',
+                    background: 'rgba(15, 20, 30, 0.7)',
+                    border: '1px solid rgba(0, 229, 255, 0.2)',
                     borderRadius: '16px',
                     padding: '14px',
                     marginBottom: '16px',
@@ -342,7 +343,7 @@ export default function ShiftOpenModal({
                     gap: '10px'
                 }}>
                     <div>
-                        <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#2C1A12', marginBottom: '5px' }}>
+                        <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#F8FAFC', marginBottom: '5px' }}>
                             🏪 {isEn ? 'Branch / Warehouse to open shift for:' : 'منفذ البيع / المستودع المراد فتح ورديته:'}
                         </label>
                         <select 
@@ -363,7 +364,7 @@ export default function ShiftOpenModal({
                     </div>
 
                     <div>
-                        <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#2C1A12', marginBottom: '5px' }}>
+                        <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#F8FAFC', marginBottom: '5px' }}>
                             👤 {isEn ? 'Responsible Employee / Cashier:' : 'الموظف / الكاشير المسؤول عن الوردية:'}
                         </label>
                         <select 
@@ -391,27 +392,27 @@ export default function ShiftOpenModal({
                 {/* ⛔ تنبيه الحماية 1: المستودع لديه وردية مفتوحة بالفعل */}
                 {existingWarehouseShift && (
                     <div style={{
-                        background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.12) 0%, rgba(220, 38, 38, 0.05) 100%)',
-                        border: '1.5px solid #ef4444',
+                        background: 'linear-gradient(135deg, rgba(239, 68, 68, 0.15) 0%, rgba(220, 38, 38, 0.08) 100%)',
+                        border: '1.5px solid rgba(239, 68, 68, 0.4)',
                         borderRadius: '16px',
                         padding: '14px',
                         marginBottom: '16px',
                         textAlign: 'right'
                     }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#dc2626', fontWeight: 900, fontSize: '14px', marginBottom: '6px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#f87171', fontWeight: 900, fontSize: '14px', marginBottom: '6px' }}>
                             <span style={{ fontSize: '18px' }}>⛔</span>
                             <span>{isEn ? 'Branch already running!' : 'المستودع قيد التشغيل بالفعل!'}</span>
                         </div>
-                        <p style={{ color: '#991b1b', fontSize: '12.5px', margin: '0 0 8px 0', lineHeight: 1.6, fontWeight: 700 }}>
+                        <p style={{ color: '#fca5a5', fontSize: '12.5px', margin: '0 0 8px 0', lineHeight: 1.6, fontWeight: 700 }}>
                             {isEn ? 'There is currently an active shift in ' : 'توجد حالياً وردية مفتوحة في '}<strong>{selectedWarehouse?.name}</strong>{isEn ? ' ID: ' : ' برقم '}<strong>#{String(existingWarehouseShift.id).slice(-6)}</strong>.
                             <br />
-                            {isEn ? 'Current Cashier: ' : 'المسؤول الحالي: '}<strong style={{ color: '#111827' }}>{(Array.isArray(existingWarehouseShift.delegate) ? existingWarehouseShift.delegate[0]?.name : (existingWarehouseShift.delegate as any)?.name) || (isEn ? 'Direct Sales' : 'مبيعات مباشرة')}</strong>.
+                            {isEn ? 'Current Cashier: ' : 'المسؤول الحالي: '}<strong style={{ color: '#F8FAFC' }}>{(Array.isArray(existingWarehouseShift.delegate) ? existingWarehouseShift.delegate[0]?.name : (existingWarehouseShift.delegate as any)?.name) || (isEn ? 'Direct Sales' : 'مبيعات مباشرة')}</strong>.
                         </p>
                         <div style={{
-                            background: 'rgba(255, 255, 255, 0.9)',
+                            background: 'rgba(239, 68, 68, 0.2)',
                             padding: '8px 10px',
                             borderRadius: '10px',
-                            color: '#b91c1c',
+                            color: '#fca5a5',
                             fontSize: '11.5px',
                             fontWeight: 800,
                             border: '1px dashed #ef4444'
@@ -424,18 +425,18 @@ export default function ShiftOpenModal({
                 {/* ⚠️ تنبيه الحماية 2: المندوب لديه وردية مفتوحة في مستودع آخر */}
                 {isConflictWithOtherWarehouse && (
                     <div style={{
-                        background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.12) 0%, rgba(217, 119, 6, 0.05) 100%)',
-                        border: '1.5px solid #f59e0b',
+                        background: 'linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.08) 100%)',
+                        border: '1.5px solid rgba(245, 158, 11, 0.4)',
                         borderRadius: '16px',
                         padding: '14px',
                         marginBottom: '16px',
                         textAlign: 'right'
                     }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#d97706', fontWeight: 900, fontSize: '14px', marginBottom: '6px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#fbbf24', fontWeight: 900, fontSize: '14px', marginBottom: '6px' }}>
                             <span style={{ fontSize: '18px' }}>⚠️</span>
                             <span>{isEn ? 'Rep has active shift in another branch!' : 'المندوب مسؤول عن وردية نشطة في منفذ آخر!'}</span>
                         </div>
-                        <p style={{ color: '#92400e', fontSize: '12.5px', margin: 0, lineHeight: 1.6, fontWeight: 700 }}>
+                        <p style={{ color: '#fcd34d', fontSize: '12.5px', margin: 0, lineHeight: 1.6, fontWeight: 700 }}>
                             {isEn ? 'Rep ' : 'المندوب '}<strong>{selectedDelegate?.name}</strong>{isEn ? ' is currently managing an active shift in ' : ' يدير حالياً وردية نشطة في '}<strong>{(Array.isArray(existingDelegateShift?.warehouse) ? existingDelegateShift?.warehouse[0]?.name : (existingDelegateShift?.warehouse as any)?.name) || (isEn ? 'another branch' : 'منفذ آخر')}</strong>.
                             <br />
                             {isEn ? 'A rep cannot manage two shifts simultaneously.' : 'المسؤول شخص واحد ولا يمكن الجمع بين ورديتين لنفس الشخص في نفس الوقت.'}
@@ -446,18 +447,18 @@ export default function ShiftOpenModal({
                 {/* 👑 إشعار الإدارة: إمكانية فتح وإشراف ورديات متعددة للفروع المستقلة */}
                 {isManagerOrAdmin && existingDelegateShift && existingDelegateShift.id !== existingWarehouseShift?.id && !existingWarehouseShift && (
                     <div style={{
-                        background: 'linear-gradient(135deg, rgba(194, 155, 98, 0.15) 0%, rgba(168, 87, 60, 0.08) 100%)',
-                        border: '1.5px solid rgba(194, 155, 98, 0.45)',
+                        background: 'rgba(0, 229, 255, 0.08)',
+                        border: '1.5px solid rgba(0, 229, 255, 0.3)',
                         borderRadius: '16px',
                         padding: '12px 14px',
                         marginBottom: '16px',
                         textAlign: 'right'
                     }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#A8573C', fontWeight: 900, fontSize: '13px', marginBottom: '4px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#00E5FF', fontWeight: 900, fontSize: '13px', marginBottom: '4px' }}>
                             <span style={{ fontSize: '16px' }}>👑</span>
                             <span>{isEn ? 'Management Mode: Multi-Branch Shifts Permitted' : 'وضع الإدارة: فتح وإدارة ورديات مستقلة للفروع متاح'}</span>
                         </div>
-                        <p style={{ color: '#2C1A12', fontSize: '12px', margin: 0, lineHeight: 1.5, fontWeight: 700 }}>
+                        <p style={{ color: '#94A3B8', fontSize: '12px', margin: 0, lineHeight: 1.5, fontWeight: 700 }}>
                             {isEn 
                                 ? 'As an administrator, you can open and supervise independent shifts across different branches simultaneously.' 
                                 : 'بصفتك مديراً / مسؤول نظام، يمكنك فتح وردية مستقلة تماماً لهذا الفرع مع بقاء ورديات الفروع الأخرى نشطة ومستقلة بمبيعاتها وخزينتها.'}
@@ -468,18 +469,18 @@ export default function ShiftOpenModal({
                 {/* 🔄 إشعار استئناف وردية اليوم لنفس المندوب */}
                 {todayClosedShift && !existingWarehouseShift && !isConflictWithOtherWarehouse && (
                     <div style={{
-                        background: 'linear-gradient(135deg, rgba(40, 145, 200, 0.12) 0%, rgba(28, 115, 171, 0.05) 100%)',
-                        border: '1.5px solid #2891C8',
+                        background: 'rgba(16, 185, 129, 0.08)',
+                        border: '1.5px solid rgba(16, 185, 129, 0.3)',
                         borderRadius: '16px',
                         padding: '12px 14px',
                         marginBottom: '16px',
                         textAlign: 'right'
                     }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#1C73AB', fontWeight: 900, fontSize: '13.5px', marginBottom: '4px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: '#10B981', fontWeight: 900, fontSize: '13.5px', marginBottom: '4px' }}>
                             <span style={{ fontSize: '18px' }}>🔄</span>
                             <span>{isEn ? 'Resume today\'s shift for this rep' : 'استئناف وردية اليوم لنفس المندوب'}</span>
                         </div>
-                        <p style={{ color: '#0369a1', fontSize: '12px', margin: 0, lineHeight: 1.5, fontWeight: 700 }}>
+                        <p style={{ color: '#94A3B8', fontSize: '12px', margin: 0, lineHeight: 1.5, fontWeight: 700 }}>
                             {isEn ? 'There is a closed shift today for this rep in this branch ID: ' : 'توجد وردية أُغلقت اليوم لهذا المندوب في هذا المنفذ برقم '}<strong>#{todayClosedShift.shift_number || String(todayClosedShift.id).slice(-6)}</strong>.
                             <br />
                             {isEn ? 'Clicking below will ' : 'النقر أدناه سيقوم بـ '}<strong>{isEn ? 'resume the same shift' : 'استئناف نفس الوردية'}</strong>{isEn ? ' to continue today\'s sales.' : ' لتكملة مبيعات اليوم عليها دون فتح وردية مكررة.'}
@@ -488,7 +489,7 @@ export default function ShiftOpenModal({
                 )}
 
                 <div style={{ textAlign: 'right', marginBottom: '20px' }}>
-                    <label style={{ display: 'block', marginBottom: '6px', color: '#1C73AB', fontWeight: 900, fontSize: '13px' }}>
+                    <label style={{ display: 'block', marginBottom: '6px', color: '#00E5FF', fontWeight: 900, fontSize: '13px' }}>
                         {isEn ? 'Opening Cash (Amount in register SAR):' : 'العهدة الافتتاحية (المبلغ بالدرج الآن بالريال):'}
                     </label>
                     <input 
@@ -522,10 +523,11 @@ export default function ShiftOpenModal({
                             opacity: (!targetWarehouseId || !!existingWarehouseShift || !!isConflictWithOtherWarehouse) ? 0.6 : 1,
                             cursor: (!targetWarehouseId || !!existingWarehouseShift || !!isConflictWithOtherWarehouse) ? 'not-allowed' : 'pointer',
                             background: (existingWarehouseShift || isConflictWithOtherWarehouse)
-                                ? '#94a3b8'
+                                ? '#334155'
                                 : todayClosedShift
-                                    ? 'linear-gradient(135deg, #4E734F 0%, #2C1A12 100%)'
-                                    : 'linear-gradient(135deg, #C29B62 0%, #A8573C 100%)'
+                                    ? 'linear-gradient(135deg, #10B981 0%, #059669 100%)'
+                                    : 'linear-gradient(135deg, #00E5FF 0%, #0284C7 100%)',
+                            color: (existingWarehouseShift || isConflictWithOtherWarehouse) ? '#94a3b8' : '#0B0E14'
                         }}
                     >
                         {openShiftMutation.isPending 
@@ -547,9 +549,9 @@ export default function ShiftOpenModal({
                             type="button"
                             style={{
                                 flex: 1,
-                                background: '#f1f5f9',
-                                color: '#64748b',
-                                border: 'none',
+                                background: 'rgba(255, 255, 255, 0.06)',
+                                color: '#94A3B8',
+                                border: '1px solid rgba(255, 255, 255, 0.12)',
                                 borderRadius: '16px',
                                 fontWeight: 800,
                                 fontSize: '14px',

@@ -258,7 +258,7 @@ export default function PrintStatement() {
             </div>
             ) : (
             <div className="thermal-preview-box">
-                <div style={{ fontSize: '18px', fontWeight: 900, marginBottom: '5px' }}>صيدلية تاج المودة البيطرية</div>
+                <div style={{ fontSize: '18px', fontWeight: 900, marginBottom: '5px' }}>محطات النور للوقود</div>
                 <div>كشف حساب | Account Statement</div>
                 <div style={{ borderBottom: '1px dashed #000', margin: '10px 0' }}></div>
                 
@@ -305,7 +305,7 @@ export default function PrintStatement() {
                 <div style={{ borderBottom: '1px dashed #000', margin: '10px 0' }}></div>
 
                 <div style={{ fontSize: '11px', marginTop: '10px', textAlign: 'center' }}>
-                    تم الإصدار عبر نظام تاج المودة
+                    تم الإصدار عبر نظام محطات النور
                 </div>
             </div>
             )}

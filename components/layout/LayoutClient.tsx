@@ -307,7 +307,7 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
   }
 
   if (!mounted || !isInitialized || loading) {
-    return <LoadingScreen message="جاري تهيئة نظام صيدلية تاج المودة..." />; 
+    return <LoadingScreen message="جاري تهيئة نظام محطات النور للوقود..." />; 
   }
 
   // فلترة القوائم حسب الصلاحيات
@@ -393,14 +393,15 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
   return (
     <div style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh', overflowX: 'hidden' }}>
       
-      {/* 🏜️ أنماط Desert Glassmorphism المتقدمة للـ Layout الفاخر */}
+      {/* ⚡ أنماط Dark Titanium Glassmorphism لمركز القيادة والقائمة العائمة */}
       <style dangerouslySetInnerHTML={{__html: `
         :root {
-          --desert-brown: #2C1A12;
-          --desert-gold: #C29B62;
-          --desert-clay: #A8573C;
-          --desert-pearl: #FDFBF7;
-          --desert-oasis: #4E734F;
+          --titanium-bg: #0B0E14;
+          --titanium-surface: #141822;
+          --electric-cyan: #00E5FF;
+          --neon-emerald: #10B981;
+          --neon-amber: #F59E0B;
+          --titanium-border: rgba(0, 229, 255, 0.25);
         }
 
         /* =================== الزر العائم القابل للسحب (Draggable FAB) =================== */
@@ -409,11 +410,11 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
           bottom: 30px; left: 30px; right: auto;
           width: 66px; height: 66px;
           border-radius: 50%;
-          background: linear-gradient(135deg, rgba(255, 253, 250, 0.94) 0%, rgba(255, 253, 250, 0.7) 100%);
+          background: linear-gradient(135deg, rgba(20, 24, 34, 0.95) 0%, rgba(15, 20, 30, 0.85) 100%);
           backdrop-filter: blur(24px) saturate(160%);
           -webkit-backdrop-filter: blur(24px) saturate(160%);
-          border: 1.5px solid rgba(194, 155, 98, 0.5);
-          box-shadow: 0 10px 30px rgba(44, 26, 18, 0.15), inset 0 0 12px rgba(255, 253, 250, 0.8);
+          border: 1.5px solid rgba(0, 229, 255, 0.4);
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(0, 229, 255, 0.2);
           cursor: grab; z-index: 9990;
           display: flex; align-items: center; justify-content: center;
           transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s ease;
@@ -430,21 +431,21 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
           cursor: grabbing !important;
           transition: none !important;
           transform: scale(1.12) !important;
-          box-shadow: 0 15px 35px rgba(168, 87, 60, 0.35) !important;
+          box-shadow: 0 15px 35px rgba(0, 229, 255, 0.35) !important;
           opacity: 0.95 !important;
         }
         .fab-main:hover { 
           transform: scale(1.08) rotate(6deg); 
-          background: rgba(255, 253, 250, 0.98); 
-          border-color: #C29B62; 
-          box-shadow: 0 12px 35px rgba(194, 155, 98, 0.35);
+          background: rgba(25, 30, 44, 0.98); 
+          border-color: #00E5FF; 
+          box-shadow: 0 12px 35px rgba(0, 229, 255, 0.35);
         }
         .fab-main:active { transform: scale(0.95); }
         .fab-logo { 
           width: 100%; height: 100%; 
           object-fit: contain; 
           pointer-events: none; 
-          filter: drop-shadow(0 2px 4px rgba(44,26,18,0.25));
+          filter: drop-shadow(0 0 6px rgba(0, 229, 255, 0.4));
         }
 
         /* =================== مركز القيادة الزجاجي (Command Hub Overlay) =================== */
@@ -458,7 +459,7 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
 
         .overlay-backdrop {
           position: fixed; inset: 0; z-index: 10000;
-          background: rgba(44, 26, 18, 0.55);
+          background: rgba(11, 14, 20, 0.85);
           backdrop-filter: blur(28px) saturate(160%);
           -webkit-backdrop-filter: blur(28px) saturate(160%);
           opacity: ${isOpen ? 1 : 0};
@@ -477,8 +478,8 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
 
         /* ترويسة القائمة الفاخرة */
         .admin-header-glass {
-          background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(255, 253, 250, 0.8) 100%);
-          border: 1px solid rgba(194, 155, 98, 0.4);
+          background: linear-gradient(135deg, rgba(20, 24, 34, 0.96) 0%, rgba(15, 20, 30, 0.92) 100%);
+          border: 1px solid rgba(0, 229, 255, 0.25);
           border-radius: 22px;
           padding: 16px 24px;
           display: flex;
@@ -486,7 +487,7 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
           justify-content: space-between;
           backdrop-filter: blur(24px) saturate(160%);
           -webkit-backdrop-filter: blur(24px) saturate(160%);
-          box-shadow: 0 10px 30px rgba(44, 26, 18, 0.08);
+          box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
           gap: 15px;
           flex-wrap: wrap;
         }
@@ -502,13 +503,13 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
           width: 48px;
           height: 48px;
           border-radius: 14px;
-          background: linear-gradient(135deg, rgba(255, 253, 250, 0.95), rgba(194, 155, 98, 0.25));
-          border: 1.5px solid rgba(194, 155, 98, 0.45);
+          background: rgba(0, 229, 255, 0.1);
+          border: 1.5px solid rgba(0, 229, 255, 0.35);
           display: flex;
           align-items: center;
           justify-content: center;
           padding: 4px;
-          box-shadow: 0 4px 12px rgba(44, 26, 18, 0.08);
+          box-shadow: 0 0 12px rgba(0, 229, 255, 0.15);
         }
         .brand-logo-img {
           width: 100%;
@@ -522,13 +523,13 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
         .brand-title {
           font-size: 17px;
           font-weight: 900;
-          color: #2C1A12;
+          color: #F8FAFC;
           line-height: 1.2;
         }
         .brand-subtitle {
           font-size: 12px;
           font-weight: 700;
-          color: #C29B62;
+          color: #00E5FF;
           letter-spacing: 0.3px;
         }
 
@@ -536,9 +537,9 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
           display: flex;
           align-items: center;
           gap: 6px;
-          background: rgba(78, 115, 79, 0.12);
-          border: 1px solid rgba(78, 115, 79, 0.35);
-          color: #4E734F;
+          background: rgba(16, 185, 129, 0.15);
+          border: 1px solid rgba(16, 185, 129, 0.35);
+          color: #10B981;
           padding: 6px 14px;
           border-radius: 20px;
           font-size: 12px;
@@ -547,9 +548,9 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
         .online-dot-pulse {
           width: 8px;
           height: 8px;
-          background: #4E734F;
+          background: #10B981;
           border-radius: 50%;
-          box-shadow: 0 0 10px #4E734F;
+          box-shadow: 0 0 10px #10B981;
           animation: pulseGreen 2s infinite ease-in-out;
         }
         @keyframes pulseGreen {
@@ -561,9 +562,9 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
           display: flex;
           align-items: center;
           gap: 6px;
-          background: rgba(220, 38, 38, 0.08);
-          color: #dc2626;
-          border: 1px solid rgba(220, 38, 38, 0.25);
+          background: rgba(220, 38, 38, 0.1);
+          color: #f87171;
+          border: 1px solid rgba(220, 38, 38, 0.3);
           padding: 8px 16px;
           border-radius: 12px;
           font-size: 12.5px;
@@ -572,43 +573,43 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
           transition: all 0.2s ease;
         }
         .btn-logout-header:hover {
-          background: #fee2e2;
-          border-color: #dc2626;
+          background: rgba(220, 38, 38, 0.25);
+          border-color: #f87171;
         }
 
         .btn-close-modal {
           width: 42px;
           height: 42px;
           border-radius: 12px;
-          background: rgba(44, 26, 18, 0.06);
-          border: 1px solid rgba(194, 155, 98, 0.25);
+          background: rgba(255, 255, 255, 0.06);
+          border: 1px solid rgba(255, 255, 255, 0.12);
           display: flex;
           align-items: center;
           justify-content: center;
           cursor: pointer;
-          color: #2C1A12;
+          color: #94A3B8;
           transition: all 0.2s ease;
         }
         .btn-close-modal:hover {
-          background: #A8573C;
-          color: #FFFFFF;
-          border-color: #A8573C;
+          background: rgba(239, 68, 68, 0.2);
+          color: #f87171;
+          border-color: rgba(239, 68, 68, 0.4);
           transform: translateY(-2px);
         }
 
         .group-section {
-          background: linear-gradient(135deg, rgba(255, 253, 250, 0.88) 0%, rgba(255, 253, 250, 0.6) 100%);
+          background: linear-gradient(135deg, rgba(20, 24, 34, 0.92) 0%, rgba(15, 20, 30, 0.85) 100%);
           backdrop-filter: blur(24px) saturate(160%);
           -webkit-backdrop-filter: blur(24px) saturate(160%);
-          border: 1px solid rgba(194, 155, 98, 0.32);
+          border: 1px solid rgba(0, 229, 255, 0.2);
           border-radius: 24px; padding: 22px;
-          box-shadow: 0 12px 30px rgba(44, 26, 18, 0.05), inset 0 0 15px rgba(255, 253, 250, 0.6);
+          box-shadow: 0 12px 30px rgba(0, 0, 0, 0.4);
           display: flex; flex-direction: column; gap: 15px;
         }
 
         .group-header {
-          font-size: 14px; font-weight: 900; color: #2C1A12;
-          border-bottom: 2px solid rgba(194, 155, 98, 0.3);
+          font-size: 14px; font-weight: 900; color: #00E5FF;
+          border-bottom: 2px solid rgba(0, 229, 255, 0.2);
           padding-bottom: 8px; margin-bottom: 8px;
           display: flex; align-items: center; justify-content: space-between;
           text-transform: uppercase; letter-spacing: 0.5px;
@@ -621,15 +622,15 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
         }
 
         .nav-card {
-          background: linear-gradient(135deg, rgba(255, 253, 250, 0.85) 0%, rgba(255, 253, 250, 0.5) 100%);
-          border: 1px solid rgba(194, 155, 98, 0.3);
+          background: rgba(20, 24, 34, 0.7);
+          border: 1px solid rgba(255, 255, 255, 0.08);
           backdrop-filter: blur(24px) saturate(160%);
           -webkit-backdrop-filter: blur(24px) saturate(160%);
           border-radius: 18px; padding: 14px 18px;
           display: flex; align-items: center; justify-content: space-between;
-          text-decoration: none; color: #2C1A12;
+          text-decoration: none; color: #F8FAFC;
           transition: all 0.28s cubic-bezier(0.25, 0.8, 0.25, 1);
-          box-shadow: 0 4px 10px rgba(44, 26, 18, 0.04);
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
           position: relative; overflow: hidden;
           opacity: ${isOpen ? 1 : 0};
           transform: ${isOpen ? 'translateY(0)' : 'translateY(20px)'};
@@ -637,16 +638,16 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
         }
 
         .nav-card:hover {
-          background: #FFFFFF;
+          background: rgba(28, 34, 48, 0.9);
           transform: translateY(-4px) !important;
-          box-shadow: 0 10px 22px rgba(168, 87, 60, 0.16) !important;
-          border-color: #C29B62;
+          box-shadow: 0 8px 25px rgba(0, 229, 255, 0.2) !important;
+          border-color: #00E5FF;
         }
 
         .nav-card.active {
-          background: linear-gradient(135deg, #FFFFFF, rgba(253, 251, 247, 0.95));
-          border: 2px solid #C29B62;
-          box-shadow: 0 8px 24px rgba(194, 155, 98, 0.25);
+          background: linear-gradient(135deg, rgba(0, 229, 255, 0.15), rgba(20, 24, 34, 0.95));
+          border: 2px solid #00E5FF;
+          box-shadow: 0 8px 24px rgba(0, 229, 255, 0.25);
         }
 
         .nav-card-left {
@@ -661,10 +662,11 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
         .icon-wrapper {
           width: 40px; height: 40px;
           min-width: 40px;
-          background: linear-gradient(135deg, rgba(255, 253, 250, 0.95), rgba(194, 155, 98, 0.2));
+          background: rgba(0, 229, 255, 0.1);
           border-radius: 12px; display: flex; align-items: center; justify-content: center;
-          font-size: 19px; box-shadow: 0 3px 8px rgba(44, 26, 18, 0.05);
-          border: 1px solid rgba(194, 155, 98, 0.35);
+          font-size: 19px; box-shadow: 0 3px 8px rgba(0, 0, 0, 0.2);
+          border: 1px solid rgba(0, 229, 255, 0.25);
+          color: #00E5FF;
           flex-shrink: 0;
         }
 
@@ -677,7 +679,7 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
         .nav-title {
           font-weight: 800;
           font-size: 13.5px;
-          color: #2C1A12;
+          color: #F8FAFC;
           line-height: 1.25;
           white-space: nowrap;
           overflow: hidden;
@@ -687,9 +689,9 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
         .nav-card-active-dot {
           width: 8px;
           height: 8px;
-          background: #4E734F;
+          background: #00E5FF;
           border-radius: 50%;
-          box-shadow: 0 0 10px #4E734F;
+          box-shadow: 0 0 10px #00E5FF;
         }
 
         @keyframes slideUpFade {
@@ -725,12 +727,12 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
             left: 12px;
             right: 12px;
             height: 62px;
-            background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(255, 253, 250, 0.8) 100%);
+            background: linear-gradient(135deg, rgba(20, 24, 34, 0.98) 0%, rgba(15, 20, 30, 0.95) 100%);
             backdrop-filter: blur(24px) saturate(160%);
             -webkit-backdrop-filter: blur(24px) saturate(160%);
-            border: 1px solid rgba(194, 155, 98, 0.4);
+            border: 1px solid rgba(0, 229, 255, 0.25);
             border-radius: 22px;
-            box-shadow: 0 10px 25px rgba(44, 26, 18, 0.15);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.6);
             z-index: 999;
             align-items: center;
             justify-content: space-around;
@@ -744,7 +746,7 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
             justify-content: center;
             gap: 3px;
             text-decoration: none;
-            color: rgba(44, 26, 18, 0.65);
+            color: #94A3B8;
             font-size: 10.5px;
             font-weight: 800;
             padding: 6px 10px;
@@ -754,8 +756,8 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
             flex: 1;
           }
           .dock-item.active {
-            color: #A8573C;
-            background: rgba(194, 155, 98, 0.15);
+            color: #00E5FF;
+            background: rgba(0, 229, 255, 0.12);
           }
           .dock-item.active::after {
             content: '';
@@ -764,7 +766,8 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
             width: 5px;
             height: 5px;
             border-radius: 50%;
-            background: #A8573C;
+            background: #00E5FF;
+            box-shadow: 0 0 6px #00E5FF;
           }
           .dock-item svg {
             width: 20px;
@@ -804,7 +807,7 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
         onClick={handleClick}
         title="القائمة العائمة (يمكنك سحبها وتحريكها في أي مكان)"
       >
-        <img src="/taj_logo.png" alt="شعار صيدلية تاج المودة" className="fab-logo" draggable="false" />
+        <img src="/logo.png" alt="Noor Gas Station" className="fab-logo" />
       </div>
 
       {/* 3️⃣ مركز القيادة الشامل (Command Hub Modal) */}
@@ -821,10 +824,10 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
           <div className="admin-header-glass">
             <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
               <div className="brand-logo-wrap">
-                <img src="/taj_logo.png" alt="شعار صيدلية تاج المودة" className="brand-logo-img" />
+                <img src="/logo.png" alt="Noor Gas Station" className="brand-logo-img" />
               </div>
               <div className="brand-text-block">
-                <span className="brand-title">صيدلية تاج المودة البيطرية</span>
+                <span className="brand-title">محطات النور للوقود</span>
                 <span className="brand-subtitle">
                   {language === 'en' ? `Management Portal | ${role === 'super_admin' ? 'Super Admin' : 'Staff'}` : `بوابة الإدارة الشاملة | ${role === 'super_admin' ? 'مدير النظام' : 'صلاحيات مستخدم'}`}
                 </span>
@@ -841,9 +844,9 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
                 onClick={toggleLowGraphics}
                 className="btn-logout-header"
                 style={{ 
-                  color: lowGraphics ? '#C29B62' : '#2C1A12', 
-                  background: lowGraphics ? 'rgba(194, 155, 98, 0.15)' : 'rgba(44, 26, 18, 0.05)',
-                  borderColor: lowGraphics ? 'rgba(194, 155, 98, 0.4)' : 'rgba(44, 26, 18, 0.1)'
+                  color: lowGraphics ? '#00E5FF' : '#94A3B8', 
+                  background: lowGraphics ? 'rgba(0, 229, 255, 0.15)' : 'rgba(255, 255, 255, 0.06)',
+                  borderColor: lowGraphics ? 'rgba(0, 229, 255, 0.4)' : 'rgba(255, 255, 255, 0.1)'
                 }}
                 title={language === 'en' ? 'Performance Mode' : 'وضع الأداء السريع (للجوالات القديمة)'}
               >
@@ -876,7 +879,7 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
               <div key={gIdx} className="group-section">
                 <div className="group-header">
                   <span>{groupTitle}</span>
-                  <span style={{ fontSize: '11px', color: '#C29B62', background: 'rgba(194, 155, 98, 0.15)', padding: '2px 8px', borderRadius: '10px' }}>
+                  <span style={{ fontSize: '11px', color: '#00E5FF', background: 'rgba(0, 229, 255, 0.15)', padding: '2px 8px', borderRadius: '10px' }}>
                     {group.items.length} {language === 'en' ? 'Screens' : 'شاشات'}
                   </span>
                 </div>
@@ -892,13 +895,13 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
                             <div className="icon-wrapper">{item.icon}</div>
                             <div className="nav-title-block">
                               <span className="nav-title">{itemTitle}</span>
-                              <span style={{ fontSize: '11px', color: 'rgba(44, 26, 18, 0.5)', fontWeight: 600 }}>{item.path}</span>
+                              <span style={{ fontSize: '11px', color: 'rgba(255, 255, 255, 0.4)', fontWeight: 600 }}>{item.path}</span>
                             </div>
                           </div>
                           {isActive ? (
                             <div className="nav-card-active-dot" title="الشاشة المفتوحة حالياً"></div>
                           ) : (
-                            <ArrowUpRight size={16} color="rgba(44, 26, 18, 0.35)" />
+                            <ArrowUpRight size={16} color="rgba(0, 229, 255, 0.45)" />
                           )}
                         </div>
                       </Link>
@@ -912,7 +915,7 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
           {/* المتصلين حالياً بالنظام */}
           {onlineUsers.length > 0 && (
             <div className="group-section" style={{ marginTop: '10px' }}>
-              <div className="group-header" style={{ borderColor: 'rgba(78, 115, 79, 0.3)', color: '#4E734F' }}>
+              <div className="group-header" style={{ borderColor: 'rgba(16, 185, 129, 0.3)', color: '#10B981' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   <span className="online-dot-pulse"></span>
                   <span>{language === 'en' ? `Team Online (${onlineCount})` : `فريق العمل المتصل الآن (${onlineCount})`}</span>
@@ -920,13 +923,13 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
               </div>
               <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', marginTop: '10px' }}>
                 {onlineUsers.map((user, idx) => (
-                  <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(255,255,255,0.85)', padding: '8px 14px', borderRadius: '14px', border: '1px solid rgba(78, 115, 79, 0.25)', boxShadow: '0 2px 8px rgba(44,26,18,0.03)' }}>
-                    <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#4E734F', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '13px' }}>
+                  <div key={idx} style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'rgba(20, 24, 34, 0.85)', padding: '8px 14px', borderRadius: '14px', border: '1px solid rgba(16, 185, 129, 0.3)', boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)' }}>
+                    <div style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#10B981', color: '#0B0E14', display: 'flex', alignItems: 'center', justifyContent: 'center', fontWeight: 900, fontSize: '13px' }}>
                       {user.full_name?.charAt(0) || 'م'}
                     </div>
                     <div style={{ display: 'flex', flexDirection: 'column' }}>
-                      <span style={{ fontSize: '12.5px', fontWeight: 900, color: '#2C1A12' }}>{user.full_name}</span>
-                      <span style={{ fontSize: '10.5px', color: '#C29B62', fontWeight: 700 }}>
+                      <span style={{ fontSize: '12.5px', fontWeight: 900, color: '#F8FAFC' }}>{user.full_name}</span>
+                      <span style={{ fontSize: '10.5px', color: '#00E5FF', fontWeight: 700 }}>
                         {language === 'en' ? (user.role === 'super_admin' ? 'Admin' : 'Staff') : (user.role === 'super_admin' ? 'مدير' : 'موظف')}
                       </span>
                     </div>

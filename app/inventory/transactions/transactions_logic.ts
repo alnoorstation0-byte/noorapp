@@ -3,7 +3,6 @@ import { supabase } from '@/lib/supabase';
 import { showGlobalToast } from '@/lib/toast-context';
 import { useRealtimeListener, emitTableChange } from '@/lib/useRealtimeSync';
 import { executeApproveTransaction, executeUnapproveTransaction, syncAllWarehouseBalances } from '@/lib/inventory_engine';
-import { saveLocalExpiryMetadata } from '@/app/expiry-alerts/expiry_alerts_logic';
 
 export function useInventoryTransactionsLogic() {
   const [rawRecords, setRawRecords] = useState<any[]>([]);

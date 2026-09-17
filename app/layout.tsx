@@ -13,7 +13,7 @@ const cairo = Cairo({
 
 // 📱 إعدادات الشاشة للجوال والشاشات المختلفة
 export const viewport = {
-  themeColor: '#2C1A12', // بني الخيام الداكن
+  themeColor: '#0B0E14', // تيتانيوم داكن فائق العمق
   width: 'device-width',
   initialScale: 1,
   maximumScale: 1,
@@ -22,13 +22,13 @@ export const viewport = {
 };
 
 export const metadata = {
-  title: "صيدلية تاج المودة البيطرية - نظام الإدارة الموحد",
-  description: "نظام إدارة صيدلية تاج المودة المتخصصة في رعاية الخيول والإبل",
+  title: "محطات النور للوقود - مركز القيادة والتحكم",
+  description: "نظام إدارة ومراقبة محطات النور المتخصصة في إدارة محطات الوقود والخزانات",
   manifest: "/manifest.json",
   appleWebApp: {
     capable: true,
-    statusBarStyle: "default",
-    title: "تاج المودة",
+    statusBarStyle: "black-translucent",
+    title: "محطات النور",
   },
   formatDetection: {
     telephone: false,
@@ -41,14 +41,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ar" dir="rtl" suppressHydrationWarning>
+    <html lang="ar" dir="rtl" className="dark" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{
           __html: `
             (function() {
               try {
                 var saved = localStorage.getItem('lowGraphicsMode');
-                // Glassmorphism is default; only apply low-graphics if explicitly enabled
                 if (saved === 'true') {
                   document.documentElement.classList.add('low-graphics-mode');
                   window.addEventListener('DOMContentLoaded', function() {
@@ -66,41 +65,45 @@ export default function RootLayout({
           position: 'relative', 
           minHeight: '100vh', 
           margin: 0, 
-          backgroundColor: '#FDFBF7', // كثبان لؤلؤية
-          color: '#2C1A12',           // بني الخيام الداكن
+          backgroundColor: '#0B0E14', // تيتانيوم داكن
+          color: '#F8FAFC',           // نصوص بيضاء ساطعة
         }}
       >
         
-        {/* 🏜️ ستايل الخلفية الصحراوية الزجاجية (Dune Pearl Glass Background) المحسنة للأداء */}
+        {/* 🚀 ستايل خلفية مركز القيادة والتحكم (Command Center Titanium Radial Glow) */}
         <style dangerouslySetInnerHTML={{__html: `
           .bg-master-container {
             position: fixed; inset: 0; z-index: -4; 
-            background: radial-gradient(circle at 10% 20%, rgba(194, 155, 98, 0.08) 0%, rgba(253, 251, 247, 1) 90%); 
+            background: 
+              radial-gradient(circle at 10% 15%, rgba(0, 229, 255, 0.08) 0%, transparent 45%),
+              radial-gradient(circle at 90% 85%, rgba(224, 109, 68, 0.07) 0%, transparent 45%),
+              #0B0E14; 
             overflow: hidden;
             pointer-events: none;
             transform: translateZ(0);
           }
           .bg-glass-tint {
             position: absolute; inset: 0; z-index: -3;
-            background: linear-gradient(
-              135deg, 
-              rgba(255, 253, 250, 0.6) 0%, 
-              rgba(253, 251, 247, 0.2) 100% 
+            background: radial-gradient(
+              circle at 50% 50%, 
+              rgba(20, 24, 34, 0.4) 0%, 
+              rgba(11, 14, 20, 0.85) 100% 
             );
-            backdrop-filter: blur(20px) saturate(150%);
+            backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             transform: translateZ(0);
           }
           @media (max-width: 768px) {
             .bg-glass-tint {
-              backdrop-filter: blur(10px) saturate(130%);
+              backdrop-filter: blur(10px);
               -webkit-backdrop-filter: blur(10px);
             }
           }
           .watermark-bg {
             position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
-            width: 45vw; max-width: 500px; opacity: 0.035; z-index: -2;
+            width: 45vw; max-width: 500px; opacity: 0.03; z-index: -2;
             pointer-events: none; user-select: none;
+            filter: drop-shadow(0 0 30px rgba(0, 229, 255, 0.15));
           }
           @media print { .no-print { display: none !important; } }
         `}} />
@@ -109,7 +112,7 @@ export default function RootLayout({
             <div className="bg-glass-tint"></div>
         </div>
 
-        <img src="/taj_logo.png" alt="watermark" className="watermark-bg no-print" decoding="async" fetchPriority="low" />
+        <img src="/logo.png" alt="watermark" className="watermark-bg no-print" decoding="async" fetchPriority="low" />
 
         <AppClientProviders>
             {children}
@@ -119,3 +122,4 @@ export default function RootLayout({
     </html>
   );
 }
+
