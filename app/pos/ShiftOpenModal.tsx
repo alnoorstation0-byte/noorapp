@@ -105,6 +105,44 @@ export default function ShiftOpenModal({
         }
     });
 
+    // ⛽ جلب مضخات المحطة وقراءات العدادات الحالية لتهيئة بداية الوردية
+    const { data: stationPumpsData, isLoading: loadingPumps } = useQuery({
+        queryKey: ['pos_station_pumps', targetWarehouseId, isOpen],
+        enabled: Boolean(isOpen && targetWarehouseId),
+        queryFn: async () => {
+            const { data, error } = await supabase
+                .from('fuel_pumps')
+                .select('id, warehouse_id, pump_number, pump_name, fuel_type, unit_price, current_meter, is_active')
+                .eq('warehouse_id', targetWarehouseId)
+                .eq('is_active', true)
+                .order('pump_number');
+            if (error) {
+                console.warn('Error fetching station pumps:', error);
+                return [];
+            }
+            return data || [];
+        }
+    });
+
+    const stationPumps = stationPumpsData || [];
+    const [pumpStartReadings, setPumpStartReadings] = useState<Record<string, number | ''>>({});
+
+    useEffect(() => {
+        if (!isOpen) {
+            setPumpStartReadings({});
+        }
+    }, [isOpen]);
+
+    useEffect(() => {
+        if (isOpen && stationPumpsData && stationPumpsData.length > 0) {
+            const initial: Record<string, number | ''> = {};
+            stationPumpsData.forEach((p: any) => {
+                initial[p.id] = (p.current_meter !== null && p.current_meter !== undefined) ? Number(p.current_meter) : 0;
+            });
+            setPumpStartReadings(initial);
+        }
+    }, [isOpen, stationPumpsData]);
+
     // 👑 صلاحية الإدارة العليا للإشراف على عدة فروع
     const isManagerOrAdmin = Boolean(
         userProfile?.role === 'super_admin' || 
@@ -150,6 +188,14 @@ export default function ShiftOpenModal({
             const resolvedShiftUserId = chosenEmp?.userId || currentUserId;
             const resolvedShiftDelegateId = chosenEmp?.partnerId || chosenEmp?.id || targetDelegateId;
 
+            // تجهيز قراءات العدادات الافتتاحية للمضخات
+            const pumpReadingsPayload = stationPumps.map((p: any) => ({
+                pump_id: p.id,
+                start_reading: (pumpStartReadings[p.id] !== '' && pumpStartReadings[p.id] !== undefined)
+                    ? Number(pumpStartReadings[p.id])
+                    : Number(p.current_meter || 0)
+            }));
+
             // استدعاء مسار الباك إند المحمي بالكامل
             const res = await fetch('/api/pos/shifts', {
                 method: 'POST',
@@ -158,7 +204,8 @@ export default function ShiftOpenModal({
                     warehouse_id: targetWarehouseId,
                     delegate_id: resolvedShiftDelegateId || null,
                     user_id: resolvedShiftUserId || null,
-                    starting_cash: Number(startingCash) || 0
+                    starting_cash: Number(startingCash) || 0,
+                    pump_readings: pumpReadingsPayload
                 })
             });
 
@@ -283,8 +330,10 @@ export default function ShiftOpenModal({
                     border: 1px solid rgba(0, 229, 255, 0.25);
                     border-radius: 24px;
                     width: 95vw;
-                    max-width: 480px;
-                    padding: 30px 24px;
+                    max-width: 520px;
+                    max-height: 90vh;
+                    overflow-y: auto;
+                    padding: 28px 22px;
                     text-align: right;
                     box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 229, 255, 0.1);
                     animation: fadeUp 0.35s ease-out;
@@ -348,6 +397,30 @@ export default function ShiftOpenModal({
                 }
                 .daylight-theme .shift-info-box label,
                 .daylight-theme .shift-info-box span {
+                    color: #2C1A12 !important;
+                }
+                .pump-open-box {
+                    background: rgba(15, 20, 30, 0.7);
+                    border: 1.5px solid rgba(0, 229, 255, 0.25);
+                    border-radius: 16px;
+                    padding: 14px;
+                    margin-bottom: 16px;
+                }
+                .pump-open-item {
+                    background: rgba(20, 24, 34, 0.85);
+                    border: 1px solid rgba(255, 255, 255, 0.08);
+                    border-radius: 12px;
+                    padding: 10px 12px;
+                }
+                .daylight-theme .pump-open-box {
+                    background: rgba(255, 255, 255, 0.85) !important;
+                    border-color: rgba(194, 155, 98, 0.35) !important;
+                }
+                .daylight-theme .pump-open-item {
+                    background: rgba(253, 251, 247, 0.95) !important;
+                    border-color: rgba(194, 155, 98, 0.25) !important;
+                }
+                .daylight-theme .pump-open-item strong {
                     color: #2C1A12 !important;
                 }
             `}</style>
@@ -518,6 +591,105 @@ export default function ShiftOpenModal({
                             <br />
                             {isEn ? 'Clicking below will ' : 'النقر أدناه سيقوم بـ '}<strong>{isEn ? 'resume the same shift' : 'استئناف نفس الوردية'}</strong>{isEn ? ' to continue today\'s sales.' : ' لتكملة مبيعات اليوم عليها دون فتح وردية مكررة.'}
                         </p>
+                    </div>
+                )}
+
+                {/* ⛽ قسم تسجيل قراءات عدادات المضخات الافتتاحية */}
+                {targetWarehouseId && !existingWarehouseShift && !isConflictWithOtherWarehouse && (
+                    <div className="pump-open-box">
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <span style={{ fontSize: '20px' }}>⛽</span>
+                                <div>
+                                    <h4 style={{ margin: 0, fontSize: '13.5px', fontWeight: 900, color: '#00E5FF' }}>
+                                        {isEn ? 'Fuel Pump Meters (Opening Readings):' : 'قراءات عدادات المضخات (بداية الوردية):'}
+                                    </h4>
+                                    <span style={{ fontSize: '11px', color: '#94A3B8' }}>
+                                        {isEn ? 'Verify or enter current meter reading for each pump' : 'تحقق من قراءة العداد الحالي لكل مضخة أو عدّلها لبدء الحساب'}
+                                    </span>
+                                </div>
+                            </div>
+                            {loadingPumps && (
+                                <span style={{ fontSize: '11px', color: '#00E5FF' }}>⏳ جاري التحميل...</span>
+                            )}
+                        </div>
+
+                        {stationPumps.length === 0 && !loadingPumps ? (
+                            <div style={{ 
+                                padding: '10px 12px', 
+                                background: 'rgba(245, 158, 11, 0.12)', 
+                                border: '1px solid rgba(245, 158, 11, 0.3)',
+                                borderRadius: '10px', 
+                                color: '#fbbf24', 
+                                fontSize: '12px', 
+                                fontWeight: 700,
+                                textAlign: 'center'
+                            }}>
+                                {isEn ? 'No pumps configured for this station yet.' : 'لا توجد مضخات مسجلة لهذه المحطة حتى الآن.'}
+                            </div>
+                        ) : (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', maxHeight: '220px', overflowY: 'auto', paddingLeft: '4px' }}>
+                                {stationPumps.map((p: any) => {
+                                    const isOctane91 = p.fuel_type?.includes('91');
+                                    const isOctane95 = p.fuel_type?.includes('95');
+                                    const badgeBg = isOctane91 ? 'rgba(16, 185, 129, 0.2)' : isOctane95 ? 'rgba(239, 68, 68, 0.2)' : 'rgba(245, 158, 11, 0.2)';
+                                    const badgeColor = isOctane91 ? '#34d399' : isOctane95 ? '#f87171' : '#fbbf24';
+
+                                    return (
+                                        <div key={p.id} className="pump-open-item" style={{
+                                            display: 'grid',
+                                            gridTemplateColumns: '1.4fr 1fr',
+                                            gap: '10px',
+                                            alignItems: 'center'
+                                        }}>
+                                            <div>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '4px' }}>
+                                                    <strong style={{ fontSize: '12.5px', color: '#F8FAFC' }}>{p.pump_name}</strong>
+                                                    <span style={{ 
+                                                        fontSize: '9.5px', 
+                                                        fontWeight: 800, 
+                                                        padding: '1px 6px', 
+                                                        borderRadius: '4px', 
+                                                        background: badgeBg, 
+                                                        color: badgeColor 
+                                                    }}>
+                                                        {p.fuel_type}
+                                                    </span>
+                                                </div>
+                                                <span style={{ fontSize: '10.5px', color: '#94A3B8' }}>
+                                                    {p.unit_price ? `${Number(p.unit_price).toFixed(2)} ${isEn ? 'SAR/L' : 'ر.س/لتر'}` : ''}
+                                                </span>
+                                            </div>
+
+                                            <div>
+                                                <label style={{ display: 'block', fontSize: '10px', fontWeight: 800, color: '#00E5FF', marginBottom: '2px' }}>
+                                                    {isEn ? 'Start Meter:' : 'قراءة العداد الآن:'}
+                                                </label>
+                                                <input 
+                                                    type="number" 
+                                                    step="any"
+                                                    min="0"
+                                                    className="aqua-shift-input"
+                                                    value={pumpStartReadings[p.id] ?? ''} 
+                                                    onChange={(e) => setPumpStartReadings(prev => ({
+                                                        ...prev,
+                                                        [p.id]: e.target.value === '' ? '' : Number(e.target.value)
+                                                    }))}
+                                                    onFocus={(e) => e.target.select()}
+                                                    placeholder="0.00"
+                                                    style={{
+                                                        height: '36px',
+                                                        padding: '4px 8px',
+                                                        fontSize: '14px',
+                                                        fontWeight: 800
+                                                    }}
+                                                />
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        )}
                     </div>
                 )}
 

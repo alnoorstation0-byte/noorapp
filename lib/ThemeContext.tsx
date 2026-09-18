@@ -20,7 +20,7 @@ const ThemeContext = createContext<ThemeContextType>({
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-    const [themeMode, setThemeModeState] = useState<ThemeMode>('dark');
+    const [themeMode, setThemeModeState] = useState<ThemeMode>('daylight');
     const [mounted, setMounted] = useState(false);
 
     const applyThemeToDOM = (mode: ThemeMode) => {
@@ -34,8 +34,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
             if (body) {
                 body.classList.add('daylight-theme');
                 body.setAttribute('data-theme', 'daylight');
-                body.style.backgroundColor = '#FDFBF7';
-                body.style.color = '#2C1A12';
+                body.style.backgroundColor = '#F8FAFC';
+                body.style.color = '#0F172A';
             }
         } else {
             html.classList.remove('daylight-theme');
@@ -57,9 +57,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
             setThemeModeState(saved);
             applyThemeToDOM(saved);
         } else {
-            // الافتراضي هو مركز القيادة الداكن
-            setThemeModeState('dark');
-            applyThemeToDOM('dark');
+            // الافتراضي هو النمط الأبيض الكريستالي الساطع
+            setThemeModeState('daylight');
+            applyThemeToDOM('daylight');
         }
 
         // 2. مزامنة مع بروفايل المستخدم في Supabase إن وجد

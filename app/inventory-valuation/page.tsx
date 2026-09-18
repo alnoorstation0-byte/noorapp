@@ -3,6 +3,7 @@ import React from 'react';
 import { THEME } from '@/lib/theme';
 import { formatCurrency } from '@/lib/helpers';
 import { useInventoryValuationLogic } from './inventory_valuation_logic';
+import LoadingScreen from '@/components/LoadingScreen';
 
 export default function InventoryValuationPage() {
     const {
@@ -98,7 +99,7 @@ export default function InventoryValuationPage() {
             </div>
 
             {isLoading ? (
-                <div style={{ padding: '50px', textAlign: 'center', color: 'white', fontWeight: 900, fontSize: '20px' }}>جاري الحساب والتقييم...</div>
+                <LoadingScreen message="جاري تحضير وتقييم أرصدة المخزون..." fullScreen={false} />
             ) : (
                 <>
                     {/* Global KPIs */}

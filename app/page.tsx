@@ -155,7 +155,7 @@ export default function WelcomeHomePage() {
                 // 3. جلب الورديات النشطة المفتوحة
                 const { data: shiftsData } = await supabase
                     .from('pos_shifts')
-                    .select('id, opened_at, starting_cash, status, warehouse_id, delegate_id, user_id, warehouses(name)')
+                    .select('id, opened_at, starting_cash, status, warehouse_id, delegate_id, user_id')
                     .eq('status', 'open');
 
                 if (shiftsData) setActiveShifts(shiftsData);

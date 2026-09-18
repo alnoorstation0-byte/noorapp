@@ -755,13 +755,11 @@ export function useInvoicesLogic() {
     });
 
     const isSaving = saveMutation.isPending || postMutation.isPending || unpostMutation.isPending || deleteMutation.isPending || payMutation.isPending || returnMutation.isPending;
-    const isLoading = isInvLoading || isProjLoading || isSaving;
+    const isLoading = isInvLoading || isSaving;
 
     return {
         invoices: paginatedInvoices,
         allFiltered,
-        projects,
-        fleetOperations,
         warehouses,
         delegates,
         summary,

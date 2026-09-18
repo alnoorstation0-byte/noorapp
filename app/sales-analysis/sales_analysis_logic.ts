@@ -23,9 +23,7 @@ export function useSalesAnalysisLogic() {
                     lines_data, 
                     client_name,
                     partner_id,
-                    delegate_id,
-                    partner:partners!invoices_partner_id_fkey(name),
-                    delegate:partners!invoices_delegate_id_fkey(name)
+                    delegate_id
                 `)
                 // ✅ فقط الفواتير المعتمدة/المرحلة - لا تشمل المعلقة أو الملغاة
                 .in('status', ['مرحل', 'معتمد', 'مغلق', 'مدفوع']);
@@ -36,14 +34,25 @@ export function useSalesAnalysisLogic() {
             const { data, error } = await q;
             if (error) throw error;
 
-            // ✅ جلب تكلفة الأصناف من inventory_items لحساب هامش الربح
-            const { data: itemsCost } = await supabase
-                .from('inventory_items')
-                .select('id, name, cost_price');
+            // ✅ جلب تكلفة الأصناف والشركاء بشكل متزامن
+            const [{ data: itemsCost }, { data: partnersData }] = await Promise.all([
+                supabase.from('inventory_items').select('id, name, cost_price'),
+                supabase.from('partners').select('id, name')
+            ]);
+
             const costMap: Record<string, number> = {};
             itemsCost?.forEach(i => { costMap[i.id] = Number(i.cost_price || 0); });
 
-            return { invoices: data || [], costMap };
+            const partnerMap: Record<string, string> = {};
+            partnersData?.forEach(p => { partnerMap[p.id] = p.name; });
+
+            const invoices = (data || []).map(inv => ({
+                ...inv,
+                partner: { name: partnerMap[inv.partner_id] },
+                delegate: { name: partnerMap[inv.delegate_id] }
+            }));
+
+            return { invoices, costMap };
         }
     });
 

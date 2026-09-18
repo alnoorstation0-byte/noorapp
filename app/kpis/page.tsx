@@ -3,6 +3,7 @@ import React from 'react';
 import { THEME } from '@/lib/theme';
 import { formatCurrency } from '@/lib/helpers';
 import { useKpisLogic } from './kpis_logic';
+import LoadingScreen from '@/components/LoadingScreen';
 
 export default function KpisPage() {
     const {
@@ -69,7 +70,7 @@ export default function KpisPage() {
             </div>
 
             {isLoading ? (
-                <div style={{ padding: '50px', textAlign: 'center', color: 'white', fontWeight: 900, fontSize: '20px' }}>جاري الحساب...</div>
+                <LoadingScreen message="جاري تحضير وحساب مؤشرات الأداء..." fullScreen={false} />
             ) : (
                 <div className="kpis-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '30px' }}>
                     {/* Total Sales KPI */}

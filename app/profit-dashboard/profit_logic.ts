@@ -12,8 +12,7 @@ export function useProfitDashboardLogic() {
         queryKey: ['profit_dash_invoices', dateFrom, dateTo],
         queryFn: async () => {
             let q = supabase.from('invoices').select(`
-                id, total_amount, paid_amount, lines_data, status, date,
-                delegate:partners!invoices_delegate_id_fkey(name)
+                id, total_amount, paid_amount, lines_data, status, date, delegate_id
             `).neq('status', 'ملغي');
             
             if (dateFrom) q = q.gte('date', dateFrom);
@@ -22,11 +21,23 @@ export function useProfitDashboardLogic() {
             const { data: invData, error: invErr } = await q;
             if (invErr) throw invErr;
 
-            const { data: itemsCost } = await supabase.from('inventory_items').select('id, name, cost_price');
+            const [{ data: itemsCost }, { data: partners }] = await Promise.all([
+                supabase.from('inventory_items').select('id, name, cost_price'),
+                supabase.from('partners').select('id, name')
+            ]);
+
             const costMap: Record<string, number> = {};
             itemsCost?.forEach(i => { costMap[i.id] = Number(i.cost_price || 0); });
 
-            return { invoices: invData || [], costMap };
+            const partnerMap: Record<string, string> = {};
+            partners?.forEach(p => { partnerMap[p.id] = p.name; });
+
+            const invoices = (invData || []).map(inv => ({
+                ...inv,
+                delegate: { name: partnerMap[inv.delegate_id] }
+            }));
+
+            return { invoices, costMap };
         }
     });
 
@@ -116,7 +127,7 @@ export function useProfitDashboardLogic() {
     return {
         dateFrom, setDateFrom, 
         dateTo, setDateTo,
-        isLoading: invoicesQuery.isLoading || tripsQuery.isLoading,
+        isLoading: invoicesQuery.isLoading || shiftsQuery.isLoading,
         ...dashboardData
     };
 }

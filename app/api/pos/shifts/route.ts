@@ -146,7 +146,7 @@ export async function GET(request: Request) {
 export async function POST(request: Request) {
     try {
         const body = await request.json();
-        let { warehouse_id, delegate_id, user_id, starting_cash } = body;
+        let { warehouse_id, delegate_id, user_id, starting_cash, pump_readings } = body;
 
         if (!warehouse_id) {
             return NextResponse.json(
@@ -386,6 +386,29 @@ export async function POST(request: Request) {
             await supabaseAdmin.rpc('get_or_init_shift_pump_readings', { p_shift_id: newShift.id });
         } catch (pumpErr) {
             console.warn('Error initializing pump readings:', pumpErr);
+        }
+
+        // ⛽ تحديث قراءات العدادات الافتتاحية المحددة يدوياً من الكاشير إن وُجدت
+        if (Array.isArray(pump_readings) && pump_readings.length > 0) {
+            try {
+                for (const pr of pump_readings) {
+                    if (pr?.pump_id && pr.start_reading !== undefined && pr.start_reading !== null && pr.start_reading !== '') {
+                        const startVal = Number(pr.start_reading) || 0;
+                        await supabaseAdmin
+                            .from('shift_pump_readings')
+                            .update({ start_reading: startVal, updated_at: new Date().toISOString() })
+                            .eq('shift_id', newShift.id)
+                            .eq('pump_id', pr.pump_id);
+
+                        await supabaseAdmin
+                            .from('fuel_pumps')
+                            .update({ current_meter: startVal, updated_at: new Date().toISOString() })
+                            .eq('id', pr.pump_id);
+                    }
+                }
+            } catch (prUpdateErr) {
+                console.warn('Error updating opening pump readings:', prUpdateErr);
+            }
         }
 
         // إرفاق بيانات المستودع والشريك

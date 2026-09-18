@@ -1,6 +1,7 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/lib/supabase';
 import { formatCurrency } from '@/lib/helpers';
+import { useToast } from '@/lib/toast-context';
 
 // 🚀 دالة البلدوزر السريعة لسحب البيانات الضخمة
 const fetchAllForDashboard = async (
@@ -47,14 +48,14 @@ export const useDashboardLogic = () => {
         fetchAllForDashboard('receipt_vouchers', 'amount, status'),
         fetchAllForDashboard('journal_lines', 'debit, credit, account_id'),
         fetchAllForDashboard('accounts', 'id, account_type, code, name'),
-        fetchAllForDashboard('warehouses', 'id, name, tank_capacity_liters, fuel_type'),
+        fetchAllForDashboard('warehouses', 'id, name, description, tank_capacity_liters, fuel_type, is_active'),
         fetchAllForDashboard('warehouse_inventory', 'warehouse_id, item_id, quantity'),
-        fetchAllForDashboard('inventory_items', 'id, name, current_quantity, default_price, cost_price, unit, item_type'),
-        fetchAllForDashboard('fuel_pumps', 'id, pump_number, pump_name, fuel_type, unit_price, current_meter, is_active'),
+        fetchAllForDashboard('inventory_items', 'id, name, current_quantity, default_price, cost_price, unit, item_type, fuel_type'),
+        fetchAllForDashboard('fuel_pumps', 'id, warehouse_id, pump_number, pump_name, fuel_type, unit_price, current_meter, is_active'),
         fetchAllForDashboard('pos_shifts', 'id, opened_at, closed_at, status, starting_cash, expected_cash, actual_cash, total_sales, total_liters_sold, shortage_overage')
       ]);
 
-      // --- ⛽ تحليل حالة مضخات الوقود ---
+      // --- ⛽ تحليل حالة مضخات الوقود الحقيقية ---
       const activePumpsCount = fuelPumps.filter(p => p.is_active !== false).length;
       const pumpStatusData = [
         { name: 'مضخات نشطة', value: activePumpsCount },
@@ -170,14 +171,13 @@ export const useDashboardLogic = () => {
       let expiredItemsCount = 0;
       let criticalExpiryCount = 0;
       try {
-        const { data: expItems } = await supabase.from('inventory_items').select('id, expiry_date, alert_before_days');
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         let localExp: any = {};
         if (typeof window !== 'undefined') {
           try { localExp = JSON.parse(localStorage.getItem('taj_expiry_metadata_cache') || '{}'); } catch {}
         }
-        (expItems || inventoryItems || []).forEach((it: any) => {
+        (inventoryItems || []).forEach((it: any) => {
           const cached = localExp[it.id] || {};
           const expDate = it.expiry_date || cached.expiry_date;
           const alertDays = Number(it.alert_before_days || cached.alert_before_days || 30);
@@ -206,91 +206,141 @@ export const useDashboardLogic = () => {
         .sort((a, b) => b.value - a.value)
         .slice(0, 5);
 
-      // --- ⛽ حساب بيانات خزانات الوقود (Fuel Storage Tanks) ---
-      const fuelItem91 = inventoryItems.find(i => i.name?.includes('91')) || { current_quantity: 45000, default_price: 2.18 };
-      const fuelItem95 = inventoryItems.find(i => i.name?.includes('95')) || { current_quantity: 35000, default_price: 2.33 };
-      const fuelItemDiesel = inventoryItems.find(i => i.name?.includes('ديزل')) || { current_quantity: 60000, default_price: 1.15 };
-
-      const tanksData = [
-        {
-          id: 'tank-91',
-          name: 'خزان بنزين 91 (أوكتان 91)',
-          shortName: 'بنزين 91',
-          type: 'gasoline_91',
-          currentLiters: Number(fuelItem91.current_quantity || 45000),
-          capacity: 60000,
-          unitPrice: Number(fuelItem91.default_price || 2.18),
-          percentage: Math.min(100, Math.round((Number(fuelItem91.current_quantity || 45000) / 60000) * 100)),
-          color: '#00E5FF', // Electric Cyan
-          glowClass: 'shadow-neon-cyan',
-          status: Number(fuelItem91.current_quantity || 45000) <= 15000 ? 'warning' : 'healthy',
-          statusText: Number(fuelItem91.current_quantity || 45000) <= 15000 ? 'منسوب منخفض ⚠️' : 'المستوى آمن 🟢'
-        },
-        {
-          id: 'tank-95',
-          name: 'خزان بنزين 95 (سوبر 95)',
-          shortName: 'بنزين 95',
-          type: 'gasoline_95',
-          currentLiters: Number(fuelItem95.current_quantity || 35000),
-          capacity: 50000,
-          unitPrice: Number(fuelItem95.default_price || 2.33),
-          percentage: Math.min(100, Math.round((Number(fuelItem95.current_quantity || 35000) / 50000) * 100)),
-          color: '#38BDF8', // Sky Cyan
-          glowClass: 'shadow-neon-cyan',
-          status: Number(fuelItem95.current_quantity || 35000) <= 12000 ? 'warning' : 'healthy',
-          statusText: Number(fuelItem95.current_quantity || 35000) <= 12000 ? 'منسوب منخفض ⚠️' : 'المستوى آمن 🟢'
-        },
-        {
-          id: 'tank-diesel',
-          name: 'خزان الديزل (Diesel Tank)',
-          shortName: 'ديزل ممتاز',
-          type: 'diesel',
-          currentLiters: Number(fuelItemDiesel.current_quantity || 60000),
-          capacity: 80000,
-          unitPrice: Number(fuelItemDiesel.default_price || 1.15),
-          percentage: Math.min(100, Math.round((Number(fuelItemDiesel.current_quantity || 60000) / 80000) * 100)),
-          color: '#E06D44', // Terracotta Orange
-          glowClass: 'shadow-neon-orange',
-          status: Number(fuelItemDiesel.current_quantity || 60000) <= 20000 ? 'warning' : 'healthy',
-          statusText: Number(fuelItemDiesel.current_quantity || 60000) <= 20000 ? 'منسوب منخفض ⚠️' : 'المستوى آمن 🟢'
+      // --- ⛽ استخراج خزانات الوقود الحقيقية من المستودعات (Real Fuel Storage Tanks) ---
+      const tanksData: any[] = [];
+      const primaryStation = warehouses.find(w => w.is_active !== false) || warehouses[0];
+      
+      warehouses.forEach(w => {
+        let stationTanks: any[] = [];
+        try {
+          if (w.description && typeof w.description === 'string' && w.description.trim().startsWith('{')) {
+            const parsed = JSON.parse(w.description);
+            if (Array.isArray(parsed.tanks)) {
+              stationTanks = parsed.tanks;
+            }
+          }
+        } catch (e) {
+          console.warn('Error parsing warehouse tanks JSON for', w.name, e);
         }
-      ];
 
-      // --- ⏱️ إحصائيات الورديات والمضخات ومبيعات اللترات ---
+        if (stationTanks.length === 0 && (Number(w.tank_capacity_liters) > 0 || w.fuel_type)) {
+          stationTanks = [{
+            tank_number: 'خزان 1',
+            fuel_type: w.fuel_type || 'بنزين 91',
+            capacity_liters: Number(w.tank_capacity_liters) || 45000
+          }];
+        }
+
+        stationTanks.forEach((tank, tIdx) => {
+          const matchedItem = inventoryItems.find(i => 
+            (i.name && i.name.includes(tank.fuel_type)) ||
+            (i.fuel_type && i.fuel_type === tank.fuel_type)
+          );
+
+          const isGasoline95 = tank.fuel_type?.includes('95');
+          const isDiesel = tank.fuel_type?.includes('ديزل');
+          const isGasoline91 = tank.fuel_type?.includes('91');
+          const tankColor = isGasoline95 ? '#38BDF8' : isDiesel ? '#E06D44' : isGasoline91 ? '#10B981' : '#00E5FF';
+          const glowClass = isDiesel ? 'shadow-neon-orange' : isGasoline91 ? 'shadow-neon-green' : 'shadow-neon-cyan';
+
+          const capacity = Number(tank.capacity_liters) || 50000;
+          
+          // المنسوب الحالي: الأولوية لـ current_level المخزن في الخزان، ثم رصيد المستودع، ثم الرصيد العام
+          let currentLiters = 0;
+          if (tank.current_level !== undefined && tank.current_level !== null && Number(tank.current_level) > 0) {
+            currentLiters = Number(tank.current_level);
+          } else {
+            const whInv = warehouseInventory.find((wi: any) => wi.warehouse_id === w.id && wi.item_id === matchedItem?.id);
+            if (whInv && Number(whInv.quantity) > 0) {
+              currentLiters = Number(whInv.quantity);
+            } else if (Number(matchedItem?.current_quantity) > 0) {
+              currentLiters = Number(matchedItem?.current_quantity);
+            }
+          }
+
+          const percentage = capacity > 0 ? Math.min(100, Math.round((currentLiters / capacity) * 100)) : 0;
+          const unitPrice = Number(matchedItem?.default_price) || (isGasoline95 ? 2.33 : isDiesel ? 1.15 : 2.18);
+
+          let statusText = 'المستوى آمن 🟢';
+          let status = 'healthy';
+          if (percentage === 0) {
+            status = 'warning';
+            statusText = 'خزان فارغ ⚠️';
+          } else if (percentage <= 20) {
+            status = 'warning';
+            statusText = 'منسوب منخفض ⚠️';
+          } else if (percentage >= 90) {
+            status = 'healthy';
+            statusText = 'شبه ممتلئ 🟢';
+          }
+
+          tanksData.push({
+            id: `${w.id}-t-${tIdx}`,
+            tankIndex: tIdx,
+            warehouseId: w.id,
+            warehouseName: w.name,
+            name: `${tank.tank_number || `خزان ${tIdx + 1}`} (${tank.fuel_type})`,
+            shortName: `${tank.fuel_type}`,
+            tankNumber: tank.tank_number || `خزان ${tIdx + 1}`,
+            fuelType: tank.fuel_type,
+            currentLiters,
+            capacity,
+            unitPrice,
+            percentage,
+            color: tankColor,
+            glowClass,
+            status,
+            statusText
+          });
+        });
+      });
+
+      // 📊 إحصائيات الخزانات الإجمالية
+      const totalTanksCount = tanksData.length;
+      const totalStorageCapacity = tanksData.reduce((sum, t) => sum + (Number(t.capacity) || 0), 0);
+      const totalCurrentLiters = tanksData.reduce((sum, t) => sum + (Number(t.currentLiters) || 0), 0);
+      const overallFillPercentage = totalStorageCapacity > 0 ? Math.min(100, Math.round((totalCurrentLiters / totalStorageCapacity) * 100)) : 0;
+
+      // --- ⏱️ إحصائيات الورديات والمضخات ومبيعات اللترات الحقيقية ---
       const openShift = posShifts.find(s => s.status === 'open');
-      const totalLitersSold = posShifts.reduce((acc, s) => acc + Number(s.total_liters_sold || 0), 0) || 12450;
-      const totalShiftSales = posShifts.reduce((acc, s) => acc + Number(s.total_sales || 0), 0) || approvedInvoices;
+      const totalLitersSold = posShifts.reduce((acc, s) => acc + Number(s.total_liters_sold || 0), 0);
+      const totalShiftSales = posShifts.reduce((acc, s) => acc + Number(s.total_sales || 0), 0);
 
-      // إعداد بيانات خط اتجاه المبيعات (Sales Timeline)
+      // إعداد بيانات خط اتجاه المبيعات (Sales Timeline) الحقيقية
+      const currentSalesToday = approvedInvoices || totalShiftSales;
       const salesTimelineData = [
-        { time: '06:00', sales: 1200, liters: 550, gasoline: 700, diesel: 500 },
-        { time: '08:00', sales: 3400, liters: 1560, gasoline: 2100, diesel: 1300 },
-        { time: '10:00', sales: 5100, liters: 2340, gasoline: 3200, diesel: 1900 },
-        { time: '12:00', sales: 7800, liters: 3580, gasoline: 4800, diesel: 3000 },
-        { time: '14:00', sales: 9400, liters: 4310, gasoline: 5900, diesel: 3500 },
-        { time: '16:00', sales: 12200, liters: 5600, gasoline: 7800, diesel: 4400 },
-        { time: '18:00', sales: 15800, liters: 7250, gasoline: 10100, diesel: 5700 },
-        { time: '20:00', sales: 19200, liters: 8810, gasoline: 12300, diesel: 6900 },
-        { time: 'الآن', sales: totalShiftSales > 20000 ? totalShiftSales : 22450, liters: totalLitersSold > 9000 ? totalLitersSold : 10250, gasoline: 14500, diesel: 7950 }
+        { time: '06:00', sales: 0, liters: 0 },
+        { time: '09:00', sales: 0, liters: 0 },
+        { time: '12:00', sales: 0, liters: 0 },
+        { time: '15:00', sales: 0, liters: 0 },
+        { time: '18:00', sales: 0, liters: 0 },
+        { time: '21:00', sales: 0, liters: 0 },
+        { time: 'الآن', sales: currentSalesToday, liters: totalLitersSold }
       ];
 
-      // توزيع المبيعات حسب نوع الوقود
+      // حساب توزيع المبيعات أو المخزون حسب نوع الوقود الحقيقي
       const fuelDistributionData = [
-        { name: 'بنزين 91', value: 52, liters: 6500, color: '#00E5FF' },
-        { name: 'بنزين 95', value: 28, liters: 3500, color: '#38BDF8' },
-        { name: 'ديزل', value: 20, liters: 2500, color: '#E06D44' }
+        { name: 'بنزين 91', value: 0, liters: 0, color: '#00E5FF' },
+        { name: 'بنزين 95', value: 0, liters: 0, color: '#38BDF8' },
+        { name: 'ديزل', value: 0, liters: 0, color: '#E06D44' }
       ];
+      inventoryItems.forEach(item => {
+        const matched = fuelDistributionData.find(f => item.name?.includes(f.name));
+        if (matched) {
+          matched.liters = Number(item.current_quantity || 0);
+        }
+      });
+      const totalFuelStock = fuelDistributionData.reduce((sum, f) => sum + f.liters, 0);
+      fuelDistributionData.forEach(f => {
+        f.value = totalFuelStock > 0 ? Math.round((f.liters / totalFuelStock) * 100) : (f.name === 'بنزين 91' ? 100 : 0);
+      });
 
       return {
         // 🚀 مركز القيادة والتحكم: المؤشرات الحيوية لمحطات النور
         fuelTanks: tanksData,
-        fuelPumps: fuelPumps.length > 0 ? fuelPumps : [
-          { id: 'p1', pump_number: '01', pump_name: 'مضخة 1 (بنزين 91)', fuel_type: 'بنزين 91', unit_price: 2.18, current_meter: 125550, is_active: true },
-          { id: 'p2', pump_number: '02', pump_name: 'مضخة 2 (بنزين 91)', fuel_type: 'بنزين 91', unit_price: 2.18, current_meter: 98900, is_active: true },
-          { id: 'p3', pump_number: '03', pump_name: 'مضخة 3 (بنزين 95)', fuel_type: 'بنزين 95', unit_price: 2.33, current_meter: 64250, is_active: true },
-          { id: 'p4', pump_number: '04', pump_name: 'مضخة 4 (ديزل)', fuel_type: 'ديزل', unit_price: 1.15, current_meter: 211100, is_active: true }
-        ],
-        activeShift: openShift || { id: 'live-shift', status: 'open', starting_cash: 500, total_sales: totalShiftSales, total_liters_sold: totalLitersSold },
+        fuelPumps: fuelPumps,
+        primaryStationName: primaryStation?.name || 'محطة النور الرئيسية',
+        activeShift: openShift || null,
         totalLitersSold,
         salesTimelineData,
         fuelDistributionData,
@@ -298,9 +348,9 @@ export const useDashboardLogic = () => {
         // 📊 الخصائص المباشرة والمؤشرات المالية
         totalRevenues: approvedInvoices || totalShiftSales,
         totalExpenses: approvedExpenses,
-        cashAndBankBalance: cashAndBankBalance || 48600,
+        cashAndBankBalance: cashAndBankBalance,
         totalWarehouses: warehouses.length,
-        totalInventoryValue: totalInventoryValue || 312000,
+        totalInventoryValue: totalInventoryValue,
         totalPumps: fuelPumps.length,
         activePumps: activePumpsCount,
         totalShifts: posShifts.length,
@@ -325,6 +375,36 @@ export const useDashboardLogic = () => {
           totalAssets,
           totalLiabilities
         },
+        // 🛢️ ملخص وقائمة الخزانات والمحطات
+        tanksSummary: {
+          totalTanksCount,
+          totalStorageCapacity,
+          totalCurrentLiters,
+          overallFillPercentage
+        },
+        allStations: warehouses.map(w => {
+          let parsedTanks: any[] = [];
+          try {
+            if (w.description?.trim().startsWith('{')) {
+              const parsed = JSON.parse(w.description);
+              if (Array.isArray(parsed.tanks)) parsedTanks = parsed.tanks;
+            }
+          } catch {}
+          if (parsedTanks.length === 0 && (Number(w.tank_capacity_liters) > 0 || w.fuel_type)) {
+            parsedTanks = [{
+              tank_number: 'خزان 1',
+              fuel_type: w.fuel_type || 'بنزين 91',
+              capacity_liters: Number(w.tank_capacity_liters) || 45000,
+              current_level: 0
+            }];
+          }
+          return {
+            id: w.id,
+            name: w.name,
+            description: w.description,
+            tanks: parsedTanks
+          };
+        }),
         projectsStatusData: pumpStatusData,
         warehouseChartData,
         postingCharts,
@@ -334,11 +414,146 @@ export const useDashboardLogic = () => {
     staleTime: 1000 * 60 * 5,
   });
 
+  const queryClient = useQueryClient();
+  const { showToast } = useToast();
+
+  // 💾 حفظ وضبط الخزانات لأي محطة مباشرة من الداشبورد
+  const saveStationTanksMutation = useMutation({
+    mutationFn: async ({ warehouseId, tanks }: { warehouseId: string, tanks: any[] }) => {
+      const { data: wh, error: fetchErr } = await supabase
+        .from('warehouses')
+        .select('*')
+        .eq('id', warehouseId)
+        .single();
+      if (fetchErr) throw fetchErr;
+
+      let descObj: any = {};
+      try {
+        if (wh.description && wh.description.trim().startsWith('{')) {
+          descObj = JSON.parse(wh.description);
+        } else {
+          descObj = { notes: wh.description || '' };
+        }
+      } catch {
+        descObj = { notes: wh.description || '' };
+      }
+
+      const formattedTanks = (tanks || []).map((t: any, idx: number) => ({
+        tank_number: t.tank_number || `خزان ${idx + 1}`,
+        fuel_type: t.fuel_type || 'بنزين 91',
+        capacity_liters: Number(t.capacity_liters) || 0,
+        current_level: Number(t.current_level) || 0
+      }));
+
+      descObj.tanks = formattedTanks;
+
+      const totalCap = formattedTanks.reduce((sum, t) => sum + (Number(t.capacity_liters) || 0), 0);
+      const primaryFuel = formattedTanks.length > 0 ? [...new Set(formattedTanks.map(t => t.fuel_type))].join('، ') : null;
+
+      const { error: updateErr } = await supabase
+        .from('warehouses')
+        .update({
+          description: JSON.stringify(descObj),
+          tank_capacity_liters: totalCap,
+          fuel_type: primaryFuel
+        })
+        .eq('id', warehouseId);
+
+      if (updateErr) throw updateErr;
+
+      // تحديث رصيد الأصناف المقابلة في inventory_items
+      for (const t of formattedTanks) {
+        if (t.fuel_type && Number(t.current_level) > 0) {
+          const { data: matchedItems } = await supabase
+            .from('inventory_items')
+            .select('id, name')
+            .ilike('name', `%${t.fuel_type}%`);
+
+          if (matchedItems && matchedItems.length > 0) {
+            await supabase
+              .from('inventory_items')
+              .update({ current_quantity: Number(t.current_level) })
+              .eq('id', matchedItems[0].id);
+          }
+        }
+      }
+
+      return true;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['dashboard_stats_comprehensive'] });
+      queryClient.invalidateQueries({ queryKey: ['warehouses'] });
+      showToast('تم حفظ وضبط الخزانات بنجاح وتحديث الداشبورد ✅', 'success');
+    },
+    onError: (err: any) => {
+      showToast(`فشل حفظ الخزانات: ${err.message}`, 'error');
+    }
+  });
+
+  // ⚡ تعديل منسوب الخزان السريع (قراءة المسطرة / تفريغ شحنة)
+  const updateTankLevelMutation = useMutation({
+    mutationFn: async ({ warehouseId, tankIndex, newLevel }: { warehouseId: string, tankIndex: number, newLevel: number }) => {
+      const { data: wh, error: fetchErr } = await supabase
+        .from('warehouses')
+        .select('*')
+        .eq('id', warehouseId)
+        .single();
+      if (fetchErr) throw fetchErr;
+
+      let descObj: any = {};
+      try {
+        if (wh.description && wh.description.trim().startsWith('{')) {
+          descObj = JSON.parse(wh.description);
+        }
+      } catch {}
+
+      if (!Array.isArray(descObj.tanks) || !descObj.tanks[tankIndex]) {
+        throw new Error('بيانات الخزان غير متوفرة للتعديل');
+      }
+
+      descObj.tanks[tankIndex].current_level = Number(newLevel) || 0;
+      const fuelType = descObj.tanks[tankIndex].fuel_type;
+
+      const { error: updateErr } = await supabase
+        .from('warehouses')
+        .update({ description: JSON.stringify(descObj) })
+        .eq('id', warehouseId);
+      if (updateErr) throw updateErr;
+
+      // تحديث رصيد الصنف المباشر
+      if (fuelType) {
+        const { data: matchedItems } = await supabase
+          .from('inventory_items')
+          .select('id')
+          .ilike('name', `%${fuelType}%`);
+        if (matchedItems && matchedItems[0]) {
+          await supabase
+            .from('inventory_items')
+            .update({ current_quantity: Number(newLevel) || 0 })
+            .eq('id', matchedItems[0].id);
+        }
+      }
+
+      return true;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['dashboard_stats_comprehensive'] });
+      showToast('تم تحديث منسوب الخزان بنجاح ⛽', 'success');
+    },
+    onError: (err: any) => {
+      showToast(`فشل تحديث منسوب الخزان: ${err.message}`, 'error');
+    }
+  });
 
   return {
     stats: query.data,
     isLoading: query.isLoading,
     error: query.error,
-    formatCurrency
+    formatCurrency,
+    saveStationTanks: saveStationTanksMutation.mutateAsync,
+    isSavingTanks: saveStationTanksMutation.isPending,
+    updateTankLevel: updateTankLevelMutation.mutateAsync,
+    isUpdatingLevel: updateTankLevelMutation.isPending,
+    refetch: query.refetch
   };
 };

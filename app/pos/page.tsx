@@ -1185,7 +1185,7 @@ export default function PosPage() {
                     .pos-section-hidden-mobile { 
                         display: none !important; 
                     }
-                    .items-section, .cart-section {
+                    .clean-page.pos-master-page .items-section, .clean-page.pos-master-page .cart-section {
                         height: auto !important;
                         max-height: none !important;
                         overflow: visible !important;
@@ -1193,14 +1193,14 @@ export default function PosPage() {
                         padding: 12px 10px !important;
                         border-radius: 18px !important;
                     }
-                    .items-grid {
+                    .clean-page.pos-master-page .items-grid {
                         height: auto !important;
                         max-height: none !important;
                         overflow: visible !important;
                         min-height: auto !important;
                         padding-bottom: 95px !important;
                     }
-                    .cart-list {
+                    .clean-page.pos-master-page .cart-list {
                         height: auto !important;
                         max-height: none !important;
                         overflow: visible !important;
@@ -1369,7 +1369,7 @@ export default function PosPage() {
                 }
 
                 /* 🛍️ شبكة الأصناف التفاعلية المتناسقة تماماً */
-                .items-grid {
+                .clean-page.pos-master-page .items-grid {
                     display: grid;
                     grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
                     grid-auto-rows: max-content;
@@ -1384,7 +1384,7 @@ export default function PosPage() {
 
                 /* أحجام شبكة الأصناف حسب مقاسات الشاشة لضمان تناسق 100% */
                 @media (max-width: 540px) {
-                    .items-grid {
+                    .clean-page.pos-master-page .items-grid {
                         grid-template-columns: repeat(2, 1fr) !important;
                         grid-auto-rows: max-content !important;
                         align-content: start !important;
@@ -1393,7 +1393,7 @@ export default function PosPage() {
                     }
                 }
                 @media (min-width: 541px) and (max-width: 820px) {
-                    .items-grid {
+                    .clean-page.pos-master-page .items-grid {
                         grid-template-columns: repeat(3, 1fr) !important;
                         grid-auto-rows: max-content !important;
                         align-content: start !important;
@@ -1402,7 +1402,7 @@ export default function PosPage() {
                     }
                 }
                 @media (min-width: 821px) and (max-width: 1024px) {
-                    .items-grid {
+                    .clean-page.pos-master-page .items-grid {
                         grid-template-columns: repeat(4, 1fr) !important;
                         grid-auto-rows: max-content !important;
                         align-content: start !important;
@@ -1411,7 +1411,7 @@ export default function PosPage() {
                     }
                 }
                 @media (min-width: 1025px) {
-                    .items-grid {
+                    .clean-page.pos-master-page .items-grid {
                         grid-template-columns: repeat(auto-fill, minmax(135px, 1fr)) !important;
                         grid-auto-rows: max-content !important;
                         align-content: start !important;
@@ -2047,6 +2047,22 @@ export default function PosPage() {
                     color: #FFFFFF !important;
                     box-shadow: 0 4px 15px rgba(168, 87, 60, 0.3) !important;
                 }
+                .daylight-theme .pos-cart-header-title {
+                    color: #2C1A12 !important;
+                }
+                .daylight-theme .pos-cart-count-badge {
+                    background: rgba(194, 155, 98, 0.18) !important;
+                    color: #A8573C !important;
+                    border: 1px solid rgba(194, 155, 98, 0.35) !important;
+                }
+                .daylight-theme .pos-admin-badge {
+                    background: rgba(194, 155, 98, 0.18) !important;
+                    color: #A8573C !important;
+                    border-color: rgba(194, 155, 98, 0.4) !important;
+                }
+                .daylight-theme .pos-station-tank-label {
+                    color: #A8573C !important;
+                }
             `}</style>
 
             {/* 🎛️ شريط تحكم الكاشير المتكامل (محطة الوقود + مشغل المحطة + الوردية) */}
@@ -2054,7 +2070,7 @@ export default function PosPage() {
                 <div className="pos-selectors-group">
                     {/* محطة الوقود / الخزان */}
                     <div className="pos-select-item">
-                        <span className="pos-item-label" style={{ color: THEME.primary }}>
+                        <span className="pos-item-label pos-station-tank-label" style={{ color: THEME.primary }}>
                             ⛽ {isEn ? 'Station / Tank:' : 'محطة الوقود / الخزان:'}
                         </span>
                         <select 
@@ -2070,7 +2086,7 @@ export default function PosPage() {
                             ))}
                         </select>
                         {logic.isManagerOrAdmin && (
-                            <span style={{
+                            <span className="pos-admin-badge" style={{
                                 background: 'rgba(0, 229, 255, 0.15)',
                                 color: '#00E5FF',
                                 border: '1px solid rgba(0, 229, 255, 0.35)',
@@ -2548,11 +2564,11 @@ export default function PosPage() {
                         }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                                 <span style={{ fontSize: '20px' }}>🛒</span>
-                                <h3 style={{ margin: 0, color: THEME.primary, fontWeight: 900, fontSize: '17px' }}>
+                                <h3 className="pos-cart-header-title" style={{ margin: 0, color: THEME.primary, fontWeight: 900, fontSize: '17px' }}>
                                     الفاتورة الحالية
                                 </h3>
                                 {logic.cart.length > 0 && (
-                                    <span style={{
+                                    <span className="pos-cart-count-badge" style={{
                                         background: 'rgba(0, 229, 255, 0.15)',
                                         color: '#00E5FF',
                                         fontSize: '11px',

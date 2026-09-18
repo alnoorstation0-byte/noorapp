@@ -49,10 +49,10 @@ export default function ShiftCloseModal({
     );
 
     useEffect(() => {
-        if (isOpen && activeShift) {
+        if (isOpen && activeShift?.id) {
             calculateZReport();
         }
-    }, [isOpen, activeShift]);
+    }, [isOpen, activeShift?.id]);
 
     const calculateZReport = async () => {
         setIsLoadingStats(true);
@@ -79,19 +79,21 @@ export default function ShiftCloseModal({
                 .neq('status', 'ملغي'); // Arabic status check remains in logic
 
             // Fetch fuel pump readings for this shift
+            let loadedPumpReadings: any[] = [];
             try {
                 const { data: pReadings, error: pErr } = await supabase.rpc('get_or_init_shift_pump_readings', {
                     p_shift_id: activeShift.id
                 });
                 if (!pErr && pReadings) {
-                    setPumpReadings(pReadings.map((pr: any) => ({
+                    loadedPumpReadings = pReadings.map((pr: any) => ({
                         ...pr,
                         unit_price: Number(pr.unit_price) || 0,
                         start_reading: Number(pr.start_reading) || 0,
                         end_reading: (pr.end_reading !== null && pr.end_reading !== undefined) ? Number(pr.end_reading) : '',
                         liters_pumped: Number(pr.liters_pumped) || 0,
                         expected_amount: Number(pr.expected_amount) || 0
-                    })));
+                    }));
+                    setPumpReadings(loadedPumpReadings);
                 }
             } catch (pEx) {
                 console.warn('Error fetching pump readings:', pEx);
@@ -145,6 +147,20 @@ export default function ShiftCloseModal({
                 cashExpenses, 
                 totalExpenses 
             } as any);
+
+            // ⚡ وضع المبلغ التلقائي في الدرج مباشرة عند فتح نافذة الإغلاق
+            const totalMeterAmt = loadedPumpReadings.reduce((sum, p) => sum + (Number(p.expected_amount) || 0), 0);
+            const initialFuelCash = totalMeterAmt > 0
+                ? Math.max(0, totalMeterAmt - cardSales - creditSales)
+                : cashSales;
+            const autoInitialCash = Math.max(0,
+                Number(activeShift?.starting_cash || 0)
+                + initialFuelCash
+                + standaloneCashReceipts
+                - cashExpenses
+            );
+            setActualCash(Number(autoInitialCash.toFixed(2)));
+
         } catch (error) {
             console.error(error);
         } finally {
@@ -153,20 +169,37 @@ export default function ShiftCloseModal({
     };
 
     const handleUpdateEndReading = (pumpId: string, val: number | '') => {
-        setPumpReadings(prev => prev.map(p => {
-            if (p.pump_id === pumpId) {
-                const endVal = val === '' ? '' : Math.max(p.start_reading, Number(val));
-                const liters = endVal === '' ? 0 : Math.max(0, Number(endVal) - p.start_reading);
-                const amount = liters * p.unit_price;
-                return {
-                    ...p,
-                    end_reading: endVal,
-                    liters_pumped: liters,
-                    expected_amount: amount
-                };
-            }
-            return p;
-        }));
+        setPumpReadings(prev => {
+            const updated = prev.map(p => {
+                if (p.pump_id === pumpId) {
+                    const endVal = val === '' ? '' : Math.max(p.start_reading, Number(val));
+                    const liters = endVal === '' ? 0 : Math.max(0, Number(endVal) - p.start_reading);
+                    const amount = liters * p.unit_price;
+                    return {
+                        ...p,
+                        end_reading: endVal,
+                        liters_pumped: liters,
+                        expected_amount: amount
+                    };
+                }
+                return p;
+            });
+
+            // ⚡ وضع المبلغ الذي في الدرج تلقائياً فور كتابة أو تعديل قراءة العداد
+            const newTotalMeter = updated.reduce((sum, p) => sum + (Number(p.expected_amount) || 0), 0);
+            const fuelCash = newTotalMeter > 0 
+                ? Math.max(0, newTotalMeter - (totals.card || 0) - (totals.credit || 0))
+                : (totals.cash || 0);
+            const autoCash = Math.max(0,
+                Number(activeShift?.starting_cash || 0)
+                + fuelCash
+                + Number((totals as any).standaloneCash || 0)
+                - Number((totals as any).cashExpenses || 0)
+            );
+            setActualCash(Number(autoCash.toFixed(2)));
+
+            return updated;
+        });
     };
 
     // إجمالي قراءات العدادات ومقارنتها مع المبيعات
@@ -175,9 +208,25 @@ export default function ShiftCloseModal({
         totalMeterAmount: pumpReadings.reduce((sum, p) => sum + (Number(p.expected_amount) || 0), 0)
     };
 
-    const expectedCash = Number(activeShift?.starting_cash || 0) + (totals.cash || 0) + ((totals as any).standaloneCash || 0) - ((totals as any).cashExpenses || 0);
+    // صافي كاش الوقود من العدادات مخصوماً منه الشبكة والآجل
+    const fuelCashFromMeters = meterSummary.totalMeterAmount > 0 
+        ? Math.max(0, meterSummary.totalMeterAmount - (totals.card || 0) - (totals.credit || 0))
+        : (totals.cash || 0);
+
+    const expectedCash = Math.max(0,
+        Number(activeShift?.starting_cash || 0) 
+        + fuelCashFromMeters 
+        + Number((totals as any).standaloneCash || 0) 
+        - Number((totals as any).cashExpenses || 0)
+    );
+
     const difference = actualCash === '' ? 0 : Number(actualCash) - expectedCash;
     const meterSalesVariance = meterSummary.totalMeterAmount > 0 ? (meterSummary.totalMeterAmount - totals.total) : 0;
+
+    const handleAutoFillDrawerCash = () => {
+        setActualCash(Number(expectedCash.toFixed(2)));
+        showToast(isEn ? 'Cash drawer amount auto-filled from meter readings ⚡' : 'تم وضع مبلغ الدرج تلقائياً بناءً على قراءات العدادات ⚡', 'info');
+    };
 
     const closeShiftMutation = useMutation({
         mutationFn: async () => {
@@ -205,8 +254,8 @@ export default function ShiftCloseModal({
                 closed_at: new Date().toISOString(),
                 expected_cash: expectedCash,
                 actual_cash: Number(actualCash),
-                total_sales: totals.total,
-                total_cash_sales: totals.cash,
+                total_sales: meterSummary.totalMeterAmount > 0 ? meterSummary.totalMeterAmount : totals.total,
+                total_cash_sales: fuelCashFromMeters,
                 total_card_sales: totals.card,
                 total_credit_sales: totals.credit,
                 total_expenses: (totals as any).totalExpenses || 0,
@@ -449,88 +498,7 @@ export default function ShiftCloseModal({
                     </div>
                 ) : (
                     <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
-                        {/* ملخص المبيعات */}
-                        <div className="shift-sales-summary" style={{ background: 'rgba(15, 20, 30, 0.7)', border: '1px solid rgba(255, 255, 255, 0.08)', padding: '16px', borderRadius: '16px' }}>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', fontSize: '14px', fontWeight: 700, color: '#94A3B8' }}>
-                                <span>💵 {isEn ? 'Opening Cash:' : 'العهدة الافتتاحية:'}</span>
-                                <strong style={{ color: '#F8FAFC' }}>{Number(activeShift.starting_cash || 0).toFixed(2)} {isEn ? 'SAR' : 'ريال'}</strong>
-                            </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', fontSize: '14px', fontWeight: 700, color: '#10B981' }}>
-                                <span>💰 {isEn ? 'Cash Sales:' : 'المبيعات النقدية (كاش):'}</span>
-                                <strong>+ {totals.cash.toFixed(2)} {isEn ? 'SAR' : 'ريال'}</strong>
-                            </div>
-                            {Number((totals as any).standaloneCash || 0) > 0 && (
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', fontSize: '14px', fontWeight: 700, color: '#00E5FF' }}>
-                                    <span>📥 {isEn ? 'Additional Collections:' : 'تحصيلات نقدية إضافية:'}</span>
-                                    <strong>+ {Number((totals as any).standaloneCash).toFixed(2)} {isEn ? 'SAR' : 'ريال'}</strong>
-                                </div>
-                            )}
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', fontSize: '14px', fontWeight: 700, color: '#38BDF8' }}>
-                                <span>💳 {isEn ? 'Card / POS Sales:' : 'مبيعات الشبكة / مدى:'}</span>
-                                <strong>{totals.card.toFixed(2)} {isEn ? 'SAR' : 'ريال'}</strong>
-                            </div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', fontSize: '14px', fontWeight: 700, color: '#fbbf24' }}>
-                                <span>📋 {isEn ? 'Credit Sales:' : 'المبيعات الآجلة:'}</span>
-                                <strong>{totals.credit.toFixed(2)} {isEn ? 'SAR' : 'ريال'}</strong>
-                            </div>
-                            {Number((totals as any).cashExpenses || 0) > 0 && (
-                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', fontSize: '14px', fontWeight: 700, color: '#f87171' }}>
-                                    <span>💸 {isEn ? 'Drawer Expenses:' : 'مصروفات الدرج (كاش):'}</span>
-                                    <strong>- {Number((totals as any).cashExpenses).toFixed(2)} {isEn ? 'SAR' : 'ريال'}</strong>
-                                </div>
-                            )}
-                            <hr style={{ borderColor: 'rgba(255, 255, 255, 0.1)', margin: '10px 0' }} />
-                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '16px', fontWeight: 900, color: '#F8FAFC' }}>
-                                <span>🏦 {isEn ? 'Expected Cash in Register:' : 'النقدية المتوقعة بالدرج:'}</span>
-                                <span style={{ fontSize: '20px', color: '#00E5FF' }}>{expectedCash.toFixed(2)} {isEn ? 'SAR' : 'ريال'}</span>
-                            </div>
-                        </div>
-
-                        {/* إدخال النقدية الفعلية */}
-                        <div className="form-group">
-                            <label style={{ fontWeight: 900, color: '#00E5FF', fontSize: '14px', display: 'block', marginBottom: '8px' }}>
-                                💵 {isEn ? 'Actual Cash in Register (Counted):' : 'المبلغ الفعلي الموجود في الدرج الآن (بعد العد):'}
-                            </label>
-                            <input 
-                                type="number" 
-                                className="glass-input-field" 
-                                value={actualCash} 
-                                onChange={(e) => setActualCash(e.target.value === '' ? '' : Number(e.target.value))}
-                                onFocus={(e) => e.target.select()}
-                                style={{ 
-                                    fontSize: '26px', 
-                                    fontWeight: 900, 
-                                    textAlign: 'center', 
-                                    borderColor: 'rgba(0, 229, 255, 0.5)', 
-                                    height: '54px',
-                                    background: 'rgba(11, 14, 20, 0.8)',
-                                    color: '#00E5FF',
-                                    borderRadius: '12px'
-                                }}
-                                placeholder="0.00"
-                            />
-                        </div>
-
-                        {actualCash !== '' && (
-                            <div style={{ 
-                                textAlign: 'center', 
-                                fontSize: '16px', 
-                                fontWeight: 900, 
-                                color: difference === 0 ? '#10B981' : difference > 0 ? '#00E5FF' : '#f87171', 
-                                padding: '12px', 
-                                background: difference === 0 ? 'rgba(16, 185, 129, 0.15)' : difference > 0 ? 'rgba(0, 229, 255, 0.15)' : 'rgba(239, 68, 68, 0.15)', 
-                                borderRadius: '12px',
-                                border: `1px solid ${difference === 0 ? 'rgba(16, 185, 129, 0.4)' : difference > 0 ? 'rgba(0, 229, 255, 0.4)' : 'rgba(239, 68, 68, 0.4)'}`
-                            }}>
-                                {difference === 0 
-                                    ? (isEn ? '✅ Register matches exactly (No variance)' : '✅ الصندوق مطابق تماماً (لا يوجد عجز أو زيادة)') 
-                                    : difference > 0 
-                                        ? `💰 يوجد زيادة بقيمة: +${difference.toFixed(2)} ${isEn ? 'SAR' : 'ريال'}` 
-                                        : `⚠️ يوجد عجز بقيمة: -${Math.abs(difference).toFixed(2)} ${isEn ? 'SAR' : 'ريال'}`}
-                            </div>
-                        )}
-
-                        {/* ⛽ قراءات عدادات المضخات ومطابقة كميات الوقود */}
+                        {/* 1. ⛽ قراءات عدادات المضخات ونهاية الوردية */}
                         <div className="shift-meters-box" style={{
                             background: 'rgba(15, 20, 30, 0.7)',
                             border: '1.5px solid rgba(0, 229, 255, 0.25)',
@@ -543,10 +511,10 @@ export default function ShiftCloseModal({
                                     <span style={{ fontSize: '18px' }}>⛽</span>
                                     <div>
                                         <h4 style={{ margin: 0, fontSize: '14px', fontWeight: 900, color: '#F8FAFC' }}>
-                                            {isEn ? 'Fuel Pump Meters & Dispensed Fuel' : 'قراءات عدادات المضخات (جرد المحروقات)'}
+                                            {isEn ? 'Fuel Pump Meters & Closing Readings' : 'قراءات عدادات المضخات (نهاية الوردية)'}
                                         </h4>
                                         <span style={{ fontSize: '11px', color: '#94A3B8' }}>
-                                            {isEn ? 'Record closing meter reading for each pump' : 'سجّل قراءة العداد النهائية لمطابقة الوقود المباع مع الفواتير'}
+                                            {isEn ? 'Record closing meter reading to auto-calculate cash drawer' : 'سجّل قراءة العداد النهائية لحساب وقود الوردية ومبلغ الدرج تلقائياً'}
                                         </span>
                                     </div>
                                 </div>
@@ -627,7 +595,7 @@ export default function ShiftCloseModal({
                                                             {isEn ? 'End Meter *' : 'نهاية الوردية (العداد) *'}
                                                         </span>
                                                         <input 
-                                                            type="number"
+                                                            type="number" 
                                                             step="any"
                                                             min={p.start_reading}
                                                             className="glass-input-field"
@@ -639,7 +607,7 @@ export default function ShiftCloseModal({
                                                                 fontWeight: 800, 
                                                                 textAlign: 'center', 
                                                                 borderColor: 'rgba(0, 229, 255, 0.4)', 
-                                                                background: 'rgba(11, 14, 20, 0.9)',
+                                                                background: 'rgba(11, 14, 20, 0.9)', 
                                                                 color: '#00E5FF',
                                                                 padding: '6px 4px', 
                                                                 height: '34px',
@@ -721,6 +689,118 @@ export default function ShiftCloseModal({
                                 </div>
                             )}
                         </div>
+
+                        {/* 2. 📊 ملخص المبيعات والحسابات */}
+                        <div className="shift-sales-summary" style={{ background: 'rgba(15, 20, 30, 0.7)', border: '1px solid rgba(255, 255, 255, 0.08)', padding: '16px', borderRadius: '16px' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', fontSize: '14px', fontWeight: 700, color: '#94A3B8' }}>
+                                <span>💵 {isEn ? 'Opening Cash:' : 'العهدة الافتتاحية:'}</span>
+                                <strong style={{ color: '#F8FAFC' }}>{Number(activeShift.starting_cash || 0).toFixed(2)} {isEn ? 'SAR' : 'ريال'}</strong>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', fontSize: '14px', fontWeight: 700, color: '#10B981' }}>
+                                <span>💰 {isEn ? 'Cash Fuel Sales (from meters):' : 'كاش الوقود (من العدادات):'}</span>
+                                <strong>+ {fuelCashFromMeters.toFixed(2)} {isEn ? 'SAR' : 'ريال'}</strong>
+                            </div>
+                            {Number((totals as any).standaloneCash || 0) > 0 && (
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', fontSize: '14px', fontWeight: 700, color: '#00E5FF' }}>
+                                    <span>📥 {isEn ? 'Additional Collections:' : 'تحصيلات نقدية إضافية:'}</span>
+                                    <strong>+ {Number((totals as any).standaloneCash).toFixed(2)} {isEn ? 'SAR' : 'ريال'}</strong>
+                                </div>
+                            )}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', fontSize: '14px', fontWeight: 700, color: '#38BDF8' }}>
+                                <span>💳 {isEn ? 'Card / POS Sales:' : 'مبيعات الشبكة / مدى:'}</span>
+                                <strong>{totals.card.toFixed(2)} {isEn ? 'SAR' : 'ريال'}</strong>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', fontSize: '14px', fontWeight: 700, color: '#fbbf24' }}>
+                                <span>📋 {isEn ? 'Credit Sales:' : 'المبيعات الآجلة:'}</span>
+                                <strong>{totals.credit.toFixed(2)} {isEn ? 'SAR' : 'ريال'}</strong>
+                            </div>
+                            {Number((totals as any).cashExpenses || 0) > 0 && (
+                                <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', fontSize: '14px', fontWeight: 700, color: '#f87171' }}>
+                                    <span>💸 {isEn ? 'Drawer Expenses:' : 'مصروفات الدرج (كاش):'}</span>
+                                    <strong>- {Number((totals as any).cashExpenses).toFixed(2)} {isEn ? 'SAR' : 'ريال'}</strong>
+                                </div>
+                            )}
+                            <hr style={{ borderColor: 'rgba(255, 255, 255, 0.1)', margin: '10px 0' }} />
+                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '16px', fontWeight: 900, color: '#F8FAFC' }}>
+                                <span>🏦 {isEn ? 'Expected Cash in Register:' : 'صافي النقدية المفترضة بالدرج:'}</span>
+                                <span style={{ fontSize: '20px', color: '#00E5FF' }}>{expectedCash.toFixed(2)} {isEn ? 'SAR' : 'ريال'}</span>
+                            </div>
+                        </div>
+
+                        {/* 3. 💵 المبلغ الفعلي الموجود في الدرج (ملء تلقائي فوري) */}
+                        <div className="form-group" style={{
+                            background: 'rgba(0, 229, 255, 0.04)',
+                            border: '1.5px solid rgba(0, 229, 255, 0.3)',
+                            padding: '16px',
+                            borderRadius: '16px'
+                        }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                                <div>
+                                    <label style={{ fontWeight: 900, color: '#00E5FF', fontSize: '14px', margin: 0, display: 'block' }}>
+                                        💵 {isEn ? 'Actual Cash in Register:' : 'المبلغ الفعلي الموجود في الدرج (تلقائي):'}
+                                    </label>
+                                    <span style={{ fontSize: '11px', color: '#94A3B8', fontWeight: 700 }}>
+                                        {isEn ? '⚡ Auto-computed from meters & shift cash sales' : '⚡ تم ملء وحساب المبلغ تلقائياً بناءً على العدادات وحركة الكاش'}
+                                    </span>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={handleAutoFillDrawerCash}
+                                    style={{
+                                        background: 'rgba(0, 229, 255, 0.15)',
+                                        border: '1px solid rgba(0, 229, 255, 0.4)',
+                                        color: '#00E5FF',
+                                        padding: '5px 12px',
+                                        borderRadius: '8px',
+                                        fontSize: '11.5px',
+                                        fontWeight: 800,
+                                        cursor: 'pointer',
+                                        whiteSpace: 'nowrap'
+                                    }}
+                                >
+                                    ⚡ {isEn ? 'Reset to Auto' : 'إعادة التعيين للتلقائي'}
+                                </button>
+                            </div>
+
+                            <input 
+                                type="number" 
+                                step="any"
+                                className="glass-input-field" 
+                                value={actualCash} 
+                                onChange={(e) => setActualCash(e.target.value === '' ? '' : Number(e.target.value))}
+                                onFocus={(e) => e.target.select()}
+                                style={{ 
+                                    fontSize: '26px', 
+                                    fontWeight: 900, 
+                                    textAlign: 'center', 
+                                    borderColor: 'rgba(0, 229, 255, 0.5)', 
+                                    height: '54px',
+                                    background: 'rgba(11, 14, 20, 0.8)', 
+                                    color: '#00E5FF',
+                                    borderRadius: '12px'
+                                }}
+                                placeholder="0.00"
+                            />
+                        </div>
+
+                        {actualCash !== '' && (
+                            <div style={{ 
+                                textAlign: 'center', 
+                                fontSize: '16px', 
+                                fontWeight: 900, 
+                                color: difference === 0 ? '#10B981' : difference > 0 ? '#00E5FF' : '#f87171', 
+                                padding: '12px', 
+                                background: difference === 0 ? 'rgba(16, 185, 129, 0.15)' : difference > 0 ? 'rgba(0, 229, 255, 0.15)' : 'rgba(239, 68, 68, 0.15)', 
+                                borderRadius: '12px',
+                                border: `1px solid ${difference === 0 ? 'rgba(16, 185, 129, 0.4)' : difference > 0 ? 'rgba(0, 229, 255, 0.4)' : 'rgba(239, 68, 68, 0.4)'}`
+                            }}>
+                                {difference === 0 
+                                    ? (isEn ? '✅ Register matches exactly (No variance)' : '✅ الصندوق مطابق تماماً (لا يوجد عجز أو زيادة)') 
+                                    : difference > 0 
+                                        ? `💰 يوجد زيادة بقيمة: +${difference.toFixed(2)} ${isEn ? 'SAR' : 'ريال'}` 
+                                        : `⚠️ يوجد عجز بقيمة: -${Math.abs(difference).toFixed(2)} ${isEn ? 'SAR' : 'ريال'}`}
+                            </div>
+                        )}
 
                         {/* أزرار الإجراء */}
                         <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '10px', marginTop: '8px' }}>

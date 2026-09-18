@@ -16,6 +16,8 @@ export default function Sidebar() {
     { name: 'إغلاق الورديات والعدادات', icon: '⏱️', path: '/pos-settlements' },
     { name: 'فواتير ومبيعات الوقود', icon: '🧾', path: '/invoices' },
     { name: 'خزانات الوقود والمستودع', icon: '🛢️', path: '/inventory' },
+    { name: 'إدارة التراخيص والوثائق', icon: '📜', path: '/licenses' },
+    { name: 'عقود إيجار المحطات', icon: '🏢', path: '/station-leases' },
     { name: 'سندات القبض والصرف', icon: '💵', path: '/ReceiptVouchers' },
     { name: 'التقارير المحاسبية والميزان', icon: '📊', path: '/journal' }
   ];
@@ -27,9 +29,9 @@ export default function Sidebar() {
         width: isCollapsed ? '80px' : '270px',
         height: '100vh',
         background: isDaylight
-          ? 'linear-gradient(180deg, #FFFFFF 0%, #FDFBF7 100%)'
+          ? 'linear-gradient(180deg, #FFFFFF 0%, #F8FAFC 100%)'
           : 'linear-gradient(180deg, #0F1218 0%, #080A0E 100%)',
-        color: isDaylight ? '#2C1A12' : '#F8FAFC',
+        color: isDaylight ? '#0F172A' : '#F8FAFC',
         transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
         display: 'flex',
         flexDirection: 'column',
@@ -37,8 +39,8 @@ export default function Sidebar() {
         right: 0,
         top: 0,
         zIndex: 1000,
-        borderLeft: isDaylight ? '1px solid rgba(194, 155, 98, 0.25)' : '1px solid rgba(0, 229, 255, 0.15)',
-        boxShadow: isDaylight ? '-6px 0 30px rgba(44, 26, 18, 0.08)' : '-6px 0 30px rgba(0, 0, 0, 0.65)',
+        borderLeft: isDaylight ? '1px solid rgba(226, 232, 240, 0.9)' : '1px solid rgba(0, 229, 255, 0.15)',
+        boxShadow: isDaylight ? '-4px 0 25px rgba(15, 23, 42, 0.05)' : '-6px 0 30px rgba(0, 0, 0, 0.65)',
         direction: 'rtl'
       }}
     >
@@ -48,8 +50,8 @@ export default function Sidebar() {
         display: 'flex', 
         justifyContent: 'space-between', 
         alignItems: 'center', 
-        borderBottom: isDaylight ? '1px solid rgba(194, 155, 98, 0.2)' : '1px solid rgba(0, 229, 255, 0.12)',
-        background: isDaylight ? 'rgba(255, 253, 250, 0.85)' : 'rgba(15, 18, 24, 0.6)'
+        borderBottom: isDaylight ? '1px solid rgba(226, 232, 240, 0.9)' : '1px solid rgba(0, 229, 255, 0.12)',
+        background: isDaylight ? '#FFFFFF' : 'rgba(15, 18, 24, 0.6)'
       }}>
         {!isCollapsed ? (
           <div style={{ display: 'flex', alignItems: 'center', gap: '12px', overflow: 'hidden' }}>
@@ -58,8 +60,8 @@ export default function Sidebar() {
               height: '42px',
               borderRadius: '12px',
               background: isDaylight ? '#FFFFFF' : 'rgba(11, 14, 20, 0.85)',
-              border: isDaylight ? '1px solid rgba(194, 155, 98, 0.4)' : '1px solid rgba(0, 229, 255, 0.35)',
-              boxShadow: isDaylight ? '0 2px 8px rgba(44, 26, 18, 0.08)' : '0 0 15px rgba(0, 229, 255, 0.25)',
+              border: isDaylight ? '1px solid rgba(245, 158, 11, 0.4)' : '1px solid rgba(0, 229, 255, 0.35)',
+              boxShadow: isDaylight ? '0 2px 10px rgba(245, 158, 11, 0.15)' : '0 0 15px rgba(0, 229, 255, 0.25)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
@@ -68,10 +70,10 @@ export default function Sidebar() {
               <img src="/logo.png" alt="Noor Logo" style={{ width: '32px', height: '32px', objectFit: 'contain' }} />
             </div>
             <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <span style={{ fontWeight: 900, fontSize: '15px', color: isDaylight ? '#2C1A12' : '#F8FAFC', letterSpacing: '-0.3px' }}>
-                محطات النور <span style={{ color: isDaylight ? '#C29B62' : '#00E5FF' }}>للوقود</span>
+              <span style={{ fontWeight: 900, fontSize: '15px', color: isDaylight ? '#0F172A' : '#F8FAFC', letterSpacing: '-0.3px' }}>
+                محطات النور <span style={{ color: isDaylight ? '#D97706' : '#00E5FF' }}>للوقود</span>
               </span>
-              <span style={{ fontSize: '10.5px', color: isDaylight ? '#A8573C' : '#E06D44', fontWeight: 700 }}>
+              <span style={{ fontSize: '10.5px', color: isDaylight ? '#EA580C' : '#E06D44', fontWeight: 700 }}>
                 مركز القيادة الموحد
               </span>
             </div>
@@ -85,10 +87,10 @@ export default function Sidebar() {
         <button 
           onClick={() => setIsCollapsed(!isCollapsed)} 
           style={{ 
-            background: isDaylight ? 'rgba(194, 155, 98, 0.1)' : 'rgba(0, 229, 255, 0.08)', 
-            border: isDaylight ? '1px solid rgba(194, 155, 98, 0.3)' : '1px solid rgba(0, 229, 255, 0.25)', 
+            background: isDaylight ? 'rgba(245, 158, 11, 0.1)' : 'rgba(0, 229, 255, 0.08)', 
+            border: isDaylight ? '1px solid rgba(245, 158, 11, 0.3)' : '1px solid rgba(0, 229, 255, 0.25)', 
             borderRadius: '8px', 
-            color: isDaylight ? '#C29B62' : '#00E5FF', 
+            color: isDaylight ? '#D97706' : '#00E5FF', 
             cursor: 'pointer', 
             fontSize: '13px', 
             padding: '6px 8px',
@@ -116,21 +118,21 @@ export default function Sidebar() {
               borderRadius: '12px',
               textDecoration: 'none',
               color: isActive 
-                ? (isDaylight ? '#2C1A12' : '#FFFFFF') 
-                : (isDaylight ? 'rgba(44, 26, 18, 0.65)' : '#94A3B8'),
+                ? (isDaylight ? '#0F172A' : '#FFFFFF') 
+                : (isDaylight ? '#64748B' : '#94A3B8'),
               background: isActive 
-                ? (isDaylight ? 'linear-gradient(135deg, rgba(194, 155, 98, 0.18) 0%, rgba(168, 87, 60, 0.08) 100%)' : 'linear-gradient(135deg, rgba(0, 229, 255, 0.16) 0%, rgba(0, 140, 200, 0.08) 100%)') 
+                ? (isDaylight ? 'linear-gradient(135deg, rgba(245, 158, 11, 0.15) 0%, rgba(217, 119, 6, 0.08) 100%)' : 'linear-gradient(135deg, rgba(0, 229, 255, 0.16) 0%, rgba(0, 140, 200, 0.08) 100%)') 
                 : 'transparent',
               borderRight: isActive 
-                ? (isDaylight ? '3.5px solid #C29B62' : '3.5px solid #00E5FF') 
+                ? (isDaylight ? '3.5px solid #F59E0B' : '3.5px solid #00E5FF') 
                 : '3.5px solid transparent',
               border: isActive 
-                ? (isDaylight ? '1px solid rgba(194, 155, 98, 0.4)' : '1px solid rgba(0, 229, 255, 0.35)') 
+                ? (isDaylight ? '1px solid rgba(245, 158, 11, 0.35)' : '1px solid rgba(0, 229, 255, 0.35)') 
                 : '1px solid transparent',
               fontWeight: isActive ? 900 : 600,
               fontSize: '13px',
               boxShadow: isActive 
-                ? (isDaylight ? '0 2px 8px rgba(194, 155, 98, 0.15)' : '0 0 15px rgba(0, 229, 255, 0.2), inset 0 0 10px rgba(0, 229, 255, 0.05)') 
+                ? (isDaylight ? '0 2px 10px rgba(245, 158, 11, 0.15)' : '0 0 15px rgba(0, 229, 255, 0.2), inset 0 0 10px rgba(0, 229, 255, 0.05)') 
                 : 'none',
               transition: 'all 0.2s cubic-bezier(0.4, 0, 0.2, 1)',
               overflow: 'hidden',
@@ -144,7 +146,7 @@ export default function Sidebar() {
               </span>
               {!isCollapsed && (
                 <span style={{ 
-                  color: isActive ? (isDaylight ? '#2C1A12' : '#00E5FF') : (isDaylight ? 'rgba(44, 26, 18, 0.7)' : '#94A3B8'),
+                  color: isActive ? (isDaylight ? '#0F172A' : '#00E5FF') : (isDaylight ? '#475569' : '#94A3B8'),
                   textShadow: isActive && !isDaylight ? '0 0 10px rgba(0, 229, 255, 0.4)' : 'none'
                 }}>
                   {item.name}
@@ -159,16 +161,16 @@ export default function Sidebar() {
       {!isCollapsed && (
         <div style={{ 
           padding: '14px 16px', 
-          background: isDaylight ? 'rgba(255, 253, 250, 0.9)' : 'rgba(7, 9, 13, 0.85)', 
+          background: isDaylight ? '#FFFFFF' : 'rgba(7, 9, 13, 0.85)', 
           fontSize: '11.5px', 
           textAlign: 'center', 
-          color: isDaylight ? 'rgba(44, 26, 18, 0.6)' : '#64748B', 
-          borderTop: isDaylight ? '1px solid rgba(194, 155, 98, 0.2)' : '1px solid rgba(0, 229, 255, 0.1)',
+          color: isDaylight ? '#64748B' : '#64748B', 
+          borderTop: isDaylight ? '1px solid rgba(226, 232, 240, 0.9)' : '1px solid rgba(0, 229, 255, 0.1)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'space-between'
         }}>
-          <span style={{ color: isDaylight ? '#C29B62' : '#00E5FF', fontWeight: 800 }}>⚡ نور OS v3.0</span>
+          <span style={{ color: isDaylight ? '#D97706' : '#00E5FF', fontWeight: 800 }}>⚡ نور OS v3.0</span>
           <span style={{ display: 'flex', alignItems: 'center', gap: '5px', color: '#10B981', fontWeight: 700 }}>
             <span style={{ width: '7px', height: '7px', borderRadius: '50%', background: '#10B981', boxShadow: '0 0 8px #10B981' }}></span>
             متصل

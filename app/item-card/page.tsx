@@ -4,6 +4,7 @@ import { THEME } from '@/lib/theme';
 import { formatCurrency } from '@/lib/helpers';
 import { useItemCardLogic } from './item_card_logic';
 import { BarcodeCameraButton } from '@/components/BarcodeScannerWidget';
+import LoadingScreen from '@/components/LoadingScreen';
 
 export default function ItemCardPage() {
     const {
@@ -172,7 +173,7 @@ export default function ItemCardPage() {
             </div>
 
             {isLoading ? (
-                <div style={{ padding: '50px', textAlign: 'center', color: 'white', fontWeight: 900, fontSize: '20px' }}>جاري التحميل...</div>
+                <LoadingScreen message="جاري تحضير حركات الصنف..." fullScreen={false} />
             ) : !selectedItemId ? (
                 <div style={{ padding: '80px 20px', textAlign: 'center', background: 'rgba(255,255,255,0.02)', borderRadius: '24px', border: '1px dashed rgba(255,255,255,0.1)' }}>
                     <div style={{ fontSize: '48px', marginBottom: '15px' }}>🏷️</div>

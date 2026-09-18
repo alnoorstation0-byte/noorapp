@@ -2,6 +2,7 @@
 import React from 'react';
 import { THEME } from '@/lib/theme';
 import { useReorderAlertsLogic } from './reorder_alerts_logic';
+import LoadingScreen from '@/components/LoadingScreen';
 
 export default function ReorderAlertsPage() {
     const {
@@ -103,7 +104,7 @@ export default function ReorderAlertsPage() {
             </div>
 
             {isLoading ? (
-                <div style={{ padding: '50px', textAlign: 'center', color: 'white', fontWeight: 900, fontSize: '20px' }}>جاري التحقق من الأرصدة...</div>
+                <LoadingScreen message="جاري تحضير وفحص نواقص المخزون..." fullScreen={false} />
             ) : (
                 <>
                     {/* Global KPIs */}

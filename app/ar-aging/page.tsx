@@ -4,6 +4,7 @@ import { THEME } from '@/lib/theme';
 import { formatCurrency } from '@/lib/helpers';
 import { useArAgingLogic } from './ar_aging_logic';
 import MasterPage from '@/components/MasterPage';
+import LoadingScreen from '@/components/LoadingScreen';
 
 export default function ArAgingPage() {
     const {
@@ -120,7 +121,7 @@ export default function ArAgingPage() {
             </div>
 
             {isLoading ? (
-                <div style={{ padding: '50px', textAlign: 'center', color: '#00E5FF', fontWeight: 900, fontSize: '20px' }}>جاري الحساب...</div>
+                <LoadingScreen message="جاري تحضير واحتساب أعمار الديون..." fullScreen={false} />
             ) : (
                 <>
                     {/* Global Totals Row */}
