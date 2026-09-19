@@ -146,11 +146,9 @@ export default function RootLayout({
               #FFFFFF !important; 
           }
           .daylight-theme .bg-glass-tint {
-            background: radial-gradient(
-              circle at 50% 50%, 
-              rgba(255, 255, 255, 0.5) 0%, 
-              rgba(248, 250, 252, 0.9) 100% 
-            ) !important;
+            background: #FFFFFF !important;
+            backdrop-filter: none !important;
+            -webkit-backdrop-filter: none !important;
           }
           .daylight-theme .watermark-bg {
             opacity: 0.035 !important;

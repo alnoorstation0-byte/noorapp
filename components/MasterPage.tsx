@@ -375,9 +375,8 @@ export default function MasterPage({ title, subtitle, children, headerContent, i
     await supabase.auth.signOut();
     router.push('/login');
   };
-
   return (
-    <div className={`clean-page ${className || ''}`.trim()}>
+    <div className={`clean-page ${isDaylight ? 'daylight-theme' : ''} ${className || ''}`.trim()}>
       <style>{`
 /* 🚀 🛠️ Prevent horizontal scroll */
 html, body { 
@@ -808,7 +807,140 @@ html, body {
     width: 34px !important; 
     height: 34px !important; 
   }
-}`}</style>
+}
+
+/* ☀️ وضع الرؤية النهارية الكريستالي الناصع لترويسة الصفحة (Pure Crystal Bright White) */
+.daylight-theme .master-header,
+html.daylight-theme .master-header,
+body.daylight-theme .master-header {
+  background: #FFFFFF !important;
+  border: 1px solid rgba(226, 232, 240, 0.95) !important;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.05) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+.daylight-theme .master-page-heading,
+html.daylight-theme .master-page-heading {
+  color: #0F172A !important;
+}
+
+.daylight-theme .master-page-subheading,
+html.daylight-theme .master-page-subheading {
+  color: #475569 !important;
+  font-weight: 700 !important;
+}
+
+.daylight-theme .header-icon,
+html.daylight-theme .header-icon {
+  background: rgba(245, 158, 11, 0.12) !important;
+  border: 1.5px solid rgba(245, 158, 11, 0.35) !important;
+  box-shadow: 0 2px 10px rgba(245, 158, 11, 0.15) !important;
+}
+.daylight-theme .header-icon span,
+html.daylight-theme .header-icon span {
+  color: #D97706 !important;
+}
+
+.daylight-theme .imperial-trigger,
+html.daylight-theme .imperial-trigger {
+  background: #FFFFFF !important;
+  border: 1px solid rgba(226, 232, 240, 0.95) !important;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+.daylight-theme .imperial-trigger:hover,
+html.daylight-theme .imperial-trigger:hover {
+  background: #FFFBEB !important;
+  border-color: rgba(245, 158, 11, 0.5) !important;
+  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.15) !important;
+}
+
+.daylight-theme .u-name,
+html.daylight-theme .u-name {
+  color: #0F172A !important;
+}
+
+.daylight-theme .u-role,
+html.daylight-theme .u-role {
+  color: #D97706 !important;
+  font-weight: 800 !important;
+}
+
+.daylight-theme .header-action-btn,
+html.daylight-theme .header-action-btn {
+  background: #FFFFFF !important;
+  border: 1px solid rgba(226, 232, 240, 0.95) !important;
+  color: #334155 !important;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+.daylight-theme .header-action-btn:hover,
+html.daylight-theme .header-action-btn:hover {
+  background: #FFFBEB !important;
+  color: #D97706 !important;
+  border-color: rgba(245, 158, 11, 0.5) !important;
+}
+
+.daylight-theme .lang-switcher-pill,
+.daylight-theme .perf-switcher-pill,
+.daylight-theme .theme-switcher-pill,
+html.daylight-theme .lang-switcher-pill,
+html.daylight-theme .perf-switcher-pill,
+html.daylight-theme .theme-switcher-pill {
+  background: #FFFFFF !important;
+  border: 1px solid rgba(226, 232, 240, 0.95) !important;
+  color: #334155 !important;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+.daylight-theme .lang-switcher-pill:hover,
+.daylight-theme .perf-switcher-pill:hover,
+.daylight-theme .theme-switcher-pill:hover,
+html.daylight-theme .lang-switcher-pill:hover,
+html.daylight-theme .perf-switcher-pill:hover,
+html.daylight-theme .theme-switcher-pill:hover {
+  background: #FFFBEB !important;
+  border-color: rgba(245, 158, 11, 0.5) !important;
+  color: #D97706 !important;
+}
+.daylight-theme .theme-switcher-pill.daylight-active,
+html.daylight-theme .theme-switcher-pill.daylight-active {
+  background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%) !important;
+  border-color: rgba(245, 158, 11, 0.6) !important;
+  color: #B45309 !important;
+}
+
+.daylight-theme .supreme-dropdown,
+html.daylight-theme .supreme-dropdown {
+  background: #FFFFFF !important;
+  border: 1px solid rgba(226, 232, 240, 0.95) !important;
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.12) !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+.daylight-theme .drop-item,
+html.daylight-theme .drop-item {
+  color: #0F172A !important;
+}
+.daylight-theme .drop-item:hover,
+html.daylight-theme .drop-item:hover {
+  background: rgba(245, 158, 11, 0.1) !important;
+  color: #D97706 !important;
+}
+.daylight-theme .drop-item.logout,
+html.daylight-theme .drop-item.logout {
+  color: #EF4444 !important;
+  border-top: 1px solid rgba(226, 232, 240, 0.9) !important;
+}
+.daylight-theme .drop-item.logout:hover,
+html.daylight-theme .drop-item.logout:hover {
+  background: rgba(239, 68, 68, 0.08) !important;
+}
+`}</style>
 
       <header className="master-header no-print">
         {/* Right side: Icon and Title */}
@@ -838,7 +970,7 @@ html, body {
         <div className="header-side" style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0 }}>
           {headerContent}
           
-          <div className="header-actions" style={{ display: 'flex', flexDirection: 'row', gap: '6px', alignItems: 'center', borderRight: isRtl ? '2px solid rgba(0, 229, 255, 0.2)' : 'none', borderLeft: !isRtl ? '2px solid rgba(0, 229, 255, 0.2)' : 'none', paddingRight: isRtl ? '10px' : '0', paddingLeft: !isRtl ? '10px' : '0' }}>
+          <div className="header-actions" style={{ display: 'flex', flexDirection: 'row', gap: '6px', alignItems: 'center', borderRight: isRtl ? (isDaylight ? '2px solid rgba(226, 232, 240, 0.9)' : '2px solid rgba(0, 229, 255, 0.2)') : 'none', borderLeft: !isRtl ? (isDaylight ? '2px solid rgba(226, 232, 240, 0.9)' : '2px solid rgba(0, 229, 255, 0.2)') : 'none', paddingRight: isRtl ? '10px' : '0', paddingLeft: !isRtl ? '10px' : '0' }}>
              
              {/* Desktop Nav Arrows & Shortcuts Button */}
              <div className="nav-group" style={{ display: 'flex', gap: '4px', margin: 0, border: 'none', background: isDaylight ? 'rgba(255, 253, 250, 0.9)' : 'rgba(20, 24, 34, 0.6)', borderRadius: '12px', padding: '3px' }}>

@@ -706,11 +706,29 @@ export default function WelcomeHomePage() {
                 transform: translateY(-4px);
             }
 
-            /* ── Daylight Theme Overrides ── */
+            /* ── Daylight Theme Overrides (Pure Crystal Bright White) ── */
             .daylight-theme .station-hero-banner {
-                background: linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(243, 247, 252, 0.92) 100%) !important;
-                border-color: rgba(2, 132, 199, 0.3) !important;
-                box-shadow: 0 8px 30px rgba(15, 23, 42, 0.08) !important;
+                background: #FFFFFF !important;
+                border: 1.5px solid rgba(245, 158, 11, 0.35) !important;
+                box-shadow: 0 10px 30px rgba(245, 158, 11, 0.08) !important;
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+            }
+
+            .daylight-theme .station-hero-banner::before {
+                background: linear-gradient(90deg, transparent, #F59E0B, transparent) !important;
+                box-shadow: 0 0 12px rgba(245, 158, 11, 0.4) !important;
+            }
+
+            .daylight-theme .station-status-strip {
+                border-bottom: 1px solid rgba(226, 232, 240, 0.8) !important;
+            }
+
+            .daylight-theme .live-pulse-badge {
+                background: rgba(16, 185, 129, 0.12) !important;
+                border-color: rgba(16, 185, 129, 0.35) !important;
+                color: #059669 !important;
+                box-shadow: 0 0 10px rgba(16, 185, 129, 0.15) !important;
             }
 
             .daylight-theme .hero-greeting-box h1 {
@@ -719,50 +737,163 @@ export default function WelcomeHomePage() {
 
             .daylight-theme .hero-greeting-box p {
                 color: #475569 !important;
+                font-weight: 700 !important;
             }
 
-            .daylight-theme .station-kpi-card,
-            .daylight-theme .tank-card-interactive,
-            .daylight-theme .op-action-btn,
-            .daylight-theme .pump-status-card,
-            .daylight-theme .recent-tx-card,
-            .daylight-theme .command-card-item {
-                background: rgba(255, 255, 255, 0.95) !important;
-                border-color: rgba(203, 213, 225, 0.8) !important;
-                box-shadow: 0 4px 15px rgba(15, 23, 42, 0.06) !important;
+            .daylight-theme .station-kpi-card {
+                background: #FFFFFF !important;
+                border: 1px solid rgba(226, 232, 240, 0.95) !important;
+                border-top: 3.5px solid #F59E0B !important;
+                box-shadow: 0 4px 18px rgba(15, 23, 42, 0.05) !important;
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
                 color: #0F172A !important;
             }
 
-            .daylight-theme .station-kpi-card:hover,
-            .daylight-theme .tank-card-interactive:hover,
-            .daylight-theme .op-action-btn:hover,
-            .daylight-theme .command-card-item:hover {
-                border-color: #0284C7 !important;
-                box-shadow: 0 10px 25px rgba(2, 132, 199, 0.18) !important;
+            .daylight-theme .station-kpi-card:hover {
+                border-color: #F59E0B !important;
+                box-shadow: 0 10px 25px rgba(245, 158, 11, 0.15) !important;
+                transform: translateY(-4px) !important;
                 background: #FFFFFF !important;
+            }
+
+            .daylight-theme .kpi-sub-label {
+                color: #475569 !important;
+                font-weight: 800 !important;
+                font-size: 13px !important;
             }
 
             .daylight-theme .kpi-val-highlight {
                 color: #0F172A !important;
+                font-weight: 900 !important;
+                font-size: 28px !important;
             }
 
-            .daylight-theme .station-table-clean th {
-                color: #0284C7 !important;
-                border-bottom-color: rgba(2, 132, 199, 0.25) !important;
-            }
-
-            .daylight-theme .station-table-clean td {
+            .daylight-theme .section-header-title h2 {
                 color: #0F172A !important;
-                border-bottom-color: rgba(226, 232, 240, 0.8) !important;
+                font-weight: 900 !important;
+            }
+
+            .daylight-theme .section-header-title span.badge-pill {
+                background: rgba(245, 158, 11, 0.12) !important;
+                border: 1px solid rgba(245, 158, 11, 0.35) !important;
+                color: #B45309 !important;
+                font-weight: 800 !important;
+            }
+
+            .daylight-theme .tank-card-interactive {
+                background: #FFFFFF !important;
+                border: 1.5px solid rgba(226, 232, 240, 0.95) !important;
+                box-shadow: 0 6px 20px rgba(15, 23, 42, 0.06) !important;
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+                color: #0F172A !important;
+            }
+
+            .daylight-theme .tank-card-interactive:hover {
+                border-color: #F59E0B !important;
+                box-shadow: 0 12px 28px rgba(245, 158, 11, 0.14) !important;
+                transform: translateY(-4px) !important;
             }
 
             .daylight-theme .fuel-vertical-cylinder {
                 background: #F1F5F9 !important;
-                border-color: rgba(203, 213, 225, 0.9) !important;
+                border: 2px solid rgba(203, 213, 225, 0.9) !important;
+                box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.08) !important;
+            }
+
+            .daylight-theme .op-action-btn {
+                background: #FFFFFF !important;
+                border: 1px solid rgba(226, 232, 240, 0.95) !important;
+                box-shadow: 0 4px 15px rgba(15, 23, 42, 0.05) !important;
+                color: #0F172A !important;
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+            }
+
+            .daylight-theme .op-action-btn:hover {
+                border-color: #F59E0B !important;
+                background: #FFFBEB !important;
+                box-shadow: 0 8px 20px rgba(245, 158, 11, 0.15) !important;
+                transform: translateY(-3px) !important;
+            }
+
+            .daylight-theme .op-icon-pill {
+                background: rgba(245, 158, 11, 0.1) !important;
+                border: 1px solid rgba(245, 158, 11, 0.3) !important;
+                color: #D97706 !important;
+            }
+
+            .daylight-theme .pump-status-card {
+                background: #FFFFFF !important;
+                border: 1px solid rgba(226, 232, 240, 0.95) !important;
+                box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05) !important;
+                color: #0F172A !important;
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+            }
+
+            .daylight-theme .recent-tx-card {
+                background: #FFFFFF !important;
+                border: 1px solid rgba(226, 232, 240, 0.95) !important;
+                box-shadow: 0 6px 20px rgba(15, 23, 42, 0.06) !important;
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+            }
+
+            .daylight-theme .station-table-clean th {
+                color: #B45309 !important;
+                background: rgba(245, 158, 11, 0.08) !important;
+                border-bottom: 1.5px solid rgba(245, 158, 11, 0.25) !important;
+            }
+
+            .daylight-theme .station-table-clean td {
+                color: #0F172A !important;
+                border-bottom: 1px solid rgba(226, 232, 240, 0.8) !important;
+            }
+
+            .daylight-theme .station-table-clean tr:hover td {
+                background: rgba(245, 158, 11, 0.04) !important;
+            }
+
+            .daylight-theme .command-card-item {
+                background: #FFFFFF !important;
+                border: 1px solid rgba(226, 232, 240, 0.95) !important;
+                box-shadow: 0 4px 14px rgba(15, 23, 42, 0.05) !important;
+                color: #0F172A !important;
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+            }
+
+            .daylight-theme .command-card-item:hover {
+                border-color: #F59E0B !important;
+                background: #FFFBEB !important;
+                box-shadow: 0 10px 25px rgba(245, 158, 11, 0.15) !important;
+                transform: translateY(-4px) !important;
             }
 
             .daylight-theme .card-title {
                 color: #0F172A !important;
+                font-weight: 800 !important;
+            }
+
+            .daylight-theme .add-card-btn {
+                background: #FFFFFF !important;
+                border: 1.5px dashed rgba(245, 158, 11, 0.4) !important;
+                color: #D97706 !important;
+            }
+            .daylight-theme .add-card-btn:hover {
+                border-color: #D97706 !important;
+                background: #FFFBEB !important;
+            }
+
+            /* نصوص ثانوية واضحة جداً في الوضع النهاري بدلاً من الرمادي الباهت */
+            .daylight-theme .text-muted,
+            .daylight-theme span[style*="color: #94A3B8"],
+            .daylight-theme span[style*="color:#94A3B8"],
+            .daylight-theme div[style*="color: #94A3B8"],
+            .daylight-theme div[style*="color:#94A3B8"] {
+                color: #475569 !important;
             }
 
             /* ── Responsive Mobile ── */
@@ -792,9 +923,9 @@ export default function WelcomeHomePage() {
                             fontWeight: 800,
                             padding: '4px 12px',
                             borderRadius: '20px',
-                            background: 'rgba(0, 229, 255, 0.1)',
-                            border: '1px solid rgba(0, 229, 255, 0.3)',
-                            color: '#00E5FF'
+                            background: isDaylight ? 'rgba(245, 158, 11, 0.12)' : 'rgba(0, 229, 255, 0.1)',
+                            border: isDaylight ? '1px solid rgba(245, 158, 11, 0.35)' : '1px solid rgba(0, 229, 255, 0.3)',
+                            color: isDaylight ? '#B45309' : '#00E5FF'
                         }}>
                             {isEn ? 'ZATCA Compliance: 100% Valid' : 'الفوترة الإلكترونية ZATCA: معتمدة ✅'}
                         </span>
@@ -811,7 +942,7 @@ export default function WelcomeHomePage() {
                         }}>
                             {roleTitle}
                         </span>
-                        <span style={{ fontSize: '12px', color: '#94A3B8', fontWeight: 700 }}>
+                        <span style={{ fontSize: '12px', color: isDaylight ? '#475569' : '#94A3B8', fontWeight: 700 }}>
                             📅 {new Date().toLocaleDateString(isEn ? 'en-US' : 'ar-SA', { weekday: 'long', year: 'numeric', month: 'short', day: 'numeric' })}
                         </span>
                     </div>
@@ -834,12 +965,12 @@ export default function WelcomeHomePage() {
                 <div className="station-kpi-card">
                     <div className="kpi-top-row">
                         <span className="kpi-sub-label">{isEn ? "Today's Fuel Sales" : "مبيعات محطة الوقود اليوم"}</span>
-                        <div className="kpi-icon-wrap" style={{ background: 'rgba(0, 229, 255, 0.15)', color: '#00E5FF' }}>💳</div>
+                        <div className="kpi-icon-wrap" style={{ background: isDaylight ? 'rgba(245, 158, 11, 0.12)' : 'rgba(0, 229, 255, 0.15)', color: isDaylight ? '#D97706' : '#00E5FF' }}>💳</div>
                     </div>
-                    <div className="kpi-val-highlight" style={{ color: '#00E5FF' }}>
+                    <div className="kpi-val-highlight" style={{ color: isDaylight ? '#0F172A' : '#00E5FF' }}>
                         {formatCurrency(todaySales.total)}
                     </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11.5px', color: '#94A3B8', fontWeight: 700 }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11.5px', color: isDaylight ? '#475569' : '#94A3B8', fontWeight: 700 }}>
                         <span>💵 {isEn ? 'Cash:' : 'كاش:'} {formatCurrency(todaySales.cash)}</span>
                         <span>📶 {isEn ? 'Network:' : 'شبكة/مدى:'} {formatCurrency(todaySales.card)}</span>
                     </div>
@@ -851,11 +982,11 @@ export default function WelcomeHomePage() {
                         <span className="kpi-sub-label">{isEn ? "Strategic Fuel Stock" : "إجمالي وقود الخزانات"}</span>
                         <div className="kpi-icon-wrap" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10B981' }}>🛢️</div>
                     </div>
-                    <div className="kpi-val-highlight" style={{ color: '#10B981' }}>
+                    <div className="kpi-val-highlight" style={{ color: isDaylight ? '#059669' : '#10B981' }}>
                         {totalFuelCurrent.toLocaleString()} <span style={{ fontSize: '14px', fontWeight: 800 }}>{isEn ? 'L' : 'لتر'}</span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontSize: '12px', color: '#94A3B8', fontWeight: 700 }}>
+                        <span style={{ fontSize: '12px', color: isDaylight ? '#475569' : '#94A3B8', fontWeight: 700 }}>
                             {isEn ? `Capacity: ${totalFuelCapacity.toLocaleString()} L` : `من أصل: ${totalFuelCapacity.toLocaleString()} لتر`}
                         </span>
                         <span style={{ fontSize: '12px', fontWeight: 900, color: '#10B981' }}>{totalFuelPercent}%</span>
@@ -868,11 +999,11 @@ export default function WelcomeHomePage() {
                         <span className="kpi-sub-label">{isEn ? "Active Shifts & Cashiers" : "الورديات ونقاط البيع النشطة"}</span>
                         <div className="kpi-icon-wrap" style={{ background: 'rgba(245, 158, 11, 0.15)', color: '#F59E0B' }}>⏱️</div>
                     </div>
-                    <div className="kpi-val-highlight" style={{ color: '#F59E0B' }}>
+                    <div className="kpi-val-highlight" style={{ color: isDaylight ? '#D97706' : '#F59E0B' }}>
                         {activeShifts.length} <span style={{ fontSize: '14px', fontWeight: 800 }}>{isEn ? 'Open Shift(s)' : 'وردية جارية'}</span>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <span style={{ fontSize: '12px', color: '#94A3B8', fontWeight: 700 }}>
+                        <span style={{ fontSize: '12px', color: isDaylight ? '#475569' : '#94A3B8', fontWeight: 700 }}>
                             {activeShifts.length > 0 ? (isEn ? 'Cashiers running now' : 'كاشير المحطة يعمل الآن') : (isEn ? 'Ready to open shift' : 'جاهز لفتح وردية')}
                         </span>
                         <button
@@ -881,7 +1012,7 @@ export default function WelcomeHomePage() {
                             style={{
                                 background: 'transparent',
                                 border: 'none',
-                                color: '#00E5FF',
+                                color: isDaylight ? '#D97706' : '#00E5FF',
                                 fontWeight: 900,
                                 fontSize: '12px',
                                 cursor: 'pointer',
@@ -899,10 +1030,10 @@ export default function WelcomeHomePage() {
                         <span className="kpi-sub-label">{isEn ? "Today's Transactions" : "عمليات وفواتير اليوم"}</span>
                         <div className="kpi-icon-wrap" style={{ background: 'rgba(168, 85, 247, 0.15)', color: '#C084FC' }}>🧾</div>
                     </div>
-                    <div className="kpi-val-highlight" style={{ color: '#C084FC' }}>
+                    <div className="kpi-val-highlight" style={{ color: isDaylight ? '#7C3AED' : '#C084FC' }}>
                         {todaySales.count} <span style={{ fontSize: '14px', fontWeight: 800 }}>{isEn ? 'Receipts' : 'فاتورة'}</span>
                     </div>
-                    <div style={{ fontSize: '12px', color: '#94A3B8', fontWeight: 700 }}>
+                    <div style={{ fontSize: '12px', color: isDaylight ? '#475569' : '#94A3B8', fontWeight: 700 }}>
                         {isEn ? `Fuel Dispensed: ~${todaySales.liters.toLocaleString()} Liters` : `حجم الوقود المباع: ~${todaySales.liters.toLocaleString()} لتر`}
                     </div>
                 </div>
@@ -924,9 +1055,10 @@ export default function WelcomeHomePage() {
                             display: 'inline-flex',
                             alignItems: 'center',
                             gap: '6px',
-                            background: 'rgba(0, 229, 255, 0.1)',
-                            border: '1px solid rgba(0, 229, 255, 0.3)',
-                            color: '#00E5FF',
+                            background: isDaylight ? '#FFFFFF' : 'rgba(0, 229, 255, 0.1)',
+                            border: isDaylight ? '1px solid rgba(245, 158, 11, 0.35)' : '1px solid rgba(0, 229, 255, 0.3)',
+                            color: isDaylight ? '#D97706' : '#00E5FF',
+                            boxShadow: isDaylight ? '0 2px 8px rgba(15, 23, 42, 0.04)' : 'none',
                             padding: '6px 14px',
                             borderRadius: '10px',
                             fontSize: '12px',
@@ -954,7 +1086,7 @@ export default function WelcomeHomePage() {
                                                 {isEn ? tank.nameEn : tank.name}
                                             </strong>
                                         </div>
-                                        <div style={{ fontSize: '12px', color: '#94A3B8', marginTop: '3px' }}>
+                                        <div style={{ fontSize: '12px', color: isDaylight ? '#475569' : '#94A3B8', marginTop: '3px' }}>
                                             {isEn ? 'Official Price:' : 'السعر المعتمد:'} <strong style={{ color: tank.color }}>{tank.price} {isEn ? 'SAR/L' : 'ر.س / لتر'}</strong>
                                         </div>
                                     </div>
@@ -996,20 +1128,20 @@ export default function WelcomeHomePage() {
                                             }}>
                                                 {Number(tank.current).toLocaleString()}
                                             </span>
-                                            <span style={{ fontSize: '13px', fontWeight: 800, color: '#94A3B8' }}>{isEn ? 'Liters' : 'لتر'}</span>
+                                            <span style={{ fontSize: '13px', fontWeight: 800, color: isDaylight ? '#64748B' : '#94A3B8' }}>{isEn ? 'Liters' : 'لتر'}</span>
                                         </div>
 
-                                        <div style={{ fontSize: '12px', color: '#64748B', marginTop: '2px', fontWeight: 700 }}>
+                                        <div style={{ fontSize: '12px', color: isDaylight ? '#64748B' : '#64748B', marginTop: '2px', fontWeight: 700 }}>
                                             {isEn ? `Out of ${tank.capacity.toLocaleString()} Liters max` : `من إجمالي سعة: ${tank.capacity.toLocaleString()} لتر`}
                                         </div>
 
                                         {/* شريط الامتلاء الأفقي */}
                                         <div style={{ marginTop: '12px' }}>
                                             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', fontWeight: 800, marginBottom: '4px' }}>
-                                                <span style={{ color: '#94A3B8' }}>{isEn ? 'Fill Ratio:' : 'نسبة الامتلاء:'}</span>
+                                                <span style={{ color: isDaylight ? '#475569' : '#94A3B8' }}>{isEn ? 'Fill Ratio:' : 'نسبة الامتلاء:'}</span>
                                                 <span style={{ color: tank.color }}>{percent}%</span>
                                             </div>
-                                            <div style={{ width: '100%', height: '7px', background: 'rgba(0,0,0,0.3)', borderRadius: '10px', overflow: 'hidden' }}>
+                                            <div style={{ width: '100%', height: '7px', background: isDaylight ? '#E2E8F0' : 'rgba(0,0,0,0.3)', borderRadius: '10px', overflow: 'hidden' }}>
                                                 <div style={{ width: `${percent}%`, height: '100%', background: tank.color, borderRadius: '10px' }} />
                                             </div>
                                         </div>
@@ -1135,7 +1267,7 @@ export default function WelcomeHomePage() {
                         </div>
                         <Link 
                             href="/pos" 
-                            style={{ fontSize: '12px', color: '#00E5FF', fontWeight: 800, textDecoration: 'none' }}
+                            style={{ fontSize: '12px', color: isDaylight ? '#D97706' : '#00E5FF', fontWeight: 800, textDecoration: 'none' }}
                         >
                             {isEn ? 'Manage Shifts ⚡' : 'إدارة الورديات ⚡'}
                         </Link>
@@ -1143,35 +1275,37 @@ export default function WelcomeHomePage() {
 
                     {activeShifts.length === 0 ? (
                         <div style={{
-                            background: isDaylight ? 'rgba(255, 255, 255, 0.95)' : 'rgba(20, 24, 34, 0.8)',
-                            border: '1px dashed rgba(0, 229, 255, 0.3)',
+                            background: isDaylight ? '#FFFFFF' : 'rgba(20, 24, 34, 0.8)',
+                            border: isDaylight ? '1.5px dashed rgba(245, 158, 11, 0.4)' : '1px dashed rgba(0, 229, 255, 0.3)',
                             borderRadius: '16px',
                             padding: '24px',
                             textAlign: 'center',
                             display: 'flex',
                             flexDirection: 'column',
                             alignItems: 'center',
-                            gap: '10px'
+                            gap: '10px',
+                            boxShadow: isDaylight ? '0 4px 15px rgba(15, 23, 42, 0.04)' : 'none'
                         }}>
                             <span style={{ fontSize: '32px' }}>⏱️</span>
                             <div style={{ fontWeight: 800, fontSize: '14px', color: isDaylight ? '#0F172A' : '#F8FAFC' }}>
                                 {isEn ? 'No active shift open right now' : 'لا توجد وردية كاشير مفتوحة حالياً'}
                             </div>
-                            <div style={{ fontSize: '12px', color: '#94A3B8' }}>
+                            <div style={{ fontSize: '12px', color: isDaylight ? '#64748B' : '#94A3B8' }}>
                                 {isEn ? 'Click below to open a new shift and start sales.' : 'يمكنك فتح وردية جديدة الآن لبدء عمليات البيع وضخ الوقود.'}
                             </div>
                             <button
                                 type="button"
                                 onClick={() => router.push('/pos')}
                                 style={{
-                                    background: 'linear-gradient(135deg, #00E5FF 0%, #0284C7 100%)',
+                                    background: isDaylight ? 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)' : 'linear-gradient(135deg, #00E5FF 0%, #0284C7 100%)',
                                     border: 'none',
                                     borderRadius: '10px',
-                                    color: '#0B0E14',
+                                    color: isDaylight ? '#FFFFFF' : '#0B0E14',
                                     fontWeight: 900,
                                     fontSize: '13px',
                                     padding: '8px 20px',
-                                    cursor: 'pointer'
+                                    cursor: 'pointer',
+                                    boxShadow: isDaylight ? '0 4px 12px rgba(245, 158, 11, 0.3)' : 'none'
                                 }}
                             >
                                 {isEn ? 'Open New Shift Now' : 'فتح وردية كاشير الآن ⚡'}
@@ -1183,13 +1317,14 @@ export default function WelcomeHomePage() {
                                 <div 
                                     key={sh.id}
                                     style={{
-                                        background: isDaylight ? 'rgba(255, 255, 255, 0.95)' : 'rgba(20, 24, 34, 0.85)',
-                                        border: '1px solid rgba(16, 185, 129, 0.4)',
+                                        background: isDaylight ? '#FFFFFF' : 'rgba(20, 24, 34, 0.85)',
+                                        border: isDaylight ? '1px solid rgba(16, 185, 129, 0.35)' : '1px solid rgba(16, 185, 129, 0.4)',
                                         borderRadius: '14px',
                                         padding: '14px 16px',
                                         display: 'flex',
                                         justifyContent: 'space-between',
-                                        alignItems: 'center'
+                                        alignItems: 'center',
+                                        boxShadow: isDaylight ? '0 4px 15px rgba(15, 23, 42, 0.04)' : 'none'
                                     }}
                                 >
                                     <div>
@@ -1199,7 +1334,7 @@ export default function WelcomeHomePage() {
                                                 {sh.warehouses?.name || (isEn ? 'Main Station Branch' : 'الفرع الرئيسي للمحطة')}
                                             </strong>
                                         </div>
-                                        <div style={{ fontSize: '12px', color: '#94A3B8', marginTop: '3px' }}>
+                                        <div style={{ fontSize: '12px', color: isDaylight ? '#64748B' : '#94A3B8', marginTop: '3px' }}>
                                             {isEn ? 'Opening Cash:' : 'العهدة الافتتاحية:'} <strong style={{ color: '#10B981' }}>{formatCurrency(sh.starting_cash || 0)}</strong>
                                             {' | '}
                                             {isEn ? 'Opened:' : 'وقت الفتح:'} {new Date(sh.opened_at).toLocaleTimeString(isEn ? 'en-US' : 'ar-SA', { hour: '2-digit', minute: '2-digit' })}
@@ -1209,9 +1344,9 @@ export default function WelcomeHomePage() {
                                         type="button"
                                         onClick={() => router.push('/pos')}
                                         style={{
-                                            background: 'rgba(0, 229, 255, 0.1)',
-                                            border: '1px solid rgba(0, 229, 255, 0.3)',
-                                            color: '#00E5FF',
+                                            background: isDaylight ? 'rgba(245, 158, 11, 0.12)' : 'rgba(0, 229, 255, 0.1)',
+                                            border: isDaylight ? '1px solid rgba(245, 158, 11, 0.35)' : '1px solid rgba(0, 229, 255, 0.3)',
+                                            color: isDaylight ? '#D97706' : '#00E5FF',
                                             borderRadius: '8px',
                                             padding: '6px 12px',
                                             fontSize: '12px',
@@ -1239,7 +1374,7 @@ export default function WelcomeHomePage() {
                     </div>
                     <Link 
                         href="/invoices"
-                        style={{ fontSize: '12px', color: '#00E5FF', fontWeight: 800, textDecoration: 'none' }}
+                        style={{ fontSize: '12px', color: isDaylight ? '#D97706' : '#00E5FF', fontWeight: 800, textDecoration: 'none' }}
                     >
                         {isEn ? 'View All Invoices ↗' : 'عرض كافة الفواتير ↗'}
                     </Link>
@@ -1247,7 +1382,7 @@ export default function WelcomeHomePage() {
 
                 <div className="recent-tx-card">
                     {recentInvoices.length === 0 ? (
-                        <div style={{ textAlign: 'center', padding: '30px', color: '#94A3B8' }}>
+                        <div style={{ textAlign: 'center', padding: '30px', color: isDaylight ? '#64748B' : '#94A3B8' }}>
                             {isEn ? 'No transactions recorded yet.' : 'لا توجد معاملات مسجلة حتى الآن.'}
                         </div>
                     ) : (
@@ -1265,7 +1400,7 @@ export default function WelcomeHomePage() {
                             <tbody>
                                 {recentInvoices.map((inv) => (
                                     <tr key={inv.id}>
-                                        <td style={{ fontWeight: 900, color: '#00E5FF' }}>
+                                        <td style={{ fontWeight: 900, color: isDaylight ? '#D97706' : '#00E5FF' }}>
                                             {inv.invoice_number || `#${String(inv.id).slice(-6)}`}
                                         </td>
                                         <td style={{ fontWeight: 700 }}>
@@ -1277,8 +1412,8 @@ export default function WelcomeHomePage() {
                                                 borderRadius: '6px',
                                                 fontSize: '11px',
                                                 fontWeight: 800,
-                                                background: inv.payment_method?.includes('كاش') || inv.payment_method?.toLowerCase().includes('cash') ? 'rgba(16, 185, 129, 0.15)' : 'rgba(0, 229, 255, 0.15)',
-                                                color: inv.payment_method?.includes('كاش') || inv.payment_method?.toLowerCase().includes('cash') ? '#10B981' : '#00E5FF'
+                                                background: inv.payment_method?.includes('كاش') || inv.payment_method?.toLowerCase().includes('cash') ? 'rgba(16, 185, 129, 0.15)' : (isDaylight ? 'rgba(245, 158, 11, 0.15)' : 'rgba(0, 229, 255, 0.15)'),
+                                                color: inv.payment_method?.includes('كاش') || inv.payment_method?.toLowerCase().includes('cash') ? '#10B981' : (isDaylight ? '#D97706' : '#00E5FF')
                                             }}>
                                                 {inv.payment_method || (isEn ? 'Direct POS' : 'نقاط بيع')}
                                             </span>
@@ -1286,7 +1421,7 @@ export default function WelcomeHomePage() {
                                         <td style={{ fontWeight: 900, color: '#10B981' }}>
                                             {formatCurrency(inv.total_amount)}
                                         </td>
-                                        <td style={{ color: '#94A3B8', fontSize: '12px' }}>
+                                        <td style={{ color: isDaylight ? '#64748B' : '#94A3B8', fontSize: '12px' }}>
                                             {inv.created_at ? new Date(inv.created_at).toLocaleTimeString(isEn ? 'en-US' : 'ar-SA', { hour: '2-digit', minute: '2-digit' }) : '—'}
                                         </td>
                                         <td>
@@ -1315,7 +1450,7 @@ export default function WelcomeHomePage() {
                         <span style={{ fontSize: '20px' }}>⭐</span>
                         <h2>{isEn ? 'Customized Quick Workspace Launchpad' : 'مساحة العمل والمفضلة المخصصة'}</h2>
                     </div>
-                    <span style={{ fontSize: '12px', color: '#94A3B8' }}>
+                    <span style={{ fontSize: '12px', color: isDaylight ? '#64748B' : '#94A3B8' }}>
                         {isEn ? 'Quick access to your most frequently used pages' : 'الوصول المباشر للشاشات الأكثر استخداماً'}
                     </span>
                 </div>
@@ -1333,17 +1468,17 @@ export default function WelcomeHomePage() {
                             width: '52px',
                             height: '52px',
                             borderRadius: '14px',
-                            background: 'rgba(0, 229, 255, 0.08)',
-                            border: '1px dashed rgba(0, 229, 255, 0.4)',
+                            background: isDaylight ? 'rgba(245, 158, 11, 0.1)' : 'rgba(0, 229, 255, 0.08)',
+                            border: isDaylight ? '1px dashed rgba(245, 158, 11, 0.4)' : '1px dashed rgba(0, 229, 255, 0.4)',
                             display: 'flex',
                             alignItems: 'center',
                             justifyContent: 'center',
                             fontSize: '22px',
-                            color: '#00E5FF'
+                            color: isDaylight ? '#D97706' : '#00E5FF'
                         }}>
                             ➕
                         </div>
-                        <div className="card-title" style={{ color: '#00E5FF' }}>
+                        <div className="card-title" style={{ color: isDaylight ? '#D97706' : '#00E5FF' }}>
                             {isEn ? 'Customize' : 'تخصيص المفضلة'}
                         </div>
                     </div>
@@ -1357,7 +1492,7 @@ export default function WelcomeHomePage() {
                 <div 
                     style={{
                         position: 'fixed', inset: 0,
-                        background: 'rgba(11, 14, 20, 0.88)',
+                        background: isDaylight ? 'rgba(15, 23, 42, 0.45)' : 'rgba(11, 14, 20, 0.88)',
                         backdropFilter: 'blur(16px)',
                         WebkitBackdropFilter: 'blur(16px)',
                         zIndex: 99999,
@@ -1372,16 +1507,16 @@ export default function WelcomeHomePage() {
                             borderRadius: '24px',
                             width: '95vw', maxWidth: '820px', maxHeight: '85vh',
                             display: 'flex', flexDirection: 'column', overflow: 'hidden',
-                            boxShadow: '0 25px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 229, 255, 0.15)',
-                            border: '1px solid rgba(0, 229, 255, 0.3)'
+                            boxShadow: isDaylight ? '0 20px 50px rgba(15, 23, 42, 0.15)' : '0 25px 60px rgba(0, 0, 0, 0.8), 0 0 30px rgba(0, 229, 255, 0.15)',
+                            border: isDaylight ? '1px solid rgba(226, 232, 240, 0.95)' : '1px solid rgba(0, 229, 255, 0.3)'
                         }}
                         onClick={e => e.stopPropagation()}
                     >
                         <div style={{
                             padding: '20px 24px',
-                            borderBottom: '1px solid rgba(0, 229, 255, 0.2)',
+                            borderBottom: isDaylight ? '1px solid rgba(226, 232, 240, 0.9)' : '1px solid rgba(0, 229, 255, 0.2)',
                             display: 'flex', justifyContent: 'space-between', alignItems: 'center',
-                            background: isDaylight ? 'rgba(243, 247, 252, 0.9)' : 'rgba(11, 14, 20, 0.7)'
+                            background: isDaylight ? '#FFFFFF' : 'rgba(11, 14, 20, 0.7)'
                         }}>
                             <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                                 <span style={{ fontSize: '24px' }}>✨</span>
@@ -1403,7 +1538,7 @@ export default function WelcomeHomePage() {
                                 if (!items.length) return null;
                                 return (
                                     <div key={gIdx}>
-                                        <div style={{ fontWeight: 900, color: '#00E5FF', marginBottom: '10px', fontSize: '14px' }}>
+                                        <div style={{ fontWeight: 900, color: isDaylight ? '#D97706' : '#00E5FF', marginBottom: '10px', fontSize: '14px' }}>
                                             {group.group}
                                         </div>
                                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '10px' }}>
@@ -1415,27 +1550,31 @@ export default function WelcomeHomePage() {
                                                         onClick={() => toggleFav(item.id)}
                                                         style={{
                                                             display: 'flex', alignItems: 'center', gap: '10px', padding: '10px 14px',
-                                                            border: `1.5px solid ${sel ? '#00E5FF' : 'rgba(0, 229, 255, 0.2)'}`,
+                                                            border: sel 
+                                                                ? (isDaylight ? '1.5px solid #D97706' : '1.5px solid #00E5FF') 
+                                                                : (isDaylight ? '1px solid rgba(226, 232, 240, 0.9)' : '1.5px solid rgba(0, 229, 255, 0.2)'),
                                                             borderRadius: '12px',
                                                             cursor: 'pointer',
-                                                            background: sel ? 'rgba(0, 229, 255, 0.15)' : (isDaylight ? 'rgba(241, 245, 249, 0.8)' : 'rgba(20, 24, 34, 0.6)'),
+                                                            background: sel 
+                                                                ? (isDaylight ? '#FEF3C7' : 'rgba(0, 229, 255, 0.15)') 
+                                                                : (isDaylight ? '#FFFFFF' : 'rgba(20, 24, 34, 0.6)'),
                                                             transition: 'all 0.2s ease'
                                                         }}
                                                     >
                                                         <div style={{ fontSize: '20px' }}>{item.icon}</div>
-                                                        <div style={{ fontWeight: 800, color: sel ? '#00E5FF' : (isDaylight ? '#0F172A' : '#94A3B8'), flex: 1, fontSize: '13px' }}>
+                                                        <div style={{ fontWeight: 800, color: sel ? (isDaylight ? '#B45309' : '#00E5FF') : (isDaylight ? '#0F172A' : '#94A3B8'), flex: 1, fontSize: '13px' }}>
                                                             {item.title}
                                                         </div>
                                                         <div style={{
                                                             width: '20px', 
                                                             height: '20px', 
                                                             borderRadius: '6px', 
-                                                            border: `2px solid ${sel ? '#00E5FF' : 'rgba(0, 229, 255, 0.3)'}`, 
-                                                            background: sel ? '#00E5FF' : 'transparent', 
+                                                            border: sel ? (isDaylight ? '2px solid #D97706' : '2px solid #00E5FF') : (isDaylight ? '2px solid rgba(203, 213, 225, 0.9)' : '2px solid rgba(0, 229, 255, 0.3)'), 
+                                                            background: sel ? (isDaylight ? '#D97706' : '#00E5FF') : 'transparent', 
                                                             display: 'flex', 
                                                             alignItems: 'center', 
-                                                            justifyContent: 'center',
-                                                            color: '#0B0E14',
+                                                            justifyContent: 'center', 
+                                                            color: isDaylight ? '#FFFFFF' : '#0B0E14',
                                                             fontSize: '11px',
                                                             fontWeight: 900
                                                         }}>
@@ -1452,18 +1591,18 @@ export default function WelcomeHomePage() {
                         
                         <div style={{
                             padding: '16px 24px',
-                            borderTop: '1px solid rgba(0, 229, 255, 0.2)',
+                            borderTop: isDaylight ? '1px solid rgba(226, 232, 240, 0.9)' : '1px solid rgba(0, 229, 255, 0.2)',
                             display: 'flex', justifyContent: 'flex-end', gap: '12px',
-                            background: isDaylight ? 'rgba(243, 247, 252, 0.9)' : 'rgba(11, 14, 20, 0.85)'
+                            background: isDaylight ? '#FFFFFF' : 'rgba(11, 14, 20, 0.85)'
                         }}>
                             <button 
                                 onClick={() => setIsFavModalOpen(false)} 
                                 style={{
                                     padding: '10px 20px',
                                     borderRadius: '12px',
-                                    background: 'rgba(255, 255, 255, 0.05)',
-                                    border: '1px solid rgba(255, 255, 255, 0.1)',
-                                    color: '#94A3B8',
+                                    background: isDaylight ? '#F1F5F9' : 'rgba(255, 255, 255, 0.05)',
+                                    border: isDaylight ? '1px solid rgba(203, 213, 225, 0.9)' : '1px solid rgba(255, 255, 255, 0.1)',
+                                    color: isDaylight ? '#475569' : '#94A3B8',
                                     fontWeight: 800,
                                     cursor: 'pointer'
                                 }}
@@ -1475,12 +1614,12 @@ export default function WelcomeHomePage() {
                                 style={{
                                     padding: '10px 24px',
                                     borderRadius: '12px',
-                                    background: 'linear-gradient(135deg, #00E5FF 0%, #0284C7 100%)',
+                                    background: isDaylight ? 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)' : 'linear-gradient(135deg, #00E5FF 0%, #0284C7 100%)',
                                     border: 'none',
-                                    color: '#0B0E14',
+                                    color: isDaylight ? '#FFFFFF' : '#0B0E14',
                                     fontWeight: 900,
                                     cursor: 'pointer',
-                                    boxShadow: '0 4px 15px rgba(0, 229, 255, 0.35)'
+                                    boxShadow: isDaylight ? '0 4px 14px rgba(245, 158, 11, 0.35)' : '0 4px 15px rgba(0, 229, 255, 0.35)'
                                 }}
                             >
                                 {isEn ? 'Save Changes 💾' : 'حفظ التغييرات 💾'}
