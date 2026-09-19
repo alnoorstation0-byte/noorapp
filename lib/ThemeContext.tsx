@@ -51,15 +51,22 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
     useEffect(() => {
         setMounted(true);
-        // 1. قراءة التفضيل المحلي من المتصفح
+        // 1. تفعيل النمط الأبيض الكريستالي الناصع تلقائياً للمتصفحات التي كانت مسجلة على النمط المكتوم القديم
         const saved = localStorage.getItem('noor_theme_mode') as ThemeMode;
-        if (saved === 'daylight' || saved === 'dark') {
+        const brightMigrated = localStorage.getItem('noor_crystal_bright_v1');
+
+        if (!brightMigrated) {
+            setThemeModeState('daylight');
+            applyThemeToDOM('daylight');
+            localStorage.setItem('noor_theme_mode', 'daylight');
+            localStorage.setItem('noor_crystal_bright_v1', 'true');
+        } else if (saved === 'daylight' || saved === 'dark') {
             setThemeModeState(saved);
             applyThemeToDOM(saved);
         } else {
-            // الافتراضي هو النمط الأبيض الكريستالي الساطع
             setThemeModeState('daylight');
             applyThemeToDOM('daylight');
+            localStorage.setItem('noor_theme_mode', 'daylight');
         }
 
         // 2. مزامنة مع بروفايل المستخدم في Supabase إن وجد
