@@ -948,12 +948,12 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
 
         /* ☀️ وضع الرؤية النهارية الكريستالي لمركز القيادة والقوائم والشريط السفلي (Pure Crystal Radiant White) */
         .daylight-theme .overlay-screen {
-          background: rgba(15, 23, 42, 0.45) !important;
+          background: transparent !important;
         }
         .daylight-theme .overlay-backdrop {
-          background: rgba(255, 255, 255, 0.9) !important;
-          backdrop-filter: blur(20px) saturate(160%) !important;
-          -webkit-backdrop-filter: blur(20px) saturate(160%) !important;
+          background: rgba(241, 245, 249, 0.9) !important;
+          backdrop-filter: blur(24px) saturate(160%) !important;
+          -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
         }
         .daylight-theme .admin-header-glass {
           background: #FFFFFF !important;

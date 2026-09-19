@@ -1576,3 +1576,39 @@ body.daylight-theme {
   color: #FFFFFF !important;
   box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25) !important;
 }
+
+/* 🚀 لوحة القيادة والتحكم في الوضع النهاري (Unified Dashboard Daylight Overrides) */
+.daylight-theme .dashboard-content-root > div,
+.daylight-theme .dashboard-content-root div[style*="rgba(20, 24, 34"],
+.daylight-theme .dashboard-content-root div[style*="rgba(22, 27, 38"],
+.daylight-theme .dashboard-content-root div[style*="rgba(14, 18, 25"],
+.daylight-theme .dashboard-content-root div[style*="rgba(13, 16, 24"] {
+  background: #FFFFFF !important;
+  border: 1px solid #E2E8F0 !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 8px 24px -4px rgba(15, 23, 42, 0.08) !important;
+  color: #0F172A !important;
+}
+
+.daylight-theme .dashboard-content-root h2,
+.daylight-theme .dashboard-content-root h3,
+.daylight-theme .dashboard-content-root h4,
+.daylight-theme .dashboard-content-root span[style*="color: #F8FAFC"],
+.daylight-theme .dashboard-content-root div[style*="color: #F8FAFC"] {
+  color: #0F172A !important;
+}
+
+.daylight-theme .dashboard-content-root span[style*="color: #94A3B8"],
+.daylight-theme .dashboard-content-root div[style*="color: #94A3B8"] {
+  color: #475569 !important;
+}
+
+.daylight-theme .dashboard-content-root select {
+  background: #FFFFFF !important;
+  color: #0F172A !important;
+  border-color: #CBD5E1 !important;
+}
+
+.daylight-theme .dashboard-content-root select option {
+  background: #FFFFFF !important;
+  color: #0F172A !important;
+}

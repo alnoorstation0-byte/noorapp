@@ -127,7 +127,7 @@ export default function DashboardPage() {
           fullScreen={false} 
         />
       ) : (
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '28px', animation: 'fadeUp 0.6s ease-out', paddingBottom: '60px' }}>
+        <div className="dashboard-content-root" style={{ display: 'flex', flexDirection: 'column', gap: '28px', animation: 'fadeUp 0.6s ease-out', paddingBottom: '60px' }}>
           
           {/* ========================================================================= */}
           {/* ⚡ 1. شريط التحكم والعمليات السريعة (Command Action Bar) */}
