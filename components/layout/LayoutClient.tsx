@@ -957,8 +957,8 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
         }
         .daylight-theme .admin-header-glass {
           background: #FFFFFF !important;
-          border: 1px solid rgba(226, 232, 240, 0.95) !important;
-          box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06) !important;
+          border-bottom: 1px solid #E2E8F0 !important;
+          box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.06) !important;
         }
         .daylight-theme .brand-title {
           color: #0F172A !important;
@@ -983,8 +983,8 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
         }
         .daylight-theme .group-section {
           background: #FFFFFF !important;
-          border: 1px solid rgba(226, 232, 240, 0.95) !important;
-          box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04) !important;
+          border: 1px solid #E2E8F0 !important;
+          box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06), 0 8px 24px -4px rgba(15, 23, 42, 0.08) !important;
         }
         .daylight-theme .group-header {
           color: #0F172A !important;
@@ -1039,8 +1039,8 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
         }
         .daylight-theme .desert-bottom-dock {
           background: #FFFFFF !important;
-          border: 1px solid rgba(226, 232, 240, 0.95) !important;
-          box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08) !important;
+          border: 1px solid #E2E8F0 !important;
+          box-shadow: 0 8px 30px rgba(15, 23, 42, 0.1) !important;
         }
         .daylight-theme .dock-item {
           color: #64748B !important;

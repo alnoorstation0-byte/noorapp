@@ -277,8 +277,8 @@ export default function RawasiSmartTable({
             WebkitBackdropFilter: isDaylight ? 'none' : 'blur(24px)',
             borderRadius: '20px', 
             padding: '20px', 
-            border: isDaylight ? '1px solid rgba(226, 232, 240, 0.95)' : '1px solid rgba(0, 229, 255, 0.2)', 
-            boxShadow: isDaylight ? '0 4px 20px rgba(15, 23, 42, 0.05)' : '0 8px 32px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(0, 229, 255, 0.03)' 
+            border: isDaylight ? '1px solid #E2E8F0' : '1px solid rgba(0, 229, 255, 0.2)', 
+            boxShadow: isDaylight ? '0 1px 3px rgba(15, 23, 42, 0.06), 0 8px 24px -4px rgba(15, 23, 42, 0.08)' : '0 8px 32px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(0, 229, 255, 0.03)' 
         }}>
             
             {/* 🛠️ شريط أدوات الجدول (أزرار التصدير والعنوان) */}
