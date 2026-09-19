@@ -279,17 +279,26 @@ export function usePosSettlementsLogic() {
     const pumpReadingsQuery = useQuery({
         queryKey: ['pos_settlements_pump_readings', dateFrom, dateTo, selectedWarehouseId],
         queryFn: async () => {
-            const { data, error } = await supabase
-                .from('shift_pump_readings')
-                .select(`
-                    *,
-                    pump:fuel_pumps(id, pump_name, pump_number, fuel_type, unit_price)
-                `);
-            if (error) {
-                console.warn('Error fetching shift pump readings:', error);
+            try {
+                const { data: readings, error: readingsError } = await supabase
+                    .from('shift_pump_readings')
+                    .select('*');
+                if (readingsError) throw readingsError;
+
+                const { data: pumps } = await supabase
+                    .from('fuel_pumps')
+                    .select('id, pump_name, pump_number, fuel_type, unit_price');
+
+                const pumpMap = new Map((pumps || []).map((p: any) => [p.id, p]));
+
+                return (readings || []).map((r: any) => ({
+                    ...r,
+                    pump: pumpMap.get(r.pump_id) || null
+                }));
+            } catch (err) {
+                console.warn('Shift pump readings notice:', err);
                 return [];
             }
-            return data || [];
         },
         staleTime: 0
     });

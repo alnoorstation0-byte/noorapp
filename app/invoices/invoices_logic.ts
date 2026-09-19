@@ -151,21 +151,50 @@ export function useInvoicesLogic() {
         queryKey: ['warehouse_items', currentRecord?.warehouse_id],
         queryFn: async () => {
             if (currentRecord?.warehouse_id) {
-                const { data, error } = await supabase
-                    .from('warehouse_inventory')
-                    .select('quantity, item_id, inventory_items(name, unit, default_price, tax_rate, code)')
-                    .eq('warehouse_id', currentRecord.warehouse_id)
-                    .gt('quantity', 0);
-                if (error) throw error;
-                return data?.map((d: any) => ({
-                    id: d.item_id,
-                    name: d.inventory_items?.name,
-                    unit: d.inventory_items?.unit,
-                    price: d.inventory_items?.default_price || 0,
-                    quantity: d.quantity,
-                    tax_rate: d.inventory_items?.tax_rate,
-                    code: d.inventory_items?.code
-                })) || [];
+                try {
+                    const { data: invData, error: invError } = await supabase
+                        .from('warehouse_inventory')
+                        .select('quantity, item_id')
+                        .eq('warehouse_id', currentRecord.warehouse_id)
+                        .gt('quantity', 0);
+                    if (invError) throw invError;
+
+                    const itemIds = (invData || []).map((d: any) => d.item_id).filter(Boolean);
+                    if (itemIds.length === 0) return [];
+
+                    const { data: itemsData, error: itemsError } = await supabase
+                        .from('inventory_items')
+                        .select('id, name, unit, default_price, tax_rate, code')
+                        .in('id', itemIds);
+                    if (itemsError) throw itemsError;
+
+                    const itemMap = new Map((itemsData || []).map((it: any) => [it.id, it]));
+
+                    return (invData || []).map((d: any) => {
+                        const it = itemMap.get(d.item_id);
+                        return {
+                            id: d.item_id,
+                            name: it?.name || 'صنف',
+                            unit: it?.unit || 'حبة',
+                            price: it?.default_price || 0,
+                            quantity: d.quantity,
+                            tax_rate: it?.tax_rate || 15,
+                            code: it?.code || ''
+                        };
+                    });
+                } catch (e) {
+                    console.warn('Fallback fetching warehouse items:', e);
+                    const { data } = await supabase.from('inventory_items').select('id, name, unit, default_price, tax_rate, code');
+                    return (data || []).map((d: any) => ({
+                        id: d.id,
+                        name: d.name,
+                        unit: d.unit,
+                        price: d.default_price || 0,
+                        quantity: 'غير محدد',
+                        tax_rate: d.tax_rate,
+                        code: d.code
+                    }));
+                }
             } else {
                 const { data, error } = await supabase.from('inventory_items').select('id, name, unit, default_price, tax_rate, code');
                 if (error) throw error;
