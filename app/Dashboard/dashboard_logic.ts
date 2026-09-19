@@ -48,7 +48,7 @@ export const useDashboardLogic = () => {
         expenses, invoices, payments, receipts,
         journalLines, accounts,
         warehouses, warehouseInventory, inventoryItems,
-        fuelPumps, posShifts
+        posShifts
       ] = await Promise.all([
         fetchAllForDashboard('expenses', 'id, total_price, unit_price, quantity, vat_amount, discount_amount, paid_amount, is_posted, main_category, created_at'),
         fetchAllForDashboard('invoices', 'id, total_amount, status, created_at'),
@@ -59,11 +59,23 @@ export const useDashboardLogic = () => {
         fetchAllForDashboard('warehouses', 'id, name, description'),
         fetchAllForDashboard('warehouse_inventory', 'warehouse_id, item_id, quantity'),
         fetchAllForDashboard('inventory_items', 'id, name, current_quantity, default_price, cost_price, unit'),
-        fetchAllForDashboard('fuel_pumps', 'id, warehouse_id, pump_number, pump_name, unit_price, current_meter'),
         fetchAllForDashboard('pos_shifts', 'id, opened_at, closed_at, status, starting_cash, expected_cash, actual_cash, total_sales')
       ]);
 
-      // --- ⛽ تحليل حالة مضخات الوقود الحقيقية ---
+      // --- ⛽ تحليل حالة مضخات الوقود مباشرة من بيانات المحطات لمنع أخطاء 404 ---
+      const fuelPumps: any[] = [];
+      (warehouses || []).forEach((wh: any) => {
+        if (wh.description) {
+          try {
+            const parsed = JSON.parse(wh.description);
+            if (Array.isArray(parsed?.pumps)) {
+              fuelPumps.push(...parsed.pumps.map((p: any) => ({ ...p, warehouse_id: wh.id })));
+            }
+          } catch {
+            // ignore JSON parse error
+          }
+        }
+      });
       const activePumpsCount = fuelPumps.filter(p => p.is_active !== false).length;
       const pumpStatusData = [
         { name: 'مضخات نشطة', value: activePumpsCount },

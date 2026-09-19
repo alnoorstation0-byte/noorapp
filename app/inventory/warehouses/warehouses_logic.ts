@@ -49,18 +49,49 @@ export function useWarehousesLogic() {
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const [whRes, pumpsRes, itemsRes] = await Promise.all([
+      const [whRes, itemsRes] = await Promise.all([
         supabase.from('warehouses').select('*').order('type', { ascending: true }).order('created_at', { ascending: false }),
-        supabase.from('fuel_pumps').select('*').order('pump_number', { ascending: true }),
         supabase.from('inventory_items').select('id, name, fuel_type, default_price, unit, category').eq('is_active', true)
       ]);
 
       if (whRes.error) throw whRes.error;
-      if (pumpsRes.error) throw pumpsRes.error;
       if (itemsRes.error) throw itemsRes.error;
       if (whRes.data) setWarehouses(whRes.data);
-      if (pumpsRes.data) setFuelPumps(pumpsRes.data);
       if (itemsRes.data) setFuelItems(itemsRes.data);
+
+      // استرجاع المضخات إما من جدول fuel_pumps أو من JSON المخزن داخل description
+      try {
+        const pumpsRes = await supabase.from('fuel_pumps').select('*').order('pump_number', { ascending: true });
+        if (!pumpsRes.error && pumpsRes.data && pumpsRes.data.length > 0) {
+          setFuelPumps(pumpsRes.data);
+        } else {
+          const fallbackPumps: any[] = [];
+          (whRes.data || []).forEach(wh => {
+            if (wh.description) {
+              try {
+                const parsed = JSON.parse(wh.description);
+                if (Array.isArray(parsed?.pumps)) {
+                  fallbackPumps.push(...parsed.pumps.map((p: any) => ({ ...p, warehouse_id: wh.id })));
+                }
+              } catch {}
+            }
+          });
+          setFuelPumps(fallbackPumps);
+        }
+      } catch {
+        const fallbackPumps: any[] = [];
+        (whRes.data || []).forEach(wh => {
+          if (wh.description) {
+            try {
+              const parsed = JSON.parse(wh.description);
+              if (Array.isArray(parsed?.pumps)) {
+                fallbackPumps.push(...parsed.pumps.map((p: any) => ({ ...p, warehouse_id: wh.id })));
+              }
+            } catch {}
+          }
+        });
+        setFuelPumps(fallbackPumps);
+      }
     } catch (err: any) {
       console.error(err);
       showToast(`فشل جلب بيانات المحطات: ${err.message}`, "error");
@@ -77,11 +108,15 @@ export function useWarehousesLogic() {
   const enrichedWarehouses = useMemo(() => {
     return warehouses.map(wh => {
       let tanks: StationTank[] = [];
+      let stationPumps: StationPump[] = [];
       if (wh.description) {
         try {
           const parsed = JSON.parse(wh.description);
           if (Array.isArray(parsed?.tanks)) {
             tanks = parsed.tanks;
+          }
+          if (Array.isArray(parsed?.pumps)) {
+            stationPumps = parsed.pumps;
           }
         } catch {
           if (wh.tank_capacity_liters > 0 || wh.fuel_type) {
@@ -100,14 +135,15 @@ export function useWarehousesLogic() {
         }];
       }
 
-      const stationPumps = fuelPumps.filter(p => p.warehouse_id === wh.id);
+      const matchingPumps = fuelPumps.filter(p => p.warehouse_id === wh.id);
+      const effectivePumps = matchingPumps.length > 0 ? matchingPumps : stationPumps;
 
       return {
         ...wh,
         tanks,
-        pumps: stationPumps,
+        pumps: effectivePumps,
         tanksCount: tanks.length,
-        pumpsCount: stationPumps.length,
+        pumpsCount: effectivePumps.length,
         totalTanksCapacity: tanks.reduce((sum, t) => sum + (Number(t.capacity_liters) || 0), 0)
       };
     });
@@ -128,7 +164,8 @@ export function useWarehousesLogic() {
 
       const descriptionObject = {
         notes: payload.notes || '',
-        tanks: tanksData
+        tanks: tanksData,
+        pumps: payload.pumps || []
       };
 
       const dataToSave = {
@@ -154,49 +191,46 @@ export function useWarehousesLogic() {
         if (newWh) savedStationId = newWh.id;
       }
 
-      // 2. مزامنة وحفظ مضخات الوقود التابعة لهذه المحطة في جدول fuel_pumps
+      // 2. مزامنة وحفظ مضخات الوقود في جدول fuel_pumps إن كان متاحاً في قاعدة البيانات
       if (savedStationId && Array.isArray(payload.pumps)) {
-        const existingPumps = fuelPumps.filter(p => p.warehouse_id === savedStationId);
-        const existingIds = new Set(existingPumps.map(p => p.id));
-        const keptPumpIds = new Set<string>();
-        const pumpErrors: string[] = [];
+        try {
+          const existingPumps = fuelPumps.filter(p => p.warehouse_id === savedStationId);
+          const existingIds = new Set(existingPumps.map(p => p.id));
+          const keptPumpIds = new Set<string>();
 
-        for (const pump of payload.pumps) {
-          const matchedItem = fuelItems.find(i => 
-            (i.name && i.name.includes(pump.fuel_type)) || 
-            (i.fuel_type && i.fuel_type === pump.fuel_type)
-          );
+          for (const pump of payload.pumps) {
+            const matchedItem = fuelItems.find(i => 
+              (i.name && i.name.includes(pump.fuel_type)) || 
+              (i.fuel_type && i.fuel_type === pump.fuel_type)
+            );
 
-          const pumpRecord: any = {
-            warehouse_id: savedStationId,
-            pump_number: pump.pump_number || '01',
-            pump_name: pump.pump_name || `مضخة (${pump.fuel_type})`,
-            fuel_type: pump.fuel_type || 'بنزين 91',
-            fuel_item_id: matchedItem?.id || pump.fuel_item_id || null,
-            unit_price: Number(pump.unit_price) > 0 ? Number(pump.unit_price) : (Number(matchedItem?.default_price) || 2.18),
-            current_meter: Number(pump.current_meter) || 0,
-            is_active: pump.is_active ?? true
-          };
+            const pumpRecord: any = {
+              warehouse_id: savedStationId,
+              pump_number: pump.pump_number || '01',
+              pump_name: pump.pump_name || `مضخة (${pump.fuel_type})`,
+              fuel_type: pump.fuel_type || 'بنزين 91',
+              fuel_item_id: matchedItem?.id || pump.fuel_item_id || null,
+              unit_price: Number(pump.unit_price) > 0 ? Number(pump.unit_price) : (Number(matchedItem?.default_price) || 2.18),
+              current_meter: Number(pump.current_meter) || 0,
+              is_active: pump.is_active ?? true
+            };
 
-          if (pump.id && existingIds.has(pump.id)) {
-            keptPumpIds.add(pump.id);
-            const { error: pErr } = await supabase.from('fuel_pumps').update(pumpRecord).eq('id', pump.id);
-            if (pErr) pumpErrors.push(`تحديث مضخة ${pump.pump_number}: ${pErr.message}`);
-          } else {
-            const { data: insertedP, error: pErr } = await supabase.from('fuel_pumps').insert([pumpRecord]).select().single();
-            if (pErr) pumpErrors.push(`إضافة مضخة ${pump.pump_number}: ${pErr.message}`);
-            if (insertedP) keptPumpIds.add(insertedP.id);
+            if (pump.id && existingIds.has(pump.id)) {
+              keptPumpIds.add(pump.id);
+              await supabase.from('fuel_pumps').update(pumpRecord).eq('id', pump.id);
+            } else {
+              const { data: insertedP } = await supabase.from('fuel_pumps').insert([pumpRecord]).select().single();
+              if (insertedP) keptPumpIds.add(insertedP.id);
+            }
           }
-        }
 
-        const pumpsToDelete = existingPumps.filter(p => !keptPumpIds.has(p.id)).map(p => p.id);
-        if (pumpsToDelete.length > 0) {
-          const { error: delErr } = await supabase.from('fuel_pumps').delete().in('id', pumpsToDelete);
-          if (delErr) pumpErrors.push(`حذف مضخات قديمة: ${delErr.message}`);
-        }
-
-        if (pumpErrors.length > 0) {
-          throw new Error(`تم حفظ بيانات المحطة لكن فشلت بعض عمليات المضخات:\n${pumpErrors.join('\n')}`);
+          const pumpsToDelete = existingPumps.filter(p => !keptPumpIds.has(p.id)).map(p => p.id);
+          if (pumpsToDelete.length > 0) {
+            await supabase.from('fuel_pumps').delete().in('id', pumpsToDelete);
+          }
+        } catch (pumpSyncErr) {
+          // تم حفظ المضخات بالفعل داخل وصف المحطة JSON، لذلك لا نعطل الحفظ إذا كان جدول المضخات غير مثبت
+          console.warn('Notice: fuel_pumps table sync skipped, pumps saved in warehouse JSON:', pumpSyncErr);
         }
       }
     },
@@ -210,7 +244,9 @@ export function useWarehousesLogic() {
 
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
-      await supabase.from('fuel_pumps').delete().eq('warehouse_id', id);
+      try {
+        await supabase.from('fuel_pumps').delete().eq('warehouse_id', id);
+      } catch {}
       const { error } = await supabase.from('warehouses').delete().eq('id', id);
       if (error) throw error;
     },

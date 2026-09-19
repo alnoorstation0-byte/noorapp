@@ -116,11 +116,33 @@ export default function ShiftOpenModal({
                 .eq('warehouse_id', targetWarehouseId)
                 .eq('is_active', true)
                 .order('pump_number');
-            if (error) {
-                console.warn('Error fetching station pumps:', error);
-                return [];
+            if (error || !data || data.length === 0) {
+                try {
+                    const { data: wh } = await supabase
+                        .from('warehouses')
+                        .select('description')
+                        .eq('id', targetWarehouseId)
+                        .maybeSingle();
+                    if (wh?.description) {
+                        const parsed = JSON.parse(wh.description);
+                        if (Array.isArray(parsed?.pumps) && parsed.pumps.length > 0) {
+                            return parsed.pumps.map((p: any) => ({
+                                id: p.id || `pump_${p.pump_number}`,
+                                warehouse_id: targetWarehouseId,
+                                pump_number: p.pump_number || '01',
+                                pump_name: p.pump_name || `مضخة ${p.pump_number}`,
+                                fuel_type: p.fuel_type || 'بنزين 91',
+                                unit_price: Number(p.unit_price) || 0,
+                                current_meter: Number(p.current_meter) || 0,
+                                is_active: p.is_active ?? true
+                            }));
+                        }
+                    }
+                } catch {
+                    // ignore parse error
+                }
+                return data || [];
             }
-            return data || [];
         }
     });
 

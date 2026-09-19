@@ -17,12 +17,14 @@ export function useUnreadCounts() {
                     .from('notifications')
                     .select('id', { count: 'exact', head: true })
                     .eq('user_id', userId)
-                    .eq('is_read', false),
-                supabase
-                    .from('messages')
-                    .select('id', { count: 'exact', head: true })
-                    .eq('receiver_id', userId)
                     .eq('is_read', false)
+                    .neq('type', 'message'),
+                supabase
+                    .from('notifications')
+                    .select('id', { count: 'exact', head: true })
+                    .eq('user_id', userId)
+                    .eq('is_read', false)
+                    .eq('type', 'message')
             ]);
             
             setCounts({
@@ -37,8 +39,8 @@ export function useUnreadCounts() {
     useEffect(() => {
         fetchCounts();
 
-        // ⏱️ فحص احتياطي كل 5 ثوانٍ لضمان التحديث بدون ريفرش إطلاقاً
-        const interval = setInterval(fetchCounts, 5000);
+        // ⏱️ فحص احتياطي كل 10 ثوانٍ لضمان التحديث بدون ريفرش إطلاقاً
+        const interval = setInterval(fetchCounts, 10000);
 
         // الاستماع لأحداث التحديث الفوري المحلي وتغيير التبويب
         const handleRefresh = () => fetchCounts();
@@ -56,7 +58,7 @@ export function useUnreadCounts() {
     }, [fetchCounts]);
 
     // ⚡ تحديث فوري فائق السرعة بمجرد وصول أو قراءة أو حذف أي إشعار عبر Realtime
-    useRealtimeListener(['notifications', 'messages'], fetchCounts, 100);
+    useRealtimeListener(['notifications'], fetchCounts, 100);
 
     return counts;
 }
