@@ -3,17 +3,14 @@ import { supabase } from '@/lib/supabase';
 import { formatCurrency } from '@/lib/helpers';
 import { useToast } from '@/lib/toast-context';
 
-// 🚀 دالة البلدوزر السريعة لسحب البيانات الضخمة
+// 🚀 دالة سحب البيانات الآمنة والسريعة للوحة القيادة
 const fetchAllForDashboard = async (
   tableName: string, 
   columns: string, 
   filters?: { col: string, val: any, op?: 'eq' | 'neq' }[]
 ) => {
-  let allData: any[] = [];
-  let currentOffset = 0;
-  const limit = 1000;
-  while (true) {
-    let query = supabase.from(tableName).select(columns).range(currentOffset, currentOffset + limit - 1);
+  try {
+    let query = supabase.from(tableName).select(columns).limit(1000);
     if (filters) {
       filters.forEach(f => {
         if (f.op === 'neq') query = query.neq(f.col, f.val);
@@ -21,14 +18,25 @@ const fetchAllForDashboard = async (
       });
     }
     const { data, error } = await query;
-    if (error) break;
-    if (data && data.length > 0) {
-      allData = [...allData, ...data];
-      if (data.length < limit) break;
-      currentOffset += limit;
-    } else break;
+    if (error) {
+      if (tableName === 'warehouses') {
+        const fb = await supabase.from('warehouses').select('id, name, description').limit(500);
+        return fb.data || [];
+      }
+      if (tableName === 'inventory_items') {
+        const fb = await supabase.from('inventory_items').select('id, name, current_quantity, default_price, cost_price, unit').limit(1000);
+        return fb.data || [];
+      }
+      if (tableName === 'pos_shifts') {
+        const fb = await supabase.from('pos_shifts').select('id, opened_at, closed_at, status, starting_cash, expected_cash, actual_cash, total_sales').limit(500);
+        return fb.data || [];
+      }
+      return [];
+    }
+    return data || [];
+  } catch (err) {
+    return [];
   }
-  return allData;
 };
 
 export const useDashboardLogic = () => {
@@ -48,11 +56,11 @@ export const useDashboardLogic = () => {
         fetchAllForDashboard('receipt_vouchers', 'amount, status'),
         fetchAllForDashboard('journal_lines', 'debit, credit, account_id'),
         fetchAllForDashboard('accounts', 'id, account_type, code, name'),
-        fetchAllForDashboard('warehouses', 'id, name, description, tank_capacity_liters, fuel_type, is_active'),
+        fetchAllForDashboard('warehouses', 'id, name, description'),
         fetchAllForDashboard('warehouse_inventory', 'warehouse_id, item_id, quantity'),
-        fetchAllForDashboard('inventory_items', 'id, name, current_quantity, default_price, cost_price, unit, item_type, fuel_type'),
-        fetchAllForDashboard('fuel_pumps', 'id, warehouse_id, pump_number, pump_name, fuel_type, unit_price, current_meter, is_active'),
-        fetchAllForDashboard('pos_shifts', 'id, opened_at, closed_at, status, starting_cash, expected_cash, actual_cash, total_sales, total_liters_sold, shortage_overage')
+        fetchAllForDashboard('inventory_items', 'id, name, current_quantity, default_price, cost_price, unit'),
+        fetchAllForDashboard('fuel_pumps', 'id, warehouse_id, pump_number, pump_name, unit_price, current_meter'),
+        fetchAllForDashboard('pos_shifts', 'id, opened_at, closed_at, status, starting_cash, expected_cash, actual_cash, total_sales')
       ]);
 
       // --- ⛽ تحليل حالة مضخات الوقود الحقيقية ---

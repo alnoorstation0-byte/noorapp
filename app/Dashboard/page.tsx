@@ -15,12 +15,6 @@ export default function DashboardPage() {
   const logic = useDashboardLogic();
   const router = useRouter();
 
-  useEffect(() => { setMounted(true); }, []);
-
-  if (!mounted) return null;
-
-  const stats = logic.stats;
-
   const [selectedStationFilter, setSelectedStationFilter] = useState<string>('all');
   const [isManageTanksModalOpen, setIsManageTanksModalOpen] = useState(false);
   const [selectedStationForEdit, setSelectedStationForEdit] = useState<string>('');
@@ -29,6 +23,12 @@ export default function DashboardPage() {
   // Quick level calibration modal state
   const [calibratingTank, setCalibratingTank] = useState<any | null>(null);
   const [newLevelInput, setNewLevelInput] = useState<number | ''>('');
+
+  useEffect(() => { setMounted(true); }, []);
+
+  if (!mounted) return null;
+
+  const stats = logic.stats;
 
   const handleOpenManageTanks = (stationId?: string) => {
     const stations = stats?.allStations || [];

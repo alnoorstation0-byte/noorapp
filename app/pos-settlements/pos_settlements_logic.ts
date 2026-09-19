@@ -217,14 +217,26 @@ export function usePosSettlementsLogic() {
     const warehouseInventoryQuery = useQuery({
         queryKey: ['pos_settlements_warehouse_inventory'],
         queryFn: async () => {
-            const { data, error } = await supabase
-                .from('warehouse_inventory')
-                .select(`
-                    id, warehouse_id, item_id, quantity,
-                    item:inventory_items!item_id(id, name, unit, cost_price, default_price, code)
-                `);
-            if (error) throw error;
-            return data || [];
+            try {
+                const { data: invData, error: invError } = await supabase
+                    .from('warehouse_inventory')
+                    .select('id, warehouse_id, item_id, quantity');
+                if (invError) throw invError;
+
+                const { data: itemsData } = await supabase
+                    .from('inventory_items')
+                    .select('id, name, unit, cost_price, default_price');
+                
+                const itemsMap = new Map((itemsData || []).map((it: any) => [it.id, it]));
+
+                return (invData || []).map((row: any) => ({
+                    ...row,
+                    item: itemsMap.get(row.item_id) || null
+                }));
+            } catch (err) {
+                console.warn('Error fetching warehouse inventory:', err);
+                return [];
+            }
         },
         staleTime: 0
     });
@@ -248,13 +260,17 @@ export function usePosSettlementsLogic() {
     const inventoryItemsQuery = useQuery({
         queryKey: ['pos_settlements_active_items'],
         queryFn: async () => {
-            const { data, error } = await supabase
-                .from('inventory_items')
-                .select('id, name, unit, current_quantity, cost_price, default_price, code')
-                .eq('is_active', true)
-                .order('name');
-            if (error) throw error;
-            return data || [];
+            try {
+                const { data, error } = await supabase
+                    .from('inventory_items')
+                    .select('id, name, unit, current_quantity, cost_price, default_price')
+                    .order('name');
+                if (error) throw error;
+                return data || [];
+            } catch (err) {
+                console.warn('Error fetching active items:', err);
+                return [];
+            }
         },
         staleTime: 1000 * 60 * 5
     });
