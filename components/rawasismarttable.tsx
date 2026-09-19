@@ -272,13 +272,13 @@ export default function RawasiSmartTable({
 
     return (
         <div className="rawasi-table-wrapper" style={{ 
-            background: isDaylight ? 'linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.92) 100%)' : 'linear-gradient(135deg, rgba(20, 24, 34, 0.88) 0%, rgba(13, 16, 24, 0.75) 100%)', 
-            backdropFilter: 'blur(24px) saturate(160%)', 
-            WebkitBackdropFilter: 'blur(24px)',
+            background: isDaylight ? '#FFFFFF' : 'linear-gradient(135deg, rgba(20, 24, 34, 0.88) 0%, rgba(13, 16, 24, 0.75) 100%)', 
+            backdropFilter: isDaylight ? 'none' : 'blur(24px) saturate(160%)', 
+            WebkitBackdropFilter: isDaylight ? 'none' : 'blur(24px)',
             borderRadius: '20px', 
             padding: '20px', 
-            border: isDaylight ? '1px solid rgba(194, 155, 98, 0.3)' : '1px solid rgba(0, 229, 255, 0.2)', 
-            boxShadow: isDaylight ? '0 10px 30px rgba(44, 26, 18, 0.06), 0 1px 2px rgba(44, 26, 18, 0.04)' : '0 8px 32px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(0, 229, 255, 0.03)' 
+            border: isDaylight ? '1px solid rgba(226, 232, 240, 0.95)' : '1px solid rgba(0, 229, 255, 0.2)', 
+            boxShadow: isDaylight ? '0 4px 20px rgba(15, 23, 42, 0.05)' : '0 8px 32px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(0, 229, 255, 0.03)' 
         }}>
             
             {/* 🛠️ شريط أدوات الجدول (أزرار التصدير والعنوان) */}
@@ -291,18 +291,18 @@ export default function RawasiSmartTable({
 
             <div style={{ overflowX: 'auto', borderRadius: '12px' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: isRtl ? 'right' : 'left' }} className="rawasi-printable-table">
-                    <thead style={{ background: isDaylight ? 'rgba(194, 155, 98, 0.08)' : 'rgba(0, 229, 255, 0.06)' }}>
+                    <thead style={{ background: isDaylight ? '#F8FAFC' : 'rgba(0, 229, 255, 0.06)' }}>
                         <tr>
                             {selectable && (
                                 <th className="hide-on-print" style={{ padding: '15px', width: '40px', textAlign: isRtl ? 'right' : 'left' }}>
                                     <input 
                                         type="checkbox" 
                                         onChange={(e) => {
-                                            if (e.target.checked) onSelectionChange?.(paginatedData.map(i => i.id));
-                                            else onSelectionChange?.([]);
+                                             if (e.target.checked) onSelectionChange?.(paginatedData.map(i => i.id));
+                                             else onSelectionChange?.([]);
                                         }}
                                         checked={paginatedData.length > 0 && selectedIds.length === paginatedData.length}
-                                        style={{ accentColor: isDaylight ? '#C29B62' : THEME.goldAccent, width: '16px', height: '16px', cursor: 'pointer' }}
+                                        style={{ accentColor: isDaylight ? '#F59E0B' : THEME.goldAccent, width: '16px', height: '16px', cursor: 'pointer' }}
                                     />
                                 </th>
                             )}
@@ -318,10 +318,10 @@ export default function RawasiSmartTable({
                                         style={{ 
                                             padding: isActions ? '15px 8px' : '15px', 
                                             textAlign: isRtl ? 'right' : 'left', 
-                                            color: isDaylight ? '#2C1A12' : '#00E5FF', 
+                                            color: isDaylight ? '#0F172A' : '#00E5FF', 
                                             fontWeight: 900, 
                                             fontSize: '13px', 
-                                            borderBottom: isDaylight ? '2px solid rgba(194, 155, 98, 0.3)' : '1px solid rgba(0, 229, 255, 0.25)',
+                                            borderBottom: isDaylight ? '2px solid rgba(226, 232, 240, 0.95)' : '1px solid rgba(0, 229, 255, 0.25)',
                                             cursor: sortKey ? 'pointer' : 'default',
                                             userSelect: 'none',
                                             whiteSpace: 'nowrap',
@@ -335,7 +335,7 @@ export default function RawasiSmartTable({
                                             
                                             {/* مؤشر الفرز */}
                                             {sortKey && (
-                                                <span style={{ fontSize: '10px', color: isSorted ? (isDaylight ? '#C29B62' : THEME.goldAccent) : 'transparent' }}>
+                                                <span style={{ fontSize: '10px', color: isSorted ? (isDaylight ? '#D97706' : THEME.goldAccent) : 'transparent' }}>
                                                     {sortConfig?.direction === 'asc' ? '🔼' : '🔽'}
                                                 </span>
                                             )}
@@ -346,34 +346,52 @@ export default function RawasiSmartTable({
                         </tr>
                     </thead>
                     <motion.tbody variants={containerVariants} initial="hidden" animate="show">
-                        {paginatedData.length === 0 ? (
-                            <tr><td colSpan={columns.length + (selectable ? 1 : 0)} style={{ padding: '40px', textAlign: 'center', color: isDaylight ? 'rgba(44, 26, 18, 0.6)' : '#94A3B8', fontWeight: 900 }}>{emptyMessage || (language === 'en' ? 'No data available' : 'لا توجد بيانات')}</td></tr>
+                        {loading ? (
+                            <tr>
+                                <td colSpan={columns.length + (selectable ? 1 : 0)} style={{ padding: '60px', textAlign: 'center' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '15px' }}>
+                                        <div style={{ width: '40px', height: '40px', border: `3px solid ${isDaylight ? '#F59E0B' : '#00E5FF'}`, borderTopColor: 'transparent', borderRadius: '50%', animation: 'spin 0.8s linear infinite' }} />
+                                        <span style={{ color: isDaylight ? '#64748B' : '#94A3B8', fontSize: '14px', fontWeight: 800 }}>جاري استخراج وتحليل البيانات...</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        ) : paginatedData.length === 0 ? (
+                            <tr>
+                                <td colSpan={columns.length + (selectable ? 1 : 0)} style={{ padding: '60px', textAlign: 'center', color: isDaylight ? '#64748B' : '#64748b' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '10px' }}>
+                                        <span style={{ fontSize: '40px' }}>📦</span>
+                                        <span style={{ fontSize: '15px', fontWeight: 800, color: isDaylight ? '#0F172A' : '#F8FAFC' }}>
+                                            {emptyMessage || (language === 'en' ? 'No records match search criteria' : 'لا توجد بيانات مطابقة لمعايير البحث')}
+                                        </span>
+                                    </div>
+                                </td>
+                            </tr>
                         ) : (
-                            paginatedData.map((row, rowIndex) => (
+                            paginatedData.map((row, index) => (
                                 <motion.tr 
-                                    key={row._unique_key || row.id || rowIndex} 
-                                    variants={itemVariants} 
-                                    onClick={() => onRowClick?.(row)} 
-                                    style={{ 
-                                        borderBottom: isDaylight ? '1px solid rgba(194, 155, 98, 0.15)' : '1px solid rgba(255, 255, 255, 0.05)', 
-                                        cursor: onRowClick ? 'pointer' : 'default',
-                                        background: rowIndex % 2 === 0 ? 'transparent' : (isDaylight ? 'rgba(194, 155, 98, 0.04)' : 'rgba(255, 255, 255, 0.02)'),
-                                        transition: '0.2s'
-                                    }}
+                                    variants={itemVariants}
+                                    key={row.id || index}
+                                    onClick={() => onRowClick?.(row)}
                                     className="table-row-hover"
+                                    style={{ 
+                                        borderBottom: isDaylight ? '1px solid rgba(226, 232, 240, 0.9)' : '1px solid rgba(255, 255, 255, 0.05)',
+                                        cursor: onRowClick ? 'pointer' : 'default',
+                                        transition: 'background 0.2s, transform 0.2s',
+                                        background: selectedIds.includes(row.id) ? (isDaylight ? 'rgba(245, 158, 11, 0.08)' : 'rgba(0, 229, 255, 0.12)') : 'transparent'
+                                    }}
                                 >
                                     {selectable && (
-                                        <td className="hide-on-print" style={{ padding: '12px 15px' }} onClick={(e) => e.stopPropagation()}>
+                                        <td className="hide-on-print" style={{ padding: '12px 15px', width: '40px' }} onClick={(e) => e.stopPropagation()}>
                                             <input 
                                                 type="checkbox" 
                                                 checked={selectedIds.includes(row.id)}
                                                 onChange={() => {
-                                                    const newSelection = selectedIds.includes(row.id) 
-                                                        ? selectedIds.filter(id => id !== row.id) 
+                                                    const newSelected = selectedIds.includes(row.id) 
+                                                        ? selectedIds.filter(id => id !== row.id)
                                                         : [...selectedIds, row.id];
-                                                    onSelectionChange?.(newSelection);
+                                                    onSelectionChange?.(newSelected);
                                                 }}
-                                                style={{ accentColor: isDaylight ? '#C29B62' : THEME.goldAccent, width: '16px', height: '16px', cursor: 'pointer' }}
+                                                style={{ accentColor: isDaylight ? '#F59E0B' : THEME.goldAccent, width: '16px', height: '16px', cursor: 'pointer' }}
                                             />
                                         </td>
                                     )}
@@ -384,7 +402,7 @@ export default function RawasiSmartTable({
                                                 key={colIndex} 
                                                 style={{ 
                                                     padding: isActions ? '10px 8px' : '12px 15px', 
-                                                    color: isDaylight ? '#2C1A12' : '#F8FAFC', 
+                                                    color: isDaylight ? '#0F172A' : '#F8FAFC', 
                                                     fontSize: '13px',
                                                     textAlign: isRtl ? 'right' : 'left',
                                                     whiteSpace: isActions ? 'nowrap' : undefined,
@@ -407,28 +425,28 @@ export default function RawasiSmartTable({
                 <div className="hide-on-print table-pagination-mobile" style={{ 
                     display: 'flex', justifyContent: 'space-between', alignItems: 'center', 
                     padding: '15px 20px', marginTop: '15px', 
-                    borderTop: isDaylight ? '1px solid rgba(194, 155, 98, 0.25)' : '1px solid rgba(0, 229, 255, 0.15)',
-                    background: isDaylight ? 'rgba(255, 253, 250, 0.9)' : 'rgba(20, 24, 34, 0.6)', 
+                    borderTop: isDaylight ? '1px solid rgba(226, 232, 240, 0.95)' : '1px solid rgba(0, 229, 255, 0.15)',
+                    background: isDaylight ? '#F8FAFC' : 'rgba(20, 24, 34, 0.6)', 
                     borderRadius: '12px', flexWrap: 'wrap', gap: '15px'
                 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-                        <span style={{ fontSize: '12px', fontWeight: 900, color: isDaylight ? 'rgba(44, 26, 18, 0.7)' : '#94A3B8' }}>{language === 'en' ? 'Show:' : 'عرض:'}</span>
+                        <span style={{ fontSize: '12px', fontWeight: 900, color: isDaylight ? '#64748B' : '#94A3B8' }}>{language === 'en' ? 'Show:' : 'عرض:'}</span>
                         <select 
                             value={activeRows} 
                             onChange={(e) => handleRowsChange(Number(e.target.value))}
                             style={{ 
                                 padding: '8px 15px', borderRadius: '12px', 
-                                border: isDaylight ? '1px solid rgba(194, 155, 98, 0.35)' : '1px solid rgba(0, 229, 255, 0.25)', 
+                                border: isDaylight ? '1px solid rgba(203, 213, 225, 0.9)' : '1px solid rgba(0, 229, 255, 0.25)', 
                                 outline: 'none', fontWeight: 800, cursor: 'pointer', 
                                 background: isDaylight ? '#FFFFFF' : '#141822', 
-                                color: isDaylight ? '#2C1A12' : '#F8FAFC' 
+                                color: isDaylight ? '#0F172A' : '#F8FAFC' 
                             }}
                         >
                             <option value="50">{language === 'en' ? '50 records' : '50 سجل'}</option>
                             <option value="100">{language === 'en' ? '100 records' : '100 سجل'}</option>
                             <option value="500">{language === 'en' ? '500 records' : '500 سجل'}</option>
                         </select>
-                        <span style={{ fontSize: '12px', fontWeight: 700, color: isDaylight ? 'rgba(44, 26, 18, 0.7)' : '#94A3B8' }}>
+                        <span style={{ fontSize: '12px', fontWeight: 700, color: isDaylight ? '#64748B' : '#94A3B8' }}>
                             {language === 'en' ? `of ${activeTotal} total` : `من إجمالي ${activeTotal}`}
                         </span>
                     </div>
@@ -439,21 +457,21 @@ export default function RawasiSmartTable({
                             onClick={(e) => { e.stopPropagation(); handlePageChange(activePage - 1); }} 
                             style={{ 
                                 padding: '8px 16px', borderRadius: '12px', 
-                                border: isDaylight ? '1px solid rgba(194, 155, 98, 0.35)' : '1px solid rgba(0, 229, 255, 0.25)', 
+                                border: isDaylight ? '1px solid rgba(203, 213, 225, 0.9)' : '1px solid rgba(0, 229, 255, 0.25)', 
                                 background: isDaylight ? '#FFFFFF' : 'rgba(20, 24, 34, 0.85)', 
                                 fontWeight: 900, cursor: activePage === 1 ? 'not-allowed' : 'pointer', 
                                 opacity: activePage === 1 ? 0.4 : 1, 
-                                color: isDaylight ? '#2C1A12' : '#F8FAFC', 
+                                color: isDaylight ? '#0F172A' : '#F8FAFC', 
                                 transition: '0.2s' 
                             }}
                         >
                             {language === 'en' ? 'Previous' : 'السابق'}
                         </button>
                         <div style={{ 
-                            background: isDaylight ? 'linear-gradient(135deg, #C29B62 0%, #A8573C 100%)' : 'linear-gradient(135deg, #00E5FF 0%, #0088CC 100%)', 
+                            background: isDaylight ? 'linear-gradient(135deg, #F59E0B 0%, #D97706 100%)' : 'linear-gradient(135deg, #00E5FF 0%, #0088CC 100%)', 
                             color: '#FFFFFF', 
                             padding: '8px 20px', borderRadius: '12px', fontWeight: 900, fontSize: '13px', 
-                            boxShadow: isDaylight ? '0 2px 8px rgba(194, 155, 98, 0.3)' : '0 0 15px rgba(0, 229, 255, 0.35)', 
+                            boxShadow: isDaylight ? '0 2px 10px rgba(245, 158, 11, 0.3)' : '0 0 15px rgba(0, 229, 255, 0.35)', 
                             textAlign: 'center' 
                         }}>
                             {language === 'en' ? `Page ${activePage} of ${totalPages}` : `صفحة ${activePage} من ${totalPages}`}
@@ -463,11 +481,11 @@ export default function RawasiSmartTable({
                             onClick={(e) => { e.stopPropagation(); handlePageChange(activePage + 1); }} 
                             style={{ 
                                 padding: '8px 16px', borderRadius: '12px', 
-                                border: isDaylight ? '1px solid rgba(194, 155, 98, 0.35)' : '1px solid rgba(0, 229, 255, 0.25)', 
+                                border: isDaylight ? '1px solid rgba(203, 213, 225, 0.9)' : '1px solid rgba(0, 229, 255, 0.25)', 
                                 background: isDaylight ? '#FFFFFF' : 'rgba(20, 24, 34, 0.85)', 
                                 fontWeight: 900, cursor: activePage >= totalPages ? 'not-allowed' : 'pointer', 
                                 opacity: activePage >= totalPages ? 0.4 : 1, 
-                                color: isDaylight ? '#2C1A12' : '#F8FAFC', 
+                                color: isDaylight ? '#0F172A' : '#F8FAFC', 
                                 transition: '0.2s' 
                             }}
                         >

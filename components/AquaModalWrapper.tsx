@@ -113,22 +113,22 @@ export default function AquaModalWrapper({ isOpen, onClose, onConfirm, title, ic
                 }
 
                 .daylight-theme .warm-portal-overlay-fullscreen {
-                    background: rgba(44, 26, 18, 0.45) !important;
+                    background: rgba(15, 23, 42, 0.45) !important;
                 }
 
                 .daylight-theme .glass-modal-container {
-                    background: linear-gradient(135deg, rgba(255, 253, 250, 0.98) 0%, rgba(250, 246, 240, 0.95) 100%) !important;
-                    border: 1px solid rgba(194, 155, 98, 0.35) !important;
-                    box-shadow: 0 25px 60px rgba(44, 26, 18, 0.15), 0 0 30px rgba(194, 155, 98, 0.1) !important;
-                    color: #2C1A12 !important;
+                    background: #FFFFFF !important;
+                    border: 1px solid rgba(226, 232, 240, 0.95) !important;
+                    box-shadow: 0 25px 60px rgba(15, 23, 42, 0.15) !important;
+                    color: #0F172A !important;
                 }
 
                 .daylight-theme .glass-modal-container h2 {
-                    color: #2C1A12 !important;
+                    color: #0F172A !important;
                 }
 
                 .daylight-theme .modal-header-title {
-                    border-bottom-color: rgba(194, 155, 98, 0.25) !important;
+                    border-bottom-color: rgba(226, 232, 240, 0.8) !important;
                 }
 
                 .cinematic-scroll::-webkit-scrollbar { width: 6px; }
@@ -136,7 +136,7 @@ export default function AquaModalWrapper({ isOpen, onClose, onConfirm, title, ic
                 .cinematic-scroll::-webkit-scrollbar-thumb { background: rgba(0, 229, 255, 0.2); border-radius: 10px; }
                 .cinematic-scroll::-webkit-scrollbar-thumb:hover { background: rgba(0, 229, 255, 0.4); }
 
-                .daylight-theme .cinematic-scroll::-webkit-scrollbar-thumb { background: rgba(194, 155, 98, 0.35); }
+                .daylight-theme .cinematic-scroll::-webkit-scrollbar-thumb { background: rgba(203, 213, 225, 0.8); }
 
                 .glass-input-field {
                     width: 100%; padding: 8px 10px; border-radius: 12px;
@@ -153,13 +153,13 @@ export default function AquaModalWrapper({ isOpen, onClose, onConfirm, title, ic
 
                 .daylight-theme .glass-input-field {
                     background: #FFFFFF !important;
-                    border: 1px solid rgba(194, 155, 98, 0.35) !important;
-                    color: #2C1A12 !important;
-                    box-shadow: inset 0 1px 2px rgba(44, 26, 18, 0.05) !important;
+                    border: 1px solid rgba(203, 213, 225, 0.9) !important;
+                    color: #0F172A !important;
+                    box-shadow: inset 0 1px 2px rgba(15, 23, 42, 0.05) !important;
                 }
                 .daylight-theme .glass-input-field:focus {
-                    border-color: #C29B62 !important;
-                    box-shadow: 0 0 0 3px rgba(194, 155, 98, 0.2) !important;
+                    border-color: #F59E0B !important;
+                    box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2) !important;
                 }
                 
                 .btn-glass-save {
@@ -173,9 +173,9 @@ export default function AquaModalWrapper({ isOpen, onClose, onConfirm, title, ic
                 .btn-glass-save:disabled { opacity: 0.6; cursor: not-allowed; }
 
                 .daylight-theme .btn-glass-save {
-                    background: linear-gradient(135deg, #C29B62 0%, #A8573C 100%) !important;
+                    background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%) !important;
                     color: #FFFFFF !important;
-                    box-shadow: 0 4px 15px rgba(168, 87, 60, 0.25) !important;
+                    box-shadow: 0 4px 15px rgba(217, 119, 6, 0.25) !important;
                 }
 
                 .btn-glass-cancel {
@@ -186,20 +186,20 @@ export default function AquaModalWrapper({ isOpen, onClose, onConfirm, title, ic
                 .btn-glass-cancel:hover { background: rgba(26, 32, 46, 1); color: #F8FAFC; transform: translateY(-2px); border-color: rgba(0, 229, 255, 0.3); }
 
                 .daylight-theme .btn-glass-cancel {
-                    background: rgba(194, 155, 98, 0.1) !important;
-                    color: #2C1A12 !important;
-                    border: 1px solid rgba(194, 155, 98, 0.25) !important;
+                    background: #F1F5F9 !important;
+                    color: #334155 !important;
+                    border: 1px solid #CBD5E1 !important;
                 }
                 .daylight-theme .btn-glass-cancel:hover {
-                    background: #FFFFFF !important;
-                    color: #2C1A12 !important;
-                    border-color: #C29B62 !important;
+                    background: #E2E8F0 !important;
+                    color: #0F172A !important;
+                    border-color: #94A3B8 !important;
                 }
 
                 .daylight-theme .modal-kbd-badge {
-                    background: rgba(194, 155, 98, 0.12) !important;
-                    color: #A8573C !important;
-                    border: 1px solid rgba(194, 155, 98, 0.25) !important;
+                    background: rgba(245, 158, 11, 0.12) !important;
+                    color: #B45309 !important;
+                    border: 1px solid rgba(245, 158, 11, 0.25) !important;
                 }
 
                 @keyframes modalScaleUp { 0% { transform: scale(0.95); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }

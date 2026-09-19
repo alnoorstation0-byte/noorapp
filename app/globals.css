@@ -1085,31 +1085,34 @@ body.daylight-theme {
   justify-content: center !important;
 }
 
-/* ☀️ ==========================================================================
-   🏜️ نظام النمط النهاري الصحراوي الموحد (Desert Glassmorphism Daylight Suite)
-   يضمن تحويل كافة الجداول والحاويات والبطاقات إلى طراز الزجاج الصحراوي النقي
-   ========================================================================== */
+/* ══════════════════════════════════════════════════════════════════════════
+   ☀️ وضع الرؤية النهارية الكريستالي الناصع الشامل (Pure Crystal Radiant White)
+   بياض ساطع صريح، تباين فائق مع خطوط كحلية/سوداء واضحة، ولمسات ذهبية ملكية
+   ══════════════════════════════════════════════════════════════════════════ */
 
 .daylight-theme,
 [data-theme="daylight"] {
-  --bg-main: #FDFBF7 !important;
+  --bg-main: #FFFFFF !important;
   --surface: #FFFFFF !important;
-  --primary: #C29B62 !important;
-  --accent: #C29B62 !important;
-  --terracotta: #A8573C !important;
-  --success: #4E734F !important;
-  --text-main: #2C1A12 !important;
-  --text-muted: rgba(44, 26, 18, 0.65) !important;
-  --glass-bg: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.90) 100%) !important;
-  --glass-border: 1px solid rgba(194, 155, 98, 0.3) !important;
-  --card-shadow: 0 4px 20px rgba(44, 26, 18, 0.08) !important;
-  --hover-shadow: 0 10px 25px rgba(168, 87, 60, 0.15) !important;
-  --table-header-bg: rgba(194, 155, 98, 0.1) !important;
-  --table-hover: rgba(194, 155, 98, 0.06) !important;
-  --table-border: rgba(194, 155, 98, 0.2) !important;
+  --primary: #F59E0B !important;
+  --primary-rgb: 245, 158, 11 !important;
+  --accent: #D97706 !important;
+  --accent-rgb: 217, 119, 6 !important;
+  --terracotta: #EA580C !important;
+  --success: #059669 !important;
+  --success-rgb: 5, 150, 105 !important;
+  --text-main: #0F172A !important;
+  --text-muted: #475569 !important;
+  --glass-bg: #FFFFFF !important;
+  --glass-border: 1px solid rgba(226, 232, 240, 0.95) !important;
+  --card-shadow: 0 4px 20px rgba(15, 23, 42, 0.05) !important;
+  --hover-shadow: 0 10px 25px rgba(245, 158, 11, 0.15) !important;
+  --table-header-bg: #F8FAFC !important;
+  --table-hover: rgba(245, 158, 11, 0.05) !important;
+  --table-border: rgba(226, 232, 240, 0.95) !important;
 }
 
-/* 🏷️ الحاويات والبطاقات الشاملة (Universal Glass Containers & Cards) */
+/* 🏷️ الحاويات والبطاقات الشاملة (Universal Glass Containers & Cards in Daylight) */
 .daylight-theme .desert-glass,
 .daylight-theme .glass-card,
 .daylight-theme .glass-panel,
@@ -1147,12 +1150,12 @@ body.daylight-theme {
 .daylight-theme .op-action-btn,
 .daylight-theme .command-card-item,
 .daylight-theme .fp-table-card {
-  background: linear-gradient(135deg, rgba(255, 253, 250, 0.96) 0%, rgba(250, 246, 240, 0.92) 100%) !important;
-  backdrop-filter: blur(24px) saturate(160%) !important;
-  -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
-  border: 1px solid rgba(194, 155, 98, 0.3) !important;
-  box-shadow: 0 4px 20px rgba(44, 26, 18, 0.08) !important;
-  color: #2C1A12 !important;
+  background: #FFFFFF !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  border: 1px solid rgba(226, 232, 240, 0.95) !important;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.05) !important;
+  color: #0F172A !important;
 }
 
 .daylight-theme .desert-glass:hover,
@@ -1160,22 +1163,24 @@ body.daylight-theme {
 .daylight-theme .summary-card:hover,
 .daylight-theme .source-breakdown-card:hover,
 .daylight-theme .audit-stat-card:hover,
-.daylight-theme .aqua-glass-card:hover {
-  box-shadow: 0 10px 25px rgba(168, 87, 60, 0.15) !important;
-  border-color: rgba(194, 155, 98, 0.5) !important;
+.daylight-theme .aqua-glass-card:hover,
+.daylight-theme .command-card:hover {
+  box-shadow: 0 10px 25px rgba(245, 158, 11, 0.15) !important;
+  border-color: rgba(245, 158, 11, 0.5) !important;
+  transform: translateY(-3px) !important;
 }
 
 /* 📊 القواعد العامة لكافة الجداول (Universal Tables in Daylight) */
 .daylight-theme table {
   background: transparent !important;
-  color: #2C1A12 !important;
+  color: #0F172A !important;
 }
 
 .daylight-theme table thead,
 .daylight-theme .rawasi-printable-table thead,
 .daylight-theme .tree-thead,
 .daylight-theme .station-table-clean thead {
-  background: rgba(194, 155, 98, 0.1) !important;
+  background: #F8FAFC !important;
 }
 
 .daylight-theme table thead th,
@@ -1195,10 +1200,10 @@ body.daylight-theme {
 .daylight-theme .return-table th,
 .daylight-theme .shift-table th,
 .daylight-theme .station-table-clean th {
-  background: rgba(194, 155, 98, 0.1) !important;
-  color: #2C1A12 !important;
+  background: #F8FAFC !important;
+  color: #0F172A !important;
   font-weight: 900 !important;
-  border-bottom: 2px solid rgba(194, 155, 98, 0.3) !important;
+  border-bottom: 2px solid rgba(226, 232, 240, 0.95) !important;
   border-top: none !important;
 }
 
@@ -1218,9 +1223,9 @@ body.daylight-theme {
 .daylight-theme .return-table tbody tr,
 .daylight-theme .shift-table tbody tr,
 .daylight-theme .station-table-clean tbody tr {
-  background: rgba(255, 255, 255, 0.8) !important;
-  border-bottom: 1px solid rgba(194, 155, 98, 0.18) !important;
-  color: #2C1A12 !important;
+  background: #FFFFFF !important;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8) !important;
+  color: #0F172A !important;
   transition: all 0.2s ease !important;
 }
 
@@ -1229,7 +1234,7 @@ body.daylight-theme {
 .daylight-theme .itemcard-table tbody tr:nth-child(even),
 .daylight-theme .inv-val-table tbody tr:nth-child(even),
 .daylight-theme .reorder-table tbody tr:nth-child(even) {
-  background: rgba(253, 251, 247, 0.9) !important;
+  background: #FAFAFA !important;
 }
 
 .daylight-theme table tbody tr:hover,
@@ -1249,8 +1254,8 @@ body.daylight-theme {
 .daylight-theme .shift-table tbody tr:hover,
 .daylight-theme .station-table-clean tbody tr:hover,
 .daylight-theme .table-row-hover:hover {
-  background: rgba(194, 155, 98, 0.08) !important;
-  box-shadow: 0 2px 10px rgba(44, 26, 18, 0.05) !important;
+  background: rgba(245, 158, 11, 0.05) !important;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.04) !important;
 }
 
 .daylight-theme table td,
@@ -1269,8 +1274,8 @@ body.daylight-theme {
 .daylight-theme .return-table td,
 .daylight-theme .shift-table td,
 .daylight-theme .station-table-clean td {
-  color: #2C1A12 !important;
-  border-bottom: 1px solid rgba(194, 155, 98, 0.15) !important;
+  color: #0F172A !important;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8) !important;
 }
 
 /* 📋 أوعية الجداول وحاوياتها (Table Containers & Wrappers) */
@@ -1279,152 +1284,152 @@ body.daylight-theme {
 .daylight-theme .fp-table-wrapper,
 .daylight-theme .child-tree-container,
 .daylight-theme .table-scroll-wrap {
-  background: linear-gradient(135deg, rgba(255, 253, 250, 0.96) 0%, rgba(250, 246, 240, 0.90) 100%) !important;
-  border: 1px solid rgba(194, 155, 98, 0.3) !important;
-  box-shadow: 0 6px 20px rgba(44, 26, 18, 0.06) !important;
+  background: #FFFFFF !important;
+  border: 1px solid rgba(226, 232, 240, 0.95) !important;
+  box-shadow: 0 4px 20px rgba(15, 23, 42, 0.05) !important;
   border-radius: 16px !important;
 }
 
 /* 🌲 شجرة الحسابات (Accounts Tree Rows & Headers in Daylight) */
 .daylight-theme .acc-row {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(250, 247, 242, 0.9) 100%) !important;
-  border: 1px solid rgba(194, 155, 98, 0.3) !important;
-  box-shadow: 0 2px 8px rgba(44, 26, 18, 0.05) !important;
-  color: #2C1A12 !important;
+  background: #FFFFFF !important;
+  border: 1px solid rgba(226, 232, 240, 0.9) !important;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04) !important;
+  color: #0F172A !important;
 }
 
 .daylight-theme .acc-row.root-node {
-  background: linear-gradient(135deg, rgba(255, 253, 250, 0.98) 0%, rgba(245, 240, 230, 0.95) 100%) !important;
-  border: 1.5px solid rgba(194, 155, 98, 0.45) !important;
-  box-shadow: 0 4px 12px rgba(44, 26, 18, 0.08) !important;
+  background: linear-gradient(135deg, #FFFFFF 0%, #FFFBEB 100%) !important;
+  border: 1.5px solid rgba(245, 158, 11, 0.4) !important;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.08) !important;
 }
 
 .daylight-theme .acc-row.child-node {
-  background: rgba(255, 255, 255, 0.85) !important;
+  background: #FFFFFF !important;
 }
 
 .daylight-theme .acc-row:hover {
-  border-color: #C29B62 !important;
-  background: #FFFFFF !important;
-  box-shadow: 0 6px 16px rgba(168, 87, 60, 0.12) !important;
+  border-color: #F59E0B !important;
+  background: #FFFBEB !important;
+  box-shadow: 0 6px 16px rgba(245, 158, 11, 0.12) !important;
 }
 
 .daylight-theme .acc-row.selected {
-  background: rgba(194, 155, 98, 0.15) !important;
-  border-color: #C29B62 !important;
+  background: rgba(245, 158, 11, 0.12) !important;
+  border-color: #D97706 !important;
 }
 
 .daylight-theme .acc-name-text {
-  color: #2C1A12 !important;
+  color: #0F172A !important;
 }
 
 .daylight-theme .acc-code-badge {
-  background: rgba(194, 155, 98, 0.15) !important;
-  color: #A8573C !important;
+  background: rgba(245, 158, 11, 0.12) !important;
+  color: #B45309 !important;
 }
 
 .daylight-theme .table-header {
-  background: rgba(194, 155, 98, 0.12) !important;
-  border: 1px solid rgba(194, 155, 98, 0.3) !important;
-  color: #2C1A12 !important;
+  background: #F8FAFC !important;
+  border: 1px solid rgba(226, 232, 240, 0.95) !important;
+  color: #0F172A !important;
 }
 
 .daylight-theme .table-header-title {
-  color: #2C1A12 !important;
+  color: #0F172A !important;
 }
 
 .daylight-theme .entry-line {
-  background: rgba(255, 255, 255, 0.95) !important;
-  border: 1px solid rgba(194, 155, 98, 0.25) !important;
-  border-right: 3px solid #C29B62 !important;
-  box-shadow: 0 1px 4px rgba(44, 26, 18, 0.05) !important;
+  background: #FFFFFF !important;
+  border: 1px solid rgba(226, 232, 240, 0.9) !important;
+  border-right: 3px solid #F59E0B !important;
+  box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04) !important;
 }
 
 .daylight-theme .entry-line-desc {
-  color: #2C1A12 !important;
+  color: #0F172A !important;
 }
 
 .daylight-theme .entry-line-date {
-  background: rgba(194, 155, 98, 0.12) !important;
-  color: #2C1A12 !important;
+  background: #F1F5F9 !important;
+  color: #475569 !important;
 }
 
 .daylight-theme .mobile-accounts-toolbar,
 .daylight-theme .accounts-selection-bar {
-  background: linear-gradient(135deg, rgba(255, 253, 250, 0.96) 0%, rgba(250, 246, 240, 0.92) 100%) !important;
-  border: 1px solid rgba(194, 155, 98, 0.35) !important;
-  box-shadow: 0 4px 15px rgba(44, 26, 18, 0.08) !important;
+  background: #FFFFFF !important;
+  border: 1px solid rgba(226, 232, 240, 0.95) !important;
+  box-shadow: 0 4px 15px rgba(15, 23, 42, 0.05) !important;
 }
 
 .daylight-theme .mobile-search-input {
   background: #FFFFFF !important;
-  border: 1px solid rgba(194, 155, 98, 0.35) !important;
-  color: #2C1A12 !important;
+  border: 1px solid rgba(203, 213, 225, 0.9) !important;
+  color: #0F172A !important;
 }
 
 /* 🌊 التدفقات النقدية (Cashflows Tree Table & Filter) */
 .daylight-theme .master-group-row {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(250, 247, 242, 0.9) 100%) !important;
-  box-shadow: 0 2px 8px rgba(44, 26, 18, 0.05) !important;
+  background: #FFFFFF !important;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04) !important;
 }
 
 .daylight-theme .master-group-row:hover {
-  background: #FFFFFF !important;
-  box-shadow: 0 6px 16px rgba(168, 87, 60, 0.12) !important;
+  background: #FFFBEB !important;
+  box-shadow: 0 6px 16px rgba(245, 158, 11, 0.12) !important;
 }
 
 .daylight-theme .master-group-row td {
-  color: #2C1A12 !important;
-  border-bottom: 1px solid rgba(194, 155, 98, 0.2) !important;
+  color: #0F172A !important;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.8) !important;
 }
 
 .daylight-theme .child-tree-container {
-  background: rgba(253, 251, 247, 0.95) !important;
-  border-bottom: 2px solid rgba(194, 155, 98, 0.3) !important;
+  background: #F8FAFC !important;
+  border-bottom: 2px solid rgba(226, 232, 240, 0.95) !important;
 }
 
 .daylight-theme .child-table {
   background: #FFFFFF !important;
-  border: 1px solid rgba(194, 155, 98, 0.3) !important;
+  border: 1px solid rgba(226, 232, 240, 0.95) !important;
 }
 
 .daylight-theme .arrow-icon {
-  background: rgba(194, 155, 98, 0.15) !important;
-  color: #C29B62 !important;
+  background: rgba(245, 158, 11, 0.12) !important;
+  color: #D97706 !important;
 }
 
 .daylight-theme .arrow-expanded {
-  background: #C29B62 !important;
+  background: #F59E0B !important;
   color: #FFFFFF !important;
 }
 
 .daylight-theme .view-toggle-btn {
-  color: rgba(44, 26, 18, 0.7) !important;
+  color: #475569 !important;
 }
 
 .daylight-theme .view-toggle-btn.active {
-  background: #C29B62 !important;
+  background: #F59E0B !important;
   color: #FFFFFF !important;
 }
 
 .daylight-theme .view-toggle-btn:not(.active):hover {
-  background: rgba(194, 155, 98, 0.12) !important;
-  color: #2C1A12 !important;
+  background: rgba(245, 158, 11, 0.1) !important;
+  color: #D97706 !important;
 }
 
 .daylight-theme .filter-input,
 .daylight-theme .search-box,
 .daylight-theme .glass-input-field {
   background: #FFFFFF !important;
-  border: 1.5px solid rgba(194, 155, 98, 0.35) !important;
-  color: #2C1A12 !important;
+  border: 1.5px solid rgba(203, 213, 225, 0.9) !important;
+  color: #0F172A !important;
 }
 
 .daylight-theme .filter-input:focus,
 .daylight-theme .search-box:focus,
 .daylight-theme .glass-input-field:focus {
-  border-color: #C29B62 !important;
-  box-shadow: 0 0 0 3px rgba(194, 155, 98, 0.2) !important;
+  border-color: #F59E0B !important;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15) !important;
 }
 
 /* ⚖️ ميزان المراجعة (Trial Balance) */
@@ -1433,31 +1438,32 @@ body.daylight-theme {
 }
 
 .daylight-theme .tb-date-group {
-  background: rgba(253, 251, 247, 0.95) !important;
-  border: 1px solid rgba(194, 155, 98, 0.35) !important;
+  background: #F8FAFC !important;
+  border: 1px solid rgba(226, 232, 240, 0.95) !important;
 }
 
 .daylight-theme .tb-date-group input {
-  color: #2C1A12 !important;
+  color: #0F172A !important;
 }
 
 .daylight-theme .tb-totals {
-  background-color: rgba(194, 155, 98, 0.12) !important;
+  background-color: #FFFBEB !important;
 }
 
 .daylight-theme .tb-totals td {
-  border-top: 2px solid #C29B62 !important;
-  color: #2C1A12 !important;
+  border-top: 2px solid #F59E0B !important;
+  color: #0F172A !important;
+  font-weight: 900 !important;
 }
 
 /* 🕵️ الرادار المحاسبي (Audit) */
 .daylight-theme .err-row {
-  border-bottom: 1px dashed rgba(194, 155, 98, 0.25) !important;
-  color: #2C1A12 !important;
+  border-bottom: 1px dashed rgba(226, 232, 240, 0.95) !important;
+  color: #0F172A !important;
 }
 
 .daylight-theme .err-row:hover {
-  background: rgba(194, 155, 98, 0.08) !important;
+  background: rgba(239, 68, 68, 0.05) !important;
 }
 
 /* 🏷️ حقول الإدخال والاختيار الشاملة (Universal Inputs, Selects, Textareas) */
@@ -1465,106 +1471,107 @@ body.daylight-theme {
 .daylight-theme select,
 .daylight-theme textarea {
   background: #FFFFFF !important;
-  border: 1px solid rgba(194, 155, 98, 0.35) !important;
-  color: #2C1A12 !important;
+  border: 1px solid rgba(203, 213, 225, 0.9) !important;
+  color: #0F172A !important;
 }
 
 .daylight-theme input:focus,
 .daylight-theme select:focus,
 .daylight-theme textarea:focus {
-  border-color: #C29B62 !important;
-  box-shadow: 0 0 0 3px rgba(194, 155, 98, 0.2) !important;
+  border-color: #F59E0B !important;
+  box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.15) !important;
   background: #FFFFFF !important;
 }
 
 .daylight-theme select option {
   background: #FFFFFF !important;
-  color: #2C1A12 !important;
+  color: #0F172A !important;
 }
 
 .daylight-theme .stat-box {
-  background: rgba(255, 255, 255, 0.9) !important;
-  border: 1px solid rgba(194, 155, 98, 0.25) !important;
-  color: #2C1A12 !important;
+  background: #FFFFFF !important;
+  border: 1px solid rgba(226, 232, 240, 0.95) !important;
+  color: #0F172A !important;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04) !important;
 }
 
 .daylight-theme .stat-box-title {
-  color: rgba(44, 26, 18, 0.65) !important;
+  color: #475569 !important;
 }
 
 .daylight-theme .stat-box-value {
-  color: #2C1A12 !important;
+  color: #0F172A !important;
+  font-weight: 900 !important;
 }
 
 .daylight-theme .stat-box.highlight {
-  background: linear-gradient(135deg, rgba(194, 155, 98, 0.15), rgba(168, 87, 60, 0.15)) !important;
-  border-color: #C29B62 !important;
-  box-shadow: 0 4px 15px rgba(194, 155, 98, 0.2) !important;
+  background: linear-gradient(135deg, #FFFFFF 0%, #FFFBEB 100%) !important;
+  border-color: #F59E0B !important;
+  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.15) !important;
 }
 
 .daylight-theme .stat-box.highlight .stat-box-title,
 .daylight-theme .stat-box.highlight .stat-box-value {
-  color: #A8573C !important;
+  color: #D97706 !important;
 }
 
 /* 🏷️ شريط تبويبات التسويات والمودال (Tabs & Filters) */
 .daylight-theme .aqua-filter-tab:not(.active),
 .daylight-theme .aqua-tab-btn:not(.active) {
-  background: rgba(255, 255, 255, 0.85) !important;
-  color: rgba(44, 26, 18, 0.7) !important;
-  border-color: rgba(194, 155, 98, 0.3) !important;
+  background: #FFFFFF !important;
+  color: #475569 !important;
+  border-color: rgba(203, 213, 225, 0.9) !important;
 }
 
 .daylight-theme .aqua-filter-tab:not(.active):hover,
 .daylight-theme .aqua-tab-btn:not(.active):hover {
-  background: #FFFFFF !important;
-  color: #2C1A12 !important;
-  border-color: #C29B62 !important;
+  background: #FFFBEB !important;
+  color: #D97706 !important;
+  border-color: #F59E0B !important;
 }
 
 .daylight-theme .aqua-filter-tab.active,
 .daylight-theme .aqua-tab-btn.active {
-  background: linear-gradient(135deg, #C29B62 0%, #A8573C 100%) !important;
+  background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%) !important;
   color: #FFFFFF !important;
-  border-color: #C29B62 !important;
-  box-shadow: 0 4px 12px rgba(168, 87, 60, 0.25) !important;
+  border-color: #D97706 !important;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25) !important;
 }
 
 /* 🏷️ شريط فحص الباركود */
 .daylight-theme .barcode-scan-container {
-  background: rgba(253, 251, 247, 0.95) !important;
-  border: 1.5px dashed rgba(194, 155, 98, 0.45) !important;
+  background: #F8FAFC !important;
+  border: 1.5px dashed rgba(245, 158, 11, 0.45) !important;
 }
 
 /* 🏷️ النصوص والعناوين الإحصائية */
 .daylight-theme .summary-val,
 .daylight-theme .stat-value,
 .daylight-theme .kpi-val-highlight {
-  color: #2C1A12 !important;
+  color: #0F172A !important;
+  font-weight: 900 !important;
 }
 
 .daylight-theme .summary-label,
 .daylight-theme .stat-title,
 .daylight-theme .kpi-sub-label,
 .daylight-theme .card-section-title {
-  color: rgba(44, 26, 18, 0.7) !important;
+  color: #475569 !important;
+  font-weight: 700 !important;
 }
 
 .daylight-theme .card-section-title {
-  border-bottom-color: rgba(194, 155, 98, 0.3) !important;
+  border-bottom-color: rgba(226, 232, 240, 0.95) !important;
 }
 
 .daylight-theme .card-section-title span.badge {
-  background: rgba(194, 155, 98, 0.15) !important;
-  color: #A8573C !important;
+  background: rgba(245, 158, 11, 0.12) !important;
+  color: #B45309 !important;
 }
 
 /* 🏷️ زر إدراج الصنف في المودال */
 .daylight-theme .btn-add-line {
-  background: linear-gradient(135deg, #C29B62 0%, #A8573C 100%) !important;
+  background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%) !important;
   color: #FFFFFF !important;
-  box-shadow: 0 4px 12px rgba(168, 87, 60, 0.25) !important;
+  box-shadow: 0 4px 12px rgba(245, 158, 11, 0.25) !important;
 }
-
-
-

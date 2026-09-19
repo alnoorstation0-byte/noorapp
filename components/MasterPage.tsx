@@ -1113,28 +1113,28 @@ html.daylight-theme .drop-item.logout:hover {
             overflowY: 'auto',
             padding: '12px',
             background: isDaylight
-              ? 'linear-gradient(135deg, rgba(255, 253, 250, 0.98) 0%, rgba(250, 246, 240, 0.95) 100%)'
+              ? '#FFFFFF'
               : 'linear-gradient(135deg, rgba(20, 24, 34, 0.98) 0%, rgba(13, 16, 24, 0.95) 100%)',
             backdropFilter: 'blur(30px) saturate(200%)',
             boxShadow: isDaylight
-              ? '0 20px 50px rgba(44, 26, 18, 0.15), 0 0 25px rgba(194, 155, 98, 0.15)'
+              ? '0 20px 50px rgba(15, 23, 42, 0.12)'
               : '0 20px 50px rgba(0, 0, 0, 0.8), 0 0 25px rgba(0, 229, 255, 0.15)',
             border: isDaylight
-              ? '1px solid rgba(194, 155, 98, 0.35)'
+              ? '1px solid rgba(226, 232, 240, 0.95)'
               : '1px solid rgba(0, 229, 255, 0.25)',
             borderRadius: '20px',
             zIndex: 999999,
-            color: isDaylight ? '#2C1A12' : '#F8FAFC'
+            color: isDaylight ? '#0F172A' : '#F8FAFC'
           }} 
           onClick={(e) => e.stopPropagation()}
         >
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px 10px', borderBottom: isDaylight ? '1px solid rgba(194, 155, 98, 0.2)' : '1px solid rgba(0, 229, 255, 0.2)', marginBottom: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px 10px', borderBottom: isDaylight ? '1px solid rgba(226, 232, 240, 0.8)' : '1px solid rgba(0, 229, 255, 0.2)', marginBottom: '8px' }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-              <span style={{ fontSize: '14px', fontWeight: 900, color: isDaylight ? '#2C1A12' : '#00E5FF' }}>🔔 مركز التدقيق والمعلقات</span>
+              <span style={{ fontSize: '14px', fontWeight: 900, color: isDaylight ? '#0F172A' : '#00E5FF' }}>🔔 مركز التدقيق والمعلقات</span>
               <button 
                 onClick={(e) => { e.stopPropagation(); fetchPendingCount(); }}
                 title="تحديث لحظي"
-                style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '13px', padding: '2px 4px', color: isDaylight ? '#C29B62' : '#00E5FF' }}
+                style={{ background: 'transparent', border: 'none', cursor: 'pointer', fontSize: '13px', padding: '2px 4px', color: isDaylight ? '#D97706' : '#00E5FF' }}
               >
                 🔄
               </button>

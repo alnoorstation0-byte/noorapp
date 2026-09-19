@@ -946,112 +946,112 @@ export default function LayoutClient({ children }: { children: React.ReactNode }
           }
         }
 
-        /* ☀️ وضع الرؤية النهارية الصحراوية لمركز القيادة والقوائم والشريط السفلي (Desert Glassmorphism) */
+        /* ☀️ وضع الرؤية النهارية الكريستالي لمركز القيادة والقوائم والشريط السفلي (Pure Crystal Radiant White) */
         .daylight-theme .overlay-screen {
-          background: rgba(44, 26, 18, 0.25) !important;
+          background: rgba(15, 23, 42, 0.45) !important;
         }
         .daylight-theme .overlay-backdrop {
-          background: rgba(253, 251, 247, 0.75) !important;
-          backdrop-filter: blur(24px) saturate(160%) !important;
-          -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
+          background: rgba(255, 255, 255, 0.9) !important;
+          backdrop-filter: blur(20px) saturate(160%) !important;
+          -webkit-backdrop-filter: blur(20px) saturate(160%) !important;
         }
         .daylight-theme .admin-header-glass {
-          background: linear-gradient(135deg, rgba(255, 253, 250, 0.98) 0%, rgba(250, 246, 240, 0.94) 100%) !important;
-          border: 1px solid rgba(194, 155, 98, 0.35) !important;
-          box-shadow: 0 10px 30px rgba(44, 26, 18, 0.08) !important;
+          background: #FFFFFF !important;
+          border: 1px solid rgba(226, 232, 240, 0.95) !important;
+          box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06) !important;
         }
         .daylight-theme .brand-title {
-          color: #2C1A12 !important;
+          color: #0F172A !important;
         }
         .daylight-theme .brand-subtitle {
-          color: #A8573C !important;
+          color: #D97706 !important;
         }
         .daylight-theme .brand-logo-wrap {
-          background: rgba(194, 155, 98, 0.12) !important;
-          border-color: rgba(194, 155, 98, 0.4) !important;
-          box-shadow: 0 0 12px rgba(194, 155, 98, 0.15) !important;
+          background: rgba(245, 158, 11, 0.1) !important;
+          border-color: rgba(245, 158, 11, 0.3) !important;
+          box-shadow: 0 0 12px rgba(245, 158, 11, 0.12) !important;
         }
         .daylight-theme .btn-close-modal {
-          background: rgba(245, 240, 232, 0.9) !important;
-          border-color: rgba(194, 155, 98, 0.3) !important;
-          color: #2C1A12 !important;
+          background: #F1F5F9 !important;
+          border-color: #CBD5E1 !important;
+          color: #0F172A !important;
         }
         .daylight-theme .btn-close-modal:hover {
-          background: rgba(239, 68, 68, 0.15) !important;
+          background: rgba(239, 68, 68, 0.12) !important;
           color: #dc2626 !important;
-          border-color: rgba(239, 68, 68, 0.4) !important;
+          border-color: rgba(239, 68, 68, 0.3) !important;
         }
         .daylight-theme .group-section {
-          background: linear-gradient(135deg, rgba(255, 253, 250, 0.96) 0%, rgba(250, 246, 240, 0.90) 100%) !important;
-          border: 1px solid rgba(194, 155, 98, 0.3) !important;
-          box-shadow: 0 10px 25px rgba(44, 26, 18, 0.05) !important;
+          background: #FFFFFF !important;
+          border: 1px solid rgba(226, 232, 240, 0.95) !important;
+          box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04) !important;
         }
         .daylight-theme .group-header {
-          color: #2C1A12 !important;
-          border-bottom-color: rgba(194, 155, 98, 0.3) !important;
+          color: #0F172A !important;
+          border-bottom-color: rgba(226, 232, 240, 0.8) !important;
         }
         .daylight-theme .group-header-badge {
-          color: #A8573C !important;
-          background: rgba(194, 155, 98, 0.15) !important;
-          border-color: rgba(194, 155, 98, 0.3) !important;
+          color: #B45309 !important;
+          background: rgba(245, 158, 11, 0.12) !important;
+          border-color: rgba(245, 158, 11, 0.25) !important;
         }
         .daylight-theme .nav-card {
-          background: rgba(255, 253, 250, 0.92) !important;
-          border-color: rgba(194, 155, 98, 0.25) !important;
-          box-shadow: 0 3px 10px rgba(44, 26, 18, 0.04) !important;
-          color: #2C1A12 !important;
+          background: #F8FAFC !important;
+          border-color: rgba(226, 232, 240, 0.9) !important;
+          box-shadow: 0 2px 6px rgba(15, 23, 42, 0.03) !important;
+          color: #0F172A !important;
         }
         .daylight-theme .nav-card:hover {
           background: #FFFFFF !important;
-          border-color: #C29B62 !important;
-          box-shadow: 0 8px 22px rgba(168, 87, 60, 0.15) !important;
+          border-color: #F59E0B !important;
+          box-shadow: 0 8px 20px rgba(245, 158, 11, 0.15) !important;
         }
         .daylight-theme .nav-card.active {
-          background: linear-gradient(135deg, rgba(194, 155, 98, 0.2), rgba(255, 253, 250, 0.98)) !important;
-          border: 2px solid #C29B62 !important;
-          box-shadow: 0 8px 24px rgba(194, 155, 98, 0.25) !important;
+          background: #FFFBEB !important;
+          border: 2px solid #F59E0B !important;
+          box-shadow: 0 8px 20px rgba(245, 158, 11, 0.2) !important;
         }
         .daylight-theme .nav-title {
-          color: #2C1A12 !important;
+          color: #0F172A !important;
         }
         .daylight-theme .nav-path {
-          color: rgba(44, 26, 18, 0.55) !important;
+          color: #64748B !important;
         }
         .daylight-theme .icon-wrapper {
-          background: rgba(194, 155, 98, 0.12) !important;
-          border-color: rgba(194, 155, 98, 0.35) !important;
-          color: #A8573C !important;
+          background: rgba(245, 158, 11, 0.1) !important;
+          border-color: rgba(245, 158, 11, 0.25) !important;
+          color: #D97706 !important;
         }
         .daylight-theme .nav-card-active-dot {
-          background: #C29B62 !important;
-          box-shadow: 0 0 10px #C29B62 !important;
+          background: #F59E0B !important;
+          box-shadow: 0 0 10px #F59E0B !important;
         }
         .daylight-theme .online-user-card {
-          background: rgba(255, 253, 250, 0.95) !important;
-          border-color: rgba(78, 115, 79, 0.35) !important;
-          box-shadow: 0 2px 8px rgba(44, 26, 18, 0.06) !important;
+          background: #FFFFFF !important;
+          border-color: rgba(16, 185, 129, 0.3) !important;
+          box-shadow: 0 2px 8px rgba(15, 23, 42, 0.04) !important;
         }
         .daylight-theme .online-user-name {
-          color: #2C1A12 !important;
+          color: #0F172A !important;
         }
         .daylight-theme .online-user-role {
-          color: #4E734F !important;
+          color: #059669 !important;
         }
         .daylight-theme .desert-bottom-dock {
-          background: linear-gradient(135deg, rgba(255, 253, 250, 0.98) 0%, rgba(250, 246, 240, 0.95) 100%) !important;
-          border: 1px solid rgba(194, 155, 98, 0.35) !important;
-          box-shadow: 0 10px 25px rgba(44, 26, 18, 0.12) !important;
+          background: #FFFFFF !important;
+          border: 1px solid rgba(226, 232, 240, 0.95) !important;
+          box-shadow: 0 10px 25px rgba(15, 23, 42, 0.08) !important;
         }
         .daylight-theme .dock-item {
-          color: rgba(44, 26, 18, 0.6) !important;
+          color: #64748B !important;
         }
         .daylight-theme .dock-item.active {
-          color: #A8573C !important;
-          background: rgba(194, 155, 98, 0.16) !important;
+          color: #D97706 !important;
+          background: rgba(245, 158, 11, 0.12) !important;
         }
         .daylight-theme .dock-item.active::after {
-          background: #A8573C !important;
-          box-shadow: 0 0 6px #A8573C !important;
+          background: #D97706 !important;
+          box-shadow: 0 0 6px #D97706 !important;
         }
       `}} />
 

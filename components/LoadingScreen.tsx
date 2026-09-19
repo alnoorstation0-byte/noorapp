@@ -118,43 +118,43 @@ export default function LoadingScreen({
                     text-align: center;
                 }
 
-                /* ☀️ أنماط الوضع النهاري الصحراوي (Desert Glassmorphism) */
+                /* ☀️ أنماط الوضع النهاري الكريستالي الناصع (Pure Crystal Radiant White) */
                 :global(.daylight-theme) .loading-fullscreen,
                 .loading-fullscreen.daylight-active {
-                    background-color: rgba(253, 251, 247, 0.88) !important;
-                    backdrop-filter: blur(24px) saturate(160%) !important;
-                    -webkit-backdrop-filter: blur(24px) saturate(160%) !important;
+                    background-color: rgba(255, 255, 255, 0.92) !important;
+                    backdrop-filter: blur(20px) saturate(160%) !important;
+                    -webkit-backdrop-filter: blur(20px) saturate(160%) !important;
                 }
 
                 :global(.daylight-theme) .loading-inline,
                 .loading-inline.daylight-active {
-                    background: linear-gradient(135deg, rgba(255, 253, 250, 0.95) 0%, rgba(250, 246, 240, 0.90) 100%) !important;
-                    border: 1px solid rgba(194, 155, 98, 0.35) !important;
-                    box-shadow: 0 8px 30px rgba(44, 26, 18, 0.08), inset 0 0 15px rgba(194, 155, 98, 0.05) !important;
+                    background: #FFFFFF !important;
+                    border: 1px solid rgba(226, 232, 240, 0.95) !important;
+                    box-shadow: 0 4px 20px rgba(15, 23, 42, 0.05) !important;
                 }
 
                 :global(.daylight-theme) .loading-spinner-ring,
                 .daylight-active .loading-spinner-ring {
-                    border-color: rgba(194, 155, 98, 0.2) !important;
-                    border-top-color: #C29B62 !important;
-                    box-shadow: 0 0 15px rgba(194, 155, 98, 0.25) !important;
+                    border-color: rgba(245, 158, 11, 0.2) !important;
+                    border-top-color: #F59E0B !important;
+                    box-shadow: 0 0 15px rgba(245, 158, 11, 0.25) !important;
                 }
 
                 :global(.daylight-theme) .loading-spinner-pulse,
                 .daylight-active .loading-spinner-pulse {
-                    background-color: #A8573C !important;
-                    box-shadow: 0 0 20px rgba(168, 87, 60, 0.4) !important;
+                    background-color: #D97706 !important;
+                    box-shadow: 0 0 20px rgba(217, 119, 6, 0.4) !important;
                 }
 
                 :global(.daylight-theme) .loading-title,
                 .daylight-active .loading-title {
-                    color: #2C1A12 !important;
+                    color: #0F172A !important;
                     text-shadow: none !important;
                 }
 
                 :global(.daylight-theme) .loading-submessage,
                 .daylight-active .loading-submessage {
-                    color: rgba(44, 26, 18, 0.65) !important;
+                    color: #64748B !important;
                 }
 
                 @keyframes spin {
