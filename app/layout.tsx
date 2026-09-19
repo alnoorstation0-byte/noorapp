@@ -41,7 +41,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="ar" dir="rtl" className="daylight-theme" data-theme="daylight" suppressHydrationWarning>
+    <html lang="ar" dir="rtl" className="dark" data-theme="dark" suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{
           __html: `
@@ -51,31 +51,36 @@ export default function RootLayout({
                 if (savedMode === 'true') {
                   document.documentElement.classList.add('low-graphics-mode');
                 }
-                var savedTheme = localStorage.getItem('noor_theme_mode');
-                if (savedTheme === 'dark') {
-                  document.documentElement.classList.remove('daylight-theme');
-                  document.documentElement.classList.add('dark');
-                  document.documentElement.setAttribute('data-theme', 'dark');
-                } else {
+                var resetToDark = localStorage.getItem('noor_revert_dark_v3');
+                if (!resetToDark) {
+                  localStorage.setItem('noor_theme_mode', 'dark');
+                  localStorage.setItem('noor_revert_dark_v3', 'true');
+                }
+                var savedTheme = localStorage.getItem('noor_theme_mode') || 'dark';
+                if (savedTheme === 'daylight') {
                   document.documentElement.classList.add('daylight-theme');
                   document.documentElement.classList.remove('dark');
                   document.documentElement.setAttribute('data-theme', 'daylight');
+                } else {
+                  document.documentElement.classList.remove('daylight-theme');
+                  document.documentElement.classList.add('dark');
+                  document.documentElement.setAttribute('data-theme', 'dark');
                 }
                 window.addEventListener('DOMContentLoaded', function() {
                   if (savedMode === 'true' && document.body) {
                     document.body.classList.add('low-graphics-mode');
                   }
-                  if (savedTheme === 'dark' && document.body) {
+                  if (savedTheme === 'daylight' && document.body) {
+                    document.body.classList.add('daylight-theme');
+                    document.body.setAttribute('data-theme', 'daylight');
+                    document.body.style.backgroundColor = '#FFFFFF';
+                    document.body.style.color = '#0F172A';
+                  } else if (document.body) {
                     document.body.classList.remove('daylight-theme');
                     document.body.classList.add('dark');
                     document.body.setAttribute('data-theme', 'dark');
                     document.body.style.backgroundColor = '#0B0E14';
                     document.body.style.color = '#F8FAFC';
-                  } else if (document.body) {
-                    document.body.classList.add('daylight-theme');
-                    document.body.setAttribute('data-theme', 'daylight');
-                    document.body.style.backgroundColor = '#FFFFFF';
-                    document.body.style.color = '#0F172A';
                   }
                 });
               } catch(e) {}
@@ -90,19 +95,19 @@ export default function RootLayout({
           position: 'relative', 
           minHeight: '100vh', 
           margin: 0, 
-          backgroundColor: '#FFFFFF', // أبيض ناصع ساطع افتراضياً
-          color: '#0F172A',           // نصوص واضحة حادة التباين
+          backgroundColor: '#0B0E14',
+          color: '#F8FAFC',
         }}
       >
         
-        {/* 🚀 ستايل خلفية مركز القيادة والتحكم (Pure Crystal Bright White & Dark Fallback) */}
+        {/* 🚀 ستايل خلفية مركز القيادة والتحكم (Command Center Titanium Dark) */}
         <style dangerouslySetInnerHTML={{__html: `
           .bg-master-container {
             position: fixed; inset: 0; z-index: -4; 
             background: 
-              radial-gradient(circle at 10% 15%, rgba(245, 158, 11, 0.07) 0%, transparent 45%),
-              radial-gradient(circle at 90% 85%, rgba(217, 119, 6, 0.05) 0%, transparent 45%),
-              #FFFFFF; 
+              radial-gradient(circle at 10% 15%, rgba(0, 229, 255, 0.08) 0%, transparent 45%),
+              radial-gradient(circle at 90% 85%, rgba(224, 109, 68, 0.07) 0%, transparent 45%),
+              #0B0E14; 
             overflow: hidden;
             pointer-events: none;
             transform: translateZ(0);
@@ -112,8 +117,8 @@ export default function RootLayout({
             position: absolute; inset: 0; z-index: -3;
             background: radial-gradient(
               circle at 50% 50%, 
-              rgba(255, 255, 255, 0.4) 0%, 
-              rgba(248, 250, 252, 0.85) 100% 
+              rgba(20, 24, 34, 0.4) 0%, 
+              rgba(11, 14, 20, 0.85) 100% 
             );
             backdrop-filter: blur(12px);
             -webkit-backdrop-filter: blur(12px);

@@ -20,7 +20,7 @@ const ThemeContext = createContext<ThemeContextType>({
 });
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
-    const [themeMode, setThemeModeState] = useState<ThemeMode>('daylight');
+    const [themeMode, setThemeModeState] = useState<ThemeMode>('dark');
     const [mounted, setMounted] = useState(false);
 
     const applyThemeToDOM = (mode: ThemeMode) => {
@@ -34,7 +34,7 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
             if (body) {
                 body.classList.add('daylight-theme');
                 body.setAttribute('data-theme', 'daylight');
-                body.style.backgroundColor = '#F8FAFC';
+                body.style.backgroundColor = '#FFFFFF';
                 body.style.color = '#0F172A';
             }
         } else {
@@ -51,22 +51,23 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
     useEffect(() => {
         setMounted(true);
-        // 1. تفعيل النمط الأبيض الكريستالي الناصع تلقائياً للمتصفحات التي كانت مسجلة على النمط المكتوم القديم
-        const saved = localStorage.getItem('noor_theme_mode') as ThemeMode;
-        const brightMigrated = localStorage.getItem('noor_crystal_bright_v1');
-
-        if (!brightMigrated) {
-            setThemeModeState('daylight');
-            applyThemeToDOM('daylight');
-            localStorage.setItem('noor_theme_mode', 'daylight');
-            localStorage.setItem('noor_crystal_bright_v1', 'true');
-        } else if (saved === 'daylight' || saved === 'dark') {
-            setThemeModeState(saved);
-            applyThemeToDOM(saved);
+        // إعادة التعيين إلى النمط الليلي الفخم بناء على رغبة المستخدم
+        const resetToDark = localStorage.getItem('noor_revert_dark_v3');
+        if (!resetToDark) {
+            setThemeModeState('dark');
+            applyThemeToDOM('dark');
+            localStorage.setItem('noor_theme_mode', 'dark');
+            localStorage.setItem('noor_revert_dark_v3', 'true');
         } else {
-            setThemeModeState('daylight');
-            applyThemeToDOM('daylight');
-            localStorage.setItem('noor_theme_mode', 'daylight');
+            const saved = localStorage.getItem('noor_theme_mode') as ThemeMode;
+            if (saved === 'daylight' || saved === 'dark') {
+                setThemeModeState(saved);
+                applyThemeToDOM(saved);
+            } else {
+                setThemeModeState('dark');
+                applyThemeToDOM('dark');
+                localStorage.setItem('noor_theme_mode', 'dark');
+            }
         }
 
         // 2. مزامنة مع بروفايل المستخدم في Supabase إن وجد
