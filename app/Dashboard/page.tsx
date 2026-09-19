@@ -237,31 +237,31 @@ export default function DashboardPage() {
             alignItems: 'center',
             flexWrap: 'wrap',
             gap: '14px',
-            background: 'linear-gradient(135deg, rgba(20, 24, 34, 0.9) 0%, rgba(13, 16, 24, 0.8) 100%)',
-            border: '1px solid rgba(0, 229, 255, 0.25)',
+            background: isDaylight ? '#FFFFFF' : 'linear-gradient(135deg, rgba(20, 24, 34, 0.9) 0%, rgba(13, 16, 24, 0.8) 100%)',
+            border: isDaylight ? '1px solid #E2E8F0' : '1px solid rgba(0, 229, 255, 0.25)',
             borderRadius: '16px',
             padding: '14px 20px',
-            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(0, 229, 255, 0.05)'
+            boxShadow: isDaylight ? '0 4px 20px rgba(15, 23, 42, 0.05)' : '0 8px 32px rgba(0, 0, 0, 0.5), inset 0 0 15px rgba(0, 229, 255, 0.05)'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
               <div style={{
                 width: '42px',
                 height: '42px',
                 borderRadius: '12px',
-                background: 'rgba(0, 229, 255, 0.12)',
-                border: '1px solid rgba(0, 229, 255, 0.4)',
+                background: isDaylight ? 'rgba(217, 119, 6, 0.12)' : 'rgba(0, 229, 255, 0.12)',
+                border: isDaylight ? '1px solid rgba(217, 119, 6, 0.4)' : '1px solid rgba(0, 229, 255, 0.4)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 fontSize: '20px',
-                color: '#00E5FF',
-                boxShadow: '0 0 15px rgba(0, 229, 255, 0.3)'
+                color: isDaylight ? '#D97706' : '#00E5FF',
+                boxShadow: isDaylight ? '0 2px 8px rgba(217, 119, 6, 0.2)' : '0 0 15px rgba(0, 229, 255, 0.3)'
               }}>
                 ⚡
               </div>
               <div>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ fontWeight: 900, fontSize: '15px', color: '#F8FAFC' }}>
+                  <span style={{ fontWeight: 900, fontSize: '15px', color: isDaylight ? '#0F172A' : '#F8FAFC' }}>
                     حالة {stats.primaryStationName || 'محطة الوقود'}: متصلة وجاهزة
                   </span>
                   <span style={{
@@ -270,17 +270,17 @@ export default function DashboardPage() {
                     gap: '4px',
                     fontSize: '11px',
                     fontWeight: 800,
-                    color: '#10B981',
-                    background: 'rgba(16, 185, 129, 0.15)',
-                    border: '1px solid rgba(16, 185, 129, 0.4)',
+                    color: '#059669',
+                    background: isDaylight ? 'rgba(5, 150, 105, 0.12)' : 'rgba(16, 185, 129, 0.15)',
+                    border: isDaylight ? '1px solid rgba(5, 150, 105, 0.35)' : '1px solid rgba(16, 185, 129, 0.4)',
                     padding: '2px 8px',
                     borderRadius: '20px'
                   }}>
-                    <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10B981', boxShadow: '0 0 6px #10B981' }}></span>
+                    <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#059669', boxShadow: '0 0 6px #059669' }}></span>
                     مزامنة حية
                   </span>
                 </div>
-                <div style={{ fontSize: '12px', color: '#94A3B8', marginTop: '2px' }}>
+                <div style={{ fontSize: '12px', color: isDaylight ? '#475569' : '#94A3B8', marginTop: '2px', fontWeight: 600 }}>
                   {stats.activePumps || 0} مضخات وقود نشطة | {stats.fuelTanks?.length || 0} خزانات رئيسية تحت المراقبة
                 </div>
               </div>
@@ -292,9 +292,11 @@ export default function DashboardPage() {
                 type="button"
                 onClick={() => router.push('/pos')}
                 style={{
-                  background: 'linear-gradient(135deg, #00E5FF 0%, #0099CC 100%)',
-                  color: '#07090D',
-                  border: '1px solid rgba(0, 229, 255, 0.8)',
+                  background: isDaylight 
+                    ? 'linear-gradient(135deg, #10B981 0%, #059669 100%)' 
+                    : 'linear-gradient(135deg, #00E5FF 0%, #0099CC 100%)',
+                  color: isDaylight ? '#FFFFFF' : '#07090D',
+                  border: isDaylight ? '1px solid #059669' : '1px solid rgba(0, 229, 255, 0.8)',
                   borderRadius: '10px',
                   padding: '9px 16px',
                   fontSize: '13px',
@@ -303,7 +305,7 @@ export default function DashboardPage() {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '6px',
-                  boxShadow: '0 0 15px rgba(0, 229, 255, 0.45)',
+                  boxShadow: isDaylight ? '0 4px 14px rgba(16, 185, 129, 0.3)' : '0 0 15px rgba(0, 229, 255, 0.45)',
                   transition: 'all 0.2s ease'
                 }}
               >
@@ -314,9 +316,11 @@ export default function DashboardPage() {
                 type="button"
                 onClick={() => router.push('/pos-settlements')}
                 style={{
-                  background: 'linear-gradient(135deg, rgba(224, 109, 68, 0.2) 0%, rgba(224, 109, 68, 0.08) 100%)',
-                  color: '#E06D44',
-                  border: '1px solid rgba(224, 109, 68, 0.5)',
+                  background: isDaylight 
+                    ? '#FFF7ED' 
+                    : 'linear-gradient(135deg, rgba(224, 109, 68, 0.2) 0%, rgba(224, 109, 68, 0.08) 100%)',
+                  color: isDaylight ? '#C2410C' : '#E06D44',
+                  border: isDaylight ? '1px solid #FDBA74' : '1px solid rgba(224, 109, 68, 0.5)',
                   borderRadius: '10px',
                   padding: '9px 16px',
                   fontSize: '13px',
@@ -325,7 +329,7 @@ export default function DashboardPage() {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '6px',
-                  boxShadow: '0 0 12px rgba(224, 109, 68, 0.25)',
+                  boxShadow: isDaylight ? '0 2px 8px rgba(194, 65, 12, 0.1)' : '0 0 12px rgba(224, 109, 68, 0.25)',
                   transition: 'all 0.2s ease'
                 }}
               >
@@ -336,9 +340,9 @@ export default function DashboardPage() {
                 type="button"
                 onClick={() => router.push('/inventory')}
                 style={{
-                  background: 'rgba(255, 255, 255, 0.06)',
-                  color: '#F8FAFC',
-                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                  background: isDaylight ? '#F8FAFC' : 'rgba(255, 255, 255, 0.06)',
+                  color: isDaylight ? '#0F172A' : '#F8FAFC',
+                  border: isDaylight ? '1px solid #CBD5E1' : '1px solid rgba(255, 255, 255, 0.15)',
                   borderRadius: '10px',
                   padding: '9px 16px',
                   fontSize: '13px',
@@ -347,6 +351,7 @@ export default function DashboardPage() {
                   display: 'flex',
                   alignItems: 'center',
                   gap: '6px',
+                  boxShadow: isDaylight ? '0 2px 6px rgba(0,0,0,0.04)' : 'none',
                   transition: 'all 0.2s ease'
                 }}
               >
@@ -1390,108 +1395,122 @@ export default function DashboardPage() {
           {/* ========================================================================= */}
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '16px' }}>
-              <h3 style={{ fontSize: '18px', fontWeight: 900, color: '#F8FAFC', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <span style={{ color: '#00E5FF' }}>⚡</span>
+              <h3 style={{ fontSize: '18px', fontWeight: 900, color: isDaylight ? '#0F172A' : '#F8FAFC', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <span style={{ color: isDaylight ? '#D97706' : '#00E5FF' }}>⚡</span>
                 المؤشرات الحيوية والمالية لليوم (Live Station KPIs)
               </h3>
-              <span style={{ fontSize: '12px', fontWeight: 800, color: '#94A3B8' }}>العملة: ريال سعودي (SAR)</span>
+              <span style={{ fontSize: '12px', fontWeight: 800, color: isDaylight ? '#475569' : '#94A3B8' }}>العملة: ريال سعودي (SAR)</span>
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: '18px' }}>
               
               {/* كارت 1: مبيعات اليوم الإجمالية */}
               <div style={{
-                background: 'linear-gradient(135deg, rgba(22, 27, 38, 0.9) 0%, rgba(14, 18, 25, 0.85) 100%)',
-                border: '1px solid rgba(0, 229, 255, 0.3)',
-                borderRight: '4px solid #00E5FF',
+                background: isDaylight ? '#FFFFFF' : 'linear-gradient(135deg, rgba(22, 27, 38, 0.9) 0%, rgba(14, 18, 25, 0.85) 100%)',
+                border: isDaylight ? '1px solid #E2E8F0' : '1px solid rgba(0, 229, 255, 0.3)',
+                borderRight: `4px solid ${isDaylight ? '#0284C7' : '#00E5FF'}`,
                 borderRadius: '16px',
                 padding: '18px',
-                boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)'
+                boxShadow: isDaylight ? '0 4px 15px rgba(15, 23, 42, 0.05)' : '0 8px 24px rgba(0, 0, 0, 0.4)'
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '13px', fontWeight: 800, color: '#94A3B8' }}>إجمالي مبيعات اليوم</span>
+                  <span style={{ fontSize: '13px', fontWeight: 800, color: isDaylight ? '#475569' : '#94A3B8' }}>إجمالي مبيعات اليوم</span>
                   <span style={{ fontSize: '20px' }}>💰</span>
                 </div>
-                <div style={{ fontSize: '24px', fontWeight: 900, color: '#00E5FF', margin: '10px 0 4px 0', textShadow: '0 0 15px rgba(0, 229, 255, 0.4)' }}>
+                <div style={{ 
+                  fontSize: '24px', 
+                  fontWeight: 900, 
+                  color: isDaylight ? '#0284C7' : '#00E5FF', 
+                  margin: '10px 0 4px 0', 
+                  textShadow: isDaylight ? 'none' : '0 0 15px rgba(0, 229, 255, 0.4)' 
+                }}>
                   {logic.formatCurrency(stats.totalRevenues || 0)}
                 </div>
-                <div style={{ fontSize: '11.5px', color: '#10B981', fontWeight: 700 }}>
+                <div style={{ fontSize: '11.5px', color: '#059669', fontWeight: 700 }}>
                   ↑ تم التدقيق والمطابقة مع الصندوق
                 </div>
               </div>
 
               {/* كارت 2: إجمالي اللترات المباعة */}
               <div style={{
-                background: 'linear-gradient(135deg, rgba(22, 27, 38, 0.9) 0%, rgba(14, 18, 25, 0.85) 100%)',
-                border: '1px solid rgba(0, 229, 255, 0.3)',
-                borderRight: '4px solid #38BDF8',
+                background: isDaylight ? '#FFFFFF' : 'linear-gradient(135deg, rgba(22, 27, 38, 0.9) 0%, rgba(14, 18, 25, 0.85) 100%)',
+                border: isDaylight ? '1px solid #E2E8F0' : '1px solid rgba(0, 229, 255, 0.3)',
+                borderRight: '4px solid #0284C7',
                 borderRadius: '16px',
                 padding: '18px',
-                boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)'
+                boxShadow: isDaylight ? '0 4px 15px rgba(15, 23, 42, 0.05)' : '0 8px 24px rgba(0, 0, 0, 0.4)'
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '13px', fontWeight: 800, color: '#94A3B8' }}>إجمالي اللترات المباعة</span>
+                  <span style={{ fontSize: '13px', fontWeight: 800, color: isDaylight ? '#475569' : '#94A3B8' }}>إجمالي اللترات المباعة</span>
                   <span style={{ fontSize: '20px' }}>⛽</span>
                 </div>
-                <div style={{ fontSize: '24px', fontWeight: 900, color: '#38BDF8', margin: '10px 0 4px 0', fontFamily: 'monospace' }}>
-                  {Number(stats.totalLitersSold || 0).toLocaleString()} <span style={{ fontSize: '14px', color: '#94A3B8' }}>لتر</span>
+                <div style={{ fontSize: '24px', fontWeight: 900, color: isDaylight ? '#0369A1' : '#38BDF8', margin: '10px 0 4px 0', fontFamily: 'monospace' }}>
+                  {Number(stats.totalLitersSold || 0).toLocaleString()} <span style={{ fontSize: '14px', color: isDaylight ? '#475569' : '#94A3B8' }}>لتر</span>
                 </div>
-                <div style={{ fontSize: '11.5px', color: '#94A3B8', fontWeight: 700 }}>
+                <div style={{ fontSize: '11.5px', color: isDaylight ? '#64748B' : '#94A3B8', fontWeight: 700 }}>
                   مجموع حركة عدادات المضخات
                 </div>
               </div>
 
               {/* كارت 3: السيولة النقدية والدرج */}
               <div style={{
-                background: 'linear-gradient(135deg, rgba(22, 27, 38, 0.9) 0%, rgba(14, 18, 25, 0.85) 100%)',
-                border: '1px solid rgba(16, 185, 129, 0.3)',
-                borderRight: '4px solid #10B981',
+                background: isDaylight ? '#FFFFFF' : 'linear-gradient(135deg, rgba(22, 27, 38, 0.9) 0%, rgba(14, 18, 25, 0.85) 100%)',
+                border: isDaylight ? '1px solid #E2E8F0' : '1px solid rgba(16, 185, 129, 0.3)',
+                borderRight: '4px solid #059669',
                 borderRadius: '16px',
                 padding: '18px',
-                boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)'
+                boxShadow: isDaylight ? '0 4px 15px rgba(15, 23, 42, 0.05)' : '0 8px 24px rgba(0, 0, 0, 0.4)'
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '13px', fontWeight: 800, color: '#94A3B8' }}>الرصيد النقدي والبنكي</span>
+                  <span style={{ fontSize: '13px', fontWeight: 800, color: isDaylight ? '#475569' : '#94A3B8' }}>الرصيد النقدي والبنكي</span>
                   <span style={{ fontSize: '20px' }}>🏦</span>
                 </div>
-                <div style={{ fontSize: '24px', fontWeight: 900, color: '#10B981', margin: '10px 0 4px 0', textShadow: '0 0 15px rgba(16, 185, 129, 0.4)' }}>
+                <div style={{ 
+                  fontSize: '24px', 
+                  fontWeight: 900, 
+                  color: '#059669', 
+                  margin: '10px 0 4px 0', 
+                  textShadow: isDaylight ? 'none' : '0 0 15px rgba(16, 185, 129, 0.4)' 
+                }}>
                   {logic.formatCurrency(stats.cashAndBankBalance || 0)}
                 </div>
-                <div style={{ fontSize: '11.5px', color: '#94A3B8', fontWeight: 700 }}>
+                <div style={{ fontSize: '11.5px', color: isDaylight ? '#64748B' : '#94A3B8', fontWeight: 700 }}>
                   الصناديق المركزية والحسابات البنكية
                 </div>
               </div>
 
               {/* كارت 4: الوردية النشطة ومطابقة العدادات */}
               <div style={{
-                background: 'linear-gradient(135deg, rgba(22, 27, 38, 0.9) 0%, rgba(14, 18, 25, 0.85) 100%)',
-                border: `1px solid ${stats.activeShift ? 'rgba(16, 185, 129, 0.3)' : 'rgba(255, 255, 255, 0.1)'}`,
-                borderRight: `4px solid ${stats.activeShift ? '#10B981' : '#64748B'}`,
+                background: isDaylight ? '#FFFFFF' : 'linear-gradient(135deg, rgba(22, 27, 38, 0.9) 0%, rgba(14, 18, 25, 0.85) 100%)',
+                border: isDaylight 
+                  ? `1px solid ${stats.activeShift ? 'rgba(5, 150, 105, 0.4)' : '#E2E8F0'}` 
+                  : `1px solid ${stats.activeShift ? 'rgba(16, 185, 129, 0.3)' : 'rgba(255, 255, 255, 0.1)'}`,
+                borderRight: `4px solid ${stats.activeShift ? '#059669' : '#94A3B8'}`,
                 borderRadius: '16px',
                 padding: '18px',
-                boxShadow: '0 8px 24px rgba(0, 0, 0, 0.4)'
+                boxShadow: isDaylight ? '0 4px 15px rgba(15, 23, 42, 0.05)' : '0 8px 24px rgba(0, 0, 0, 0.4)'
               }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                  <span style={{ fontSize: '13px', fontWeight: 800, color: '#94A3B8' }}>حالة الوردية الحالية</span>
+                  <span style={{ fontSize: '13px', fontWeight: 800, color: isDaylight ? '#475569' : '#94A3B8' }}>حالة الوردية الحالية</span>
                   <span style={{ fontSize: '20px' }}>⏱️</span>
                 </div>
                 {stats.activeShift ? (
                   <>
-                    <div style={{ fontSize: '20px', fontWeight: 900, color: '#10B981', margin: '10px 0 4px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{ fontSize: '20px', fontWeight: 900, color: '#059669', margin: '10px 0 4px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <span>وردية مفتوحة</span>
-                      <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#10B981', boxShadow: '0 0 8px #10B981' }}></span>
+                      <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#059669', boxShadow: '0 0 8px #059669' }}></span>
                     </div>
-                    <div style={{ fontSize: '11.5px', color: '#10B981', fontWeight: 700 }}>
+                    <div style={{ fontSize: '11.5px', color: '#059669', fontWeight: 700 }}>
                       الوردية قيد التشغيل واستقبال المبيعات
                     </div>
                   </>
                 ) : (
                   <>
-                    <div style={{ fontSize: '20px', fontWeight: 900, color: '#94A3B8', margin: '10px 0 4px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <div style={{ fontSize: '20px', fontWeight: 900, color: isDaylight ? '#475569' : '#94A3B8', margin: '10px 0 4px 0', display: 'flex', alignItems: 'center', gap: '8px' }}>
                       <span>الوردية مغلقة</span>
-                      <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#64748B' }}></span>
+                      <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#94A3B8' }}></span>
                     </div>
-                    <div style={{ fontSize: '11.5px', color: '#64748B', fontWeight: 700 }}>
+                    <div style={{ fontSize: '11.5px', color: isDaylight ? '#64748B' : '#64748B', fontWeight: 700 }}>
                       لا توجد وردية كاشير نشطة حالياً
                     </div>
                   </>
@@ -1507,11 +1526,11 @@ export default function DashboardPage() {
           <div>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '16px' }}>
               <div>
-                <h3 style={{ fontSize: '18px', fontWeight: 900, color: '#F8FAFC', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ color: '#00E5FF' }}>📟</span>
+                <h3 style={{ fontSize: '18px', fontWeight: 900, color: isDaylight ? '#0F172A' : '#F8FAFC', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ color: isDaylight ? '#D97706' : '#00E5FF' }}>📟</span>
                   مراقبة مضخات الوقود وعدادات اللترات (Live Pumps Telemetry)
                 </h3>
-                <div style={{ fontSize: '12px', color: '#94A3B8', marginTop: '3px' }}>
+                <div style={{ fontSize: '12px', color: isDaylight ? '#475569' : '#94A3B8', marginTop: '3px', fontWeight: 600 }}>
                   قراءات العدادات الرقمية اللحظية للمضخات ومطابقتها مع الإغلاقات
                 </div>
               </div>
@@ -1519,9 +1538,9 @@ export default function DashboardPage() {
                 type="button"
                 onClick={() => router.push('/pos-settlements')}
                 style={{
-                  background: 'rgba(0, 229, 255, 0.08)',
-                  border: '1px solid rgba(0, 229, 255, 0.3)',
-                  color: '#00E5FF',
+                  background: isDaylight ? '#F0F9FF' : 'rgba(0, 229, 255, 0.08)',
+                  border: isDaylight ? '1px solid #BAE6FD' : '1px solid rgba(0, 229, 255, 0.3)',
+                  color: isDaylight ? '#0284C7' : '#00E5FF',
                   borderRadius: '10px',
                   padding: '6px 14px',
                   fontSize: '12px',
@@ -1537,10 +1556,10 @@ export default function DashboardPage() {
               <div style={{
                 textAlign: 'center',
                 padding: '30px',
-                background: 'rgba(20, 24, 34, 0.6)',
+                background: isDaylight ? '#FFFFFF' : 'rgba(20, 24, 34, 0.6)',
                 borderRadius: '14px',
-                border: '1px dashed rgba(255, 255, 255, 0.1)',
-                color: '#94A3B8'
+                border: isDaylight ? '1px dashed #CBD5E1' : '1px dashed rgba(255, 255, 255, 0.1)',
+                color: isDaylight ? '#475569' : '#94A3B8'
               }}>
                 لا توجد مضخات وقود مسجلة لهذه المحطة بعد.
               </div>
@@ -1549,17 +1568,21 @@ export default function DashboardPage() {
                 {stats.fuelPumps.map((pump: any) => {
                   const isGasoline91 = pump.fuel_type?.includes('91');
                   const isDiesel = pump.fuel_type?.includes('ديزل');
-                  const badgeColor = isGasoline91 ? '#00E5FF' : isDiesel ? '#E06D44' : '#38BDF8';
+                  const badgeColor = isGasoline91 
+                    ? (isDaylight ? '#0284C7' : '#00E5FF') 
+                    : isDiesel 
+                      ? (isDaylight ? '#C2410C' : '#E06D44') 
+                      : (isDaylight ? '#0369A1' : '#38BDF8');
 
                   return (
                     <div 
                       key={pump.id}
                       style={{
-                        background: 'linear-gradient(135deg, rgba(20, 24, 34, 0.85) 0%, rgba(13, 16, 24, 0.75) 100%)',
-                        border: '1px solid rgba(255, 255, 255, 0.08)',
+                        background: isDaylight ? '#FFFFFF' : 'linear-gradient(135deg, rgba(20, 24, 34, 0.85) 0%, rgba(13, 16, 24, 0.75) 100%)',
+                        border: isDaylight ? '1px solid #E2E8F0' : '1px solid rgba(255, 255, 255, 0.08)',
                         borderRadius: '14px',
                         padding: '16px',
-                        boxShadow: '0 4px 15px rgba(0, 0, 0, 0.3)',
+                        boxShadow: isDaylight ? '0 4px 15px rgba(15, 23, 42, 0.05)' : '0 4px 15px rgba(0, 0, 0, 0.3)',
                         transition: 'all 0.2s ease'
                       }}
                     >
@@ -1581,25 +1604,25 @@ export default function DashboardPage() {
                           {pump.pump_number || '01'}
                         </div>
                         <div>
-                          <div style={{ fontWeight: 800, fontSize: '13.5px', color: '#F8FAFC' }}>
+                          <div style={{ fontWeight: 800, fontSize: '13.5px', color: isDaylight ? '#0F172A' : '#F8FAFC' }}>
                             {pump.pump_name}
                           </div>
-                          <div style={{ fontSize: '11px', color: badgeColor, fontWeight: 700 }}>
+                          <div style={{ fontSize: '11px', color: badgeColor, fontWeight: 800 }}>
                             {pump.fuel_type}
                           </div>
                         </div>
                       </div>
 
-                      <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px', color: '#10B981', fontWeight: 800 }}>
-                        <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#10B981', boxShadow: '0 0 6px #10B981' }}></span>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: '5px', fontSize: '11px', color: '#059669', fontWeight: 800 }}>
+                        <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: '#059669', boxShadow: '0 0 6px #059669' }}></span>
                         نشطة
                       </span>
                     </div>
 
                     {/* العداد الرقمي المتوهج */}
                     <div style={{
-                      background: '#07090D',
-                      border: '1px solid rgba(0, 229, 255, 0.2)',
+                      background: isDaylight ? '#F0F9FF' : '#07090D',
+                      border: isDaylight ? '1px solid #BAE6FD' : '1px solid rgba(0, 229, 255, 0.2)',
                       borderRadius: '8px',
                       padding: '8px 12px',
                       marginBottom: '10px',
@@ -1607,22 +1630,22 @@ export default function DashboardPage() {
                       justifyContent: 'space-between',
                       alignItems: 'center'
                     }}>
-                      <span style={{ fontSize: '11px', color: '#64748B', fontWeight: 700 }}>العداد الحالي:</span>
+                      <span style={{ fontSize: '11px', color: isDaylight ? '#0369A1' : '#64748B', fontWeight: 800 }}>العداد الحالي:</span>
                       <span style={{ 
                         fontFamily: 'monospace', 
                         fontSize: '16px', 
                         fontWeight: 900, 
-                        color: '#00E5FF',
+                        color: isDaylight ? '#0284C7' : '#00E5FF',
                         letterSpacing: '1px',
-                        textShadow: '0 0 8px rgba(0, 229, 255, 0.5)'
+                        textShadow: isDaylight ? 'none' : '0 0 8px rgba(0, 229, 255, 0.5)'
                       }}>
                         {Number(pump.current_meter || 0).toLocaleString(undefined, { minimumFractionDigits: 1 })} L
                       </span>
                     </div>
 
-                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11.5px', color: '#94A3B8' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11.5px', color: isDaylight ? '#475569' : '#94A3B8', fontWeight: 600 }}>
                       <span>سعر البيع:</span>
-                      <strong style={{ color: '#F8FAFC' }}>{pump.unit_price} ر.س / لتر</strong>
+                      <strong style={{ color: isDaylight ? '#0F172A' : '#F8FAFC' }}>{pump.unit_price} ر.س / لتر</strong>
                     </div>
                   </div>
                 );
@@ -1638,23 +1661,31 @@ export default function DashboardPage() {
             
             {/* منحنى المبيعات وتدفق اللترات عبر ساعات اليوم */}
             <div style={{
-              background: 'linear-gradient(135deg, rgba(20, 24, 34, 0.85) 0%, rgba(13, 16, 24, 0.75) 100%)',
-              border: '1px solid rgba(0, 229, 255, 0.2)',
+              background: isDaylight ? '#FFFFFF' : 'linear-gradient(135deg, rgba(20, 24, 34, 0.85) 0%, rgba(13, 16, 24, 0.75) 100%)',
+              border: isDaylight ? '1px solid #E2E8F0' : '1px solid rgba(0, 229, 255, 0.2)',
               borderRadius: '18px',
               padding: '22px',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.45)'
+              boxShadow: isDaylight ? '0 4px 20px rgba(15, 23, 42, 0.05)' : '0 8px 32px rgba(0, 0, 0, 0.45)'
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
                 <div>
-                  <h4 style={{ margin: 0, fontSize: '15px', fontWeight: 900, color: '#F8FAFC', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ color: '#00E5FF' }}>📈</span>
+                  <h4 style={{ margin: 0, fontSize: '15px', fontWeight: 900, color: isDaylight ? '#0F172A' : '#F8FAFC', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ color: isDaylight ? '#D97706' : '#00E5FF' }}>📈</span>
                     تدفق مبيعات الوقود خلال اليوم (Sales & Liters Velocity)
                   </h4>
-                  <div style={{ fontSize: '11.5px', color: '#94A3B8', marginTop: '2px' }}>
+                  <div style={{ fontSize: '11.5px', color: isDaylight ? '#475569' : '#94A3B8', marginTop: '2px', fontWeight: 600 }}>
                     تتبع حركة التزود بالوقود والذروة اللحظية (ريال vs لتر)
                   </div>
                 </div>
-                <span style={{ fontSize: '11.5px', fontWeight: 800, color: '#00E5FF', background: 'rgba(0, 229, 255, 0.1)', padding: '3px 10px', borderRadius: '12px' }}>
+                <span style={{ 
+                  fontSize: '11.5px', 
+                  fontWeight: 800, 
+                  color: isDaylight ? '#0284C7' : '#00E5FF', 
+                  background: isDaylight ? '#EFF6FF' : 'rgba(0, 229, 255, 0.1)', 
+                  border: isDaylight ? '1px solid #BFDBFE' : 'none',
+                  padding: '3px 10px', 
+                  borderRadius: '12px' 
+                }}>
                   24 ساعة
                 </span>
               </div>
@@ -1664,24 +1695,24 @@ export default function DashboardPage() {
                   <AreaChart data={stats.salesTimelineData || []} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
                     <defs>
                       <linearGradient id="cyanSalesGlow" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#00E5FF" stopOpacity={0.4}/>
-                        <stop offset="95%" stopColor="#00E5FF" stopOpacity={0.0}/>
+                        <stop offset="5%" stopColor={isDaylight ? "#0284C7" : "#00E5FF"} stopOpacity={0.4}/>
+                        <stop offset="95%" stopColor={isDaylight ? "#0284C7" : "#00E5FF"} stopOpacity={0.0}/>
                       </linearGradient>
                       <linearGradient id="orangeLitersGlow" x1="0" y1="0" x2="0" y2="1">
                         <stop offset="5%" stopColor="#E06D44" stopOpacity={0.35}/>
                         <stop offset="95%" stopColor="#E06D44" stopOpacity={0.0}/>
                       </linearGradient>
                     </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(255,255,255,0.06)" />
-                    <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{ fill: '#94A3B8', fontSize: 11, fontWeight: 'bold' }} />
-                    <YAxis axisLine={false} tickLine={false} tick={{ fill: '#94A3B8', fontSize: 11 }} tickFormatter={(val) => `${val / 1000}k`} />
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={isDaylight ? "#E2E8F0" : "rgba(255,255,255,0.06)"} />
+                    <XAxis dataKey="time" axisLine={false} tickLine={false} tick={{ fill: isDaylight ? '#475569' : '#94A3B8', fontSize: 11, fontWeight: 'bold' }} />
+                    <YAxis axisLine={false} tickLine={false} tick={{ fill: isDaylight ? '#475569' : '#94A3B8', fontSize: 11, fontWeight: 'bold' }} tickFormatter={(val) => `${val / 1000}k`} />
                     <Tooltip 
                       contentStyle={{ 
-                        background: '#0B0E14', 
-                        border: '1px solid rgba(0, 229, 255, 0.4)', 
+                        background: isDaylight ? '#FFFFFF' : '#0B0E14', 
+                        border: isDaylight ? '1px solid #CBD5E1' : '1px solid rgba(0, 229, 255, 0.4)', 
                         borderRadius: '12px',
-                        boxShadow: '0 0 20px rgba(0, 229, 255, 0.3)',
-                        color: '#F8FAFC' 
+                        boxShadow: isDaylight ? '0 4px 15px rgba(0,0,0,0.08)' : '0 0 20px rgba(0, 229, 255, 0.3)',
+                        color: isDaylight ? '#0F172A' : '#F8FAFC' 
                       }} 
                     />
                     <Legend wrapperStyle={{ paddingTop: '10px', fontSize: '12px', fontWeight: 700 }} />
@@ -1689,7 +1720,7 @@ export default function DashboardPage() {
                       type="monotone" 
                       dataKey="sales" 
                       name="المبيعات (ر.س)" 
-                      stroke="#00E5FF" 
+                      stroke={isDaylight ? "#0284C7" : "#00E5FF"} 
                       strokeWidth={2.5}
                       fillOpacity={1} 
                       fill="url(#cyanSalesGlow)" 
@@ -1710,19 +1741,19 @@ export default function DashboardPage() {
 
             {/* توزيع مبيعات الوقود حسب الصنف (Donut Chart) */}
             <div style={{
-              background: 'linear-gradient(135deg, rgba(20, 24, 34, 0.85) 0%, rgba(13, 16, 24, 0.75) 100%)',
-              border: '1px solid rgba(0, 229, 255, 0.2)',
+              background: isDaylight ? '#FFFFFF' : 'linear-gradient(135deg, rgba(20, 24, 34, 0.85) 0%, rgba(13, 16, 24, 0.75) 100%)',
+              border: isDaylight ? '1px solid #E2E8F0' : '1px solid rgba(0, 229, 255, 0.2)',
               borderRadius: '18px',
               padding: '22px',
-              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.45)'
+              boxShadow: isDaylight ? '0 4px 20px rgba(15, 23, 42, 0.05)' : '0 8px 32px rgba(0, 0, 0, 0.45)'
             }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
                 <div>
-                  <h4 style={{ margin: 0, fontSize: '15px', fontWeight: 900, color: '#F8FAFC', display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span style={{ color: '#00E5FF' }}>🎯</span>
+                  <h4 style={{ margin: 0, fontSize: '15px', fontWeight: 900, color: isDaylight ? '#0F172A' : '#F8FAFC', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <span style={{ color: isDaylight ? '#D97706' : '#00E5FF' }}>🎯</span>
                     حصة المبيعات حسب نوع الوقود (Fuel Mix)
                   </h4>
-                  <div style={{ fontSize: '11.5px', color: '#94A3B8', marginTop: '2px' }}>
+                  <div style={{ fontSize: '11.5px', color: isDaylight ? '#475569' : '#94A3B8', marginTop: '2px', fontWeight: 600 }}>
                     نسبة استهلاك بنزين 91 و 95 والديزل
                   </div>
                 </div>
@@ -1739,23 +1770,23 @@ export default function DashboardPage() {
                       dataKey="value"
                     >
                       {(stats.fuelDistributionData || []).map((entry: any, index: number) => (
-                        <Cell key={`cell-${index}`} fill={entry.color || '#00E5FF'} stroke="rgba(11, 14, 20, 0.8)" strokeWidth={2} />
+                        <Cell key={`cell-${index}`} fill={entry.color || (isDaylight ? '#0284C7' : '#00E5FF')} stroke={isDaylight ? '#FFFFFF' : 'rgba(11, 14, 20, 0.8)'} strokeWidth={2} />
                       ))}
                     </Pie>
                     <Tooltip 
                       formatter={(val: any) => `${val}% من إجمالي المبيعات`}
                       contentStyle={{ 
-                        background: '#0B0E14', 
-                        border: '1px solid rgba(0, 229, 255, 0.4)', 
+                        background: isDaylight ? '#FFFFFF' : '#0B0E14', 
+                        border: isDaylight ? '1px solid #CBD5E1' : '1px solid rgba(0, 229, 255, 0.4)', 
                         borderRadius: '12px',
-                        boxShadow: '0 0 20px rgba(0, 229, 255, 0.3)',
-                        color: '#F8FAFC' 
+                        boxShadow: isDaylight ? '0 4px 15px rgba(0,0,0,0.08)' : '0 0 20px rgba(0, 229, 255, 0.3)',
+                        color: isDaylight ? '#0F172A' : '#F8FAFC' 
                       }} 
                     />
                     <Legend 
                       verticalAlign="bottom" 
                       height={36} 
-                      formatter={(value, entry: any) => <span style={{ color: '#F8FAFC', fontWeight: 800, fontSize: '12px' }}>{value}</span>}
+                      formatter={(value, entry: any) => <span style={{ color: isDaylight ? '#0F172A' : '#F8FAFC', fontWeight: 800, fontSize: '12px' }}>{value}</span>}
                     />
                   </PieChart>
                 </ResponsiveContainer>
@@ -1770,8 +1801,8 @@ export default function DashboardPage() {
           {(stats.pendingActions || []).length > 0 && (
             <div>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginBottom: '14px' }}>
-                <h3 style={{ fontSize: '16px', fontWeight: 900, color: '#F8FAFC', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
-                  <span style={{ color: '#E06D44' }}>⚠️</span>
+                <h3 style={{ fontSize: '16px', fontWeight: 900, color: isDaylight ? '#0F172A' : '#F8FAFC', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <span style={{ color: isDaylight ? '#C2410C' : '#E06D44' }}>⚠️</span>
                   مستندات وعمليات قيد الانتظار تحتاج اعتماد أو مراجعة
                 </h3>
               </div>
@@ -1788,20 +1819,20 @@ export default function DashboardPage() {
                       key={idx} 
                       onClick={() => router.push(`/${action.type}`)} 
                       style={{
-                        background: 'linear-gradient(135deg, rgba(224, 109, 68, 0.12) 0%, rgba(20, 24, 34, 0.9) 100%)',
-                        border: '1px solid rgba(224, 109, 68, 0.35)',
+                        background: isDaylight ? '#FFF7ED' : 'linear-gradient(135deg, rgba(224, 109, 68, 0.12) 0%, rgba(20, 24, 34, 0.9) 100%)',
+                        border: isDaylight ? '1px solid #FDBA74' : '1px solid rgba(224, 109, 68, 0.35)',
                         borderRadius: '14px',
                         padding: '14px',
                         cursor: 'pointer',
                         transition: 'all 0.2s ease',
-                        boxShadow: '0 4px 15px rgba(0, 0, 0, 0.3)'
+                        boxShadow: isDaylight ? '0 2px 8px rgba(194, 65, 12, 0.08)' : '0 4px 15px rgba(0, 0, 0, 0.3)'
                       }}
                     >
                       <div style={{ fontSize: '20px', marginBottom: '6px' }}>📝</div>
-                      <div style={{ fontSize: '22px', fontWeight: 900, color: '#E06D44', fontFamily: 'monospace' }}>
+                      <div style={{ fontSize: '22px', fontWeight: 900, color: isDaylight ? '#C2410C' : '#E06D44', fontFamily: 'monospace' }}>
                         {action.count}
                       </div>
-                      <div style={{ fontSize: '12px', fontWeight: 'bold', color: '#F8FAFC', marginTop: '2px' }}>
+                      <div style={{ fontSize: '12px', fontWeight: 'bold', color: isDaylight ? '#7C2D12' : '#F8FAFC', marginTop: '2px' }}>
                         {labels[action.type] || action.type} بانتظار الترحيل
                       </div>
                     </div>
@@ -2848,7 +2879,7 @@ export default function DashboardPage() {
           position: 'fixed',
           inset: 0,
           zIndex: 999999,
-          background: 'rgba(7, 10, 15, 0.88)',
+          background: isDaylight ? 'rgba(44, 26, 18, 0.4)' : 'rgba(7, 10, 15, 0.88)',
           backdropFilter: 'blur(16px)',
           display: 'flex',
           alignItems: 'center',
@@ -2856,18 +2887,18 @@ export default function DashboardPage() {
           padding: '16px'
         }}>
           <div style={{
-            background: 'linear-gradient(135deg, rgba(22, 27, 38, 0.98) 0%, rgba(13, 16, 24, 0.96) 100%)',
-            border: '1.5px solid rgba(0, 229, 255, 0.4)',
+            background: isDaylight ? 'linear-gradient(135deg, #FFFFFF 0%, #FAF8F5 100%)' : 'linear-gradient(135deg, rgba(22, 27, 38, 0.98) 0%, rgba(13, 16, 24, 0.96) 100%)',
+            border: isDaylight ? '1.5px solid rgba(194, 155, 98, 0.45)' : '1.5px solid rgba(0, 229, 255, 0.4)',
             borderRadius: '20px',
             width: '100%',
             maxWidth: '460px',
-            boxShadow: '0 20px 50px rgba(0, 0, 0, 0.7), 0 0 30px rgba(0, 229, 255, 0.2)',
+            boxShadow: isDaylight ? '0 20px 50px rgba(44, 26, 18, 0.15)' : '0 20px 50px rgba(0, 0, 0, 0.7), 0 0 30px rgba(0, 229, 255, 0.2)',
             overflow: 'hidden'
           }}>
             {/* رأس النافذة */}
             <div style={{
               padding: '16px 20px',
-              borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
+              borderBottom: isDaylight ? '1px solid #E2E8F0' : '1px solid rgba(255, 255, 255, 0.08)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between'
@@ -2875,10 +2906,10 @@ export default function DashboardPage() {
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <span style={{ fontSize: '22px' }}>📏</span>
                 <div>
-                  <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 900, color: '#F8FAFC' }}>
+                  <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 900, color: isDaylight ? '#2C1A12' : '#F8FAFC' }}>
                     تعديل منسوب الخزان / قياس المسطرة
                   </h3>
-                  <span style={{ fontSize: '11px', color: '#94A3B8' }}>
+                  <span style={{ fontSize: '11px', color: isDaylight ? '#475569' : '#94A3B8' }}>
                     {calibratingTank.name} - {calibratingTank.warehouseName}
                   </span>
                 </div>
@@ -2888,9 +2919,9 @@ export default function DashboardPage() {
                 type="button"
                 onClick={() => setCalibratingTank(null)}
                 style={{
-                  background: 'rgba(255, 255, 255, 0.06)',
-                  border: 'none',
-                  color: '#94A3B8',
+                  background: isDaylight ? '#F1F5F9' : 'rgba(255, 255, 255, 0.06)',
+                  border: isDaylight ? '1px solid #CBD5E1' : 'none',
+                  color: isDaylight ? '#475569' : '#94A3B8',
                   borderRadius: '50%',
                   width: '28px',
                   height: '28px',
@@ -2907,8 +2938,8 @@ export default function DashboardPage() {
             {/* جسم النافذة */}
             <div style={{ padding: '20px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div style={{
-                background: 'rgba(0, 229, 255, 0.06)',
-                border: '1px solid rgba(0, 229, 255, 0.2)',
+                background: isDaylight ? '#F0F9FF' : 'rgba(0, 229, 255, 0.06)',
+                border: isDaylight ? '1px solid #BAE6FD' : '1px solid rgba(0, 229, 255, 0.2)',
                 borderRadius: '12px',
                 padding: '12px',
                 display: 'flex',
@@ -2916,21 +2947,21 @@ export default function DashboardPage() {
                 alignItems: 'center'
               }}>
                 <div>
-                  <span style={{ fontSize: '11px', color: '#94A3B8', display: 'block' }}>السعة القصوى للخزان:</span>
-                  <strong style={{ fontSize: '15px', color: '#00E5FF', fontFamily: 'monospace' }}>
+                  <span style={{ fontSize: '11px', color: isDaylight ? '#475569' : '#94A3B8', display: 'block' }}>السعة القصوى للخزان:</span>
+                  <strong style={{ fontSize: '15px', color: isDaylight ? '#0284C7' : '#00E5FF', fontFamily: 'monospace' }}>
                     {Number(calibratingTank.capacity || 0).toLocaleString()} لتر
                   </strong>
                 </div>
                 <div>
-                  <span style={{ fontSize: '11px', color: '#94A3B8', display: 'block' }}>المنسوب الحالي المسجل:</span>
-                  <strong style={{ fontSize: '15px', color: '#10B981', fontFamily: 'monospace' }}>
+                  <span style={{ fontSize: '11px', color: isDaylight ? '#475569' : '#94A3B8', display: 'block' }}>المنسوب الحالي المسجل:</span>
+                  <strong style={{ fontSize: '15px', color: isDaylight ? '#059669' : '#10B981', fontFamily: 'monospace' }}>
                     {Number(calibratingTank.currentLiters || 0).toLocaleString()} لتر
                   </strong>
                 </div>
               </div>
 
               <div>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: '#F8FAFC', marginBottom: '6px' }}>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: 800, color: isDaylight ? '#0F172A' : '#F8FAFC', marginBottom: '6px' }}>
                   ⛽ اكتب منسوب الوقود الجديد (لتر):
                 </label>
                 <input
@@ -2945,13 +2976,13 @@ export default function DashboardPage() {
                     width: '100%',
                     padding: '12px 14px',
                     borderRadius: '12px',
-                    background: 'rgba(11, 14, 20, 0.9)',
-                    border: '2px solid #00E5FF',
-                    color: '#F8FAFC',
+                    background: isDaylight ? '#FFFFFF' : 'rgba(11, 14, 20, 0.9)',
+                    border: isDaylight ? '2px solid #0284C7' : '2px solid #00E5FF',
+                    color: isDaylight ? '#0F172A' : '#F8FAFC',
                     fontSize: '18px',
                     fontWeight: 900,
                     fontFamily: 'monospace',
-                    boxShadow: '0 0 15px rgba(0, 229, 255, 0.2)',
+                    boxShadow: isDaylight ? '0 0 10px rgba(2, 132, 199, 0.15)' : '0 0 15px rgba(0, 229, 255, 0.2)',
                     outline: 'none'
                   }}
                 />
@@ -2959,7 +2990,7 @@ export default function DashboardPage() {
 
               {/* أزرار النسب السريعة */}
               <div>
-                <span style={{ display: 'block', fontSize: '11px', color: '#94A3B8', fontWeight: 800, marginBottom: '6px' }}>
+                <span style={{ display: 'block', fontSize: '11px', color: isDaylight ? '#475569' : '#94A3B8', fontWeight: 800, marginBottom: '6px' }}>
                   أو اختر نسبة سريعة من سعة الخزان:
                 </span>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: '6px' }}>
@@ -2977,9 +3008,9 @@ export default function DashboardPage() {
                         type="button"
                         onClick={() => setNewLevelInput(liters)}
                         style={{
-                          background: 'rgba(255, 255, 255, 0.05)',
-                          border: '1px solid rgba(255, 255, 255, 0.15)',
-                          color: '#F8FAFC',
+                          background: isDaylight ? '#F8FAFC' : 'rgba(255, 255, 255, 0.05)',
+                          border: isDaylight ? '1px solid #CBD5E1' : '1px solid rgba(255, 255, 255, 0.15)',
+                          color: isDaylight ? '#0F172A' : '#F8FAFC',
                           borderRadius: '8px',
                           padding: '6px 2px',
                           fontSize: '11px',
@@ -2998,19 +3029,19 @@ export default function DashboardPage() {
             {/* أزرار التأكيد */}
             <div style={{
               padding: '14px 20px',
-              borderTop: '1px solid rgba(255, 255, 255, 0.08)',
+              borderTop: isDaylight ? '1px solid #E2E8F0' : '1px solid rgba(255, 255, 255, 0.08)',
               display: 'flex',
               justifyContent: 'flex-end',
               gap: '10px',
-              background: 'rgba(255, 255, 255, 0.02)'
+              background: isDaylight ? '#FAF8F5' : 'rgba(255, 255, 255, 0.02)'
             }}>
               <button
                 type="button"
                 onClick={() => setCalibratingTank(null)}
                 style={{
-                  background: 'rgba(255, 255, 255, 0.06)',
-                  border: '1px solid rgba(255, 255, 255, 0.15)',
-                  color: '#94A3B8',
+                  background: isDaylight ? '#F1F5F9' : 'rgba(255, 255, 255, 0.06)',
+                  border: isDaylight ? '1px solid #CBD5E1' : '1px solid rgba(255, 255, 255, 0.15)',
+                  color: isDaylight ? '#475569' : '#94A3B8',
                   borderRadius: '10px',
                   padding: '8px 16px',
                   fontSize: '12px',

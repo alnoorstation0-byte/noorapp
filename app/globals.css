@@ -1591,15 +1591,8 @@ body.daylight-theme {
 
 .daylight-theme .dashboard-content-root h2,
 .daylight-theme .dashboard-content-root h3,
-.daylight-theme .dashboard-content-root h4,
-.daylight-theme .dashboard-content-root span[style*="color: #F8FAFC"],
-.daylight-theme .dashboard-content-root div[style*="color: #F8FAFC"] {
+.daylight-theme .dashboard-content-root h4 {
   color: #0F172A !important;
-}
-
-.daylight-theme .dashboard-content-root span[style*="color: #94A3B8"],
-.daylight-theme .dashboard-content-root div[style*="color: #94A3B8"] {
-  color: #475569 !important;
 }
 
 .daylight-theme .dashboard-content-root select {
@@ -1612,3 +1605,118 @@ body.daylight-theme {
   background: #FFFFFF !important;
   color: #0F172A !important;
 }
+
+/* ========================================================================= */
+/* ☀️ تعزيز تباين النصوص والقراءة في الوضع النهاري الشامل (Universal Daylight Contrast) */
+/* ========================================================================= */
+.daylight-theme,
+[data-theme="daylight"] {
+  color: #0F172A !important;
+}
+
+/* 1. إصلاح فئات Tailwind الرمادية الباهتة لتكون واضحة وحادة على الخلفية الفاتحة */
+.daylight-theme .text-slate-400,
+.daylight-theme .text-gray-400,
+.daylight-theme .text-zinc-400,
+.daylight-theme .text-neutral-400,
+.daylight-theme .text-stone-400,
+.daylight-theme .text-muted,
+[data-theme="daylight"] .text-slate-400,
+[data-theme="daylight"] .text-gray-400,
+[data-theme="daylight"] .text-zinc-400,
+[data-theme="daylight"] .text-neutral-400,
+[data-theme="daylight"] .text-stone-400,
+[data-theme="daylight"] .text-muted {
+  color: #475569 !important; /* Slate-600 عالي التباين */
+}
+
+.daylight-theme .text-slate-500,
+.daylight-theme .text-gray-500,
+.daylight-theme .text-zinc-500,
+[data-theme="daylight"] .text-slate-500,
+[data-theme="daylight"] .text-gray-500,
+[data-theme="daylight"] .text-zinc-500 {
+  color: #334155 !important; /* Slate-700 شديد الوضوح */
+}
+
+.daylight-theme .text-slate-300,
+.daylight-theme .text-gray-300,
+.daylight-theme .text-zinc-300,
+.daylight-theme .text-slate-200,
+.daylight-theme .text-gray-200,
+[data-theme="daylight"] .text-slate-300,
+[data-theme="daylight"] .text-gray-300,
+[data-theme="daylight"] .text-zinc-300,
+[data-theme="daylight"] .text-slate-200,
+[data-theme="daylight"] .text-gray-200 {
+  color: #1E293B !important;
+}
+
+/* 2. تحويل ألوان السيان والسماوي الفاتحة إلى أزرق ملكي عميق مقروء على الخلفية البيضاء */
+.daylight-theme .text-cyan-400,
+.daylight-theme .text-cyan-300,
+.daylight-theme .text-sky-400,
+.daylight-theme .text-sky-300,
+[data-theme="daylight"] .text-cyan-400,
+[data-theme="daylight"] .text-cyan-300,
+[data-theme="daylight"] .text-sky-400,
+[data-theme="daylight"] .text-sky-300 {
+  color: #0284C7 !important; /* Deep Sky Blue مقروء بوضوح */
+}
+
+/* 3. عناصر الإدخال والعناوين والتسميات */
+.daylight-theme label,
+[data-theme="daylight"] label {
+  color: #0F172A !important;
+}
+
+.daylight-theme input::placeholder,
+.daylight-theme textarea::placeholder,
+[data-theme="daylight"] input::placeholder,
+[data-theme="daylight"] textarea::placeholder {
+  color: #94A3B8 !important;
+}
+
+/* 4. دعم عناصر النصوص الصريحة ذات الأنماط المشتركة */
+.daylight-theme span[style*="color: #94A3B8"],
+.daylight-theme span[style*="color: rgb(148, 163, 184)"],
+.daylight-theme p[style*="color: #94A3B8"],
+.daylight-theme p[style*="color: rgb(148, 163, 184)"],
+.daylight-theme div[style*="color: #94A3B8"],
+.daylight-theme div[style*="color: rgb(148, 163, 184)"],
+[data-theme="daylight"] span[style*="color: #94A3B8"],
+[data-theme="daylight"] span[style*="color: rgb(148, 163, 184)"],
+[data-theme="daylight"] p[style*="color: #94A3B8"],
+[data-theme="daylight"] p[style*="color: rgb(148, 163, 184)"],
+[data-theme="daylight"] div[style*="color: #94A3B8"],
+[data-theme="daylight"] div[style*="color: rgb(148, 163, 184)"] {
+  color: #475569 !important;
+}
+
+.daylight-theme span[style*="color: #00E5FF"],
+.daylight-theme span[style*="color: rgb(0, 229, 255)"],
+.daylight-theme p[style*="color: #00E5FF"],
+.daylight-theme p[style*="color: rgb(0, 229, 255)"],
+.daylight-theme div[style*="color: #00E5FF"],
+.daylight-theme div[style*="color: rgb(0, 229, 255)"],
+[data-theme="daylight"] span[style*="color: #00E5FF"],
+[data-theme="daylight"] span[style*="color: rgb(0, 229, 255)"],
+[data-theme="daylight"] p[style*="color: #00E5FF"],
+[data-theme="daylight"] p[style*="color: rgb(0, 229, 255)"],
+[data-theme="daylight"] div[style*="color: #00E5FF"],
+[data-theme="daylight"] div[style*="color: rgb(0, 229, 255)"] {
+  color: #0284C7 !important;
+}
+
+/* 5. ترويسة الجداول والقوائم في الوضع النهاري */
+.daylight-theme table thead th,
+[data-theme="daylight"] table thead th {
+  color: #1E293B !important;
+  background-color: #F8FAFC !important;
+}
+
+.daylight-theme table tbody td,
+[data-theme="daylight"] table tbody td {
+  color: #0F172A !important;
+}
+
