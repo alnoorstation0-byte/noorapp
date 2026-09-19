@@ -20,7 +20,7 @@ const fetchAllForDashboard = async (
     const { data, error } = await query;
     if (error) {
       if (tableName === 'warehouses') {
-        const fb = await supabase.from('warehouses').select('id, name, description').limit(500);
+        const fb = await supabase.from('warehouses').select('id, name, type, location, phone, manager_name, is_active, tank_capacity_liters, fuel_type, description').limit(500);
         return fb.data || [];
       }
       if (tableName === 'inventory_items') {
@@ -56,7 +56,7 @@ export const useDashboardLogic = () => {
         fetchAllForDashboard('receipt_vouchers', 'amount, status'),
         fetchAllForDashboard('journal_lines', 'debit, credit, account_id'),
         fetchAllForDashboard('accounts', 'id, account_type, code, name'),
-        fetchAllForDashboard('warehouses', 'id, name, description'),
+        fetchAllForDashboard('warehouses', 'id, name, type, location, phone, manager_name, is_active, tank_capacity_liters, fuel_type, description'),
         fetchAllForDashboard('warehouse_inventory', 'warehouse_id, item_id, quantity'),
         fetchAllForDashboard('inventory_items', 'id, name, current_quantity, default_price, cost_price, unit'),
         fetchAllForDashboard('pos_shifts', 'id, opened_at, closed_at, status, starting_cash, expected_cash, actual_cash, total_sales')
@@ -227,36 +227,35 @@ export const useDashboardLogic = () => {
         .slice(0, 5);
 
       // --- ⛽ استخراج خزانات الوقود الحقيقية من المستودعات (Real Fuel Storage Tanks) ---
-      const tanksData: any[] = [];
-      const primaryStation = warehouses.find(w => w.is_active !== false) || warehouses[0];
-      
-      warehouses.forEach(w => {
+      // --- ⛽ استخراج أسطول محطات الوقود مع خزاناتها ومضخاتها ومسؤوليها بدقة فائقة ---
+      const processedStations = (warehouses || []).map(w => {
         let stationTanks: any[] = [];
+        let stationPumps: any[] = [];
+        let notes = '';
+
         try {
           if (w.description && typeof w.description === 'string' && w.description.trim().startsWith('{')) {
             const parsed = JSON.parse(w.description);
-            if (Array.isArray(parsed.tanks)) {
-              stationTanks = parsed.tanks;
-            }
+            if (Array.isArray(parsed.tanks)) stationTanks = parsed.tanks;
+            if (Array.isArray(parsed.pumps)) stationPumps = parsed.pumps;
+            notes = parsed.notes || '';
+          } else {
+            notes = w.description || '';
           }
         } catch (e) {
-          console.warn('Error parsing warehouse tanks JSON for', w.name, e);
+          notes = w.description || '';
         }
 
         if (stationTanks.length === 0 && (Number(w.tank_capacity_liters) > 0 || w.fuel_type)) {
           stationTanks = [{
             tank_number: 'خزان 1',
             fuel_type: w.fuel_type || 'بنزين 91',
-            capacity_liters: Number(w.tank_capacity_liters) || 45000
+            capacity_liters: Number(w.tank_capacity_liters) || 45000,
+            current_level: 0
           }];
         }
 
-        stationTanks.forEach((tank, tIdx) => {
-          const matchedItem = inventoryItems.find(i => 
-            (i.name && i.name.includes(tank.fuel_type)) ||
-            (i.fuel_type && i.fuel_type === tank.fuel_type)
-          );
-
+        const tanks = stationTanks.map((tank, tIdx) => {
           const isGasoline95 = tank.fuel_type?.includes('95');
           const isDiesel = tank.fuel_type?.includes('ديزل');
           const isGasoline91 = tank.fuel_type?.includes('91');
@@ -265,11 +264,14 @@ export const useDashboardLogic = () => {
 
           const capacity = Number(tank.capacity_liters) || 50000;
           
-          // المنسوب الحالي: الأولوية لـ current_level المخزن في الخزان، ثم رصيد المستودع، ثم الرصيد العام
           let currentLiters = 0;
           if (tank.current_level !== undefined && tank.current_level !== null && Number(tank.current_level) > 0) {
             currentLiters = Number(tank.current_level);
           } else {
+            const matchedItem = inventoryItems.find(i => 
+              (i.name && i.name.includes(tank.fuel_type)) ||
+              (i.fuel_type && i.fuel_type === tank.fuel_type)
+            );
             const whInv = warehouseInventory.find((wi: any) => wi.warehouse_id === w.id && wi.item_id === matchedItem?.id);
             if (whInv && Number(whInv.quantity) > 0) {
               currentLiters = Number(whInv.quantity);
@@ -279,13 +281,13 @@ export const useDashboardLogic = () => {
           }
 
           const percentage = capacity > 0 ? Math.min(100, Math.round((currentLiters / capacity) * 100)) : 0;
-          const unitPrice = Number(matchedItem?.default_price) || (isGasoline95 ? 2.33 : isDiesel ? 1.15 : 2.18);
+          const unitPrice = (tank.unit_price && Number(tank.unit_price) > 0) ? Number(tank.unit_price) : (isGasoline95 ? 2.33 : isDiesel ? 1.15 : 2.18);
 
           let statusText = 'المستوى آمن 🟢';
           let status = 'healthy';
           if (percentage === 0) {
-            status = 'warning';
-            statusText = 'خزان فارغ ⚠️';
+            status = 'critical';
+            statusText = 'خزان فارغ 🔴';
           } else if (percentage <= 20) {
             status = 'warning';
             statusText = 'منسوب منخفض ⚠️';
@@ -294,26 +296,73 @@ export const useDashboardLogic = () => {
             statusText = 'شبه ممتلئ 🟢';
           }
 
-          tanksData.push({
+          return {
             id: `${w.id}-t-${tIdx}`,
             tankIndex: tIdx,
             warehouseId: w.id,
             warehouseName: w.name,
-            name: `${tank.tank_number || `خزان ${tIdx + 1}`} (${tank.fuel_type})`,
-            shortName: `${tank.fuel_type}`,
+            name: `${tank.tank_number || `خزان ${tIdx + 1}`} (${tank.fuel_type || 'بنزين 91'})`,
+            shortName: `${tank.fuel_type || 'بنزين 91'}`,
             tankNumber: tank.tank_number || `خزان ${tIdx + 1}`,
-            fuelType: tank.fuel_type,
+            fuelType: tank.fuel_type || 'بنزين 91',
             currentLiters,
             capacity,
             unitPrice,
+            totalValue: currentLiters * unitPrice,
             percentage,
             color: tankColor,
             glowClass,
             status,
             statusText
-          });
+          };
         });
+
+        const pumps = stationPumps.map((pump, pIdx) => {
+          const isGasoline95 = pump.fuel_type?.includes('95');
+          const isDiesel = pump.fuel_type?.includes('ديزل');
+          const isGasoline91 = pump.fuel_type?.includes('91');
+          const color = isGasoline95 ? '#38BDF8' : isDiesel ? '#E06D44' : isGasoline91 ? '#10B981' : '#00E5FF';
+
+          return {
+            id: pump.id || `${w.id}-p-${pIdx}`,
+            warehouseId: w.id,
+            pumpNumber: pump.pump_number || `0${pIdx + 1}`,
+            pumpName: pump.pump_name || `مضخة (${pump.fuel_type || 'بنزين 91'})`,
+            fuelType: pump.fuel_type || 'بنزين 91',
+            unitPrice: Number(pump.unit_price) || (isGasoline95 ? 2.33 : isDiesel ? 1.15 : 2.18),
+            currentMeter: Number(pump.current_meter) || 0,
+            isActive: pump.is_active !== false,
+            color
+          };
+        });
+
+        const totalCapacity = tanks.reduce((sum, t) => sum + (Number(t.capacity) || 0), 0);
+        const totalCurrentLiters = tanks.reduce((sum, t) => sum + (Number(t.currentLiters) || 0), 0);
+        const fillPercentage = totalCapacity > 0 ? Math.min(100, Math.round((totalCurrentLiters / totalCapacity) * 100)) : 0;
+        const activePumpsCount = pumps.filter(p => p.isActive).length;
+
+        return {
+          id: w.id,
+          name: w.name,
+          type: w.type || 'pos',
+          managerName: w.manager_name || 'إدارة المحطة',
+          phone: w.phone || 'غير مسجل',
+          location: w.location || 'الفرع الرئيسي',
+          isActive: w.is_active !== false,
+          notes,
+          tanks,
+          pumps,
+          tanksCount: tanks.length,
+          pumpsCount: pumps.length,
+          activePumpsCount,
+          totalCapacity,
+          totalCurrentLiters,
+          fillPercentage
+        };
       });
+
+      const tanksData: any[] = processedStations.flatMap(s => s.tanks);
+      const allPumpsData: any[] = processedStations.flatMap(s => s.pumps);
 
       // 📊 إحصائيات الخزانات الإجمالية
       const totalTanksCount = tanksData.length;
@@ -402,29 +451,8 @@ export const useDashboardLogic = () => {
           totalCurrentLiters,
           overallFillPercentage
         },
-        allStations: warehouses.map(w => {
-          let parsedTanks: any[] = [];
-          try {
-            if (w.description?.trim().startsWith('{')) {
-              const parsed = JSON.parse(w.description);
-              if (Array.isArray(parsed.tanks)) parsedTanks = parsed.tanks;
-            }
-          } catch {}
-          if (parsedTanks.length === 0 && (Number(w.tank_capacity_liters) > 0 || w.fuel_type)) {
-            parsedTanks = [{
-              tank_number: 'خزان 1',
-              fuel_type: w.fuel_type || 'بنزين 91',
-              capacity_liters: Number(w.tank_capacity_liters) || 45000,
-              current_level: 0
-            }];
-          }
-          return {
-            id: w.id,
-            name: w.name,
-            description: w.description,
-            tanks: parsedTanks
-          };
-        }),
+        allStations: processedStations,
+        allPumps: allPumpsData,
         projectsStatusData: pumpStatusData,
         warehouseChartData,
         postingCharts,
@@ -437,9 +465,9 @@ export const useDashboardLogic = () => {
   const queryClient = useQueryClient();
   const { showToast } = useToast();
 
-  // 💾 حفظ وضبط الخزانات لأي محطة مباشرة من الداشبورد
+  // 💾 حفظ وضبط الخزانات والمضخات لأي محطة مباشرة من الداشبورد
   const saveStationTanksMutation = useMutation({
-    mutationFn: async ({ warehouseId, tanks }: { warehouseId: string, tanks: any[] }) => {
+    mutationFn: async ({ warehouseId, tanks, pumps }: { warehouseId: string, tanks?: any[], pumps?: any[] }) => {
       const { data: wh, error: fetchErr } = await supabase
         .from('warehouses')
         .select('*')
@@ -458,17 +486,33 @@ export const useDashboardLogic = () => {
         descObj = { notes: wh.description || '' };
       }
 
-      const formattedTanks = (tanks || []).map((t: any, idx: number) => ({
-        tank_number: t.tank_number || `خزان ${idx + 1}`,
-        fuel_type: t.fuel_type || 'بنزين 91',
-        capacity_liters: Number(t.capacity_liters) || 0,
-        current_level: Number(t.current_level) || 0
-      }));
+      let totalCap = wh.tank_capacity_liters;
+      let primaryFuel = wh.fuel_type;
 
-      descObj.tanks = formattedTanks;
+      if (tanks && Array.isArray(tanks)) {
+        const formattedTanks = (tanks || []).map((t: any, idx: number) => ({
+          tank_number: t.tank_number || `خزان ${idx + 1}`,
+          fuel_type: t.fuel_type || 'بنزين 91',
+          capacity_liters: Number(t.capacity_liters) || 0,
+          current_level: Number(t.current_level) || 0
+        }));
+        descObj.tanks = formattedTanks;
+        totalCap = formattedTanks.reduce((sum, t) => sum + (Number(t.capacity_liters) || 0), 0);
+        primaryFuel = formattedTanks.length > 0 ? [...new Set(formattedTanks.map(t => t.fuel_type))].join('، ') : null;
+      }
 
-      const totalCap = formattedTanks.reduce((sum, t) => sum + (Number(t.capacity_liters) || 0), 0);
-      const primaryFuel = formattedTanks.length > 0 ? [...new Set(formattedTanks.map(t => t.fuel_type))].join('، ') : null;
+      if (pumps && Array.isArray(pumps)) {
+        const formattedPumps = (pumps || []).map((p: any, idx: number) => ({
+          id: p.id || `pump_${idx + 1}`,
+          pump_number: p.pump_number || `0${idx + 1}`,
+          pump_name: p.pump_name || `مضخة (${p.fuel_type || 'بنزين 91'})`,
+          fuel_type: p.fuel_type || 'بنزين 91',
+          unit_price: Number(p.unit_price) || 0,
+          current_meter: Number(p.current_meter) || 0,
+          is_active: p.is_active !== false
+        }));
+        descObj.pumps = formattedPumps;
+      }
 
       const { error: updateErr } = await supabase
         .from('warehouses')
@@ -480,6 +524,28 @@ export const useDashboardLogic = () => {
         .eq('id', warehouseId);
 
       if (updateErr) throw updateErr;
+
+      // محاولة حفظ المضخات في جدول fuel_pumps إن كان موجوداً
+      if (pumps && Array.isArray(pumps)) {
+        try {
+          for (const p of pumps) {
+            const pumpRecord: any = {
+              warehouse_id: warehouseId,
+              pump_number: p.pump_number || '01',
+              pump_name: p.pump_name || `مضخة (${p.fuel_type || 'بنزين 91'})`,
+              fuel_type: p.fuel_type || 'بنزين 91',
+              unit_price: Number(p.unit_price) || 0,
+              current_meter: Number(p.current_meter) || 0,
+              is_active: p.is_active !== false
+            };
+            if (p.id && !p.id.startsWith('pump_')) {
+              await supabase.from('fuel_pumps').update(pumpRecord).eq('id', p.id);
+            }
+          }
+        } catch {
+          // ignore table missing error
+        }
+      }
 
       // تحديث رصيد الأصناف المقابلة في inventory_items
       for (const t of formattedTanks) {
