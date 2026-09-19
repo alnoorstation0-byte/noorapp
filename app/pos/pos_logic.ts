@@ -31,6 +31,10 @@ export function usePosLogic() {
     // ⛽ التبديل الآمن بين محطات الوقود مع إفراغ السلة لمنع تداخل أرصدة المحطات
     const handleWarehouseChange = (newWarehouseId: string) => {
         if (!newWarehouseId || newWarehouseId === selectedWarehouseId) return;
+        if (isUserStationRestricted && userAssignedWarehouse && newWarehouseId !== userAssignedWarehouse.id) {
+            showToast("عفواً، حسابك مخصص للعمل على محطتك المعتمدة فقط.", "warning");
+            return;
+        }
         if (cart.length > 0) {
             const confirmMsg = "تنبيه: التبديل إلى محطة وقود أو خزان آخر سيقوم بإفراغ سلة المبيعات الحالية لضمان استقلالية المخزون والوردية لكل محطة.\n\nهل تريد المتابعة وتغيير المحطة؟";
             if (typeof window !== 'undefined' && !window.confirm(confirmMsg)) {
@@ -56,7 +60,7 @@ export function usePosLogic() {
 
             const { data: profile } = await supabase
                 .from('profiles')
-                .select('id, linked_partner_id, role')
+                .select('id, linked_partner_id, role, permissions, phone_number, email, full_name')
                 .eq('id', userId)
                 .maybeSingle();
             return profile || { id: userId };
@@ -71,13 +75,57 @@ export function usePosLogic() {
     );
 
     // Fetch Warehouses (Points of Sale)
-    const { data: warehouses = [], isLoading: loadingWarehouses } = useQuery({
+    const { data: rawWarehouses = [], isLoading: loadingWarehouses } = useQuery({
         queryKey: ['pos_warehouses'],
         queryFn: async () => {
             const { data } = await supabase.from('warehouses').select('*').eq('is_active', true).order('name');
             return data || [];
         }
     });
+
+    // 🛡️ حصر المحطة المفتوحة لمشغلي وعمال المحطات (غير المدراء والمسؤولين)
+    const { warehouses, userAssignedWarehouse, isUserStationRestricted } = useMemo(() => {
+        if (!userProfile || isManagerOrAdmin) {
+            return { warehouses: rawWarehouses, userAssignedWarehouse: null, isUserStationRestricted: false };
+        }
+
+        const permWhId = userProfile.permissions?.assigned_warehouse_id;
+        const userPhone = userProfile.phone_number;
+        const userEmail = userProfile.email;
+        const userName = (userProfile.full_name || '').trim().toLowerCase();
+        const linkedPartnerId = userProfile.linked_partner_id;
+
+        const assigned = rawWarehouses.filter((w: any) => {
+            if (permWhId && w.id === permWhId) return true;
+            if (linkedPartnerId && w.delegate_id === linkedPartnerId) return true;
+            
+            // فحص قائمة عمال المحطة المخزنة في description
+            let descObj: any = {};
+            try {
+                descObj = typeof w.description === 'string' ? JSON.parse(w.description) : (w.description || {});
+            } catch {
+                descObj = {};
+            }
+            const workers = Array.isArray(descObj.workers) ? descObj.workers : [];
+            const isWorker = workers.some((wrk: any) => 
+                (userProfile.id && wrk.user_id === userProfile.id) ||
+                (userPhone && wrk.phone && wrk.phone.includes(userPhone)) ||
+                (userEmail && wrk.email && wrk.email.toLowerCase() === userEmail.toLowerCase()) ||
+                (userName && wrk.name && wrk.name.trim().toLowerCase() === userName)
+            );
+            return isWorker;
+        });
+
+        if (assigned.length > 0) {
+            return {
+                warehouses: assigned,
+                userAssignedWarehouse: assigned[0],
+                isUserStationRestricted: true
+            };
+        }
+
+        return { warehouses: rawWarehouses, userAssignedWarehouse: null, isUserStationRestricted: false };
+    }, [rawWarehouses, userProfile, isManagerOrAdmin]);
 
     // Fetch delegates & employees (الموظفين والمناديب والكاشير)
     const { data: delegates = [] } = useQuery({
@@ -217,6 +265,16 @@ export function usePosLogic() {
     useEffect(() => {
         const profile: any = userProfile;
         if (!loadingProfile && !loadingWarehouses) {
+            const urlWhId = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('warehouse_id') : null;
+
+            // أولاً: إذا كان المستخدم مقيداً بمحطة معينة
+            if (isUserStationRestricted && userAssignedWarehouse) {
+                setSelectedWarehouseId(userAssignedWarehouse.id);
+                setIsDelegateLocked(true);
+            } else if (urlWhId && warehouses.some((w: any) => w.id === urlWhId)) {
+                setSelectedWarehouseId(urlWhId);
+            }
+
             // البحث عن الموظف الحالي في قائمة الموظفين
             const myEmp = delegates.find((d: any) => 
                 (profile?.id && d.userId === profile.id) ||
@@ -232,23 +290,25 @@ export function usePosLogic() {
                 }
                 
                 // البحث عن مستودع الموظف / المندوب
-                if (warehouses.length > 0) {
+                if (!isUserStationRestricted && warehouses.length > 0) {
                     const assignedWh = warehouses.find((w: any) => w.delegate_id === targetId);
-                    if (assignedWh) {
+                    if (assignedWh && !urlWhId) {
                         setSelectedWarehouseId(assignedWh.id);
                     } else if (!selectedWarehouseId) {
-                        setSelectedWarehouseId(warehouses[0].id); // fallback
+                        setSelectedWarehouseId(urlWhId || warehouses[0].id); // fallback
                     }
                 }
             } else {
                 // ليس مندوب (مستخدم عادي/أدمن)
-                setIsDelegateLocked(false);
-                if (!selectedWarehouseId && warehouses.length > 0) {
-                    setSelectedWarehouseId(warehouses[0].id);
+                if (!isUserStationRestricted) {
+                    setIsDelegateLocked(false);
+                    if (!selectedWarehouseId && warehouses.length > 0) {
+                        setSelectedWarehouseId(urlWhId || warehouses[0].id);
+                    }
                 }
             }
         }
-    }, [userProfile, warehouses, loadingProfile, loadingWarehouses, delegates]);
+    }, [userProfile, warehouses, loadingProfile, loadingWarehouses, delegates, isUserStationRestricted, userAssignedWarehouse]);
 
     const [onlyLowStock, setOnlyLowStock] = useState(false);
 
@@ -975,6 +1035,8 @@ export function usePosLogic() {
     return {
         selectedWarehouseId, setSelectedWarehouseId, handleWarehouseChange, warehouses,
         isManagerOrAdmin,
+        isUserStationRestricted,
+        userAssignedWarehouse,
         searchQuery, setSearchQuery, inventoryItems: filteredItems, filteredItems,
         selectedItemForCart, setSelectedItemForCart, confirmAddToCart, handleItemClick,
         cart, addToCart, removeFromCart, updateCartItemQty, updateCartItemPrice,

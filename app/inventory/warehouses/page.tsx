@@ -11,7 +11,41 @@ export default function WarehousesPage() {
   const logic = useWarehousesLogic();
   const { isDaylight } = useThemeMode();
   const [selectedIds, setSelectedIds] = useState<any[]>([]);
-  const [activeModalTab, setActiveModalTab] = useState<'info' | 'tanks' | 'pumps'>('info');
+  const [activeModalTab, setActiveModalTab] = useState<'info' | 'tanks' | 'pumps' | 'workers'>('info');
+
+  // حالات إضافة عامل جديد للمحطة
+  const [selectedUserToAdd, setSelectedUserToAdd] = useState<string>('');
+  const [customWorkerName, setCustomWorkerName] = useState<string>('');
+  const [customWorkerPhone, setCustomWorkerPhone] = useState<string>('');
+  const [workerRole, setWorkerRole] = useState<string>('مشغل مضخة / كاشير');
+
+  const handleAddWorkerToStation = () => {
+    if (selectedUserToAdd) {
+      const u = (logic.availableUsers || []).find((usr: any) => usr.id === selectedUserToAdd);
+      if (u) {
+        logic.handleAddWorker({
+          user_id: u.user_id,
+          name: u.name,
+          phone: u.phone,
+          email: u.email,
+          role: workerRole
+        });
+        setSelectedUserToAdd('');
+        return;
+      }
+    }
+    if (customWorkerName.trim()) {
+      logic.handleAddWorker({
+        user_id: null,
+        name: customWorkerName.trim(),
+        phone: customWorkerPhone.trim(),
+        email: '',
+        role: workerRole
+      });
+      setCustomWorkerName('');
+      setCustomWorkerPhone('');
+    }
+  };
 
   // ألوان ديناميكية حسب الوضع (نهاري كريستالي ناصع / ليلي)
   const T = {
@@ -179,6 +213,36 @@ export default function WarehousesPage() {
           {row.is_active ? 'نشطة ✅' : 'غير نشطة'}
         </span>
       )
+    },
+    {
+      key: 'workers',
+      label: 'العمال والمشغلون',
+      render: (row: any) => {
+        const workers = row.workers || [];
+        if (workers.length === 0) {
+          return <span style={{ color: T.textMuted, fontSize: '11.5px' }}>لا يوجد عمال مسندين</span>;
+        }
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '3px' }}>
+            <span style={{ 
+              fontWeight: 800, 
+              fontSize: '11.5px', 
+              color: '#3B82F6',
+              background: 'rgba(59, 130, 246, 0.12)',
+              padding: '2px 8px',
+              borderRadius: '8px',
+              border: '1px solid rgba(59, 130, 246, 0.3)',
+              display: 'inline-block',
+              width: 'fit-content'
+            }}>
+              👷 {workers.length} {workers.length === 1 ? 'عامل / مشغل' : 'عمال مسندين'}
+            </span>
+            <span style={{ fontSize: '10.5px', color: T.textMuted, maxWidth: '160px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+              {workers.map((w: any) => w.name).join('، ')}
+            </span>
+          </div>
+        );
+      }
     },
     { 
       key: 'actions', 
@@ -460,6 +524,28 @@ export default function WarehousesPage() {
               <span>📟 مضخات الوقود</span>
               <span style={{ background: T.warn, color: isDaylight ? '#FDFBF7' : '#0B0E14', borderRadius: '10px', padding: '1px 7px', fontSize: '11px', fontWeight: 900 }}>
                 {logic.currentRecord.pumps?.length || 0}
+              </span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveModalTab('workers')}
+              style={{
+                background: activeModalTab === 'workers' ? 'rgba(59, 130, 246, 0.15)' : T.tabInactiveBg,
+                color: activeModalTab === 'workers' ? '#3B82F6' : T.textMuted,
+                border: `1px solid ${activeModalTab === 'workers' ? 'rgba(59, 130, 246, 0.4)' : T.tabInactiveBorder}`,
+                padding: '8px 16px',
+                borderRadius: '12px',
+                fontWeight: 800,
+                fontSize: '13px',
+                cursor: 'pointer',
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}
+            >
+              <span>👷 عمال ومشغلو المحطة</span>
+              <span style={{ background: '#3B82F6', color: '#FFFFFF', borderRadius: '10px', padding: '1px 7px', fontSize: '11px', fontWeight: 900 }}>
+                {logic.currentRecord.workers?.length || 0}
               </span>
             </button>
           </div>
@@ -823,6 +909,234 @@ export default function WarehousesPage() {
             </div>
           )}
 
+          {/* التبويب الرابع: عمال ومشغلو المحطة */}
+          {activeModalTab === 'workers' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div>
+                <h4 style={{ margin: 0, color: '#3B82F6', fontSize: '15px', fontWeight: 900 }}>
+                  👷 طاقم العمل ومشغلو المحطة
+                </h4>
+                <span style={{ fontSize: '11.5px', color: T.textMuted }}>
+                  تخصيص العمال والمشغلين لهذه المحطة، لتقييد وصولهم بحيث تفتح لهم هذه المحطة فقط عند تسجيل الدخول
+                </span>
+              </div>
+
+              {/* بطاقة تنبيه الصلاحيات */}
+              <div style={{
+                background: 'rgba(59, 130, 246, 0.08)',
+                border: '1px solid rgba(59, 130, 246, 0.25)',
+                borderRadius: '12px',
+                padding: '10px 14px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px',
+                fontSize: '12px',
+                color: isDaylight ? '#1E40AF' : '#93C5FD'
+              }}>
+                <span style={{ fontSize: '20px' }}>🔒</span>
+                <div>
+                  <strong>تقييد الصلاحيات التلقائي:</strong> أي عامل أو مشغل يتم تعيينه لهذه المحطة، سيقتصر دخوله في النظام على هذه المحطة حصراً (في نقاط البيع، الخزانات، والمضخات)، مما يضمن عدم تداخل العهد والورديات.
+                </div>
+              </div>
+
+              {/* نموذج إضافة عامل جديد */}
+              <div style={{
+                background: T.cardBg,
+                border: `1px solid ${T.cardBorder}`,
+                borderRadius: '16px',
+                padding: '14px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '10px'
+              }}>
+                <span style={{ fontSize: '12.5px', fontWeight: 900, color: T.text }}>
+                  ➕ إضافة عامل أو مشغل جديد للمحطة:
+                </span>
+
+                <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr 1fr 1fr auto', gap: '10px', alignItems: 'flex-end' }}>
+                  <div>
+                    <label style={{ fontSize: '11px', color: T.textMuted, display: 'block', marginBottom: '3px', fontWeight: 800 }}>
+                      اختيار حساب مستخدم مسجل
+                    </label>
+                    <select
+                      className="glass-input-field"
+                      style={{ width: '100%', padding: '7px 10px', fontSize: '12px' }}
+                      value={selectedUserToAdd}
+                      onChange={e => {
+                        setSelectedUserToAdd(e.target.value);
+                        if (e.target.value) {
+                          setCustomWorkerName('');
+                          setCustomWorkerPhone('');
+                        }
+                      }}
+                    >
+                      <option value="">-- اختر من المستخدمين --</option>
+                      {(logic.availableUsers || []).map((u: any) => (
+                        <option key={u.id} value={u.id}>
+                          {u.name} ({u.role || 'مستخدم'}) {u.phone ? `- ${u.phone}` : ''}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: '11px', color: T.textMuted, display: 'block', marginBottom: '3px', fontWeight: 800 }}>
+                      أو اكتب الاسم يدوياً
+                    </label>
+                    <input
+                      type="text"
+                      className="glass-input-field"
+                      style={{ width: '100%', padding: '7px 10px', fontSize: '12px' }}
+                      value={customWorkerName}
+                      disabled={!!selectedUserToAdd}
+                      onChange={e => setCustomWorkerName(e.target.value)}
+                      placeholder="اسم العامل الجديد"
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: '11px', color: T.textMuted, display: 'block', marginBottom: '3px', fontWeight: 800 }}>
+                      رقم الجوال
+                    </label>
+                    <input
+                      type="text"
+                      className="glass-input-field"
+                      style={{ width: '100%', padding: '7px 10px', fontSize: '12px' }}
+                      value={customWorkerPhone}
+                      disabled={!!selectedUserToAdd}
+                      onChange={e => setCustomWorkerPhone(e.target.value)}
+                      placeholder="05xxxxxxxx"
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: '11px', color: T.textMuted, display: 'block', marginBottom: '3px', fontWeight: 800 }}>
+                      الدور في المحطة
+                    </label>
+                    <select
+                      className="glass-input-field"
+                      style={{ width: '100%', padding: '7px 10px', fontSize: '12px' }}
+                      value={workerRole}
+                      onChange={e => setWorkerRole(e.target.value)}
+                    >
+                      <option value="مشغل مضخة / كاشير">مشغل مضخة / كاشير</option>
+                      <option value="مسؤول خزانات وتفريغ">مسؤول خزانات وتفريغ</option>
+                      <option value="مدير محطة">مدير محطة</option>
+                      <option value="مشرف وردية">مشرف وردية</option>
+                      <option value="فني صيانة">فني صيانة</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <button
+                      type="button"
+                      onClick={handleAddWorkerToStation}
+                      style={{
+                        background: 'linear-gradient(135deg, #3B82F6 0%, #2563EB 100%)',
+                        color: '#FFFFFF',
+                        border: 'none',
+                        borderRadius: '10px',
+                        padding: '8px 16px',
+                        fontSize: '12px',
+                        fontWeight: 900,
+                        cursor: 'pointer',
+                        whiteSpace: 'nowrap',
+                        height: '36px'
+                      }}
+                    >
+                      ➕ إضافة للمحطة
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* قائمة العمال المسندين */}
+              {(!logic.currentRecord.workers || logic.currentRecord.workers.length === 0) ? (
+                <div style={{ textAlign: 'center', padding: '30px', color: T.textMuted, background: T.cardBg, borderRadius: '14px', border: `1px dashed ${T.cardBorder}` }}>
+                  لا يوجد عمال أو مشغلون مسندون لهذه المحطة بعد. استخدم النموذج بالأعلى لإضافة طاقم العمل.
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  {logic.currentRecord.workers.map((w: any, idx: number) => (
+                    <div
+                      key={w.id || idx}
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        padding: '10px 14px',
+                        background: T.cardBg,
+                        border: `1px solid ${T.cardBorder}`,
+                        borderRadius: '12px',
+                        gap: '12px'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <div style={{
+                          width: '36px',
+                          height: '36px',
+                          borderRadius: '10px',
+                          background: 'rgba(59, 130, 246, 0.15)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '18px'
+                        }}>
+                          👷
+                        </div>
+                        <div>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span style={{ fontWeight: 900, fontSize: '13px', color: T.text }}>
+                              {w.name}
+                            </span>
+                            <span style={{
+                              fontSize: '10.5px',
+                              fontWeight: 800,
+                              padding: '2px 8px',
+                              borderRadius: '6px',
+                              background: 'rgba(59, 130, 246, 0.12)',
+                              color: '#3B82F6',
+                              border: '1px solid rgba(59, 130, 246, 0.3)'
+                            }}>
+                              {w.role || 'مشغل محطة'}
+                            </span>
+                          </div>
+                          <span style={{ fontSize: '11px', color: T.textMuted }}>
+                            {w.phone ? `📱 ${w.phone}` : 'بدون رقم هاتف'} 
+                            {w.user_id ? ' • 🟢 حساب نظام مرتبط' : ' • ⚪ مسجل بالمحطة'}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <button
+                          type="button"
+                          onClick={() => logic.handleRemoveWorker(idx)}
+                          style={{
+                            background: 'rgba(239, 68, 68, 0.15)',
+                            color: '#f87171',
+                            border: '1px solid rgba(239, 68, 68, 0.3)',
+                            borderRadius: '8px',
+                            width: '34px',
+                            height: '34px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontSize: '13px'
+                          }}
+                          title="إزالة العامل من المحطة"
+                        >
+                          🗑️
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
           {/* أزرار الحفظ والإلغاء */}
           <div style={{ display: 'flex', gap: '10px', marginTop: '24px', borderTop: `1px solid ${T.divider}`, paddingTop: '16px' }}>
             <button 
@@ -831,7 +1145,7 @@ export default function WarehousesPage() {
               className="btn-main-glass gold desert-btn-primary" 
               style={{ flex: 2, margin: 0, minHeight: '44px', fontWeight: 900 }}
             >
-              {logic.isSaving ? '⏳ جاري الحفظ...' : '💾 حفظ بيانات المحطة والخزانات والمضخات'}
+              {logic.isSaving ? '⏳ جاري الحفظ...' : '💾 حفظ بيانات المحطة والخزانات والمضخات والعمال'}
             </button>
             <button 
               onClick={() => logic.setIsModalOpen(false)} 

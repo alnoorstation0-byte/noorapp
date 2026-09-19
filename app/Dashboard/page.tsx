@@ -22,7 +22,14 @@ export default function DashboardPage() {
   const [selectedStationForEdit, setSelectedStationForEdit] = useState<string>('');
   const [editingTanks, setEditingTanks] = useState<any[]>([]);
   const [editingPumps, setEditingPumps] = useState<any[]>([]);
-  const [modalActiveTab, setModalActiveTab] = useState<'tanks' | 'pumps'>('tanks');
+  const [editingWorkers, setEditingWorkers] = useState<any[]>([]);
+  const [modalActiveTab, setModalActiveTab] = useState<'tanks' | 'pumps' | 'workers'>('tanks');
+
+  // حالات إضافة عامل جديد للمحطة من الداشبورد
+  const [dashSelectedUserToAdd, setDashSelectedUserToAdd] = useState<string>('');
+  const [dashCustomWorkerName, setDashCustomWorkerName] = useState<string>('');
+  const [dashCustomWorkerPhone, setDashCustomWorkerPhone] = useState<string>('');
+  const [dashWorkerRole, setDashWorkerRole] = useState<string>('مشغل مضخة / كاشير');
   
   // Quick level calibration modal state
   const [calibratingTank, setCalibratingTank] = useState<any | null>(null);
@@ -34,7 +41,7 @@ export default function DashboardPage() {
 
   const stats = logic.stats;
 
-  const handleOpenManageTanks = (stationId?: string, defaultTab: 'tanks' | 'pumps' = 'tanks') => {
+  const handleOpenManageTanks = (stationId?: string, defaultTab: 'tanks' | 'pumps' | 'workers' = 'tanks') => {
     const stations = stats?.allStations || [];
     const targetStationId = stationId || (selectedStationFilter !== 'all' ? selectedStationFilter : (stations[0]?.id || ''));
     setSelectedStationForEdit(targetStationId);
@@ -43,9 +50,11 @@ export default function DashboardPage() {
     if (targetStation) {
       setEditingTanks(Array.isArray(targetStation.tanks) ? JSON.parse(JSON.stringify(targetStation.tanks)) : []);
       setEditingPumps(Array.isArray(targetStation.pumps) ? JSON.parse(JSON.stringify(targetStation.pumps)) : []);
+      setEditingWorkers(Array.isArray(targetStation.workers) ? JSON.parse(JSON.stringify(targetStation.workers)) : []);
     } else {
       setEditingTanks([]);
       setEditingPumps([]);
+      setEditingWorkers([]);
     }
     setIsManageTanksModalOpen(true);
   };
@@ -56,9 +65,11 @@ export default function DashboardPage() {
     if (targetStation) {
       setEditingTanks(Array.isArray(targetStation.tanks) ? JSON.parse(JSON.stringify(targetStation.tanks)) : []);
       setEditingPumps(Array.isArray(targetStation.pumps) ? JSON.parse(JSON.stringify(targetStation.pumps)) : []);
+      setEditingWorkers(Array.isArray(targetStation.workers) ? JSON.parse(JSON.stringify(targetStation.workers)) : []);
     } else {
       setEditingTanks([]);
       setEditingPumps([]);
+      setEditingWorkers([]);
     }
   };
 
@@ -115,13 +126,63 @@ export default function DashboardPage() {
     setEditingPumps(prev => prev.filter((_, idx) => idx !== index));
   };
 
+  // إدارة عمال المحطة في نافذة الداشبورد
+  const handleAddWorkerRow = () => {
+    if (dashSelectedUserToAdd) {
+      const u = (stats?.availableUsers || []).find((usr: any) => usr.id === dashSelectedUserToAdd);
+      if (u) {
+        setEditingWorkers(prev => [
+          ...prev,
+          {
+            id: `wrk_${Date.now()}`,
+            user_id: u.user_id,
+            name: u.name,
+            phone: u.phone,
+            email: u.email,
+            role: dashWorkerRole
+          }
+        ]);
+        setDashSelectedUserToAdd('');
+        return;
+      }
+    }
+    if (dashCustomWorkerName.trim()) {
+      setEditingWorkers(prev => [
+        ...prev,
+        {
+          id: `wrk_${Date.now()}`,
+          user_id: null,
+          name: dashCustomWorkerName.trim(),
+          phone: dashCustomWorkerPhone.trim(),
+          email: '',
+          role: dashWorkerRole
+        }
+      ]);
+      setDashCustomWorkerName('');
+      setDashCustomWorkerPhone('');
+    }
+  };
+
+  const handleUpdateWorkerRow = (index: number, field: string, val: any) => {
+    setEditingWorkers(prev => {
+      const copy = [...prev];
+      copy[index] = { ...copy[index], [field]: val };
+      return copy;
+    });
+  };
+
+  const handleRemoveWorkerRow = (index: number) => {
+    setEditingWorkers(prev => prev.filter((_, idx) => idx !== index));
+  };
+
   const handleSaveTanks = async () => {
     if (!selectedStationForEdit) return;
     try {
       await logic.saveStationTanks({
         warehouseId: selectedStationForEdit,
         tanks: editingTanks,
-        pumps: editingPumps
+        pumps: editingPumps,
+        workers: editingWorkers
       });
       setIsManageTanksModalOpen(false);
     } catch (e) {
@@ -299,6 +360,61 @@ export default function DashboardPage() {
           {/* ⛽ 2. أسطول محطات النور للوقود | المراقبة الشاملة للمحطات والمضخات والخزانات */}
           {/* ========================================================================= */}
           <div>
+            {/* 🛡️ تنبيه تقييد المحطة للمستخدم المشغل/الكاشير */}
+            {stats.isUserRestricted && (
+              <div style={{
+                background: 'linear-gradient(135deg, rgba(194, 155, 98, 0.15) 0%, rgba(168, 87, 60, 0.12) 100%)',
+                border: '1.5px solid rgba(194, 155, 98, 0.5)',
+                borderRadius: '16px',
+                padding: '14px 20px',
+                marginBottom: '18px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '12px',
+                boxShadow: '0 4px 15px rgba(168, 87, 60, 0.08)'
+              }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                  <div style={{
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '12px',
+                    background: 'rgba(194, 155, 98, 0.2)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '22px'
+                  }}>
+                    🔒
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '14px', fontWeight: 900, color: isDaylight ? '#2C1A12' : '#F8FAFC' }}>
+                      أنت مسجل حالياً كمشغل / كاشير في محطة: <span style={{ color: '#C29B62' }}>{stats.assignedStationName}</span>
+                    </div>
+                    <div style={{ fontSize: '12px', color: isDaylight ? 'rgba(44, 26, 18, 0.7)' : '#94A3B8', marginTop: '2px' }}>
+                      تم تقييد الواجهة وشاشات المراقبة والكاشير تلقائياً لمحطتك المكلف بالعمل بها فقط.
+                    </div>
+                  </div>
+                </div>
+                <div style={{
+                  background: 'rgba(16, 185, 129, 0.15)',
+                  color: '#10B981',
+                  border: '1px solid rgba(16, 185, 129, 0.35)',
+                  padding: '6px 14px',
+                  borderRadius: '20px',
+                  fontSize: '12px',
+                  fontWeight: 800,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '6px'
+                }}>
+                  <span>🟢</span>
+                  <span>محطة العمل المخصصة</span>
+                </div>
+              </div>
+            )}
+
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '14px', marginBottom: '18px' }}>
               <div>
                 <h3 style={{ fontSize: '20px', fontWeight: 900, color: isDaylight ? '#0F172A' : '#F8FAFC', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
@@ -766,6 +882,76 @@ export default function DashboardPage() {
                             </button>
                           </div>
                         </div>
+                      </div>
+
+                      {/* طاقم ومشغلو المحطة المعتمدون */}
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'space-between',
+                        flexWrap: 'wrap',
+                        gap: '10px',
+                        padding: '10px 14px',
+                        marginTop: '12px',
+                        background: isDaylight ? '#F8FAFC' : 'rgba(255, 255, 255, 0.03)',
+                        borderRadius: '12px',
+                        border: isDaylight ? '1px solid #E2E8F0' : '1px solid rgba(255, 255, 255, 0.06)'
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                          <span style={{ fontSize: '13px' }}>👷</span>
+                          <span style={{ fontSize: '12px', fontWeight: 800, color: isDaylight ? '#475569' : '#94A3B8' }}>
+                            طاقم العمل والمشغلين ({station.workers?.length || 0}):
+                          </span>
+                          {station.workers && station.workers.length > 0 ? (
+                            <div style={{ display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                              {station.workers.map((w: any, wIdx: number) => (
+                                <span
+                                  key={w.id || wIdx}
+                                  style={{
+                                    background: isDaylight ? '#EFF6FF' : 'rgba(0, 229, 255, 0.12)',
+                                    color: isDaylight ? '#0284C7' : '#00E5FF',
+                                    border: isDaylight ? '1px solid #BFDBFE' : '1px solid rgba(0, 229, 255, 0.25)',
+                                    padding: '2px 9px',
+                                    borderRadius: '8px',
+                                    fontSize: '11px',
+                                    fontWeight: 800,
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '5px'
+                                  }}
+                                  title={`الدور: ${w.role || 'مشغل'} | هاتف: ${w.phone || 'غير مسجل'}`}
+                                >
+                                  <span>👤 {w.name}</span>
+                                  <span style={{ opacity: 0.75, fontSize: '10px' }}>({w.role || 'مشغل'})</span>
+                                  {w.phone && <span style={{ opacity: 0.6, fontSize: '9.5px' }}>• {w.phone}</span>}
+                                </span>
+                              ))}
+                            </div>
+                          ) : (
+                            <span style={{ fontSize: '11.5px', color: isDaylight ? '#94A3B8' : '#64748B' }}>
+                              لم يتم تعيين عمال بعد لهذه المحطة
+                            </span>
+                          )}
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => handleOpenManageTanks(station.id, 'workers')}
+                          style={{
+                            background: 'transparent',
+                            border: 'none',
+                            color: '#C29B62',
+                            fontSize: '11.5px',
+                            fontWeight: 800,
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '4px',
+                            padding: '2px 6px'
+                          }}
+                        >
+                          <span>➕ تعيين / إدارة العمال</span>
+                        </button>
                       </div>
 
                       {/* ============================================================= */}
@@ -1811,6 +1997,43 @@ export default function DashboardPage() {
                     {editingPumps.length}
                   </span>
                 </button>
+
+                <button
+                  type="button"
+                  onClick={() => setModalActiveTab('workers')}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '8px 18px',
+                    borderRadius: '10px',
+                    border: modalActiveTab === 'workers' 
+                      ? '1.5px solid #10B981' 
+                      : (isDaylight ? '1px solid #E2E8F0' : '1px solid rgba(255,255,255,0.1)'),
+                    background: modalActiveTab === 'workers'
+                      ? (isDaylight ? 'rgba(16, 185, 129, 0.12)' : 'rgba(16, 185, 129, 0.18)')
+                      : 'transparent',
+                    color: modalActiveTab === 'workers'
+                      ? (isDaylight ? '#047857' : '#10B981')
+                      : (isDaylight ? '#64748B' : '#94A3B8'),
+                    fontWeight: modalActiveTab === 'workers' ? 900 : 700,
+                    fontSize: '13px',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}
+                >
+                  <span>👷 عمال ومشغلو المحطة</span>
+                  <span style={{
+                    background: modalActiveTab === 'workers' ? '#10B981' : (isDaylight ? '#E2E8F0' : 'rgba(255,255,255,0.1)'),
+                    color: modalActiveTab === 'workers' ? '#FFFFFF' : (isDaylight ? '#64748B' : '#94A3B8'),
+                    borderRadius: '12px',
+                    padding: '1px 7px',
+                    fontSize: '11px',
+                    fontWeight: 900
+                  }}>
+                    {editingWorkers.length}
+                  </span>
+                </button>
               </div>
 
               {/* محتوى تبويب الخزانات */}
@@ -2232,6 +2455,318 @@ export default function DashboardPage() {
                   )}
                 </div>
               )}
+
+              {/* محتوى تبويب العمال والمشغلين */}
+              {modalActiveTab === 'workers' && (
+                <div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', flexWrap: 'wrap', gap: '8px' }}>
+                    <div>
+                      <div style={{ fontWeight: 800, fontSize: '13.5px', color: isDaylight ? '#2C1A12' : '#F8FAFC' }}>
+                        👷 طاقم العمل والعمال المعينون في هذه المحطة ({editingWorkers.length})
+                      </div>
+                      <div style={{ fontSize: '11.5px', color: isDaylight ? '#64748B' : '#94A3B8', marginTop: '2px' }}>
+                        إضافة وتعيين عمال المحطة ليتم حصر تسجيل الدخول وشاشات الكاشير الخاصة بهم على هذه المحطة فقط
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* إشعار أمني إرشادي */}
+                  <div style={{
+                    background: isDaylight ? 'rgba(194, 155, 98, 0.1)' : 'rgba(194, 155, 98, 0.15)',
+                    border: '1px solid rgba(194, 155, 98, 0.3)',
+                    borderRadius: '12px',
+                    padding: '10px 14px',
+                    marginBottom: '16px',
+                    fontSize: '11.5px',
+                    color: isDaylight ? '#78350F' : '#FDE68A',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}>
+                    <span>💡</span>
+                    <span>
+                      <strong>نظام حصر المحطات:</strong> عند تسجيل أي من هؤلاء العمال للدخول، سيفتح النظام له هذه المحطة تحديداً ويحصر عمليات البيع والمراقبة عليها دون المحطات الأخرى.
+                    </span>
+                  </div>
+
+                  {/* شريط إضافة عامل جديد */}
+                  <div style={{
+                    background: isDaylight ? '#F8FAFC' : 'rgba(255, 255, 255, 0.03)',
+                    border: isDaylight ? '1px solid #E2E8F0' : '1px solid rgba(255, 255, 255, 0.08)',
+                    borderRadius: '14px',
+                    padding: '14px',
+                    marginBottom: '16px'
+                  }}>
+                    <div style={{ fontSize: '12px', fontWeight: 800, color: isDaylight ? '#2C1A12' : '#F8FAFC', marginBottom: '10px' }}>
+                      ➕ إضافة عامل جديد إلى طاقم المحطة
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '10px', alignItems: 'end' }}>
+                      {/* اختيار مستخدم مسجل مسبقاً */}
+                      <div>
+                        <label style={{ display: 'block', fontSize: '11px', color: isDaylight ? '#64748B' : '#94A3B8', fontWeight: 800, marginBottom: '4px' }}>
+                          اختر مستخدم مسجل بالنظام:
+                        </label>
+                        <select
+                          value={dashSelectedUserToAdd}
+                          onChange={(e) => {
+                            setDashSelectedUserToAdd(e.target.value);
+                            if (e.target.value) {
+                              setDashCustomWorkerName('');
+                              setDashCustomWorkerPhone('');
+                            }
+                          }}
+                          style={{
+                            width: '100%',
+                            padding: '8px 12px',
+                            borderRadius: '10px',
+                            background: isDaylight ? '#FFFFFF' : 'rgba(255, 255, 255, 0.05)',
+                            border: isDaylight ? '1px solid #CBD5E1' : '1px solid rgba(255, 255, 255, 0.15)',
+                            color: isDaylight ? '#2C1A12' : '#F8FAFC',
+                            fontSize: '12px',
+                            fontWeight: 800,
+                            outline: 'none'
+                          }}
+                        >
+                          <option value="">-- أو اختر من موظفي النظام --</option>
+                          {(stats?.availableUsers || []).map((u: any) => (
+                            <option key={u.id} value={u.id} style={{ background: isDaylight ? '#FFF' : '#0F141C' }}>
+                              {u.name} {u.phone ? `(${u.phone})` : ''} - {u.role}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      {/* اسم العامل اليدوي */}
+                      <div>
+                        <label style={{ display: 'block', fontSize: '11px', color: isDaylight ? '#64748B' : '#94A3B8', fontWeight: 800, marginBottom: '4px' }}>
+                          أو أدخل اسم العامل يدوياً:
+                        </label>
+                        <input
+                          type="text"
+                          value={dashCustomWorkerName}
+                          onChange={(e) => {
+                            setDashCustomWorkerName(e.target.value);
+                            if (e.target.value) setDashSelectedUserToAdd('');
+                          }}
+                          placeholder="مثال: أحمد عبد الله"
+                          style={{
+                            width: '100%',
+                            padding: '8px 12px',
+                            borderRadius: '10px',
+                            background: isDaylight ? '#FFFFFF' : 'rgba(255, 255, 255, 0.05)',
+                            border: isDaylight ? '1px solid #CBD5E1' : '1px solid rgba(255, 255, 255, 0.15)',
+                            color: isDaylight ? '#2C1A12' : '#F8FAFC',
+                            fontSize: '12px',
+                            fontWeight: 800,
+                            outline: 'none'
+                          }}
+                        />
+                      </div>
+
+                      {/* رقم الهاتف */}
+                      <div>
+                        <label style={{ display: 'block', fontSize: '11px', color: isDaylight ? '#64748B' : '#94A3B8', fontWeight: 800, marginBottom: '4px' }}>
+                          رقم هاتف العامل:
+                        </label>
+                        <input
+                          type="text"
+                          value={dashCustomWorkerPhone}
+                          onChange={(e) => setDashCustomWorkerPhone(e.target.value)}
+                          placeholder="05XXXXXXXX"
+                          style={{
+                            width: '100%',
+                            padding: '8px 12px',
+                            borderRadius: '10px',
+                            background: isDaylight ? '#FFFFFF' : 'rgba(255, 255, 255, 0.05)',
+                            border: isDaylight ? '1px solid #CBD5E1' : '1px solid rgba(255, 255, 255, 0.15)',
+                            color: isDaylight ? '#2C1A12' : '#F8FAFC',
+                            fontSize: '12px',
+                            fontWeight: 800,
+                            outline: 'none'
+                          }}
+                        />
+                      </div>
+
+                      {/* الدور الوظيفي */}
+                      <div>
+                        <label style={{ display: 'block', fontSize: '11px', color: isDaylight ? '#64748B' : '#94A3B8', fontWeight: 800, marginBottom: '4px' }}>
+                          الدور / الوظيفة:
+                        </label>
+                        <select
+                          value={dashWorkerRole}
+                          onChange={(e) => setDashWorkerRole(e.target.value)}
+                          style={{
+                            width: '100%',
+                            padding: '8px 12px',
+                            borderRadius: '10px',
+                            background: isDaylight ? '#FFFFFF' : 'rgba(255, 255, 255, 0.05)',
+                            border: isDaylight ? '1px solid #CBD5E1' : '1px solid rgba(255, 255, 255, 0.15)',
+                            color: isDaylight ? '#2C1A12' : '#F8FAFC',
+                            fontSize: '12px',
+                            fontWeight: 800,
+                            outline: 'none'
+                          }}
+                        >
+                          <option value="مشغل مضخة / كاشير">مشغل مضخة / كاشير</option>
+                          <option value="كاشير محطة">كاشير محطة</option>
+                          <option value="مشرف وردية">مشرف وردية</option>
+                          <option value="فني صيانة ومضخات">فني صيانة ومضخات</option>
+                          <option value="حارس محطة">حارس محطة</option>
+                        </select>
+                      </div>
+
+                      {/* زر الإضافة */}
+                      <div>
+                        <button
+                          type="button"
+                          onClick={handleAddWorkerRow}
+                          disabled={!dashSelectedUserToAdd && !dashCustomWorkerName.trim()}
+                          style={{
+                            width: '100%',
+                            padding: '9px 16px',
+                            borderRadius: '10px',
+                            background: (!dashSelectedUserToAdd && !dashCustomWorkerName.trim()) 
+                              ? (isDaylight ? '#E2E8F0' : 'rgba(255,255,255,0.1)') 
+                              : 'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+                            color: (!dashSelectedUserToAdd && !dashCustomWorkerName.trim()) 
+                              ? (isDaylight ? '#94A3B8' : '#64748B') 
+                              : '#FFFFFF',
+                            border: 'none',
+                            fontSize: '12.5px',
+                            fontWeight: 900,
+                            cursor: (!dashSelectedUserToAdd && !dashCustomWorkerName.trim()) ? 'not-allowed' : 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            gap: '6px',
+                            boxShadow: (!dashSelectedUserToAdd && !dashCustomWorkerName.trim()) ? 'none' : '0 2px 8px rgba(16, 185, 129, 0.3)'
+                          }}
+                        >
+                          <span>➕ تعيين العامل</span>
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* قائمة العمال المضافين */}
+                  {editingWorkers.length === 0 ? (
+                    <div style={{
+                      textAlign: 'center',
+                      padding: '30px',
+                      background: isDaylight ? '#FFFFFF' : 'rgba(255, 255, 255, 0.02)',
+                      border: isDaylight ? '1px dashed #CBD5E1' : '1px dashed rgba(255, 255, 255, 0.15)',
+                      borderRadius: '12px',
+                      color: isDaylight ? '#64748B' : '#94A3B8'
+                    }}>
+                      <div style={{ fontSize: '32px', marginBottom: '8px' }}>👷</div>
+                      <div style={{ fontWeight: 800, fontSize: '13px' }}>لم يتم تعيين عمال لهذه المحطة بعد</div>
+                      <div style={{ fontSize: '11.5px', marginTop: '4px' }}>
+                        اختر أو أدخل عمال المحطة أعلاه ثم انقر "تعيين العامل" ليتم حصر صلاحياتهم
+                      </div>
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      {editingWorkers.map((w, idx) => (
+                        <div
+                          key={w.id || idx}
+                          style={{
+                            background: isDaylight ? '#FFFFFF' : 'rgba(255, 255, 255, 0.04)',
+                            border: isDaylight ? '1px solid #E2E8F0' : '1px solid rgba(255, 255, 255, 0.08)',
+                            borderRadius: '12px',
+                            padding: '10px 14px',
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                            flexWrap: 'wrap',
+                            gap: '10px'
+                          }}
+                        >
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <div style={{
+                              width: '36px',
+                              height: '36px',
+                              borderRadius: '10px',
+                              background: 'rgba(16, 185, 129, 0.12)',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              fontSize: '18px'
+                            }}>
+                              👷
+                            </div>
+                            <div>
+                              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                <span style={{ fontWeight: 900, fontSize: '13px', color: isDaylight ? '#2C1A12' : '#F8FAFC' }}>
+                                  {w.name}
+                                </span>
+                                <span style={{
+                                  background: 'rgba(16, 185, 129, 0.12)',
+                                  color: '#10B981',
+                                  border: '1px solid rgba(16, 185, 129, 0.3)',
+                                  padding: '1px 8px',
+                                  borderRadius: '6px',
+                                  fontSize: '10.5px',
+                                  fontWeight: 800
+                                }}>
+                                  {w.role || 'عامل محطة'}
+                                </span>
+                              </div>
+                              <div style={{ fontSize: '11px', color: isDaylight ? '#64748B' : '#94A3B8', marginTop: '2px', display: 'flex', gap: '10px' }}>
+                                <span>📱 {w.phone || 'غير مسجل'}</span>
+                                {w.email && <span>📧 {w.email}</span>}
+                              </div>
+                            </div>
+                          </div>
+
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                            <select
+                              value={w.role || 'مشغل مضخة / كاشير'}
+                              onChange={(e) => handleUpdateWorkerRow(idx, 'role', e.target.value)}
+                              style={{
+                                padding: '4px 8px',
+                                borderRadius: '8px',
+                                background: isDaylight ? '#F8FAFC' : 'rgba(255, 255, 255, 0.05)',
+                                border: isDaylight ? '1px solid #CBD5E1' : '1px solid rgba(255, 255, 255, 0.15)',
+                                color: isDaylight ? '#2C1A12' : '#F8FAFC',
+                                fontSize: '11.5px',
+                                fontWeight: 800
+                              }}
+                            >
+                              <option value="مشغل مضخة / كاشير">مشغل مضخة / كاشير</option>
+                              <option value="كاشير محطة">كاشير محطة</option>
+                              <option value="مشرف وردية">مشرف وردية</option>
+                              <option value="فني صيانة ومضخات">فني صيانة ومضخات</option>
+                              <option value="حارس محطة">حارس محطة</option>
+                            </select>
+
+                            <button
+                              type="button"
+                              onClick={() => handleRemoveWorkerRow(idx)}
+                              title="إلغاء تعيين هذا العامل"
+                              style={{
+                                background: 'rgba(239, 68, 68, 0.12)',
+                                border: '1px solid rgba(239, 68, 68, 0.3)',
+                                color: '#EF4444',
+                                borderRadius: '8px',
+                                width: '30px',
+                                height: '30px',
+                                cursor: 'pointer',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: '13px'
+                              }}
+                            >
+                              🗑️
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* أسفل النافذة والأزرار */}
@@ -2243,7 +2778,7 @@ export default function DashboardPage() {
               alignItems: 'center',
               background: isDaylight ? '#FAF8F5' : 'rgba(255, 255, 255, 0.02)'
             }}>
-              <div style={{ display: 'flex', gap: '14px', fontSize: '12px', color: isDaylight ? '#64748B' : '#94A3B8' }}>
+              <div style={{ display: 'flex', gap: '14px', fontSize: '12px', color: isDaylight ? '#64748B' : '#94A3B8', flexWrap: 'wrap' }}>
                 <span>
                   سعة الخزانات: <strong style={{ color: isDaylight ? '#2C1A12' : '#C29B62' }}>
                     {editingTanks.reduce((sum, t) => sum + (Number(t.capacity_liters) || 0), 0).toLocaleString()} لتر
@@ -2253,6 +2788,12 @@ export default function DashboardPage() {
                 <span>
                   المضخات: <strong style={{ color: isDaylight ? '#007799' : '#00E5FF' }}>
                     {editingPumps.length} مضخة ({editingPumps.filter(p => p.is_active).length} نشطة)
+                  </strong>
+                </span>
+                <span>•</span>
+                <span>
+                  طاقم العمل: <strong style={{ color: isDaylight ? '#047857' : '#10B981' }}>
+                    {editingWorkers.length} عامل
                   </strong>
                 </span>
               </div>

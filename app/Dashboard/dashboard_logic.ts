@@ -48,7 +48,8 @@ export const useDashboardLogic = () => {
         expenses, invoices, payments, receipts,
         journalLines, accounts,
         warehouses, warehouseInventory, inventoryItems,
-        posShifts
+        posShifts,
+        profilesRes, partnersRes, sessionRes
       ] = await Promise.all([
         fetchAllForDashboard('expenses', 'id, total_price, unit_price, quantity, vat_amount, discount_amount, paid_amount, is_posted, main_category, created_at'),
         fetchAllForDashboard('invoices', 'id, total_amount, status, created_at'),
@@ -59,7 +60,10 @@ export const useDashboardLogic = () => {
         fetchAllForDashboard('warehouses', 'id, name, type, location, phone, manager_name, is_active, tank_capacity_liters, fuel_type, description'),
         fetchAllForDashboard('warehouse_inventory', 'warehouse_id, item_id, quantity'),
         fetchAllForDashboard('inventory_items', 'id, name, current_quantity, default_price, cost_price, unit'),
-        fetchAllForDashboard('pos_shifts', 'id, opened_at, closed_at, status, starting_cash, expected_cash, actual_cash, total_sales')
+        fetchAllForDashboard('pos_shifts', 'id, opened_at, closed_at, status, starting_cash, expected_cash, actual_cash, total_sales'),
+        supabase.from('profiles').select('id, full_name, email, phone_number, role, permissions, linked_partner_id'),
+        supabase.from('partners').select('id, name, phone, partner_type, job_role'),
+        supabase.auth.getSession()
       ]);
 
       // --- ⛽ تحليل حالة مضخات الوقود مباشرة من بيانات المحطات لمنع أخطاء 404 ---
@@ -226,11 +230,11 @@ export const useDashboardLogic = () => {
         .sort((a, b) => b.value - a.value)
         .slice(0, 5);
 
-      // --- ⛽ استخراج خزانات الوقود الحقيقية من المستودعات (Real Fuel Storage Tanks) ---
-      // --- ⛽ استخراج أسطول محطات الوقود مع خزاناتها ومضخاتها ومسؤوليها بدقة فائقة ---
+      // --- ⛽ استخراج أسطول محطات الوقود مع خزاناتها ومضخاتها ومسؤوليها وعمالها بدقة فائقة ---
       const processedStations = (warehouses || []).map(w => {
         let stationTanks: any[] = [];
         let stationPumps: any[] = [];
+        let stationWorkers: any[] = [];
         let notes = '';
 
         try {
@@ -238,6 +242,7 @@ export const useDashboardLogic = () => {
             const parsed = JSON.parse(w.description);
             if (Array.isArray(parsed.tanks)) stationTanks = parsed.tanks;
             if (Array.isArray(parsed.pumps)) stationPumps = parsed.pumps;
+            if (Array.isArray(parsed.workers)) stationWorkers = parsed.workers;
             notes = parsed.notes || '';
           } else {
             notes = w.description || '';
@@ -352,6 +357,8 @@ export const useDashboardLogic = () => {
           notes,
           tanks,
           pumps,
+          workers: stationWorkers,
+          workersCount: stationWorkers.length,
           tanksCount: tanks.length,
           pumpsCount: pumps.length,
           activePumpsCount,
@@ -361,8 +368,72 @@ export const useDashboardLogic = () => {
         };
       });
 
-      const tanksData: any[] = processedStations.flatMap(s => s.tanks);
-      const allPumpsData: any[] = processedStations.flatMap(s => s.pumps);
+      // 👥 تجهيز قائمة المستخدمين المتاحين للإسناد
+      const availableUsers: any[] = [];
+      const seenUserNames = new Set<string>();
+      (profilesRes.data || []).forEach((prof: any) => {
+        const name = (prof.full_name || prof.email?.split('@')[0] || 'مستخدم').trim();
+        seenUserNames.add(name.toLowerCase());
+        availableUsers.push({
+          id: prof.id,
+          user_id: prof.id,
+          name,
+          phone: prof.phone_number || '',
+          email: prof.email || '',
+          role: prof.role || 'مشغل محطة'
+        });
+      });
+      (partnersRes.data || []).forEach((part: any) => {
+        const name = (part.name || '').trim();
+        if (!seenUserNames.has(name.toLowerCase())) {
+          availableUsers.push({
+            id: part.id,
+            user_id: null,
+            name,
+            phone: part.phone || '',
+            email: '',
+            role: part.job_role || 'موظف محطة'
+          });
+        }
+      });
+
+      // 🛡️ فحص هوية المستخدم الحالي وحصر المحطة المفتوحة له فقط
+      const currentUserId = sessionRes.data?.session?.user?.id;
+      const currentUserProf = (profilesRes.data || []).find((p: any) => p.id === currentUserId);
+      const isSuperOrAdmin = currentUserProf?.role === 'admin' || currentUserProf?.role === 'super_admin';
+
+      let displayedStations = processedStations;
+      let isUserRestricted = false;
+      let assignedStationName = '';
+
+      if (!isSuperOrAdmin && currentUserProf) {
+        const permWhId = currentUserProf.permissions?.assigned_warehouse_id;
+        const userPhone = currentUserProf.phone_number;
+        const userEmail = currentUserProf.email;
+        const userName = (currentUserProf.full_name || '').trim().toLowerCase();
+
+        const userStations = processedStations.filter(st => {
+          if (permWhId && st.id === permWhId) return true;
+          if (st.workers && st.workers.some((wrk: any) => 
+            (currentUserProf.id && wrk.user_id === currentUserProf.id) ||
+            (userPhone && wrk.phone && wrk.phone.includes(userPhone)) ||
+            (userEmail && wrk.email && wrk.email.toLowerCase() === userEmail.toLowerCase()) ||
+            (userName && wrk.name && wrk.name.trim().toLowerCase() === userName)
+          )) return true;
+          if (st.managerName && userName && st.managerName.trim().toLowerCase() === userName) return true;
+          if (st.delegate_id && currentUserProf.linked_partner_id && st.delegate_id === currentUserProf.linked_partner_id) return true;
+          return false;
+        });
+
+        if (userStations.length > 0) {
+          displayedStations = userStations;
+          isUserRestricted = true;
+          assignedStationName = userStations[0].name;
+        }
+      }
+
+      const tanksData: any[] = displayedStations.flatMap(s => s.tanks);
+      const allPumpsData: any[] = displayedStations.flatMap(s => s.pumps);
 
       // 📊 إحصائيات الخزانات الإجمالية
       const totalTanksCount = tanksData.length;
@@ -451,7 +522,11 @@ export const useDashboardLogic = () => {
           totalCurrentLiters,
           overallFillPercentage
         },
-        allStations: processedStations,
+        allStations: displayedStations,
+        rawAllStations: processedStations,
+        availableUsers,
+        isUserRestricted,
+        assignedStationName,
         allPumps: allPumpsData,
         projectsStatusData: pumpStatusData,
         warehouseChartData,
@@ -465,9 +540,9 @@ export const useDashboardLogic = () => {
   const queryClient = useQueryClient();
   const { showToast } = useToast();
 
-  // 💾 حفظ وضبط الخزانات والمضخات لأي محطة مباشرة من الداشبورد
+  // 💾 حفظ وضبط الخزانات والمضخات والعمال لأي محطة مباشرة من الداشبورد
   const saveStationTanksMutation = useMutation({
-    mutationFn: async ({ warehouseId, tanks, pumps }: { warehouseId: string, tanks?: any[], pumps?: any[] }) => {
+    mutationFn: async ({ warehouseId, tanks, pumps, workers }: { warehouseId: string, tanks?: any[], pumps?: any[], workers?: any[] }) => {
       const { data: wh, error: fetchErr } = await supabase
         .from('warehouses')
         .select('*')
@@ -514,6 +589,10 @@ export const useDashboardLogic = () => {
         descObj.pumps = formattedPumps;
       }
 
+      if (workers && Array.isArray(workers)) {
+        descObj.workers = workers;
+      }
+
       const { error: updateErr } = await supabase
         .from('warehouses')
         .update({
@@ -524,6 +603,27 @@ export const useDashboardLogic = () => {
         .eq('id', warehouseId);
 
       if (updateErr) throw updateErr;
+
+      // تحديث صلاحيات الحسابات المرتبطة بالعمال وتعيين المحطة لهم فوراً
+      if (warehouseId && Array.isArray(workers)) {
+        for (const w of workers) {
+          if (w.user_id) {
+            try {
+              const { data: prof } = await supabase.from('profiles').select('permissions').eq('id', w.user_id).single();
+              const existingPerms = prof?.permissions || {};
+              await supabase.from('profiles').update({
+                permissions: {
+                  ...existingPerms,
+                  assigned_warehouse_id: warehouseId,
+                  assigned_warehouse_name: wh.name
+                }
+              }).eq('id', w.user_id);
+            } catch (permErr) {
+              console.warn('Could not update profile permissions for worker:', permErr);
+            }
+          }
+        }
+      }
 
       // محاولة حفظ المضخات في جدول fuel_pumps إن كان موجوداً
       if (pumps && Array.isArray(pumps)) {

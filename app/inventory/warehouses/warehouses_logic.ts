@@ -24,11 +24,22 @@ export interface StationPump {
   is_active: boolean;
 }
 
+export interface StationWorker {
+  id?: string;
+  user_id?: string | null;
+  name: string;
+  phone?: string;
+  email?: string;
+  role: string;
+}
+
 export function useWarehousesLogic() {
   const { showToast } = useToast();
   const [warehouses, setWarehouses] = useState<any[]>([]);
   const [fuelPumps, setFuelPumps] = useState<any[]>([]);
   const [fuelItems, setFuelItems] = useState<any[]>([]);
+  const [availableUsers, setAvailableUsers] = useState<any[]>([]);
+  const [currentUserProfile, setCurrentUserProfile] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   
@@ -43,21 +54,64 @@ export function useWarehousesLogic() {
     description: '',
     notes: '',
     tanks: [] as StationTank[],
-    pumps: [] as StationPump[]
+    pumps: [] as StationPump[],
+    workers: [] as StationWorker[]
   });
 
   const fetchData = async () => {
     setIsLoading(true);
     try {
-      const [whRes, itemsRes] = await Promise.all([
+      const [whRes, itemsRes, profRes, partRes, sessionRes] = await Promise.all([
         supabase.from('warehouses').select('*').order('type', { ascending: true }).order('created_at', { ascending: false }),
-        supabase.from('inventory_items').select('id, name, fuel_type, default_price, unit, category').eq('is_active', true)
+        supabase.from('inventory_items').select('id, name, fuel_type, default_price, unit, category').eq('is_active', true),
+        supabase.from('profiles').select('id, full_name, email, phone_number, role, permissions, linked_partner_id').order('full_name'),
+        supabase.from('partners').select('id, name, phone, partner_type, job_role').order('name'),
+        supabase.auth.getSession()
       ]);
 
       if (whRes.error) throw whRes.error;
       if (itemsRes.error) throw itemsRes.error;
       if (whRes.data) setWarehouses(whRes.data);
       if (itemsRes.data) setFuelItems(itemsRes.data);
+
+      // استخراج المستخدمين والموظفين المتاحين لإسنادهم للمحطات
+      const userList: any[] = [];
+      const seenNames = new Set<string>();
+
+      (profRes.data || []).forEach((prof: any) => {
+        const name = (prof.full_name || prof.email?.split('@')[0] || 'مستخدم').trim();
+        seenNames.add(name.toLowerCase());
+        userList.push({
+          id: prof.id,
+          user_id: prof.id,
+          name,
+          phone: prof.phone_number || '',
+          email: prof.email || '',
+          role: prof.role || 'مشغل محطة'
+        });
+      });
+
+      (partRes.data || []).forEach((part: any) => {
+        const name = (part.name || '').trim();
+        if (!seenNames.has(name.toLowerCase())) {
+          userList.push({
+            id: part.id,
+            user_id: null,
+            name,
+            phone: part.phone || '',
+            email: '',
+            role: part.job_role || 'موظف محطة'
+          });
+        }
+      });
+      setAvailableUsers(userList);
+
+      // تحديد بروفايل المستخدم الحالي لفحص الصلاحيات وتقييد المحطات
+      const currentUserId = sessionRes.data?.session?.user?.id;
+      if (currentUserId && profRes.data) {
+        const myProf = profRes.data.find((p: any) => p.id === currentUserId);
+        if (myProf) setCurrentUserProfile(myProf);
+      }
 
       // استرجاع المضخات إما من جدول fuel_pumps أو من JSON المخزن داخل description
       try {
@@ -104,20 +158,18 @@ export function useWarehousesLogic() {
     fetchData();
   }, []);
 
-  // دمج بيانات الخزانات والمضخات لكل محطة لسهولة العرض في الجدول والإحصائيات
+  // دمج بيانات الخزانات والمضخات والعمال لكل محطة لسهولة العرض في الجدول والإحصائيات
   const enrichedWarehouses = useMemo(() => {
-    return warehouses.map(wh => {
+    const rawEnriched = warehouses.map(wh => {
       let tanks: StationTank[] = [];
       let stationPumps: StationPump[] = [];
+      let stationWorkers: StationWorker[] = [];
       if (wh.description) {
         try {
           const parsed = JSON.parse(wh.description);
-          if (Array.isArray(parsed?.tanks)) {
-            tanks = parsed.tanks;
-          }
-          if (Array.isArray(parsed?.pumps)) {
-            stationPumps = parsed.pumps;
-          }
+          if (Array.isArray(parsed?.tanks)) tanks = parsed.tanks;
+          if (Array.isArray(parsed?.pumps)) stationPumps = parsed.pumps;
+          if (Array.isArray(parsed?.workers)) stationWorkers = parsed.workers;
         } catch {
           if (wh.tank_capacity_liters > 0 || wh.fuel_type) {
             tanks = [{
@@ -142,12 +194,39 @@ export function useWarehousesLogic() {
         ...wh,
         tanks,
         pumps: effectivePumps,
+        workers: stationWorkers,
+        workersCount: stationWorkers.length,
         tanksCount: tanks.length,
         pumpsCount: effectivePumps.length,
         totalTanksCapacity: tanks.reduce((sum, t) => sum + (Number(t.capacity_liters) || 0), 0)
       };
     });
-  }, [warehouses, fuelPumps]);
+
+    // 🛡️ إذا كان المستخدم مسجلاً وليس أدمن أو سوبر أدمن، يتم حصر المحطات على محطته المعينة فقط
+    if (currentUserProfile && currentUserProfile.role !== 'admin' && currentUserProfile.role !== 'super_admin') {
+      const permWhId = currentUserProfile.permissions?.assigned_warehouse_id;
+      const userPhone = currentUserProfile.phone_number;
+      const userEmail = currentUserProfile.email;
+      const userName = (currentUserProfile.full_name || '').trim().toLowerCase();
+
+      const filtered = rawEnriched.filter(wh => {
+        if (permWhId && wh.id === permWhId) return true;
+        if (wh.workers && wh.workers.some((wrk: any) => 
+          (currentUserProfile.id && wrk.user_id === currentUserProfile.id) ||
+          (userPhone && wrk.phone && wrk.phone.includes(userPhone)) ||
+          (userEmail && wrk.email && wrk.email.toLowerCase() === userEmail.toLowerCase()) ||
+          (userName && wrk.name && wrk.name.trim().toLowerCase() === userName)
+        )) return true;
+        if (wh.manager_name && userName && wh.manager_name.trim().toLowerCase() === userName) return true;
+        if (wh.delegate_id && currentUserProfile.linked_partner_id && wh.delegate_id === currentUserProfile.linked_partner_id) return true;
+        return false;
+      });
+
+      return filtered.length > 0 ? filtered : rawEnriched;
+    }
+
+    return rawEnriched;
+  }, [warehouses, fuelPumps, currentUserProfile]);
 
   const saveMutation = useMutation({
     mutationFn: async (payload: any) => {
@@ -165,7 +244,8 @@ export function useWarehousesLogic() {
       const descriptionObject = {
         notes: payload.notes || '',
         tanks: tanksData,
-        pumps: payload.pumps || []
+        pumps: payload.pumps || [],
+        workers: payload.workers || []
       };
 
       const dataToSave = {
@@ -189,6 +269,27 @@ export function useWarehousesLogic() {
         const { data: newWh, error } = await supabase.from('warehouses').insert([dataToSave]).select().single();
         if (error) throw error;
         if (newWh) savedStationId = newWh.id;
+      }
+
+      // 2. تحديث صلاحيات الحسابات المرتبطة بالعمال وتعيين المحطة لهم فوراً
+      if (savedStationId && Array.isArray(payload.workers)) {
+        for (const w of payload.workers) {
+          if (w.user_id) {
+            try {
+              const { data: prof } = await supabase.from('profiles').select('permissions').eq('id', w.user_id).single();
+              const existingPerms = prof?.permissions || {};
+              await supabase.from('profiles').update({
+                permissions: {
+                  ...existingPerms,
+                  assigned_warehouse_id: savedStationId,
+                  assigned_warehouse_name: payload.name
+                }
+              }).eq('id', w.user_id);
+            } catch (permErr) {
+              console.warn('Could not update profile permissions for worker:', permErr);
+            }
+          }
+        }
       }
 
       // 2. مزامنة وحفظ مضخات الوقود في جدول fuel_pumps إن كان متاحاً في قاعدة البيانات
@@ -283,18 +384,21 @@ export function useWarehousesLogic() {
         { pump_number: '02', pump_name: 'مضخة 2 (بنزين 91)', fuel_type: 'بنزين 91', unit_price: 2.18, current_meter: 0, is_active: true },
         { pump_number: '03', pump_name: 'مضخة 3 (بنزين 95)', fuel_type: 'بنزين 95', unit_price: 2.33, current_meter: 0, is_active: true },
         { pump_number: '04', pump_name: 'مضخة 4 (ديزل)', fuel_type: 'ديزل', unit_price: 1.15, current_meter: 0, is_active: true }
-      ]
+      ],
+      workers: [] as StationWorker[]
     });
     setIsModalOpen(true);
   };
 
   const handleEdit = (w: any) => {
     let tanks: StationTank[] = [];
+    let stationWorkers: StationWorker[] = [];
     let notes = '';
     if (w.description) {
       try {
         const parsed = JSON.parse(w.description);
         if (Array.isArray(parsed?.tanks)) tanks = parsed.tanks;
+        if (Array.isArray(parsed?.workers)) stationWorkers = parsed.workers;
         notes = parsed?.notes || '';
       } catch {
         notes = w.description || '';
@@ -320,7 +424,8 @@ export function useWarehousesLogic() {
       ...w,
       notes,
       tanks,
-      pumps: stationPumps
+      pumps: stationPumps,
+      workers: stationWorkers
     });
     setIsModalOpen(true);
   };
@@ -401,17 +506,55 @@ export function useWarehousesLogic() {
     });
   };
 
+  // 👷 إدارة عمال ومشغلي المحطة
+  const handleAddWorker = (worker?: Partial<StationWorker>) => {
+    const nextNum = (currentRecord.workers?.length || 0) + 1;
+    setCurrentRecord((prev: any) => ({
+      ...prev,
+      workers: [
+        ...(prev.workers || []),
+        {
+          id: worker?.id || `wrk_${Date.now()}_${nextNum}`,
+          user_id: worker?.user_id || null,
+          name: worker?.name || `عامل ${nextNum}`,
+          phone: worker?.phone || '',
+          email: worker?.email || '',
+          role: worker?.role || 'مشغل مضخة / كاشير'
+        }
+      ]
+    }));
+  };
+
+  const handleUpdateWorker = (index: number, field: string, value: any) => {
+    setCurrentRecord((prev: any) => {
+      const updatedWorkers = [...(prev.workers || [])];
+      updatedWorkers[index] = { ...updatedWorkers[index], [field]: value };
+      return { ...prev, workers: updatedWorkers };
+    });
+  };
+
+  const handleRemoveWorker = (index: number) => {
+    setCurrentRecord((prev: any) => {
+      const updatedWorkers = [...(prev.workers || [])];
+      updatedWorkers.splice(index, 1);
+      return { ...prev, workers: updatedWorkers };
+    });
+  };
+
   return {
     warehouses: enrichedWarehouses,
     rawWarehouses: warehouses,
     fuelPumps,
     fuelItems,
+    availableUsers,
+    currentUserProfile,
     isLoading,
     isModalOpen, setIsModalOpen,
     currentRecord, setCurrentRecord,
     handleAddNew, handleEdit, handleDelete,
     handleAddTank, handleUpdateTank, handleRemoveTank,
     handleAddPump, handleUpdatePump, handleRemovePump,
+    handleAddWorker, handleUpdateWorker, handleRemoveWorker,
     handleSave: () => saveMutation.mutate(currentRecord),
     isSaving: saveMutation.isPending
   };

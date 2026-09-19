@@ -2099,6 +2099,20 @@ export default function PosPage() {
                                 👑 {isEn ? 'Admin Mode' : 'وضع الإدارة'}
                             </span>
                         )}
+                        {logic.isUserStationRestricted && (
+                            <span style={{
+                                background: 'rgba(16, 185, 129, 0.15)',
+                                color: '#10B981',
+                                border: '1px solid rgba(16, 185, 129, 0.35)',
+                                borderRadius: '6px',
+                                padding: '2px 7px',
+                                fontSize: '10px',
+                                fontWeight: 800,
+                                whiteSpace: 'nowrap'
+                            }} title={isEn ? 'Restricted to your assigned station' : 'حسابك مقيد بمحطتك المعتمدة فقط'}>
+                                🔒 {isEn ? 'Assigned Station' : 'محطتك المعتمدة'}
+                            </span>
+                        )}
                     </div>
 
                     {/* مشغل المحطة */}
