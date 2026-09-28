@@ -3,21 +3,16 @@ import { createClient } from '@supabase/supabase-js';
 
 export const dynamic = 'force-dynamic';
 
-const DEFAULT_SERVICE_ROLE_KEY = 
-    process.env.SUPABASE_SERVICE_ROLE_KEY || 
-    Buffer.from('c2Jfc2VjcmV0X1BtOUNCWXFNUjVTZG5XdlRrU1Y3SkFfNlpxN2FfZjc=', 'base64').toString('utf-8');
-
-// تهيئة عميل Supabase بصلاحيات الإدارة (Service Role)
-const getSupabaseAdmin = () => createClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL || 'https://tvfxxonuxkskrthsnrhu.supabase.co',
-    DEFAULT_SERVICE_ROLE_KEY,
-    {
+const getSupabaseAdmin = () => {
+    const url = process.env.NEXT_PUBLIC_SUPABASE_URL || '';
+    const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || '';
+    return createClient(url, key, {
         auth: {
             autoRefreshToken: false,
             persistSession: false
         }
-    }
-);
+    });
+};
 
 // دالة لتنظيف وتنسيق رقم الجوال للبروفايل
 function cleanPhoneNumber(phone?: string) {
