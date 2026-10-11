@@ -134,7 +134,7 @@ export function generateInvoiceWhatsAppMessage(record: any, customer: any, lines
     });
 
     const msg = 
-`💧 *محطات النور للوقود | Al-Noor Gas Stations Station*
+`⛽ *محطة نوره حامد محمد القرني*
 ---------------------------------------
 مرحباً بك عزيزنا: *${clientName}*
 يسعدنا تزويدكم بتفاصيل فاتورتكم:
@@ -142,7 +142,8 @@ export function generateInvoiceWhatsAppMessage(record: any, customer: any, lines
 📄 *رقم الفاتورة:* #${invoiceNum}
 📅 *تاريخ الإصدار:* ${dateStr}
 💳 *طريقة الدفع:* ${paymentMethod}
-🏢 *الرقم الضريبي:* 312487477800003
+🏛️ *سجل تجاري:* 586352397
+🏢 *الرقم الضريبي:* 310147870100003
 
 📦 *تفاصيل الأصناف:*
 ${itemsList || '- تفاصيل المبيعات\n'}
@@ -151,7 +152,7 @@ ${itemsList || '- تفاصيل المبيعات\n'}
 🧾 *ضريبة القيمة المضافة (15%):* ${taxAmount} ر.س
 💎 *الإجمالي النهائي:* ${totalAmount} ر.س
 
-شكراً لتعاملكم مع محطات النور للوقود ⛽🚗
+شكراً لتعاملكم مع محطة نوره حامد محمد القرني ⛽🚗
 خدمة العملاء: info@alnoor-gas.com`;
 
     return msg;

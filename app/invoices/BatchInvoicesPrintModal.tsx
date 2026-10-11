@@ -155,7 +155,7 @@ export default function BatchInvoicesPrintModal({
             let mada = 0;
             let credit = 0;
 
-            (data || []).forEach(inv => {
+            allData.forEach(inv => {
                 const tot = Number(inv.total_amount || 0);
                 const tx = Number(inv.tax_amount || 0);
                 const txb = Number(inv.taxable_amount || (tot - tx));
@@ -195,7 +195,7 @@ export default function BatchInvoicesPrintModal({
     // 🖨️ أمر الطباعة الموحد
     const handlePrint = () => {
         const originalTitle = document.title;
-        document.title = `فواتير_حرارية_محطات_النور_${selectedPeriod}_${dateFrom}_الى_${dateTo}`;
+        document.title = `فواتير_حرارية_محطة_نوره_حامد_${selectedPeriod}_${dateFrom}_الى_${dateTo}`;
         window.print();
         setTimeout(() => { document.title = originalTitle; }, 1000);
     };
@@ -215,16 +215,15 @@ export default function BatchInvoicesPrintModal({
                 const tax = Number(inv.tax_amount || 0);
                 const taxable = Number(inv.taxable_amount || (total - tax));
                 const liters = (total / 2.18).toFixed(2);
-                const qrVal = generateZatcaQR('محطات النور للوقود', '312487477800003', `${inv.date || '2023-07-01'}T12:00:00Z`, total.toFixed(2), tax.toFixed(2));
+                const qrVal = generateZatcaQR('محطة نوره حامد محمد القرني', '310147870100003', `${inv.date || '2023-07-01'}T12:00:00Z`, total.toFixed(2), tax.toFixed(2));
                 const qrImgSrc = `https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=${encodeURIComponent(qrVal)}`;
 
                 return `
                 <div class="thermal-receipt">
                     <div class="header">
-                        <div class="brand">مؤسسة محطات النور للوقود</div>
-                        <div class="sub-brand">لصاحبتها نورة حامد حامد القرني</div>
-                        <div class="info">س.ت: 5855341295 | ترخيص: 43/91</div>
-                        <div class="info">الرقم الضريبي: 312487477800003</div>
+                        <div class="brand">محطة نوره حامد محمد القرني</div>
+                        <div class="info">س.ت: 586352397</div>
+                        <div class="info">الرقم الضريبي: 310147870100003</div>
                         <div class="info">سبت العلاية - عسير - المملكة العربية السعودية</div>
                         <div class="badge">فاتورة ضريبية مبسطة</div>
                         <div class="badge-en">SIMPLIFIED TAX INVOICE</div>
@@ -237,7 +236,7 @@ export default function BatchInvoicesPrintModal({
                         <tr><td>تاريخ ووقت التوريد:</td><td>${inv.date || ''} 10:30 ص</td></tr>
                         <tr><td>العميل:</td><td>${inv.client_name || 'عميل نقدي'}</td></tr>
                         <tr><td>طريقة السداد:</td><td class="bold">${inv.payment_method || 'نقاط بيع (مدى)'}</td></tr>
-                        <tr><td>الفرع / المضخة:</td><td>محطة النور الرئيسية</td></tr>
+                        <tr><td>الفرع / المضخة:</td><td>محطة نوره حامد محمد القرني</td></tr>
                     </table>
 
                     <div class="divider"></div>
@@ -277,7 +276,7 @@ export default function BatchInvoicesPrintModal({
                     </div>
 
                     <div class="footer">
-                        <div>شكراً لزيارتكم محطات النور</div>
+                        <div>شكراً لزيارتكم محطة نوره حامد محمد القرني</div>
                         <div>الأسعار شاملة ضريبة القيمة المضافة 15%</div>
                         <div class="inv-index">فاتورة (${idx + 1} من ${invoices.length})</div>
                     </div>
@@ -289,7 +288,7 @@ export default function BatchInvoicesPrintModal({
 <html dir="rtl" lang="ar">
 <head>
     <meta charset="UTF-8">
-    <title>دفتر الفواتير الحرارية - محطات النور للوقود (${dateFrom} إلى ${dateTo})</title>
+    <title>دفتر الفواتير الحرارية - محطة نوره حامد محمد القرني (${dateFrom} إلى ${dateTo})</title>
     <style>
         body {
             margin: 0;
@@ -386,7 +385,7 @@ export default function BatchInvoicesPrintModal({
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `فواتير_حرارية_محطات_النور_${dateFrom}_الى_${dateTo}.html`;
+            a.download = `فواتير_حرارية_محطة_نوره_حامد_${dateFrom}_الى_${dateTo}.html`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -1092,16 +1091,15 @@ export default function BatchInvoicesPrintModal({
                                 const tax = Number(inv.tax_amount || 0);
                                 const taxable = Number(inv.taxable_amount || (total - tax));
                                 const liters = (total / 2.18).toFixed(2);
-                                const qrVal = generateZatcaQR('محطات النور للوقود', '312487477800003', `${inv.date || '2023-07-01'}T12:00:00Z`, total.toFixed(2), tax.toFixed(2));
+                                const qrVal = generateZatcaQR('محطة نوره حامد محمد القرني', '310147870100003', `${inv.date || '2023-07-01'}T12:00:00Z`, total.toFixed(2), tax.toFixed(2));
 
                                 return (
                                     <div key={inv.id || idx} className="thermal-receipt-card">
                                         
                                         {/* ترويسة الفاتورة الحرارية */}
-                                        <div className="t-brand">مؤسسة محطات النور للوقود</div>
-                                        <div className="t-sub">لصاحبتها نورة حامد حامد القرني</div>
-                                        <div className="t-info">س.ت: 5855341295 | ترخيص: 43/91</div>
-                                        <div className="t-info">الرقم الضريبي: 312487477800003</div>
+                                        <div className="t-brand">محطة نوره حامد محمد القرني</div>
+                                        <div className="t-info">س.ت: 586352397</div>
+                                        <div className="t-info">الرقم الضريبي: 310147870100003</div>
                                         <div className="t-info">سبت العلاية - عسير - المملكة العربية السعودية</div>
                                         
                                         <div className="t-badge">فاتورة ضريبية مبسطة</div>
@@ -1130,7 +1128,7 @@ export default function BatchInvoicesPrintModal({
                                                 </tr>
                                                 <tr>
                                                     <td style={{ color: '#333' }}>الفرع / المنفذ:</td>
-                                                    <td>محطة النور الرئيسية</td>
+                                                    <td>محطة نوره حامد محمد القرني</td>
                                                 </tr>
                                             </tbody>
                                         </table>
@@ -1189,7 +1187,7 @@ export default function BatchInvoicesPrintModal({
 
                                         {/* تذييل الإيصال */}
                                         <div className="t-footer">
-                                            <div>شكراً لزيارتكم محطات النور للوقود</div>
+                                            <div>شكراً لزيارتكم محطة نوره حامد محمد القرني</div>
                                             <div>الأسعار شاملة ضريبة القيمة المضافة 15%</div>
                                             <div style={{ fontSize: '8px', color: '#777', marginTop: '3px' }}>
                                                 فاتورة ({idx + 1} من {invoices.length})
@@ -1207,9 +1205,9 @@ export default function BatchInvoicesPrintModal({
                         <div className="print-paper-sheet">
                             <div className="zatca-sheet-header">
                                 <div className="comp-name-box">
-                                    <h1>مؤسسة محطات النور للوقود</h1>
-                                    <p>سجل تجاري: 5855341295 | ترخيص المحروقات: 43/91</p>
-                                    <p style={{ color: '#0ea5e9' }}>الرقم الضريبي: 312487477800003</p>
+                                    <h1>محطة نوره حامد محمد القرني</h1>
+                                    <p>سجل تجاري: 586352397</p>
+                                    <p style={{ color: '#0ea5e9' }}>الرقم الضريبي: 310147870100003</p>
                                     <p>المملكة العربية السعودية - منطقة عسير - سبت العلاية</p>
                                 </div>
                                 <div className="report-title-badge">
@@ -1219,7 +1217,7 @@ export default function BatchInvoicesPrintModal({
                                 </div>
                                 <div style={{ textAlign: 'left' }}>
                                     <QRCodeSVG 
-                                        value={generateZatcaQR('محطات النور للوقود', '312487477800003', `${dateFrom}T12:00:00Z`, periodSummary.totalAmount.toFixed(2), periodSummary.taxAmount.toFixed(2))}
+                                        value={generateZatcaQR('محطة نوره حامد محمد القرني', '310147870100003', `${dateFrom}T12:00:00Z`, periodSummary.totalAmount.toFixed(2), periodSummary.taxAmount.toFixed(2))}
                                         size={80}
                                         level="M"
                                     />
@@ -1287,7 +1285,7 @@ export default function BatchInvoicesPrintModal({
                                     const total = Number(inv.total_amount || 0);
                                     const tax = Number(inv.tax_amount || 0);
                                     const taxable = Number(inv.taxable_amount || (total - tax));
-                                    const qrVal = generateZatcaQR('محطات النور للوقود', '312487477800003', `${inv.date || '2023-07-01'}T12:00:00Z`, total.toFixed(2), tax.toFixed(2));
+                                    const qrVal = generateZatcaQR('محطة نوره حامد محمد القرني', '310147870100003', `${inv.date || '2023-07-01'}T12:00:00Z`, total.toFixed(2), tax.toFixed(2));
 
                                     return (
                                         <div key={inv.id || idx} style={{ border: '1px solid #cbd5e1', borderRadius: '8px', padding: '12px', background: '#fff' }}>

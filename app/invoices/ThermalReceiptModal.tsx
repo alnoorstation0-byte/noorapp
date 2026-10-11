@@ -158,7 +158,7 @@ export default function ThermalReceiptModal({ isOpen, onClose, record, onOpenA4 
             const totalStr = totalAmount.toFixed(2);
             const vatStr = taxAmount.toFixed(2);
             
-            const qr = generateZatcaQR('محطات النور للوقود', '312487477800003', dateStr, totalStr, vatStr);
+            const qr = generateZatcaQR('محطة نوره حامد محمد القرني', '310147870100003', dateStr, totalStr, vatStr);
             setQrData(qr);
         }
     }, [record, totalAmount, taxAmount]);
@@ -547,11 +547,12 @@ export default function ThermalReceiptModal({ isOpen, onClose, record, onOpenA4 
             <div className="thermal-receipt-container">
                 
                 {/* 1. الشعار والترويسة */}
-                <img src="/logo.png" alt="Al-Noor Gas Stations Logo" className="thermal-logo" />
-                <div style={{ fontSize: '16px', fontWeight: 900, color: '#000', margin: '2px 0' }}>محطات النور للوقود</div>
-                <div style={{ fontSize: '10.5px', fontWeight: 700, letterSpacing: '0.5px' }}>Al-Noor Gas Stations Gas Station</div>
-                <div style={{ fontSize: '10.5px', marginTop: '3px' }}>الرقم الضريبي: 312487477800003</div>
-                <div style={{ fontSize: '10px' }}>الرقم الموحد: 7051013519</div>
+                <img src="/logo.png" alt="Noura Hamed Mohammed Al-Qarni Station Logo" className="thermal-logo" />
+                <div style={{ fontSize: '16px', fontWeight: 900, color: '#000', margin: '2px 0' }}>محطة نوره حامد محمد القرني</div>
+                <div style={{ fontSize: '10.5px', fontWeight: 700, letterSpacing: '0.5px' }}>Noura Hamed Mohammed Al-Qarni Station</div>
+                <div style={{ fontSize: '10.5px', marginTop: '3px' }}>س.ت: 586352397</div>
+                <div style={{ fontSize: '10.5px' }}>الرقم الضريبي: 310147870100003</div>
+                <div style={{ fontSize: '10px' }}>سبت العلاية - عسير - المملكة العربية السعودية</div>
                 
                 <div style={{ margin: '5px 0' }}>
                     <div className="badge-invoice-type">
@@ -702,9 +703,9 @@ export default function ThermalReceiptModal({ isOpen, onClose, record, onOpenA4 
                 {/* 6. التذييل والشروط */}
                 <div style={{ fontSize: '10px', marginTop: '6px', color: '#111', lineHeight: '1.4' }}>
                     تخضع مبيعات المحروقات والخدمات لمعايير الجودة المعتمدة.<br/>
-                    شكراً لتعاملكم مع <strong>محطات النور للوقود</strong> ⛽🚗<br/>
+                    شكراً لتعاملكم مع <strong>محطة نوره حامد محمد القرني</strong> ⛽🚗<br/>
                     خدمة العملاء: info@alnoor-gas.com<br/>
-                    <span style={{ fontSize: '8.5px', color: '#555' }}>تم الإصدار إلكترونياً عبر نظام محطات النور</span>
+                    <span style={{ fontSize: '8.5px', color: '#555' }}>تم الإصدار إلكترونياً عبر نظام محطة نوره حامد محمد القرني</span>
                 </div>
 
             </div>

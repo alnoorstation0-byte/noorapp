@@ -207,7 +207,7 @@ export default function InvoicePrintModal({
     const thermalZatcaQr = useMemo(() => {
         if (!record) return '';
         const dateStr = record.date ? `${record.date.split('T')[0]}T12:00:00Z` : new Date().toISOString();
-        return generateZatcaQR('محطات النور للوقود', '312487477800003', dateStr, totalAmount.toFixed(2), taxAmount.toFixed(2));
+        return generateZatcaQR('محطة نوره حامد محمد القرني', '310147870100003', dateStr, totalAmount.toFixed(2), taxAmount.toFixed(2));
     }, [record, totalAmount, taxAmount]);
 
     // دالة الطباعة
@@ -675,10 +675,10 @@ export default function InvoicePrintModal({
                         </div>
 
                         <div className="header-center">
-                            <h1 style={{ fontSize: '19px', fontWeight: 900, color: '#122946', margin: '0 0 4px 0' }}>محطات النور للوقود</h1>
-                            <h2 style={{ fontSize: '14px', fontWeight: 900, color: '#2891C8', margin: '0 0 6px 0', letterSpacing: '0.5px' }}>Al-Noor Gas Stations Gas Station</h2>
-                            <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#334155' }}>الرقم الضريبي (VAT No): 312487477800003</div>
-                            <div style={{ fontSize: '12px', fontWeight: 700, color: '#334155', marginTop: '2px' }}>الرقم الموحد (Unified No): 7051013519</div>
+                            <h1 style={{ fontSize: '19px', fontWeight: 900, color: '#122946', margin: '0 0 4px 0' }}>محطة نوره حامد محمد القرني</h1>
+                            <h2 style={{ fontSize: '14px', fontWeight: 900, color: '#2891C8', margin: '0 0 6px 0', letterSpacing: '0.5px' }}>Noura Hamed Mohammed Al-Qarni Station</h2>
+                            <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#334155' }}>سجل تجاري (CR): 586352397</div>
+                            <div style={{ fontSize: '12.5px', fontWeight: 700, color: '#334155', marginTop: '2px' }}>الرقم الضريبي (VAT No): 310147870100003</div>
                         </div>
 
                         <div className="header-logo">
@@ -883,11 +883,12 @@ export default function InvoicePrintModal({
                 /* المعاينة الثانية: الإيصال الحراري 80mm المتكامل بالشعار وباركود ZATCA      */
                 /* ========================================================================= */
                 <div className="thermal-preview-box">
-                    <img src="/logo.png" alt="Al-Noor Gas Stations Logo" className="thermal-logo" />
-                    <div style={{ fontSize: '16px', fontWeight: 900, color: '#000', margin: '2px 0' }}>محطات النور للوقود</div>
-                    <div style={{ fontSize: '10.5px', fontWeight: 700, letterSpacing: '0.5px' }}>Al-Noor Gas Stations Gas Station</div>
-                    <div style={{ fontSize: '10.5px', marginTop: '3px' }}>الرقم الضريبي: 312487477800003</div>
-                    <div style={{ fontSize: '10px' }}>الرقم الموحد: 7051013519</div>
+                    <img src="/logo.png" alt="Noura Hamed Mohammed Al-Qarni Station Logo" className="thermal-logo" />
+                    <div style={{ fontSize: '16px', fontWeight: 900, color: '#000', margin: '2px 0' }}>محطة نوره حامد محمد القرني</div>
+                    <div style={{ fontSize: '10.5px', fontWeight: 700, letterSpacing: '0.5px' }}>Noura Hamed Mohammed Al-Qarni Station</div>
+                    <div style={{ fontSize: '10.5px', marginTop: '3px' }}>س.ت: 586352397</div>
+                    <div style={{ fontSize: '10.5px' }}>الرقم الضريبي: 310147870100003</div>
+                    <div style={{ fontSize: '10px' }}>سبت العلاية - عسير - المملكة العربية السعودية</div>
                     
                     <div style={{ margin: '5px 0' }}>
                         <div className="badge-invoice-type">
@@ -1016,9 +1017,9 @@ export default function InvoicePrintModal({
 
                     <div style={{ fontSize: '10px', marginTop: '6px', color: '#111', lineHeight: '1.4' }}>
                         تخضع مبيعات المحروقات والخدمات لمعايير الجودة المعتمدة.<br/>
-                        شكراً لتعاملكم مع <strong>محطات النور للوقود</strong> ⛽🚗<br/>
+                        شكراً لتعاملكم مع <strong>محطة نوره حامد محمد القرني</strong> ⛽🚗<br/>
                         خدمة العملاء: info@alnoor-gas.com<br/>
-                        <span style={{ fontSize: '8.5px', color: '#555' }}>تم الإصدار إلكترونياً عبر نظام محطات النور</span>
+                        <span style={{ fontSize: '8.5px', color: '#555' }}>تم الإصدار إلكترونياً عبر نظام محطة نوره حامد محمد القرني</span>
                     </div>
                 </div>
             )}

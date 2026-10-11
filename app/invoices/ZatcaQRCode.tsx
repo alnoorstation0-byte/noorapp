@@ -37,7 +37,7 @@ export default function ZatcaQRCode({ record }: { record: any }) {
   return (
     <div style={{ padding: '4px', border: `2px solid ${THEME.primary}`, borderRadius: '8px', background: 'white', display: 'inline-block' }}>
       <QRCodeSVG 
-        value={generateQR("محطات النور للوقود", "312487477800003", timestamp, invoiceTotal, taxTotal)} 
+        value={generateQR("محطة نوره حامد محمد القرني", "310147870100003", timestamp, invoiceTotal, taxTotal)} 
         size={90} 
         level="H" 
         imageSettings={{ src: "/logo.png", height: 20, width: 20, excavate: true }} 

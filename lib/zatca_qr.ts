@@ -9,8 +9,8 @@ export function generateZatcaQR(sellerName: string, vatNumber: string, timestamp
     };
 
     const hexString = 
-        getHexForTag(1, sellerName || 'محطات النور للوقود') +
-        getHexForTag(2, vatNumber || '312487477800003') +
+        getHexForTag(1, sellerName || 'محطة نوره حامد محمد القرني') +
+        getHexForTag(2, vatNumber || '310147870100003') +
         getHexForTag(3, timestamp || new Date().toISOString()) +
         getHexForTag(4, total || '0.00') +
         getHexForTag(5, vatTotal || '0.00');
