@@ -20,6 +20,7 @@ import SmartCombo from '@/components/SmartCombo';
   // 🎬 المودالز
 import InvoiceFormModal from './InvoiceFormModal';
 import InvoicePrintModal from './InvoicePrintModal';
+import BatchInvoicesPrintModal from './BatchInvoicesPrintModal';
 import InvoiceReturnModal from './InvoiceReturnModal';
 import ReceiptVoucherModal from '@/app/ReceiptVouchers/ReceiptVoucherModal';
 import LoadingScreen from '@/components/LoadingScreen';
@@ -32,6 +33,7 @@ export default function InvoicesPage() {
   const { can, loading: permsLoading } = usePermissions();
   const [mounted, setMounted] = useState(false);
   const [isPrintModalOpen, setIsPrintModalOpen] = useState(false);
+  const [isBatchPrintModalOpen, setIsBatchPrintModalOpen] = useState(false);
   const [printData, setPrintData] = useState<any>(null);
   
   useEffect(() => {
@@ -1059,6 +1061,32 @@ export default function InvoicesPage() {
                 )}
               </div>
 
+              <button
+                type="button"
+                className="btn-batch-print"
+                onClick={() => setIsBatchPrintModalOpen(true)}
+                title="طباعة وتجميع كافة فواتير الفترة في ملف موحد"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  height: '42px',
+                  padding: '0 18px',
+                  borderRadius: '12px',
+                  fontWeight: 800,
+                  fontSize: '13px',
+                  cursor: 'pointer',
+                  background: 'linear-gradient(135deg, rgba(194, 155, 98, 0.25) 0%, rgba(168, 87, 60, 0.2) 100%)',
+                  border: '1px solid rgba(194, 155, 98, 0.5)',
+                  color: '#2C1A12',
+                  boxShadow: '0 2px 8px rgba(44, 26, 18, 0.08)',
+                  transition: 'all 0.2s'
+                }}
+              >
+                <span>📑</span>
+                <span>طباعة الفواتير المجمعة للفترة</span>
+              </button>
+
               <SecureAction module="invoices" action="create">
                 <button
                   type="button"
@@ -1101,6 +1129,17 @@ export default function InvoicesPage() {
               </div>
 
               <div className="batch-buttons">
+                <button
+                  type="button"
+                  className="batch-btn"
+                  style={{ background: 'linear-gradient(135deg, #0284c7, #0369a1)', color: 'white', display: 'flex', alignItems: 'center', gap: '6px' }}
+                  onClick={() => setIsBatchPrintModalOpen(true)}
+                  title="طباعة وتجميع الفواتير المحددة في ملف واحد"
+                >
+                  <span>🖨️</span>
+                  <span>طباعة المحددة ({logic.selectedIds.length})</span>
+                </button>
+
                 <SecureAction module="invoices" action="post">
                   <button
                     type="button"
@@ -1213,6 +1252,14 @@ export default function InvoicesPage() {
             invoice={logic.selectedInvoiceForReturn}
             onConfirmReturn={logic.handleConfirmReturn}
             isSubmitting={logic.isReturning}
+          />
+      )}
+
+      {mounted && isBatchPrintModalOpen && (
+          <BatchInvoicesPrintModal
+            isOpen={isBatchPrintModalOpen}
+            onClose={() => setIsBatchPrintModalOpen(false)}
+            initialSelectedIds={logic.selectedIds}
           />
       )}
       
