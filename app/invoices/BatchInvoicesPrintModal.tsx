@@ -121,11 +121,31 @@ export default function BatchInvoicesPrintModal({
             // ترتيب زمني تصاعدي للفاحص
             query = query.order('date', { ascending: true }).order('invoice_number', { ascending: true });
 
-            const { data, error, count } = await query.limit(printBatchSize);
-            if (error) throw error;
+            let allData: any[] = [];
+            if (printBatchSize === 0) {
+                // سحب جميع فواتير الفترة عبر دفعات تتابعية
+                let from = 0;
+                const step = 1000;
+                let hasMore = true;
+                while (hasMore) {
+                    const { data: chunk, error: chunkErr } = await query.range(from, from + step - 1);
+                    if (chunkErr) throw chunkErr;
+                    if (chunk && chunk.length > 0) {
+                        allData.push(...chunk);
+                        from += step;
+                        if (chunk.length < step) hasMore = false;
+                    } else {
+                        hasMore = false;
+                    }
+                }
+            } else {
+                const { data, error } = await query.limit(printBatchSize);
+                if (error) throw error;
+                allData = data || [];
+            }
 
-            setInvoices(data || []);
-            setTotalCount(count || data?.length || 0);
+            setInvoices(allData);
+            setTotalCount(allData.length);
 
             // حساب المجاميع
             let total = 0;
@@ -903,16 +923,17 @@ export default function BatchInvoicesPrintModal({
 
                         {/* حجم دفعة العرض */}
                         <div className="filter-field-box">
-                            <label>عرض أول (دفعة):</label>
+                            <label>عرض وتحميل دفعة:</label>
                             <select
                                 value={printBatchSize}
                                 onChange={(e) => setPrintBatchSize(Number(e.target.value))}
                             >
-                                <option value={100}>100 فاتورة</option>
                                 <option value={200}>200 فاتورة</option>
                                 <option value={500}>500 فاتورة</option>
                                 <option value={1000}>1,000 فاتورة</option>
+                                <option value={2500}>2,500 فاتورة</option>
                                 <option value={5000}>5,000 فاتورة</option>
+                                <option value={0}>⚡ جميع فواتير الفترة (الـ 15,583 فاتورة كاملة)</option>
                             </select>
                         </div>
 
@@ -927,6 +948,96 @@ export default function BatchInvoicesPrintModal({
                     >
                         {isLoading ? '⏳ جاري الجلب...' : '🔄 تحديث النتائج'}
                     </button>
+                </div>
+
+                {/* ⚡ قسم التنزيل الفوري الشامل للفواتير الحرارية */}
+                <div style={{
+                    padding: '10px 24px',
+                    background: 'linear-gradient(135deg, rgba(2, 132, 199, 0.12) 0%, rgba(14, 165, 233, 0.06) 100%)',
+                    borderBottom: '1px solid rgba(2, 132, 199, 0.25)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    flexWrap: 'wrap',
+                    gap: '10px'
+                }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', fontWeight: 900, color: '#0369a1' }}>
+                        <span>⚡</span>
+                        <span>تنزيل فوري جاهز لكافة الفواتير الحرارية (15,583 فاتورة):</span>
+                    </div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                        <a
+                            href="/فواتير_حرارية_الربع_الثالث_2023_كاملة.zip"
+                            download="فواتير_حرارية_الربع_الثالث_2023_كاملة.zip"
+                            style={{
+                                background: 'linear-gradient(135deg, #0284c7, #0369a1)',
+                                color: '#ffffff',
+                                textDecoration: 'none',
+                                padding: '6px 14px',
+                                borderRadius: '8px',
+                                fontSize: '12px',
+                                fontWeight: 900,
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '6px',
+                                boxShadow: '0 2px 6px rgba(2, 132, 199, 0.3)'
+                            }}
+                        >
+                            <span>📦</span>
+                            <span>تحميل الحزمة الشاملة كاملة (15,583 فاتورة - ZIP)</span>
+                        </a>
+                        <a
+                            href="/فواتير_حرارية_شهر_7_يوليو_2023.html"
+                            target="_blank"
+                            download="فواتير_حرارية_شهر_7_يوليو_2023.html"
+                            style={{
+                                background: '#ffffff',
+                                color: '#0369a1',
+                                border: '1px solid #0284c7',
+                                textDecoration: 'none',
+                                padding: '6px 10px',
+                                borderRadius: '8px',
+                                fontSize: '11px',
+                                fontWeight: 800
+                            }}
+                        >
+                            📅 شهر 7 (5,634 فاتورة)
+                        </a>
+                        <a
+                            href="/فواتير_حرارية_شهر_8_أغسطس_2023.html"
+                            target="_blank"
+                            download="فواتير_حرارية_شهر_8_أغسطس_2023.html"
+                            style={{
+                                background: '#ffffff',
+                                color: '#0369a1',
+                                border: '1px solid #0284c7',
+                                textDecoration: 'none',
+                                padding: '6px 10px',
+                                borderRadius: '8px',
+                                fontSize: '11px',
+                                fontWeight: 800
+                            }}
+                        >
+                            📅 شهر 8 (5,004 فاتورة)
+                        </a>
+                        <a
+                            href="/فواتير_حرارية_شهر_9_سبتمبر_2023.html"
+                            target="_blank"
+                            download="فواتير_حرارية_شهر_9_سبتمبر_2023.html"
+                            style={{
+                                background: '#ffffff',
+                                color: '#0369a1',
+                                border: '1px solid #0284c7',
+                                textDecoration: 'none',
+                                padding: '6px 10px',
+                                borderRadius: '8px',
+                                fontSize: '11px',
+                                fontWeight: 800
+                            }}
+                        >
+                            📅 شهر 9 (4,945 فاتورة)
+                        </a>
+                    </div>
                 </div>
 
                 {/* 3. شريط المؤشرات الحية للفترة */}

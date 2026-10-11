@@ -5,3 +5,4 @@ backups/*.json
 scratch/
 ~$*
 *.tmp
+public/*.html
