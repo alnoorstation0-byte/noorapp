@@ -1,7 +1,6 @@
 "use client";
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
-import { THEME } from '@/lib/theme';
 import { formatCurrency } from '@/lib/helpers';
 import { QRCodeSVG } from 'qrcode.react';
 import { generateZatcaQR } from '@/lib/zatca_qr';
@@ -38,8 +37,12 @@ export default function BatchInvoicesPrintModal({
     const [dateTo, setDateTo] = useState<string>('2023-09-30');
     
     const [paymentMethodFilter, setPaymentMethodFilter] = useState<'all' | 'mada' | 'cash' | 'credit'>('all');
-    const [documentLayout, setDocumentLayout] = useState<'statement' | 'book'>('statement');
     
+    // 🧾 نمط المستند الافتراضي: فواتير حرارية 80mm
+    const [documentLayout, setDocumentLayout] = useState<'thermal' | 'statement' | 'book'>('thermal');
+    // نمط ورق الطباعة الحرارية: رول 80mm أو شبكة A4
+    const [thermalPaperMode, setThermalPaperMode] = useState<'roll80' | 'gridA4'>('roll80');
+
     const [isLoading, setIsLoading] = useState(false);
     const [invoices, setInvoices] = useState<any[]>([]);
     const [totalCount, setTotalCount] = useState<number>(0);
@@ -52,8 +55,10 @@ export default function BatchInvoicesPrintModal({
         creditTotal: 0
     });
 
-    // حد المعاينة والطباعة لحماية أداء المتصفح من التجمد
+    // حجم دفعة المعاينة والطباعة لحماية المتصفح
     const [printBatchSize, setPrintBatchSize] = useState<number>(200);
+
+    const printContainerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         setMounted(true);
@@ -116,7 +121,6 @@ export default function BatchInvoicesPrintModal({
             // ترتيب زمني تصاعدي للفاحص
             query = query.order('date', { ascending: true }).order('invoice_number', { ascending: true });
 
-            // أولاً: جلب الإحصائيات الكاملة
             const { data, error, count } = await query.limit(printBatchSize);
             if (error) throw error;
 
@@ -171,9 +175,208 @@ export default function BatchInvoicesPrintModal({
     // 🖨️ أمر الطباعة الموحد
     const handlePrint = () => {
         const originalTitle = document.title;
-        document.title = `دفتر_فواتير_المبيعات_الضريبية_${selectedPeriod}_${dateFrom}_الى_${dateTo}`;
+        document.title = `فواتير_حرارية_محطات_النور_${selectedPeriod}_${dateFrom}_الى_${dateTo}`;
         window.print();
         setTimeout(() => { document.title = originalTitle; }, 1000);
+    };
+
+    // 💾 تنزيل ملف الفواتير الحرارية المستقل (Standalone Thermal HTML)
+    const handleDownloadThermalHtml = () => {
+        if (!invoices || invoices.length === 0) {
+            toast.error('لا توجد فواتير لتنزيلها.');
+            return;
+        }
+
+        const toastId = toast.loading('جاري توليد ملف الفواتير الحرارية المستقل... ⏳');
+        try {
+            // توليد كود HTML مستقل كامل يحتوي على جميع الفواتير الحرارية وباركوداتها
+            const thermalItemsHtml = invoices.map((inv, idx) => {
+                const total = Number(inv.total_amount || 0);
+                const tax = Number(inv.tax_amount || 0);
+                const taxable = Number(inv.taxable_amount || (total - tax));
+                const liters = (total / 2.18).toFixed(2);
+                const qrVal = generateZatcaQR('محطات النور للوقود', '312487477800003', `${inv.date || '2023-07-01'}T12:00:00Z`, total.toFixed(2), tax.toFixed(2));
+                const qrImgSrc = `https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=${encodeURIComponent(qrVal)}`;
+
+                return `
+                <div class="thermal-receipt">
+                    <div class="header">
+                        <div class="brand">مؤسسة محطات النور للوقود</div>
+                        <div class="sub-brand">لصاحبتها نورة حامد حامد القرني</div>
+                        <div class="info">س.ت: 5855341295 | ترخيص: 43/91</div>
+                        <div class="info">الرقم الضريبي: 312487477800003</div>
+                        <div class="info">سبت العلاية - عسير - المملكة العربية السعودية</div>
+                        <div class="badge">فاتورة ضريبية مبسطة</div>
+                        <div class="badge-en">SIMPLIFIED TAX INVOICE</div>
+                    </div>
+
+                    <div class="divider"></div>
+
+                    <table class="meta">
+                        <tr><td>رقم الفاتورة:</td><td class="bold">#${inv.invoice_number || ''}</td></tr>
+                        <tr><td>تاريخ ووقت التوريد:</td><td>${inv.date || ''} 10:30 ص</td></tr>
+                        <tr><td>العميل:</td><td>${inv.client_name || 'عميل نقدي'}</td></tr>
+                        <tr><td>طريقة السداد:</td><td class="bold">${inv.payment_method || 'نقاط بيع (مدى)'}</td></tr>
+                        <tr><td>الفرع / المضخة:</td><td>محطة النور الرئيسية</td></tr>
+                    </table>
+
+                    <div class="divider"></div>
+
+                    <table class="items">
+                        <thead>
+                            <tr>
+                                <th>الصنف</th>
+                                <th>الكمية</th>
+                                <th>السعر</th>
+                                <th>الإجمالي</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>بنزين 91 ممتاز</td>
+                                <td>${liters} لتر</td>
+                                <td>2.18</td>
+                                <td class="bold">${total.toFixed(2)}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+
+                    <div class="divider"></div>
+
+                    <table class="totals">
+                        <tr><td>المبلغ غير شامل الضريبة:</td><td>${taxable.toFixed(2)} ر.س</td></tr>
+                        <tr><td>ضريبة القيمة المضافة (15%):</td><td>${tax.toFixed(2)} ر.س</td></tr>
+                        <tr class="grand-total"><td>الإجمالي شامل الضريبة:</td><td class="bold">${total.toFixed(2)} ر.س</td></tr>
+                    </table>
+
+                    <div class="divider"></div>
+
+                    <div class="qr-box">
+                        <img src="${qrImgSrc}" alt="ZATCA QR" width="90" height="90" />
+                        <div class="qr-text">رمز التحقق الإلكتروني (هيئة الزكاة ZATCA)</div>
+                    </div>
+
+                    <div class="footer">
+                        <div>شكراً لزيارتكم محطات النور</div>
+                        <div>الأسعار شاملة ضريبة القيمة المضافة 15%</div>
+                        <div class="inv-index">فاتورة (${idx + 1} من ${invoices.length})</div>
+                    </div>
+                </div>
+                `;
+            }).join('\n');
+
+            const fullHtml = `<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>دفتر الفواتير الحرارية - محطات النور للوقود (${dateFrom} إلى ${dateTo})</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background: #f1f5f9;
+            font-family: 'Courier New', Courier, monospace, Tahoma, sans-serif;
+            direction: rtl;
+        }
+        .controls {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            background: #1e293b;
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 30px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            display: flex;
+            gap: 10px;
+            z-index: 9999;
+        }
+        .btn {
+            background: #0284c7;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 13px;
+        }
+        .btn:hover { background: #0369a1; }
+        .receipts-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 25px;
+            margin-top: 40px;
+        }
+        .thermal-receipt {
+            width: 78mm;
+            max-width: 80mm;
+            background: white;
+            padding: 6mm 5mm;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            font-size: 11px;
+            line-height: 1.35;
+            color: #000;
+            font-weight: bold;
+            box-sizing: border-box;
+            page-break-after: always;
+            break-after: page;
+        }
+        .header { text-align: center; }
+        .brand { font-size: 14px; font-weight: 900; margin-bottom: 2px; }
+        .sub-brand { font-size: 10px; color: #333; margin-bottom: 3px; }
+        .info { font-size: 10px; color: #222; }
+        .badge { display: inline-block; border: 1.5px solid #000; padding: 2px 8px; font-size: 11px; font-weight: 900; margin: 5px 0 1px 0; border-radius: 4px; }
+        .badge-en { font-size: 9px; letter-spacing: 0.5px; }
+        .divider { border-bottom: 1px dashed #000; margin: 6px 0; width: 100%; }
+        table { width: 100%; border-collapse: collapse; font-size: 11px; }
+        .meta td { padding: 2px 0; }
+        .items th { border-bottom: 1.5px solid #000; border-top: 1.5px solid #000; padding: 3px 1px; text-align: center; font-size: 10px; }
+        .items td { padding: 4px 1px; border-bottom: 1px dashed #666; text-align: center; }
+        .totals td { padding: 2px 0; }
+        .grand-total { font-size: 12px; font-weight: 900; border-top: 1.5px solid #000; }
+        .bold { font-weight: 900; }
+        .qr-box { text-align: center; margin: 8px 0; }
+        .qr-text { font-size: 9px; margin-top: 3px; color: #444; }
+        .footer { text-align: center; font-size: 10px; margin-top: 6px; }
+        .inv-index { font-size: 8px; color: #888; margin-top: 4px; }
+        @media print {
+            body { background: white; padding: 0; }
+            .controls { display: none !important; }
+            .receipts-container { margin: 0; gap: 0; }
+            .thermal-receipt { box-shadow: none; border-radius: 0; margin: 0 auto; page-break-after: always; break-after: page; }
+            @page { size: 80mm auto; margin: 2mm; }
+        }
+    </style>
+</head>
+<body>
+    <div class="controls">
+        <span>🧾 إجمالي الفواتير: ${invoices.length}</span>
+        <button class="btn" onclick="window.print()">🖨️ طباعة لكافة الفواتير (طابعة حرارية / PDF)</button>
+    </div>
+    <div class="receipts-container">
+        ${thermalItemsHtml}
+    </div>
+</body>
+</html>`;
+
+            const blob = new Blob([fullHtml], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `فواتير_حرارية_محطات_النور_${dateFrom}_الى_${dateTo}.html`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+
+            toast.success('✅ تم تنزيل ملف الفواتير الحرارية المستقل بنجاح!', { id: toastId });
+        } catch (err: any) {
+            console.error('Thermal download error:', err);
+            toast.error('حدث خطأ أثناء تنزيل الفواتير الحرارية: ' + err.message, { id: toastId });
+        }
     };
 
     // 📊 تصدير Excel شامل للفترة
@@ -382,11 +585,67 @@ export default function BatchInvoicesPrintModal({
                 .modal-document-scroll-canvas {
                     flex: 1;
                     overflow-y: auto;
-                    background: #525659;
+                    background: #334155;
                     padding: 24px;
                     display: flex;
                     justify-content: center;
                 }
+
+                /* 🧾 صندوق الإيصال الحراري 80mm */
+                .thermal-container-roll {
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
+                    gap: 25px;
+                    width: 100%;
+                }
+                .thermal-container-grid {
+                    display: grid;
+                    grid-template-columns: repeat(auto-fill, minmax(80mm, 1fr));
+                    gap: 20px;
+                    justify-content: center;
+                    max-width: 1100px;
+                    width: 100%;
+                }
+
+                .thermal-receipt-card {
+                    width: 78mm;
+                    max-width: 80mm;
+                    background: #FFFFFF;
+                    padding: 6mm 5mm;
+                    border-radius: 8px;
+                    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+                    color: #000;
+                    font-family: 'Courier New', Courier, monospace, monospace;
+                    font-size: 11px;
+                    line-height: 1.35;
+                    font-weight: bold;
+                    text-align: center;
+                    direction: rtl;
+                    box-sizing: border-box;
+                    page-break-after: always;
+                    break-after: page;
+                }
+
+                .t-brand { font-size: 14px; font-weight: 900; color: #000; margin-bottom: 2px; }
+                .t-sub { font-size: 10px; color: #222; margin-bottom: 2px; }
+                .t-info { font-size: 10px; color: #111; }
+                .t-badge { display: inline-block; border: 1.5px solid #000; padding: 2px 8px; font-size: 11px; font-weight: 900; margin: 5px 0 1px 0; border-radius: 4px; }
+                .t-badge-en { font-size: 9px; letter-spacing: 0.5px; }
+                .t-divider { border-bottom: 1px dashed #000; margin: 6px 0; width: 100%; }
+                .t-meta-table { width: 100%; border-collapse: collapse; font-size: 11px; text-align: right; }
+                .t-meta-table td { padding: 2px 0; }
+                .t-items-table { width: 100%; border-collapse: collapse; font-size: 11px; margin: 4px 0; }
+                .t-items-table th { border-top: 1.5px solid #000; border-bottom: 1.5px solid #000; padding: 3px 1px; text-align: center; font-size: 10px; font-weight: 900; }
+                .t-items-table td { padding: 4px 1px; border-bottom: 1px dashed #555; text-align: center; }
+                .t-totals-table { width: 100%; border-collapse: collapse; font-size: 11px; text-align: right; }
+                .t-totals-table td { padding: 2px 0; }
+                .t-grand-total { font-size: 12px; font-weight: 900; border-top: 1.5px solid #000; }
+                .t-qr-box { text-align: center; margin: 8px 0; }
+                .t-qr-label { font-size: 9px; margin-top: 3px; color: #333; }
+                .t-footer { text-align: center; font-size: 10px; margin-top: 6px; }
+
+                /* 📋 ورقة بيان المبيعات A4 */
                 .print-paper-sheet {
                     background: #FFFFFF;
                     width: 100%;
@@ -398,8 +657,6 @@ export default function BatchInvoicesPrintModal({
                     color: #111827;
                     font-size: 12px;
                 }
-
-                /* 🖨️ ترويسة التقرير الضريبي المعتمد */
                 .zatca-sheet-header {
                     display: flex;
                     align-items: center;
@@ -408,87 +665,15 @@ export default function BatchInvoicesPrintModal({
                     padding-bottom: 18px;
                     margin-bottom: 20px;
                 }
-                .comp-name-box h1 {
-                    margin: 0;
-                    font-size: 20px;
-                    font-weight: 900;
-                    color: #0f172a;
-                }
-                .comp-name-box p {
-                    margin: 3px 0 0 0;
-                    font-size: 12px;
-                    color: #475569;
-                    font-weight: 700;
-                }
-                .report-title-badge {
-                    text-align: center;
-                }
-                .report-title-badge h2 {
-                    margin: 0;
-                    font-size: 16px;
-                    font-weight: 900;
-                    color: #1e293b;
-                    background: #f1f5f9;
-                    padding: 6px 18px;
-                    border-radius: 8px;
-                    border: 1px solid #cbd5e1;
-                }
-                .report-title-badge span {
-                    display: block;
-                    margin-top: 5px;
-                    font-size: 11px;
-                    font-weight: 800;
-                    color: #64748b;
-                }
-
-                /* 🧾 جدول الفواتير الضريبي */
-                .tax-invoices-table {
-                    width: 100%;
-                    border-collapse: collapse;
-                    margin-top: 15px;
-                    font-size: 11px;
-                }
-                .tax-invoices-table th {
-                    background: #1e293b;
-                    color: #FFFFFF;
-                    padding: 8px 6px;
-                    font-weight: 800;
-                    text-align: center;
-                    border: 1px solid #334155;
-                }
-                .tax-invoices-table td {
-                    padding: 6px 8px;
-                    border: 1px solid #e2e8f0;
-                    text-align: center;
-                    font-weight: 600;
-                    color: #1e293b;
-                }
-                .tax-invoices-table tr:nth-child(even) {
-                    background: #f8fafc;
-                }
-                .tax-invoices-table tr.total-row td {
-                    background: #f1f5f9;
-                    font-weight: 900;
-                    font-size: 12px;
-                    border-top: 2px solid #0f172a;
-                }
-
-                /* 🖨️ نمط دفتر الفواتير المصغرة ZATCA */
-                .invoices-grid-cards {
-                    display: grid;
-                    grid-template-columns: repeat(2, 1fr);
-                    gap: 15px;
-                }
-                .single-invoice-card {
-                    border: 1px solid #cbd5e1;
-                    border-radius: 8px;
-                    padding: 12px;
-                    background: #FFFFFF;
-                    display: flex;
-                    flex-direction: column;
-                    justify-content: space-between;
-                    page-break-inside: avoid;
-                }
+                .comp-name-box h1 { margin: 0; font-size: 20px; font-weight: 900; color: #0f172a; }
+                .comp-name-box p { margin: 3px 0 0 0; font-size: 12px; color: #475569; font-weight: 700; }
+                .report-title-badge h2 { margin: 0; font-size: 16px; font-weight: 900; color: #1e293b; background: #f1f5f9; padding: 6px 18px; border-radius: 8px; border: 1px solid #cbd5e1; }
+                .report-title-badge span { display: block; margin-top: 5px; font-size: 11px; font-weight: 800; color: #64748b; }
+                .tax-invoices-table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 11px; }
+                .tax-invoices-table th { background: #1e293b; color: #FFFFFF; padding: 8px 6px; font-weight: 800; text-align: center; border: 1px solid #334155; }
+                .tax-invoices-table td { padding: 6px 8px; border: 1px solid #e2e8f0; text-align: center; font-weight: 600; color: #1e293b; }
+                .tax-invoices-table tr:nth-child(even) { background: #f8fafc; }
+                .tax-invoices-table tr.total-row td { background: #f1f5f9; font-weight: 900; font-size: 12px; border-top: 2px solid #0f172a; }
 
                 /* ⚙️ أزرار الإجراءات السفلية */
                 .modal-actions-footer {
@@ -498,6 +683,8 @@ export default function BatchInvoicesPrintModal({
                     display: flex;
                     align-items: center;
                     justify-content: space-between;
+                    flex-wrap: wrap;
+                    gap: 12px;
                 }
                 .btn-action-primary {
                     background: linear-gradient(135deg, #C29B62 0%, #A8573C 100%);
@@ -518,6 +705,25 @@ export default function BatchInvoicesPrintModal({
                 .btn-action-primary:hover {
                     transform: translateY(-2px);
                     box-shadow: 0 8px 18px rgba(168, 87, 60, 0.35);
+                }
+                .btn-action-download {
+                    background: #0284c7;
+                    color: #FFFFFF;
+                    border: none;
+                    height: 44px;
+                    padding: 0 20px;
+                    border-radius: 12px;
+                    font-weight: 900;
+                    font-size: 13px;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    transition: transform 0.2s;
+                }
+                .btn-action-download:hover {
+                    background: #0369a1;
+                    transform: translateY(-2px);
                 }
                 .btn-action-excel {
                     background: #107C41;
@@ -578,6 +784,14 @@ export default function BatchInvoicesPrintModal({
                         padding: 0 !important;
                         overflow: visible !important;
                     }
+                    .thermal-receipt-card {
+                        visibility: visible !important;
+                        box-shadow: none !important;
+                        border-radius: 0 !important;
+                        margin: 0 auto 5mm auto !important;
+                        page-break-after: always !important;
+                        break-after: page !important;
+                    }
                     .print-paper-sheet {
                         visibility: visible !important;
                         box-shadow: none !important;
@@ -585,9 +799,9 @@ export default function BatchInvoicesPrintModal({
                         width: 100% !important;
                         max-width: 100% !important;
                     }
-                    .page-break {
-                        page-break-after: always !important;
-                        break-after: page !important;
+                    @page {
+                        size: auto;
+                        margin: 2mm;
                     }
                 }
             `}</style>
@@ -598,10 +812,10 @@ export default function BatchInvoicesPrintModal({
                 <div className="modal-header-ribbon">
                     <div className="header-title-box">
                         <h2>
-                            <span>📑</span>
-                            <span>دفتر الفواتير الضريبية المجمع (ملف موحد للفترة)</span>
+                            <span>🧾</span>
+                            <span>دفتر الفواتير الحرارية والمجمعة (80mm POS Receipts & Statement)</span>
                         </h2>
-                        <p>تجميع وطباعة فواتير المبيعات الضريبية المعتمدة في ملف واحد متصل للفاحص الضريبي (ZATCA)</p>
+                        <p>تنزيل وطباعة فواتير المبيعات الضريبية كفواتير حرارية معتمدة (ZATCA) في ملف واحد</p>
                     </div>
                     <button type="button" className="btn-close-modal" onClick={onClose} title="إغلاق (Esc)">
                         ✕
@@ -662,15 +876,30 @@ export default function BatchInvoicesPrintModal({
 
                         {/* نمط الإخراج */}
                         <div className="filter-field-box">
-                            <label>تنسيق العرض والطباعة:</label>
+                            <label>تنسيق المستند:</label>
                             <select
                                 value={documentLayout}
                                 onChange={(e) => setDocumentLayout(e.target.value as any)}
                             >
+                                <option value="thermal">🧾 فواتير حرارية (80mm POS Thermal Receipts)</option>
                                 <option value="statement">📋 بيان المبيعات الضريبي الشامل (كشف الفاحص)</option>
-                                <option value="book">🧾 دفتر الفواتير الضريبية (قسائم ZATCA مع QR)</option>
+                                <option value="book">📑 قسائم ضريبية مجمعة (A4 ZATCA Book)</option>
                             </select>
                         </div>
+
+                        {/* نمط عرض الحراري */}
+                        {documentLayout === 'thermal' && (
+                            <div className="filter-field-box">
+                                <label>طريقة عرض الحراري:</label>
+                                <select
+                                    value={thermalPaperMode}
+                                    onChange={(e) => setThermalPaperMode(e.target.value as any)}
+                                >
+                                    <option value="roll80">رول حراري متصل (80mm Roll)</option>
+                                    <option value="gridA4">شبكة إيصالات متجاورة (A4 Grid)</option>
+                                </select>
+                            </div>
+                        )}
 
                         {/* حجم دفعة العرض */}
                         <div className="filter-field-box">
@@ -733,62 +962,160 @@ export default function BatchInvoicesPrintModal({
                 </div>
 
                 {/* 4. مساحة ورقة الطباعة والمعاينة */}
-                <div className="modal-document-scroll-canvas">
-                    <div className="print-paper-sheet">
+                <div className="modal-document-scroll-canvas" ref={printContainerRef}>
+                    
+                    {isLoading ? (
+                        <div style={{ textAlign: 'center', padding: '100px 20px', color: '#FFFFFF', fontWeight: 800 }}>
+                            ⏳ جاري تجهيز وتنسيق الفواتير الحرارية للفترة...
+                        </div>
+                    ) : invoices.length === 0 ? (
+                        <div style={{ textAlign: 'center', padding: '100px 20px', color: '#f87171', fontWeight: 800 }}>
+                            ⚠️ لا توجد فواتير مبيعات مسجلة في النطاق الزمني المحدد.
+                        </div>
+                    ) : documentLayout === 'thermal' ? (
                         
-                        {/* ترويسة التقرير الضريبي الرسمي */}
-                        <div className="zatca-sheet-header">
-                            <div className="comp-name-box">
-                                <h1>مؤسسة محطات النور للوقود</h1>
-                                <p>سجل تجاري: 5855341295 | ترخيص المحروقات: 43/91</p>
-                                <p style={{ color: '#0ea5e9' }}>الرقم الضريبي: 312487477800003</p>
-                                <p>المملكة العربية السعودية - منطقة عسير - سبت العلاية</p>
-                            </div>
+                        /* 🧾 النمط الأول: الفواتير الحرارية 80mm POS Receipts */
+                        <div className={thermalPaperMode === 'roll80' ? 'thermal-container-roll' : 'thermal-container-grid'}>
+                            {invoices.map((inv, idx) => {
+                                const total = Number(inv.total_amount || 0);
+                                const tax = Number(inv.tax_amount || 0);
+                                const taxable = Number(inv.taxable_amount || (total - tax));
+                                const liters = (total / 2.18).toFixed(2);
+                                const qrVal = generateZatcaQR('محطات النور للوقود', '312487477800003', `${inv.date || '2023-07-01'}T12:00:00Z`, total.toFixed(2), tax.toFixed(2));
 
-                            <div className="report-title-badge">
-                                <h2>
-                                    {documentLayout === 'statement' 
-                                        ? 'بيان فواتير المبيعات الضريبية المحلية' 
-                                        : 'دفتر الفواتير الضريبية المبسطة المجمعة'}
-                                </h2>
-                                <span>عن الفترة الضريبية من: {dateFrom} إلى: {dateTo}</span>
-                                <span style={{ color: '#16a34a', fontWeight: 900 }}>الحالة: معتمد ومطابق لإقرار ضريبة القيمة المضافة (15%)</span>
-                            </div>
+                                return (
+                                    <div key={inv.id || idx} className="thermal-receipt-card">
+                                        
+                                        {/* ترويسة الفاتورة الحرارية */}
+                                        <div className="t-brand">مؤسسة محطات النور للوقود</div>
+                                        <div className="t-sub">لصاحبتها نورة حامد حامد القرني</div>
+                                        <div className="t-info">س.ت: 5855341295 | ترخيص: 43/91</div>
+                                        <div className="t-info">الرقم الضريبي: 312487477800003</div>
+                                        <div className="t-info">سبت العلاية - عسير - المملكة العربية السعودية</div>
+                                        
+                                        <div className="t-badge">فاتورة ضريبية مبسطة</div>
+                                        <div className="t-badge-en">SIMPLIFIED TAX INVOICE</div>
 
-                            <div style={{ textAlign: 'left' }}>
-                                <QRCodeSVG 
-                                    value={generateZatcaQR('محطات النور للوقود', '312487477800003', `${dateFrom}T12:00:00Z`, periodSummary.totalAmount.toFixed(2), periodSummary.taxAmount.toFixed(2))}
-                                    size={80}
-                                    level="M"
-                                />
-                                <span style={{ display: 'block', fontSize: '9px', color: '#64748b', marginTop: '3px' }}>ختم هيئة الزكاة والضريبة</span>
-                            </div>
+                                        <div className="t-divider"></div>
+
+                                        {/* بيانات الفاتورة */}
+                                        <table className="t-meta-table">
+                                            <tbody>
+                                                <tr>
+                                                    <td style={{ width: '38%', color: '#333' }}>رقم الفاتورة:</td>
+                                                    <td style={{ fontWeight: 900 }}>#{inv.invoice_number || ''}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td style={{ color: '#333' }}>تاريخ التوريد:</td>
+                                                    <td>{inv.date || ''} 10:30 ص</td>
+                                                </tr>
+                                                <tr>
+                                                    <td style={{ color: '#333' }}>العميل:</td>
+                                                    <td>{inv.client_name || 'عميل نقدي'}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td style={{ color: '#333' }}>طريقة السداد:</td>
+                                                    <td style={{ fontWeight: 900 }}>{inv.payment_method || 'نقاط بيع (مدى)'}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td style={{ color: '#333' }}>الفرع / المنفذ:</td>
+                                                    <td>محطة النور الرئيسية</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+
+                                        <div className="t-divider"></div>
+
+                                        {/* جدول الأصناف والكميات */}
+                                        <table className="t-items-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>الصنف</th>
+                                                    <th>الكمية</th>
+                                                    <th>السعر</th>
+                                                    <th>الإجمالي</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <tr>
+                                                    <td>بنزين 91</td>
+                                                    <td>{liters} لتر</td>
+                                                    <td>2.18</td>
+                                                    <td style={{ fontWeight: 900 }}>{total.toFixed(2)}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+
+                                        <div className="t-divider"></div>
+
+                                        {/* الإجماليات والضريبة */}
+                                        <table className="t-totals-table">
+                                            <tbody>
+                                                <tr>
+                                                    <td>المجموع غير شامل الضريبة:</td>
+                                                    <td style={{ textAlign: 'left' }}>{taxable.toFixed(2)} ر.س</td>
+                                                </tr>
+                                                <tr>
+                                                    <td>ضريبة القيمة المضافة (15%):</td>
+                                                    <td style={{ textAlign: 'left' }}>{tax.toFixed(2)} ر.س</td>
+                                                </tr>
+                                                <tr className="t-grand-total">
+                                                    <td style={{ paddingTop: '4px' }}>الإجمالي شامل الضريبة:</td>
+                                                    <td style={{ textAlign: 'left', paddingTop: '4px', fontSize: '13px', fontWeight: 900 }}>
+                                                        {total.toFixed(2)} ر.س
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+
+                                        <div className="t-divider"></div>
+
+                                        {/* باركود ZATCA QR Code */}
+                                        <div className="t-qr-box">
+                                            <QRCodeSVG value={qrVal} size={85} level="M" />
+                                            <div className="t-qr-label">رمز التحقق الإلكتروني (هيئة الزكاة ZATCA)</div>
+                                        </div>
+
+                                        {/* تذييل الإيصال */}
+                                        <div className="t-footer">
+                                            <div>شكراً لزيارتكم محطات النور للوقود</div>
+                                            <div>الأسعار شاملة ضريبة القيمة المضافة 15%</div>
+                                            <div style={{ fontSize: '8px', color: '#777', marginTop: '3px' }}>
+                                                فاتورة ({idx + 1} من {invoices.length})
+                                            </div>
+                                        </div>
+
+                                    </div>
+                                );
+                            })}
                         </div>
 
-                        {/* ملخص إقرار الفترة الضريبية */}
-                        <div style={{ background: '#f8fafc', border: '1px solid #cbd5e1', borderRadius: '8px', padding: '12px 18px', marginBottom: '20px' }}>
-                            <div style={{ fontWeight: 900, fontSize: '13px', color: '#1e293b', marginBottom: '8px' }}>
-                                📑 ملخص التوريدات والإقرار الضريبي للفترة المحددة:
+                    ) : documentLayout === 'statement' ? (
+                        
+                        /* 📋 النمط الثاني: بيان المبيعات الضريبي الشامل A4 */
+                        <div className="print-paper-sheet">
+                            <div className="zatca-sheet-header">
+                                <div className="comp-name-box">
+                                    <h1>مؤسسة محطات النور للوقود</h1>
+                                    <p>سجل تجاري: 5855341295 | ترخيص المحروقات: 43/91</p>
+                                    <p style={{ color: '#0ea5e9' }}>الرقم الضريبي: 312487477800003</p>
+                                    <p>المملكة العربية السعودية - منطقة عسير - سبت العلاية</p>
+                                </div>
+                                <div className="report-title-badge">
+                                    <h2>بيان فواتير المبيعات الضريبية المحلية</h2>
+                                    <span>عن الفترة الضريبية من: {dateFrom} إلى: {dateTo}</span>
+                                    <span style={{ color: '#16a34a', fontWeight: 900 }}>الحالة: معتمد ومطابق لإقرار ضريبة القيمة المضافة (15%)</span>
+                                </div>
+                                <div style={{ textAlign: 'left' }}>
+                                    <QRCodeSVG 
+                                        value={generateZatcaQR('محطات النور للوقود', '312487477800003', `${dateFrom}T12:00:00Z`, periodSummary.totalAmount.toFixed(2), periodSummary.taxAmount.toFixed(2))}
+                                        size={80}
+                                        level="M"
+                                    />
+                                    <span style={{ display: 'block', fontSize: '9px', color: '#64748b', marginTop: '3px' }}>ختم هيئة الزكاة والضريبة</span>
+                                </div>
                             </div>
-                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '10px', fontSize: '11px' }}>
-                                <div><b>إجمالي الفواتير:</b> {invoices.length} فاتورة</div>
-                                <div><b>المبيعات الخاضعة للنسبة الأساسية:</b> {formatCurrency(periodSummary.taxableAmount)}</div>
-                                <div><b>إجمالي ضريبة القيمة المضافة (15%):</b> {formatCurrency(periodSummary.taxAmount)}</div>
-                                <div><b>الإجمالي النهائي شامل الضريبة:</b> {formatCurrency(periodSummary.totalAmount)}</div>
-                            </div>
-                        </div>
 
-                        {isLoading ? (
-                            <div style={{ textAlign: 'center', padding: '80px 20px', color: '#64748b', fontWeight: 800 }}>
-                                ⏳ جاري تجهيز وتنسيق مستند الفواتير الضريبية للفترة...
-                            </div>
-                        ) : invoices.length === 0 ? (
-                            <div style={{ textAlign: 'center', padding: '80px 20px', color: '#ef4444', fontWeight: 800 }}>
-                                ⚠️ لا توجد فواتير مبيعات مسجلة في النطاق الزمني المحدد.
-                            </div>
-                        ) : documentLayout === 'statement' ? (
-                            
-                            /* 📋 النمط الأول: بيان المبيعات الضريبي الشامل (كشف الفاحص المعتمد) */
                             <table className="tax-invoices-table">
                                 <thead>
                                     <tr>
@@ -809,13 +1136,7 @@ export default function BatchInvoicesPrintModal({
                                         const total = Number(inv.total_amount || 0);
                                         const tax = Number(inv.tax_amount || 0);
                                         const taxable = Number(inv.taxable_amount || (total - tax));
-                                        
-                                        let itemTitle = 'بنزين 91 ممتاز';
-                                        let liters = (total / 2.18).toFixed(2);
-                                        if (Array.isArray(inv.lines_data) && inv.lines_data.length > 0) {
-                                            itemTitle = inv.lines_data[0].item_name || inv.lines_data[0].name || itemTitle;
-                                            if (inv.lines_data[0].quantity) liters = Number(inv.lines_data[0].quantity).toFixed(2);
-                                        }
+                                        const liters = (total / 2.18).toFixed(2);
 
                                         return (
                                             <tr key={inv.id || idx}>
@@ -824,7 +1145,7 @@ export default function BatchInvoicesPrintModal({
                                                 <td>{inv.date}</td>
                                                 <td>{inv.client_name || 'عميل نقدي'}</td>
                                                 <td>{inv.payment_method || 'مدى'}</td>
-                                                <td>{itemTitle}</td>
+                                                <td>بنزين 91 ممتاز</td>
                                                 <td>{liters}</td>
                                                 <td style={{ textAlign: 'left' }}>{formatCurrency(taxable)}</td>
                                                 <td style={{ textAlign: 'left', color: '#0284c7' }}>{formatCurrency(tax)}</td>
@@ -832,8 +1153,6 @@ export default function BatchInvoicesPrintModal({
                                             </tr>
                                         );
                                     })}
-                                    
-                                    {/* سطر الإجماليات */}
                                     <tr className="total-row">
                                         <td colSpan={7} style={{ textAlign: 'right', paddingRight: '15px' }}>المجموع الإجمالي للفترة:</td>
                                         <td style={{ textAlign: 'left' }}>{formatCurrency(periodSummary.taxableAmount)}</td>
@@ -842,11 +1161,17 @@ export default function BatchInvoicesPrintModal({
                                     </tr>
                                 </tbody>
                             </table>
+                        </div>
 
-                        ) : (
+                    ) : (
 
-                            /* 🧾 النمط الثاني: دفتر الفواتير الضريبية المصغرة المتتالية */
-                            <div className="invoices-grid-cards">
+                        /* 📑 النمط الثالث: قسائم ZATCA مجمعة */
+                        <div className="print-paper-sheet">
+                            <div style={{ textAlign: 'center', marginBottom: '20px' }}>
+                                <h2 style={{ margin: 0 }}>دفتر قسائم الفواتير الضريبية المبسطة</h2>
+                                <p style={{ margin: '4px 0 0 0', color: '#64748b' }}>عن الفترة: {dateFrom} إلى {dateTo}</p>
+                            </div>
+                            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '15px' }}>
                                 {invoices.map((inv, idx) => {
                                     const total = Number(inv.total_amount || 0);
                                     const tax = Number(inv.tax_amount || 0);
@@ -854,62 +1179,60 @@ export default function BatchInvoicesPrintModal({
                                     const qrVal = generateZatcaQR('محطات النور للوقود', '312487477800003', `${inv.date || '2023-07-01'}T12:00:00Z`, total.toFixed(2), tax.toFixed(2));
 
                                     return (
-                                        <div key={inv.id || idx} className="single-invoice-card">
-                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e2e8f0', paddingBottom: '6px', marginBottom: '8px' }}>
+                                        <div key={inv.id || idx} style={{ border: '1px solid #cbd5e1', borderRadius: '8px', padding: '12px', background: '#fff' }}>
+                                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #e2e8f0', paddingBottom: '6px' }}>
                                                 <div>
-                                                    <span style={{ fontWeight: 900, color: '#0369a1', fontSize: '13px' }}>فاتورة #{inv.invoice_number}</span>
-                                                    <span style={{ display: 'block', fontSize: '10px', color: '#64748b' }}>التاريخ: {inv.date}</span>
+                                                    <span style={{ fontWeight: 900, color: '#0369a1' }}>#{inv.invoice_number}</span>
+                                                    <span style={{ display: 'block', fontSize: '10px', color: '#64748b' }}>{inv.date}</span>
                                                 </div>
                                                 <QRCodeSVG value={qrVal} size={50} level="L" />
                                             </div>
-
-                                            <div style={{ fontSize: '10px', display: 'flex', flexDirection: 'column', gap: '3px', color: '#334155' }}>
-                                                <div><b>العميل:</b> {inv.client_name || 'عميل نقدي'}</div>
-                                                <div><b>طريقة السداد:</b> {inv.payment_method || 'نقاط بيع (مدى)'}</div>
-                                                <div><b>الصنف:</b> بنزين 91 ممتاز ({ (total / 2.18).toFixed(2) } لتر)</div>
+                                            <div style={{ fontSize: '11px', marginTop: '6px' }}>
+                                                <div>العميل: {inv.client_name || 'عميل نقدي'}</div>
+                                                <div>السداد: {inv.payment_method || 'نقاط بيع (مدى)'}</div>
+                                                <div>الصنف: بنزين 91 ممتاز ({(total/2.18).toFixed(2)} لتر)</div>
                                             </div>
-
                                             <div style={{ borderTop: '1px dashed #cbd5e1', marginTop: '8px', paddingTop: '6px', display: 'flex', justifyContent: 'space-between', fontSize: '11px' }}>
                                                 <span>الخاضع: {formatCurrency(taxable)}</span>
-                                                <span style={{ color: '#0284c7' }}>الضريبة: {formatCurrency(tax)}</span>
-                                                <span style={{ fontWeight: 900, color: '#0f172a' }}>الإجمالي: {formatCurrency(total)}</span>
+                                                <span style={{ fontWeight: 900 }}>الإجمالي: {formatCurrency(total)}</span>
                                             </div>
                                         </div>
                                     );
                                 })}
                             </div>
-
-                        )}
-
-                        {/* تذييل الاعتماد الرسمي للطباعة */}
-                        <div style={{ marginTop: '40px', paddingTop: '15px', borderTop: '1px solid #cbd5e1', display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontSize: '11px', color: '#64748b' }}>
-                            <div>
-                                <span>تم الاستخراج آلياً من نظام إدارة موارد محطات النور للوقود ERP</span>
-                                <span style={{ display: 'block', fontSize: '10px' }}>تاريخ الاستخراج والطباعة: {new Date().toLocaleDateString('ar-SA')}</span>
-                            </div>
-                            <div style={{ textAlign: 'center' }}>
-                                <span>ختم الإدارة المالية والاعتماد الضريبي</span>
-                                <div style={{ width: '120px', height: '45px', border: '1px dashed #94a3b8', borderRadius: '6px', marginTop: '4px' }} />
-                            </div>
                         </div>
 
-                    </div>
+                    )}
+
                 </div>
 
                 {/* 5. شريط الإجراءات السفلي */}
                 <div className="modal-actions-footer">
                     <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                         <span style={{ fontSize: '12px', fontWeight: 800, color: '#2C1A12' }}>
-                            المستند مجهز لـ {invoices.length} فاتورة في ملف واحد.
+                            المستند مجهز لـ {invoices.length} فاتورة حرارية.
                         </span>
                         {totalCount > printBatchSize && (
                             <span style={{ fontSize: '11px', color: '#A8573C', fontWeight: 700 }}>
-                                (المستند يعرض أول {printBatchSize} فاتورة لحماية المتصفح، يمكنك زيادة الدفعة من القائمة بالأعلى).
+                                (المعاينة تعرض أول {printBatchSize} فاتورة، يمكنك زيادة الدفعة من القائمة بالأعلى أو تنزيل الملف المستقل).
                             </span>
                         )}
                     </div>
 
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                        {/* 💾 زر تنزيل ملف الفواتير الحرارية المستقل */}
+                        <button
+                            type="button"
+                            onClick={handleDownloadThermalHtml}
+                            className="btn-action-download"
+                            disabled={isLoading || invoices.length === 0}
+                            title="تنزيل ملف HTML حراري كامل مستقل لفتحه وطباعته بدون إنترنت"
+                        >
+                            <span>💾</span>
+                            <span>تنزيل الفواتير الحرارية (ملف حراري كامل)</span>
+                        </button>
+
+                        {/* 📊 تصدير Excel */}
                         <button
                             type="button"
                             onClick={handleExportExcel}
@@ -917,9 +1240,10 @@ export default function BatchInvoicesPrintModal({
                             disabled={isLoading || invoices.length === 0}
                         >
                             <span>📊</span>
-                            <span>تصدير Excel موحد للفترة</span>
+                            <span>Excel</span>
                         </button>
 
+                        {/* 🖨️ طباعة موحدة */}
                         <button
                             type="button"
                             onClick={handlePrint}
