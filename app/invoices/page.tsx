@@ -1084,7 +1084,7 @@ export default function InvoicesPage() {
                 }}
               >
                 <span>📑</span>
-                <span>طباعة الفواتير المجمعة للفترة</span>
+                <span>دفتر الفواتير المجمعة للفترة (PDF)</span>
               </button>
 
               <SecureAction module="invoices" action="create">

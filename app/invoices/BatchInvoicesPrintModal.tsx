@@ -16,12 +16,15 @@ interface BatchInvoicesPrintModalProps {
 
 // الفترات الضريبية المعتمدة
 const TAX_PERIODS = [
-    { id: 'Q3-2023', label: 'الربع الثالث 2023 (الفترة الضريبية الحالية)', from: '2023-07-01', to: '2023-09-30' },
+    { id: 'Q3-2023', label: '📋 الربع الثالث 2023 كاملاً (15,583 فاتورة)', from: '2023-07-01', to: '2023-09-30' },
+    { id: 'M7-2023', label: '📅 شهر 7 - يوليو 2023 (5,634 فاتورة)', from: '2023-07-01', to: '2023-07-31' },
+    { id: 'M8-2023', label: '📅 شهر 8 - أغسطس 2023 (5,004 فاتورة)', from: '2023-08-01', to: '2023-08-31' },
+    { id: 'M9-2023', label: '📅 شهر 9 - سبتمبر 2023 (4,945 فاتورة)', from: '2023-09-01', to: '2023-09-30' },
     { id: 'Q4-2023', label: 'الربع الرابع 2023 (Q4 2023)', from: '2023-10-01', to: '2023-12-31' },
     { id: 'Q1-2024', label: 'الربع الأول 2024 (Q1 2024)', from: '2024-01-01', to: '2024-03-31' },
     { id: 'Q2-2024', label: 'الربع الثاني 2024 (Q2 2024)', from: '2024-04-01', to: '2024-06-30' },
     { id: 'Q3-2024', label: 'الربع الثالث 2024 (Q3 2024)', from: '2024-07-01', to: '2024-09-30' },
-    { id: 'custom', label: 'فترة مخصصة (تحديد يدوي من وإلى)', from: '', to: '' },
+    { id: 'custom', label: '⚙️ فترة مخصصة (تحديد يدوي من وإلى)', from: '', to: '' },
 ];
 
 export default function BatchInvoicesPrintModal({
@@ -200,6 +203,28 @@ export default function BatchInvoicesPrintModal({
         setTimeout(() => { document.title = originalTitle; }, 1000);
     };
 
+    // 📄 تصدير وحفظ كملف PDF مخصص للفترة
+    const handleExportPdf = () => {
+        if (!invoices || invoices.length === 0) {
+            toast.error('لا توجد فواتير لتصديرها كملف PDF.');
+            return;
+        }
+        const periodObj = TAX_PERIODS.find(t => t.id === selectedPeriod);
+        const periodLabel = periodObj ? periodObj.label.replace(/[^a-zA-Z0-9\u0621-\u064A_-]/g, '_') : `${dateFrom}_الى_${dateTo}`;
+        const originalTitle = document.title;
+        document.title = `فواتير_حرارية_ضريبية_${periodLabel}_محطة_نوره_حامد_القرني`;
+        toast.success('📄 جاري فتح شاشة الحفظ! اختر "حفظ بتنسيق PDF" (Save as PDF) من نافذة المتصفح.', {
+            duration: 5000,
+            icon: '📄'
+        });
+        setTimeout(() => {
+            window.print();
+        }, 300);
+        setTimeout(() => {
+            document.title = originalTitle;
+        }, 2000);
+    };
+
     // 💾 تنزيل ملف الفواتير الحرارية المستقل (Standalone Thermal HTML)
     const handleDownloadThermalHtml = () => {
         if (!invoices || invoices.length === 0) {
@@ -372,11 +397,22 @@ export default function BatchInvoicesPrintModal({
 <body>
     <div class="controls">
         <span>🧾 إجمالي الفواتير: ${invoices.length}</span>
-        <button class="btn" onclick="window.print()">🖨️ طباعة لكافة الفواتير (طابعة حرارية / PDF)</button>
+        <button class="btn" style="background: #dc2626;" onclick="window.print()">📄 حفظ كملف PDF</button>
+        <button class="btn" onclick="window.print()">🖨️ طباعة الفواتير حرارياً</button>
     </div>
     <div class="receipts-container">
         ${thermalItemsHtml}
     </div>
+    <script>
+        window.addEventListener('DOMContentLoaded', function() {
+            var params = new URLSearchParams(window.location.search);
+            if (params.get('autoprint') === '1' || params.get('pdf') === '1') {
+                setTimeout(function() {
+                    window.print();
+                }, 800);
+            }
+        });
+    </script>
 </body>
 </html>`;
 
@@ -762,6 +798,27 @@ export default function BatchInvoicesPrintModal({
                     background: #0B5C30;
                     transform: translateY(-2px);
                 }
+                .btn-action-pdf {
+                    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+                    color: #FFFFFF;
+                    border: none;
+                    height: 44px;
+                    padding: 0 22px;
+                    border-radius: 12px;
+                    font-weight: 900;
+                    font-size: 13px;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    gap: 8px;
+                    box-shadow: 0 4px 12px rgba(220, 38, 38, 0.28);
+                    transition: all 0.2s;
+                }
+                .btn-action-pdf:hover {
+                    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+                    transform: translateY(-2px);
+                    box-shadow: 0 8px 18px rgba(220, 38, 38, 0.4);
+                }
 
                 /* 🖨️ إعدادات الطباعة عند الضغط على Print */
                 @media print {
@@ -948,93 +1005,146 @@ export default function BatchInvoicesPrintModal({
                     </button>
                 </div>
 
-                {/* ⚡ قسم التنزيل الفوري الشامل للفواتير الحرارية */}
+                {/* ⚡ قسم تنزيل الفترات بصيغة PDF (ملف كامل وملفات شهرية مقسمة) */}
                 <div style={{
-                    padding: '10px 24px',
-                    background: 'linear-gradient(135deg, rgba(2, 132, 199, 0.12) 0%, rgba(14, 165, 233, 0.06) 100%)',
-                    borderBottom: '1px solid rgba(2, 132, 199, 0.25)',
+                    padding: '14px 24px',
+                    background: 'linear-gradient(135deg, rgba(253, 251, 247, 0.95) 0%, rgba(245, 240, 230, 0.85) 100%)',
+                    borderBottom: '1px solid rgba(194, 155, 98, 0.35)',
                     display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    flexWrap: 'wrap',
-                    gap: '10px'
+                    flexDirection: 'column',
+                    gap: '12px'
                 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '12px', fontWeight: 900, color: '#0369a1' }}>
-                        <span>⚡</span>
-                        <span>تنزيل فوري جاهز لكافة الفواتير الحرارية (15,583 فاتورة):</span>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', fontWeight: 900, color: '#2C1A12' }}>
+                            <span>📑</span>
+                            <span>تنزيل الفواتير الحرارية بصيغة PDF (مقسمة لملف كامل وملفات شهرية مستقلة):</span>
+                        </div>
+                        <span style={{ fontSize: '11px', color: '#A8573C', fontWeight: 700 }}>
+                            💡 عند النقر على أي ملف PDF، يفتح مباشرة في نافذة جاهزة للحفظ كـ PDF بضغطة واحدة
+                        </span>
                     </div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                        <a
-                            href="/فواتير_حرارية_الربع_الثالث_2023_كاملة.zip"
-                            download="فواتير_حرارية_الربع_الثالث_2023_كاملة.zip"
-                            style={{
-                                background: 'linear-gradient(135deg, #0284c7, #0369a1)',
-                                color: '#ffffff',
-                                textDecoration: 'none',
-                                padding: '6px 14px',
-                                borderRadius: '8px',
-                                fontSize: '12px',
-                                fontWeight: 900,
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: '6px',
-                                boxShadow: '0 2px 6px rgba(2, 132, 199, 0.3)'
-                            }}
-                        >
-                            <span>📦</span>
-                            <span>تحميل الحزمة الشاملة كاملة (15,583 فاتورة - ZIP)</span>
-                        </a>
-                        <a
-                            href="/فواتير_حرارية_شهر_7_يوليو_2023.html"
-                            target="_blank"
-                            download="فواتير_حرارية_شهر_7_يوليو_2023.html"
-                            style={{
-                                background: '#ffffff',
-                                color: '#0369a1',
-                                border: '1px solid #0284c7',
-                                textDecoration: 'none',
-                                padding: '6px 10px',
-                                borderRadius: '8px',
-                                fontSize: '11px',
-                                fontWeight: 800
-                            }}
-                        >
-                            📅 شهر 7 (5,634 فاتورة)
-                        </a>
-                        <a
-                            href="/فواتير_حرارية_شهر_8_أغسطس_2023.html"
-                            target="_blank"
-                            download="فواتير_حرارية_شهر_8_أغسطس_2023.html"
-                            style={{
-                                background: '#ffffff',
-                                color: '#0369a1',
-                                border: '1px solid #0284c7',
-                                textDecoration: 'none',
-                                padding: '6px 10px',
-                                borderRadius: '8px',
-                                fontSize: '11px',
-                                fontWeight: 800
-                            }}
-                        >
-                            📅 شهر 8 (5,004 فاتورة)
-                        </a>
-                        <a
-                            href="/فواتير_حرارية_شهر_9_سبتمبر_2023.html"
-                            target="_blank"
-                            download="فواتير_حرارية_شهر_9_سبتمبر_2023.html"
-                            style={{
-                                background: '#ffffff',
-                                color: '#0369a1',
-                                border: '1px solid #0284c7',
-                                textDecoration: 'none',
-                                padding: '6px 10px',
-                                borderRadius: '8px',
-                                fontSize: '11px',
-                                fontWeight: 800
-                            }}
-                        >
-                            📅 شهر 9 (4,945 فاتورة)
-                        </a>
+
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+                        {/* 1. الملف الكامل */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                            <span style={{ fontSize: '11px', fontWeight: 900, color: '#2C1A12', background: 'rgba(194, 155, 98, 0.2)', padding: '4px 10px', borderRadius: '6px' }}>
+                                📋 الملف الكامل (الربع 3):
+                            </span>
+                            <a
+                                href="/فواتير_حرارية_الربع_الثالث_2023_الكاملة.html?autoprint=1"
+                                target="_blank"
+                                rel="noreferrer"
+                                style={{
+                                    background: 'linear-gradient(135deg, #dc2626, #b91c1c)',
+                                    color: '#ffffff',
+                                    textDecoration: 'none',
+                                    padding: '7px 14px',
+                                    borderRadius: '8px',
+                                    fontSize: '12px',
+                                    fontWeight: 900,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '6px',
+                                    boxShadow: '0 2px 8px rgba(220, 38, 38, 0.3)'
+                                }}
+                            >
+                                <span>📄</span>
+                                <span>حفظ الربع كاملاً (PDF - 15,583 فاتورة)</span>
+                            </a>
+                            <a
+                                href="/فواتير_حرارية_الربع_الثالث_2023_كاملة.zip"
+                                download="فواتير_حرارية_الربع_الثالث_2023_كاملة.zip"
+                                style={{
+                                    background: 'linear-gradient(135deg, #0284c7, #0369a1)',
+                                    color: '#ffffff',
+                                    textDecoration: 'none',
+                                    padding: '7px 14px',
+                                    borderRadius: '8px',
+                                    fontSize: '12px',
+                                    fontWeight: 900,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '6px',
+                                    boxShadow: '0 2px 8px rgba(2, 132, 199, 0.25)'
+                                }}
+                            >
+                                <span>📦</span>
+                                <span>الحزمة الشاملة كاملة (ZIP)</span>
+                            </a>
+                        </div>
+
+                        {/* 2. الملفات الشهرية المقسمة */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                            <span style={{ fontSize: '11px', fontWeight: 900, color: '#2C1A12', background: 'rgba(168, 87, 60, 0.15)', padding: '4px 10px', borderRadius: '6px' }}>
+                                📅 الملفات الشهرية (PDF):
+                            </span>
+                            <a
+                                href="/فواتير_حرارية_شهر_7_يوليو_2023.html?autoprint=1"
+                                target="_blank"
+                                rel="noreferrer"
+                                style={{
+                                    background: '#ffffff',
+                                    color: '#dc2626',
+                                    border: '1.5px solid #dc2626',
+                                    textDecoration: 'none',
+                                    padding: '6px 12px',
+                                    borderRadius: '8px',
+                                    fontSize: '11px',
+                                    fontWeight: 900,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '5px',
+                                    boxShadow: '0 2px 6px rgba(0,0,0,0.05)'
+                                }}
+                            >
+                                <span>📄</span>
+                                <span>شهر 7 - يوليو (5,634 فاتورة)</span>
+                            </a>
+                            <a
+                                href="/فواتير_حرارية_شهر_8_أغسطس_2023.html?autoprint=1"
+                                target="_blank"
+                                rel="noreferrer"
+                                style={{
+                                    background: '#ffffff',
+                                    color: '#dc2626',
+                                    border: '1.5px solid #dc2626',
+                                    textDecoration: 'none',
+                                    padding: '6px 12px',
+                                    borderRadius: '8px',
+                                    fontSize: '11px',
+                                    fontWeight: 900,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '5px',
+                                    boxShadow: '0 2px 6px rgba(0,0,0,0.05)'
+                                }}
+                            >
+                                <span>📄</span>
+                                <span>شهر 8 - أغسطس (5,004 فاتورة)</span>
+                            </a>
+                            <a
+                                href="/فواتير_حرارية_شهر_9_سبتمبر_2023.html?autoprint=1"
+                                target="_blank"
+                                rel="noreferrer"
+                                style={{
+                                    background: '#ffffff',
+                                    color: '#dc2626',
+                                    border: '1.5px solid #dc2626',
+                                    textDecoration: 'none',
+                                    padding: '6px 12px',
+                                    borderRadius: '8px',
+                                    fontSize: '11px',
+                                    fontWeight: 900,
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '5px',
+                                    boxShadow: '0 2px 6px rgba(0,0,0,0.05)'
+                                }}
+                            >
+                                <span>📄</span>
+                                <span>شهر 9 - سبتمبر (4,945 فاتورة)</span>
+                            </a>
+                        </div>
                     </div>
                 </div>
 
@@ -1348,7 +1458,19 @@ export default function BatchInvoicesPrintModal({
                             <span>Excel</span>
                         </button>
 
-                        {/* 🖨️ طباعة موحدة */}
+                        {/* 📄 زر تصدير / حفظ كملف PDF المباشر المطلوب */}
+                        <button
+                            type="button"
+                            onClick={handleExportPdf}
+                            className="btn-action-pdf"
+                            disabled={isLoading || invoices.length === 0}
+                            title="تصدير وحفظ فواتير الفترة كملف PDF معتمد"
+                        >
+                            <span>📄</span>
+                            <span>تصدير / حفظ كملف PDF</span>
+                        </button>
+
+                        {/* 🖨️ طباعة فورية */}
                         <button
                             type="button"
                             onClick={handlePrint}
@@ -1356,7 +1478,7 @@ export default function BatchInvoicesPrintModal({
                             disabled={isLoading || invoices.length === 0}
                         >
                             <span>🖨️</span>
-                            <span>طباعة / حفظ كملف PDF موحد</span>
+                            <span>طباعة فورية</span>
                         </button>
 
                         <button
