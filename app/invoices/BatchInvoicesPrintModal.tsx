@@ -278,7 +278,6 @@ export default function BatchInvoicesPrintModal({
                     <div class="footer">
                         <div>شكراً لزيارتكم محطة نوره حامد محمد القرني</div>
                         <div>الأسعار شاملة ضريبة القيمة المضافة 15%</div>
-                        <div class="inv-index">فاتورة (${idx + 1} من ${invoices.length})</div>
                     </div>
                 </div>
                 `;
@@ -1189,9 +1188,6 @@ export default function BatchInvoicesPrintModal({
                                         <div className="t-footer">
                                             <div>شكراً لزيارتكم محطة نوره حامد محمد القرني</div>
                                             <div>الأسعار شاملة ضريبة القيمة المضافة 15%</div>
-                                            <div style={{ fontSize: '8px', color: '#777', marginTop: '3px' }}>
-                                                فاتورة ({idx + 1} من {invoices.length})
-                                            </div>
                                         </div>
 
                                     </div>
