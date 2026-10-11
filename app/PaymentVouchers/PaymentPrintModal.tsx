@@ -34,7 +34,7 @@ export default function PaymentPrintModal({ isOpen, onClose, record }: any) {
                 let fetchedFullName = '';
 
                 if (targetUserId) {
-                    const { data: profile } = await supabase.from('profiles').select('*').eq('id', targetUserId).single();
+                    const { data: profile } = await supabase.from('profiles').select('*').eq('id', targetUserId).maybeSingle();
                     if (profile) fetchedFullName = profile.full_name || profile.name || profile.nickname || '';
                 }
 

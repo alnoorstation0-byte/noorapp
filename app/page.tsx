@@ -65,7 +65,7 @@ export default function WelcomeHomePage() {
                     .from('profiles')
                     .select('quick_links')
                     .eq('id', profile.id)
-                    .single();
+                    .maybeSingle();
                 
                 if (!error && data?.quick_links && Array.isArray(data.quick_links) && data.quick_links.length > 0) {
                     setFavorites(data.quick_links);

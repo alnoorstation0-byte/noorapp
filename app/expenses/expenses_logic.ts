@@ -168,7 +168,7 @@ export function useExpensesLogic() {
         const fetchPerms = async () => {
             const { data: authData } = await supabase.auth.getUser();
             if (authData?.user) {
-                const { data: profile } = await supabase.from('profiles').select('role, permissions').eq('id', authData.user.id).single();
+                const { data: profile } = await supabase.from('profiles').select('role, permissions').eq('id', authData.user.id).maybeSingle();
                 if (profile) { setUserRole(profile.role); setUserPermissions(profile.permissions || {}); }
             }
         };

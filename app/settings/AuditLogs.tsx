@@ -70,7 +70,7 @@ export default function AuditLogs() {
                 const { data: { session }, error } = await supabase.auth.getSession();
                 if (error || !session?.user) return router.push('/login');
 
-                const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
+                const { data: profile } = await supabase.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
                 if (!profile || (profile.role !== 'admin' && profile.role !== 'super_admin' && !profile.permissions?.audit_logs?.view)) {
                     showGlobalToast("⛔ ليس لديك صلاحية لمشاهدة سجل المراقبة.", 'warning');
                     router.push('/');

@@ -609,7 +609,7 @@ export const useDashboardLogic = () => {
         for (const w of workers) {
           if (w.user_id) {
             try {
-              const { data: prof } = await supabase.from('profiles').select('permissions').eq('id', w.user_id).single();
+              const { data: prof } = await supabase.from('profiles').select('permissions').eq('id', w.user_id).maybeSingle();
               const existingPerms = prof?.permissions || {};
               await supabase.from('profiles').update({
                 permissions: {

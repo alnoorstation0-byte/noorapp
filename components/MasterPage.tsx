@@ -269,8 +269,8 @@ export default function MasterPage({ title, subtitle, children, headerContent, i
 
   useEffect(() => {
     fetchPendingCount();
-    // ⏱️ فحص احتياطي كل 5 ثوانٍ لضمان تحديث العدادات والمعلقات بدون ريفرش إطلاقاً
-    const interval = setInterval(fetchPendingCount, 5000);
+    // ⏱️ فحص احتياطي دوري كل دقيقة (حيث أن المزامنة اللحظية Realtime تقوم بالتحديث التلقائي الفوري)
+    const interval = setInterval(fetchPendingCount, 60000);
 
     const handleRefresh = () => fetchPendingCount();
     window.addEventListener('pending_counts_refresh', handleRefresh);
@@ -307,7 +307,7 @@ export default function MasterPage({ title, subtitle, children, headerContent, i
       try {
         const { data: { session } } = await supabase.auth.getSession();
         if (session?.user) {
-          const { data } = await supabase.from('profiles').select('*').eq('id', session.user.id).single();
+          const { data } = await supabase.from('profiles').select('*').eq('id', session.user.id).maybeSingle();
           const emailName = session.user.email ? session.user.email.split('@')[0] : 'المدير';
           setUserProfile({
             ...(data || {}),

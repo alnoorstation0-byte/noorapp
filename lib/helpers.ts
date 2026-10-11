@@ -141,7 +141,7 @@ export const checkAdminApprovalPrivilege = async (
   action: 'تعديل' | 'حذف' = 'حذف'
 ) => {
   const { data: { session } } = await supabase.auth.getSession();
-  const { data: profile } = await supabase.from('profiles').select('role').eq('id', session?.user?.id).single();
+  const { data: profile } = await supabase.from('profiles').select('role').eq('id', session?.user?.id).maybeSingle();
   const isAdmin = profile?.role === 'super_admin' || profile?.role === 'admin';
   
   if (!isAdmin) {

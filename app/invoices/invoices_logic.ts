@@ -90,8 +90,8 @@ export function useInvoicesLogic() {
     const accountsMap = useMemo(() => new Map(accounts.map((a: any) => [a.id, a])), [accounts]);
 
     const { data: rawInvoices = [], isLoading: isInvLoading } = useQuery({
-        queryKey: ['invoices'],
-        staleTime: 0,
+        queryKey: ['invoices', dateFrom, dateTo, statusFilter],
+        staleTime: 30000,
         queryFn: async () => {
             const buildQuery = () => {
                 let q = supabase
@@ -99,6 +99,11 @@ export function useInvoicesLogic() {
                     .select('*')
                     .order('date', { ascending: false });
                 
+                if (dateFrom) q = q.gte('date', dateFrom);
+                if (dateTo) q = q.lte('date', dateTo);
+                if (statusFilter === 'posted') q = q.in('status', ['posted', 'معتمد', 'مرحل', 'approved']);
+                if (statusFilter === 'returned') q = q.in('status', ['مرتجع', 'مرتجع جزئي']);
+
                 // 🛡️ Data Scoping Logic
                 if (profile) {
                     const role = String(profile.role || '').toLowerCase();
@@ -109,7 +114,8 @@ export function useInvoicesLogic() {
                 }
                 return q;
             };
-            return await fetchPaginatedData(buildQuery, 'id');
+            const limit = (dateFrom || dateTo || statusFilter !== 'all') ? 25000 : 3000;
+            return await fetchPaginatedData(buildQuery, 'id', limit, 1000);
         },
         enabled: !!profile // Wait until profile is loaded
     });

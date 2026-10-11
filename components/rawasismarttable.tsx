@@ -108,6 +108,7 @@ interface RawasiSmartTableProps {
     onRowsChange?: (rows: number) => void;
     
     // 🚀 خصائص إضافية مفقودة
+    loading?: boolean;
     isLoading?: boolean;
     enableExport?: boolean;
     onRefresh?: (options?: any) => Promise<any> | void;
@@ -137,8 +138,11 @@ export default function RawasiSmartTable({
     pagination,
     itemsPerPage,
     keyExtractor,
-    rowKey
+    rowKey,
+    loading: propLoading,
+    isLoading: propIsLoading
 }: RawasiSmartTableProps) {
+    const loading = propLoading ?? propIsLoading ?? false;
     const { language, isRtl } = useLanguage();
     const { isDaylight } = useThemeMode();
 
