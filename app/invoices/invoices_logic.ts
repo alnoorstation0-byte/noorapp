@@ -96,8 +96,9 @@ export function useInvoicesLogic() {
             const buildQuery = () => {
                 let q = supabase
                     .from('invoices')
-                    .select('*')
-                    .order('date', { ascending: false });
+                    .select('*', { count: 'exact' })
+                    .order('date', { ascending: false })
+                    .order('id', { ascending: false });
                 
                 if (dateFrom) q = q.gte('date', dateFrom);
                 if (dateTo) q = q.lte('date', dateTo);
@@ -114,7 +115,7 @@ export function useInvoicesLogic() {
                 }
                 return q;
             };
-            const limit = (dateFrom || dateTo || statusFilter !== 'all') ? 25000 : 3000;
+            const limit = 30000;
             return await fetchPaginatedData(buildQuery, 'id', limit, 1000);
         },
         enabled: !!profile // Wait until profile is loaded

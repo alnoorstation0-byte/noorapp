@@ -16,35 +16,72 @@ export async function fetchPaginatedData(
 ) {
     const allData: any[] = [];
     const seenIds = new Set<string>();
-    let from = 0;
-    let hasMore = true;
-    let loopGuard = 0;
+
+    const appendRows = (rows: any[], offset: number) => {
+        let idx = offset;
+        for (const row of rows) {
+            const id = typeof primaryKey === 'function' ? primaryKey(row, idx) : String(row[primaryKey]);
+            if (!seenIds.has(id)) {
+                seenIds.add(id);
+                allData.push(row);
+            }
+            idx++;
+        }
+    };
+
+    // 🚀 جلب الدفعة الأولى ومعرفة العدد الإجمالي إذا كان count مطلوباً
+    const firstQuery = buildQuery().range(0, step - 1);
+    const { data: firstData, count, error: firstErr } = await firstQuery;
+    if (firstErr) throw new Error(firstErr.message);
+
+    if (firstData && firstData.length > 0) {
+        appendRows(firstData, 0);
+    }
+
+    // ⚡ إذا كان العدد الإجمالي count متوفراً وأكبر من الدفعة الأولى، نجلبه بالتوازي لتسريع الأداء
+    if (typeof count === 'number' && count > step) {
+        const targetTotal = Math.min(count, maxRows);
+        const ranges: { from: number; to: number }[] = [];
+        for (let from = step; from < targetTotal; from += step) {
+            ranges.push({ from, to: Math.min(from + step - 1, targetTotal - 1) });
+        }
+
+        const concurrency = 6;
+        for (let i = 0; i < ranges.length; i += concurrency) {
+            const batch = ranges.slice(i, i + concurrency);
+            const promises = batch.map(r => buildQuery().range(r.from, r.to));
+            const results = await Promise.all(promises);
+            for (let j = 0; j < results.length; j++) {
+                const res = results[j];
+                if (res.error) throw new Error(res.error.message);
+                if (res.data) {
+                    appendRows(res.data, batch[j].from);
+                }
+            }
+        }
+        return allData;
+    }
+
+    // 🔄 المسار التتابعي الاحتياطي إذا لم يكن count متاحاً
+    let from = step;
+    let hasMore = firstData && firstData.length === step;
+    let loopGuard = 1;
     const maxLoops = Math.ceil(maxRows / step);
 
     while (hasMore && loopGuard < maxLoops) {
         loopGuard++;
-        // استدعاء buildQuery يضمن لنا إنشاء كائن استعلام جديد نظيف في كل مرة
-        // لمنع تداخل حالة الـ Query Builder في Supabase (v2)
         const query = buildQuery().range(from, from + step - 1);
-        
         const { data, error } = await query;
         if (error) throw new Error(error.message);
 
         if (data && data.length > 0) {
-            let rowIndex = from;
-            for (const row of data) {
-                const id = typeof primaryKey === 'function' ? primaryKey(row, rowIndex) : String(row[primaryKey]);
-                if (!seenIds.has(id)) {
-                    seenIds.add(id);
-                    allData.push(row);
-                }
-                rowIndex++;
-            }
+            appendRows(data, from);
             from += step;
             if (data.length < step) hasMore = false;
         } else {
             hasMore = false;
         }
     }
+
     return allData;
 }
