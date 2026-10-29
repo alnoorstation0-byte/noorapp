@@ -3,7 +3,7 @@ import React, { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { createPortal } from 'react-dom';
 import { formatCurrency } from '@/lib/helpers';
 import { QRCodeSVG } from 'qrcode.react';
-import { generateZatcaQR } from '@/lib/zatca_qr';
+import { COMPANY_INFO, formatZatcaTimestamp, generateZatcaQR } from '@/lib/zatca_qr';
 import { supabase } from '@/lib/supabase';
 import * as XLSX from 'xlsx';
 import { toast } from 'react-hot-toast';
@@ -198,7 +198,7 @@ export default function BatchInvoicesPrintModal({
     // 🖨️ أمر الطباعة الموحد
     const handlePrint = () => {
         const originalTitle = document.title;
-        document.title = `فواتير_حرارية_محطة_نوره_حامد_${selectedPeriod}_${dateFrom}_الى_${dateTo}`;
+        document.title = `فواتير_حرارية_شركة_مدهش_علي_ال_قريع_${selectedPeriod}_${dateFrom}_الى_${dateTo}`;
         window.print();
         setTimeout(() => { document.title = originalTitle; }, 1000);
     };
@@ -212,7 +212,7 @@ export default function BatchInvoicesPrintModal({
         const periodObj = TAX_PERIODS.find(t => t.id === selectedPeriod);
         const periodLabel = periodObj ? periodObj.label.replace(/[^a-zA-Z0-9\u0621-\u064A_-]/g, '_') : `${dateFrom}_الى_${dateTo}`;
         const originalTitle = document.title;
-        document.title = `فواتير_حرارية_ضريبية_${periodLabel}_محطة_نوره_حامد_القرني`;
+        document.title = `فواتير_حرارية_ضريبية_${periodLabel}_شركة_مدهش_علي_ال_قريع`;
         toast.success('📄 جاري فتح شاشة الحفظ! اختر "حفظ بتنسيق PDF" (Save as PDF) من نافذة المتصفح.', {
             duration: 5000,
             icon: '📄'
@@ -240,16 +240,16 @@ export default function BatchInvoicesPrintModal({
                 const tax = Number(inv.tax_amount || 0);
                 const taxable = Number(inv.taxable_amount || (total - tax));
                 const liters = (total / 2.18).toFixed(2);
-                const qrVal = generateZatcaQR('محطة نوره حامد محمد القرني', '310147870100003', `${inv.date || '2023-07-01'}T12:00:00Z`, total.toFixed(2), tax.toFixed(2));
-                const qrImgSrc = `https://api.qrserver.com/v1/create-qr-code/?size=110x110&data=${encodeURIComponent(qrVal)}`;
+                const qrVal = generateZatcaQR(COMPANY_INFO.nameAr, COMPANY_INFO.vatNumber, formatZatcaTimestamp(inv.date, inv.created_at), total.toFixed(2), tax.toFixed(2));
+                const qrImgSrc = `https://api.qrserver.com/v1/create-qr-code/?size=120x120&margin=4&data=${encodeURIComponent(qrVal)}`;
 
                 return `
                 <div class="thermal-receipt">
                     <div class="header">
-                        <div class="brand">محطة نوره حامد محمد القرني</div>
-                        <div class="info">س.ت: 586352397</div>
-                        <div class="info">الرقم الضريبي: 310147870100003</div>
-                        <div class="info">سبت العلاية - عسير - المملكة العربية السعودية</div>
+                        <div class="brand">${COMPANY_INFO.nameAr}</div>
+                        <div class="info">س.ت: ${COMPANY_INFO.crNumber}</div>
+                        <div class="info">الرقم الضريبي: ${COMPANY_INFO.vatNumber}</div>
+                        <div class="info">جوال: ${COMPANY_INFO.phone}</div>
                         <div class="badge">فاتورة ضريبية مبسطة</div>
                         <div class="badge-en">SIMPLIFIED TAX INVOICE</div>
                     </div>
@@ -261,7 +261,7 @@ export default function BatchInvoicesPrintModal({
                         <tr><td>تاريخ ووقت التوريد:</td><td>${inv.date || ''} 10:30 ص</td></tr>
                         <tr><td>العميل:</td><td>${inv.client_name || 'عميل نقدي'}</td></tr>
                         <tr><td>طريقة السداد:</td><td class="bold">${inv.payment_method || 'نقاط بيع (مدى)'}</td></tr>
-                        <tr><td>الفرع / المضخة:</td><td>محطة نوره حامد محمد القرني</td></tr>
+                        <tr><td>الفرع / المضخة:</td><td>${COMPANY_INFO.nameAr}</td></tr>
                     </table>
 
                     <div class="divider"></div>
@@ -301,7 +301,7 @@ export default function BatchInvoicesPrintModal({
                     </div>
 
                     <div class="footer">
-                        <div>شكراً لزيارتكم محطة نوره حامد محمد القرني</div>
+                        <div>شكراً لتعاملكم مع ${COMPANY_INFO.nameAr}</div>
                         <div>الأسعار شاملة ضريبة القيمة المضافة 15%</div>
                     </div>
                 </div>
@@ -312,7 +312,7 @@ export default function BatchInvoicesPrintModal({
 <html dir="rtl" lang="ar">
 <head>
     <meta charset="UTF-8">
-    <title>دفتر الفواتير الحرارية - محطة نوره حامد محمد القرني (${dateFrom} إلى ${dateTo})</title>
+    <title>دفتر الفواتير الحرارية - ${COMPANY_INFO.nameAr} (${dateFrom} إلى ${dateTo})</title>
     <style>
         body {
             margin: 0;
@@ -420,7 +420,7 @@ export default function BatchInvoicesPrintModal({
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `فواتير_حرارية_محطة_نوره_حامد_${dateFrom}_الى_${dateTo}.html`;
+            a.download = `فواتير_حرارية_شركة_مدهش_علي_ال_قريع_${dateFrom}_الى_${dateTo}.html`;
             document.body.appendChild(a);
             a.click();
             document.body.removeChild(a);
@@ -1200,16 +1200,16 @@ export default function BatchInvoicesPrintModal({
                                 const tax = Number(inv.tax_amount || 0);
                                 const taxable = Number(inv.taxable_amount || (total - tax));
                                 const liters = (total / 2.18).toFixed(2);
-                                const qrVal = generateZatcaQR('محطة نوره حامد محمد القرني', '310147870100003', `${inv.date || '2023-07-01'}T12:00:00Z`, total.toFixed(2), tax.toFixed(2));
+                                const qrVal = generateZatcaQR(COMPANY_INFO.nameAr, COMPANY_INFO.vatNumber, formatZatcaTimestamp(inv.date, inv.created_at), total.toFixed(2), tax.toFixed(2));
 
                                 return (
                                     <div key={inv.id || idx} className="thermal-receipt-card">
                                         
                                         {/* ترويسة الفاتورة الحرارية */}
-                                        <div className="t-brand">محطة نوره حامد محمد القرني</div>
-                                        <div className="t-info">س.ت: 586352397</div>
-                                        <div className="t-info">الرقم الضريبي: 310147870100003</div>
-                                        <div className="t-info">سبت العلاية - عسير - المملكة العربية السعودية</div>
+                                        <div className="t-brand">{COMPANY_INFO.nameAr}</div>
+                                        <div className="t-info">س.ت: {COMPANY_INFO.crNumber}</div>
+                                        <div className="t-info">الرقم الضريبي: {COMPANY_INFO.vatNumber}</div>
+                                        <div className="t-info">جوال: {COMPANY_INFO.phone}</div>
                                         
                                         <div className="t-badge">فاتورة ضريبية مبسطة</div>
                                         <div className="t-badge-en">SIMPLIFIED TAX INVOICE</div>
@@ -1237,7 +1237,7 @@ export default function BatchInvoicesPrintModal({
                                                 </tr>
                                                 <tr>
                                                     <td style={{ color: '#333' }}>الفرع / المنفذ:</td>
-                                                    <td>محطة نوره حامد محمد القرني</td>
+                                                    <td>{COMPANY_INFO.nameAr}</td>
                                                 </tr>
                                             </tbody>
                                         </table>
@@ -1290,13 +1290,13 @@ export default function BatchInvoicesPrintModal({
 
                                         {/* باركود ZATCA QR Code */}
                                         <div className="t-qr-box">
-                                            <QRCodeSVG value={qrVal} size={85} level="M" />
+                                            <QRCodeSVG value={qrVal} size={100} level="M" marginSize={2} />
                                             <div className="t-qr-label">رمز التحقق الإلكتروني (هيئة الزكاة ZATCA)</div>
                                         </div>
 
                                         {/* تذييل الإيصال */}
                                         <div className="t-footer">
-                                            <div>شكراً لزيارتكم محطة نوره حامد محمد القرني</div>
+                                            <div>شكراً لتعاملكم مع {COMPANY_INFO.nameAr}</div>
                                             <div>الأسعار شاملة ضريبة القيمة المضافة 15%</div>
                                         </div>
 
@@ -1311,10 +1311,10 @@ export default function BatchInvoicesPrintModal({
                         <div className="print-paper-sheet">
                             <div className="zatca-sheet-header">
                                 <div className="comp-name-box">
-                                    <h1>محطة نوره حامد محمد القرني</h1>
-                                    <p>سجل تجاري: 586352397</p>
-                                    <p style={{ color: '#0ea5e9' }}>الرقم الضريبي: 310147870100003</p>
-                                    <p>المملكة العربية السعودية - منطقة عسير - سبت العلاية</p>
+                                    <h1>{COMPANY_INFO.nameAr}</h1>
+                                    <p>سجل تجاري / الرقم الموحد: {COMPANY_INFO.crNumber}</p>
+                                    <p style={{ color: '#0ea5e9' }}>الرقم الضريبي: {COMPANY_INFO.vatNumber}</p>
+                                    <p>التواصل: {COMPANY_INFO.phone} | {COMPANY_INFO.email}</p>
                                 </div>
                                 <div className="report-title-badge">
                                     <h2>بيان فواتير المبيعات الضريبية المحلية</h2>
@@ -1323,9 +1323,10 @@ export default function BatchInvoicesPrintModal({
                                 </div>
                                 <div style={{ textAlign: 'left' }}>
                                     <QRCodeSVG 
-                                        value={generateZatcaQR('محطة نوره حامد محمد القرني', '310147870100003', `${dateFrom}T12:00:00Z`, periodSummary.totalAmount.toFixed(2), periodSummary.taxAmount.toFixed(2))}
-                                        size={80}
+                                        value={generateZatcaQR(COMPANY_INFO.nameAr, COMPANY_INFO.vatNumber, `${dateFrom}T12:00:00Z`, periodSummary.totalAmount.toFixed(2), periodSummary.taxAmount.toFixed(2))}
+                                        size={90}
                                         level="M"
+                                        marginSize={2}
                                     />
                                     <span style={{ display: 'block', fontSize: '9px', color: '#64748b', marginTop: '3px' }}>ختم هيئة الزكاة والضريبة</span>
                                 </div>
@@ -1391,7 +1392,7 @@ export default function BatchInvoicesPrintModal({
                                     const total = Number(inv.total_amount || 0);
                                     const tax = Number(inv.tax_amount || 0);
                                     const taxable = Number(inv.taxable_amount || (total - tax));
-                                    const qrVal = generateZatcaQR('محطة نوره حامد محمد القرني', '310147870100003', `${inv.date || '2023-07-01'}T12:00:00Z`, total.toFixed(2), tax.toFixed(2));
+                                    const qrVal = generateZatcaQR(COMPANY_INFO.nameAr, COMPANY_INFO.vatNumber, formatZatcaTimestamp(inv.date, inv.created_at), total.toFixed(2), tax.toFixed(2));
 
                                     return (
                                         <div key={inv.id || idx} style={{ border: '1px solid #cbd5e1', borderRadius: '8px', padding: '12px', background: '#fff' }}>
@@ -1400,7 +1401,7 @@ export default function BatchInvoicesPrintModal({
                                                     <span style={{ fontWeight: 900, color: '#0369a1' }}>#{inv.invoice_number}</span>
                                                     <span style={{ display: 'block', fontSize: '10px', color: '#64748b' }}>{inv.date}</span>
                                                 </div>
-                                                <QRCodeSVG value={qrVal} size={50} level="L" />
+                                                <QRCodeSVG value={qrVal} size={75} level="M" marginSize={2} />
                                             </div>
                                             <div style={{ fontSize: '11px', marginTop: '6px' }}>
                                                 <div>العميل: {inv.client_name || 'عميل نقدي'}</div>

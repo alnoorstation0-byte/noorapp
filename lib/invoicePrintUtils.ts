@@ -1,7 +1,8 @@
 /**
  * دالات مساعدة لطباعة ومشاركة الفواتير (A4 والحرارية وواتساب)
- * Al-Noor Gas Stations Gas Station - Invoice Utilities
+ * شركة مدهش علي ال قريع - Invoice Utilities
  */
+import { COMPANY_INFO } from './zatca_qr';
 
 export interface NormalizedInvoiceLine {
     index: number;
@@ -54,11 +55,11 @@ export function normalizeInvoiceLines(record: any): NormalizedInvoiceLine[] {
         sourceArray.forEach((item: any, idx: number) => {
             const name = item.item_name || item.name || item.description || item.title || `صنف #${idx + 1}`;
             const quantity = Number(item.quantity ?? item.qty ?? 1);
-            const unit = item.unit || 'حبة';
+            const unit = item.unit || 'لتر';
             const unit_price = Number(item.unit_price ?? item.price ?? item.selected_price ?? 0);
             const discount = Number(item.discount ?? item.discount_amount ?? 0);
             const total = Number(item.total_price ?? item.total ?? ((quantity * unit_price) - discount));
-            const tax = Number(item.tax ?? item.tax_amount ?? (total * 0.15));
+            const tax = Number(item.tax ?? item.tax_amount ?? (total - (total / 1.15)));
             result.push({
                 index: idx + 1,
                 name,
@@ -76,9 +77,9 @@ export function normalizeInvoiceLines(record: any): NormalizedInvoiceLine[] {
     if (result.length === 0) {
         const hasHeaderItem = record.description || Number(record.quantity || 0) > 0 || Number(record.unit_price || 0) > 0;
         if (hasHeaderItem) {
-            const name = record.description || 'مبيعات منتجات ومستلزمات وقودة';
+            const name = record.description || 'مبيعات محروقات';
             const quantity = Number(record.quantity) > 0 ? Number(record.quantity) : 1;
-            const unit = record.unit || 'حبة';
+            const unit = record.unit || 'لتر';
             const unit_price = Number(record.unit_price) > 0 
                 ? Number(record.unit_price) 
                 : (Number(record.taxable_amount || record.total_amount || 0) / quantity);
@@ -89,7 +90,7 @@ export function normalizeInvoiceLines(record: any): NormalizedInvoiceLine[] {
                 quantity,
                 unit,
                 unit_price,
-                tax: total * 0.15,
+                tax: total - (total / 1.15),
                 total
             });
         }
@@ -134,7 +135,7 @@ export function generateInvoiceWhatsAppMessage(record: any, customer: any, lines
     });
 
     const msg = 
-`⛽ *محطة نوره حامد محمد القرني*
+`⛽ *${COMPANY_INFO.nameAr}*
 ---------------------------------------
 مرحباً بك عزيزنا: *${clientName}*
 يسعدنا تزويدكم بتفاصيل فاتورتكم:
@@ -142,8 +143,8 @@ export function generateInvoiceWhatsAppMessage(record: any, customer: any, lines
 📄 *رقم الفاتورة:* #${invoiceNum}
 📅 *تاريخ الإصدار:* ${dateStr}
 💳 *طريقة الدفع:* ${paymentMethod}
-🏛️ *سجل تجاري:* 586352397
-🏢 *الرقم الضريبي:* 310147870100003
+🏛️ *سجل تجاري / الرقم الموحد:* ${COMPANY_INFO.crNumber}
+🏢 *الرقم الضريبي:* ${COMPANY_INFO.vatNumber}
 
 📦 *تفاصيل الأصناف:*
 ${itemsList || '- تفاصيل المبيعات\n'}
@@ -152,8 +153,8 @@ ${itemsList || '- تفاصيل المبيعات\n'}
 🧾 *ضريبة القيمة المضافة (15%):* ${taxAmount} ر.س
 💎 *الإجمالي النهائي:* ${totalAmount} ر.س
 
-شكراً لتعاملكم مع محطة نوره حامد محمد القرني ⛽🚗
-خدمة العملاء: info@alnoor-gas.com`;
+شكراً لتعاملكم مع ${COMPANY_INFO.nameAr} ⛽🚗
+التواصل: ${COMPANY_INFO.phone} | ${COMPANY_INFO.email}`;
 
     return msg;
 }

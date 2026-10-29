@@ -12,7 +12,7 @@ import { notifyInvoiceCreated } from '@/lib/notificationService';
 
 
 const updateInventoryQty = async (itemId: string, warehouseId: string, qtyChange: number) => {
-    const { data } = await supabase.from('warehouse_inventory').select('*').eq('item_id', itemId).eq('warehouse_id', warehouseId).single();
+    const { data } = await supabase.from('warehouse_inventory').select('*').eq('item_id', itemId).eq('warehouse_id', warehouseId).maybeSingle();
     if (data) {
         await supabase.from('warehouse_inventory').update({ quantity: Number(data.quantity) + qtyChange }).eq('id', data.id);
     } else if (qtyChange > 0) {
@@ -167,7 +167,18 @@ export function useInvoicesLogic() {
                     if (invError) throw invError;
 
                     const itemIds = (invData || []).map((d: any) => d.item_id).filter(Boolean);
-                    if (itemIds.length === 0) return [];
+                    if (itemIds.length === 0) {
+                        const { data: fallbackItems } = await supabase.from('inventory_items').select('id, name, unit, default_price, suggested_price, tax_rate, code');
+                        return (fallbackItems || []).map((d: any) => ({
+                            id: d.id,
+                            name: d.name,
+                            unit: d.unit || 'لتر',
+                            price: d.default_price || d.suggested_price || 0,
+                            quantity: 'متوفر',
+                            tax_rate: d.tax_rate ?? 15,
+                            code: d.code || ''
+                        }));
+                    }
 
                     const { data: itemsData, error: itemsError } = await supabase
                         .from('inventory_items')
@@ -363,7 +374,7 @@ export function useInvoicesLogic() {
             const cleanId = (id: any) => (id && typeof id === 'string' && id.trim() !== '') ? id : null;
             
             if (record.id) {
-                const { data: currentInv } = await supabase.from('invoices').select('status').eq('id', record.id).single();
+                const { data: currentInv } = await supabase.from('invoices').select('status').eq('id', record.id).maybeSingle();
                 if (currentInv && ['posted', 'معتمد', 'مرحل', 'approved'].includes(String(currentInv.status || '').trim().toLowerCase())) {
                     throw new Error("لا يمكن حفظ التعديلات! الفاتورة معتمدة بالفعل في النظام. يرجى فك الترحيل أولاً.");
                 }
@@ -396,12 +407,12 @@ export function useInvoicesLogic() {
                 const { error: headErr } = await supabase.from('invoices').update(invoiceHeader).eq('id', record.id);
                 if (headErr) throw headErr;
             } else {
-                const { data: inserted, error: headErr } = await supabase.from('invoices').insert([invoiceHeader]).select().single();
+                const { data: inserted, error: headErr } = await supabase.from('invoices').insert([invoiceHeader]).select().maybeSingle();
                 if (headErr) throw headErr;
 
-                // AUTO POST INVOICE (If Warehouse is specified)
-                if (invoiceHeader.warehouse_id && inserted) {
-                     await supabase.rpc('post_invoices_bulk', { p_ids: [inserted.id] });
+                // AUTO POST INVOICE (If Warehouse is specified or status is approved)
+                if ((invoiceHeader.warehouse_id || ['posted', 'معتمد', 'مرحل', 'approved'].includes(String(invoiceHeader.status || '').trim().toLowerCase())) && inserted) {
+                     await directPostInvoices([inserted.id]);
                 }
 
                 // 🔔 بث إشعار فوري في النظام وعبر الجوال
@@ -426,21 +437,20 @@ export function useInvoicesLogic() {
 
     // 🛡️ دوال مساعدة للترحيل وفك الترحيل والحذف المباشر (Dual-Layer Fallback)
     const directPostInvoices = async (ids: string[]) => {
-        try {
-            const { error } = await supabase.rpc('post_invoices_bulk', { p_ids: ids });
-            if (!error) return;
-        } catch {}
-
         const { data: invs } = await supabase.from('invoices').select('*').in('id', ids);
         for (const inv of (invs || [])) {
-            if (inv.is_posted || ['posted', 'معتمد', 'مرحل', 'approved'].includes(String(inv.status || '').trim().toLowerCase())) continue;
+            const { data: existingJh } = await supabase.from('journal_headers').select('id').eq('reference_id', inv.id).limit(1).maybeSingle();
+            if (existingJh) {
+                await supabase.from('invoices').update({ status: 'معتمد' }).eq('id', inv.id);
+                continue;
+            }
             const { data: jh } = await supabase.from('journal_headers').insert([{
                 entry_date: inv.date || new Date().toISOString().split('T')[0],
                 description: `فاتورة مبيعات رقم ${inv.invoice_number || ''}`,
                 reference_id: inv.id,
                 v_type: 'invoice',
                 status: 'posted'
-            }]).select().single();
+            }]).select().maybeSingle();
 
             if (jh) {
                 const lines: any[] = [];
@@ -491,28 +501,20 @@ export function useInvoicesLogic() {
     };
 
     const directUnpostInvoices = async (ids: string[]) => {
-        try {
-            const { error } = await supabase.rpc('unpost_invoices_bulk', { p_ids: ids });
-            if (!error) return;
-        } catch {}
-
         const { data: headers } = await supabase.from('journal_headers').select('id').in('reference_id', ids);
         if (headers && headers.length > 0) {
             const headerIds = headers.map(h => h.id);
             await supabase.from('journal_lines').delete().in('header_id', headerIds);
             await supabase.from('journal_headers').delete().in('id', headerIds);
         }
-        await supabase.from('invoices').update({ status: 'مسودة' }).in('id', ids);
+        const { error: updErr } = await supabase.from('invoices').update({ status: 'مسودة' }).in('id', ids);
+        if (updErr) throw updErr;
     };
 
     const directDeleteInvoices = async (ids: string[]) => {
-        try {
-            const { error } = await supabase.rpc('delete_invoices_bulk', { p_ids: ids });
-            if (!error) return;
-        } catch {}
-
         await directUnpostInvoices(ids);
-        await supabase.from('invoices').delete().in('id', ids);
+        const { error: delErr } = await supabase.from('invoices').delete().in('id', ids);
+        if (delErr) throw delErr;
     };
 
     const postMutation = useMutation({
@@ -637,14 +639,11 @@ export function useInvoicesLogic() {
                 partner_id: originalInvoice.partner_id || null,
                 client_name: originalInvoice.client_name || 'عميل نقدي',
                 description: `مرتجع مبيعات للفاتورة #${originalInvoice.invoice_number}${reason ? ` (${reason})` : ''}`,
-                materials_discount: 0,
                 taxable_amount: -returnTaxable,
                 tax_amount: -returnTax,
                 total_amount: -returnTotal,
                 debit_account_id: originalInvoice.credit_account_id, // عكس القيد: مدين إيراد المبيعات
                 credit_account_id: originalInvoice.debit_account_id, // دائن العميل/النقدية
-                materials_acc_id: originalInvoice.materials_acc_id,
-                guarantee_acc_id: originalInvoice.guarantee_acc_id,
                 tax_acc_id: originalInvoice.tax_acc_id,
                 skip_zatca: Boolean(originalInvoice.skip_zatca),
                 status: 'مرتجع',
@@ -663,7 +662,7 @@ export function useInvoicesLogic() {
                 .from('invoices')
                 .insert([returnInvoiceHeader])
                 .select()
-                .single();
+                .maybeSingle();
 
             if (returnErr) throw returnErr;
 

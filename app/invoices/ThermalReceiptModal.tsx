@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useMemo, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { QRCodeSVG } from 'qrcode.react';
-import { generateZatcaQR } from '@/lib/zatca_qr';
+import { COMPANY_INFO, formatZatcaTimestamp, generateZatcaQR } from '@/lib/zatca_qr';
 import { supabase } from '@/lib/supabase';
 import { tafqeet } from '@/lib/helpers';
 import { 
@@ -151,14 +151,14 @@ export default function ThermalReceiptModal({ isOpen, onClose, record, onOpenA4 
     const paidAmount = Number(record?.paid_amount ?? (record?.payment_method !== 'آجل' ? totalAmount : 0));
     const remainingAmount = Math.max(0, totalAmount - paidAmount);
 
-    // 4️⃣ إنشاء باركود ZATCA الإلكتروني الرسمي
+    // 4️⃣ إنشاء باركود ZATCA الإلكتروني الرسمي (بدون شعار ومتوافق 100%)
     useEffect(() => {
         if (record) {
-            const dateStr = record.date ? `${record.date.split('T')[0]}T12:00:00Z` : new Date().toISOString();
+            const ts = formatZatcaTimestamp(record.date, record.created_at);
             const totalStr = totalAmount.toFixed(2);
             const vatStr = taxAmount.toFixed(2);
             
-            const qr = generateZatcaQR('محطة نوره حامد محمد القرني', '310147870100003', dateStr, totalStr, vatStr);
+            const qr = generateZatcaQR(COMPANY_INFO.nameAr, COMPANY_INFO.vatNumber, ts, totalStr, vatStr);
             setQrData(qr);
         }
     }, [record, totalAmount, taxAmount]);
@@ -547,12 +547,12 @@ export default function ThermalReceiptModal({ isOpen, onClose, record, onOpenA4 
             <div className="thermal-receipt-container">
                 
                 {/* 1. الشعار والترويسة */}
-                <img src="/logo.png" alt="Noura Hamed Mohammed Al-Qarni Station Logo" className="thermal-logo" />
-                <div style={{ fontSize: '16px', fontWeight: 900, color: '#000', margin: '2px 0' }}>محطة نوره حامد محمد القرني</div>
-                <div style={{ fontSize: '10.5px', fontWeight: 700, letterSpacing: '0.5px' }}>Noura Hamed Mohammed Al-Qarni Station</div>
-                <div style={{ fontSize: '10.5px', marginTop: '3px' }}>س.ت: 586352397</div>
-                <div style={{ fontSize: '10.5px' }}>الرقم الضريبي: 310147870100003</div>
-                <div style={{ fontSize: '10px' }}>سبت العلاية - عسير - المملكة العربية السعودية</div>
+                <img src="/logo.png" alt={COMPANY_INFO.nameEn} className="thermal-logo" />
+                <div style={{ fontSize: '16px', fontWeight: 900, color: '#000', margin: '2px 0' }}>{COMPANY_INFO.nameAr}</div>
+                <div style={{ fontSize: '10.5px', fontWeight: 700, letterSpacing: '0.5px' }}>{COMPANY_INFO.nameEn}</div>
+                <div style={{ fontSize: '10.5px', marginTop: '3px' }}>س.ت / الرقم الموحد: {COMPANY_INFO.crNumber}</div>
+                <div style={{ fontSize: '10.5px' }}>الرقم الضريبي: {COMPANY_INFO.vatNumber}</div>
+                <div style={{ fontSize: '10px' }}>التواصل: {COMPANY_INFO.phone}</div>
                 
                 <div style={{ margin: '5px 0' }}>
                     <div className="badge-invoice-type">
@@ -691,7 +691,7 @@ export default function ThermalReceiptModal({ isOpen, onClose, record, onOpenA4 
                 {/* 5. باركود ZATCA الرسمي */}
                 {!record.skip_zatca && qrData && (
                     <div style={{ margin: '10px 0', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                        <QRCodeSVG value={qrData} size={125} level="M" />
+                        <QRCodeSVG value={qrData} size={125} level="M" marginSize={2} />
                         <div style={{ fontSize: '9px', marginTop: '4px', color: '#444' }}>
                             رمز التحقق الإلكتروني (هيئة الزكاة والضريبة)
                         </div>
@@ -703,9 +703,9 @@ export default function ThermalReceiptModal({ isOpen, onClose, record, onOpenA4 
                 {/* 6. التذييل والشروط */}
                 <div style={{ fontSize: '10px', marginTop: '6px', color: '#111', lineHeight: '1.4' }}>
                     تخضع مبيعات المحروقات والخدمات لمعايير الجودة المعتمدة.<br/>
-                    شكراً لتعاملكم مع <strong>محطة نوره حامد محمد القرني</strong> ⛽🚗<br/>
-                    خدمة العملاء: info@alnoor-gas.com<br/>
-                    <span style={{ fontSize: '8.5px', color: '#555' }}>تم الإصدار إلكترونياً عبر نظام محطة نوره حامد محمد القرني</span>
+                    شكراً لتعاملكم مع <strong>{COMPANY_INFO.nameAr}</strong> ⛽🚗<br/>
+                    التواصل: {COMPANY_INFO.phone} | {COMPANY_INFO.email}<br/>
+                    <span style={{ fontSize: '8.5px', color: '#555' }}>تم الإصدار إلكترونياً عبر نظام {COMPANY_INFO.nameAr}</span>
                 </div>
 
             </div>

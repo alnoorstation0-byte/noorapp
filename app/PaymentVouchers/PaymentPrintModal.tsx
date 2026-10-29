@@ -3,7 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom'; 
 import { THEME } from '@/lib/theme';
 import { formatCurrency, tafqeet } from '@/lib/helpers'; 
-import { QRCodeSVG } from 'qrcode.react'; 
+import { QRCodeSVG } from 'qrcode.react';
+import { COMPANY_INFO } from '@/lib/zatca_qr'; 
 import { supabase } from '@/lib/supabase';
 
 export default function PaymentPrintModal({ isOpen, onClose, record }: any) {
@@ -194,12 +195,12 @@ export default function PaymentPrintModal({ isOpen, onClose, record }: any) {
                     <div className="inv-header">
                         <div style={{width: '180px'}}></div>
                         <div className="header-center">
-                        <h1 style={{ fontSize: '20px', fontWeight: 900, color: '#122946', margin: '0 0 4px 0' }}>محطة نوره حامد محمد القرني</h1>
-                        <h2 style={{ fontSize: '14px', fontWeight: 700, color: '#2891C8', margin: '0 0 8px 0' }}>Noura Hamed Mohammed Al-Qarni Station</h2>
-                        <div style={{ fontSize: '12px', fontWeight: 700, color: '#334155' }}>سجل تجاري: 586352397</div>
-                        <div style={{ fontSize: '13px', fontWeight: 700, color: '#334155' }}>الرقم الضريبي: 310147870100003</div>
+                        <h1 style={{ fontSize: '20px', fontWeight: 900, color: '#122946', margin: '0 0 4px 0' }}>{COMPANY_INFO.nameAr}</h1>
+                        <h2 style={{ fontSize: '14px', fontWeight: 700, color: '#2891C8', margin: '0 0 8px 0' }}>{COMPANY_INFO.nameEn}</h2>
+                        <div style={{ fontSize: '12px', fontWeight: 700, color: '#334155' }}>سجل تجاري / الرقم الموحد: {COMPANY_INFO.crNumber}</div>
+                        <div style={{ fontSize: '13px', fontWeight: 700, color: '#334155' }}>الرقم الضريبي: {COMPANY_INFO.vatNumber}</div>
                     </div>
-                    <div className="header-logo"><img src="/logo.png" alt="شعار محطات النور للوقود" /></div>
+                    <div className="header-logo"><img src="/logo.png" alt={COMPANY_INFO.nameAr} /></div>
                 </div>
 
                 <div className="inv-title-box">
@@ -242,7 +243,7 @@ export default function PaymentPrintModal({ isOpen, onClose, record }: any) {
                         <div className="signature-area">
                             <div className="signature-title">معتمد إلكترونياً / E-Signature</div>
                             <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                <QRCodeSVG value={signatureData} size={75} level="M" />
+                                <QRCodeSVG value={signatureData} size={75} level="M" marginSize={2} />
                                 <div style={{ fontSize: '14px', fontWeight: 900, marginTop: '8px', color: '#122946' }}>{finalFullName}</div>
                             </div>
                         </div>
@@ -250,12 +251,12 @@ export default function PaymentPrintModal({ isOpen, onClose, record }: any) {
                 </div>
 
                 <div className="inv-footer-contact">
-                    المملكة العربية السعودية &nbsp;|&nbsp; info@alnoor-gas.com &nbsp;|&nbsp; محطات النور للوقود © {new Date().getFullYear()}
+                    {COMPANY_INFO.phone} &nbsp;|&nbsp; {COMPANY_INFO.email} &nbsp;|&nbsp; {COMPANY_INFO.nameAr} © {new Date().getFullYear()}
                 </div>
             </div>
             ) : (
                 <div className="thermal-preview-box">
-                    <div style={{ fontSize: '18px', fontWeight: 900, marginBottom: '5px' }}>محطة نوره حامد محمد القرني</div>
+                    <div style={{ fontSize: '18px', fontWeight: 900, marginBottom: '5px' }}>{COMPANY_INFO.nameAr}</div>
                     <div>سند صرف | Payment Voucher</div>
                     <div style={{ borderBottom: '1px dashed #000', margin: '10px 0' }}></div>
                     

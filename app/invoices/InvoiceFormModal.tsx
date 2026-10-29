@@ -158,7 +158,7 @@ export default function InvoiceFormModal({
     const handleBarcodeScan = async (barcode: string) => {
         let foundItem = warehouseItems?.find((i: any) => String(i.code) === barcode || String(i.id) === barcode);
         if (!foundItem) {
-            const { data } = await supabase.from('inventory_items').select('*').eq('code', barcode).single();
+            const { data } = await supabase.from('inventory_items').select('*').eq('code', barcode).maybeSingle();
             if (data) foundItem = data;
         }
 
@@ -187,15 +187,14 @@ export default function InvoiceFormModal({
     // 🚀 3. دالة التحقق قبل الحفظ (باستخدام Zod)
     const invoiceSchema = z.object({
         date: z.string().min(1, "يرجى إدخال تاريخ الفاتورة"),
-        partner_id: z.string().min(1, "يرجى اختيار العميل (البارتنر) أولاً"),
         total_amount: z.number().min(0.01, "إجمالي الفاتورة لا يمكن أن يكون 0، يرجى التأكد من السعر والكمية")
     });
 
     const handleValidateAndSave = () => {
+        const computedTotal = Number(record.total_amount) > 0 ? Number(record.total_amount) : Number(record.line_total || 0);
         const validationResult = invoiceSchema.safeParse({
-            date: record.date,
-            partner_id: record.partner_id,
-            total_amount: Number(record.total_amount) > 0 ? Number(record.total_amount) : Number(record.line_total)
+            date: String(record.date || ''),
+            total_amount: computedTotal
         });
 
         if (!validationResult.success) {
@@ -204,8 +203,33 @@ export default function InvoiceFormModal({
             showToast(`${firstError} ⚠️`, "warning");
             return;
         }
-        
-        onSave(record);
+
+        const isCreditSale = (record.payment_method || 'آجل') === 'آجل';
+        if (isCreditSale && !record.partner_id && !String(record.client_name || '').trim()) {
+            showToast("يرجى اختيار العميل (البارتنر) أولاً للفواتير الآجلة، أو تغيير طريقة السداد إلى نقدي/شبكة ⚠️", "warning");
+            return;
+        }
+
+        // إذا كتب المستخدم بيانات صنف ولم يضغط "إدراج الصنف"، ندرجه تلقائياً حتى لا تضيع البنود
+        let finalLines = Array.isArray(record.lines) ? [...record.lines] : [];
+        if (record.description && Number(record.quantity || 0) > 0 && Number(record.unit_price || 0) > 0) {
+            finalLines.push({
+                boq_id: record.boq_id || null,
+                description: record.description,
+                quantity: Number(record.quantity),
+                unit: record.unit || 'لتر',
+                unit_price: Number(record.unit_price),
+                total_price: Number(record.quantity) * Number(record.unit_price),
+                item_id: record.item_id || null,
+                tax_rate: (record.tax_rate !== undefined && record.tax_rate !== null) ? Number(record.tax_rate) : 15
+            });
+        }
+
+        onSave({
+            ...record,
+            client_name: record.client_name || record.partners?.name || 'عميل نقدي',
+            lines: finalLines
+        });
     };
 
     if (!isOpen || !mounted) return null;
@@ -774,8 +798,8 @@ export default function InvoiceFormModal({
                                         setRecord({
                                             ...record, 
                                             description: val.name,
-                                            unit: val.unit || 'عدد',
-                                            unit_price: val.price || 0,
+                                            unit: val.unit || 'لتر',
+                                            unit_price: val.price || val.default_price || val.suggested_price || 0,
                                             item_id: val.id,
                                             tax_rate: (val.tax_rate !== undefined && val.tax_rate !== null) ? Number(val.tax_rate) : 15
                                         });
@@ -799,10 +823,11 @@ export default function InvoiceFormModal({
                         <div className="form-field-unit">
                             <label className="form-field-label">الوحدة</label>
                             <select 
-                                value={record.unit ?? 'عدد'} 
+                                value={record.unit ?? 'لتر'} 
                                 onChange={(e) => setRecord({ ...record, unit: e.target.value })} 
                                 className="field-input"
                             >
+                                <option value="لتر">لتر</option>
                                 <option value="عدد">عدد / حبة</option>
                                 <option value="كرتون">كرتون</option>
                                 <option value="طن">طن</option>

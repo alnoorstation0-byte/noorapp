@@ -1,46 +1,55 @@
 "use client";
 import React from 'react';
-import { QRCodeSVG } from 'qrcode.react'; 
+import { QRCodeSVG } from 'qrcode.react';
+import { COMPANY_INFO, formatZatcaTimestamp, generateZatcaQR } from '@/lib/zatca_qr';
 
-// تم إضافة الثيم عشان الكود ميضربش لو مش متعرف في الملف ده
 const THEME = {
-  primary: '#0f172a', accent: '#ca8a04', success: '#059669', slate: 'rgba(255, 255, 255, 0.6)', text: '#111827', border: 'rgba(40, 145, 200, 0.2)', ruby: '#e11d48'
+  primary: '#0f172a',
+  ruby: '#e11d48',
 };
 
-export default function ZatcaQRCode({ record }: { record: any }) {
+export default function ZatcaQRCode({ record, size = 105 }: { record: any; size?: number }) {
   if (!record) return null;
 
+  // في حال الفاتورة الداخلية غير الخاضعة للضريبة (بدون أي شعار داخل الباركود)
   if (record.is_internal || record.skip_zatca) {
-     return (
-        <div style={{ padding: '4px', border: `2px solid ${THEME.ruby}`, borderRadius: '8px', background: 'white', display: 'inline-block' }}>
-           <QRCodeSVG value={`INTERNAL-INV-${record.invoice_number}`} size={90} level="H" imageSettings={{ src: "/logo.png", height: 20, width: 20, excavate: true }} />
-        </div>
-     );
+    return (
+      <div style={{ padding: '6px', border: `1.5px solid ${THEME.ruby}`, borderRadius: '8px', background: '#ffffff', display: 'inline-flex' }}>
+        <QRCodeSVG
+          value={`INTERNAL-INV-${record.invoice_number || record.id || ''}`}
+          size={size}
+          level="M"
+          marginSize={2}
+          bgColor="#FFFFFF"
+          fgColor="#000000"
+        />
+      </div>
+    );
   }
 
-  // تظبيط التاريخ عشان لو الفاتورة قديمة أو جديدة يقراها صح
-  const timestamp = record.date ? `${record.date.split('T')[0]}T12:00:00Z` : new Date().toISOString().split('.')[0] + 'Z';
-  
-  const generateQR = (s:string, v:string, t:string, it:string, vt:string) => {
-    const getB = (tag:number, val:string) => {
-      const enc = new TextEncoder(); const b = Array.from(enc.encode(val));
-      return [tag, b.length, ...b];
-    };
-    const tlvs = [...getB(1, s), ...getB(2, v), ...getB(3, t), ...getB(4, it), ...getB(5, vt)];
-    return btoa(String.fromCharCode(...new Uint8Array(tlvs)));
-  };
+  const timestamp = formatZatcaTimestamp(record.date, record.created_at);
+  const totalAmount = Number(record.total_amount || 0);
+  const taxableAmount = Number(record.taxable_amount || (totalAmount / 1.15));
+  const taxAmount = Number(record.tax_amount ?? (totalAmount - taxableAmount));
 
-  // 🚀 القفشة هنا: استخدمنا total_amount بدلاً من net_amount عشان يقرا من الداتابيز صح
-  const invoiceTotal = Number(record.total_amount || 0).toFixed(2);
-  const taxTotal = Number(record.tax_amount || 0).toFixed(2);
+  const qrBase64 = generateZatcaQR(
+    COMPANY_INFO.nameAr,
+    COMPANY_INFO.vatNumber,
+    timestamp,
+    totalAmount.toFixed(2),
+    taxAmount.toFixed(2)
+  );
 
+  // باركود ZATCA نقي بدون أي شعار في المنتصف لضمان قراءة فورية في تطبيقات الزكاة والضريبة
   return (
-    <div style={{ padding: '4px', border: `2px solid ${THEME.primary}`, borderRadius: '8px', background: 'white', display: 'inline-block' }}>
-      <QRCodeSVG 
-        value={generateQR("محطة نوره حامد محمد القرني", "310147870100003", timestamp, invoiceTotal, taxTotal)} 
-        size={90} 
-        level="H" 
-        imageSettings={{ src: "/logo.png", height: 20, width: 20, excavate: true }} 
+    <div style={{ padding: '6px', border: `1.5px solid ${THEME.primary}`, borderRadius: '8px', background: '#ffffff', display: 'inline-flex' }}>
+      <QRCodeSVG
+        value={qrBase64}
+        size={size}
+        level="M"
+        marginSize={2}
+        bgColor="#FFFFFF"
+        fgColor="#000000"
       />
     </div>
   );

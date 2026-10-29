@@ -18,15 +18,17 @@ export function useUniversalPosting(queryKey: string, tableName: string, postRpc
             if (!selectedIds || selectedIds.length === 0) throw new Error("لم يتم تحديد أي سجلات للترحيل.");
             
             let rpcSuccess = false;
-            try {
-                const { error } = await supabase.rpc(postRpcName, { p_ids: selectedIds });
-                if (!error) {
-                    rpcSuccess = true;
-                } else if (!error.message?.includes('Could not find the function') && !error.message?.includes('PGRST202')) {
-                    console.warn(`RPC ${postRpcName} returned error, trying direct fallback:`, error.message);
+            if (tableName !== 'invoices') {
+                try {
+                    const { error } = await supabase.rpc(postRpcName, { p_ids: selectedIds });
+                    if (!error) {
+                        rpcSuccess = true;
+                    } else if (!error.message?.includes('Could not find the function') && !error.message?.includes('PGRST202')) {
+                        console.warn(`RPC ${postRpcName} returned error, trying direct fallback:`, error.message);
+                    }
+                } catch (err: any) {
+                    console.warn(`RPC ${postRpcName} execution error:`, err);
                 }
-            } catch (err: any) {
-                console.warn(`RPC ${postRpcName} execution error:`, err);
             }
 
             // 🛡️ Fallback المباشر عند غياب الدالة في السيرفر
@@ -35,60 +37,59 @@ export function useUniversalPosting(queryKey: string, tableName: string, postRpc
                     const { data: invs } = await supabase.from('invoices').select('*').in('id', selectedIds);
                     for (const inv of (invs || [])) {
                         if (inv.is_posted || ['posted', 'معتمد', 'مرحل', 'approved'].includes(String(inv.status || '').trim().toLowerCase())) continue;
-                        const { data: jh } = await supabase.from('journal_headers').insert([{
-                            entry_date: inv.date || new Date().toISOString().split('T')[0],
-                            description: `فاتورة مبيعات رقم ${inv.invoice_number || ''}`,
-                            reference_id: inv.id,
-                            v_type: 'invoice',
-                            status: 'posted',
-                            fleet_operation_id: inv.fleet_operation_id || null
-                        }]).select().single();
+                        const { data: existingJh } = await supabase.from('journal_headers').select('id').eq('reference_id', inv.id).limit(1).maybeSingle();
+                        if (!existingJh) {
+                            const { data: jh } = await supabase.from('journal_headers').insert([{
+                                entry_date: inv.date || new Date().toISOString().split('T')[0],
+                                description: `فاتورة مبيعات رقم ${inv.invoice_number || ''}`,
+                                reference_id: inv.id,
+                                v_type: 'invoice',
+                                status: 'posted'
+                            }]).select().maybeSingle();
 
-                        if (jh) {
-                            const lines: any[] = [];
-                            const total = Number(inv.total_amount || 0);
-                            const tax = Number(inv.tax_amount || 0);
-                            const taxable = Number(inv.taxable_amount || total - tax);
+                            if (jh) {
+                                const lines: any[] = [];
+                                const total = Number(inv.total_amount || 0);
+                                const tax = Number(inv.tax_amount || 0);
+                                const taxable = Number(inv.taxable_amount || total - tax);
 
-                            if (total > 0 && inv.debit_account_id) {
-                                lines.push({
-                                    header_id: jh.id,
-                                    account_id: inv.debit_account_id,
-                                    partner_id: inv.partner_id || null,
-                                    debit: total,
-                                    credit: 0,
-                                    notes: `استحقاق فاتورة مبيعات #${inv.invoice_number || ''}`,
-                                    fleet_operation_id: inv.fleet_operation_id || null,
-                                    delegate_id: inv.delegate_id || null
-                                });
-                            }
-                            if (taxable > 0 && inv.credit_account_id) {
-                                lines.push({
-                                    header_id: jh.id,
-                                    account_id: inv.credit_account_id,
-                                    partner_id: inv.partner_id || null,
-                                    debit: 0,
-                                    credit: taxable,
-                                    notes: `إيراد مبيعات فاتورة #${inv.invoice_number || ''}`,
-                                    fleet_operation_id: inv.fleet_operation_id || null,
-                                    delegate_id: inv.delegate_id || null
-                                });
-                            }
-                            if (tax > 0 && inv.tax_acc_id) {
-                                lines.push({
-                                    header_id: jh.id,
-                                    account_id: inv.tax_acc_id,
-                                    partner_id: inv.partner_id || null,
-                                    debit: 0,
-                                    credit: tax,
-                                    notes: `ضريبة القيمة المضافة فاتورة #${inv.invoice_number || ''}`,
-                                    tax_amount: tax,
-                                    fleet_operation_id: inv.fleet_operation_id || null,
-                                    delegate_id: inv.delegate_id || null
-                                });
-                            }
-                            if (lines.length > 0) {
-                                await supabase.from('journal_lines').insert(lines);
+                                if (total > 0 && inv.debit_account_id) {
+                                    lines.push({
+                                        header_id: jh.id,
+                                        account_id: inv.debit_account_id,
+                                        partner_id: inv.partner_id || null,
+                                        debit: total,
+                                        credit: 0,
+                                        notes: `استحقاق فاتورة مبيعات #${inv.invoice_number || ''}`,
+                                        delegate_id: inv.delegate_id || null
+                                    });
+                                }
+                                if (taxable > 0 && inv.credit_account_id) {
+                                    lines.push({
+                                        header_id: jh.id,
+                                        account_id: inv.credit_account_id,
+                                        partner_id: inv.partner_id || null,
+                                        debit: 0,
+                                        credit: taxable,
+                                        notes: `إيراد مبيعات فاتورة #${inv.invoice_number || ''}`,
+                                        delegate_id: inv.delegate_id || null
+                                    });
+                                }
+                                if (tax > 0 && inv.tax_acc_id) {
+                                    lines.push({
+                                        header_id: jh.id,
+                                        account_id: inv.tax_acc_id,
+                                        partner_id: inv.partner_id || null,
+                                        debit: 0,
+                                        credit: tax,
+                                        notes: `ضريبة القيمة المضافة فاتورة #${inv.invoice_number || ''}`,
+                                        tax_amount: tax,
+                                        delegate_id: inv.delegate_id || null
+                                    });
+                                }
+                                if (lines.length > 0) {
+                                    await supabase.from('journal_lines').insert(lines);
+                                }
                             }
                         }
                         await supabase.from('invoices').update({ status: 'معتمد' }).eq('id', inv.id);
@@ -102,9 +103,8 @@ export function useUniversalPosting(queryKey: string, tableName: string, postRpc
                             description: `سند صرف رقم ${pv.voucher_number || ''}`,
                             reference_id: pv.id,
                             v_type: 'payment_voucher',
-                            status: 'posted',
-                            fleet_operation_id: pv.fleet_operation_id || null
-                        }]).select().single();
+                            status: 'posted'
+                        }]).select().maybeSingle();
 
                         if (jh) {
                             const amt = Number(pv.amount || 0);
@@ -116,8 +116,7 @@ export function useUniversalPosting(queryKey: string, tableName: string, postRpc
                                     partner_id: pv.partner_id || null,
                                     debit: amt,
                                     credit: 0,
-                                    notes: `سند صرف #${pv.voucher_number || ''}`,
-                                    fleet_operation_id: pv.fleet_operation_id || null
+                                    notes: `سند صرف #${pv.voucher_number || ''}`
                                 });
                             }
                             if (amt > 0 && pv.credit_account_id) {
@@ -126,8 +125,7 @@ export function useUniversalPosting(queryKey: string, tableName: string, postRpc
                                     account_id: pv.credit_account_id,
                                     debit: 0,
                                     credit: amt,
-                                    notes: `سداد سند صرف #${pv.voucher_number || ''}`,
-                                    fleet_operation_id: pv.fleet_operation_id || null
+                                    notes: `سداد سند صرف #${pv.voucher_number || ''}`
                                 });
                             }
                             if (lines.length > 0) {
@@ -153,9 +151,8 @@ export function useUniversalPosting(queryKey: string, tableName: string, postRpc
                             description: `سند قبض رقم ${rv.receipt_number || ''}`,
                             reference_id: rv.id,
                             v_type: 'receipt',
-                            status: 'posted',
-                            fleet_operation_id: rv.fleet_operation_id || null
-                        }]).select().single();
+                            status: 'posted'
+                        }]).select().maybeSingle();
 
                         if (jh) {
                             const amt = Number(rv.amount || 0);
@@ -168,7 +165,6 @@ export function useUniversalPosting(queryKey: string, tableName: string, postRpc
                                     debit: amt,
                                     credit: 0,
                                     notes: `تحصيل نقدية سند قبض #${rv.receipt_number || ''}`,
-                                    fleet_operation_id: rv.fleet_operation_id || null,
                                     delegate_id: rv.delegate_id || null
                                 });
                             }
@@ -180,7 +176,6 @@ export function useUniversalPosting(queryKey: string, tableName: string, postRpc
                                     debit: 0,
                                     credit: amt,
                                     notes: `سداد عميل سند قبض #${rv.receipt_number || ''}`,
-                                    fleet_operation_id: rv.fleet_operation_id || null,
                                     delegate_id: rv.delegate_id || null
                                 });
                             }
@@ -215,28 +210,23 @@ export function useUniversalPosting(queryKey: string, tableName: string, postRpc
         mutationFn: async (selectedIds: string[]) => {
             if (!selectedIds || selectedIds.length === 0) throw new Error("لم يتم تحديد أي سجلات لفك الترحيل.");
             
-            let rpcSuccess = false;
-            try {
-                let res: any = null;
-                if (tableName === 'payment_vouchers') {
-                    res = await supabase.rpc('unpost_payment_vouchers_bulk', { p_ids: selectedIds });
-                } else if (tableName === 'invoices') {
-                    res = await supabase.rpc('unpost_invoices_bulk', { p_ids: selectedIds });
-                } else if (tableName === 'expenses') {
-                    res = await supabase.rpc('unpost_expenses_bulk', { p_ids: selectedIds });
-                } else if (tableName === 'receipt_vouchers') {
-                    res = await supabase.rpc('unpost_receipts_bulk', { p_ids: selectedIds });
-                } else {
-                    res = await supabase.rpc('unpost_universal_bulk', { 
-                        p_ids: selectedIds,
-                        p_table_name: tableName 
-                    });
+            if (tableName !== 'invoices') {
+                try {
+                    if (tableName === 'payment_vouchers') {
+                        await supabase.rpc('unpost_payment_vouchers_bulk', { p_ids: selectedIds });
+                    } else if (tableName === 'expenses') {
+                        await supabase.rpc('unpost_expenses_bulk', { p_ids: selectedIds });
+                    } else if (tableName === 'receipt_vouchers') {
+                        await supabase.rpc('unpost_receipts_bulk', { p_ids: selectedIds });
+                    } else {
+                        await supabase.rpc('unpost_universal_bulk', { 
+                            p_ids: selectedIds,
+                            p_table_name: tableName 
+                        });
+                    }
+                } catch (err) {
+                    console.warn(`RPC unpost error, applying direct fallback:`, err);
                 }
-                if (!res?.error) {
-                    rpcSuccess = true;
-                }
-            } catch (err) {
-                console.warn(`RPC unpost error, applying direct fallback:`, err);
             }
 
             // 🛡️ Fallback المباشر: مسح القيود وتحديث الحالة برمجياً

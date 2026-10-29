@@ -1,5 +1,6 @@
 "use client";
 import React from 'react';
+import { COMPANY_INFO } from '@/lib/zatca_qr';
 
 interface PrintHeaderProps {
     title: string;
@@ -15,13 +16,13 @@ export default function PrintHeader({ title, subtitle, showDate = true }: PrintH
                 <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                     <img 
                         src="/logo.png" 
-                        alt="محطات النور للوقود" 
+                        alt={COMPANY_INFO.nameAr} 
                         style={{ width: '60px', height: '60px', objectFit: 'contain', borderRadius: '8px' }} 
                     />
                     <div>
-                        <h2 style={{ margin: 0, fontSize: '24px', color: '#000' }}>محطات النور للوقود</h2>
-                        <div style={{ fontSize: '14px', color: '#555', marginTop: '4px' }}>
-                            الرقم الضريبي: 300000000000003
+                        <h2 style={{ margin: 0, fontSize: '22px', color: '#000' }}>{COMPANY_INFO.nameAr}</h2>
+                        <div style={{ fontSize: '13px', color: '#555', marginTop: '4px' }}>
+                            س.ت / موحد: {COMPANY_INFO.crNumber} &nbsp;|&nbsp; الرقم الضريبي: {COMPANY_INFO.vatNumber}
                         </div>
                     </div>
                 </div>

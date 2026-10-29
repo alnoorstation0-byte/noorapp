@@ -846,7 +846,7 @@ export function usePosLogic() {
                 // If deducting from main warehouse, also update inventory_items.current_quantity
                 if (line.warehouse_id === '11111111-1111-1111-1111-111111111111') {
                     const { data: catItem } = await supabase.from('inventory_items')
-                        .select('current_quantity').eq('id', line.item_id).single();
+                        .select('current_quantity').eq('id', line.item_id).maybeSingle();
                     if (catItem) {
                         const newCatQty = Math.max(0, (Number(catItem.current_quantity) || 0) - line.quantity);
                         await supabase.from('inventory_items')
@@ -858,73 +858,62 @@ export function usePosLogic() {
 
             // AUTO POST INVOICE (Creates Journal Lines & guarantees status is معتمد)
             if (insertedInv) {
-                let postSuccess = false;
                 try {
-                    const { error: postErr } = await supabase.rpc('post_invoices_bulk', { p_ids: [insertedInv.id] });
-                    if (!postErr) postSuccess = true;
-                } catch {}
+                    const { data: jh } = await supabase.from('journal_headers').insert([{
+                        entry_date: insertedInv.date || new Date().toISOString().split('T')[0],
+                        description: `فاتورة مبيعات نقاط بيع رقم ${insertedInv.invoice_number || autoNumber}`,
+                        reference_id: insertedInv.id,
+                        v_type: 'invoice',
+                        status: 'posted'
+                    }]).select().maybeSingle();
 
-                if (!postSuccess) {
-                    try {
-                        const { data: jh } = await supabase.from('journal_headers').insert([{
-                            entry_date: insertedInv.date || new Date().toISOString().split('T')[0],
-                            description: `فاتورة مبيعات نقاط بيع رقم ${insertedInv.invoice_number || autoNumber}`,
-                            reference_id: insertedInv.id,
-                            v_type: 'invoice',
-                            status: 'posted',
-                            fleet_operation_id: fleetOpId || null
-                        }]).select().single();
+                    if (jh) {
+                        const jLines: any[] = [];
+                        const tot = Number(insertedInv.total_amount || 0);
+                        const tx = Number(insertedInv.tax_amount || 0);
+                        const txbl = Number(insertedInv.taxable_amount || (tot - tx));
 
-                        if (jh) {
-                            const jLines: any[] = [];
-                            const tot = Number(insertedInv.total_amount || 0);
-                            const tx = Number(insertedInv.tax_amount || 0);
-                            const txbl = Number(insertedInv.taxable_amount || (tot - tx));
-
-                            if (tot > 0) {
-                                jLines.push({
-                                    header_id: jh.id,
-                                    account_id: insertedInv.debit_account_id || SALES_ACCOUNTS.AR,
-                                    partner_id: insertedInv.partner_id || null,
-                                    debit: tot,
-                                    credit: 0,
-                                    notes: `استحقاق فاتورة مبيعات نقاط بيع #${insertedInv.invoice_number || autoNumber}`,
-                                    fleet_operation_id: fleetOpId || null,
-                                    delegate_id: delegateId || null
-                                });
-                            }
-                            if (txbl > 0) {
-                                jLines.push({
-                                    header_id: jh.id,
-                                    account_id: insertedInv.credit_account_id || SALES_ACCOUNTS.REVENUE,
-                                    partner_id: insertedInv.partner_id || null,
-                                    debit: 0,
-                                    credit: txbl,
-                                    notes: `إيراد مبيعات نقاط بيع #${insertedInv.invoice_number || autoNumber}`,
-                                    fleet_operation_id: fleetOpId || null,
-                                    delegate_id: delegateId || null
-                                });
-                            }
-                            if (tx > 0) {
-                                jLines.push({
-                                    header_id: jh.id,
-                                    account_id: insertedInv.tax_acc_id || SALES_ACCOUNTS.VAT,
-                                    partner_id: insertedInv.partner_id || null,
-                                    debit: 0,
-                                    credit: tx,
-                                    notes: `ضريبة القيمة المضافة فاتورة #${insertedInv.invoice_number || autoNumber}`,
-                                    tax_amount: tx,
-                                    fleet_operation_id: fleetOpId || null,
-                                    delegate_id: delegateId || null
-                                });
-                            }
-                            if (jLines.length > 0) {
-                                await supabase.from('journal_lines').insert(jLines);
-                            }
+                        if (tot > 0) {
+                            jLines.push({
+                                header_id: jh.id,
+                                account_id: insertedInv.debit_account_id || SALES_ACCOUNTS.AR,
+                                partner_id: insertedInv.partner_id || null,
+                                debit: tot,
+                                credit: 0,
+                                notes: `استحقاق فاتورة مبيعات نقاط بيع #${insertedInv.invoice_number || autoNumber}`,
+                                delegate_id: delegateId || null
+                            });
                         }
-                    } catch (jhErr) {
-                        console.warn('POS direct journal creation notice:', jhErr);
+                        if (txbl > 0) {
+                            jLines.push({
+                                header_id: jh.id,
+                                account_id: insertedInv.credit_account_id || SALES_ACCOUNTS.REVENUE,
+                                partner_id: insertedInv.partner_id || null,
+                                debit: 0,
+                                credit: txbl,
+                                notes: `إيراد مبيعات نقاط بيع #${insertedInv.invoice_number || autoNumber}`,
+                                delegate_id: delegateId || null
+                            });
+                        }
+                        if (tx > 0) {
+                            jLines.push({
+                                header_id: jh.id,
+                                account_id: insertedInv.tax_acc_id || SALES_ACCOUNTS.VAT,
+                                partner_id: insertedInv.partner_id || null,
+                                debit: 0,
+                                credit: tx,
+                                notes: `ضريبة القيمة المضافة فاتورة #${insertedInv.invoice_number || autoNumber}`,
+                                tax_amount: tx,
+                                delegate_id: delegateId || null
+                            });
+                        }
+                        if (jLines.length > 0) {
+                            await supabase.from('journal_lines').insert(jLines);
+                        }
                     }
+                    await supabase.from('invoices').update({ status: 'معتمد' }).eq('id', insertedInv.id);
+                } catch (jhErr) {
+                    console.warn('POS direct journal creation notice:', jhErr);
                 }
 
                 // 🧾 إنشاء وترحيل سند القبض تلقائياً للمبيعات النقدية والشبكة (كل ما هو غير آجل)
@@ -963,9 +952,8 @@ export function usePosLogic() {
                                     description: `سند قبض مبيعات نقاط بيع رقم ${insertedRv.receipt_number || ''}`,
                                     reference_id: insertedRv.id,
                                     v_type: 'receipt_voucher',
-                                    status: 'posted',
-                                    fleet_operation_id: fleetOpId || null
-                                }]).select().single();
+                                    status: 'posted'
+                                }]).select().maybeSingle();
 
                                 if (rvJh) {
                                     await supabase.from('journal_lines').insert([
@@ -976,7 +964,6 @@ export function usePosLogic() {
                                             debit: cartTotal.total,
                                             credit: 0,
                                             notes: `تحصيل مبيعات نقاط بيع #${insertedInv.invoice_number || autoNumber}`,
-                                            fleet_operation_id: fleetOpId || null,
                                             delegate_id: delegateId || null
                                         },
                                         {
@@ -986,7 +973,6 @@ export function usePosLogic() {
                                             debit: 0,
                                             credit: cartTotal.total,
                                             notes: `سداد عميل مبيعات نقاط بيع #${insertedInv.invoice_number || autoNumber}`,
-                                            fleet_operation_id: fleetOpId || null,
                                             delegate_id: delegateId || null
                                         }
                                     ]);

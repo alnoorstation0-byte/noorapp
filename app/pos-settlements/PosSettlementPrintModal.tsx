@@ -210,13 +210,13 @@ export default function PosSettlementPrintModal({
                     }}>
                         <div>
                             <h1 style={{ margin: '0 0 4px 0', fontSize: '22px', fontWeight: 900, color: '#1C73AB' }}>
-                                محطات النور للوقود
+                                شركة مدهش علي ال قريع
                             </h1>
                             <div style={{ fontSize: '12px', color: '#64748b', fontWeight: 700 }}>
-                                خدمات المحروقات ومحطات الوقود المعتمدة
+                                سجل تجاري / الرقم الموحد: 7051013519 | التواصل: 0569545201
                             </div>
                             <div style={{ fontSize: '12px', color: '#122946', fontWeight: 800, marginTop: '2px' }}>
-                                الرقم الضريبي: <span style={{ fontFamily: 'monospace', color: '#1C73AB' }}>300000000000003</span>
+                                الرقم الضريبي: <span style={{ fontFamily: 'monospace', color: '#1C73AB' }}>315082337900003</span>
                             </div>
                         </div>
 

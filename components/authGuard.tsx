@@ -160,7 +160,7 @@ export default function AuthGuard({ children }: { children: React.ReactNode }) {
           .from("profiles")
           .select("*")
           .eq("id", session.user.id)
-          .single();
+          .maybeSingle();
 
         if (!isMounted) return;
 

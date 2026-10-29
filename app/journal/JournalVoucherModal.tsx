@@ -84,9 +84,9 @@ export default function JournalVoucherModal({
             <div className="jv-header-brand">
               <div className="jv-logo-box">🩺</div>
               <div>
-                <h2 className="jv-company-name">محطات النور للوقود</h2>
-                <p className="jv-vat-number">الرقم الضريبي: 300000000000003</p>
-                <p className="jv-sub-info">لتجارة المنتجات والمكملات وإدارة محطات الوقود</p>
+                <h2 className="jv-company-name">شركة مدهش علي ال قريع</h2>
+                <p className="jv-vat-number">س.ت / موحد: 7051013519 | الرقم الضريبي: 315082337900003</p>
+                <p className="jv-sub-info">للمحروقات وإدارة محطات الوقود | 0569545201</p>
               </div>
             </div>
 
